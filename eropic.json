@@ -1,0 +1,7 @@
+{
+  "apikey": "apikey-string",
+  "limit": {
+    "eropic": 250,
+    "eropic_detect": 400
+  }
+}
