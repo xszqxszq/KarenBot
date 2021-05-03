@@ -22,6 +22,10 @@ tasks {
         manifest {
             attributes(mapOf("Main-Class" to "tk.xszq.otomadbot.OtomadBotKt"))
         }
+	dependencies {
+	    exclude(dependency("edu.stanford.nlp:stanford-parser:3.8.0"))
+	    exclude(dependency("edu.stanford.nlp:stanford-parser:3.8.0:models"))
+	}
     }
 }
 
@@ -44,8 +48,8 @@ dependencies {
     implementation("com.huaban:jieba-analysis:1.0.2")
     implementation("com.soywiz.korlibs.korio:korio:2.0.10")
     implementation("com.soywiz.korlibs.korau:korau:2.0.11")
-    implementation("edu.stanford.nlp:stanford-parser:3.8.0")
-    implementation("edu.stanford.nlp:stanford-parser:3.8.0:models")
+    compile("edu.stanford.nlp:stanford-parser:3.8.0")
+    compile("edu.stanford.nlp:stanford-parser:3.8.0:models")
     implementation("mysql:mysql-connector-java:5.1.48")
     implementation("net.mamoe:mirai-core:2.7-M1-dev-2")
     implementation("net.mamoe:mirai-login-solver-selenium:1.0-dev-17")
