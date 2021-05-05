@@ -139,7 +139,8 @@ object ImageUtils: CommandUtils("image") {
     suspend fun spherize(args: Args, event: MessageEvent) = event.run {
         if (message.anyIsInstance<Image>()) { message }
         else { quoteReply("请发送想要球面化的图片："); nextMessage() }.filterIsInstance<Image>().forEach {
-            quoteReply(PyApi().getSpherizedImage(it)!!.toExternalResource().uploadAsImage(subject))
+            if (getDownloadFileSize(it.queryUrl()) > 5242880L) quoteReply("图片太大了啦，不能超过5M哦")
+            else quoteReply(PyApi().getSpherizedImage(it)!!.toExternalResource().uploadAsImage(subject))
         }
     }
 }
