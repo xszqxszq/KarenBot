@@ -22,7 +22,6 @@ tasks {
         manifest {
             attributes(mapOf("Main-Class" to "tk.xszq.otomadbot.OtomadBotKt"))
         }
-        minimize()
     }
 }
 
