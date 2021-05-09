@@ -1,0 +1,15 @@
+/backup/
+/build/
+/cache/
+/image/
+/workdir/
+/.gradle/
+!/cache/image/README.md
+!/cache/voice/README.md
+!/image/eropic/README.md
+!/image/hint/
+!/image/ma/README.md
+!/image/reply/README.md
+/device.json
+/MxLibData/
+/edu/

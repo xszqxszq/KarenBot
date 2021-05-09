@@ -8,7 +8,10 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import net.mamoe.mirai.event.events.MessageEvent
 import net.mamoe.mirai.message.data.SimpleServiceMessage
-import tk.xszq.otomadbot.*
+import tk.xszq.otomadbot.Args
+import tk.xszq.otomadbot.Command
+import tk.xszq.otomadbot.CommandUtils
+import tk.xszq.otomadbot.QQXMLMessage
 
 open class BilibiliApiResponse(open val code: Int, open val message: String, open val ttl: Int, open val data: Any)
 data class BilibiliApiVideoResponse(val code: Int, val message: String, val ttl: Int, val data: BilibiliVideoInfo)

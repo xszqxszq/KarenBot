@@ -8,6 +8,8 @@ import com.soywiz.korio.util.UUID
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.util.*
+import io.ktor.utils.io.*
+import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import sun.security.action.GetPropertyAction
@@ -88,4 +90,14 @@ fun BufferedImage.toByteArrayBlocking(): ByteArray {
 }
 suspend fun BufferedImage.toByteArray(): ByteArray = withContext(Dispatchers.IO) {
     toByteArrayBlocking()
+}
+fun Collection<String>.matchString(str: String): String? {
+    var result: String? = null
+    forEach {
+        if (it in str) {
+            result = it
+            return@forEach
+        }
+    }
+    return result
 }

@@ -8,7 +8,6 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import net.mamoe.mirai.event.events.MessageEvent
-import org.jsoup.Jsoup
 import tk.xszq.otomadbot.*
 
 object MediaWikiUtils: CommandUtils("wiki") {

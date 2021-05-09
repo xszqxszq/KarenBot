@@ -22,6 +22,7 @@ tasks {
         manifest {
             attributes(mapOf("Main-Class" to "tk.xszq.otomadbot.OtomadBotKt"))
         }
+        minimize()
     }
 }
 
@@ -44,9 +45,8 @@ dependencies {
     implementation("com.huaban:jieba-analysis:1.0.2")
     implementation("com.soywiz.korlibs.korio:korio:2.0.10")
     implementation("com.soywiz.korlibs.korau:korau:2.0.11")
-    implementation("edu.stanford.nlp:stanford-parser:3.8.0")
     implementation("mysql:mysql-connector-java:5.1.48")
-    implementation("net.mamoe:mirai-core:2.7-M1-dev-2")
+    implementation("net.mamoe:mirai-core:2.6.4")
     implementation("net.mamoe:mirai-login-solver-selenium:1.0-dev-17")
     implementation("org.jsoup:jsoup:1.13.1")
     implementation("org.jetbrains.exposed:exposed-core:0.30.2")

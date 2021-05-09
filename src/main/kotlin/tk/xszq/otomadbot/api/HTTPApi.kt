@@ -3,6 +3,7 @@ package tk.xszq.otomadbot.api
 
 import com.google.gson.Gson
 import io.ktor.application.*
+import io.ktor.client.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
@@ -19,6 +20,7 @@ import tk.xszq.otomadbot.bot
 import tk.xszq.otomadbot.configMain
 import tk.xszq.otomadbot.toArgsList
 
+open class HTTPApi(val client: HttpClient)
 data class ApiResult(val status: Boolean, val data: Any)
 @MiraiExperimentalApi
 suspend fun doInitListener() {

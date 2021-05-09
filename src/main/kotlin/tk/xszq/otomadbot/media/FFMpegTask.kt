@@ -6,7 +6,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import tk.xszq.otomadbot.bot
 import tk.xszq.otomadbot.configMain
-import tk.xszq.otomadbot.newTempFile
 import tk.xszq.otomadbot.newTempFileBlocking
 import java.io.File
 

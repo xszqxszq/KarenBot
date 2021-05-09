@@ -22,11 +22,12 @@ permalink: /guide/
 
 | 功能名称                              | 使用方法                                                     | 私聊可用 | 所需权限                                       |
 | ------------------------------------- | ------------------------------------------------------------ | -------- | ---------------------------------------------- |
+| 生成5000兆円风格图片                  | **生成5000** *第一行文字 第二行文字(可选)*                   | 是       | `image.5000choyen`                             |
 | 球面化                                | **球面化**<br>**球面化** *图片*                              | 是       | `image.spherize`                               |
 | 生成二维码                            | **生成二维码** *文本内容/URL*                                | 是       | `image.qrcode.encode`                          |
 | 自动识别二维码                        | 发送二维码图片                                               | 否       | `image.qrcode.decode`                          |
 | 生成Latex                             | **生成laxtex** *公式内容*                                    | 是       | `image.latex`                                  |
-|                                       | **随机字体**                                                 | 是       | `random.font`                                  |
+| 随机字体                              | **随机字体**                                                 | 是       | `random.font`                                  |
 | [SauceNAO](https://saucenao.com/)搜图 | **搜图**<br>**搜番** *图片*                                  | 是       | `image.search.illusion`                        |
 | [trace.moe](https://trace.moe)搜番    | **搜番**<br>**搜番** *图片*                                  | 是       | `image.search.bangumi`                         |
 | 表情回复                              | 发送被收录的黄发小女孩/哭哭猫猫表情                          | 否       | [个人]`reply.answer`<br />[群聊]`image.auto.*` |

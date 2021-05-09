@@ -1,7 +1,6 @@
 @file:Suppress("unused", "UNUSED_PARAMETER")
 package tk.xszq.otomadbot.database
 
-import com.github.houbb.opencc4j.util.ZhConverterUtil
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.message.data.*
 import org.jetbrains.exposed.dao.IntEntity
@@ -36,13 +35,13 @@ object ReplyRules : IntIdTable() {
     val type = integer("type")
     val createTime = timestamp("createtime")
     suspend fun getRulesBySubject(subject: Long): SizedIterable<ReplyRule> {
-        return newSuspendedTransaction(db = Databases.mysql) { ReplyRule.find { group eq subject } }
+        return newSuspendedTransaction(db = Databases.cache) { ReplyRule.find { group eq subject } }
     }
     suspend fun getRuleById(id: Int): ReplyRule? {
-        return newSuspendedTransaction(db = Databases.mysql) { ReplyRule.findById(id) }
+        return newSuspendedTransaction(db = Databases.cache) { ReplyRule.findById(id) }
     }
     suspend fun insertRule(rule: String, reply: String, subject: Long, type: Int, creator: Long) {
-        newSuspendedTransaction(db = Databases.mysql) {
+        newSuspendedTransaction(db = Databases.cache) {
             ReplyRule.new {
                 this.name = ""
                 this.rule = rule
@@ -55,7 +54,7 @@ object ReplyRules : IntIdTable() {
         }
     }
     suspend fun removeRule(id: Int): Boolean {
-        return newSuspendedTransaction(db = Databases.mysql) {
+        return newSuspendedTransaction(db = Databases.cache) {
             var result = false
             ReplyRule.findById(id)?.let{
                 it.delete()
@@ -65,21 +64,21 @@ object ReplyRules : IntIdTable() {
         }
     }
     private suspend fun matchInclude(event: GroupMessageEvent, content: String, ruleType: ReplyRuleType =
-        ReplyRuleType.INCLUDE) = newSuspendedTransaction(db = Databases.mysql) {
+        ReplyRuleType.INCLUDE) = newSuspendedTransaction(db = Databases.cache) {
         ReplyRule.find {
             type eq ruleType.type and
                     (group eq event.group.id or (group eq -1)) and InStr(content, rule)
         }.maxByOrNull { it.createTime }
     }
     private suspend fun matchEqual(event: GroupMessageEvent, content: String) =
-        newSuspendedTransaction(db = Databases.mysql) {
+        newSuspendedTransaction(db = Databases.cache) {
         ReplyRule.find {
             type eq ReplyRuleType.EQUAL.type and
                     (group eq event.group.id or (group eq -1)) and (rule eq content)
         }.maxByOrNull { it.createTime }
     }
     private suspend fun matchRegex(event: GroupMessageEvent, content: String) =
-        newSuspendedTransaction(db = Databases.mysql) {
+        newSuspendedTransaction(db = Databases.cache) {
         ReplyRule.find {
             type eq ReplyRuleType.REGEX.type and
                     (group eq event.group.id or (group eq -1)) and
@@ -88,7 +87,7 @@ object ReplyRules : IntIdTable() {
     }
     private suspend fun matchAny(event: GroupMessageEvent, content: String,
                                  ruleType: ReplyRuleType = ReplyRuleType.ANY) =
-        newSuspendedTransaction(db = Databases.mysql) {
+        newSuspendedTransaction(db = Databases.cache) {
         var result: ReplyRule? = null
         ReplyRule.find {
             type eq ruleType.type and (group eq event.group.id)
@@ -104,7 +103,7 @@ object ReplyRules : IntIdTable() {
     }
     private suspend fun matchAll(event: GroupMessageEvent, content: String,
                                  ruleType: ReplyRuleType = ReplyRuleType.ALL) =
-        newSuspendedTransaction(db = Databases.mysql) {
+        newSuspendedTransaction(db = Databases.cache) {
         var result: ReplyRule? = null
         ReplyRule.find {
             type eq ruleType.type and (group eq event.group.id or (group eq -1))
@@ -122,19 +121,19 @@ object ReplyRules : IntIdTable() {
         }
         result
     }
-    private suspend fun hasImageRule(group: Long): Boolean = newSuspendedTransaction(db = Databases.mysql) {
+    private suspend fun hasImageRule(group: Long): Boolean = newSuspendedTransaction(db = Databases.cache) {
         ReplyRule.find { type less 0 and (ReplyRules.group eq group) }.count() > 0L
     }
     suspend fun match(event: GroupMessageEvent): String? = event.run {
-        if (!message.anyIsInstance<PlainText>())
-            return null
-        var content = ZhConverterUtil.toSimple(event.message.content)!!
+        var content = message.content.toSimple()
         var result: String? = null
-        result ?: matchInclude(this, content)?.let { result = it.reply }
-        result ?: matchEqual(this, content)?.let { result = it.reply }
-        result ?: matchRegex(this, content)?.let { result = it.reply }
-        result ?: matchAny(this, content)?.let { result = it.reply }
-        result ?: matchAll(this, content)?.let { result = it.reply }
+        if (message.anyIsInstance<PlainText>()) {
+            result ?: matchInclude(this, content)?.let { result = it.reply }
+            result ?: matchEqual(this, content)?.let { result = it.reply }
+            result ?: matchRegex(this, content)?.let { result = it.reply }
+            result ?: matchAny(this, content)?.let { result = it.reply }
+            result ?: matchAll(this, content)?.let { result = it.reply }
+        }
         result ?: run {
             if (message.anyIsInstance<Image>() && hasImageRule(group.id)) {
                 content = ""

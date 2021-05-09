@@ -4,7 +4,6 @@ package tk.xszq.otomadbot.database
 import com.soywiz.korio.async.launchImmediately
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import tk.xszq.otomadbot.configMain
@@ -20,7 +19,7 @@ object Databases {
         )
     }
     val cache by lazy {
-        Database.connect("jdbc:h2:mem:cache;DB_CLOSE_DELAY=-1;", "org.h2.Driver")
+        Database.connect("jdbc:h2:mem:cache;MODE=MySQL;DB_CLOSE_DELAY=-1;", "org.h2.Driver")
     }
     var refreshLock = AtomicBoolean()
     suspend fun init() {
@@ -28,6 +27,7 @@ object Databases {
         newSuspendedTransaction(db = cache) {
             SchemaUtils.create(Counters)
             SchemaUtils.create(Permissions)
+            SchemaUtils.create(ReplyRules)
         }
         TasksExecutor.start()
     }
@@ -35,6 +35,9 @@ object Databases {
         try {
             val perms = newSuspendedTransaction(db = mysql) {
                 Permission.all().toList()
+            }
+            val rules = newSuspendedTransaction(db = mysql) {
+                ReplyRule.all().toList()
             }
             newSuspendedTransaction(db = cache) {
                 refreshLock.set(true)
@@ -44,6 +47,17 @@ object Databases {
                     this[Permissions.name] = it.name
                     this[Permissions.enabled] = it.enabled
                     this[Permissions.subject] = it.subject
+                }
+                ReplyRules.deleteAll()
+                ReplyRules.batchInsert(rules) {
+                    this[ReplyRules.createTime] = it.createTime
+                    this[ReplyRules.creator] = it.creator
+                    this[ReplyRules.group] = it.group
+                    this[ReplyRules.name] = it.name
+                    this[ReplyRules.reply] = it.reply
+                    this[ReplyRules.rule] = it.rule
+                    this[ReplyRules.type] = it.type
+                    this[ReplyRules.id] = it.id
                 }
             }
         } catch (e: Exception) {

@@ -55,7 +55,8 @@
     "token": "token-string"
   },
   "api": {
-    "pyapi": "http://192.168.0.114:10090/"
+    "pyapi": "http://192.168.0.114:10090/",
+    "fiveThousandChoyen": "localhost:4000"
   },
   "github": {
     "token": "abcdefg",

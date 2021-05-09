@@ -30,6 +30,7 @@ import org.jsoup.Jsoup
 import org.scilab.forge.jlatexmath.TeXConstants
 import org.scilab.forge.jlatexmath.TeXFormula
 import tk.xszq.otomadbot.*
+import tk.xszq.otomadbot.api.FiveThousandChoyenApi
 import tk.xszq.otomadbot.api.PyApi
 import tk.xszq.otomadbot.database.*
 import java.awt.Color
@@ -141,6 +142,20 @@ object ImageUtils: CommandUtils("image") {
         else { quoteReply("请发送想要球面化的图片："); nextMessage() }.filterIsInstance<Image>().forEach {
             if (getDownloadFileSize(it.queryUrl()) > 5242880L) quoteReply("图片太大了啦，不能超过5M哦")
             else quoteReply(PyApi().getSpherizedImage(it)!!.toExternalResource().uploadAsImage(subject))
+        }
+    }
+    @Command("生成5000", "5000choyen")
+    suspend fun generate5000Choyen(args: Args, event: MessageEvent) = event.run {
+        if (args.isEmpty()) {
+            quoteReply("用法：\n生成5000 第一行文本 第二行文本（可选）")
+        } else {
+            val result = FiveThousandChoyenApi().generate(args.first(), args.getOrNull(1))
+            kotlin.runCatching {
+                quoteReply(subject.uploadImage(result))
+            }.onFailure { err ->
+                bot.logger.error(err)
+                quoteReply("被腾讯拦截了o(╥﹏╥)o\n请稍后重试")
+            }
         }
     }
 }

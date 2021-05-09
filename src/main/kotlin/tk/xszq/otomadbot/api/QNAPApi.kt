@@ -15,17 +15,16 @@ import tk.xszq.otomadbot.configMain
 class QNAPApi(
     val addr: String = configMain.qnap.addr, val username: String = configMain.qnap.username,
     val password: String = configMain.qnap.password
-) {
-    val client = HttpClient(CIO) {
-        install(HttpCookies) {
-            storage = AcceptAllCookiesStorage()
-        }
-        install(HttpTimeout) {
-            requestTimeoutMillis = 114000
-            connectTimeoutMillis = 114000
-            socketTimeoutMillis = 114000
-        }
+): HTTPApi(HttpClient(CIO) {
+    install(HttpCookies) {
+        storage = AcceptAllCookiesStorage()
     }
+    install(HttpTimeout) {
+        requestTimeoutMillis = 114000
+        connectTimeoutMillis = 114000
+        socketTimeoutMillis = 114000
+    }
+}) {
     suspend fun login() {
         val response = client.submitForm<HttpResponse>("$addr/containerstation/api/v1/login",
             formParameters = Parameters.build {
