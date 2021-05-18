@@ -10,6 +10,7 @@ import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.message.data.content
 import net.mamoe.mirai.message.data.toMessageChain
+import net.mamoe.mirai.utils.BotConfiguration
 import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
 import net.mamoe.mirai.utils.MiraiExperimentalApi
 import net.mamoe.mirai.utils.MiraiInternalApi
@@ -33,7 +34,7 @@ suspend fun doInitConnection(retry: Boolean = false): Bot? {
         bot = BotFactory.newBot(configAccount!!.id, configAccount!!.password) {
             autoReconnectOnForceOffline()
             fileBasedDeviceInfo()
-            heartbeatStrategy = HeartbeatStrategy.REGISTER // Suggested in https://github.com/mamoe/mirai/issues/1261
+            heartbeatStrategy = BotConfiguration.HeartbeatStrategy.REGISTER // Suggested in https://github.com/mamoe/mirai/issues/1261
         }
     }
     bot!!.login()
