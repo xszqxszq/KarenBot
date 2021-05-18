@@ -33,6 +33,7 @@ suspend fun doInitConnection(retry: Boolean = false): Bot? {
         bot = BotFactory.newBot(configAccount!!.id, configAccount!!.password) {
             autoReconnectOnForceOffline()
             fileBasedDeviceInfo()
+            heartbeatStrategy = HeartbeatStrategy.REGISTER // Suggested in https://github.com/mamoe/mirai/issues/1261
         }
     }
     bot!!.login()
