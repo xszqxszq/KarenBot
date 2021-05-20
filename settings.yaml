@@ -1,0 +1,70 @@
+h2:
+  filename: ../bot/db/mirai_image
+  username: username
+  password: password
+cooldown:
+  tutorial: 300000
+  ma: 60000
+  reply: 60000
+  replypic: 20000
+  eropic: 10000
+  touhou: 60000
+  hso: 60000
+  group: 600000
+  weakcd: 60000
+regex:
+  midi: >-
+    (?:.*(?:有无|有|发一下|发给我|发我|给我|发|找一下|找找|找|球球|求求|求|我想要|我要|要)(.*)的(?i)MID.*|^(?:(?i)MIDI搜索|搜索(?i)MIDI)
+    (.*))
+  eropic: ^(?:来(?:份|点|张)(?:色|涩)图|我要一(?:份|点|张)(?:色|涩)图)(.*)
+  weak: 菜|垃圾|渣|废|弱|辣鸡|垫底|群地位
+  randomtouhou: ^(?:来点|随机)东方原曲$
+  otomadwiki: >-
+    (?:(?:(?i)otomad(?:维基|\.(?i)wiki|(?i)wiki)|(?:音(?i)mad|音骂)(?:维基|(?i)wiki))搜索)(.*)
+  splashes: >-
+    ^(?:来点|随机)(?:(?i)minecraft|(?)mc|我的世界|麦块|当个创世神|.*)(?:标语|闪烁标语|(?)splash|(?)splashes|副标题|右上角)$
+text:
+  joinActive: (o゜▽゜)o☆
+  joinInvite: (๑•̀ㅂ•́)و✧
+  joinRetrieve: (つ´∀｀)つ
+  searchprefix: (?:请问|很好奇|(?:什么|甚么|啥|哈)(?:是|事|似)|查一下)
+  searchsuffix: (.*)(?:(?:是|事|似)(?:什么|甚么|个啥|啥|哈))
+  weak: 菜|我菜|垃圾|辣鸡|地位|蒟|蒻|废|弱|不强|渣|飞舞|垫底
+  self: 我|俺|老子|劳资|本人|
+config:
+  account: account.yaml
+  bce: bce.yaml
+  eropic: eropic.yaml
+database:
+  host: 127.0.0.1:3306
+  username: username
+  password: password
+  database: otomadbot
+  args: '?useUnicode=true&characterEncoding=UTF-8'
+bin:
+  ffmpeg: /usr/local/bin/ffmpeg
+  ffmpegpath: LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$FFMPEG_HOME/lib:/usr/local/lib
+  python: /usr/local/bin/python3
+  pitchshift: /bot/bin/PitchCorrection4Mirai.py
+listener:
+  port: 7700
+  token: token-string
+api:
+  pyapi: http://192.168.0.114:10090/
+  fiveThousandChoyen: localhost:4000
+github:
+  token: abcdefg
+  repository: xszqxszq/OtomadBot
+qnap:
+  addr: http://192.168.0.99:5000
+  username: admin
+  password: abcdefg
+  dockerId: 12345678
+sentiment:
+  threshold: 6.4
+  scale: 100
+  maxInQueue: 10
+  hint: 下一个话题
+internal:
+  protocol: ANDROID_PAD
+  heartbeatStrategy: REGISTER

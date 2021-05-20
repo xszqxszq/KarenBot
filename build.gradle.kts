@@ -3,8 +3,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("java")
-    kotlin("jvm") version ("1.4.32")
     id("com.github.johnrengelman.shadow") version ("6.1.0")
+    kotlin("jvm") version ("1.4.32")
+    kotlin("plugin.serialization") version "1.4.20"
 }
 configure<JavaPluginExtension> {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -34,6 +35,7 @@ repositories {
 }
 
 dependencies {
+    implementation("com.charleskorn.kaml:kaml:0.33.0")
     implementation("com.github.houbb:opencc4j:1.6.0")
     implementation("com.github.kilianB:JImageHash:3.0.0")
     implementation("com.gitlab.mvysny.konsume-xml:konsume-xml:0.13")
@@ -46,7 +48,6 @@ dependencies {
     implementation("com.soywiz.korlibs.korau:korau:2.0.11")
     implementation("mysql:mysql-connector-java:5.1.48")
     implementation("net.mamoe:mirai-core:2.6.4")
-    implementation("net.mamoe:mirai-login-solver-selenium:1.0-dev-17")
     implementation("org.jsoup:jsoup:1.13.1")
     implementation("org.jetbrains.exposed:exposed-core:0.30.2")
     implementation("org.jetbrains.exposed:exposed-dao:0.30.2")

@@ -34,7 +34,21 @@ suspend fun doInitConnection(retry: Boolean = false): Bot? {
         bot = BotFactory.newBot(configAccount!!.id, configAccount!!.password) {
             autoReconnectOnForceOffline()
             fileBasedDeviceInfo()
-            heartbeatStrategy = BotConfiguration.HeartbeatStrategy.REGISTER // Suggested in https://github.com/mamoe/mirai/issues/1261
+            heartbeatStrategy = when (configMain.internal.heartbeatStrategy) {
+                "STAT_HB" -> BotConfiguration.HeartbeatStrategy.STAT_HB
+                "REGISTER" -> BotConfiguration.HeartbeatStrategy.REGISTER
+                "NONE" -> BotConfiguration.HeartbeatStrategy.NONE
+                else -> BotConfiguration.HeartbeatStrategy.STAT_HB
+            }
+            protocol = when (configMain.internal.protocol.toUpperCase()) {
+                "ANDROID_PAD" -> BotConfiguration.MiraiProtocol.ANDROID_PAD
+                "ANDROID_PHONE" -> BotConfiguration.MiraiProtocol.ANDROID_PHONE
+                "ANDROID_WATCH" -> BotConfiguration.MiraiProtocol.ANDROID_WATCH
+                "PAD" -> BotConfiguration.MiraiProtocol.ANDROID_PAD
+                "PHONE" -> BotConfiguration.MiraiProtocol.ANDROID_PHONE
+                "WATCH" -> BotConfiguration.MiraiProtocol.ANDROID_WATCH
+                else -> BotConfiguration.MiraiProtocol.ANDROID_PHONE
+            }
         }
     }
     bot!!.login()
