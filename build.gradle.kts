@@ -47,7 +47,7 @@ dependencies {
     implementation("com.soywiz.korlibs.korio:korio:2.0.10")
     implementation("com.soywiz.korlibs.korau:korau:2.0.11")
     implementation("mysql:mysql-connector-java:5.1.48")
-    implementation("net.mamoe:mirai-core:2.6.4")
+    implementation("net.mamoe:mirai-core:2.7-M1-dev-3")
     implementation("org.jsoup:jsoup:1.13.1")
     implementation("org.jetbrains.exposed:exposed-core:0.30.2")
     implementation("org.jetbrains.exposed:exposed-dao:0.30.2")
