@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("java")
     id("com.github.johnrengelman.shadow") version ("6.1.0")
-    kotlin("jvm") version ("1.4.32")
+    kotlin("jvm") version ("1.5.0")
     kotlin("plugin.serialization") version "1.4.20"
 }
 configure<JavaPluginExtension> {
@@ -47,7 +47,7 @@ dependencies {
     implementation("com.soywiz.korlibs.korio:korio:2.0.10")
     implementation("com.soywiz.korlibs.korau:korau:2.0.11")
     implementation("mysql:mysql-connector-java:5.1.48")
-    implementation("net.mamoe:mirai-core:2.7-M1-dev-3")
+    implementation("net.mamoe:mirai-core:v2.6.4-dev-kt15")
     implementation("org.jsoup:jsoup:1.13.1")
     implementation("org.jetbrains.exposed:exposed-core:0.30.2")
     implementation("org.jetbrains.exposed:exposed-dao:0.30.2")
@@ -57,11 +57,11 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
     implementation("org.redundent:kotlin-xml-builder:1.7.2")
     implementation("org.scilab.forge:jlatexmath:1.0.7")
-    implementation("io.ktor:ktor-client-core:1.5.3")
-    implementation("io.ktor:ktor-client-cio:1.5.3")
-    implementation("io.ktor:ktor-server-core:1.5.3")
-    implementation("io.ktor:ktor-server-netty:1.5.3")
-    implementation("io.ktor:ktor-serialization:1.5.3")
+    implementation("io.ktor:ktor-client-core:1.5.2")
+    implementation("io.ktor:ktor-client-cio:1.5.2")
+    implementation("io.ktor:ktor-server-core:1.5.2")
+    implementation("io.ktor:ktor-server-netty:1.5.2")
+    implementation("io.ktor:ktor-serialization:1.5.2")
 }
 
 dependencies {
