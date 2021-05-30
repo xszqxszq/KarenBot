@@ -12,6 +12,7 @@ import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import net.mamoe.mirai.event.events.GroupMessageEvent
+import net.mamoe.mirai.message.data.FlashImage
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.Image.Key.queryUrl
 import net.mamoe.mirai.message.data.MessageSource.Key.quote
@@ -43,7 +44,7 @@ object EropicUtils: CommandUtils("eropic") {
                         result.data[0].url, pid, "." + File(URL(result.data[0].url).path).extension, tempDir, pixivHeader)
                     img.toExternalResource().use {
                         kotlin.runCatching {
-                            event.quoteReply(it.uploadAsImage(event.group) + "PID: $pid\n作者：$author")
+                            event.quoteReply(it.uploadAsImage(event.group).flash() + "PID: $pid\n作者：$author")
                         }.onFailure { err ->
                             event.bot.logger.error(err)
                             event.quoteReply("被腾讯拦截了o(╥﹏╥)o\n请稍后重试")
