@@ -33,4 +33,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: OtomadBot
-          path: build/libs/OtomadBot-*.jar
+          path: build/mirai/OtomadBot-*.jar
