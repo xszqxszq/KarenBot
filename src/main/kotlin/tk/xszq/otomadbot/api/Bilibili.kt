@@ -1,4 +1,4 @@
-package tk.xszq.otomadbot.core.api
+package tk.xszq.otomadbot.api
 
 import com.google.gson.Gson
 import net.mamoe.mirai.event.GlobalEventChannel
@@ -8,12 +8,11 @@ import net.mamoe.mirai.message.data.SimpleServiceMessage
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import ru.gildor.coroutines.okhttp.await
-import tk.xszq.otomadbot.core.QQXMLMessage
-import tk.xszq.otomadbot.core.availableUA
-import tk.xszq.otomadbot.core.get
-import tk.xszq.otomadbot.core.text.EventHandler
+import tk.xszq.otomadbot.EventHandler
+import tk.xszq.otomadbot.QQXMLMessage
+import tk.xszq.otomadbot.availableUA
+import tk.xszq.otomadbot.get
 
-open class BilibiliApiResponse(open val code: Int, open val message: String, open val ttl: Int, open val data: Any)
 data class BilibiliApiVideoResponse(val code: Int, val message: String, val ttl: Int, val data: BilibiliVideoInfo)
 data class BilibiliUser(val mid: Long, val name: String, val face: String)
 data class BilibiliVideoInfo(
@@ -24,6 +23,25 @@ data class BilibiliVideoInfo(
     val no_cache: Boolean = false, val pages: List<Any> = emptyList(), val subtitle: HashMap<String, Any> = hashMapOf(),
     val user_garb: HashMap<String, Any> = hashMapOf()
 )
+
+object BilibiliApi: ApiClient() {
+    suspend fun queryAv(aid: String): BilibiliApiVideoResponse {
+        val request = Request.Builder()
+            .addHeader("User-Agent", availableUA)
+            .url("http://api.bilibili.com/x/web-interface/view?aid=$aid")
+            .build()
+        return Gson().fromJson(OkHttpClient().newCall(request).await().body!!.get(),
+            BilibiliApiVideoResponse::class.java)
+    }
+    suspend fun queryBv(bvid: String): BilibiliApiVideoResponse {
+        val request = Request.Builder()
+            .addHeader("User-Agent", availableUA)
+            .url("http://api.bilibili.com/x/web-interface/view?bvid=$bvid")
+            .build()
+        return Gson().fromJson(OkHttpClient().newCall(request).await().body!!.get(),
+            BilibiliApiVideoResponse::class.java)
+    }
+}
 
 @Suppress("EXPERIMENTAL_API_USAGE")
 object BilibiliConverter: EventHandler("B站视频", "bilibili") {
@@ -39,12 +57,7 @@ object BilibiliConverter: EventHandler("B站视频", "bilibili") {
         super.register()
     }
     private suspend fun avToShare(aid: String, event: MessageEvent) = event.run {
-        val request = Request.Builder()
-            .addHeader("User-Agent", availableUA)
-            .url("http://api.bilibili.com/x/web-interface/view?aid=$aid")
-            .build()
-        val response = Gson().fromJson(OkHttpClient().newCall(request).await().body!!.get(),
-            BilibiliApiVideoResponse::class.java)
+        val response = BilibiliApi.queryAv(aid)
         if (response.code == 0) {
             subject.sendMessage(SimpleServiceMessage(60, QQXMLMessage {
                 title(response.data.title)
@@ -56,12 +69,7 @@ object BilibiliConverter: EventHandler("B站视频", "bilibili") {
         }
     }
     private suspend fun bvToShare(bvid: String, event: MessageEvent) = event.run {
-        val request = Request.Builder()
-            .addHeader("User-Agent", availableUA)
-            .url("http://api.bilibili.com/x/web-interface/view?bvid=$bvid")
-            .build()
-        val response = Gson().fromJson(OkHttpClient().newCall(request).await().body!!.get(),
-            BilibiliApiVideoResponse::class.java)
+        val response = BilibiliApi.queryBv(bvid)
         if (response.code == 0) {
             subject.sendMessage(SimpleServiceMessage(60, QQXMLMessage {
                 title(response.data.title)

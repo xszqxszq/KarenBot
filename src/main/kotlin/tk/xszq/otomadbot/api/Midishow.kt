@@ -1,6 +1,6 @@
 @file:Suppress("EXPERIMENTAL_API_USAGE", "unused")
 
-package tk.xszq.otomadbot.core.api
+package tk.xszq.otomadbot.api
 
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.MessageEvent
@@ -10,9 +10,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.Jsoup
 import ru.gildor.coroutines.okhttp.await
-import tk.xszq.otomadbot.core.*
-import tk.xszq.otomadbot.core.text.EventHandler
-import tk.xszq.otomadbot.core.text.TextSettings
+import tk.xszq.otomadbot.*
+import tk.xszq.otomadbot.text.TextSettings
 
 object Midishow: EventHandler("MIDI搜索", "midishow") {
     override fun register() {

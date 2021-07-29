@@ -1,6 +1,6 @@
 @file:Suppress("unused", "MemberVisibilityCanBePrivate")
 
-package tk.xszq.otomadbot.core.text
+package tk.xszq.otomadbot.text
 
 import com.charleskorn.kaml.Yaml
 import kotlinx.coroutines.delay
@@ -9,6 +9,7 @@ import kotlinx.serialization.Serializable
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.message.data.Image
+import net.mamoe.mirai.message.data.Image.Key.queryUrl
 import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.message.data.anyIsInstance
 import net.mamoe.mirai.message.data.content
@@ -18,10 +19,11 @@ import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import tk.xszq.otomadbot.core.*
-import tk.xszq.otomadbot.core.api.PaddleOCR
-import tk.xszq.otomadbot.core.text.AutoReplyHandler.database
-import tk.xszq.otomadbot.core.text.AutoReplyHandler.newLockedSuspendedTransaction
+import tk.xszq.otomadbot.*
+import tk.xszq.otomadbot.api.PythonApi
+import tk.xszq.otomadbot.core.OtomadBotCore
+import tk.xszq.otomadbot.text.AutoReplyHandler.database
+import tk.xszq.otomadbot.text.AutoReplyHandler.newLockedSuspendedTransaction
 import java.util.concurrent.atomic.AtomicBoolean
 
 @Serializable
@@ -160,9 +162,8 @@ object RuleItems: IntIdTable() {
             if (message.anyIsInstance<Image>() && hasImageRule(group.id)) {
                 content = ""
                 message.forEach {
-                    content += if (it is Image) PaddleOCR.getText(it) + " " else ""
+                    content += if (it is Image) PythonApi.ocr(it.queryUrl()) + " " else ""
                 }
-                println(content)
                 if (!content.isEmptyChar()) {
                     result ?: matchInclude(this, content, ReplyRuleType.PIC_INCLUDE)?.let { result = it.reply }
                     result ?: matchAll(this, content, ReplyRuleType.PIC_ALL)?.let { result = it.reply }
@@ -220,7 +221,7 @@ enum class ReplyRuleType(val type: Byte) {
     PIC_ALL(-2),
     PIC_ANY(-3)
 }
-object AutoReplyHandler {
+object AutoReplyHandler: EventHandler("自动回复", "reply") {
     val database = Database.connect("jdbc:h2:mem:reply;MODE=MySQL;DB_CLOSE_DELAY=-1;", driver = "org.h2.Driver")
     val rwLock = AtomicBoolean(false)
     var config = AutoReplyRules()
@@ -254,16 +255,18 @@ object AutoReplyHandler {
             }
         }
     }
-    fun register() {
+    override fun register() {
         rwLock.set(false)
         runBlocking {
             reloadConfig()
         }
         GlobalEventChannel.subscribeAlways<GroupMessageEvent> {
-
-            RuleItems.match(this) ?.let {
-                quoteReply(it)
+            requireSenderNot(denied) {
+                RuleItems.match(this) ?.let {
+                    quoteReply(it)
+                }
             }
         }
+        super.register()
     }
 }
