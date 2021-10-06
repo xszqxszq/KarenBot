@@ -6,11 +6,13 @@ import net.mamoe.mirai.message.data.Image.Key.queryUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import ru.gildor.coroutines.okhttp.await
+import tk.xszq.otomadbot.api.ApiSettings
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
+import java.net.InetSocketAddress
+import java.net.Proxy
 
 
 @Suppress("MemberVisibilityCanBePrivate")
@@ -30,14 +32,21 @@ object NetworkUtils {
         }
         return 0L
     }
-    fun downloadFile(url: String, dir: File, filename: String, headers: List<Pair<String, String>> = emptyList()): File? {
+    fun downloadFile(url: String, dir: File, filename: String, headers: List<Pair<String, String>> = emptyList(),
+                     proxy: Boolean = false): File? {
+        println(url)
         val requestBuilder = Request.Builder()
             .url(url)
             .get()
         headers.forEach {
             requestBuilder.addHeader(it.first, it.second)
         }
-        val call = OkHttpClient().newCall(requestBuilder.build())
+        val clientBuilder = OkHttpClient.Builder()
+        if (proxy)
+            clientBuilder.proxy(Proxy(
+                if (ApiSettings.proxy.type.lowercase() == "socks") Proxy.Type.SOCKS else Proxy.Type.HTTP,
+                InetSocketAddress(ApiSettings.proxy.addr, ApiSettings.proxy.port)))
+        val call = clientBuilder.build().newCall(requestBuilder.build())
         try {
             val response = call.execute()
             if (response.code == 200 || response.code == 201) {
@@ -70,7 +79,9 @@ object NetworkUtils {
         }
         return null
     }
-    fun downloadTempFile(url: String, headers: List<Pair<String, String>> = emptyList(), ext: String = "")
-        = downloadFile(url, tempDir, UUID.randomUUID().toString() + if (ext.isNotEmpty()) ".$ext" else "", headers)
+    fun downloadTempFile(url: String, headers: List<Pair<String, String>> = emptyList(), ext: String = "",
+                         proxy: Boolean = false)
+        = downloadFile(url, tempDir, UUID.randomUUID().toString() + if (ext.isNotEmpty()) ".$ext" else "",
+        headers, proxy)
     suspend fun Image.getFile(): File? = downloadTempFile(queryUrl())
 }

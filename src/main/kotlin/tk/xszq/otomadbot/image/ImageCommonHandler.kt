@@ -8,12 +8,12 @@ import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.anyIsInstance
 import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
-import tk.xszq.otomadbot.EventHandler
+import tk.xszq.otomadbot.*
 import tk.xszq.otomadbot.NetworkUtils.getFile
+import tk.xszq.otomadbot.core.Cooldown
 import tk.xszq.otomadbot.core.OtomadBotCore
-import tk.xszq.otomadbot.pass
-import tk.xszq.otomadbot.quoteReply
-import tk.xszq.otomadbot.requireNot
+import tk.xszq.otomadbot.core.ifReady
+import tk.xszq.otomadbot.core.update
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -36,6 +36,7 @@ class ReplyPicList {
     fun insert(dir: String, element: String) = list[dir]!!.add(File(element).toPath())
 }
 object ImageCommonHandler: EventHandler("图片通用功能", "image.common") {
+    val parseCooldown = Cooldown("image_parse")
     private val replyDenied by lazy {
         PermissionService.INSTANCE.register(
             PermissionId("otm", "deny.image.reply"), "禁用自动回复表情包")
@@ -49,25 +50,31 @@ object ImageCommonHandler: EventHandler("图片通用功能", "image.common") {
         super.register()
     }
     private suspend fun handle(event: GroupMessageEvent) = event.run {
-        message.forEach { msg ->
-            if (msg is Image && msg.imageId.split(".").last() != "gif") {
-                requireNot(denied) {
-                    val file = msg.getFile()
-                    file ?.let { img ->
-                        requireNot(replyDenied) {
-                            if (isTargetH2Image("reply", img)) {
-                                val pic = replyPic.getRandom("reply")
-                                pic.sendAsImageTo(group)
+        ifReady(parseCooldown) {
+            message.forEach { msg ->
+                if (msg is Image && msg.imageId.split(".").last() != "gif") {
+                    requireNot(denied) {
+                        val file = msg.getFile()
+                        file?.let { img ->
+                            requireNot(replyDenied) {
+                                if (isTargetH2Image("reply", img)) {
+                                    val pic = replyPic.getRandom("reply")
+                                    pic.sendAsImageTo(group)
+                                }
+                                update(parseCooldown)
+                            }
+                            try {
+                                val result = img.decodeQR()
+                                if (urlRegex.matches(result))
+                                    quoteReply(result)
+                                update(parseCooldown)
+                                pass
+                            } catch (e: Exception) {
+                                pass
                             }
                         }
-                        try {
-                            val result = img.decodeQR()
-                            quoteReply(result)
-                        } catch (e: Exception) {
-                            pass
-                        }
+                        file?.delete()
                     }
-                    file?.delete()
                 }
             }
         }

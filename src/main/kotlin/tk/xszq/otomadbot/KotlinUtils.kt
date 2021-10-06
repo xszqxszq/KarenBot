@@ -16,12 +16,18 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.InputStream
+import java.math.BigInteger
 import java.nio.file.Path
+import java.security.MessageDigest
 import java.util.*
 import javax.imageio.ImageIO
+import kotlin.text.toCharArray
+
+typealias Args = List<String>
 
 const val availableUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) " +
         "Chrome/85.0.4183.83 Safari/537.36"
+val urlRegex = "^[A-Za-z0-9]*://.*$".toRegex()
 val pass = {}
 val tempDir = File(privilegedGetProperty("java.io.tmpdir").replace("\\", "/"))
 
@@ -42,11 +48,14 @@ fun String.isEmptyChar(): Boolean {
     return text == "" || text == "\n" || text == "\t"
 }
 fun String.toArgsList(): List<String> = this.trim().split(" +".toRegex()).toMutableList().filter { isNotBlank() }
+fun String.toArgsListByLn(): List<String> = this.trim().split("\n").toMutableList().filter { isNotBlank() }
 fun String.toSimple(): String = ZhConverterUtil.toSimple(this)
+fun String.toTraditional(): String = ZhConverterUtil.toTraditional(this)
 fun String.trimLiteralTrident() = this.replace("    ", "")
 fun isLinux() = File("/bin/bash").exists()
 
 fun ResponseBody.get(): String = string()
+fun ResponseBody.getBytes(): ByteArray = bytes()
 fun BufferedImage.toInputStream(): InputStream? {
     val stream = ByteArrayOutputStream()
     return try {
@@ -89,5 +98,33 @@ class RegexpOpCol<T : String?>(
 
 @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
 fun String.lowercase(): String = (this as java.lang.String).toLowerCase(Locale.ROOT)
+fun String.md5(): String = BigInteger(1, MessageDigest.getInstance("MD5")
+    .digest(toByteArray())).toString(16).padStart(32, '0')
 fun newTempFile(prefix: String = "", suffix: String = ""): File = tempDir.resolve(prefix +
         UUID.randomUUID().toString() + suffix)
+
+const val DBC_SPACE = ' '
+const val SBC_SPACE = 12288
+const val DBC_CHAR_START = 33
+const val DBC_CHAR_END = 126
+const val CONVERT_STEP = 65248
+
+fun String.toSBC(): String {
+    val buf = StringBuilder(length)
+    this.toCharArray().forEach {
+        buf.append(
+            when (it.toInt()) {
+                DBC_SPACE.toInt() -> SBC_SPACE
+                in DBC_CHAR_START..DBC_CHAR_END -> it + CONVERT_STEP
+                else -> it
+            }
+        )
+    }
+    return buf.toString()
+}
+fun Char.isDBC() = this.toInt() in DBC_SPACE.toInt()..DBC_CHAR_END
+enum class TextHAlign {
+    LEFT,
+    CENTER,
+    RIGHT
+}

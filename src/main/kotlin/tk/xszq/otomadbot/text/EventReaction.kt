@@ -1,8 +1,11 @@
-@file:Suppress("unused", "MemberVisibilityCanBePrivate")
+@file:Suppress("unused", "MemberVisibilityCanBePrivate", "EXPERIMENTAL_API_USAGE")
 package tk.xszq.otomadbot.text
 
-import com.google.gson.Gson
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.double
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.console.data.AutoSavePluginConfig
 import net.mamoe.mirai.console.data.value
@@ -24,16 +27,15 @@ import okhttp3.Response
 import tk.xszq.otomadbot.*
 import tk.xszq.otomadbot.api.BilibiliApi
 import tk.xszq.otomadbot.api.PythonApi
-import tk.xszq.otomadbot.core.Counter
+import tk.xszq.otomadbot.core.*
 import tk.xszq.otomadbot.image.ImageCommonHandler
 import java.io.IOException
-
 
 object WelcomeHandler: EventHandler("欢迎消息", "welcome") {
     override fun register() {
         super.register()
         GlobalEventChannel.subscribeAlways<MemberJoinEvent> { event ->
-            requireNot(WelcomeHandler.denied) {
+            requireNot(denied) {
                 group.sendMessage(
                     when (event) {
                         is MemberJoinEvent.Invite -> TextSettings.welcome.invite
@@ -46,7 +48,7 @@ object WelcomeHandler: EventHandler("欢迎消息", "welcome") {
         }
     }
 }
-object Repeater: EventHandler("重复草字", "kusa") {
+object Repeater: EventHandler("重复草字", "kusa", HandlerType.RESTRICTED_ENABLED) {
     val kusa = Counter()
     override fun register() {
         super.register()
@@ -77,32 +79,38 @@ object NudgeBounce: EventHandler("戳一戳回弹", "nudge.bounce") {
     }
 }
 object LightAppHandler: EventHandler("QQ小程序解析", "lightapp") {
+    val cooldown = Cooldown("lightapp")
     override fun register() {
         super.register()
         GlobalEventChannel.subscribeAlways<MessageEvent> {
-            message.filterIsInstance<LightApp>().forEach {
-                Gson().fromJson(it.content, LightAppRoot::class.java).meta.forEach { (_, it) ->
-                    quoteReply(if (it.title == "哔哩哔哩") {
-                        try {
-                            val bvid = getBV(it.qqdocurl)
-                            val info = BilibiliApi.queryBv(bvid)
-                            val result = "$bvid\n" +
-                                    "${info.data.title}\n" +
-                                    "${(info.data.stat["view"] as Double).toInt()}播放 " +
-                                    "${(info.data.stat["danmaku"] as Double).toInt()}弹幕 " +
-                                    "${(info.data.stat["reply"] as Double).toInt()}评论\n" +
-                                    "UP主：${info.data.owner.name}\n" +
-                                    "简介：\n" +
-                                    info.data.desc
-                            val cover = NetworkUtils.downloadTempFile(info.data.pic)
-                            (cover?.toExternalResource()?.use { img ->
-                                subject.uploadImage(img)
-                            } ?: "".toPlainText()) + result
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            (it.qqdocurl ?: it.url).toPlainText()
+            requireNot(denied) {
+                ifReady(cooldown) {
+                    message.filterIsInstance<LightApp>().forEach {
+                        OtomadBotCore.json.decodeFromString<LightAppRoot>(it.content).meta.forEach { (_, it) ->
+                            quoteReply(if (it.title == "哔哩哔哩") {
+                                try {
+                                    val bvid = getBV(it.qqdocurl)
+                                    val info = BilibiliApi.queryBv(bvid)
+                                    val result = "$bvid\n" +
+                                            "${info.data.title}\n" +
+                                            "${(info.data.stat.jsonObject["view"]!!.jsonPrimitive.double).toInt()}播放 " +
+                                            "${(info.data.stat.jsonObject["danmaku"]!!.jsonPrimitive.double).toInt()}弹幕 " +
+                                            "${(info.data.stat.jsonObject["reply"]!!.jsonPrimitive.double).toInt()}评论\n" +
+                                            "UP主：${info.data.owner.name}\n" +
+                                            "简介：\n" +
+                                            info.data.desc
+                                    val cover = NetworkUtils.downloadTempFile(info.data.pic)
+                                    (cover?.toExternalResource()?.use { img ->
+                                        subject.uploadImage(img)
+                                    } ?: "".toPlainText()) + result
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                    (it.qqdocurl ?: it.url ?: it.contentJumpUrl ?: it.title).toPlainText()
+                                }
+                            } else (it.qqdocurl ?: it.url ?: it.contentJumpUrl ?: it.title)!!.toPlainText())
                         }
-                    } else (it.qqdocurl ?: it.url).toPlainText())
+                        update(cooldown)
+                    }
                 }
             }
         }
@@ -127,22 +135,34 @@ object LightAppHandler: EventHandler("QQ小程序解析", "lightapp") {
         }
     }
 }
-object SentimentDetector: EventHandler("sentiment", "情感检测") {
+object SentimentDetector: EventHandler("情感检测", "sentiment", HandlerType.RESTRICTED_ENABLED) {
+    val cooldown = Cooldown("sentiment")
     override fun register() {
         super.register()
         GlobalEventChannel.subscribeAlways<GroupMessageEvent> {
-            if (message.contains(At(bot))) {
-                quoteReply(ImageCommonHandler.replyPic.getRandom(if (PythonApi.sentiment(message.content)!!) "reply"
-                    else "afraid").uploadAsImage(group))
+            requireNot(denied) {
+                ifReady(cooldown) {
+                    if (message.contains(At(bot))) {
+                        quoteReply(
+                            ImageCommonHandler.replyPic.getRandom(
+                                if (PythonApi.sentiment(message.content)!!) "reply"
+                                else "afraid"
+                            ).uploadAsImage(group)
+                        )
+                        update(cooldown)
+                    }
+                }
             }
         }
     }
 }
 
-data class LightAppRoot(val desc: String, val view: String, val ver: String, val prompt: String,
+@Serializable
+data class LightAppRoot(val app: String?=null, val desc: String?=null, val view: String?=null, val ver: String?=null, val prompt: String?=null,
 val meta: HashMap<String, LightAppDetail>)
-data class LightAppDetail(val appid: String, val desc: String, val preview: String, val qqdocurl: String?,
-                          val title: String, val url: String)
+@Serializable
+data class LightAppDetail(val appid: String?=null, val id: String?=null, val desc: String?=null, val preview: String?=null, val qqdocurl: String?=null,
+                          val title: String?=null, val url: String?=null, val contentJumpUrl: String?=null)
 @Serializable
 class WelcomeTextSettings {
     var invite = "(๑•̀ㅂ•́)و✧"

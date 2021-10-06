@@ -4,8 +4,8 @@ package tk.xszq.otomadbot.audio
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import tk.xszq.otomadbot.core.BinConfig
 import tk.xszq.otomadbot.ProgramExecutor
+import tk.xszq.otomadbot.core.BinConfig
 import tk.xszq.otomadbot.newTempFile
 import java.io.File
 

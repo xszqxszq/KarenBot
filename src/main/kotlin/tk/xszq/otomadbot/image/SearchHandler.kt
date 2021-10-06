@@ -1,6 +1,9 @@
+@file:Suppress("EXPERIMENTAL_API_USAGE")
+
 package tk.xszq.otomadbot.image
 
-import com.google.gson.Gson
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.MessageEvent
 import net.mamoe.mirai.event.subscribeMessages
@@ -14,48 +17,58 @@ import okhttp3.Request
 import org.jsoup.Jsoup
 import ru.gildor.coroutines.okhttp.await
 import tk.xszq.otomadbot.*
+import tk.xszq.otomadbot.core.*
 import java.text.DecimalFormat
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
 object SearchHandler: EventHandler("搜图", "image.search") {
+    private val cooldown = Cooldown("search")
     override fun register() {
         GlobalEventChannel.subscribeMessages {
             startsWithSimple("搜图", true) { _, _ ->
-                requireNot(denied) {
-                    println("perm ok")
-                    val target = if (message.anyIsInstance<Image>()) {
-                        println("this")
-                        this
-                    } else {
-                        println("no msg")
-                        quoteReply("请发送想要搜索的图片（仅限二次元图片）：")
-                        nextMessageEvent()
-                    }
-                    var tempCounter = 0
-                    target.message.forEach { pic ->
-                        if (pic is Image) {
-                            println("search it")
-                            tempCounter += 1
-                            subject.sendMessage(target.message.quote() + (if (tempCounter > 1) "【图$tempCounter】" else "")
-                                    + getImageSearchByUrl(pic.queryUrl()))
+                ifReady(cooldown) {
+                    requireNot(denied) {
+                        val target = if (message.anyIsInstance<Image>()) {
+                            this
+                        } else {
+                            quoteReply("请发送想要搜索的图片（仅限二次元图片）：")
+                            nextMessageEvent()
+                        }
+                        var tempCounter = 0
+                        target.message.forEach { pic ->
+                            if (pic is Image) {
+                                tempCounter += 1
+                                subject.sendMessage(
+                                    target.message.quote() + (if (tempCounter > 1) "【图$tempCounter】" else "")
+                                            + getImageSearchByUrl(pic.queryUrl())
+                                )
+                                update(cooldown)
+                            }
                         }
                     }
+                } ?: run {
+                    quoteReply("搜得太快了~\n还需要等 ${remaining(cooldown)} 秒")
                 }
             }
             startsWithSimple("搜番", true) { _, _ ->
-                requireNot(denied) {
-                    val target = if (message.anyIsInstance<Image>()) {
-                        this
-                    } else {
-                        quoteReply("请发送想要搜索的番剧截图：")
-                        nextMessageEvent()
-                    }
-                    target.message.forEach { pic ->
-                        if (pic is Image) {
-                            doHandleTraceMoe(pic, target)
+                ifReady(cooldown) {
+                    requireNot(denied) {
+                        val target = if (message.anyIsInstance<Image>()) {
+                            this
+                        } else {
+                            quoteReply("请发送想要搜索的番剧截图：")
+                            nextMessageEvent()
+                        }
+                        target.message.forEach { pic ->
+                            if (pic is Image) {
+                                doHandleTraceMoe(pic, target)
+                                update(cooldown)
+                            }
                         }
                     }
+                } ?: run {
+                    quoteReply("搜得太快了~\n还需要等 ${remaining(cooldown)} 秒")
                 }
             }
         }
@@ -74,7 +87,9 @@ object SearchHandler: EventHandler("搜图", "image.search") {
                 val doc = Jsoup.parse(response.body!!.get())
                 val target = doc.select(".resulttablecontent")[0]
                 val similarity = target.select(".resultsimilarityinfo").text()
-                try {
+                if (similarity.substringBefore('%').toDouble() < 70) {
+                    "没有找到相关图片……"
+                } else try {
                     val name = target.select(".resulttitle").text()
                     val links = target.select(".resultcontentcolumn>a")
                     var link = target.select(".resultmiscinfo>a").attr("href")
@@ -103,9 +118,13 @@ object SearchHandler: EventHandler("搜图", "image.search") {
             return "网络连接失败，请稍后重试QWQ"
         }
     }
+    @Serializable
     data class TraceMoeResults(val result: List<TraceMoeResult>)
-    data class TraceMoeResult(val anilist: AnilistInfo?, val filename: String, val episode: Int?, val from: Double,
-                              val to: Double, val similarity: Double, val video: String, val image: String)
+    @Serializable
+    data class TraceMoeResult(val anilist: AnilistInfo?=null, val filename: String, val episode: String?=null,
+                              val from: Double, val to: Double, val similarity: Double, val video: String,
+                              val image: String)
+    @Serializable
     data class AnilistInfo(val id: Long, val idMal: Long, val title: HashMap<String, String?>,
                            val synonyms: List<String>, val isAdult: Boolean)
     /**
@@ -123,20 +142,30 @@ object SearchHandler: EventHandler("搜图", "image.search") {
                 "&url=${image.queryUrl()}")
             .build()).await()
         if (response.isSuccessful) {
-            val result = Gson().fromJson(response.body!!.get(), TraceMoeResults::class.java)
+            val result = OtomadBotCore.json.decodeFromString<TraceMoeResults>(response.body!!.get())
             try {
                 if (result.result.isNotEmpty()) {
                     val realResult = result.result[0]
-                    message.subject.sendMessage(
-                        message.message.quote() + "[${DecimalFormat("0.##")
-                            .format(realResult.similarity * 100.0)}%] " +
-                        "${realResult.anilist?.title?.get("native")} " +
-                                (realResult.episode ?.let {"第${realResult.episode}集 "} ?: "") +
+                    if (realResult.similarity < 0.7) {
+                        message.subject.sendMessage(message.message.quote() + "没有找到相关番剧……")
+                        return
+                    }
+                    var returnText = "[${DecimalFormat("0.##")
+                        .format(realResult.similarity * 100.0)}%] " +
+                            "${realResult.anilist?.title?.get("native")} "
+                    try {
+                        returnText += (realResult.episode ?.let {"第${realResult.episode}集 "} ?: "")
+                    } catch (e: Exception) {
+                        pass
+                    }
+                    returnText +=
                         String.format(
                             "%d:%02d", realResult.from.roundToInt() / 60,
                             realResult.from.roundToInt() % 60
-                        ) +
-                        "\n结果来自trace.moe，本bot不保证结果准确性，谢绝辱骂"
+                        )
+                    returnText += "\n结果来自trace.moe，本bot不保证结果准确性，谢绝辱骂"
+                    message.subject.sendMessage(
+                        message.message.quote() + returnText
                     )
                 } else {
                     message.subject.sendMessage(message.message.quote() + "没有找到相关番剧……")
@@ -145,7 +174,7 @@ object SearchHandler: EventHandler("搜图", "image.search") {
                 message.subject.sendMessage(message.message.quote() + "没有找到相关番剧……")
             }
         } else {
-            message.subject.sendMessage(message.message.quote() + "网络错误，请重试")
+            message.subject.sendMessage(message.message.quote() + "网络错误，可能当前搜番请求过多，请重试")
             println(response.body!!.get())
         }
     }

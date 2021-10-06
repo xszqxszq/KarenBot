@@ -9,6 +9,7 @@ import net.mamoe.mirai.console.permission.PermitteeId.Companion.permitteeId
 import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.contact.User
+import net.mamoe.mirai.contact.isOperator
 import net.mamoe.mirai.event.EventPriority
 import net.mamoe.mirai.event.MessageDsl
 import net.mamoe.mirai.event.MessageSubscribersBuilder
@@ -55,13 +56,15 @@ internal fun <M : MessageEvent, Ret, R : RR, RR> MessageSubscribersBuilder<M, Re
 
 @MessageDsl
 fun <M : MessageEvent, Ret, R : RR, RR> MessageSubscribersBuilder<M, Ret, R, RR>
-        .equalsTo(equals: String, ignoreCase: Boolean = false, trim: Boolean = true,
+        .equalsTo(equals: String, ignoreCase: Boolean = true, trim: Boolean = true,
                   onEvent: MessageListener<M, R>): Ret
         = (if (trim) equals.trim() else equals).let { toCheck ->
     content({ toSimple(if (trim) it.trim() else it).equals(toCheck, ignoreCase = ignoreCase) }) {
         onEvent(this, this.message.contentToString())
     }
 }
+
+fun String.substringAfterPrefix(start: String): String = substring(start.length)
 
 internal fun <M : MessageEvent, Ret, R : RR, RR> MessageSubscribersBuilder<M, Ret, R, RR>.startsWithSimpleImpl(
     prefix: String,
@@ -72,12 +75,16 @@ internal fun <M : MessageEvent, Ret, R : RR, RR> MessageSubscribersBuilder<M, Re
     return if (trim) {
         val toCheck = prefix.trim()
         content({ it.toSimple().lowercase().trimStart().startsWith(toCheck) }) {
-            if (removePrefix) this.onEvent(this.message.contentToString().toSimple().lowercase().substringAfter(toCheck).trim(), this.message.contentToString())
-            else onEvent(this, this.message.contentToString().toSimple().lowercase().trim(), this.message.contentToString())
+            if (removePrefix) this.onEvent(this.message.contentToString().toSimple().lowercase().substringAfter(toCheck).trim(),
+                this.message.contentToString().substringAfterPrefix(toCheck).trim())
+            else onEvent(this, this.message.contentToString().toSimple().lowercase().trim(),
+                this.message.contentToString().trim())
         }
     } else content({ it.toSimple().lowercase().startsWith(prefix) }) {
-        if (removePrefix) this.onEvent(this.message.contentToString().toSimple().lowercase().removePrefix(prefix), this.message.contentToString())
-        else onEvent(this, this.message.contentToString().toSimple().lowercase(), this.message.contentToString())
+        if (removePrefix) this.onEvent(this.message.contentToString().toSimple().lowercase().removePrefix(prefix),
+            this.message.contentToString().substringAfterPrefix(prefix).trim())
+        else onEvent(this, this.message.contentToString().toSimple().lowercase(),
+            this.message.contentToString().trim())
     }
 }
 @MessageDsl
@@ -128,11 +135,16 @@ suspend fun <T> GroupMessageEvent.requireNot(permission: Permission, block: susp
         null
     else
         block.invoke()
-suspend fun <T> GroupMessageEvent.requireSender(permission: Permission, block: suspend () -> T): T? = when {
+suspend fun <T> MessageEvent.requireSender(permission: Permission, block: suspend () -> T): T? = when {
     sender.permitteeId.hasPermission(permission) -> block.invoke()
     else -> null
 }
-suspend fun <T> GroupMessageEvent.requireSenderNot(permission: Permission, block: suspend () -> T): T? = when {
+suspend fun <T> MessageEvent.requireSenderOr(permission: Permission, bool: Boolean, block: suspend () -> T): T? =
+    if (sender.permitteeId.hasPermission(permission) || bool)
+        block.invoke()
+    else
+        null
+suspend fun <T> MessageEvent.requireSenderNot(permission: Permission, block: suspend () -> T): T? = when {
     sender.permitteeId.hasPermission(permission) -> null
     else -> block.invoke()
 }
@@ -146,6 +158,10 @@ suspend fun <T> GroupMessageEvent.requireOr(permission: Permission, bool: Boolea
         block.invoke()
     else
         null
+suspend fun <T> MessageEvent.requireBotAdmin(block: suspend () -> T): T? = requireSender(AdminEventHandler.botAdmin,
+    block)
+suspend fun <T> GroupMessageEvent.requireOperator(block: suspend () -> T): T? = requireSenderOr(AdminEventHandler.botAdmin,
+    sender.isOperator(), block)
 suspend fun MessageEvent.quoteReply(message: Message): MessageReceipt<Contact> =
     this.subject.sendMessage(this.message.quote() + message)
 suspend fun MessageEvent.quoteReply(message: String): MessageReceipt<Contact> = quoteReply(message.toPlainText())

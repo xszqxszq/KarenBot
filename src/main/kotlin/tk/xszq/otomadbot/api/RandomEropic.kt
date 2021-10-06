@@ -1,14 +1,19 @@
+@file:Suppress("EXPERIMENTAL_API_USAGE")
+
 package tk.xszq.otomadbot.api
 
-import com.google.gson.Gson
 import com.soywiz.korio.net.QueryString
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import ru.gildor.coroutines.okhttp.await
 import tk.xszq.otomadbot.availableUA
+import tk.xszq.otomadbot.core.OtomadBotCore
 import tk.xszq.otomadbot.get
 import java.util.concurrent.TimeUnit
 
+@Serializable
 data class RandomEropic(
     val pid: Long,
     val p: Int,
@@ -45,7 +50,7 @@ data class RandomEropic(
                     .url(url)
                     .build()
                 val response = client.newCall(request).await()
-                return Gson().fromJson(response.body!!.get(), RandomEropicResponse::class.java)
+                return OtomadBotCore.json.decodeFromString(response.body!!.get())
             } ?: run {
                 println("警告：ApiSettings 中 eropic 未配置！")
             }
@@ -54,11 +59,12 @@ data class RandomEropic(
         }
     }
 }
+@Serializable
 data class RandomEropicResponse(
     val code: Int,
     val msg: String,
-    val quota: Int,
-    val quota_min_ttl: Int,
+    val quota: Int? = null,
+    val quota_min_ttl: Int? = null,
     val count: Int,
     val data: List<RandomEropic>
 )

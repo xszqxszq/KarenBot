@@ -13,7 +13,7 @@ import ru.gildor.coroutines.okhttp.await
 import tk.xszq.otomadbot.*
 import tk.xszq.otomadbot.text.TextSettings
 
-object Midishow: EventHandler("MIDI搜索", "midishow") {
+object Midishow: EventHandler("MIDI搜索", "audio.midishow") {
     override fun register() {
         GlobalEventChannel.subscribeMessages {
             finding(Regex(TextSettings.regex.midishow)) { finding ->

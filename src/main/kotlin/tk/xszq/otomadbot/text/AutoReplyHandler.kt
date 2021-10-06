@@ -221,7 +221,7 @@ enum class ReplyRuleType(val type: Byte) {
     PIC_ALL(-2),
     PIC_ANY(-3)
 }
-object AutoReplyHandler: EventHandler("自动回复", "reply") {
+object AutoReplyHandler: EventHandler("自动回复", "reply", HandlerType.RESTRICTED_ENABLED) {
     val database = Database.connect("jdbc:h2:mem:reply;MODE=MySQL;DB_CLOSE_DELAY=-1;", driver = "org.h2.Driver")
     val rwLock = AtomicBoolean(false)
     var config = AutoReplyRules()

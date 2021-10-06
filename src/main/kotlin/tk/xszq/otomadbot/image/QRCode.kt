@@ -5,15 +5,11 @@ import com.google.zxing.client.j2se.BufferedImageLuminanceSource
 import com.google.zxing.client.j2se.MatrixToImageWriter.toBufferedImage
 import com.google.zxing.common.HybridBinarizer
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
-import net.mamoe.mirai.contact.Contact.Companion.uploadImage
-import net.mamoe.mirai.event.GlobalEventChannel
-import net.mamoe.mirai.event.events.MessageEvent
-import net.mamoe.mirai.event.subscribeMessages
-import tk.xszq.otomadbot.*
 import java.awt.image.BufferedImage
 import java.io.File
 import java.io.FileInputStream
 import javax.imageio.ImageIO
+import kotlin.collections.set
 
 fun File.decodeQR(): String {
     val binarizer = HybridBinarizer(BufferedImageLuminanceSource(ImageIO.read(FileInputStream(this))))
