@@ -47,6 +47,9 @@ object BotAdminCommandHandler: AdminEventHandler() {
                     quoteReply("重载成功")
                 }
             }
+            startsWith("/audioinfo") { path ->
+
+            }
         }
         super.register()
     }

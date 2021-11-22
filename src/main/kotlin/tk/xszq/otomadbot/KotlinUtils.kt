@@ -113,8 +113,8 @@ fun String.toSBC(): String {
     val buf = StringBuilder(length)
     this.toCharArray().forEach {
         buf.append(
-            when (it.toInt()) {
-                DBC_SPACE.toInt() -> SBC_SPACE
+            when (it.code) {
+                DBC_SPACE.code -> SBC_SPACE
                 in DBC_CHAR_START..DBC_CHAR_END -> it + CONVERT_STEP
                 else -> it
             }
@@ -122,7 +122,7 @@ fun String.toSBC(): String {
     }
     return buf.toString()
 }
-fun Char.isDBC() = this.toInt() in DBC_SPACE.toInt()..DBC_CHAR_END
+fun Char.isDBC() = this.code in DBC_SPACE.code..DBC_CHAR_END
 enum class TextHAlign {
     LEFT,
     CENTER,

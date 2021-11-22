@@ -39,9 +39,17 @@ class B40Result(val nickname: String, val rating: Int, val additional_rating: In
                 val charts: Map<String, List<B40ScoreResult>>)
 
 @Serializable
-class B40ScoreResult(val achievements: Double, val ds: Double, val dxScore: Int, val fc: String, val fs: String,
-val level: String, val level_index: Int, val level_label: String, val ra: Int, val rate: String, val song_id: Int,
-val title: String, val type: String)
+open class B40ScoreResult(val achievements: Double, val ds: Double, val dxScore: Int, val fc: String, val fs: String,
+                          val level: String, val level_index: Int, val level_label: String, val ra: Int,
+                          val rate: String, val song_id: Int, val title: String, val type: String)
+object EmptyB40ScoreResult: B40ScoreResult(-114.00, .0, 0, "", "", "",
+    0, "", -100, "", -114514, "", "")
+fun List<B40ScoreResult>.fillEmpty(target: Int): List<B40ScoreResult> {
+    val result = toMutableList()
+    for (i in (1..(target-size)))
+        result.add(EmptyB40ScoreResult)
+    return result
+}
 
 object MaimaiDXHandler: EventHandler("舞萌DX", "maimaidx") {
     override fun register() {
@@ -93,8 +101,8 @@ object MaimaiDXHandler: EventHandler("舞萌DX", "maimaidx") {
         g2d.drawString("底分：${info.rating} + 段位分：${info.additional_rating}", MaimaiConfig.ratingDetail)
 
         // Charts
-        g2d.drawCharts(info.charts["sd"]!!, 5, 69, 210, 8)
-        g2d.drawCharts(info.charts["dx"]!!, 3, 936, 210, 8)
+        g2d.drawCharts(info.charts["sd"]!!.fillEmpty(25), 5, 69, 210, 8)
+        g2d.drawCharts(info.charts["dx"]!!.fillEmpty(15), 3, 936, 210, 8)
 
         g2d.dispose()
 
@@ -122,7 +130,7 @@ fun String.ellipsize(max: Int): String {
         if (cnt > max) return@forEach
         result += it
     }
-    return "$result…"
+    return result + if (result.length == length) "…" else ""
 }
 
 @Serializable
@@ -132,14 +140,14 @@ class MaimaiTextAttr(val fontName: String, val fontSize: Int, val x: Int, val y:
 object MaimaiConfig: AutoSavePluginConfig("maimai") {
     val bg by value("image/maimai/dx2021_otmbot.png")
     val name by value(MaimaiTextAttr("方正悠黑_513B", 30, 84, 45))
-    val dxrating by value(MaimaiTextAttr("Arial Black", 16, 592, 38, 0.305,
+    val dxrating by value(MaimaiTextAttr("Arial Black", 16, 592, 39, 0.29,
         TextHAlign.RIGHT))
     val ratingDetail by value(MaimaiTextAttr("Source Han Sans CN", 20, 340, 102,
         hAlign = TextHAlign.CENTER))
-    val chTitle by value(MaimaiTextAttr("方正悠黑_513B", 18, 10, 10))
-    val chAchievements by value(MaimaiTextAttr("方正悠黑_513B", 14, 10, 30))
-    val chBase by value(MaimaiTextAttr("方正悠黑_513B", 14, 10, 40))
-    val chRank by value(MaimaiTextAttr("方正悠黑_513B", 18, 10, 60))
+    val chTitle by value(MaimaiTextAttr("方正悠黑_513B", 18, 8, 22))
+    val chAchievements by value(MaimaiTextAttr("方正悠黑_513B", 16, 8, 44))
+    val chBase by value(MaimaiTextAttr("方正悠黑_513B", 16, 8, 60))
+    val chRank by value(MaimaiTextAttr("方正悠黑_513B", 18, 8, 80))
 }
 fun Graphics2D.drawString(text: String, attr: MaimaiTextAttr, fontColor: Color = Color.black) {
     val attrs = mapOf(Pair(TextAttribute.TRACKING, attr.tracking))
@@ -176,29 +184,37 @@ fun resolveCover(title: String): File {
     return OtomadBotCore.configFolder.resolve("image/maimai/cover/default.jpg")
 }
 fun Graphics2D.drawCharts(charts: List<B40ScoreResult>, cols: Int, startX: Int, startY: Int, gap: Int) {
-    charts.sortedByDescending { it.ra }.forEachIndexed { index, chart ->
+    charts.sortedWith(compareBy({ -it.ra }, { it.achievements })).forEachIndexed { index, chart ->
         val coverRaw = ImageIO.read(resolveCover(chart.title)).scale(160.0 / 190)
         val newHeight = (coverRaw.width * 9.0 / 16.0).roundToInt()
         val cover = coverRaw.getSubimage(0, (coverRaw.height - newHeight) / 2, coverRaw.width, newHeight).blur()
             .brightness(0.6f)
         val x = startX + (index % cols) * (coverRaw.width + gap)
         val y = startY + (index / cols) * (newHeight + gap)
-        drawImage(cover, x, y, null)
-        drawImage(ImageIO.read(OtomadBotCore.configFolder
-            .resolve("image/maimai/label_${chart.level_label.replace(":", "")}.png")),
-            x-19, y, null)
 
-        // Details
-        drawStringRelative(chart.title.ellipsize(12), x, y, MaimaiConfig.chTitle, Color.white)
-        drawStringRelative(chart.achievements.toString() + "%", x, y, MaimaiConfig.chAchievements, Color.white)
-        drawStringRelative("Base: ${chart.ds} -> ${chart.ra}", x, y, MaimaiConfig.chBase, Color.white)
-        drawStringRelative("#" + (index + 1), x, y, MaimaiConfig.chRank, Color.white)
-        drawImage(ImageIO.read(OtomadBotCore.configFolder.resolve("image/maimai/music_icon_${chart.rate}.png"))
-            .scale(0.8), x + 90, y + 25, null)
-        if (chart.fc.isNotEmpty()) {
+        val shadowOffset = 2
+        color = Color.black
+        fillRect(x + shadowOffset, y + shadowOffset, coverRaw.width, newHeight)
+        drawImage(cover, x, y, null)
+
+        if (chart.title != "") {
             drawImage(ImageIO.read(OtomadBotCore.configFolder
-                .resolve("image/maimai/music_icon_${chart.fc}.png")).scale(0.5),
-                x + 135, y + 25, null)
+                .resolve("image/maimai/label_${chart.level_label.replace(":", "")}.png")),
+                x-19, y, null) // Difficulty
+
+            // Details
+            drawStringRelative(chart.title.ellipsize(12), x, y, MaimaiConfig.chTitle, Color.white)
+            drawStringRelative(chart.achievements.toString() + "%", x, y, MaimaiConfig.chAchievements, Color.white)
+            drawStringRelative("Base: ${chart.ds} -> ${chart.ra}", x, y, MaimaiConfig.chBase, Color.white)
+            drawStringRelative("#${index + 1}(${chart.type})", x, y, MaimaiConfig.chRank, Color.white)
+            drawImage(ImageIO.read(OtomadBotCore.configFolder
+                .resolve("image/maimai/music_icon_${chart.rate}.png"))
+                .scale(0.8), x + 90, y + 25, null)
+            if (chart.fc.isNotEmpty()) {
+                drawImage(ImageIO.read(OtomadBotCore.configFolder
+                    .resolve("image/maimai/music_icon_${chart.fc}.png")).scale(0.5),
+                    x + 135, y + 25, null)
+            }
         }
     }
 }

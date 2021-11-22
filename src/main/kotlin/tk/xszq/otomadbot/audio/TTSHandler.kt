@@ -13,27 +13,38 @@ import org.jsoup.Jsoup
 import ru.gildor.coroutines.okhttp.await
 import tk.xszq.otomadbot.*
 import tk.xszq.otomadbot.api.PythonApi
+import tk.xszq.otomadbot.core.Cooldown
+import tk.xszq.otomadbot.core.ifReady
+import tk.xszq.otomadbot.core.remaining
+import tk.xszq.otomadbot.core.update
 import java.io.File
 
 object TTSHandler: EventHandler("TTS", "audio.tts") {
+    private val cooldown = Cooldown("tts")
     override fun register() {
         GlobalEventChannel.subscribeMessages {
             startsWithSimple("朗读") { text, _ ->
                 requireNot(denied) {
-                    if (text.isNotBlank() && subject is AudioSupported) {
-                        val lang = PythonApi.getLanguage(text)
-                        val raw = lang?.let {
-                            if (lang == "ja") TTSDownloader.yukkuri(text)
-                            else TTSDownloader.googleTranslate(text, it)
-                        } ?: run { TTSDownloader.googleTranslate(text) }
-                        val encoded = AudioEncodeUtils.convertAnyToSilk(raw!!)
-                        encoded?.let { file ->
-                            file.toExternalResource().use {
-                                subject.sendMessage((subject as AudioSupported).uploadAudio(it))
+                    ifReady(cooldown) {
+                        update(cooldown)
+                        if (text.isNotBlank() && subject is AudioSupported) {
+                            val lang = PythonApi.getLanguage(text)
+                            val raw = lang?.let {
+                                if (lang == "ja") TTSDownloader.yukkuri(text)
+                                else TTSDownloader.googleTranslate(text, it)
+                            } ?: run { TTSDownloader.googleTranslate(text) }
+                            val encoded = AudioEncodeUtils.convertAnyToSilk(raw!!)
+                            encoded?.let { file ->
+                                file.toExternalResource().use {
+                                    subject.sendMessage((subject as AudioSupported).uploadAudio(it))
+                                }
                             }
+                            raw.delete()
+                            encoded?.delete()
                         }
-                        raw.delete()
-                        encoded?.delete()
+                        pass
+                    } ?: run {
+                        quoteReply("让我歇个 ${remaining(cooldown)} 秒再读，好吗QWQ")
                     }
                 }
             }

@@ -38,4 +38,5 @@ object PythonApi: ApiClient() {
     suspend fun getLanguage(text: String) = call(listOf(Pair("text", text), Pair("encode", "none")), "language")
         ?.data
     suspend fun getBPM(audio: String) = call(listOf(Pair("audio", audio)), "bpm") ?.data ?.toDouble()
+    suspend fun getHairColor(path: String) = call(listOf(Pair("img", path)), "hair_color") ?.data
 }

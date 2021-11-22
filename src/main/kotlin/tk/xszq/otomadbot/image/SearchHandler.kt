@@ -112,6 +112,7 @@ object SearchHandler: EventHandler("搜图", "image.search") {
                     "[$similarity] " + target.select(".resultcontent").text()
                 } + "\n结果来自SauceNao，本bot不保证结果准确性，谢绝辱骂"
             } else {
+                println(response.code)
                 "网络连接失败，请稍后重试QWQ"
             }
         } catch (e: Exception) {

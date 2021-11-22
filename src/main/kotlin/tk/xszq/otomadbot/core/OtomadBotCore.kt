@@ -31,7 +31,8 @@ object OtomadBotCore : KotlinPlugin(
     val registerList = arrayListOf(AutoReplyHandler, WelcomeHandler, Repeater, NudgeBounce, BilibiliConverter, Midishow,
         EropicHandler, ImageGeneratorHandler, ImageCommonHandler, SearchHandler, ImageEffectHandler,
         GroupAdminCommandHandler, BotAdminCommandHandler, LightAppHandler, SentimentDetector, BadWordHandler,
-        RandomHandler, WikiQuery, TTSHandler, BPMAnalyser, ScheduledTaskHandler, MaimaiDXHandler, AudioEffectHandler
+        RandomHandler, WikiQuery, TTSHandler, BPMAnalyser, ScheduledTaskHandler, MaimaiDXHandler, AudioEffectHandler,
+        RandomMusic, ForwardMessageConstructor
     ) // TODO: 这么多是怎么会是呢，是不是该搞点自动的
     private val settings = listOf(TextSettings, ApiSettings, BinConfig, CooldownConfig, MaimaiConfig)
     private val dataFiles = listOf(ScheduledMessageData)

@@ -11,6 +11,10 @@ import array
 import math
 import BpmDetector
 import paddleocr
+import cv2
+import os.path
+import numpy as np
+from sklearn.cluster import KMeans
 from senta import Senta
 from concurrent.futures import ThreadPoolExecutor
 from pypinyin import pinyin, Style
@@ -60,6 +64,12 @@ async def getBPM(audio: str = Form(...)):
 async def doDetectSentiment(text: str = Form(...)):
 	return {'status': True, 'data': senta.predict(text)[0][1] == 'positive'}
 
+@api.post('/hair_color')
+async def getHairColor(img: str = Form(...)):
+	loop = asyncio.get_event_loop()
+	result = await loop.run_in_executor(None, handleHairColor, img)
+	return {'status': True, 'data': ';'.join([','.join(map(str, reversed(i))) for i in result])}
+
 async def convertWindowsPath(path: str):
 	parts = path.split(':\\')
 	return '/mnt/' + parts[0].lower() + '/' + parts[1].replace('\\', '/')
@@ -98,6 +108,45 @@ def spherize(image):
 			x, y = min(max(x, 0), width - 1), min(max(y, 0), height - 1)
 			resultPix[w, h] = pix[x, y]
 	return result
+
+
+# Reference: https://www.pyimagesearch.com/2014/05/26/opencv-python-k-means-color-clustering/
+def centroidHistogram(clt):
+    numLabels = np.arange(0, len(np.unique(clt.labels_)) + 1)
+    (hist, _) = np.histogram(clt.labels_, bins = numLabels)
+    hist = hist.astype("float")
+    hist /= hist.sum()
+    return hist
+def getMainColor(hist, centroids):
+    bar = np.zeros((50, 300, 3), dtype = "uint8")
+    startX = 0
+    return sorted(zip(hist, centroids), key=lambda x:-x[0])[0][1]
+
+def handleHairColor(filename, cascade_file = "./lbpcascade_animeface.xml"):
+    if not os.path.isfile(cascade_file):
+        raise RuntimeError("%s: not found" % cascade_file)
+
+    cascade = cv2.CascadeClassifier(cascade_file)
+    image = cv2.imread(filename, cv2.IMREAD_COLOR)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray = cv2.equalizeHist(gray)
+    
+    faces = cascade.detectMultiScale(gray,
+                                     # detector options
+                                     scaleFactor = 1.1,
+                                     minNeighbors = 1,
+                                     minSize = (24, 24))
+    if len(faces) == 0:
+    	faces = [(0, 0, image.shape[1], image.shape[0])]
+    results = []
+    for (x, y, w, h) in faces:
+        now = image[y:y+h//4, x:x+w]
+        now = now.reshape((now.shape[0] * now.shape[1], 3))
+        clt = KMeans(n_clusters = 6)
+        clt.fit(now)
+        results.append(getMainColor(centroidHistogram(clt), clt.cluster_centers_))
+    return results
+
 
 if __name__ == '__main__':
 	import uvicorn
