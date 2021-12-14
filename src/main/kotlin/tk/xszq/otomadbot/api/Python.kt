@@ -39,4 +39,9 @@ object PythonApi: ApiClient() {
         ?.data
     suspend fun getBPM(audio: String) = call(listOf(Pair("audio", audio)), "bpm") ?.data ?.toDouble()
     suspend fun getHairColor(path: String) = call(listOf(Pair("img", path)), "hair_color") ?.data
+    suspend fun imSoHappy(base64: String): Pair<ByteArray, ByteArray>? = call(listOf(Pair("image", base64)),
+        "imsohappy") ?.let { it ->
+            val list = it.data.split(';')
+            return Pair(Base64.decode(list.first()), Base64.decode(list.last()))
+        }
 }

@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from typing import Optional
 import io
+import copy
 import base64
 import langid
 import functools
@@ -70,6 +71,20 @@ async def getHairColor(img: str = Form(...)):
 	result = await loop.run_in_executor(None, handleHairColor, img)
 	return {'status': True, 'data': ';'.join([','.join(map(str, reversed(i))) for i in result])}
 
+@api.post('/imsohappy')
+async def doImSoHappy(image: str = Form(...)):
+	before = cv2.imdecode(np.frombuffer(base64.b64decode(image), dtype=np.uint8), flags=1) # Base64 only
+	loop = asyncio.get_event_loop()
+	result1, result2 = await loop.run_in_executor(None, handleImSoHappy, before)
+	return {'status': True, 'data': base64.b64encode(cv2.imencode('.jpg', result1)[1].tobytes()) + b';' + base64.b64encode(cv2.imencode('.jpg', result2)[1].tobytes())}
+
+@api.post('/ocr')
+async def getOCR(url: str = Form(...)):
+	r = ""
+	for i in ocr.ocr(url, cls=True):
+		r += i[-1][0] + " "
+	return {'status': True, 'data': r}
+
 async def convertWindowsPath(path: str):
 	parts = path.split(':\\')
 	return '/mnt/' + parts[0].lower() + '/' + parts[1].replace('\\', '/')
@@ -81,13 +96,6 @@ async def getDecodedText(text: str, encode: str):
 	elif encode == 'base64':
 		text = base64.b64decode(text).decode('utf-8')
 	return text
-
-@api.post('/ocr')
-async def getOCR(url: str = Form(...)):
-	r = ""
-	for i in ocr.ocr(url, cls=True):
-		r += i[-1][0] + " "
-	return {'status': True, 'data': r}
 
 # From https://github.com/QuinnSong/JPG-Tools/blob/5aaa7b6e068909e3b6b9d5b886be519d43163f31/src/spherize.py
 def spherize(image):
@@ -108,7 +116,6 @@ def spherize(image):
 			x, y = min(max(x, 0), width - 1), min(max(y, 0), height - 1)
 			resultPix[w, h] = pix[x, y]
 	return result
-
 
 # Reference: https://www.pyimagesearch.com/2014/05/26/opencv-python-k-means-color-clustering/
 def centroidHistogram(clt):
@@ -147,6 +154,13 @@ def handleHairColor(filename, cascade_file = "./lbpcascade_animeface.xml"):
         results.append(getMainColor(centroidHistogram(clt), clt.cluster_centers_))
     return results
 
+def handleImSoHappy(image):
+	w, h = image.shape[1], image.shape[0]
+	image1, image2 = copy.deepcopy(image), copy.deepcopy(image)
+	image1[0:h, w-w//2:w] = cv2.flip(image1[0:h, 0:w//2], 1)
+	image2 = cv2.flip(image2, 1)
+	image2[0:h, w-w//2:w] = cv2.flip(image2[0:h, 0:w//2], 1)
+	return image1, image2
 
 if __name__ == '__main__':
 	import uvicorn

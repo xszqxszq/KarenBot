@@ -3,6 +3,7 @@
 package tk.xszq.otomadbot.api
 
 import com.twelvemonkeys.image.ConvolveWithEdgeOp
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -51,7 +52,19 @@ fun List<B40ScoreResult>.fillEmpty(target: Int): List<B40ScoreResult> {
     return result
 }
 
+@Serializable
+open class MaimaiMusicInfo(val id: String, val title: String, val type: String, val ds: List<Double>,
+                           val level: List<String>, val cids: List<Int>, val charts: List<MaimaiChartInfo>,
+                           val basic_info: MaimaiMusicBasicInfo)
+@Serializable
+open class MaimaiChartInfo(val notes: List<Int>, val charter: String)
+@Serializable
+open class MaimaiMusicBasicInfo(val title: String, val artist: String, val genre: String, val bpm: Int,
+                                val release_date: String, val from: String, val is_new: Boolean)
+
 object MaimaiDXHandler: EventHandler("舞萌DX", "maimaidx") {
+    @Suppress("MemberVisibilityCanBePrivate")
+    var musics: List<MaimaiMusicInfo> = listOf()
     override fun register() {
         GlobalEventChannel.subscribeMessages {
             startsWithSimple("b40") { _, username ->
@@ -65,7 +78,15 @@ object MaimaiDXHandler: EventHandler("舞萌DX", "maimaidx") {
         }
         super.register()
     }
-
+    suspend fun fetchMusicInfo() {
+        musics = emptyList()
+        val request = Request.Builder()
+            .url("https://www.diving-fish.com/api/maimaidxprober/music_data")
+            .build()
+        val response = OkHttpClient().newCall(request).await()
+        if (response.isSuccessful) {
+        }
+    }
     private suspend fun handleB40(type: String = "qq", id: String, event: MessageEvent) = event.run {
         val payload = buildJsonObject { put(type, id) }
         val request = Request.Builder()
@@ -130,7 +151,7 @@ fun String.ellipsize(max: Int): String {
         if (cnt > max) return@forEach
         result += it
     }
-    return result + if (result.length == length) "…" else ""
+    return result + if (result.length != length) "…" else ""
 }
 
 @Serializable

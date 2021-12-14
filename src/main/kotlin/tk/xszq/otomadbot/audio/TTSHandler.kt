@@ -80,12 +80,12 @@ object TTSDownloader {
      * @param lang Language of the text
      */
     fun googleTranslate(text: String, lang: String = "zh-CN") = NetworkUtils.downloadTempFile(
-        "https://translate.google.cn/translate_tts?" + QueryString.encode(
+        "https://translate.google.com/translate_tts?" + QueryString.encode(
             Pair("ie", "UTF-8"), Pair("total", "1"), Pair("idx", "0"), Pair("textlen",
                 if (text.length < 10) "16" else text.length.toString()),
             Pair("client", "tw-ob"), Pair("q", text), Pair("tl", lang)
         ), listOf(
-            Pair("Referer", "https://translate.google.cn/?sl=auto&tl=zh-CN&text="
+            Pair("Referer", "https://translate.google.com/?sl=auto&tl=zh-CN&text="
                     + URL.encodeComponent(text, UTF8, formUrlEncoded = true)
                     + "&op=translate"),
             Pair("User-Agent", availableUA)

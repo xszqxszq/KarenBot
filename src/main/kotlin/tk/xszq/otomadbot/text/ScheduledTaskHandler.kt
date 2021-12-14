@@ -9,7 +9,6 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import net.mamoe.mirai.console.data.AutoSavePluginData
 import net.mamoe.mirai.console.data.value
-import net.mamoe.mirai.contact.isOperator
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.MessageEvent
 import net.mamoe.mirai.event.subscribeMessages

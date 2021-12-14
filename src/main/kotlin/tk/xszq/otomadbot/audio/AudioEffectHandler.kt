@@ -1,12 +1,12 @@
 package tk.xszq.otomadbot.audio
 
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.toList
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
-import net.mamoe.mirai.utils.ExternalResource.Companion.uploadTo
-import net.mamoe.mirai.utils.RemoteFile.Companion.uploadFile
+import net.mamoe.mirai.utils.JavaFriendlyAPI
 import tk.xszq.otomadbot.*
 import tk.xszq.otomadbot.core.BinConfig
 import java.io.File
@@ -20,19 +20,21 @@ object AudioEffectHandler: EventHandler("音频效果", "audio.effect") {
         }
         super.register()
     }
+    @OptIn(JavaFriendlyAPI::class)
     private suspend fun handlePitchShift(path: String, event: GroupMessageEvent) = event.run {
         if (path.isBlank()) {
             quoteReply("请指定欲修音的文件名（仅支持WAV格式）！")
         } else {
-            val file = group.filesRoot.resolve(path)
-            if (!file.exists()) {
+            val file = group.files.root.resolveFiles(path).toList()
+            if (file.isEmpty()) {
                 quoteReply("文件不存在，请检查是否有拼写错误")
-            } else if (file.length() > 10485760L) {
+            } else if (file.first().size > 10485760L) {
                 quoteReply("文件不得超过10M")
             } else {
                 quoteReply("正在处理中，请稍等片刻……")
-                val url = file.getDownloadInfo()!!.url
-                val raw = NetworkUtils.downloadTempFile(url, ext = File(file.name).extension)!!
+                val target = file.first()
+                val url = target.getUrl()!!
+                val raw = NetworkUtils.downloadTempFile(url, ext = File(target.name).extension)!!
                 if (raw.getAudioDuration() > 10.0) {
                     quoteReply("文件不得超过10s")
                 } else {
@@ -44,10 +46,10 @@ object AudioEffectHandler: EventHandler("音频效果", "audio.effect") {
                     val result = File(before.absolutePath + ".result.wav")
                     result.toExternalResource().use {
                         try {
-                            group.sendMessage(group.uploadFile("/${before.name}", result))
+                            val uploaded = group.files.uploadNewFile("/${before.name}", it)
                             quoteReply("修音成功，该文件将在10min内被撤回。")
                             delay(600000)
-                            group.filesRoot.resolve("/${before.name}").delete()
+                            uploaded.delete()
                         } catch (e: Exception) {
                             quoteReply("文件上传失败")
                             e.printStackTrace()
