@@ -4,6 +4,10 @@ title: 使用说明
 permalink: /guide/
 ---
 
+### 注意：下文所述的“私聊可用”仅指与bot是好友的情况下可以私聊使用
+
+
+
 # 支持的功能
 
 ### 音频功能
@@ -21,11 +25,12 @@ permalink: /guide/
 
 | 功能名称                              | 使用方法                                 | 私聊可用 | 所需权限                                          |
 | ------------------------------------- | ---------------------------------------- | -------- | ------------------------------------------------- |
+| 自动识别二维码                        | 发送二维码图片                           | 否       | `otm:image.common`                                |
+| 生成二维码                            | **生成二维码** *文本内容/URL*            | 是       | `otm:image.generate`                              |
+| 生成Latex                             | **生成laxtex** *公式内容*                | 是       | `otm:image.generate`                              |
 | 生成5000兆円风格图片                  | **生成5k** *第一行文字 第二行文字(可选)* | 是       | `otm:image.generate`                              |
 | 球面化                                | **球面化**<br>**球面化** *图片*          | 是       | `otm:image.effect`                                |
-| 生成二维码                            | **生成二维码** *文本内容/URL*            | 是       | `otm:image.generate`                              |
-| 自动识别二维码                        | 发送二维码图片                           | 否       | `otm:image.common`                                |
-| 生成Latex                             | **生成laxtex** *公式内容*                | 是       | `otm:image.generate`                              |
+| 我巨爽                                | **我巨爽**<br>**我巨爽** *图片* | 是 | `otm.image.effect` |
 | [SauceNAO](https://saucenao.com/)搜图 | **搜图**<br>**搜番** *图片*              | 是       | `otm:image.match`                                 |
 | [trace.moe](https://trace.moe)搜番    | **搜番**<br>**搜番** *图片*              | 是       | `otm:image.match`                                 |
 | 表情回复                              | 发送被收录的黄发小女孩/哭哭猫猫表情      | 否       | `otm:image.reply`<br>前置权限：`otm:image.common` |
@@ -49,8 +54,11 @@ permalink: /guide/
 | 功能名称 | 使用方法 | 私聊可用 | 所需权限       |
 | -------- | -------- | -------- | -------------- |
 | Best 40  | **b40**  | 是       | `otm:maimaidx` |
-
-
+| Best 50 (模拟海外rating)  | **b50**  | 是       | `otm:maimaidx` |
+| 随机歌曲  | **随个(难度)等级**<br>例：随个紫13+ | 是 | `otm:maimaidx` |
+| 查歌  | **查歌** *歌名* | 是 | `otm:maimaidx` |
+| 别名查询  | *歌名***是什么歌** | 是 | `otm:maimaidx` |
+| 谱面信息  | **（难度）id** *编号*<br>  例：id 799<br> 例：紫id432 | 是 | `otm:maimaidx` |
 
 ### 杂项功能
 
