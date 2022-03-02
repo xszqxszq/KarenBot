@@ -1,5 +1,6 @@
 package tk.xszq.otomadbot.core
 
+import com.soywiz.korio.async.launchImmediately
 import io.github.mzdluo123.silk4j.LameCoder
 import io.github.mzdluo123.silk4j.NativeLibLoader
 import io.github.mzdluo123.silk4j.SilkCoder
@@ -13,7 +14,12 @@ import net.mamoe.mirai.utils.info
 import tk.xszq.otomadbot.admin.BotAdminCommandHandler
 import tk.xszq.otomadbot.admin.GroupAdminCommandHandler
 import tk.xszq.otomadbot.api.*
-import tk.xszq.otomadbot.audio.*
+import tk.xszq.otomadbot.audio.AudioEffectHandler
+import tk.xszq.otomadbot.audio.BPMAnalyser
+import tk.xszq.otomadbot.audio.RandomMusic
+import tk.xszq.otomadbot.audio.TTSHandler
+import tk.xszq.otomadbot.gamebot.MaimaiConfig
+import tk.xszq.otomadbot.gamebot.MaimaiDXHandler
 import tk.xszq.otomadbot.image.*
 import tk.xszq.otomadbot.text.*
 import java.nio.file.Files
@@ -32,7 +38,7 @@ object OtomadBotCore : KotlinPlugin(
         EropicHandler, ImageGeneratorHandler, ImageCommonHandler, SearchHandler, ImageEffectHandler,
         GroupAdminCommandHandler, BotAdminCommandHandler, LightAppHandler, SentimentDetector, BadWordHandler,
         RandomHandler, WikiQuery, TTSHandler, BPMAnalyser, MaimaiDXHandler, AudioEffectHandler,
-        RandomMusic, ForwardMessageConstructor
+        RandomMusic, ForwardMessageConstructor, RequestAccept
     //, ScheduledTaskHandler
     ) // TODO: 这么多是怎么会是呢，是不是该搞点自动的
     private val settings = listOf(TextSettings, ApiSettings, BinConfig, CooldownConfig, MaimaiConfig)
@@ -45,24 +51,40 @@ object OtomadBotCore : KotlinPlugin(
         doTest()
         logger.info { "运行前测试完毕" }
         laterFindBot()
-        doReload()
-        doInitH2Images("reply")
-        doInitH2Images("afraid", "reply")
-        doInitH2Images("ma", "reply")
-        ImageCommonHandler.replyPic.load("reply")
-        ImageCommonHandler.replyPic.load("gif", "reply")
-        ImageCommonHandler.replyPic.load("afraid")
-        logger.info { "自动回复功能初始化完成" }
-        registerList.forEach {
-            it.register()
+        launchImmediately {
+            doReload()
+            registerList.forEach {
+                kotlin.runCatching {
+                    it.register()
+                }.onFailure {
+                    logger.error(it)
+                }
+            }
+            logger.info { "加载完成" }
         }
-        logger.info { "加载完成" }
     }
-    fun doReload() {
+    private suspend fun doLoadReplyPic() {
+        kotlin.runCatching {
+            ImageMatcher.clearImages("reply")
+            ImageMatcher.loadImages("reply")
+            ImageMatcher.loadImages("afraid", "reply")
+            ImageMatcher.loadImages("ma", "reply")
+            ImageCommonHandler.replyPic.load("reply")
+            ImageCommonHandler.replyPic.load("gif", "reply")
+            ImageCommonHandler.replyPic.load("afraid")
+            logger.info { "图片自动回复功能载入完成" }
+        }.onFailure {
+            logger.error(it)
+        }
+    }
+    suspend fun doReload() {
         settings.forEach { it.reload() }
         logger.info { "配置文件载入完毕" }
         dataFiles.forEach { it.reload() }
         logger.info { "数据文件载入完毕" }
+        doLoadReplyPic()
+        AutoReplyHandler.reloadConfig()
+        MaimaiDXHandler.reload()
     }
     private fun doTest() {
         SilkCoder()

@@ -25,7 +25,7 @@ object BPMAnalyser: EventHandler("测BPM", "audio.bpm") {
                     quoteReply("文件不存在，请检查拼写！")
                     return@startsWithSimple
                 }
-                if (targetFile.size!! >= 20971520L) {
+                if (targetFile.size >= 20971520L) {
                     quoteReply("文件大小请勿超过20M :(")
                     return@startsWithSimple
                 }

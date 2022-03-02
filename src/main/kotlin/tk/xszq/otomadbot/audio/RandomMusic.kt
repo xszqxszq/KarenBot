@@ -5,7 +5,7 @@ package tk.xszq.otomadbot.audio
 import net.mamoe.mirai.contact.AudioSupported
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.MessageEvent
-import net.mamoe.mirai.event.subscribeMessages
+import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import tk.xszq.otomadbot.EventHandler
 import tk.xszq.otomadbot.core.OtomadBotCore
@@ -18,7 +18,7 @@ import kotlin.random.Random
 object RandomMusic: EventHandler("随机音乐", "audio.random") {
     private val audioExts = listOf("mp3", "wav", "ogg", "m4a")
     override fun register() {
-        GlobalEventChannel.subscribeMessages {
+        GlobalEventChannel.subscribeGroupMessages {
             equalsTo("随机东方原曲") {
                 subject.sendMessage(fetchVoice("touhou", this))
             }

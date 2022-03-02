@@ -31,11 +31,11 @@ data class RandomEropic(
             Pair("Referer", "https://www.pixiv.net/"),
             Pair("User-Agent", availableUA)
         )
-        suspend fun get(keyword: String? = null, proxy: String = "i.pixiv.re"): RandomEropicResponse {
+        suspend fun get(keyword: String? = null, proxy: String = "", r18: Boolean = false): RandomEropicResponse {
             ApiSettings.list["eropic"] ?.let { config ->
                 val args = mutableListOf(
                     Pair("apikey", config.apikey),
-                    Pair("r18", "0"),
+                    Pair("r18", if (r18) "1" else "0"),
                     Pair("num", "1"),
                     Pair("proxy", proxy),
                     Pair("size1200", "true")

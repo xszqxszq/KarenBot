@@ -59,6 +59,7 @@ object BadWordHandler: EventHandler("不良词汇/詈语控制", "badword") {
         GlobalEventChannel.subscribeAlways<GroupMessageEvent> {
             handle(this)
         }
+        //TODO
         GlobalEventChannel.subscribeGroupMessages {
             startsWithSimple("屏蔽设置") { rawArgs, _ ->
 

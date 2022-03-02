@@ -22,9 +22,9 @@ object PythonApi: ApiClient() {
         val form = formBuilder.build()
         val request = Request.Builder()
             .url(ApiSettings.list["python_api"]!!.url + "/" + path)
-            .post(form)
-            .build()
-        val response = OkHttpClient().newCall(request).await()
+        if (args.isNotEmpty())
+            request.post(form)
+        val response = OkHttpClient().newCall(request.build()).await()
         return if (response.isSuccessful)
             OtomadBotCore.json.decodeFromString(response.body!!.get())
         else
@@ -38,10 +38,7 @@ object PythonApi: ApiClient() {
     suspend fun getLanguage(text: String) = call(listOf(Pair("text", text), Pair("encode", "none")), "language")
         ?.data
     suspend fun getBPM(audio: String) = call(listOf(Pair("audio", audio)), "bpm") ?.data ?.toDouble()
-    suspend fun getHairColor(path: String) = call(listOf(Pair("img", path)), "hair_color") ?.data
-    suspend fun imSoHappy(base64: String): Pair<ByteArray, ByteArray>? = call(listOf(Pair("image", base64)),
-        "imsohappy") ?.let { it ->
-            val list = it.data.split(';')
-            return Pair(Base64.decode(list.first()), Base64.decode(list.last()))
-        }
+    suspend fun getHairColor(path: String) = call(listOf(Pair("image", path)), "hair_color") ?.data
+    suspend fun getMaimaiAliases() = call(emptyList(), "maimai_aliases")
+    suspend fun isLt(path: String) = call(listOf(Pair("image", path)), "is_lt") ?.data ?.toDouble()
 }

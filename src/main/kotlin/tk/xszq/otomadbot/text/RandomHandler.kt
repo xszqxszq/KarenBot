@@ -8,7 +8,7 @@ import net.mamoe.mirai.contact.nameCardOrNick
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.event.events.MessageEvent
-import net.mamoe.mirai.event.subscribeMessages
+import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.message.data.at
 import net.mamoe.mirai.message.data.toPlainText
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
@@ -27,7 +27,7 @@ object RandomHandler: EventHandler("随机功能", "random") {
     private val cooldown = Cooldown("random")
     override fun register() {
         super.register()
-        GlobalEventChannel.subscribeMessages {
+        GlobalEventChannel.subscribeGroupMessages {
             equalsTo("随机教程") {
                 ifReady(cooldown) {
                     requireNot(denied) {
@@ -61,12 +61,10 @@ object RandomHandler: EventHandler("随机功能", "random") {
                 }
             }
             startsWithSimple("随机群友") { rawArg, _ ->
-                if (this is GroupMessageEvent) {
-                    ifReady(cooldown) {
-                        requireNot(denied) {
-                            handleMember(rawArg.toArgsList(), this)
-                            update(cooldown)
-                        }
+                ifReady(cooldown) {
+                    requireNot(denied) {
+                        handleMember(rawArg.toArgsList(), this)
+                        update(cooldown)
                     }
                 }
             }

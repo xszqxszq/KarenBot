@@ -1,15 +1,19 @@
 package tk.xszq.otomadbot.image
 
+import com.soywiz.korim.bitmap.context2d
+import com.soywiz.korim.bitmap.flippedX
 import com.soywiz.korim.bitmap.resized
+import com.soywiz.korim.bitmap.sliceWithSize
 import com.soywiz.korim.format.PNG
 import com.soywiz.korim.format.encode
 import com.soywiz.korim.format.readBitmap
+import com.soywiz.korim.format.readNativeImage
 import com.soywiz.korio.file.std.toVfs
 import com.soywiz.korma.geom.Anchor
 import com.soywiz.korma.geom.ScaleMode
 import com.soywiz.krypto.encoding.Base64
 import net.mamoe.mirai.event.GlobalEventChannel
-import net.mamoe.mirai.event.subscribeMessages
+import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.MessageSource.Key.quote
 import net.mamoe.mirai.message.data.anyIsInstance
@@ -30,7 +34,7 @@ object ImageEffectHandler: EventHandler("图像滤镜", "image.effect") {
     private val cooldown = Cooldown("image_effect")
     private const val resizeWidth = 300
     override fun register() {
-        GlobalEventChannel.subscribeMessages {
+        GlobalEventChannel.subscribeGroupMessages {
             startsWithSimple("球面化") { arg, _ ->
                 ifReady(cooldown) {
                     requireNot(denied) {
@@ -53,7 +57,7 @@ object ImageEffectHandler: EventHandler("图像滤镜", "image.effect") {
                         }
                     } ?: pass
                 } ?: run {
-                    quoteReply("为防止刷屏，还需要等待 " + remaining(cooldown) + " 秒才能用球面化哦")
+                    quoteReply("你又在玩球面化喔，休息" + remaining(cooldown) + "秒好不好")
                 }
             }
             startsWithSimple("我巨爽") { arg, _ ->
@@ -69,13 +73,23 @@ object ImageEffectHandler: EventHandler("图像滤镜", "image.effect") {
                             }
                             target.filterIsInstance<Image>().forEach {
                                 val file = it.getFile()!!
-                                val bitmap = file.toVfs().readBitmap()
-                                val input = Base64.encode(bitmap.resized(resizeWidth,
+                                val bitmap = file.toVfs().readNativeImage()
+                                val input = bitmap.resized(resizeWidth,
                                     (1.0 * bitmap.height * resizeWidth / bitmap.width).roundToInt(),
-                                    ScaleMode.EXACT, Anchor.CENTER).encode(PNG))
-                                val result = PythonApi.imSoHappy(input)!!
-                                result.first.toExternalResource().use { first ->
-                                    result.second.toExternalResource().use { second ->
+                                    ScaleMode.EXACT, Anchor.CENTER)
+                                val resultLeft = input.clone().context2d {
+                                    drawImage(input.sliceWithSize(0, 0, input.width / 2, input.height)
+                                        .extract().flipX(), input.width / 2 + 1, 0)
+                                    dispose()
+                                }.encode(PNG)
+                                val resultRight = input.clone().context2d {
+                                    drawImage(input.sliceWithSize(input.width / 2 + 1, 0,
+                                        input.width - input.width / 2, input.height)
+                                        .extract().flipX(), 0, 0)
+                                    dispose()
+                                }.encode(PNG)
+                                resultLeft.toExternalResource().use { first ->
+                                    resultRight.toExternalResource().use { second ->
                                         subject.sendMessage(target.quote() + first.uploadAsImage(subject)
                                                 + second.uploadAsImage(subject))
                                     }
@@ -85,7 +99,7 @@ object ImageEffectHandler: EventHandler("图像滤镜", "image.effect") {
                         }
                     } ?: pass
                 } ?: run {
-                    quoteReply("为防止刷屏，还需要等待 " + remaining(cooldown) + " 秒才能用哦")
+                    quoteReply("又在玩我巨爽喔，休息" + remaining(cooldown) + "秒好不好")
                 }
             }
         }

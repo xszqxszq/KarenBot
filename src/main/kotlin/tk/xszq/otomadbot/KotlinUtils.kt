@@ -9,7 +9,6 @@ import com.soywiz.korio.net.MimeType
 import io.ktor.util.*
 import kotlinx.coroutines.runBlocking
 import okhttp3.ResponseBody
-import org.jetbrains.exposed.sql.*
 import sun.security.action.GetPropertyAction.privilegedGetProperty
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
@@ -52,6 +51,17 @@ fun String.toArgsListByLn(): List<String> = this.trim().split("\n").toMutableLis
 fun String.toSimple(): String = ZhConverterUtil.toSimple(this)
 fun String.toTraditional(): String = ZhConverterUtil.toTraditional(this)
 fun String.trimLiteralTrident() = this.replace("    ", "")
+fun String.limitDecimal(limit: Int = 4): String {
+    if (toDoubleOrNull() == null)
+        throw IllegalArgumentException("Only decimal String is allowed")
+    var result = substringBefore('.') + '.'
+    val afterPart = substringAfter('.')
+    result += if (afterPart.length <= limit)
+        afterPart + "0".repeat(4 - afterPart.length)
+    else
+        afterPart.substring(0, limit)
+    return result
+}
 fun isLinux() = File("/bin/bash").exists()
 
 fun ResponseBody.get(): String = string()
@@ -80,26 +90,11 @@ inline fun <R, reified U> Any.forceSetField(fieldName: String, value: R) {
 fun getMIMEType(filename: Path): String {
     return MimeType.getByExtension(filename.extension).mime
 }
-class InStr(expr1: String, expr2: Expression<*>): ComparisonOp(
-    CustomStringFunction("INSTR", stringParam(expr1), expr2), intParam(0), "<>")
 
-class RegexpOpCol<T : String?>(
-    /** Returns the expression being checked. */
-    private val expr1: Expression<T>,
-    /** Returns the regular expression [expr1] is checked against. */
-    private val expr2: String
-) : Op<Boolean>(), ComplexExpression {
-    override fun toQueryBuilder(queryBuilder: QueryBuilder) {
-        queryBuilder {
-            append(expr1, " REGEXP `$expr2`")
-        }
-    }
-}
-
-@Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
-fun String.lowercase(): String = (this as java.lang.String).toLowerCase(Locale.ROOT)
 fun String.md5(): String = BigInteger(1, MessageDigest.getInstance("MD5")
     .digest(toByteArray())).toString(16).padStart(32, '0')
+fun File.md5(): String = BigInteger(1, MessageDigest.getInstance("MD5")
+    .digest(readBytes())).toString(16).padStart(32, '0')
 fun newTempFile(prefix: String = "", suffix: String = ""): File = tempDir.resolve(prefix +
         UUID.randomUUID().toString() + suffix)
 

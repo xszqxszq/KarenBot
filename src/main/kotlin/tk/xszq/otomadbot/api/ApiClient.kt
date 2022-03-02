@@ -27,7 +27,7 @@ object ApiSettings: AutoSavePluginConfig("api") {
 class ProxySettings {
     val type: String = "http"
     val addr: String = "127.0.0.1"
-    val port: Int = 1080
+    val port: Int = 12308
     val username: String = ""
     val password: String = ""
 }

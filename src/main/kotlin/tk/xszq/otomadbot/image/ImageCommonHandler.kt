@@ -1,11 +1,17 @@
 @file:Suppress("WeakerAccess", "MemberVisibilityCanBePrivate", "unused")
 package tk.xszq.otomadbot.image
 
+import com.soywiz.korim.format.readNativeImage
+import com.soywiz.korio.file.std.toVfs
 import net.mamoe.mirai.console.permission.PermissionId
 import net.mamoe.mirai.console.permission.PermissionService
+import net.mamoe.mirai.contact.isOperator
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.GroupMessageEvent
+import net.mamoe.mirai.message.data.Face
 import net.mamoe.mirai.message.data.Image
+import net.mamoe.mirai.message.data.MessageSource.Key.recall
+import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.message.data.anyIsInstance
 import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
 import tk.xszq.otomadbot.*
@@ -15,6 +21,7 @@ import tk.xszq.otomadbot.core.Cooldown
 import tk.xszq.otomadbot.core.OtomadBotCore
 import tk.xszq.otomadbot.core.ifReady
 import tk.xszq.otomadbot.core.update
+import tk.xszq.otomadbot.image.ImageMatcher.matchImage
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -39,12 +46,21 @@ class ReplyPicList {
 }
 object ImageCommonHandler: EventHandler("图片通用功能", "image.common") {
     val parseCooldown = Cooldown("image_parse")
+    const val r18Threshold = 0.75
+    const val r15Threshold = 0.9
+    val hsoList = listOf(PlainText("hso"), Face(Face.SE),
+        PlainText("\uD83E\uDD75\uD83E\uDD75\uD83E\uDD75"), PlainText("烧"), PlainText("莫多莫多"))
     private val replyDenied by lazy {
         PermissionService.INSTANCE.register(
             PermissionId("otm", "deny.image.reply"), "禁用自动回复表情包")
     }
+    private val ltDetect by lazy {
+        PermissionService.INSTANCE.register(
+            PermissionId("otm", "image.lt"), "启用龙图检测")
+    }
     val replyPic = ReplyPicList()
     override fun register() {
+        ltDetect
         GlobalEventChannel.subscribeAlways<GroupMessageEvent> {
             if (message.anyIsInstance<Image>())
                 handle(this)
@@ -80,16 +96,14 @@ object ImageCommonHandler: EventHandler("图片通用功能", "image.common") {
     }
     private suspend fun handle(event: GroupMessageEvent) = event.run {
         message.forEach { msg ->
-            if (msg is Image && msg.imageId.split(".").last() != "gif") {
+            if (msg is Image && msg.imageId.split(".").lastOrNull() ?.let { it != "gif" } == true) {
+                val file = msg.getFile()
                 ifReady(parseCooldown) {
                     requireNot(denied) {
-                        val file = msg.getFile()
-                        file?.let { img ->
+                        file!!.let { img ->
                             requireNot(replyDenied) {
-                                if (isTargetH2Image("reply", img) || isBlonde(img)) {
-                                    val pic = replyPic.getRandom("reply")
-                                    pic.sendAsImageTo(group)
-                                }
+                                if (matchImage("reply", img) || isBlonde(img))
+                                    replyPic.getRandom("reply").sendAsImageTo(group)
                                 update(parseCooldown)
                             }
                             try {
@@ -102,8 +116,33 @@ object ImageCommonHandler: EventHandler("图片通用功能", "image.common") {
                                 pass
                             }
                         }
-                        file?.delete()
+                        pass
                     }
+                }
+                require(ltDetect) {
+                    var small = false
+                    kotlin.runCatching {
+                        val info = file!!.toVfs().readNativeImage()
+                        if (info.width > 800 || info.height > 900)
+                            return@require
+                        small = info.width <= 80 || info.height <= 80
+                    }.onFailure {
+                        bot.logger.error(it)
+                    }
+                    PythonApi.isLt(file!!.absolutePath) ?.let { result ->
+                        println(result)
+                        if ((!small && result > 0.92) || (small && result > 0.95)) {
+                            if (group.botAsMember.isOperator()) {
+                                message.recall()
+                                group.sendMessage("请遵守群规哦")
+                            } else {
+                                quoteReply("我超，龙")
+                            }
+                        }
+                    }
+                }
+                if (!file!!.delete()) {
+                    println("[DEBUG] Delete was failed: " + file.absolutePath)
                 }
             }
         }

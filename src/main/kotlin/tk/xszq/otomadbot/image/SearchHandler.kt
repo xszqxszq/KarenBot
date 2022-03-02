@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.MessageEvent
-import net.mamoe.mirai.event.subscribeMessages
+import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.Image.Key.queryUrl
 import net.mamoe.mirai.message.data.MessageSource.Key.quote
@@ -17,7 +17,10 @@ import okhttp3.Request
 import org.jsoup.Jsoup
 import ru.gildor.coroutines.okhttp.await
 import tk.xszq.otomadbot.*
+import tk.xszq.otomadbot.api.ApiSettings
 import tk.xszq.otomadbot.core.*
+import java.net.InetSocketAddress
+import java.net.Proxy
 import java.text.DecimalFormat
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
@@ -25,7 +28,7 @@ import kotlin.math.roundToInt
 object SearchHandler: EventHandler("搜图", "image.search") {
     private val cooldown = Cooldown("search")
     override fun register() {
-        GlobalEventChannel.subscribeMessages {
+        GlobalEventChannel.subscribeGroupMessages {
             startsWithSimple("搜图", true) { _, _ ->
                 ifReady(cooldown) {
                     requireNot(denied) {
@@ -82,7 +85,14 @@ object SearchHandler: EventHandler("搜图", "image.search") {
                 .url("https://saucenao.com/search.php")
                 .post(form)
                 .build()
-            val response = OkHttpClient().newCall(request).await()
+            val clientBuilder = OkHttpClient.Builder()
+            clientBuilder.proxy(
+                Proxy(
+                if (ApiSettings.proxy.type.lowercase() == "socks") Proxy.Type.SOCKS else Proxy.Type.HTTP,
+                InetSocketAddress(ApiSettings.proxy.addr, ApiSettings.proxy.port)
+                )
+            )
+            val response = clientBuilder.build().newCall(request).await()
             return if (response.isSuccessful) {
                 val doc = Jsoup.parse(response.body!!.get())
                 val target = doc.select(".resulttablecontent")[0]

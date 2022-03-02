@@ -7,7 +7,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.JsonObject
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.MessageEvent
-import net.mamoe.mirai.event.subscribeMessages
+import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.message.data.SimpleServiceMessage
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -51,7 +51,7 @@ object BilibiliApi: ApiClient() {
 @Suppress("EXPERIMENTAL_API_USAGE")
 object BilibiliConverter: EventHandler("av/BV号解析", "bilibili") {
     override fun register() {
-        GlobalEventChannel.subscribeMessages {
+        GlobalEventChannel.subscribeGroupMessages {
             startsWith("av", true) { aid ->
                 avToShare(aid, this)
             }

@@ -5,7 +5,7 @@ import com.soywiz.korio.net.QueryString
 import com.soywiz.korio.net.URL
 import net.mamoe.mirai.contact.AudioSupported
 import net.mamoe.mirai.event.GlobalEventChannel
-import net.mamoe.mirai.event.subscribeMessages
+import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -22,12 +22,12 @@ import java.io.File
 object TTSHandler: EventHandler("TTS", "audio.tts") {
     private val cooldown = Cooldown("tts")
     override fun register() {
-        GlobalEventChannel.subscribeMessages {
+        GlobalEventChannel.subscribeGroupMessages {
             startsWithSimple("朗读") { text, _ ->
                 requireNot(denied) {
                     ifReady(cooldown) {
                         update(cooldown)
-                        if (text.isNotBlank() && subject is AudioSupported) {
+                        if (text.isNotBlank()) {
                             val lang = PythonApi.getLanguage(text)
                             val raw = lang?.let {
                                 if (lang == "ja") TTSDownloader.yukkuri(text)

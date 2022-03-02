@@ -1,6 +1,7 @@
 @file:Suppress("unused", "MemberVisibilityCanBePrivate", "EXPERIMENTAL_API_USAGE")
 package tk.xszq.otomadbot.text
 
+import kotlinx.coroutines.delay
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.double
@@ -10,10 +11,7 @@ import net.mamoe.mirai.Bot
 import net.mamoe.mirai.console.data.AutoSavePluginConfig
 import net.mamoe.mirai.console.data.value
 import net.mamoe.mirai.event.GlobalEventChannel
-import net.mamoe.mirai.event.events.GroupMessageEvent
-import net.mamoe.mirai.event.events.MemberJoinEvent
-import net.mamoe.mirai.event.events.MessageEvent
-import net.mamoe.mirai.event.events.NudgeEvent
+import net.mamoe.mirai.event.events.*
 import net.mamoe.mirai.message.data.At
 import net.mamoe.mirai.message.data.LightApp
 import net.mamoe.mirai.message.data.content
@@ -23,13 +21,11 @@ import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.Response
 import tk.xszq.otomadbot.*
 import tk.xszq.otomadbot.api.BilibiliApi
 import tk.xszq.otomadbot.api.PythonApi
 import tk.xszq.otomadbot.core.*
 import tk.xszq.otomadbot.image.ImageCommonHandler
-import java.io.IOException
 
 object WelcomeHandler: EventHandler("欢迎消息", "welcome") {
     override fun register() {
@@ -52,7 +48,7 @@ object Repeater: EventHandler("重复草字", "kusa", HandlerType.RESTRICTED_ENA
     val kusa = Counter()
     override fun register() {
         super.register()
-        GlobalEventChannel.subscribeAlways<MessageEvent> {
+        GlobalEventChannel.subscribeAlways<GroupMessageEvent> {
             requireNot(denied) {
                 if (message.content == "草") {
                     kusa.increase(subject)
@@ -82,7 +78,7 @@ object LightAppHandler: EventHandler("QQ小程序解析", "lightapp") {
     val cooldown = Cooldown("lightapp")
     override fun register() {
         super.register()
-        GlobalEventChannel.subscribeAlways<MessageEvent> {
+        GlobalEventChannel.subscribeAlways<GroupMessageEvent> {
             requireNot(denied) {
                 ifReady(cooldown) {
                     message.filterIsInstance<LightApp>().forEach {
@@ -105,9 +101,9 @@ object LightAppHandler: EventHandler("QQ小程序解析", "lightapp") {
                                     } ?: "".toPlainText()) + result
                                 } catch (e: Exception) {
                                     e.printStackTrace()
-                                    (it.qqdocurl ?: it.url ?: it.contentJumpUrl ?: it.title).toPlainText()
+                                    (it.qqdocurl ?: it.url ?: it.contentJumpUrl ?: "").toPlainText()
                                 }
-                            } else (it.qqdocurl ?: it.url ?: it.contentJumpUrl ?: it.title)!!.toPlainText())
+                            } else (it.qqdocurl ?: it.url ?: it.contentJumpUrl ?: "").toPlainText())
                         }
                         update(cooldown)
                     }
@@ -118,12 +114,7 @@ object LightAppHandler: EventHandler("QQ小程序解析", "lightapp") {
     fun getBV(link: String?): String {
         link ?.let {
             return OkHttpClient.Builder()
-                .addNetworkInterceptor(object : Interceptor {
-                    @Throws(IOException::class)
-                    override fun intercept(chain: Interceptor.Chain): Response {
-                        return chain.proceed(chain.request())
-                    }
-                })
+                .addNetworkInterceptor(Interceptor { chain -> chain.proceed(chain.request()) })
                 .build()
                 .newCall(
                 Request.Builder()
@@ -154,6 +145,27 @@ object SentimentDetector: EventHandler("情感检测", "sentiment", HandlerType.
                 }
             }
         }
+    }
+}
+object RequestAccept: EventHandler("自动同意", "accept") {
+    override fun register() {
+        super.register()
+        GlobalEventChannel.subscribeAlways<NewFriendRequestEvent> {
+            this.accept()
+        }
+        GlobalEventChannel.subscribeAlways<BotInvitedJoinGroupRequestEvent> {
+            this.accept()
+        }
+        GlobalEventChannel.subscribeAlways<BotJoinGroupEvent> {
+            if (group.members.size < 80L)
+                group.quit()
+        }
+    }
+    tailrec suspend fun waitFor(maxDelay: Long, checkPeriod: Long, targetId: Long, bot: Bot) : Boolean{
+        if (maxDelay < 0) return false
+        if (bot.getGroup(targetId) != null) return true
+        delay(checkPeriod)
+        return waitFor(maxDelay - checkPeriod, checkPeriod, targetId, bot)
     }
 }
 

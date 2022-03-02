@@ -4,7 +4,7 @@ package tk.xszq.otomadbot.api
 
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.MessageEvent
-import net.mamoe.mirai.event.subscribeMessages
+import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.message.data.SimpleServiceMessage
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -15,7 +15,7 @@ import tk.xszq.otomadbot.text.TextSettings
 
 object Midishow: EventHandler("MIDI搜索", "audio.midishow") {
     override fun register() {
-        GlobalEventChannel.subscribeMessages {
+        GlobalEventChannel.subscribeGroupMessages {
             finding(Regex(TextSettings.regex.midishow)) { finding ->
                 requireNot(denied) {
                     finding.groupValues.lastOrNull { i -> i.isNotBlank() }?.let { keyword ->
