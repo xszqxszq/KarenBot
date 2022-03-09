@@ -13,13 +13,13 @@ import net.mamoe.mirai.event.events.BotOnlineEvent
 import net.mamoe.mirai.utils.info
 import tk.xszq.otomadbot.admin.BotAdminCommandHandler
 import tk.xszq.otomadbot.admin.GroupAdminCommandHandler
-import tk.xszq.otomadbot.api.*
+import tk.xszq.otomadbot.api.ApiSettings
+import tk.xszq.otomadbot.api.BilibiliConverter
+import tk.xszq.otomadbot.api.Midishow
 import tk.xszq.otomadbot.audio.AudioEffectHandler
 import tk.xszq.otomadbot.audio.BPMAnalyser
 import tk.xszq.otomadbot.audio.RandomMusic
 import tk.xszq.otomadbot.audio.TTSHandler
-import tk.xszq.otomadbot.gamebot.MaimaiConfig
-import tk.xszq.otomadbot.gamebot.MaimaiDXHandler
 import tk.xszq.otomadbot.image.*
 import tk.xszq.otomadbot.text.*
 import java.nio.file.Files
@@ -37,11 +37,11 @@ object OtomadBotCore : KotlinPlugin(
     val registerList = arrayListOf(AutoReplyHandler, WelcomeHandler, Repeater, NudgeBounce, BilibiliConverter, Midishow,
         EropicHandler, ImageGeneratorHandler, ImageCommonHandler, SearchHandler, ImageEffectHandler,
         GroupAdminCommandHandler, BotAdminCommandHandler, LightAppHandler, SentimentDetector, BadWordHandler,
-        RandomHandler, WikiQuery, TTSHandler, BPMAnalyser, MaimaiDXHandler, AudioEffectHandler,
+        RandomHandler, WikiQuery, TTSHandler, BPMAnalyser, AudioEffectHandler,
         RandomMusic, ForwardMessageConstructor, RequestAccept
     //, ScheduledTaskHandler
     ) // TODO: 这么多是怎么会是呢，是不是该搞点自动的
-    private val settings = listOf(TextSettings, ApiSettings, BinConfig, CooldownConfig, MaimaiConfig)
+    private val settings = listOf(TextSettings, ApiSettings, BinConfig, CooldownConfig)
     private val dataFiles = listOf(ScheduledMessageData)
     val json = Json { isLenient = true; ignoreUnknownKeys = true }
     override fun onEnable() {
@@ -84,7 +84,6 @@ object OtomadBotCore : KotlinPlugin(
         logger.info { "数据文件载入完毕" }
         doLoadReplyPic()
         AutoReplyHandler.reloadConfig()
-        MaimaiDXHandler.reload()
     }
     private fun doTest() {
         SilkCoder()

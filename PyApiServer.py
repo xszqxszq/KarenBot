@@ -1,11 +1,11 @@
 import asyncio
 import base64
-import io
 import json
-import math
 import os.path
 import re
 import time
+from itertools import chain
+
 import cv2
 import imutils
 import jiagu
@@ -13,11 +13,9 @@ import langid
 import numpy as np
 import paddleocr
 import requests
-from PIL import Image
 from fastapi import FastAPI, status, Form
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from itertools import chain
 from openpyxl import Workbook
 from pypinyin import pinyin, Style
 from selenium import webdriver
@@ -50,16 +48,6 @@ async def doDetectLanguage(text: str = Form(...), encode: str = Form(...)):
 async def doGetPinyin(text: str = Form(...), encode: str = Form(...)):
     text = await getDecodedText(text, encode)
     return {'status': True, 'data': ''.join([j[0] for j in pinyin(text.strip(), style=Style.FIRST_LETTER)])}
-
-
-@api.post('/spherize')
-async def doSpherizeImage(image: str = Form(...)):
-    before = Image.open(io.BytesIO(base64.b64decode(image)))  # Base64 only
-    loop = asyncio.get_event_loop()
-    result = await loop.run_in_executor(None, spherize, before)
-    resultBytes = io.BytesIO()
-    result.save(resultBytes, format='PNG')
-    return {'status': True, 'data': base64.b64encode(resultBytes.getvalue())}
 
 
 @api.post('/bpm')
@@ -135,27 +123,6 @@ async def getDecodedText(text: str, encode: str):
     elif encode == 'base64':
         text = base64.b64decode(text).decode('utf-8')
     return text
-
-
-# Based on https://github.com/QuinnSong/JPG-Tools/blob/5aaa7b6e068909e3b6b9d5b886be519d43163f31/src/spherize.py
-def spherize(image):
-    width, height = image.size
-    midX, midY = width / 2, height / 2
-    maxMid = max(midX, midY)
-    if image.mode != "RGBA":
-        image = image.convert("RGBA")
-    pix = image.load()
-    result = Image.new("RGBA", (width, height))
-    resultPix = result.load()
-    for w in range(width):
-        for h in range(height):
-            offsetX, offsetY = w - midX, h - midY
-            radian = math.atan2(offsetY, offsetX)
-            radius = (offsetX ** 2 + offsetY ** 2) / maxMid
-            x, y = int(radius * math.cos(radian)) + midX, int(radius * math.sin(radian)) + midY
-            x, y = min(max(x, 0), width - 1), min(max(y, 0), height - 1)
-            resultPix[w, h] = pix[x, y]
-    return result
 
 
 # Based on https://www.pyimagesearch.com/2014/05/26/opencv-python-k-means-color-clustering/

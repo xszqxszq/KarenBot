@@ -39,6 +39,5 @@ object PythonApi: ApiClient() {
         ?.data
     suspend fun getBPM(audio: String) = call(listOf(Pair("audio", audio)), "bpm") ?.data ?.toDouble()
     suspend fun getHairColor(path: String) = call(listOf(Pair("image", path)), "hair_color") ?.data
-    suspend fun getMaimaiAliases() = call(emptyList(), "maimai_aliases")
     suspend fun isLt(path: String) = call(listOf(Pair("image", path)), "is_lt") ?.data ?.toDouble()
 }
