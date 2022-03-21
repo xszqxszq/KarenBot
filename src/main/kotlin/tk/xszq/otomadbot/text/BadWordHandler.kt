@@ -2,7 +2,6 @@
 
 package tk.xszq.otomadbot.text
 
-import com.charleskorn.kaml.Yaml
 import kotlinx.serialization.Serializable
 import net.mamoe.mirai.contact.getMemberOrFail
 import net.mamoe.mirai.contact.isOperator
@@ -13,11 +12,13 @@ import net.mamoe.mirai.message.data.Face
 import net.mamoe.mirai.message.data.MessageSource.Key.recall
 import tk.xszq.otomadbot.EventHandler
 import tk.xszq.otomadbot.core.OtomadBotCore
+import tk.xszq.otomadbot.core.OtomadBotCore.yaml
+import tk.xszq.otomadbot.core.SafeYamlConfig
 import tk.xszq.otomadbot.quoteReply
 import tk.xszq.otomadbot.startsWithSimple
 
 @Serializable
-class BadWordConfig {
+class BadWordConfig: SafeYamlConfig() {
     val rules = arrayOf<BadWordConfigItem>()
 }
 
@@ -35,13 +36,13 @@ object BadWordHandler: EventHandler("不良词汇/詈语控制", "badword") {
     var config = BadWordConfig()
     fun saveConfig() {
         OtomadBotCore.configFolderPath.resolve("badword.yml").toFile()
-            .writeText(Yaml.default.encodeToString(BadWordConfig.serializer(), config))
+            .writeText(yaml.encodeToString(BadWordConfig.serializer(), config))
     }
     fun reloadConfig() {
         val file = OtomadBotCore.configFolderPath.resolve("badword.yml").toFile()
         if (!file.exists())
             saveConfig()
-        config = Yaml.default.decodeFromString(BadWordConfig.serializer(), file.readText())
+        config = yaml.decodeFromString(BadWordConfig.serializer(), file.readText())
     }
     const val ALLGROUP = -1L
     // Const for types

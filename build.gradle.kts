@@ -1,9 +1,9 @@
 plugins {
-    val kotlinVersion = "1.5.30"
+    val kotlinVersion = "1.6.10"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
 
-    id("net.mamoe.mirai-console") version "2.10.0"
+    id("net.mamoe.mirai-console") version "2.11.0-M1"
 }
 
 group = "tk.xszq"
@@ -11,32 +11,29 @@ version = "5.0"
 repositories {
     mavenCentral()
     jcenter()
-}
-
-tasks {
-    named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
-        include("libs/")
+    flatDir {
+        dirs("libs")
     }
 }
 
+val korlibsVersion = "2.6.2"
+val ktorVersion = "1.6.7"
 dependencies {
-    implementation("com.charleskorn.kaml:kaml:0.34.0")
-    implementation("com.github.houbb:opencc4j:1.6.1")
-    implementation("dev.brachtendorf:JImageHash:1.0.0")
+    implementation("net.mamoe.yamlkt:yamlkt:0.10.2")
+    implementation("com.github.houbb:opencc4j:1.7.2")
     implementation("com.google.zxing:core:3.4.1")
     implementation("com.google.zxing:javase:3.4.1")
-    implementation("com.soywiz.korlibs.korim:korim:2.5.2")
-    implementation("com.soywiz.korlibs.korio:korio:2.5.2")
-    implementation("com.soywiz.korlibs.korau:korau:2.5.2")
-    implementation("com.twelvemonkeys.common:common-image:3.7.0")
-    implementation("dev.inmo:krontab:0.6.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0-native-mt") {
-        version {
-            strictly("1.6.0-native-mt")
-        }
-    }
-    implementation("org.jsoup:jsoup:1.13.1")
+    implementation("com.soywiz.korlibs.korim:korim:$korlibsVersion")
+    implementation("com.soywiz.korlibs.korio:korio:$korlibsVersion")
+    implementation("com.soywiz.korlibs.korau:korau:$korlibsVersion")
+    implementation("dev.inmo:krontab:0.7.1")
+    implementation("io.ktor:ktor-client-core:$ktorVersion")
+    implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
+    implementation("io.ktor:ktor-client-serialization:$ktorVersion")
+    implementation("io.ktor:ktor-server-core:$ktorVersion")
+    implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation("io.ktor:ktor-serialization:$ktorVersion")
+    implementation("org.jsoup:jsoup:1.14.3")
     implementation("org.scilab.forge:jlatexmath:1.0.7")
-    implementation("ru.gildor.coroutines:kotlin-coroutines-okhttp:1.0")
-    implementation(files("libs/silk4j-1.2-dev.jar"))
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 }

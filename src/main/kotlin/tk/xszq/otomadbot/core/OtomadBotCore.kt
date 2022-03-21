@@ -11,15 +11,11 @@ import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.BotOnlineEvent
 import net.mamoe.mirai.utils.info
-import tk.xszq.otomadbot.admin.BotAdminCommandHandler
-import tk.xszq.otomadbot.admin.GroupAdminCommandHandler
-import tk.xszq.otomadbot.api.ApiSettings
-import tk.xszq.otomadbot.api.BilibiliConverter
-import tk.xszq.otomadbot.api.Midishow
-import tk.xszq.otomadbot.audio.AudioEffectHandler
-import tk.xszq.otomadbot.audio.BPMAnalyser
-import tk.xszq.otomadbot.audio.RandomMusic
-import tk.xszq.otomadbot.audio.TTSHandler
+import net.mamoe.yamlkt.Yaml
+import tk.xszq.otomadbot.*
+import tk.xszq.otomadbot.admin.*
+import tk.xszq.otomadbot.api.*
+import tk.xszq.otomadbot.audio.*
 import tk.xszq.otomadbot.image.*
 import tk.xszq.otomadbot.text.*
 import java.nio.file.Files
@@ -38,12 +34,13 @@ object OtomadBotCore : KotlinPlugin(
         EropicHandler, ImageGeneratorHandler, ImageCommonHandler, SearchHandler, ImageEffectHandler,
         GroupAdminCommandHandler, BotAdminCommandHandler, LightAppHandler, SentimentDetector, BadWordHandler,
         RandomHandler, WikiQuery, TTSHandler, BPMAnalyser, AudioEffectHandler,
-        RandomMusic, ForwardMessageConstructor, RequestAccept
+        RandomMusic, ForwardMessageConstructor, RequestAccept, AudioCommonHandler, GuildHandler
     //, ScheduledTaskHandler
     ) // TODO: 这么多是怎么会是呢，是不是该搞点自动的
     private val settings = listOf(TextSettings, ApiSettings, BinConfig, CooldownConfig)
     private val dataFiles = listOf(ScheduledMessageData)
     val json = Json { isLenient = true; ignoreUnknownKeys = true }
+    val yaml = Yaml {}
     override fun onEnable() {
         doCreateFolders()
         doLoadLibraries()
@@ -84,6 +81,8 @@ object OtomadBotCore : KotlinPlugin(
         logger.info { "数据文件载入完毕" }
         doLoadReplyPic()
         AutoReplyHandler.reloadConfig()
+        PicaComic.reloadConfig()
+        BadWordHandler.reloadConfig()
     }
     private fun doTest() {
         SilkCoder()

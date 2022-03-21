@@ -51,4 +51,8 @@ object AudioEncodeUtils {
         mp3?.delete()
         return result
     }
+    fun silkToMp3Blocking(file: File): File = AudioUtils.silkToMp3(file)
+    suspend fun silkToMp3(file: File): File = withContext(Dispatchers.IO) {
+        silkToMp3Blocking(file)
+    }
 }

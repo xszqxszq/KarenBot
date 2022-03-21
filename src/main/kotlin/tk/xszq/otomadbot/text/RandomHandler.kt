@@ -1,6 +1,8 @@
 package tk.xszq.otomadbot.text
 
 import com.soywiz.korio.util.UUID
+import io.ktor.client.*
+import io.ktor.client.request.*
 import net.mamoe.mirai.contact.AudioSupported
 import net.mamoe.mirai.contact.isOperator
 import net.mamoe.mirai.contact.isOwner
@@ -12,10 +14,7 @@ import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.message.data.at
 import net.mamoe.mirai.message.data.toPlainText
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.jsoup.Jsoup
-import ru.gildor.coroutines.okhttp.await
 import tk.xszq.otomadbot.*
 import tk.xszq.otomadbot.audio.AudioEncodeUtils
 import tk.xszq.otomadbot.core.Cooldown
@@ -70,15 +69,14 @@ object RandomHandler: EventHandler("随机功能", "random") {
             }
         }
     }
+    val client = HttpClient()
+    @Suppress("UNNECESSARY_NOT_NULL_ASSERTION")
     private suspend fun handleTutorial(event: MessageEvent) = event.run {
         val html = Jsoup.parse(
-            OkHttpClient().newCall(
-                Request.Builder()
-                    .url("https://otomad.wiki/%E5%88%B6%E4%BD%9C%E6%95%99%E7%A8%8B")
-                    .build())
-                .await().body!!.get())
+            client.get<String>("https://otomad.wiki/%E5%88%B6%E4%BD%9C%E6%95%99%E7%A8%8B")
+        )!!
         val links = mutableListOf<String>()
-        html.selectFirst(".mw-body").select("a").forEach {
+        html.selectFirst(".mw-body")!!.select("a").forEach {
             val href = it.attr("href")
             if ("#" !in href) links.add(href)
         }
@@ -87,18 +85,16 @@ object RandomHandler: EventHandler("随机功能", "random") {
             selected = "https://otomad.wiki$selected"
         quoteReply(selected)
     }
+    @Suppress("UNNECESSARY_NOT_NULL_ASSERTION")
     private suspend fun handleChiptune(event: MessageEvent) = event.run {
         if (subject !is AudioSupported)
             return@run
-        val client = OkHttpClient()
         for (i in 0..20) {
             val html = Jsoup.parse(
-                client.newCall(
-                    Request.Builder().url("https://modarchive.org/index.php?request=view_random").build())
-                    .await().body!!.get()
-            )
-            val title = html.selectFirst("h1").text()
-            val link = html.selectFirst("a.standard-link").attr("href")
+                client.get<String>("https://modarchive.org/index.php?request=view_random")
+            )!!
+            val title = html.selectFirst("h1")!!.text()
+            val link = html.selectFirst("a.standard-link")!!.attr("href")
             val ext = "." + link.split(".").last()
             if (NetworkUtils.getDownloadFileSize(link) >= 1048576L || ext !in arrayOf(".xm", ".mod", ".it", ".mptm", ".s3m"))
                 continue

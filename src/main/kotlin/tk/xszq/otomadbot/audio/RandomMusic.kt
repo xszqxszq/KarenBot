@@ -7,26 +7,42 @@ import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.MessageEvent
 import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
-import tk.xszq.otomadbot.EventHandler
+import tk.xszq.otomadbot.*
+import tk.xszq.otomadbot.core.Cooldown
 import tk.xszq.otomadbot.core.OtomadBotCore
-import tk.xszq.otomadbot.equalsTo
-import tk.xszq.otomadbot.getAudioDuration
-import tk.xszq.otomadbot.startsWithSimple
+import tk.xszq.otomadbot.core.ifReady
+import tk.xszq.otomadbot.core.update
 import java.io.File
 import kotlin.random.Random
 
 object RandomMusic: EventHandler("随机音乐", "audio.random") {
     private val audioExts = listOf("mp3", "wav", "ogg", "m4a")
+    private val cooldown = Cooldown("random")
     override fun register() {
         GlobalEventChannel.subscribeGroupMessages {
             equalsTo("随机东方原曲") {
-                subject.sendMessage(fetchVoice("touhou", this))
+                ifReady(cooldown) {
+                    requireNot(denied) {
+                        subject.sendMessage(fetchVoice("touhou", this))
+                        update(cooldown)
+                    }
+                }
             }
             startsWithSimple("随机maimai") { _, _ ->
-                subject.sendMessage(fetchVoice("finale", this))
+                ifReady(cooldown) {
+                    requireNot(denied) {
+                        subject.sendMessage(fetchVoice("finale", this))
+                        update(cooldown)
+                    }
+                }
             }
             startsWithSimple("随机dx") { _, _ ->
-                subject.sendMessage(fetchVoice("dx", this))
+                ifReady(cooldown) {
+                    requireNot(denied) {
+                        subject.sendMessage(fetchVoice("dx", this))
+                        update(cooldown)
+                    }
+                }
             }
         }
         super.register()

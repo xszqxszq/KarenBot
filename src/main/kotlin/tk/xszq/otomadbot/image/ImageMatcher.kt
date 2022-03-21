@@ -3,12 +3,11 @@
 package tk.xszq.otomadbot.image
 
 import com.soywiz.kds.iterators.fastForEach
+import com.soywiz.korim.format.readNativeImage
 import com.soywiz.korio.async.launchImmediately
 import com.soywiz.korio.file.VfsFile
 import com.soywiz.korio.file.std.toVfs
-import dev.brachtendorf.jimagehash.hash.Hash
-import dev.brachtendorf.jimagehash.hashAlgorithms.DifferenceHash
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import tk.xszq.otomadbot.core.OtomadBotCore
 import tk.xszq.otomadbot.getMIMEType
 import java.io.File
@@ -28,16 +27,18 @@ fun isImage(filename: Path): Boolean {
 }
 
 object ImageMatcher {
-    var hash = mutableMapOf<String, MutableList<Hash>>()
-    private val hasher = DifferenceHash(64, DifferenceHash.Precision.Triple)
+    private var hash = mutableMapOf<String, MutableList<Long>>()
 
     suspend fun loadImages(type: String, target: String = type) {
         if (!hash.containsKey(target))
             hash[target] = mutableListOf()
-        OtomadBotCore.configFolder.resolve("image/$type").toVfs().listRecursive().collect {
-            launchImmediately(Dispatchers.IO) {
-               if (it.isFile() && isImage(Paths.get(it.absolutePath)) && !it.isValidGIF()) {
-                    hash[target]!!.add(hasher.hash(File(it.absolutePath)))
+        coroutineScope {
+            OtomadBotCore.configFolder.resolve("image/$type").toVfs().listRecursive().collect {
+                launchImmediately {
+                    if (it.isFile() && isImage(Paths.get(it.absolutePath)) && !it.isValidGIF()) {
+                        hash[target]!!.add(DifferenceHash.calc(File(it.absolutePath).toVfs()
+                            .readNativeImage().toBMP32()))
+                    }
                 }
             }
         }
@@ -45,10 +46,10 @@ object ImageMatcher {
     fun clearImages(target: String) {
         hash[target] = mutableListOf()
     }
-    fun matchImage(type: String, target: File): Boolean {
-        val now = hasher.hash(target)
+    suspend fun matchImage(type: String, target: File): Boolean {
+        val now = DifferenceHash.calc(target.toVfs().readNativeImage().toBMP32())
         hash[type]!!.fastForEach {
-            if (now.normalizedHammingDistanceFast(it) < .2 )
+            if (ImageHash.similarity(now, it) > .8 )
                 return true
         }
         return false

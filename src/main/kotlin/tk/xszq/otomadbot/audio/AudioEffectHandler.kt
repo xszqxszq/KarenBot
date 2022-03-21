@@ -6,7 +6,6 @@ import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
-import net.mamoe.mirai.utils.JavaFriendlyAPI
 import tk.xszq.otomadbot.*
 import tk.xszq.otomadbot.core.BinConfig
 import java.io.File
@@ -20,7 +19,6 @@ object AudioEffectHandler: EventHandler("音频效果", "audio.effect") {
         }
         super.register()
     }
-    @OptIn(JavaFriendlyAPI::class)
     private suspend fun handlePitchShift(path: String, event: GroupMessageEvent) = event.run {
         if (path.isBlank()) {
             quoteReply("请指定欲修音的文件名（仅支持WAV格式）！")

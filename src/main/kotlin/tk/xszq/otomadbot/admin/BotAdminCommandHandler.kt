@@ -4,7 +4,6 @@ import kotlinx.coroutines.delay
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.subscribeMessages
 import net.mamoe.mirai.message.code.MiraiCode.deserializeMiraiCode
-import net.mamoe.mirai.message.data.SimpleServiceMessage
 import net.mamoe.mirai.message.data.content
 import net.mamoe.mirai.message.nextMessageOrNull
 import tk.xszq.otomadbot.AdminEventHandler
@@ -50,12 +49,6 @@ object BotAdminCommandHandler: AdminEventHandler() {
                         return@requireBotAdmin
                     }
                     quoteReply("重载成功")
-                }
-            }
-            equalsTo("/test") {
-                requireBotAdmin {
-                    subject.sendMessage(SimpleServiceMessage(140,
-                        "<?xml version='1.0' encoding='UTF-8' standalone='yes' ?><msg serviceID=\"60\" templateID=\"123\" action=\"web\" brief=\".*\" sourceMsgId=\"0\" url=\"\" flag=\"0\" adverSign=\"0\" multiMsgFlag=\"0\"><item layout=\"1\" advertiser_id=\"0\" aid=\"0\" /><item layout=\"1\" advertiser_id=\"0\" aid=\"0\"><summary size=\"×FF0000\">.*</summary></item><source name=\"\" icon=\"\" action=\"\" appid=\"-1\" /></msg>"))
                 }
             }
             startsWith("/show") { raw ->

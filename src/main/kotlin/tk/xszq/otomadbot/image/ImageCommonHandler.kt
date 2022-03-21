@@ -1,7 +1,7 @@
 @file:Suppress("WeakerAccess", "MemberVisibilityCanBePrivate", "unused")
 package tk.xszq.otomadbot.image
 
-import com.soywiz.korim.format.readNativeImage
+import com.soywiz.kds.iterators.fastForEach
 import com.soywiz.korio.file.std.toVfs
 import net.mamoe.mirai.console.permission.PermissionId
 import net.mamoe.mirai.console.permission.PermissionService
@@ -10,9 +10,9 @@ import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.message.data.Face
 import net.mamoe.mirai.message.data.Image
+import net.mamoe.mirai.message.data.MarketFace
 import net.mamoe.mirai.message.data.MessageSource.Key.recall
 import net.mamoe.mirai.message.data.PlainText
-import net.mamoe.mirai.message.data.anyIsInstance
 import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
 import tk.xszq.otomadbot.*
 import tk.xszq.otomadbot.NetworkUtils.getFile
@@ -62,7 +62,7 @@ object ImageCommonHandler: EventHandler("图片通用功能", "image.common") {
     override fun register() {
         ltDetect
         GlobalEventChannel.subscribeAlways<GroupMessageEvent> {
-            if (message.anyIsInstance<Image>())
+            if (message.any { it is Image || it is MarketFace })
                 handle(this)
         }
         super.register()
@@ -95,55 +95,48 @@ object ImageCommonHandler: EventHandler("图片通用功能", "image.common") {
         return result
     }
     private suspend fun handle(event: GroupMessageEvent) = event.run {
-        message.forEach { msg ->
-            if (msg is Image && msg.imageId.split(".").lastOrNull() ?.let { it != "gif" } == true) {
-                val file = msg.getFile()
-                ifReady(parseCooldown) {
-                    requireNot(denied) {
-                        file!!.let { img ->
-                            requireNot(replyDenied) {
-                                if (matchImage("reply", img) || isBlonde(img))
-                                    replyPic.getRandom("reply").sendAsImageTo(group)
-                                update(parseCooldown)
-                            }
-                            try {
-                                val result = img.decodeQR()
-                                if (urlRegex.matches(result))
-                                    quoteReply(result)
-                                update(parseCooldown)
-                                pass
-                            } catch (e: Exception) {
-                                pass
-                            }
+        message.filter { it is Image || it is MarketFace}.fastForEach { msg ->
+            val file =
+                when (msg) {
+                    is Image -> msg.getFile()!!
+                    is MarketFace -> msg.getFile()!!
+                    else -> File("")
+                }
+            ifReady(parseCooldown) {
+                requireNot(denied) {
+                    requireNot(replyDenied) {
+                        if ((!file.toVfs().isValidGIF() && matchImage("reply", file)) || isBlonde(file)) {
+                            replyPic.getRandom("reply").sendAsImageTo(group)
+                            update(parseCooldown)
                         }
+                    }
+                    try {
+                        val result = file.decodeQR()
+                        if (urlRegex.matches(result))
+                            quoteReply(result)
+                        update(parseCooldown)
+                        pass
+                    } catch (e: Exception) {
                         pass
                     }
+                    pass
                 }
-                require(ltDetect) {
-                    var small = false
-                    kotlin.runCatching {
-                        val info = file!!.toVfs().readNativeImage()
-                        if (info.width > 800 || info.height > 900)
-                            return@require
-                        small = info.width <= 80 || info.height <= 80
-                    }.onFailure {
-                        bot.logger.error(it)
-                    }
-                    PythonApi.isLt(file!!.absolutePath) ?.let { result ->
-                        println(result)
-                        if ((!small && result > 0.92) || (small && result > 0.95)) {
-                            if (group.botAsMember.isOperator()) {
-                                message.recall()
-                                group.sendMessage("请遵守群规哦")
-                            } else {
-                                quoteReply("我超，龙")
-                            }
+            }
+            require(ltDetect) {
+                PythonApi.isLt(file.absolutePath) ?.let { result ->
+                    if (result) {
+                        if (group.botAsMember.isOperator() && !sender.isOperator()) {
+                            message.recall()
+                            group.sendMessage("请遵守群规哦")
+                        } else {
+                            quoteReply("我超，龙")
                         }
+                        return@require
                     }
                 }
-                if (!file!!.delete()) {
-                    println("[DEBUG] Delete was failed: " + file.absolutePath)
-                }
+            }
+            if (!file.delete()) {
+                println("[DEBUG] Delete was failed: " + file.absolutePath)
             }
         }
     }

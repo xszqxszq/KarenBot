@@ -118,3 +118,11 @@ run/
 
 # Local Test Launch point
 src/test/kotlin/RunTerminal.kt
+plugin-libraries
+plugin-shared-libraries
+logs
+data
+bots
+config
+*.lib
+

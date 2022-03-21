@@ -3,15 +3,14 @@ package tk.xszq.otomadbot.audio
 import com.soywiz.korio.lang.UTF8
 import com.soywiz.korio.net.QueryString
 import com.soywiz.korio.net.URL
+import io.ktor.client.request.*
 import net.mamoe.mirai.contact.AudioSupported
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.jsoup.Jsoup
-import ru.gildor.coroutines.okhttp.await
 import tk.xszq.otomadbot.*
+import tk.xszq.otomadbot.api.ApiClient
 import tk.xszq.otomadbot.api.PythonApi
 import tk.xszq.otomadbot.core.Cooldown
 import tk.xszq.otomadbot.core.ifReady
@@ -52,30 +51,28 @@ object TTSHandler: EventHandler("TTS", "audio.tts") {
         super.register()
     }
 }
-object TTSDownloader {
+object TTSDownloader: ApiClient() {
     /**
-     * Download TTS result from yukkuritalk.com.
+     * Download TTS results from yukkuritalk.com.
      * @param text Text to speak
      * @param mode Yukkuri speak mode
      */
+    @Suppress("UNNECESSARY_NOT_NULL_ASSERTION")
     suspend fun yukkuri(text: String, mode: String = "ゆっくり言っていてね"): File? {
         val url = "http://yukkuritalk.com/?" + QueryString.encode(Pair("txt", text), Pair("submit", mode))
-        val response = OkHttpClient().newCall(Request.Builder().url(url).build()).await()
-        return if (response.isSuccessful) {
-            val doc = Jsoup.parse(response.body!!.get())
-            val audio = doc.select(".translate_yukkuri>audio")
-            if (audio.isNotEmpty())
-                NetworkUtils.downloadTempFile(
-                    "http://yukkuritalk.com/" + audio.first().attr("src"),
-                    listOf(
-                        Pair("Referer", "http://yukkuritalk.com/"),
-                        Pair("User-Agent", availableUA)
-                    ), "wav")
-            else null
-        } else null
+        val doc = Jsoup.parse(client.get<String>(url))!!
+        val audio = doc.select(".translate_yukkuri>audio")
+        return if (audio.isNotEmpty())
+            NetworkUtils.downloadTempFile(
+                "http://yukkuritalk.com/" + audio.first()!!.attr("src"),
+                listOf(
+                    Pair("Referer", "http://yukkuritalk.com/"),
+                    Pair("User-Agent", availableUA)
+                ), "wav")
+        else null
     }
     /**
-     * Download TTS result from Google.
+     * Download TTS results from Google.
      * @param text Text to speak
      * @param lang Language of the text
      */

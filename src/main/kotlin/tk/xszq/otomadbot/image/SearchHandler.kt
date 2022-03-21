@@ -2,6 +2,13 @@
 
 package tk.xszq.otomadbot.image
 
+import io.ktor.client.*
+import io.ktor.client.engine.*
+import io.ktor.client.features.*
+import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import net.mamoe.mirai.event.GlobalEventChannel
@@ -11,18 +18,11 @@ import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.Image.Key.queryUrl
 import net.mamoe.mirai.message.data.MessageSource.Key.quote
 import net.mamoe.mirai.message.data.anyIsInstance
-import okhttp3.FormBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.jsoup.Jsoup
-import ru.gildor.coroutines.okhttp.await
 import tk.xszq.otomadbot.*
 import tk.xszq.otomadbot.api.ApiSettings
 import tk.xszq.otomadbot.core.*
-import java.net.InetSocketAddress
-import java.net.Proxy
 import java.text.DecimalFormat
-import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
 object SearchHandler: EventHandler("搜图", "image.search") {
@@ -77,24 +77,28 @@ object SearchHandler: EventHandler("搜图", "image.search") {
         }
         super.register()
     }
+    val client = HttpClient {
+        install(HttpTimeout) {
+            socketTimeoutMillis = 10000
+            requestTimeoutMillis = 10000
+            connectTimeoutMillis = 10000
+        }
+        engine {
+            proxy =
+                if (ApiSettings.proxy.type.lowercase() == "socks")
+                    ProxyBuilder.socks(ApiSettings.proxy.addr, ApiSettings.proxy.port)
+                else
+                    ProxyBuilder.http("http://" + ApiSettings.proxy.addr + ":" + ApiSettings.proxy.port)
+        }
+    }
     private suspend fun getImageSearchByUrl(url: String): String {
-        try {
-            val form = FormBody.Builder()
-                .add("url", url).build()
-            val request = Request.Builder()
-                .url("https://saucenao.com/search.php")
-                .post(form)
-                .build()
-            val clientBuilder = OkHttpClient.Builder()
-            clientBuilder.proxy(
-                Proxy(
-                if (ApiSettings.proxy.type.lowercase() == "socks") Proxy.Type.SOCKS else Proxy.Type.HTTP,
-                InetSocketAddress(ApiSettings.proxy.addr, ApiSettings.proxy.port)
-                )
-            )
-            val response = clientBuilder.build().newCall(request).await()
-            return if (response.isSuccessful) {
-                val doc = Jsoup.parse(response.body!!.get())
+        kotlin.runCatching {
+            val response = client.submitForm<HttpResponse>(url = "https://saucenao.com/search.php",
+                formParameters = Parameters.build {
+                    append("url", url)
+                })
+            return if (response.status == HttpStatusCode.OK) {
+                val doc = Jsoup.parse(response.readText())
                 val target = doc.select(".resulttablecontent")[0]
                 val similarity = target.select(".resultsimilarityinfo").text()
                 if (similarity.substringBefore('%').toDouble() < 70) {
@@ -122,12 +126,13 @@ object SearchHandler: EventHandler("搜图", "image.search") {
                     "[$similarity] " + target.select(".resultcontent").text()
                 } + "\n结果来自SauceNao，本bot不保证结果准确性，谢绝辱骂"
             } else {
-                println(response.code)
+                println(response.status)
                 "网络连接失败，请稍后重试QWQ"
             }
-        } catch (e: Exception) {
+        }.onFailure {
             return "网络连接失败，请稍后重试QWQ"
         }
+        return ""
     }
     @Serializable
     data class TraceMoeResults(val result: List<TraceMoeResult>)
@@ -144,16 +149,10 @@ object SearchHandler: EventHandler("搜图", "image.search") {
      * @param message Request message event.
      */
     private suspend fun doHandleTraceMoe(image: Image, message: MessageEvent) {
-        val client = OkHttpClient().newBuilder()
-            .callTimeout(10, TimeUnit.SECONDS)
-            .connectTimeout(10, TimeUnit.SECONDS)
-            .readTimeout(10, TimeUnit.SECONDS)
-            .build()
-        val response = client.newCall(Request.Builder().url("https://api.trace.moe/search?anilistInfo" +
+        val response = client.get<HttpResponse>("https://api.trace.moe/search?anilistInfo" +
                 "&url=${image.queryUrl()}")
-            .build()).await()
-        if (response.isSuccessful) {
-            val result = OtomadBotCore.json.decodeFromString<TraceMoeResults>(response.body!!.get())
+        if (response.status == HttpStatusCode.OK) {
+            val result = OtomadBotCore.json.decodeFromString<TraceMoeResults>(response.readText())
             try {
                 if (result.result.isNotEmpty()) {
                     val realResult = result.result[0]
@@ -186,7 +185,7 @@ object SearchHandler: EventHandler("搜图", "image.search") {
             }
         } else {
             message.subject.sendMessage(message.message.quote() + "网络错误，可能当前搜番请求过多，请重试")
-            println(response.body!!.get())
+            println(response.readText())
         }
     }
 }

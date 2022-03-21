@@ -2,21 +2,16 @@
 
 package tk.xszq.otomadbot.api
 
+import io.ktor.client.request.*
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.JsonObject
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.MessageEvent
 import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.message.data.SimpleServiceMessage
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import ru.gildor.coroutines.okhttp.await
 import tk.xszq.otomadbot.EventHandler
 import tk.xszq.otomadbot.QQXMLMessage
 import tk.xszq.otomadbot.availableUA
-import tk.xszq.otomadbot.core.OtomadBotCore
-import tk.xszq.otomadbot.get
 
 @Serializable
 data class BilibiliApiVideoResponse(val code: Int, val message: String, val ttl: Int, val data: BilibiliVideoInfo)
@@ -32,20 +27,18 @@ data class BilibiliVideoInfo(
 )
 
 object BilibiliApi: ApiClient() {
-    suspend fun queryAv(aid: String): BilibiliApiVideoResponse {
-        val request = Request.Builder()
-            .addHeader("User-Agent", availableUA)
-            .url("http://api.bilibili.com/x/web-interface/view?aid=$aid")
-            .build()
-        return OtomadBotCore.json.decodeFromString(OkHttpClient().newCall(request).await().body!!.get())
-    }
-    suspend fun queryBv(bvid: String): BilibiliApiVideoResponse {
-        val request = Request.Builder()
-            .addHeader("User-Agent", availableUA)
-            .url("http://api.bilibili.com/x/web-interface/view?bvid=$bvid")
-            .build()
-        return OtomadBotCore.json.decodeFromString(OkHttpClient().newCall(request).await().body!!.get())
-    }
+    suspend fun queryAv(aid: String): BilibiliApiVideoResponse =
+        client.get("http://api.bilibili.com/x/web-interface/view?aid=$aid") {
+            headers {
+                append("User-Agent", availableUA)
+            }
+        }
+    suspend fun queryBv(bvid: String): BilibiliApiVideoResponse =
+        client.get("http://api.bilibili.com/x/web-interface/view?bvid=$bvid") {
+            headers {
+                append("User-Agent", availableUA)
+            }
+        }
 }
 
 @Suppress("EXPERIMENTAL_API_USAGE")

@@ -10,6 +10,8 @@ import kotlinx.serialization.json.jsonPrimitive
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.console.data.AutoSavePluginConfig
 import net.mamoe.mirai.console.data.value
+import net.mamoe.mirai.console.permission.PermissionService.Companion.hasPermission
+import net.mamoe.mirai.console.permission.PermitteeId.Companion.permitteeId
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.*
 import net.mamoe.mirai.message.data.At
@@ -103,7 +105,10 @@ object LightAppHandler: EventHandler("QQ小程序解析", "lightapp") {
                                     e.printStackTrace()
                                     (it.qqdocurl ?: it.url ?: it.contentJumpUrl ?: "").toPlainText()
                                 }
-                            } else (it.qqdocurl ?: it.url ?: it.contentJumpUrl ?: "").toPlainText())
+                            } else {
+                                val result = (it.qqdocurl ?: it.url ?: it.contentJumpUrl ?: "")
+                                (if (result.startsWith("mqqapi://")) "" else result).toPlainText()
+                            })
                         }
                         update(cooldown)
                     }
@@ -157,8 +162,13 @@ object RequestAccept: EventHandler("自动同意", "accept") {
             this.accept()
         }
         GlobalEventChannel.subscribeAlways<BotJoinGroupEvent> {
-            if (group.members.size < 80L)
-                group.quit()
+            if (group.members.size < 80L) {
+                when {
+                    this is BotJoinGroupEvent.Invite
+                            && invitor.permitteeId.hasPermission(AdminEventHandler.botAdmin) -> pass
+                    else -> group.quit()
+                }
+            }
         }
     }
     tailrec suspend fun waitFor(maxDelay: Long, checkPeriod: Long, targetId: Long, bot: Bot) : Boolean{
@@ -186,6 +196,7 @@ class RegexSettings {
     var midishow = "(?:.*(?:有无|有|发一下|发给我|发我|给我|发|找一下|找找|找|球球|求求|求|我想要|我要|要)(.*)的(?i)MID.*|" +
             "^(?:(?i)MIDI搜索|搜索(?i)MIDI)(.*))"
     var eropic = "^(?:来(?:份|点|张)(?:色|涩)图|我要一(?:份|点|张)(?:色|涩)图)(.*)"
+    var eropicBatch = "^(?:随机(?:涩|色)图)(.*)"
 }
 
 object TextSettings : AutoSavePluginConfig("text") {
