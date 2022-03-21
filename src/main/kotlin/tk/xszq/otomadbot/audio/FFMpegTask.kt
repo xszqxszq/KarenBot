@@ -27,6 +27,7 @@ data class FFMpegFileType(val ext: String, val requiredArgs: List<Argument> = em
     companion object {
         val MP3 = FFMpegFileType("mp3")
         val WAV = FFMpegFileType("wav")
+        val PCM = FFMpegFileType("pcm")
     }
 }
 class FFMpegTask(val outputFormat: FFMpegFileType,
@@ -44,6 +45,7 @@ class FFMpegTask(val outputFormat: FFMpegFileType,
         fun audioChannels(channels: Int) = insert(Argument("ac", channels.toString()))
         fun yes() = insert(Argument("y"))
         fun audioFilter(filter: String) = insert(Argument("af", filter))
+        fun acodec(type: String) = insert(Argument("acodec", type))
     }
     var ffmpegPath: String = BinConfig.ffmpeg
     var ffmpegEnv = arrayOf(BinConfig.ffmpegPath)

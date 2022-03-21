@@ -3,6 +3,12 @@
 package tk.xszq.otomadbot
 
 import com.github.houbb.opencc4j.util.ZhConverterUtil.toSimple
+import io.ktor.client.*
+import io.ktor.client.features.json.*
+import io.ktor.client.features.json.serializer.*
+import io.ktor.client.request.*
+import kotlinx.coroutines.withTimeout
+import kotlinx.serialization.Serializable
 import net.mamoe.mirai.console.permission.Permission
 import net.mamoe.mirai.console.permission.PermissionService.Companion.hasPermission
 import net.mamoe.mirai.console.permission.PermitteeId.Companion.permitteeId
@@ -10,29 +16,47 @@ import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.contact.User
 import net.mamoe.mirai.contact.isOperator
-import net.mamoe.mirai.event.EventPriority
-import net.mamoe.mirai.event.MessageDsl
-import net.mamoe.mirai.event.MessageSubscribersBuilder
-import net.mamoe.mirai.event.events.GroupEvent
-import net.mamoe.mirai.event.events.GroupMessageEvent
-import net.mamoe.mirai.event.events.MessageEvent
-import net.mamoe.mirai.event.events.NudgeEvent
-import net.mamoe.mirai.event.syncFromEvent
+import net.mamoe.mirai.event.*
+import net.mamoe.mirai.event.events.*
 import net.mamoe.mirai.message.MessageReceipt
+import net.mamoe.mirai.message.data.MarketFace
 import net.mamoe.mirai.message.data.Message
 import net.mamoe.mirai.message.data.MessageSource.Key.quote
 import net.mamoe.mirai.message.data.toPlainText
 import net.mamoe.mirai.message.isContextIdenticalWith
 
+@PublishedApi // inline, safe to remove in the future
+internal inline fun <reified P : MessageEvent>
+        P.createMapper(crossinline filter: suspend P.(P) -> Boolean): suspend (P) -> P? =
+    mapper@{ event ->
+        if (!event.isContextIdenticalWith(this)) return@mapper null
+        if (!filter(event, event)) return@mapper null
+        event
+    }
+@PublishedApi // inline, safe to remove in the future
+internal inline fun <reified P : MessageEvent>
+        P.createMapperForGroup(crossinline filter: suspend P.(P) -> Boolean): suspend (P) -> P? =
+    mapper@{ event ->
+        if (event !is GroupMessageEvent) return@mapper null
+        if (!event.isGroupIdenticalWith(this as GroupMessageEvent)) return@mapper null
+        if (!filter(event, event)) return@mapper null
+        event
+    }
 @JvmSynthetic
 suspend inline fun <reified P : MessageEvent> P.nextMessageEvent(
     timeoutMillis: Long = -1,
     priority: EventPriority = EventPriority.MONITOR,
     noinline filter: suspend P.(P) -> Boolean = { true }
 ): MessageEvent {
-    return syncFromEvent<P, P>(timeoutMillis, priority) {
-        takeIf { this.isContextIdenticalWith(this@nextMessageEvent) }?.takeIf { filter(it, it) }
-    }
+    val mapper: suspend (P) -> P? = createMapper(filter)
+
+    return (if (timeoutMillis == -1L) {
+        GlobalEventChannel.syncFromEvent(priority, mapper)
+    } else {
+        withTimeout(timeoutMillis) {
+            GlobalEventChannel.syncFromEvent(priority, mapper)
+        }
+    })
 }
 @Suppress("FINAL_UPPER_BOUND")
 @JvmSynthetic
@@ -41,9 +65,15 @@ suspend inline fun <reified P : GroupMessageEvent> P.nextGroupMessageEvent(
     priority: EventPriority = EventPriority.MONITOR,
     noinline filter: suspend P.(P) -> Boolean = { true }
 ): GroupMessageEvent {
-    return syncFromEvent<P, P>(timeoutMillis, priority) {
-        takeIf { this.isGroupIdenticalWith(this@nextGroupMessageEvent) }?.takeIf { filter(it, it) }
-    }
+    val mapper = createMapperForGroup(filter)
+
+    return (if (timeoutMillis == -1L) {
+        GlobalEventChannel.syncFromEvent(priority, mapper)
+    } else {
+        withTimeout(timeoutMillis) {
+            GlobalEventChannel.syncFromEvent(priority, mapper)
+        }
+    })
 }
 
 typealias MessageListener<T, R> = @MessageDsl suspend T.(String) -> R
@@ -65,6 +95,7 @@ fun <M : MessageEvent, Ret, R : RR, RR> MessageSubscribersBuilder<M, Ret, R, RR>
 }
 
 fun String.substringAfterPrefix(start: String): String = substring(start.length)
+fun String.substringBeforeSuffix(suffix: String): String = substring(0, suffix.length)
 
 internal fun <M : MessageEvent, Ret, R : RR, RR> MessageSubscribersBuilder<M, Ret, R, RR>.startsWithSimpleImpl(
     prefix: String,
@@ -75,27 +106,66 @@ internal fun <M : MessageEvent, Ret, R : RR, RR> MessageSubscribersBuilder<M, Re
     return if (trim) {
         val toCheck = prefix.trim()
         content({ it.toSimple().lowercase().trimStart().startsWith(toCheck) }) {
-            if (removePrefix) this.onEvent(this.message.contentToString().toSimple().lowercase().substringAfter(toCheck).trim(),
-                this.message.contentToString().substringAfterPrefix(toCheck).trim())
+            if (removePrefix) onEvent(message.contentToString().toSimple().lowercase().substringAfter(toCheck).trim(),
+                message.contentToString().substringAfterPrefix(toCheck).trim())
+            else onEvent(this, message.contentToString().toSimple().lowercase().trim(),
+                message.contentToString().trim())
+        }
+    } else content({ it.toSimple().lowercase().startsWith(prefix) }) {
+        if (removePrefix) onEvent(message.contentToString().toSimple().lowercase().removePrefix(prefix),
+            message.contentToString().substringAfterPrefix(prefix).trim())
+        else onEvent(this, message.contentToString().toSimple().lowercase(),
+            message.contentToString().trim())
+    }
+}
+
+internal fun <M : MessageEvent, Ret, R : RR, RR> MessageSubscribersBuilder<M, Ret, R, RR>.endsWithSimpleImpl(
+    suffix: String,
+    removeSuffix: Boolean = true,
+    trim: Boolean = true,
+    onEvent: @MessageDsl suspend M.(String, String) -> R
+): Ret {
+    return if (trim) {
+        val toCheck = suffix.trimEnd()
+        content({ it.toSimple().lowercase().trimEnd().endsWith(toCheck) }) {
+            if (removeSuffix) onEvent(this.message.contentToString().toSimple().lowercase().removeSuffix(toCheck).trim(),
+                this.message.contentToString().substringBeforeSuffix(toCheck).trim())
             else onEvent(this, this.message.contentToString().toSimple().lowercase().trim(),
                 this.message.contentToString().trim())
         }
-    } else content({ it.toSimple().lowercase().startsWith(prefix) }) {
-        if (removePrefix) this.onEvent(this.message.contentToString().toSimple().lowercase().removePrefix(prefix),
-            this.message.contentToString().substringAfterPrefix(prefix).trim())
-        else onEvent(this, this.message.contentToString().toSimple().lowercase(),
-            this.message.contentToString().trim())
+    } else content({ it.toSimple().lowercase().endsWith(suffix) }) {
+        if (removeSuffix) onEvent(message.contentToString().toSimple().lowercase().removeSuffix(suffix),
+            message.contentToString().substringBeforeSuffix(suffix).trim())
+        else onEvent(this, message.contentToString().toSimple().lowercase(),
+            message.contentToString().trim())
     }
+
 }
+
+/**
+ * startsWith对于繁体增加支持的版本
+ * M.(简体化且小写后的参数, 原始参数) -> R
+ */
 @MessageDsl
 fun <M : MessageEvent, Ret, R : RR, RR> MessageSubscribersBuilder<M, Ret, R, RR>.startsWithSimple(
     prefix: String, removePrefix: Boolean = true, trim: Boolean = true,
     onEvent: @MessageDsl suspend M.(String, String) -> R
 ): Ret = startsWithSimpleImpl(prefix, removePrefix, trim, onEvent)
+
+/**
+ * endsWith对于繁体增加支持的版本
+ * M.(简体化且小写后的参数, 原始参数) -> R
+ */
+@MessageDsl
+fun <M : MessageEvent, Ret, R : RR, RR> MessageSubscribersBuilder<M, Ret, R, RR>.endsWithSimple(
+    suffix: String, removeSuffix: Boolean = true, trim: Boolean = true,
+    onEvent: @MessageDsl suspend M.(String, String) -> R
+): Ret = endsWithSimpleImpl(suffix, removeSuffix, trim, onEvent)
+
+
 fun GroupMessageEvent.isGroupIdenticalWith(another: GroupMessageEvent): Boolean {
     return this.group == another.group
 }
-
 
 suspend fun <T> GroupEvent.require(permission: Permission, block: suspend () -> T): T? = when {
     group.permitteeId.hasPermission(permission) -> block.invoke()
@@ -118,6 +188,10 @@ suspend fun <T> MessageEvent.require(permission: Permission, block: suspend () -
             null
     }
     sender.permitteeId.hasPermission(permission) -> block.invoke()
+    else -> null
+}
+suspend fun <T> GroupMessageEvent.require(permission: Permission, block: suspend () -> T): T? = when {
+    group.permitteeId.hasPermission(permission) -> block.invoke()
     else -> null
 }
 suspend fun <T> MessageEvent.requireNot(permission: Permission, block: suspend () -> T): T? = when {
@@ -162,6 +236,43 @@ suspend fun <T> MessageEvent.requireBotAdmin(block: suspend () -> T): T? = requi
     block)
 suspend fun <T> GroupMessageEvent.requireOperator(block: suspend () -> T): T? = requireSenderOr(AdminEventHandler.botAdmin,
     sender.isOperator(), block)
+suspend fun <T> MessageEvent.onlyContact(block: suspend () -> T): T? = when (this) {
+    is GroupMessageEvent -> block.invoke()
+    is FriendMessageEvent -> block.invoke()
+    else -> null
+}
+
+@Serializable
+data class MarketFaceXYData(
+    val appData: Map<String, String> = mapOf(), val timestamp: Long = 0L, val data: MarketFaceData
+)
+@Serializable
+data class MarketFaceData(
+    val baseInfo: List<MarketFaceBaseInfo> = listOf(), val md5Info: List<MarketFaceMd5Info>
+)
+@Serializable
+data class MarketFaceBaseInfo(
+    val name: String = "", val _id: String = "", val id: String = ""
+)
+@Serializable
+data class MarketFaceMd5Info(val name: String, val md5: String)
+@Suppress("EXPERIMENTAL_API_USAGE")
+suspend fun MarketFace.getAttr() = HttpClient {
+    install(JsonFeature) {
+        serializer = KotlinxSerializer(kotlinx.serialization.json.Json {
+            isLenient = true
+            ignoreUnknownKeys = true
+        })
+    }
+}
+    .get<MarketFaceXYData>("https://gxh.vip.qq.com/qqshow/admindata/comdata/vipEmoji_item_$id/xydata.json")
+    .data
+suspend fun MarketFace.queryUrl(size: Int = 300) = getAttr().md5Info.run {
+    val md5 = find { "[${it.name}]" == name } ?.md5 ?: first().md5
+    "https://gxh.vip.qq.com/club/item/parcel/item/${md5.subSequence(0, 2)}/$md5/${size}x${size}.png"
+}
+
+
 suspend fun MessageEvent.quoteReply(message: Message): MessageReceipt<Contact> =
     this.subject.sendMessage(this.message.quote() + message)
 suspend fun MessageEvent.quoteReply(message: String): MessageReceipt<Contact> = quoteReply(message.toPlainText())

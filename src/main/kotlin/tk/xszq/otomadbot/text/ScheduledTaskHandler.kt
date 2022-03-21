@@ -9,10 +9,9 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import net.mamoe.mirai.console.data.AutoSavePluginData
 import net.mamoe.mirai.console.data.value
-import net.mamoe.mirai.contact.isOperator
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.MessageEvent
-import net.mamoe.mirai.event.subscribeMessages
+import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.message.code.MiraiCode.deserializeMiraiCode
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.Image.Key.queryUrl
@@ -73,7 +72,7 @@ object ScheduledTaskHandler: EventHandler("定时消息", "task", HandlerType.DE
         ScheduledMessageData.groupTask.forEach { (_, task) ->
             registerTask(task)
         }
-        GlobalEventChannel.subscribeMessages {
+        GlobalEventChannel.subscribeGroupMessages {
             startsWithSimple("定时消息") { rawArgs, _ ->
                 val args = rawArgs.toArgsList()
                 args.firstOrNull()?.let { operation ->

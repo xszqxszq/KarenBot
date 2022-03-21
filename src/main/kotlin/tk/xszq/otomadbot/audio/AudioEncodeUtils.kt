@@ -6,7 +6,6 @@ import io.github.mzdluo123.silk4j.AudioUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import tk.xszq.otomadbot.getAudioDuration
-import tk.xszq.otomadbot.lowercase
 import java.io.File
 
 object AudioEncodeUtils {
@@ -26,9 +25,10 @@ object AudioEncodeUtils {
     }.getResult()
     private suspend fun anyToWavBeforePy(file: File): File? = FFMpegTask(FFMpegFileType.WAV) {
         input(file)
+        acodec("pcm_s16le")
         yes()
     }.getResult()
-    suspend fun anyToWav(file: File) = if (file.extension.lowercase() == "wav") file else anyToWavBeforePy(file)
+    suspend fun anyToWav(file: File) = anyToWavBeforePy(file)
     suspend fun cropPeriod(file: File, startPoint: Double,
                            duration: Double, forSilk: Boolean = true): File? = FFMpegTask(FFMpegFileType.MP3) {
         input(file)
@@ -50,5 +50,9 @@ object AudioEncodeUtils {
         val result = mp3?.let { mp3ToSilk(it) }
         mp3?.delete()
         return result
+    }
+    fun silkToMp3Blocking(file: File): File = AudioUtils.silkToMp3(file)
+    suspend fun silkToMp3(file: File): File = withContext(Dispatchers.IO) {
+        silkToMp3Blocking(file)
     }
 }

@@ -2,20 +2,22 @@
 
 package tk.xszq.otomadbot.api
 
+import io.ktor.client.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.MessageEvent
-import net.mamoe.mirai.event.subscribeMessages
+import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.message.data.SimpleServiceMessage
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.jsoup.Jsoup
-import ru.gildor.coroutines.okhttp.await
 import tk.xszq.otomadbot.*
 import tk.xszq.otomadbot.text.TextSettings
 
 object Midishow: EventHandler("MIDI搜索", "audio.midishow") {
+    val client = HttpClient()
     override fun register() {
-        GlobalEventChannel.subscribeMessages {
+        GlobalEventChannel.subscribeGroupMessages {
             finding(Regex(TextSettings.regex.midishow)) { finding ->
                 requireNot(denied) {
                     finding.groupValues.lastOrNull { i -> i.isNotBlank() }?.let { keyword ->
@@ -27,14 +29,14 @@ object Midishow: EventHandler("MIDI搜索", "audio.midishow") {
         super.register()
     }
     private suspend fun handle(event: MessageEvent, keyword: String) = event.run {
-        val request = Request.Builder()
-            .url("https://www.midishow.com/search/result?q=$keyword")
-            .addHeader("Referer", "https://www.midishow.com/")
-            .addHeader("User-Agent", availableUA)
-            .build()
-        val response = OkHttpClient().newCall(request).await()
-        if (response.isSuccessful) {
-            val results = Jsoup.parse(response.body!!.get()).select("#search-result>div")
+        val response = client.get<HttpResponse>("https://www.midishow.com/search/result?q=$keyword") {
+            headers {
+                append("Referer", "https://www.midishow.com/")
+                append("User-Agent", availableUA)
+            }
+        }
+        if (response.status == HttpStatusCode.OK) {
+            val results = Jsoup.parse(response.readText()).select("#search-result>div")
             if (results.size == 0 || results[0].attr("data-key") == "") {
                 quoteReply("没有找到相关MIDI……")
             } else {

@@ -1,7 +1,11 @@
 package tk.xszq.otomadbot.admin
 
+import kotlinx.coroutines.delay
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.subscribeMessages
+import net.mamoe.mirai.message.code.MiraiCode.deserializeMiraiCode
+import net.mamoe.mirai.message.data.content
+import net.mamoe.mirai.message.nextMessageOrNull
 import tk.xszq.otomadbot.AdminEventHandler
 import tk.xszq.otomadbot.core.OtomadBotCore
 import tk.xszq.otomadbot.equalsTo
@@ -45,6 +49,43 @@ object BotAdminCommandHandler: AdminEventHandler() {
                         return@requireBotAdmin
                     }
                     quoteReply("重载成功")
+                }
+            }
+            startsWith("/show") { raw ->
+                requireBotAdmin {
+                    subject.sendMessage(raw.deserializeMiraiCode())
+                }
+            }
+            startsWith("/clean") { arg ->
+                val limit = arg.toLong()
+                quoteReply("有无无需清理的群？(n)")
+                nextMessageOrNull(120000) ?.let { raw ->
+                    val exclusion = raw.content.split(" ")
+                    val target = bot.groups.filter { it.members.size < limit && it.id.toString() !in exclusion }
+                    var confirm = "以下群将主动退出，确认？（y/n）"
+                    target.forEach { confirm += "\n${it.id}. ${it.name} (${it.members.size} 人)"}
+                    quoteReply(confirm)
+                    nextMessageOrNull(120000) ?.let { ans ->
+                        if (ans.content.lowercase() == "y") {
+                            quoteReply("正在退出中……")
+                            var counter = 0
+                            var cycle = 0
+                            target.forEach {
+                                kotlin.runCatching {
+                                    delay(1000)
+                                    it.quit()
+                                    counter += 1
+                                    cycle = (cycle + 1) % 8
+                                } .onFailure {
+                                    quoteReply("Unknown exception: " + it.stackTraceToString())
+                                }
+                                if (cycle == 0) {
+                                    quoteReply("$counter / ${target.size}")
+                                }
+                            }
+                            quoteReply("操作完毕，已退出 ${target.size} 个群。")
+                        }
+                    }
                 }
             }
         }

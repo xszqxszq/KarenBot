@@ -2,215 +2,25 @@
 
 package tk.xszq.otomadbot.text
 
-import com.charleskorn.kaml.Yaml
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
+import com.soywiz.kds.iterators.fastForEach
 import kotlinx.serialization.Serializable
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.GroupMessageEvent
+import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.Image.Key.queryUrl
 import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.message.data.anyIsInstance
 import net.mamoe.mirai.message.data.content
-import org.jetbrains.exposed.dao.IntEntity
-import org.jetbrains.exposed.dao.IntEntityClass
-import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.dao.id.IntIdTable
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import net.mamoe.mirai.message.nextMessage
 import tk.xszq.otomadbot.*
 import tk.xszq.otomadbot.api.PythonApi
 import tk.xszq.otomadbot.core.OtomadBotCore
-import tk.xszq.otomadbot.text.AutoReplyHandler.database
-import tk.xszq.otomadbot.text.AutoReplyHandler.newLockedSuspendedTransaction
-import java.util.concurrent.atomic.AtomicBoolean
+import tk.xszq.otomadbot.core.OtomadBotCore.yaml
+import tk.xszq.otomadbot.core.SafeYamlConfig
+import tk.xszq.otomadbot.text.AutoReplyRule.Companion.getNameFromType
+import tk.xszq.otomadbot.text.AutoReplyRule.Companion.getTypeFromName
 
-@Serializable
-class AutoReplyRule(val id: Int,
-                    val name: String = "",
-                    val rule: String,
-                    val type: Byte = 0,
-                    val group: Long,
-                    val reply: String,
-                    val creator: Long,
-                    val createTime: Long)
-@Serializable
-class AutoReplyRules {
-    var nextId = 1
-    val rules = mutableMapOf<Int, AutoReplyRule>()
-}
-
-object RuleItems: IntIdTable() {
-    override val tableName = "reply"
-    val name = varchar("name", 50)
-    val rule = text("rule")
-    val type = byte("type")
-    val group = long("qqgroup")
-    val reply = varchar("reply", 1024)
-    val creator = long("creator")
-    val createTime = long("createtime")
-    suspend fun getRulesBySubject(subject: Long): SizedIterable<RuleItem> {
-        return newLockedSuspendedTransaction(database) { RuleItem.find { group eq subject } }
-    }
-    suspend fun getRuleById(id: Int): RuleItem? {
-        return newLockedSuspendedTransaction(database) { RuleItem.findById(id) }
-    }
-    suspend fun insertRule(name: String, rule: String, reply: String, group: Long, type: Byte, creator: Long,
-        createTime: Long = System.currentTimeMillis()/1000) {
-        AutoReplyHandler.config.rules[AutoReplyHandler.config.nextId] =
-            AutoReplyRule(AutoReplyHandler.config.nextId, name, rule, type, group, reply, creator, createTime)
-        newLockedSuspendedTransaction(database) {
-            RuleItems.insert { ruleItem ->
-                ruleItem[RuleItems.id] = AutoReplyHandler.config.nextId
-                ruleItem[RuleItems.name] = name
-                ruleItem[RuleItems.rule] = rule
-                ruleItem[RuleItems.type] = type
-                ruleItem[RuleItems.group] = group
-                ruleItem[RuleItems.reply] = reply
-                ruleItem[RuleItems.creator] = creator
-                ruleItem[RuleItems.createTime] = createTime
-            }
-        }
-        AutoReplyHandler.config.nextId += 1
-        AutoReplyHandler.saveConfig()
-    }
-    suspend fun removeRule(id: Int): Boolean {
-        return try {
-            AutoReplyHandler.config.rules.remove(id)
-            newLockedSuspendedTransaction(database) {
-                RuleItems.deleteWhere { RuleItems.id eq id }
-            }
-            AutoReplyHandler.saveConfig()
-            true
-        } catch (e: Exception) {
-            false
-        }
-    }
-    private suspend fun matchInclude(event: GroupMessageEvent, content: String, ruleType: ReplyRuleType =
-        ReplyRuleType.INCLUDE) = newLockedSuspendedTransaction(database) {
-        RuleItem.find {
-            type eq ruleType.type and
-                    (group eq event.group.id or (group eq -1)) and InStr(content, rule)
-        }.maxByOrNull { it.createTime }
-    }
-    private suspend fun matchEqual(event: GroupMessageEvent, content: String) =
-        newLockedSuspendedTransaction(database) {
-            RuleItem.find {
-                type eq ReplyRuleType.EQUAL.type and
-                        (group eq event.group.id or (group eq -1)) and (rule eq content)
-            }.maxByOrNull { it.createTime }
-        }
-    private suspend fun matchRegex(event: GroupMessageEvent, content: String) =
-        newLockedSuspendedTransaction(database) {
-            RuleItem.find {
-                type eq ReplyRuleType.REGEX.type and
-                        (group eq event.group.id or (group eq -1)) and
-                        RegexpOpCol(stringParam(content), "rule")
-            }.maxByOrNull { it.createTime }
-        }
-    private suspend fun matchAny(event: GroupMessageEvent, content: String,
-                                 ruleType: ReplyRuleType = ReplyRuleType.ANY) =
-        newLockedSuspendedTransaction(database) {
-            var result: RuleItem? = null
-            RuleItem.find {
-                type eq ruleType.type and (group eq event.group.id)
-            }.sortedByDescending { it.createTime }.forEach { rule ->
-                rule.rule.split(",").forEach ensure@{ keyword ->
-                    if (keyword in content) {
-                        result = rule; return@ensure
-                    }
-                }
-                result?.let { return@forEach }
-            }
-            result
-        }
-    private suspend fun matchAll(event: GroupMessageEvent, content: String,
-                                 ruleType: ReplyRuleType = ReplyRuleType.ALL) =
-        newLockedSuspendedTransaction(database) {
-            var result: RuleItem? = null
-            RuleItem.find {
-                type eq ruleType.type and (group eq event.group.id or (group eq -1))
-            }.sortedByDescending { it.createTime }.forEach { rule ->
-                var isMatched = rule.rule.isNotBlank()
-                rule.rule.split(",").forEach ensure@{ keyword ->
-                    if (keyword !in content) {
-                        isMatched = false; return@ensure
-                    }
-                }
-                if (isMatched) {
-                    result = rule
-                    return@forEach
-                }
-            }
-            result
-        }
-    private suspend fun hasImageRule(group: Long): Boolean = newLockedSuspendedTransaction(database) {
-        RuleItem.find { type less 0 and (RuleItems.group eq group) }.count() > 0L
-    }
-    suspend fun match(event: GroupMessageEvent): String? = event.run {
-        var content = message.content.toSimple()
-        var result: String? = null
-        if (message.anyIsInstance<PlainText>()) {
-            result ?: matchInclude(this, content)?.let { result = it.reply }
-            result ?: matchEqual(this, content)?.let { result = it.reply }
-            result ?: matchRegex(this, content)?.let { result = it.reply }
-            result ?: matchAny(this, content)?.let { result = it.reply }
-            result ?: matchAll(this, content)?.let { result = it.reply }
-        }
-        result ?: run {
-            if (message.anyIsInstance<Image>() && hasImageRule(group.id)) {
-                content = ""
-                message.forEach {
-                    content += if (it is Image) PythonApi.ocr(it.queryUrl()) + " " else ""
-                }
-                if (!content.isEmptyChar()) {
-                    result ?: matchInclude(this, content, ReplyRuleType.PIC_INCLUDE)?.let { result = it.reply }
-                    result ?: matchAll(this, content, ReplyRuleType.PIC_ALL)?.let { result = it.reply }
-                    result ?: matchAny(this, content, ReplyRuleType.PIC_ANY)?.let { result = it.reply }
-                }
-            }
-        }
-        return result
-    }
-}
-class RuleItem(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<RuleItem>(RuleItems) {
-        fun getNameFromType(type: Byte): String? {
-            return when (type) {
-                ReplyRuleType.PIC_INCLUDE.type -> "图片包含"
-                ReplyRuleType.PIC_ALL.type -> "图片全含"
-                ReplyRuleType.PIC_ANY.type -> "图片任含"
-                ReplyRuleType.INCLUDE.type -> "包含"
-                ReplyRuleType.EQUAL.type -> "全等"
-                ReplyRuleType.REGEX.type -> "正则"
-                ReplyRuleType.ANY.type -> "任含"
-                ReplyRuleType.ALL.type -> "全含"
-                else -> null
-            }
-        }
-        fun getTypeFromName(name: String): Byte? {
-            return when (name) {
-                "图片包含" -> ReplyRuleType.PIC_INCLUDE.type
-                "图片全含" -> ReplyRuleType.PIC_ALL.type
-                "图片任含" -> ReplyRuleType.PIC_ANY.type
-                "包含" -> ReplyRuleType.INCLUDE.type
-                "全等" -> ReplyRuleType.EQUAL.type
-                "正则" -> ReplyRuleType.REGEX.type
-                "任含" -> ReplyRuleType.ANY.type
-                "全含" -> ReplyRuleType.ALL.type
-                else -> null
-            }
-        }
-    }
-    var name by RuleItems.name
-    var rule by RuleItems.rule
-    var type by RuleItems.type
-    var group by RuleItems.group
-    var reply by RuleItems.reply
-    var creator by RuleItems.creator
-    var createTime by RuleItems.createTime
-}
 enum class ReplyRuleType(val type: Byte) {
     INCLUDE(0),
     EQUAL(1),
@@ -221,52 +31,174 @@ enum class ReplyRuleType(val type: Byte) {
     PIC_ALL(-2),
     PIC_ANY(-3)
 }
-object AutoReplyHandler: EventHandler("自动回复", "reply", HandlerType.RESTRICTED_ENABLED) {
-    val database = Database.connect("jdbc:h2:mem:reply;MODE=MySQL;DB_CLOSE_DELAY=-1;", driver = "org.h2.Driver")
-    val rwLock = AtomicBoolean(false)
-    var config = AutoReplyRules()
-    suspend fun <T> newLockedSuspendedTransaction(db: Database = database, statement: suspend Transaction.() -> T): T {
-        while (rwLock.get()) delay(2000)
-        return newSuspendedTransaction(db = db) {
-            statement.invoke(this)
-        }
+@Serializable
+class AutoReplyRule(
+    val id: Int,
+    val name: String = "",
+    val rule: String,
+    val type: ReplyRuleType,
+    val group: Long,
+    val reply: String,
+    val creator: Long,
+    val createTime: Long
+) {
+    companion object {
+        val idNameMap = listOf(
+            Pair(ReplyRuleType.PIC_INCLUDE, "图片包含"),
+            Pair(ReplyRuleType.PIC_ALL, "图片全含"),
+            Pair(ReplyRuleType.PIC_ANY, "图片任含"),
+            Pair(ReplyRuleType.INCLUDE, "包含"),
+            Pair(ReplyRuleType.EQUAL, "全等"),
+            Pair(ReplyRuleType.REGEX, "正则"),
+            Pair(ReplyRuleType.ANY, "任含"),
+            Pair(ReplyRuleType.ALL, "全含"),
+        )
+        fun getNameFromType(type: ReplyRuleType) = idNameMap.find { it.first == type } ?.second
+        fun getTypeFromName(name: String) = idNameMap.find { it.second == name } ?.first
     }
+}
+@Serializable
+class AutoReplyRules: SafeYamlConfig() {
+    var nextId = 1
+    val rules = mutableMapOf<Int, AutoReplyRule>()
+}
+object AutoReplyHandler: EventHandler("自动回复", "reply", HandlerType.RESTRICTED_ENABLED) {
+    var config = AutoReplyRules()
     fun saveConfig() {
         OtomadBotCore.configFolderPath.resolve("reply.yml").toFile()
-            .writeText(Yaml.default.encodeToString(AutoReplyRules.serializer(), config))
+            .writeText(yaml.encodeToString(AutoReplyRules.serializer(), config))
     }
-    suspend fun reloadConfig() {
-        config = Yaml.default.decodeFromString(AutoReplyRules.serializer(), OtomadBotCore.configFolderPath
+    fun reloadConfig() {
+        config = yaml.decodeFromString(AutoReplyRules.serializer(), OtomadBotCore.configFolderPath
             .resolve("reply.yml").toFile().readText())
-        newLockedSuspendedTransaction(database) {
-            SchemaUtils.create(RuleItems)
-            RuleItems.deleteAll()
-            config.rules.forEach { (_, confItem) ->
-                RuleItems.insert { ruleItem ->
-                    ruleItem[id] = confItem.id
-                    ruleItem[name] = confItem.name
-                    ruleItem[rule] = confItem.rule
-                    ruleItem[type] = confItem.type
-                    ruleItem[group] = confItem.group
-                    ruleItem[reply] = confItem.reply
-                    ruleItem[creator] = confItem.creator
-                    ruleItem[createTime] = confItem.createTime
+    }
+    override fun register() {
+        GlobalEventChannel.subscribeAlways<GroupMessageEvent> {
+            requireSenderNot(denied) {
+                matchText(message.filterIsInstance<PlainText>().joinToString("\n").toSimple().lowercase(),
+                group.id) ?.let { quoteReply(it) } ?: run {
+                    if (message.anyIsInstance<Image>() &&
+                        config.rules.filter { it.value.group == group.id }.isNotEmpty()) {
+                        val textList = mutableListOf<String>()
+                        message.filterIsInstance<Image>().forEach {
+                            textList.add(PythonApi.ocr(it.queryUrl()).lowercase())
+                        }
+                        matchImage(textList, group.id) ?.let { quoteReply(it) }
+                    }
                 }
             }
         }
-    }
-    override fun register() {
-        rwLock.set(false)
-        runBlocking {
-            reloadConfig()
-        }
-        GlobalEventChannel.subscribeAlways<GroupMessageEvent> {
-            requireSenderNot(denied) {
-                RuleItems.match(this) ?.let {
-                    quoteReply(it)
+        GlobalEventChannel.subscribeGroupMessages {
+            startsWith("自动回复设置") { raw ->
+                requireOperator {
+                    val args = raw.toArgsList()
+                    if (args.isEmpty()) {
+                        quoteReply("使用格式：自动回复设置 <子命令> (附加参数)\n支持的子命令：新建、删除")
+                    }
+                    when (args.first()) {
+                        "新建" -> {
+                            quoteReply("请输入类别（全等/正则/(图片)包含/(图片)任含/(图片)全含）：")
+                            val type = getTypeFromName(nextMessage().content)!!
+                            quoteReply("请输入规则：")
+                            val rule = nextMessage().content
+                            quoteReply("请输入回复内容：")
+                            val reply = nextMessage().content
+                            quoteReply("匹配类别：${getNameFromType(type)}\n规则：$rule\n回复：$reply\n确认？(y/n)")
+                            if (nextMessage().content.lowercase() == "y") {
+                                addRule(type, rule, reply, group.id)
+                                quoteReply("添加成功")
+                            }
+                        }
+                        "删除" -> {
+                            when (args.size) {
+                                2 -> {
+                                    config.rules[args[1].toInt()] ?.let {
+                                        if (it.group == group.id) {
+                                            removeRule(args[1].toInt())
+                                        }
+                                    }
+                                }
+                                else -> quoteReply("使用格式：自动回复设置 删除 规则编号")
+                            }
+                        }
+                    }
+                    pass
                 }
             }
         }
         super.register()
+    }
+    fun matchText(msg: String, group: Long): String? {
+        config.rules.values.filter { it.group == -1L || it.group == group }.fastForEach { rule ->
+            val matched = when (rule.type) {
+                ReplyRuleType.INCLUDE -> rule.rule in msg
+                ReplyRuleType.EQUAL -> rule.rule == msg
+                ReplyRuleType.REGEX -> Regex(rule.rule).find(msg) != null
+                ReplyRuleType.ANY -> {
+                    var matched = false
+                    rule.rule.split(",").fastForEach { if (it in msg) { matched = true } }
+                    matched
+                }
+                ReplyRuleType.ALL -> {
+                    var matched = true
+                    val keywords = rule.rule.split(",")
+                    keywords.fastForEach { if (it !in msg) { matched = false } }
+                    keywords.isNotEmpty() && matched
+
+                }
+                else -> false
+            }
+            if (matched)
+                return rule.reply
+        }
+        return null
+    }
+    fun matchImage(text: List<String>, group: Long): String? {
+        config.rules.values.filter { it.group == -1L || it.group == group }.fastForEach { rule ->
+            val matched = when (rule.type) {
+                ReplyRuleType.PIC_INCLUDE -> {
+                    var matched = false
+                    text.fastForEach {
+                        if (rule.rule in it)
+                            matched = true
+                    }
+                    matched
+                }
+                ReplyRuleType.PIC_ALL -> {
+                    var matched = false
+                    val keywords = rule.rule.split(",")
+                    text.fastForEach inner@ { msg ->
+                        var now = true
+                        keywords.fastForEach { if (it !in msg) { now = false } }
+                        if (now) {
+                            matched = true
+                            return@inner
+                        }
+                    }
+                    matched
+                }
+                ReplyRuleType.PIC_ANY -> {
+                    var matched = false
+                    val keywords = rule.rule.split(",")
+                    text.fastForEach outer@ { msg ->
+                        keywords.fastForEach inner@ { if (it in msg) { matched = true; return@outer } }
+                    }
+                    matched
+                }
+                else -> false
+            }
+            if (matched)
+                return rule.reply
+        }
+        return null
+    }
+    fun addRule(type: ReplyRuleType, rule: String, reply: String, group: Long, creator: Long = -1, name: String = "",
+                time: Long = System.currentTimeMillis() / 1000) {
+        config.rules[config.nextId] = AutoReplyRule(config.nextId, name, rule, type, group, reply, creator, time)
+        saveConfig()
+    }
+    fun removeRule(id: Int) {
+        config.rules.remove(id)
+        saveConfig()
     }
 }

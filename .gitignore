@@ -118,3 +118,15 @@ run/
 
 # Local Test Launch point
 src/test/kotlin/RunTerminal.kt
+
+# Runtime cache
+plugin-libraries
+plugin-shared-libraries
+logs
+data
+bots
+config
+*.lib
+
+
+__pycache__
