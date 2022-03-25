@@ -122,6 +122,7 @@ src/test/kotlin/RunTerminal.kt
 # Runtime cache
 plugin-libraries
 plugin-shared-libraries
+plugins
 logs
 data
 bots

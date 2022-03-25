@@ -6,7 +6,7 @@ plugins {
     id("net.mamoe.mirai-console") version "2.11.0-M1"
 }
 
-group = "tk.xszq"
+group = "xyz.xszq"
 version = "5.0"
 repositories {
     mavenCentral()
@@ -16,7 +16,7 @@ repositories {
     }
 }
 
-val korlibsVersion = "2.6.2"
+val korlibsVersion = "2.7.0"
 val ktorVersion = "1.6.7"
 dependencies {
     implementation("net.mamoe.yamlkt:yamlkt:0.10.2")
@@ -35,5 +35,5 @@ dependencies {
     implementation("io.ktor:ktor-serialization:$ktorVersion")
     implementation("org.jsoup:jsoup:1.14.3")
     implementation("org.scilab.forge:jlatexmath:1.0.7")
-    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("silk4j*.jar"))))
 }

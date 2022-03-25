@@ -1,14 +1,12 @@
 import asyncio
 import base64
-import json
 import os.path
-import wave
+import random
 
 import cv2
 import imutils
 import jiagu
 import langid
-import random
 import numpy as np
 from PIL import Image
 from fastapi import FastAPI, status, Form
