@@ -2,10 +2,12 @@
 
 package xyz.xszq.otomadbot.audio
 
-import io.github.mzdluo123.silk4j.AudioUtils
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import io.github.kasukusakura.silkcodec.SilkCoder
+import net.mamoe.mirai.message.data.Audio
+import net.mamoe.mirai.message.data.OnlineAudio
+import xyz.xszq.otomadbot.NetworkUtils
 import xyz.xszq.otomadbot.getAudioDuration
+import xyz.xszq.otomadbot.newTempFile
 import java.io.File
 
 object AudioEncodeUtils {
@@ -16,7 +18,7 @@ object AudioEncodeUtils {
             audioFilter("apad=pad_dur=3")
         else if (file.getAudioDuration() < 2.0)
             audioFilter("apad=pad_dur=2")
-        audioRate(24000)
+        audioRate("24k")
         audioChannels(1)
     }.getResult()
     suspend fun anyToMp3(file: File): File? = FFMpegTask(FFMpegFileType.MP3) {
@@ -26,6 +28,7 @@ object AudioEncodeUtils {
     private suspend fun anyToWavBeforePy(file: File): File? = FFMpegTask(FFMpegFileType.WAV) {
         input(file)
         acodec("pcm_s16le")
+        audioRate("44100")
         yes()
     }.getResult()
     suspend fun anyToWav(file: File) = anyToWavBeforePy(file)
@@ -36,23 +39,24 @@ object AudioEncodeUtils {
         startAt(startPoint)
         duration(duration)
         if (forSilk) {
-            audioRate(24000)
+            audioRate("24k")
             audioChannels(1)
         }
     }.getResult()
-    fun mp3ToSilkBlocking(file: File): File = AudioUtils.mp3ToSilk(file)
-    suspend fun mp3ToSilk(file: File): File = withContext(Dispatchers.IO) {
-        mp3ToSilkBlocking(file)
-    }
-    suspend fun convertAnyToSilk(file: File): File? {
-        if (file.extension == "silk") return file
-        val mp3 = anyToMp3BeforeSilk(file)
-        val result = mp3?.let { mp3ToSilk(it) }
-        mp3?.delete()
-        return result
-    }
-    fun silkToMp3Blocking(file: File): File = AudioUtils.silkToMp3(file)
-    suspend fun silkToMp3(file: File): File = withContext(Dispatchers.IO) {
-        silkToMp3Blocking(file)
+    suspend fun silkToWav(silk: ByteArray): File? {
+        val pcm = newTempFile(suffix = ".pcm")
+        pcm.outputStream().use {
+            SilkCoder.decode(silk.inputStream(), it)
+        }
+        pcm.deleteOnExit()
+        return FFMpegTask(FFMpegFileType.WAV) {
+            forceFormat("s16le")
+            audioRate("24k")
+            audioChannels(1)
+            input(pcm.absolutePath)
+        }.getResult()
     }
 }
+
+suspend fun Audio.toWav() =
+    AudioEncodeUtils.silkToWav(NetworkUtils.downloadAsByteArray((this as OnlineAudio).urlForDownload))

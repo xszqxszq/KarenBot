@@ -81,8 +81,8 @@ object ImageEffectHandler: EventHandler("图像滤镜", "image.effect") {
                                 input = input.resizeToW(resizeWidth)
                             spherize(input.toBMP32(),
                                 0.32, 3.0, -9.0, true).toExternalResource().use { exr ->
-                                    subject.sendMessage(target.quote() + exr.uploadAsImage(subject))
-                                }
+                                subject.sendMessage(target.quote() + exr.uploadAsImage(subject))
+                            }
                             file.delete()
                         }
                     } ?: pass
@@ -105,7 +105,8 @@ object ImageEffectHandler: EventHandler("图像滤镜", "image.effect") {
                                 val file = it.getFile()!!
                                 val input = file.toVfs().readNativeImage().resizeToW(resizeWidth)
                                 val resultLeft = input.clone().context2d {
-                                    drawImage(input.sliceWithSize(0, 0, input.width / 2, input.height)
+                                    drawImage(input.sliceWithSize(0,
+                                        0, input.width / 2, input.height)
                                         .extract().flipX(), input.width / 2 + 1, 0)
                                     dispose()
                                 }.encode(PNG)

@@ -30,7 +30,7 @@ object ForwardMessageConstructor: EventHandler("forward", "转发消息伪造",
         GlobalEventChannel.subscribeMessages {
             startsWith("伪造消息", true) { target ->
                 requireBotAdmin {
-                    val group = bot.groups.find { it.id == 1006515283L }
+                    val group = bot.groups.find { it.id == 799059220L }
                     val badMessage = Konachan.fetchList()
                     val content = ForwardMessageBuilder(group as Contact)
                     content.add(group.members[target.toLong()] as User, "给大伙发点色的".toPlainText())

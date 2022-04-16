@@ -28,18 +28,16 @@ object TTSHandler: EventHandler("TTS", "audio.tts") {
                         update(cooldown)
                         if (text.isNotBlank()) {
                             val lang = PythonApi.getLanguage(text)
-                            val raw = lang?.let {
+                            val result = lang?.let {
                                 if (lang == "ja") TTSDownloader.yukkuri(text)
                                 else TTSDownloader.googleTranslate(text, it)
                             } ?: run { TTSDownloader.googleTranslate(text) }
-                            val encoded = AudioEncodeUtils.convertAnyToSilk(raw!!)
-                            encoded?.let { file ->
+                            result ?.let { file ->
                                 file.toExternalResource().use {
                                     subject.sendMessage((subject as AudioSupported).uploadAudio(it))
                                 }
                             }
-                            raw.delete()
-                            encoded?.delete()
+                            result ?.delete()
                         }
                         pass
                     } ?: run {

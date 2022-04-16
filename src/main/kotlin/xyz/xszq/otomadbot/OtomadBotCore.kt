@@ -1,9 +1,6 @@
 package xyz.xszq.otomadbot
 
 import com.soywiz.korio.async.launchImmediately
-import io.github.mzdluo123.silk4j.LameCoder
-import io.github.mzdluo123.silk4j.NativeLibLoader
-import io.github.mzdluo123.silk4j.SilkCoder
 import kotlinx.serialization.json.Json
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
@@ -71,6 +68,7 @@ object OtomadBotCore : KotlinPlugin(
             ImageMatcher.loadImages("reply")
             ImageMatcher.loadImages("afraid", "reply")
             ImageMatcher.loadImages("ma", "reply")
+            ImageMatcher.loadImages("mtf")
             ImageCommonHandler.replyPic.load("reply")
             ImageCommonHandler.replyPic.load("gif", "reply")
             ImageCommonHandler.replyPic.load("afraid")
@@ -90,11 +88,8 @@ object OtomadBotCore : KotlinPlugin(
         BadWordHandler.reloadConfig()
     }
     private fun doTest() {
-        SilkCoder()
-        LameCoder()
     }
     private fun doLoadLibraries() {
-        NativeLibLoader.load() // 我超，为什么没有自动加载
     }
     private fun doCreateFolders() {
         arrayOf("bin", "fonts", "image", "image/reply", "image/afraid", "image/ma", "image/gif", "image/message", "music",

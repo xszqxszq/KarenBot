@@ -41,11 +41,12 @@ class FFMpegTask(val outputFormat: FFMpegFileType,
         fun input(path: File) = insert(Argument("i", path.absolutePath))
         fun startAt(timeInSecond: Double) = insert(Argument("ss", timeInSecond.toString()))
         fun duration(timeInSecond: Double) = insert(Argument("t", timeInSecond.toString()))
-        fun audioRate(rate: Int) = insert(Argument("ar", rate.toString()))
+        fun audioRate(rate: String) = insert(Argument("ar", rate))
         fun audioChannels(channels: Int) = insert(Argument("ac", channels.toString()))
         fun yes() = insert(Argument("y"))
         fun audioFilter(filter: String) = insert(Argument("af", filter))
         fun acodec(type: String) = insert(Argument("acodec", type))
+        fun forceFormat(format: String) = insert(Argument("f", format))
     }
     var ffmpegPath: String = BinConfig.ffmpeg
     var ffmpegEnv = arrayOf(BinConfig.ffmpegPath)

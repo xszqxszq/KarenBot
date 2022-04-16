@@ -14,16 +14,14 @@ import net.mamoe.mirai.console.permission.PermissionService.Companion.hasPermiss
 import net.mamoe.mirai.console.permission.PermitteeId.Companion.permitteeId
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.*
-import net.mamoe.mirai.message.data.At
-import net.mamoe.mirai.message.data.LightApp
-import net.mamoe.mirai.message.data.content
-import net.mamoe.mirai.message.data.toPlainText
+import net.mamoe.mirai.message.data.*
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import xyz.xszq.otomadbot.*
+import xyz.xszq.otomadbot.AdminEventHandler.Companion.botAdmin
 import xyz.xszq.otomadbot.api.BilibiliApi
 import xyz.xszq.otomadbot.api.PythonApi
 import xyz.xszq.otomadbot.core.*
@@ -141,7 +139,8 @@ object SentimentDetector: EventHandler("情感检测", "sentiment", HandlerType.
                     if (message.contains(At(bot))) {
                         quoteReply(
                             ImageCommonHandler.replyPic.getRandom(
-                                if (PythonApi.sentiment(message.content)!!) "reply"
+                                if (PythonApi.sentiment(message.filterIsInstance<PlainText>()
+                                        .joinToString("。"))!!) "reply"
                                 else "afraid"
                             ).uploadAsImage(group)
                         )
@@ -155,17 +154,16 @@ object SentimentDetector: EventHandler("情感检测", "sentiment", HandlerType.
 object RequestAccept: EventHandler("自动同意", "accept") {
     override fun register() {
         super.register()
-        GlobalEventChannel.subscribeAlways<NewFriendRequestEvent> {
-            this.accept()
-        }
+//        GlobalEventChannel.subscribeAlways<NewFriendRequestEvent> {
+//            this.accept()
+//        }
         GlobalEventChannel.subscribeAlways<BotInvitedJoinGroupRequestEvent> {
             this.accept()
         }
         GlobalEventChannel.subscribeAlways<BotJoinGroupEvent> {
-            if (group.members.size < 40L) {
+            if (group.members.size < 60L) {
                 when {
-                    this is BotJoinGroupEvent.Invite
-                            && invitor.permitteeId.hasPermission(AdminEventHandler.botAdmin) -> pass
+                    group.members.any { it.permitteeId.hasPermission(botAdmin) } -> pass
                     else -> group.quit()
                 }
             }

@@ -131,17 +131,17 @@ object AutoReplyHandler: EventHandler("自动回复", "reply", HandlerType.RESTR
     fun matchText(msg: String, group: Long): String? {
         config.rules.values.filter { it.group == -1L || it.group == group }.fastForEach { rule ->
             val matched = when (rule.type) {
-                ReplyRuleType.INCLUDE -> rule.rule in msg
-                ReplyRuleType.EQUAL -> rule.rule == msg
-                ReplyRuleType.REGEX -> Regex(rule.rule).find(msg) != null
+                ReplyRuleType.INCLUDE -> rule.rule.lowercase() in msg
+                ReplyRuleType.EQUAL -> rule.rule.lowercase() == msg
+                ReplyRuleType.REGEX -> Regex(rule.rule.lowercase()).find(msg) != null
                 ReplyRuleType.ANY -> {
                     var matched = false
-                    rule.rule.split(",").fastForEach { if (it in msg) { matched = true } }
+                    rule.rule.lowercase().split(",").fastForEach { if (it in msg) { matched = true } }
                     matched
                 }
                 ReplyRuleType.ALL -> {
                     var matched = true
-                    val keywords = rule.rule.split(",")
+                    val keywords = rule.rule.lowercase().split(",")
                     keywords.fastForEach { if (it !in msg) { matched = false } }
                     keywords.isNotEmpty() && matched
 
@@ -159,14 +159,14 @@ object AutoReplyHandler: EventHandler("自动回复", "reply", HandlerType.RESTR
                 ReplyRuleType.PIC_INCLUDE -> {
                     var matched = false
                     text.fastForEach {
-                        if (rule.rule in it)
+                        if (rule.rule.lowercase() in it)
                             matched = true
                     }
                     matched
                 }
                 ReplyRuleType.PIC_ALL -> {
                     var matched = false
-                    val keywords = rule.rule.split(",")
+                    val keywords = rule.rule.lowercase().split(",")
                     text.fastForEach inner@ { msg ->
                         var now = true
                         keywords.fastForEach { if (it !in msg) { now = false } }
@@ -179,7 +179,7 @@ object AutoReplyHandler: EventHandler("自动回复", "reply", HandlerType.RESTR
                 }
                 ReplyRuleType.PIC_ANY -> {
                     var matched = false
-                    val keywords = rule.rule.split(",")
+                    val keywords = rule.rule.lowercase().split(",")
                     text.fastForEach outer@ { msg ->
                         keywords.fastForEach inner@ { if (it in msg) { matched = true; return@outer } }
                     }

@@ -9,11 +9,17 @@ import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.message.data.Face
+import net.mamoe.mirai.message.data.Image
+import net.mamoe.mirai.message.data.Image.Key.queryUrl
 import net.mamoe.mirai.message.data.MessageSource.Key.recall
+import net.mamoe.mirai.message.data.anyIsInstance
 import xyz.xszq.otomadbot.EventHandler
+import xyz.xszq.otomadbot.NetworkUtils.getFile
 import xyz.xszq.otomadbot.OtomadBotCore
 import xyz.xszq.otomadbot.OtomadBotCore.yaml
+import xyz.xszq.otomadbot.api.PythonApi
 import xyz.xszq.otomadbot.core.SafeYamlConfig
+import xyz.xszq.otomadbot.image.ImageMatcher
 import xyz.xszq.otomadbot.quoteReply
 import xyz.xszq.otomadbot.startsWithSimple
 
@@ -49,6 +55,8 @@ object BadWordHandler: EventHandler("不良词汇/詈语控制", "badword") {
     const val KEYWORD = 0
     const val QQFACE = 1
     const val REGEX = 2
+    const val IMG = 3
+    const val OCR = 4
     // Const for status
     const val DISABLED = 0
     const val WARNING = 1
@@ -69,11 +77,17 @@ object BadWordHandler: EventHandler("不良词汇/詈语控制", "badword") {
         super.register()
     }
     suspend fun handle(event: GroupMessageEvent) = event.run {
-        config.rules.filter { it.status != DISABLED && (it.group == ALLGROUP || it.group == this.group.id) }.forEach { rule ->
+        config.rules.filter {
+            it.status != DISABLED && (it.group == ALLGROUP || it.group == this.group.id)
+        }.forEach { rule ->
             val matched = when (rule.type) {
                 KEYWORD -> message.contentToString().contains(rule.content)
                 QQFACE -> Face(rule.content.toInt()) in message
                 REGEX -> Regex(rule.content).matches(message.contentToString())
+                IMG -> message.anyIsInstance<Image>() && message.filterIsInstance<Image>()
+                    .any { ImageMatcher.matchImage(rule.content, it.getFile()!!) }
+                OCR -> message.anyIsInstance<Image>() && message.filterIsInstance<Image>()
+                    .any { Regex(rule.content).matches(PythonApi.ocr(it.queryUrl()).lowercase()) }
                 else -> false
             }
             if (matched) {

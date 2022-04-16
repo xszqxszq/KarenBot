@@ -99,12 +99,10 @@ object RandomHandler: EventHandler("随机功能", "random") {
             if (NetworkUtils.getDownloadFileSize(link) >= 1048576L || ext !in arrayOf(".xm", ".mod", ".it", ".mptm", ".s3m"))
                 continue
             val mod = NetworkUtils.downloadTempFile(link, ext=ext)
-            val raw = AudioEncodeUtils.cropPeriod(mod!!, 5.0, 15.0)!!
-            val after = AudioEncodeUtils.mp3ToSilk(raw)
+            val after = AudioEncodeUtils.cropPeriod(mod!!, 5.0, 15.0)!!
             after.toExternalResource().use {
                 subject.sendMessage(subject.sendMessage((subject as AudioSupported).uploadAudio(it)).quote() + title)
             }
-            raw.delete()
             after.delete()
             mod.delete()
             break

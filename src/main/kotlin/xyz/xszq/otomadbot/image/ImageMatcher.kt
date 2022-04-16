@@ -50,7 +50,7 @@ object ImageMatcher {
     suspend fun matchImage(type: String, target: File): Boolean {
         val now = differenceHashTriple.calc(target.toVfs().readNativeImage().toBMP32())
         hash[type]!!.fastForEach {
-            if (differenceHashTriple.similarity(now, it) > .82 )
+            if (differenceHashTriple.similarity(now, it) > .9)
                 return true
         }
         return false

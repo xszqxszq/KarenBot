@@ -1,3 +1,5 @@
+@file:Suppress("SpellCheckingInspection")
+
 plugins {
     val kotlinVersion = "1.6.10"
     kotlin("jvm") version kotlinVersion
@@ -16,8 +18,8 @@ repositories {
     }
 }
 
-val korlibsVersion = "2.7.0"
-val ktorVersion = "1.6.7"
+val korlibsVersion = "2.6.2"
+val ktorVersion = "1.6.8"
 dependencies {
     implementation("net.mamoe.yamlkt:yamlkt:0.10.2")
     implementation("com.github.houbb:opencc4j:1.7.2")
@@ -35,5 +37,6 @@ dependencies {
     implementation("io.ktor:ktor-serialization:$ktorVersion")
     implementation("org.jsoup:jsoup:1.14.3")
     implementation("org.scilab.forge:jlatexmath:1.0.7")
-    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("silk4j*.jar"))))
+    api("net.mamoe:mirai-silk-converter:0.0.5")
+    api("io.github.kasukusakura:silk-codec:0.0.5")
 }

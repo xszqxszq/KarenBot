@@ -5,11 +5,9 @@ import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.MessageEvent
 import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
-import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
 import org.scilab.forge.jlatexmath.TeXConstants
 import org.scilab.forge.jlatexmath.TeXFormula
 import xyz.xszq.otomadbot.*
-import xyz.xszq.otomadbot.api.FiveThousandChoyenApi
 import xyz.xszq.otomadbot.core.Cooldown
 import xyz.xszq.otomadbot.core.ifReady
 import xyz.xszq.otomadbot.core.remaining
@@ -42,27 +40,6 @@ object ImageGeneratorHandler: EventHandler("生成图像", "image.generate") {
                             quoteReply(subject.uploadImage(it))
                         }
                         result.delete()
-                    } ?: run {
-                        quoteReply("为防止刷屏，请等待 ${remaining(cooldown)} 秒再试")
-                    }
-                }
-            }
-            startsWithSimple("生成5k", true) { _, raw ->
-                requireNot(denied) {
-                    ifReady(cooldown) {
-                        update(cooldown)
-                        val args = raw.toArgsListByLn()
-                        when (args.size) {
-                            0 -> quoteReply("使用方法：\n生成5k 第一行文本\n第二行文本（可选）")
-                            1 -> quoteReply(FiveThousandChoyenApi.generate(args.first().trim(), " ")
-                                .toExternalResource().use {
-                                    it.uploadAsImage(subject)
-                                })
-                            else -> quoteReply(FiveThousandChoyenApi.generate(args[0].trim(), args[1].trim())
-                                .toExternalResource().use {
-                                    it.uploadAsImage(subject)
-                                })
-                        }
                     } ?: run {
                         quoteReply("为防止刷屏，请等待 ${remaining(cooldown)} 秒再试")
                     }

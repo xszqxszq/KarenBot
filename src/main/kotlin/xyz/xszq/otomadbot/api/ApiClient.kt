@@ -21,7 +21,6 @@ class ApiItem (
 object ApiSettings: AutoSavePluginConfig("api") {
     val list: Map<String, ApiItem> by value(mapOf(
         Pair("python_api", ApiItem("http://127.0.0.1:10090")),
-        Pair("5000choyen", ApiItem("http://127.0.0.1:10091/api/5000choyen"))
     ))
     val proxy: ProxySettings by value()
 }
