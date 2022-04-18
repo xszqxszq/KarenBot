@@ -1,5 +1,6 @@
 package xyz.xszq.otomadbot.api
 
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import kotlinx.serialization.Serializable
 
@@ -17,9 +18,9 @@ data class KonachanImage(
 object Konachan: ApiClient() {
     suspend fun fetchList(): List<KonachanImage> {
         return kotlin.runCatching {
-            clientProxy.get<List<KonachanImage>>(
+            clientProxy.get(
                 "https://konachan.com/post.json?tags=order%3Arandom%20rating:explicit"
-            )
+            ).body<List<KonachanImage>>()
         }.onFailure {
             it.printStackTrace()
         }.getOrDefault(emptyList())

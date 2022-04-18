@@ -27,10 +27,7 @@ import xyz.xszq.otomadbot.core.Cooldown
 import xyz.xszq.otomadbot.core.ifReady
 import xyz.xszq.otomadbot.core.remaining
 import xyz.xszq.otomadbot.core.update
-import kotlin.math.abs
-import kotlin.math.min
-import kotlin.math.roundToInt
-import kotlin.math.sqrt
+import kotlin.math.*
 
 
 object ImageEffectHandler: EventHandler("图像滤镜", "image.effect") {
@@ -179,6 +176,7 @@ object ImageEffectHandler: EventHandler("图像滤镜", "image.effect") {
     }
 }
 fun Bitmap.resizeToW(w: Int) = resized(w, (1.0 * height * w / width).roundToInt(), ScaleMode.EXACT, Anchor.CENTER)
+fun Bitmap.resizeToSquare() = resized(max(width, height), max(width, height), ScaleMode.EXACT, Anchor.CENTER)
 fun Bitmap32.fillNear(tx: Int, ty: Int, content: RGBA) {
     val lst = listOf(-1, 0, 1)
     lst.fastForEach { x ->

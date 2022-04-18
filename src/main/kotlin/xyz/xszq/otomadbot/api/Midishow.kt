@@ -29,14 +29,14 @@ object Midishow: EventHandler("MIDI搜索", "audio.midishow") {
         super.register()
     }
     private suspend fun handle(event: MessageEvent, keyword: String) = event.run {
-        val response = client.get<HttpResponse>("https://www.midishow.com/search/result?q=$keyword") {
+        val response = client.get("https://www.midishow.com/search/result?q=$keyword") {
             headers {
                 append("Referer", "https://www.midishow.com/")
                 append("User-Agent", availableUA)
             }
         }
         if (response.status == HttpStatusCode.OK) {
-            val results = Jsoup.parse(response.readText()).select("#search-result>div")
+            val results = Jsoup.parse(response.bodyAsText()).select("#search-result>div")
             if (results.size == 0 || results[0].attr("data-key") == "") {
                 quoteReply("没有找到相关MIDI……")
             } else {

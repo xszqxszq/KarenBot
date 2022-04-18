@@ -3,6 +3,7 @@ package xyz.xszq.otomadbot.text
 import com.soywiz.korio.util.UUID
 import io.ktor.client.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import net.mamoe.mirai.contact.AudioSupported
 import net.mamoe.mirai.contact.isOperator
 import net.mamoe.mirai.contact.isOwner
@@ -73,7 +74,7 @@ object RandomHandler: EventHandler("随机功能", "random") {
     @Suppress("UNNECESSARY_NOT_NULL_ASSERTION")
     private suspend fun handleTutorial(event: MessageEvent) = event.run {
         val html = Jsoup.parse(
-            client.get<String>("https://otomad.wiki/%E5%88%B6%E4%BD%9C%E6%95%99%E7%A8%8B")
+            client.get("https://otomad.wiki/%E5%88%B6%E4%BD%9C%E6%95%99%E7%A8%8B").bodyAsText()
         )!!
         val links = mutableListOf<String>()
         html.selectFirst(".mw-body")!!.select("a").forEach {
@@ -91,7 +92,7 @@ object RandomHandler: EventHandler("随机功能", "random") {
             return@run
         for (i in 0..20) {
             val html = Jsoup.parse(
-                client.get<String>("https://modarchive.org/index.php?request=view_random")
+                client.get("https://modarchive.org/index.php?request=view_random").bodyAsText()
             )!!
             val title = html.selectFirst("h1")!!.text()
             val link = html.selectFirst("a.standard-link")!!.attr("href")

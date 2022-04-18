@@ -81,9 +81,9 @@ object BadWordHandler: EventHandler("不良词汇/詈语控制", "badword") {
             it.status != DISABLED && (it.group == ALLGROUP || it.group == this.group.id)
         }.forEach { rule ->
             val matched = when (rule.type) {
-                KEYWORD -> message.contentToString().contains(rule.content)
+                KEYWORD -> message.contentToString().lowercase().contains(rule.content)
                 QQFACE -> Face(rule.content.toInt()) in message
-                REGEX -> Regex(rule.content).matches(message.contentToString())
+                REGEX -> Regex(rule.content).matches(message.contentToString().lowercase())
                 IMG -> message.anyIsInstance<Image>() && message.filterIsInstance<Image>()
                     .any { ImageMatcher.matchImage(rule.content, it.getFile()!!) }
                 OCR -> message.anyIsInstance<Image>() && message.filterIsInstance<Image>()

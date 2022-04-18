@@ -1,5 +1,6 @@
 package xyz.xszq.otomadbot.api
 
+import io.ktor.client.call.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
@@ -18,14 +19,14 @@ class NsfwJsApiResult(val probability: Map<String, Double>)
 object NsfwJsApi: ApiClient() {
     suspend fun query(image: File): NsfwJsApiResult {
         val props = mutableMapOf<String, Double>()
-        client.submitFormWithBinaryData<List<NsfwJsApiProperty>> (
+        client.submitFormWithBinaryData (
             url = ApiSettings.list["nsfwjs"]!!.url + "/nsfw",
             formData = formData {
                 append("image", image.readBytes(), Headers.build {
                     append(HttpHeaders.ContentDisposition, "filename=${image.name}")
                 })
             }
-        ).forEach { prop ->
+        ).body<List<NsfwJsApiProperty>>().forEach { prop ->
             props[prop.className] = prop.probability
         }
         return NsfwJsApiResult(props)

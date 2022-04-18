@@ -3,13 +3,15 @@
 package xyz.xszq.otomadbot.api
 
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
-import io.ktor.client.features.json.serializer.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import xyz.xszq.otomadbot.availableUA
 
 @Serializable
@@ -32,8 +34,8 @@ data class RandomEropic(
             Pair("User-Agent", availableUA)
         )
         val client = HttpClient(OkHttp) {
-            install(JsonFeature) {
-                serializer = KotlinxSerializer(kotlinx.serialization.json.Json {
+            install(ContentNegotiation) {
+                json(Json {
                     prettyPrint = true
                     isLenient = true
                     ignoreUnknownKeys = true
@@ -48,7 +50,7 @@ data class RandomEropic(
                         size: List<String> = listOf("regular")): RandomEropicResponse {
             return client.post("https://api.lolicon.app/setu/v2") {
                 contentType(ContentType.Application.Json)
-                body = RandomEropicRequest(
+                setBody(RandomEropicRequest(
                     r18 = if (r18) 2 else 0,
                     num = num,
                     keyword = keyword ?.let { keyword.ifBlank { "" } } ?: "",
@@ -56,8 +58,8 @@ data class RandomEropic(
                         listOf(listOf("全裸")) else emptyList(),
                     size = size,
                     proxy = proxy
-                )
-            }
+                ))
+            }.body()
         }
     }
 }
