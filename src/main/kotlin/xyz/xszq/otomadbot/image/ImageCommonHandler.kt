@@ -18,7 +18,6 @@ import xyz.xszq.otomadbot.*
 import xyz.xszq.otomadbot.NetworkUtils.getFile
 import xyz.xszq.otomadbot.api.PythonApi
 import xyz.xszq.otomadbot.core.Cooldown
-import xyz.xszq.otomadbot.OtomadBotCore
 import xyz.xszq.otomadbot.core.ifReady
 import xyz.xszq.otomadbot.core.update
 import xyz.xszq.otomadbot.image.ImageMatcher.matchImage

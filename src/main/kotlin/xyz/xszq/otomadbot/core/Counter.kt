@@ -1,3 +1,5 @@
+@file:Suppress("MemberVisibilityCanBePrivate")
+
 package xyz.xszq.otomadbot.core
 
 import net.mamoe.mirai.console.data.AutoSavePluginConfig
@@ -16,7 +18,6 @@ open class Counter: ConcurrentHashMap<Long, Long>() {
     fun reset(subject: Contact) = set(getRawId(subject), 0)
     fun reset(subject: Long) = set(subject, 0)
 }
-@Suppress("MemberVisibilityCanBePrivate")
 class Cooldown(val name: String): Counter() {
     fun update(subject: Contact) = set(getRawId(subject), System.currentTimeMillis())
     fun update(group: Long) = set(group, System.currentTimeMillis())
@@ -32,10 +33,22 @@ class Cooldown(val name: String): Counter() {
         return CooldownConfig.cooldown[name]!!
     }
 }
+class Quota(val name: String): Counter() {
+    fun available(subject: Contact): Boolean = get(subject) < getQuota()
+    fun getQuota(): Long {
+        if (!QuotaConfig.quota.containsKey(name)) {
+            QuotaConfig.edit(name, 50L)
+        }
+        return QuotaConfig.quota[name]!!
+    }
+    fun update(subject: Contact) = increase(subject)
+}
 suspend fun <T> MessageEvent.ifReady(cd: Cooldown, block: suspend () -> T): T? = if (cd.isReady(subject))
     block.invoke() else null
 fun MessageEvent.update(cd: Cooldown) = cd.update(subject)
 fun MessageEvent.remaining(cd: Cooldown) = cd.remaining(subject) / 1000L
+fun MessageEvent.available(q: Quota) = q.available(subject) ||
+        (subject is Group && (subject as Group).members.size < 500)
 
 object CooldownConfig: AutoSavePluginConfig("cooldown") {
     var cooldown: Map<String, Long> by value()
@@ -43,5 +56,13 @@ object CooldownConfig: AutoSavePluginConfig("cooldown") {
         val temp = cooldown.toMutableMap()
         temp[key] = value
         cooldown = temp
+    }
+}
+object QuotaConfig: AutoSavePluginConfig("quota") {
+    var quota: Map<String, Long> by value()
+    fun edit(key: String, value: Long) {
+        val temp = quota.toMutableMap()
+        temp[key] = value
+        quota = temp
     }
 }

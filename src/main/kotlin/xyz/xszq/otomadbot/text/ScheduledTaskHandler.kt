@@ -20,7 +20,6 @@ import net.mamoe.mirai.message.nextMessage
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import xyz.xszq.otomadbot.*
 import xyz.xszq.otomadbot.admin.isAdminCommandPermitted
-import xyz.xszq.otomadbot.OtomadBotCore
 import java.io.File
 import kotlin.collections.set
 

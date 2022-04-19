@@ -3,7 +3,6 @@
 package xyz.xszq.otomadbot.api
 
 import com.soywiz.krypto.encoding.Base64
-import io.ktor.client.call.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
@@ -16,7 +15,7 @@ object PythonApi: ApiClient() {
         client.submitForm(ApiSettings.list["python_api"]!!.url + "/" + path,
             formParameters = Parameters.build {
                 args.forEach { append(it.first, it.second) }
-            }).body()
+            })
     suspend fun ocr(image: String): String = call(listOf(Pair("image", image)), "ocr")
         ?.data ?: ""
     suspend fun spherize(base64: String): ByteArray? = call(listOf(Pair("image", base64)), "spherize")

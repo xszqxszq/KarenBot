@@ -14,7 +14,6 @@ import net.mamoe.mirai.event.subscribeMessages
 import net.mamoe.mirai.message.data.content
 import net.mamoe.mirai.message.nextMessage
 import xyz.xszq.otomadbot.*
-import xyz.xszq.otomadbot.OtomadBotCore
 
 fun Member.isAdminCommandPermitted() = isOperator() || permitteeId.hasPermission(AdminEventHandler.botAdmin)
 
@@ -24,7 +23,7 @@ object GroupAdminCommandHandler: AdminEventHandler() {
             startsWithSimple("/禁言") { targetMember, _ ->
                 val groups = bot.groups.filter { group ->
                     (group.getMember(sender.id) ?.isAdminCommandPermitted() ?: false)
-                            && group.contains(targetMember.toLong())
+                            && group.contains(targetMember.toLong()) && group.botAsMember.isOperator()
                 }
                 if (groups.isNotEmpty()) {
                     val targetGroup = if (groups.size > 1) {
@@ -47,7 +46,7 @@ object GroupAdminCommandHandler: AdminEventHandler() {
                                 }
                         val member = it.getOrFail(targetMember.toLong())
                         member.mute(amount)
-                        it.sendMessage("由于 ${member.nameCardOrNick} (${member.id}) 的发言经检测违反了群规，特此处以禁言")
+                        it.sendMessage("请遵守群规哦")
                     }
                 }
             }

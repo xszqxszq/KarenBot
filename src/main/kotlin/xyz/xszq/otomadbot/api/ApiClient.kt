@@ -4,11 +4,10 @@ package xyz.xszq.otomadbot.api
 
 import io.ktor.client.*
 import io.ktor.client.engine.*
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.kotlinx.json.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
+import io.ktor.client.features.json.serializer.*
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import net.mamoe.mirai.console.data.AutoSavePluginConfig
 import net.mamoe.mirai.console.data.value
 
@@ -37,9 +36,8 @@ class ProxySettings {
 
 open class ApiClient(config: HttpClientConfig<*>.() -> Unit = {}) {
     val client = HttpClient {
-        install(ContentNegotiation) {
-            json(Json {
-                prettyPrint = true
+        install(JsonFeature) {
+            serializer = KotlinxSerializer(kotlinx.serialization.json.Json {
                 isLenient = true
                 ignoreUnknownKeys = true
             })
@@ -53,9 +51,8 @@ open class ApiClient(config: HttpClientConfig<*>.() -> Unit = {}) {
         apply(config)
     }
     val clientProxy = HttpClient {
-        install(ContentNegotiation) {
-            json(Json {
-                prettyPrint = true
+        install(JsonFeature) {
+            serializer = KotlinxSerializer(kotlinx.serialization.json.Json {
                 isLenient = true
                 ignoreUnknownKeys = true
             })

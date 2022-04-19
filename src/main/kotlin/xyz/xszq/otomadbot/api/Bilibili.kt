@@ -2,7 +2,6 @@
 
 package xyz.xszq.otomadbot.api
 
-import io.ktor.client.call.*
 import io.ktor.client.request.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
@@ -33,13 +32,13 @@ object BilibiliApi: ApiClient() {
             headers {
                 append("User-Agent", availableUA)
             }
-        }.body()
+        }
     suspend fun queryBv(bvid: String): BilibiliApiVideoResponse =
         client.get("http://api.bilibili.com/x/web-interface/view?bvid=$bvid") {
             headers {
                 append("User-Agent", availableUA)
             }
-        }.body()
+        }
 }
 
 @Suppress("EXPERIMENTAL_API_USAGE")

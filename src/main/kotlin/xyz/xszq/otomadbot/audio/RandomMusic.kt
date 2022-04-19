@@ -5,12 +5,10 @@ package xyz.xszq.otomadbot.audio
 import net.mamoe.mirai.contact.AudioSupported
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.MessageEvent
-import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.event.subscribeMessages
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import xyz.xszq.otomadbot.*
 import xyz.xszq.otomadbot.core.Cooldown
-import xyz.xszq.otomadbot.OtomadBotCore
 import xyz.xszq.otomadbot.core.ifReady
 import xyz.xszq.otomadbot.core.update
 import java.io.File

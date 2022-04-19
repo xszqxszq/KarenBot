@@ -6,11 +6,7 @@ import net.mamoe.mirai.event.subscribeMessages
 import net.mamoe.mirai.message.code.MiraiCode.deserializeMiraiCode
 import net.mamoe.mirai.message.data.content
 import net.mamoe.mirai.message.nextMessageOrNull
-import xyz.xszq.otomadbot.AdminEventHandler
-import xyz.xszq.otomadbot.OtomadBotCore
-import xyz.xszq.otomadbot.equalsTo
-import xyz.xszq.otomadbot.quoteReply
-import xyz.xszq.otomadbot.requireBotAdmin
+import xyz.xszq.otomadbot.*
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.NetworkInterface

@@ -4,7 +4,6 @@ import com.soywiz.korio.lang.UTF8
 import com.soywiz.korio.net.QueryString
 import com.soywiz.korio.net.URL
 import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import net.mamoe.mirai.contact.AudioSupported
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.subscribeGroupMessages
@@ -59,7 +58,7 @@ object TTSDownloader: ApiClient() {
     @Suppress("UNNECESSARY_NOT_NULL_ASSERTION")
     suspend fun yukkuri(text: String, mode: String = "ゆっくり言っていてね"): File? {
         val url = "http://yukkuritalk.com/?" + QueryString.encode(Pair("txt", text), Pair("submit", mode))
-        val doc = Jsoup.parse(client.get(url).bodyAsText())!!
+        val doc = Jsoup.parse(client.get<String>(url))!!
         val audio = doc.select(".translate_yukkuri>audio")
         return if (audio.isNotEmpty())
             NetworkUtils.downloadTempFile(

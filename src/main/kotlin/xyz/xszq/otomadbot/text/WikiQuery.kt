@@ -13,7 +13,6 @@ import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.event.subscribeGroupMessages
 import xyz.xszq.otomadbot.*
-import xyz.xszq.otomadbot.OtomadBotCore
 
 @Serializable
 data class MWSearchResultInfo(val totalhits: Int)
@@ -38,11 +37,11 @@ object WikiQuery: EventHandler("维基搜索", "wiki", HandlerType.DEFAULT_DISAB
         val searchUrl = "https://otomad.wiki/api.php?action=query&list=search&srwhat=title" +
                 "&srnamespace=0&format=json&srsearch=" + URL.encodeComponent(keyword)
         val parseUrl = "https://otomad.wiki/api.php?action=parse&format=json&page=" + URL.encodeComponent(keyword)
-        val responseExist = client.get(parseUrl).bodyAsText()
+        val responseExist = client.get<String>(parseUrl)
         if ("\"code\":\"missingtitle\"" in responseExist || "\"totalhits\":0" in responseExist) {
-            val responseSearch = client.get(searchUrl)
+            val responseSearch = client.get<HttpResponse>(searchUrl)
             if (responseSearch.status == HttpStatusCode.OK) {
-                val result = OtomadBotCore.json.decodeFromString<MWSearchResult>(responseSearch.bodyAsText())
+                val result = OtomadBotCore.json.decodeFromString<MWSearchResult>(responseSearch.readText())
                 if (result.query.searchinfo.totalhits > 10) {
                     quoteReply(
                         "https://otomad.wiki/index.php?title=Special:%E6%90%9C%E7%B4%A2" +

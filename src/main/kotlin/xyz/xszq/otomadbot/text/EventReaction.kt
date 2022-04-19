@@ -24,7 +24,10 @@ import xyz.xszq.otomadbot.*
 import xyz.xszq.otomadbot.AdminEventHandler.Companion.botAdmin
 import xyz.xszq.otomadbot.api.BilibiliApi
 import xyz.xszq.otomadbot.api.PythonApi
-import xyz.xszq.otomadbot.core.*
+import xyz.xszq.otomadbot.core.Cooldown
+import xyz.xszq.otomadbot.core.Counter
+import xyz.xszq.otomadbot.core.ifReady
+import xyz.xszq.otomadbot.core.update
 import xyz.xszq.otomadbot.image.ImageCommonHandler
 
 object WelcomeHandler: EventHandler("欢迎消息", "welcome") {

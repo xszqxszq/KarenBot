@@ -14,9 +14,8 @@ import net.mamoe.mirai.message.data.anyIsInstance
 import net.mamoe.mirai.message.data.content
 import net.mamoe.mirai.message.nextMessage
 import xyz.xszq.otomadbot.*
-import xyz.xszq.otomadbot.api.PythonApi
-import xyz.xszq.otomadbot.OtomadBotCore
 import xyz.xszq.otomadbot.OtomadBotCore.yaml
+import xyz.xszq.otomadbot.api.PythonApi
 import xyz.xszq.otomadbot.core.SafeYamlConfig
 import xyz.xszq.otomadbot.text.AutoReplyRule.Companion.getNameFromType
 import xyz.xszq.otomadbot.text.AutoReplyRule.Companion.getTypeFromName

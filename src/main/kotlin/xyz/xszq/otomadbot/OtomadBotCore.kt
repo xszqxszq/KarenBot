@@ -18,6 +18,7 @@ import xyz.xszq.otomadbot.api.PicaComic
 import xyz.xszq.otomadbot.audio.*
 import xyz.xszq.otomadbot.core.BinConfig
 import xyz.xszq.otomadbot.core.CooldownConfig
+import xyz.xszq.otomadbot.core.QuotaConfig
 import xyz.xszq.otomadbot.image.*
 import xyz.xszq.otomadbot.text.*
 import java.nio.file.Files
@@ -36,10 +37,11 @@ object OtomadBotCore : KotlinPlugin(
         EropicHandler, ImageGeneratorHandler, ImageCommonHandler, SearchHandler, ImageEffectHandler,
         GroupAdminCommandHandler, BotAdminCommandHandler, LightAppHandler, SentimentDetector, BadWordHandler,
         RandomHandler, WikiQuery, TTSHandler, BPMAnalyser, AudioEffectHandler,
-        RandomMusic, ForwardMessageConstructor, RequestAccept, AudioCommonHandler
+        RandomMusic, ForwardMessageConstructor, RequestAccept, AudioCommonHandler, ImageTemplate
     //, ScheduledTaskHandler
     ) // TODO: 这么多是怎么会是呢，是不是该搞点自动的
-    private val settings = listOf(TextSettings, ApiSettings, BinConfig, CooldownConfig)
+    private val settings = listOf(TextSettings, ApiSettings, BinConfig, CooldownConfig, QuotaConfig,
+        ImageTemplateConfigs)
     private val dataFiles = listOf(ScheduledMessageData)
     val json = Json { isLenient = true; ignoreUnknownKeys = true }
     val yaml = Yaml {}
