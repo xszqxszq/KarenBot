@@ -11,10 +11,7 @@ import net.mamoe.mirai.utils.info
 import net.mamoe.yamlkt.Yaml
 import xyz.xszq.otomadbot.admin.BotAdminCommandHandler
 import xyz.xszq.otomadbot.admin.GroupAdminCommandHandler
-import xyz.xszq.otomadbot.api.ApiSettings
-import xyz.xszq.otomadbot.api.BilibiliConverter
-import xyz.xszq.otomadbot.api.Midishow
-import xyz.xszq.otomadbot.api.PicaComic
+import xyz.xszq.otomadbot.api.*
 import xyz.xszq.otomadbot.audio.*
 import xyz.xszq.otomadbot.core.BinConfig
 import xyz.xszq.otomadbot.core.CooldownConfig
@@ -37,7 +34,7 @@ object OtomadBotCore : KotlinPlugin(
         EropicHandler, ImageGeneratorHandler, ImageCommonHandler, SearchHandler, ImageEffectHandler,
         GroupAdminCommandHandler, BotAdminCommandHandler, LightAppHandler, SentimentDetector, BadWordHandler,
         RandomHandler, WikiQuery, TTSHandler, BPMAnalyser, AudioEffectHandler,
-        RandomMusic, ForwardMessageConstructor, RequestAccept, AudioCommonHandler, ImageTemplate
+        RandomMusic, ForwardMessageConstructor, RequestAccept, AudioCommonHandler, ImageTemplateHandler, VTuberQuery
     //, ScheduledTaskHandler
     ) // TODO: 这么多是怎么会是呢，是不是该搞点自动的
     private val settings = listOf(TextSettings, ApiSettings, BinConfig, CooldownConfig, QuotaConfig,

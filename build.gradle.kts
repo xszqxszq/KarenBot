@@ -25,6 +25,8 @@ dependencies {
     implementation("com.github.houbb:opencc4j:1.7.2")
     implementation("com.google.zxing:core:3.4.1")
     implementation("com.google.zxing:javase:3.4.1")
+    implementation("com.sksamuel.scrimage:scrimage-core:4.0.31")
+    implementation("com.sksamuel.scrimage:scrimage-filters:4.0.31")
     implementation("com.soywiz.korlibs.korim:korim:$korlibsVersion")
     implementation("com.soywiz.korlibs.korio:korio:$korlibsVersion")
     implementation("com.soywiz.korlibs.korau:korau:$korlibsVersion")

@@ -18,7 +18,7 @@ object ImageGeneratorHandler: EventHandler("生成图像", "image.generate") {
     private val cooldown = Cooldown("image_generate")
     override fun register() {
         GlobalEventChannel.subscribeGroupMessages {
-            startsWithSimple("生成二维码", true) { text, _ ->
+            startsWithSimple("生成二维码", true) { _, text ->
                 requireNot(denied) {
                     ifReady(cooldown) {
                         update(cooldown)
@@ -28,7 +28,7 @@ object ImageGeneratorHandler: EventHandler("生成图像", "image.generate") {
                     }
                 }
             }
-            startsWithSimple("生成latex", true) { text, _ ->
+            startsWithSimple("生成latex", true) { _, text ->
                 requireNot(denied) {
                     ifReady(cooldown) {
                         update(cooldown)

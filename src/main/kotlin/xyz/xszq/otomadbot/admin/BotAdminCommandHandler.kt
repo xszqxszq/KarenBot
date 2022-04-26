@@ -1,6 +1,8 @@
 package xyz.xszq.otomadbot.admin
 
 import kotlinx.coroutines.delay
+import net.mamoe.mirai.console.permission.PermissionId
+import net.mamoe.mirai.console.permission.PermissionService
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.subscribeMessages
 import net.mamoe.mirai.message.code.MiraiCode.deserializeMiraiCode
@@ -14,6 +16,14 @@ import java.util.*
 
 
 object BotAdminCommandHandler: AdminEventHandler() {
+    private val showPerm by lazy {
+        PermissionService.INSTANCE.register(
+            PermissionId("otm", "admin.show"), "允许直接解析mirai码")
+    }
+    private val execPerm by lazy {
+        PermissionService.INSTANCE.register(
+            PermissionId("otm", "admin.exec"), "允许执行系统指令")
+    }
     override fun register() {
         GlobalEventChannel.subscribeMessages {
             equalsTo("/ip") {
@@ -28,7 +38,7 @@ object BotAdminCommandHandler: AdminEventHandler() {
                 }
             }
             startsWith("/exec") { command ->
-                requireBotAdmin {
+                requireSender(execPerm) {
                     val result = handleExec(command)
                     if (result.first.isNotEmpty())
                         quoteReply(result.first)
@@ -48,7 +58,7 @@ object BotAdminCommandHandler: AdminEventHandler() {
                 }
             }
             startsWith("/show") { raw ->
-                requireBotAdmin {
+                requireSender(showPerm) {
                     subject.sendMessage(raw.deserializeMiraiCode())
                 }
             }
@@ -85,6 +95,8 @@ object BotAdminCommandHandler: AdminEventHandler() {
                 }
             }
         }
+        showPerm
+        execPerm
         super.register()
     }
     private fun getNetworkInterfaces(): Enumeration<NetworkInterface> = NetworkInterface.getNetworkInterfaces()

@@ -3,6 +3,8 @@
 package xyz.xszq.otomadbot.text
 
 import kotlinx.serialization.Serializable
+import net.mamoe.mirai.console.permission.PermissionId
+import net.mamoe.mirai.console.permission.PermissionService
 import net.mamoe.mirai.contact.getMemberOrFail
 import net.mamoe.mirai.contact.isOperator
 import net.mamoe.mirai.event.GlobalEventChannel
@@ -13,15 +15,12 @@ import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.Image.Key.queryUrl
 import net.mamoe.mirai.message.data.MessageSource.Key.recall
 import net.mamoe.mirai.message.data.anyIsInstance
-import xyz.xszq.otomadbot.EventHandler
+import xyz.xszq.otomadbot.*
 import xyz.xszq.otomadbot.NetworkUtils.getFile
-import xyz.xszq.otomadbot.OtomadBotCore
 import xyz.xszq.otomadbot.OtomadBotCore.yaml
 import xyz.xszq.otomadbot.api.PythonApi
 import xyz.xszq.otomadbot.core.SafeYamlConfig
 import xyz.xszq.otomadbot.image.ImageMatcher
-import xyz.xszq.otomadbot.quoteReply
-import xyz.xszq.otomadbot.startsWithSimple
 
 @Serializable
 class BadWordConfig: SafeYamlConfig() {
@@ -39,6 +38,10 @@ class BadWordConfigItem(
 )
 // TODO: Implement this
 object BadWordHandler: EventHandler("不良词汇/詈语控制", "badword") {
+    val special by lazy {
+        PermissionService.INSTANCE.register(
+            PermissionId("otm", "badword.special"), "特权")
+    }
     var config = BadWordConfig()
     fun saveConfig() {
         OtomadBotCore.configFolderPath.resolve("badword.yml").toFile()
@@ -66,7 +69,9 @@ object BadWordHandler: EventHandler("不良词汇/詈语控制", "badword") {
     override fun register() {
         reloadConfig()
         GlobalEventChannel.subscribeAlways<GroupMessageEvent> {
-            handle(this)
+            requireSenderNot(special) {
+                handle(this)
+            }
         }
         //TODO
         GlobalEventChannel.subscribeGroupMessages {
@@ -74,6 +79,7 @@ object BadWordHandler: EventHandler("不良词汇/詈语控制", "badword") {
 
             }
         }
+        special
         super.register()
     }
     suspend fun handle(event: GroupMessageEvent) = event.run {
