@@ -7,6 +7,7 @@ import io.ktor.http.*
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import xyz.xszq.nereides.payload.message.Media
 import xyz.xszq.nereides.payload.message.MessageArk
 import xyz.xszq.nereides.payload.message.MessageMarkdownC2C
 import xyz.xszq.nereides.payload.post.PostGroupFile
@@ -22,39 +23,47 @@ interface C2CApi {
         content: String,
         msgType: Int,
         msgId: String,
-        messageArk: MessageArk? = null,
-        messageMarkdown: MessageMarkdownC2C? = null
+        markdown: MessageMarkdownC2C? = null,
+        media: Media? = null,
+        ark: MessageArk? = null
     ) {
         post(
             "/v2/groups/${groupId}/messages",
-            PostGroupMessage(content, msgType, msgId, messageArk = messageArk)
+            PostGroupMessage(
+                content = content,
+                msgType = msgType,
+                msgId = msgId,
+                markdown = markdown,
+                media = media,
+                ark = ark
+            )
         )
         logger.info { "[$groupId] <- $content" }
     }
-    suspend fun sendGroupFile(
+    suspend fun uploadFile(
         groupId: String,
         url: String,
         fileType: Int,
-        msgId: String
-    ): Boolean {
-        repeat(3) {
-            val response: JsonObject = call(
+        send: Boolean = false
+    ): Media? =
+        kotlin.runCatching {
+            call(
                 HttpMethod.Post,
                 "/v2/groups/${groupId}/files",
-                PostGroupFile(fileType, url, true)
-            ).body()
-            if (response.containsKey("code") || response.containsKey("ret") || response.containsKey("msg")) {
-                delay(500L)
-                return@repeat
-            }
-            return true
+                PostGroupFile(fileType, url, false)
+            ).body<Media>()
+        }.onFailure {
+            it.printStackTrace()
+            return null
+        }.getOrNull()
+    suspend fun sendGroupImage(
+        groupId: String,
+        url: String,
+        msgId: String
+    ): Boolean {
+        uploadFile(groupId, url, FileType.IMAGE, false) ?.let { media ->
+            sendGroupMessage(groupId, " ", MsgType.RICH, msgId, media = Media(fileInfo = media.fileInfo))
         }
-        sendGroupMessage(
-            groupId,
-            "图片发送三次后仍然失败：msg limit exceed，code=22009\n此错误由腾讯服务器导致，非bot故障",
-            MsgType.TEXT,
-            msgId
-        )
         return false
     }
 }

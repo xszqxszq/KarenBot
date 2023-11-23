@@ -1,6 +1,9 @@
 package xyz.xszq.nereides
 
 fun String.toArgsList(): List<String> = this.trim().split(" +".toRegex()).toMutableList().filter { isNotBlank() }
+fun String.toArgsListByLn(): List<String> = this.trim().split("\n").toMutableList().filter {
+    isNotBlank()
+}
 
 const val DBC_SPACE = 32
 const val SBC_SPACE = 12288

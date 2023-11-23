@@ -6,4 +6,5 @@ object MsgType {
     const val MARKDOWN = 2
     const val ARK = 3
     const val EMBED = 4
+    const val RICH = 7
 }

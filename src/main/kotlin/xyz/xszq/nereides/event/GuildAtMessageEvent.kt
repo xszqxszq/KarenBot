@@ -20,9 +20,6 @@ class GuildAtMessageEvent(
     override suspend fun reply(content: String) {
         client.sendChannelMessage(channelId, content, referMsgId = msgId, replyMsgId = msgId)
     }
-    override suspend fun sendImage(url: String) {
-    }
-
     override suspend fun sendImage(file: File) {
     }
 
@@ -30,9 +27,6 @@ class GuildAtMessageEvent(
     }
 
     override suspend fun sendImage(binary: ByteArray) {
-    }
-
-    override suspend fun sendArk(messageArk: MessageArk) {
     }
 
 }

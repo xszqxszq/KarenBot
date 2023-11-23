@@ -6,6 +6,7 @@ import xyz.xszq.nereides.MsgType
 import xyz.xszq.nereides.NetworkUtils
 import xyz.xszq.nereides.QQClient
 import xyz.xszq.nereides.payload.message.MessageArk
+import xyz.xszq.nereides.payload.message.MessageMarkdownC2C
 import xyz.xszq.nereides.payload.message.QQAttachment
 import java.io.File
 
@@ -22,20 +23,30 @@ class GroupAtMessageEvent(
         client.sendGroupMessage(groupId, content, MsgType.TEXT, msgId)
     }
 
-    override suspend fun sendImage(url: String) {
-        client.sendGroupFile(groupId, url, FileType.IMAGE, msgId)
-    }
-    override suspend fun sendImage(file: File) {
-        client.sendGroupFile(groupId, NetworkUtils.upload(file), FileType.IMAGE, msgId)
-    }
-    override suspend fun sendImage(file: VfsFile) {
-        client.sendGroupFile(groupId, NetworkUtils.upload(File(file.absolutePath)), FileType.IMAGE, msgId)
-    }
-    override suspend fun sendImage(binary: ByteArray) {
-        client.sendGroupFile(groupId, NetworkUtils.uploadBinary(binary), FileType.IMAGE, msgId)
+    suspend fun replyWithImage(content: String, image: File) {
+        client.sendGroupMessage(groupId, content, MsgType.RICH, msgId,
+            media = client.uploadFile(groupId, NetworkUtils.upload(image), FileType.IMAGE, false)
+        )
     }
 
-    override suspend fun sendArk(messageArk: MessageArk) {
-        client.sendGroupMessage(groupId, "", MsgType.ARK, msgId, messageArk=messageArk)
+    suspend fun replyWithImage(content: String, image: VfsFile) {
+        client.sendGroupMessage(groupId, content, MsgType.RICH, msgId,
+            media = client.uploadFile(groupId, NetworkUtils.upload(File(image.absolutePath)), FileType.IMAGE, false)
+        )
+    }
+
+    suspend fun replyWithImage(content: String, image: ByteArray) {
+        client.sendGroupMessage(groupId, content, MsgType.RICH, msgId,
+            media = client.uploadFile(groupId, NetworkUtils.uploadBinary(image), FileType.IMAGE, false)
+        )
+    }
+    override suspend fun sendImage(file: File) {
+        client.sendGroupImage(groupId, NetworkUtils.upload(file), msgId)
+    }
+    override suspend fun sendImage(file: VfsFile) {
+        client.sendGroupImage(groupId, NetworkUtils.upload(File(file.absolutePath)), msgId)
+    }
+    override suspend fun sendImage(binary: ByteArray) {
+        client.sendGroupImage(groupId, NetworkUtils.uploadBinary(binary), msgId)
     }
 }

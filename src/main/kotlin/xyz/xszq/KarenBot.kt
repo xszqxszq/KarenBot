@@ -1,7 +1,10 @@
 package xyz.xszq
 
+import com.soywiz.korim.format.PNG
+import com.soywiz.korim.format.encode
 import com.soywiz.korio.file.std.localCurrentDirVfs
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.and
@@ -9,12 +12,9 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import xyz.xszq.bot.*
 import xyz.xszq.bot.dao.*
 import xyz.xszq.bot.maimai.Maimai
-import xyz.xszq.nereides.Bot
-import xyz.xszq.nereides.NetworkUtils
+import xyz.xszq.nereides.*
 import xyz.xszq.nereides.event.GlobalEventChannel
 import xyz.xszq.nereides.event.GroupAtMessageEvent
-import xyz.xszq.nereides.event.GuildAtMessageEvent
-import xyz.xszq.nereides.toArgsList
 
 lateinit var database: Database
 lateinit var config: BotConfig
@@ -43,7 +43,14 @@ fun subscribe() {
                 reply("用法：/latex LaTeX文本")
                 return@startsWith
             }
-            sendImage(LaTeX.generateLaTeX(text))
+            try {
+                val image = LaTeX.generateLaTeX(text)
+                sendImage(image)
+            } catch (e: Exception) {
+                if (e is org.scilab.forge.jlatexmath.ParseException) {
+                    reply(e.message!!)
+                }
+            }
         }
         startsWith("/搜番") {
             if (this is GroupAtMessageEvent) {
@@ -73,6 +80,7 @@ fun subscribe() {
                 "对称" -> {
                     ImageGeneration.flipImage(img.url).forEach {
                         sendImage(it)
+                        delay(500L)
                     }
                 }
                 "球面化" -> {
@@ -209,6 +217,19 @@ fun subscribe() {
         always {
             if (this is GroupAtMessageEvent)
                 AutoQA.handle(this)
+        }
+        startsWith(listOf(
+            "/5k", "/生成5k",
+            "5k",  "生成5k",
+            "/gocho", "gocho",
+            "/choyen", "choyen"
+        )) { raw ->
+            val args = raw.toArgsListByLn()
+            when (args.size) {
+                0 -> reply("使用方法：\n/5k 第一行文本\n第二行文本（可选）")
+                1 -> sendImage(FiveThousandChoyen.generate(args.first().trim(), " ").encode(PNG))
+                else -> sendImage(FiveThousandChoyen.generate(args[0].trim(), args[1].trim()).encode(PNG))
+            }
         }
     }
     Maimai.subscribe()
