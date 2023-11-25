@@ -7,7 +7,6 @@ import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionA
 import xyz.xszq.bot.dao.QARule
 import xyz.xszq.bot.dao.QARules
 import xyz.xszq.nereides.event.GroupAtMessageEvent
-import xyz.xszq.nereides.event.MessageEvent
 
 object AutoQA {
     private suspend fun matchText(msg: String, openId: String): String? = suspendedTransactionAsync(Dispatchers.IO) {

@@ -2,39 +2,51 @@
 
 package xyz.xszq.nereides.event
 
-class MessageSubscribeBuilder(private val prefix: String = "", val force: Boolean = false) { // TODO: Force and Not force
-    fun always(block: suspend MessageEvent.() -> Unit) {
-        GlobalEventChannel.subscribeMessage {
-            if (prefix.isBlank() || !force || content.removeChannelAtPrefix(this).trim().startsWith(prefix))
+import xyz.xszq.bot.dao.Permissions
+
+class PublicMessageSubscribeBuilder(
+    private val prefix: String = "",
+    val forcePrefix: Boolean = false,
+    val permName: String = ""
+) {
+    fun always(block: suspend PublicMessageEvent.() -> Unit) {
+        GlobalEventChannel.subscribePublicMessage {
+            if (permName.isNotBlank() && Permissions.isNotPermitted(contextId, permName))
+                return@subscribePublicMessage
+            if (prefix.isBlank() || !forcePrefix || content.removeChannelAtPrefix(this).trim().startsWith(prefix))
                 block(this)
         }
     }
-    fun equalsTo(text: List<String>, block: suspend MessageEvent.() -> Unit) {
+    fun equalsTo(text: List<String>, block: suspend PublicMessageEvent.() -> Unit) {
         val list = if (prefix.isNotBlank()) {
             val nowList = text.map {
                 prefix.trim() + " " + it
             }.toMutableList()
-            if (!force)
+            if (!forcePrefix)
                 nowList.addAll(text)
             nowList
         } else text
-        GlobalEventChannel.subscribeMessage {
+        GlobalEventChannel.subscribePublicMessage {
+            if (permName.isNotBlank() && Permissions.isNotPermitted(contextId, permName))
+                return@subscribePublicMessage
             if (content.removeChannelAtPrefix(this).trim() in list) {
                 block(this)
             }
         }
     }
-    fun equalsTo(text: String, block: suspend MessageEvent.() -> Unit) = equalsTo(listOf(text), block)
-    fun startsWith(text: List<String>, block: suspend MessageEvent.(String) -> Unit) {
+    fun equalsTo(text: String, block: suspend PublicMessageEvent.() -> Unit) = equalsTo(listOf(text), block)
+    fun startsWith(text: List<String>, block: suspend PublicMessageEvent.(String) -> Unit) {
         val list = if (prefix.isNotBlank()) {
             val nowList = text.map {
                 prefix.trim() + " " + it
             }.toMutableList()
-            if (!force)
+            if (!forcePrefix)
                 nowList.addAll(text)
             nowList
         } else text
-        GlobalEventChannel.subscribeMessage {
+        GlobalEventChannel.subscribePublicMessage {
+            if (permName.isNotBlank() && Permissions.isNotPermitted(contextId, permName))
+                return@subscribePublicMessage
             list.find {
                 content.removeChannelAtPrefix(this).trim().startsWith(it)
             } ?.let {
@@ -43,17 +55,19 @@ class MessageSubscribeBuilder(private val prefix: String = "", val force: Boolea
             }
         }
     }
-    fun startsWith(text: String, block: suspend MessageEvent.(String) -> Unit) = startsWith(listOf(text), block)
-    fun endsWith(text: List<String>, block: suspend MessageEvent.(String) -> Unit) {
+    fun startsWith(text: String, block: suspend PublicMessageEvent.(String) -> Unit) = startsWith(listOf(text), block)
+    fun endsWith(text: List<String>, block: suspend PublicMessageEvent.(String) -> Unit) {
         val list = if (prefix.isNotBlank()) {
             val nowList = text.map {
                 prefix.trim() + " " + it
             }.toMutableList()
-            if (!force)
+            if (!forcePrefix)
                 nowList.addAll(text)
             nowList
         } else text
-        GlobalEventChannel.subscribeMessage {
+        GlobalEventChannel.subscribePublicMessage {
+            if (permName.isNotBlank() && Permissions.isNotPermitted(contextId, permName))
+                return@subscribePublicMessage
             list.find {
                 content.removeChannelAtPrefix(this).trim().endsWith(it)
             } ?.let {
@@ -62,8 +76,8 @@ class MessageSubscribeBuilder(private val prefix: String = "", val force: Boolea
             }
         }
     }
-    fun endsWith(text: String, block: suspend MessageEvent.(String) -> Unit) = endsWith(listOf(text), block)
-    private fun String.removeChannelAtPrefix(event: MessageEvent): String {
+    fun endsWith(text: String, block: suspend PublicMessageEvent.(String) -> Unit) = endsWith(listOf(text), block)
+    private fun String.removeChannelAtPrefix(event: PublicMessageEvent): String {
         return if (event is GuildAtMessageEvent)
             substringAfter("<@!${event.client.botGuildInfo.id}>")
         else

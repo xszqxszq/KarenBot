@@ -17,14 +17,14 @@ import xyz.xszq.bot.maimai.MultiPlatformNativeSystemFontProvider
 import java.lang.Double.max
 
 object FiveThousandChoyen {
-    val topFont: String = "Source Han Sans CN Bold"
-    val bottomFont: String = "Source Han Serif SC Bold"
-    val transparency: Boolean = false
-    val size: Double = 100.0
-    val topX = 70
-    val topY = 100
-    val bottomX = 250
-    val bottomY = 230
+    const val topFont: String = "Source Han Sans CN Bold"
+    const val bottomFont: String = "Source Han Serif SC Bold"
+    const val transparency: Boolean = false
+    const val size: Double = 100.0
+    const val topX = 70
+    const val topY = 100
+    const val bottomX = 250
+    const val bottomY = 230
     val fonts = MultiPlatformNativeSystemFontProvider(localCurrentDirVfs["font"].absolutePath)
     fun generate(top: String, bottom: String): Bitmap {
         val result = NativeImageOrBitmap32(1500, 270, true)

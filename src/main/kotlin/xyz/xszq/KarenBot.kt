@@ -12,9 +12,11 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import xyz.xszq.bot.*
 import xyz.xszq.bot.dao.*
 import xyz.xszq.bot.maimai.Maimai
-import xyz.xszq.nereides.*
+import xyz.xszq.nereides.Bot
 import xyz.xszq.nereides.event.GlobalEventChannel
 import xyz.xszq.nereides.event.GroupAtMessageEvent
+import xyz.xszq.nereides.toArgsList
+import xyz.xszq.nereides.toArgsListByLn
 
 lateinit var database: Database
 lateinit var config: BotConfig
@@ -31,7 +33,7 @@ suspend fun init() {
 }
 
 fun subscribe() {
-    GlobalEventChannel.subscribeMessages {
+    GlobalEventChannel.subscribePublicMessages {
         equalsTo("") {
             sendImage(RandomImage.getRandom("reply"))
         }
@@ -63,13 +65,13 @@ fun subscribe() {
             }
         }
         startsWith("/生成") { raw ->
+            if (this !is GroupAtMessageEvent)
+                return@startsWith
             val args = raw.toArgsList()
             if (args.isEmpty()) {
                 reply("使用方法：/生成 模式\n当前支持的模式如下：\n对称 球面化 反球面化")
                 return@startsWith
             }
-            if (this !is GroupAtMessageEvent)
-                return@startsWith
 
             val img = attachments.firstOrNull { it.isImage()}
             if (img == null) {
@@ -78,8 +80,9 @@ fun subscribe() {
             }
             when (args[0]) {
                 "对称" -> {
+                    var seq = 1
                     ImageGeneration.flipImage(img.url).forEach {
-                        sendImage(it)
+                        replyWithImage(" ", it, msgSeq = seq ++)
                         delay(500L)
                     }
                 }
@@ -89,8 +92,26 @@ fun subscribe() {
                 "反球面化" -> {
                     sendImage(ImageGeneration.pincushion(img.url))
                 }
+                "5k" -> {
+                    val nowArgs = raw.trim().substringAfter("5k").toArgsListByLn()
+                    when (nowArgs.size) {
+                        0 -> reply("使用方法：\n/生成 5k 第一行文本\n第二行文本（可选）")
+                        1 -> sendImage(FiveThousandChoyen.generate(nowArgs.first().trim(), " ").encode(PNG))
+                        else -> sendImage(FiveThousandChoyen.generate(nowArgs[0].trim(), nowArgs[1].trim()).encode(PNG))
+                    }
+                }
+                "蔚蓝档案logo" -> {
+                    reply("使用方法：\n/ba 左侧文本 右侧文本")
+                }
+                "ba" -> {
+                    val nowArgs = raw.trim().substringAfter("ba").toArgsList()
+                    when (nowArgs.size) {
+                        2 -> sendImage(BlueArchiveLogo(false).draw(nowArgs[0].trim(), nowArgs[1].trim()).encode(PNG))
+                        else -> reply("使用方法：\n/ba 左侧文本 右侧文本")
+                    }
+                }
                 else -> {
-                    reply("当前支持的模式如下：\n对称 球面化 反球面化")
+                    reply("当前支持的模式如下：\n对称 球面化 反球面化 5k 碧蔚档案logo(指令为/ba 左侧文本 右侧文本)")
                 }
             }
         }
@@ -219,8 +240,7 @@ fun subscribe() {
                 AutoQA.handle(this)
         }
         startsWith(listOf(
-            "/5k", "/生成5k",
-            "5k",  "生成5k",
+            "/5k", "5k",
             "/gocho", "gocho",
             "/choyen", "choyen"
         )) { raw ->
@@ -229,6 +249,15 @@ fun subscribe() {
                 0 -> reply("使用方法：\n/5k 第一行文本\n第二行文本（可选）")
                 1 -> sendImage(FiveThousandChoyen.generate(args.first().trim(), " ").encode(PNG))
                 else -> sendImage(FiveThousandChoyen.generate(args[0].trim(), args[1].trim()).encode(PNG))
+            }
+        }
+        startsWith(listOf(
+            "/ba", "ba"
+        )) { raw ->
+            val args = raw.toArgsList()
+            when (args.size) {
+                2 -> sendImage(BlueArchiveLogo(false).draw(args[0].trim(), args[1].trim()).encode(PNG))
+                else -> reply("使用方法：\n/ba 左侧文本 右侧文本")
             }
         }
     }

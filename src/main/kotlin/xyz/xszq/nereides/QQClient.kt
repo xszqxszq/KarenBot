@@ -67,10 +67,8 @@ open class QQClient(
         }
     override suspend fun get(api: String): HttpResponse =
         call(HttpMethod.Get, api, null)
-    override suspend fun post(api: String, payload: Any) {
-        val response = call(HttpMethod.Post, api, payload).body<JsonObject>()
-        println(response)
-    }
+    override suspend fun post(api: String, payload: Any): HttpResponse =
+        call(HttpMethod.Post, api, payload).body()
 
     override val coroutineContext: CoroutineContext = Job()
 

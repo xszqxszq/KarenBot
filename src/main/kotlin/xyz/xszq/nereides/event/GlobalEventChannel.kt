@@ -27,8 +27,8 @@ object GlobalEventChannel: CoroutineScope {
             }
         }
     }
-    fun subscribeMessage(block: suspend MessageEvent.() -> Unit) = subscribe<MessageEvent>(block)
-    fun subscribeMessages(prefix: String = "", block: MessageSubscribeBuilder.() -> Unit) {
-        block(MessageSubscribeBuilder(prefix))
+    fun subscribePublicMessage(block: suspend PublicMessageEvent.() -> Unit) = subscribe<PublicMessageEvent>(block)
+    fun subscribePublicMessages(prefix: String = "", permName: String = "", block: PublicMessageSubscribeBuilder.() -> Unit) {
+        block(PublicMessageSubscribeBuilder(prefix, permName = permName))
     }
 }

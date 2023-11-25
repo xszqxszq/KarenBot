@@ -109,7 +109,8 @@ open class MultiPlatformNativeSystemFontProvider(
 
 fun Context2d.drawText(text: String, attr: ItemPosition, color: RGBA = Colors.BLACK,
                        align: TextAlignment = TextAlignment.LEFT) {
-    this.font = MaimaiImage.fonts[attr.fontName]
+    if (attr.fontName.isNotBlank())
+        this.font = MaimaiImage.fonts[attr.fontName]
     this.fontSize = attr.size.toDouble()
     this.alignment = align
     this.fillStyle = createColor(color)

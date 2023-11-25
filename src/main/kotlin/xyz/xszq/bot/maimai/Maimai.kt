@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import xyz.xszq.bot.dao.MaimaiBinding
+import xyz.xszq.bot.dao.Permissions
 import xyz.xszq.bot.maimai.DXProberClient.Companion.getPlateVerList
 import xyz.xszq.bot.maimai.MaimaiUtils.difficulties
 import xyz.xszq.bot.maimai.MaimaiUtils.levels
@@ -33,9 +34,10 @@ object Maimai {
     private val logger = KotlinLogging.logger("Maimai")
 
     private val musics = MusicsInfo(logger)
-    private val prober = DXProberClient()
-    private val images = MaimaiImage(musics, logger, localCurrentDirVfs["maimai"])
+    val prober = DXProberClient()
+    val images = MaimaiImage(musics, logger, localCurrentDirVfs["maimai"])
     private val aliases = Aliases(musics)
+    private val guessGame = GuessGame(musics, images, aliases)
     private lateinit var config: MaimaiConfig
     private suspend fun queryBindings(openId: String): Pair<String, String>? = suspendedTransactionAsync(Dispatchers.IO) {
         val bindings = MaimaiBinding.findById(openId) ?: return@suspendedTransactionAsync null
@@ -60,6 +62,7 @@ object Maimai {
             logger.info { "正在获取歌曲数据……" }
             musics.updateMusicInfo(prober.getMusicList())
             musics.updateStats(prober.getChartStat())
+            musics.updateHot()
 
             logger.info { "正在更新别名数据……" }
             aliases.updateXrayAliases(config.xrayAliasUrl)
@@ -112,7 +115,7 @@ object Maimai {
         data
     }
     fun subscribe() {
-        GlobalEventChannel.subscribeMessages {
+        GlobalEventChannel.subscribePublicMessages {
             equalsTo("/mai") {
                 reply(buildString {
                     appendLine("此指令可查询 maimai 相关信息。")
@@ -121,7 +124,7 @@ object Maimai {
                 })
             }
         }
-        GlobalEventChannel.subscribeMessages("/mai") {
+        GlobalEventChannel.subscribePublicMessages("/mai", permName = "maimai") {
             startsWith("bind") { raw ->
                 if (this !is GroupAtMessageEvent)
                     return@startsWith
@@ -505,6 +508,30 @@ object Maimai {
                         }
                     }
                 }
+            }
+            startsWith("设置猜歌") { option ->
+                when (option.trim()) {
+                    in listOf("启用", "开启", "允许") ->  {
+                        Permissions.setPerm(contextId, "maimai.guess", true)
+                        reply("启用成功")
+                    }
+                    in listOf("禁用", "关闭", "禁止") -> {
+                        Permissions.setPerm(contextId, "maimai.guess", false)
+                        reply("禁用成功")
+                    }
+                    else -> reply(buildString {
+                        appendLine("您可以使用本命令启用/禁用本群的猜歌功能。")
+                        appendLine("例：")
+                        appendLine("\t设置猜歌 启用")
+                        appendLine("\t设置猜歌 禁用")
+                    })
+                }
+            }
+        }
+        GlobalEventChannel.subscribePublicMessages("/mai", permName = "maimai.guess") {
+            equalsTo("猜歌") {
+                if (this is GroupAtMessageEvent)
+                    guessGame.start(this)
             }
         }
     }

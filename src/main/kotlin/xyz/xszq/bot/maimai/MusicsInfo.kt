@@ -8,14 +8,15 @@ import io.ktor.http.*
 import xyz.xszq.bot.maimai.MaimaiUtils.calcB50Change
 import xyz.xszq.bot.maimai.MaimaiUtils.difficulty2Name
 import xyz.xszq.bot.maimai.MaimaiUtils.getNewRa
+import xyz.xszq.bot.maimai.MaimaiUtils.plateExcluded
+import xyz.xszq.bot.maimai.MaimaiUtils.remasterExcluded
 import xyz.xszq.bot.maimai.payload.*
 
 class MusicsInfo(val logger: KLogger) {
     private val musics = mutableMapOf<String, MusicInfo>()
     private val stats = mutableMapOf<String, List<ChartStat>>()
-    private val plateExcluded = listOf("201", "332", "336", "367", "486", "645")
-    private val remasterExcluded = listOf("158", "139", "571", "25", "72", "135", "257", "131", "351", "503", "168",
-        "299", "159", "269", "138", "275", "67", "92", "108", "85", "173", "339", "369", "49")
+    private var hotList = listOf<String>()
+    private var randomHotMusics = mutableListOf<MusicInfo>()
     fun updateMusicInfo(data: List<MusicInfo>) {
         musics.putAll(data.associateBy { it.id })
     }
@@ -100,6 +101,13 @@ class MusicsInfo(val logger: KLogger) {
     fun any(block: (MusicInfo) -> Boolean) = musics.values.any(block)
 
     fun <R> map(block: (MusicInfo) -> R) = musics.values.map(block)
+
+    fun updateHot() {
+        hotList = stats.map { (id, stat) -> Pair(id, stat.sumOf { it.cnt ?: .0 }) }
+            .sortedByDescending { it.second }.take(400).map { it.first }
+    }
+
+    fun getStats(id: String) = stats[id]
 
     fun findByDS(range: ClosedFloatingPointRange<Double>): String {
         val result = buildString {
@@ -257,5 +265,15 @@ class MusicsInfo(val logger: KLogger) {
         } else {
             return "未找到符合标准的推分歌曲。"
         }
+    }
+    fun getRandomHot(): MusicInfo {
+        if (randomHotMusics.isEmpty()) {
+            randomHotMusics = hotList.mapNotNull {
+                musics.getOrDefault(it, null)
+            }.shuffled().toMutableList()
+        }
+        val target = randomHotMusics.first()
+        randomHotMusics.removeFirst()
+        return target
     }
 }

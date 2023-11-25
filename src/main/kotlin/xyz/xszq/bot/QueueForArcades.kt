@@ -1,7 +1,6 @@
 package xyz.xszq.bot
 
 import kotlinx.coroutines.*
-import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -13,7 +12,6 @@ import xyz.xszq.nereides.event.MessageEvent
 import xyz.xszq.nereides.isSameDay
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 
 object QueueForArcades {
     private val initTime = LocalDateTime.of(2000, 1, 1, 0, 0)

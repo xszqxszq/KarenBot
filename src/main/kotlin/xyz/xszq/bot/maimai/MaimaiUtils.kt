@@ -150,6 +150,13 @@ object MaimaiUtils {
             return ra - b35Floor
         return 0
     }
+    fun toDXId(id: String): String = when (id.length) {
+        5 -> id
+        4 -> "1$id"
+        3 -> "10$id"
+        2 -> "100$id"
+        else -> id
+    }
     val difficulty2Color = listOf(
         RGBA(124, 216, 79), RGBA(245, 187, 11), RGBA(255, 128, 140),
         RGBA(178, 91, 245), RGBA(244, 212, 255)
@@ -163,4 +170,6 @@ object MaimaiUtils {
         "clear")
     val difficulties = arrayOf("绿", "黄", "红", "紫", "白")
     val plateExcluded = listOf("201", "332", "336", "367", "486", "645")
+    val remasterExcluded = listOf("158", "139", "571", "25", "72", "135", "257", "131", "351", "503", "168",
+        "299", "159", "269", "138", "275", "67", "92", "108", "85", "173", "339", "369", "49")
 }

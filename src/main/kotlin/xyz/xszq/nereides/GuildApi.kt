@@ -13,7 +13,7 @@ import xyz.xszq.nereides.payload.user.GuildUser
 interface GuildApi {
     val logger: KLogger
     suspend fun get(api: String): HttpResponse
-    suspend fun post(api: String, payload: Any)
+    suspend fun post(api: String, payload: Any): HttpResponse
     suspend fun sendChannelMessage(
         channelId: String,
         content: String? = null,

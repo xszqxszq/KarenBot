@@ -118,7 +118,7 @@ class MaimaiImage(val musics: MusicsInfo, val logger: KLogger, private val resou
     fun getCoverById(id: String) =
         resourceDir["covers"]["$id.jpg"]
 
-    private suspend fun getCoverBitmap(id: String): Bitmap {
+    suspend fun getCoverBitmap(id: String): Bitmap {
         if (imageCache.containsKey("$id.jpg"))
             return imageCache["$id.jpg"]!!
 
