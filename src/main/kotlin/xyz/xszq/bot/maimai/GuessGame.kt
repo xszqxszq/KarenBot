@@ -14,6 +14,9 @@ import xyz.xszq.bot.maimai.payload.ChartStat
 import xyz.xszq.bot.maimai.payload.MusicInfo
 import xyz.xszq.nereides.event.GlobalEventChannel
 import xyz.xszq.nereides.event.GroupAtMessageEvent
+import xyz.xszq.nereides.message.plus
+import xyz.xszq.nereides.message.toImage
+import xyz.xszq.nereides.message.toPlainText
 import xyz.xszq.nereides.pass
 import kotlin.coroutines.CoroutineContext
 
@@ -60,10 +63,9 @@ class GuessGame(
         }
         ansList.replaceAll { it.lowercase() }
         println(ansList)
-        var seq = 1
         reply("请各位发挥自己的聪明才智，根据我的提示来猜一猜这是哪一首歌曲吧！\n" +
                 "作答时，歌曲 id、歌曲标题（请尽量回答完整）、歌曲别名都将被视作有效答案哦~\n" +
-                "(致管理员：您可以使用“/mai 设置猜歌”指令开启或者关闭本群的猜歌功能)", msgSeq = seq++)
+                "(致管理员：您可以使用“/mai 设置猜歌”指令开启或者关闭本群的猜歌功能)")
         var finished = false
         coroutineScope {
             val job1 = launch {
@@ -71,10 +73,10 @@ class GuessGame(
                     if (e !is GroupAtMessageEvent ||
                                 e.contextId != contextId)
                         return@collect
-                    println(e.content)
-                    if (!(ansList.any { ans -> ans == e.content.lowercase() ||
-                                ans in e.content.lowercase()
-                                || (e.content.length >= 5 && e.content.lowercase() in ans)}))
+                    println(e.contentString)
+                    if (!(ansList.any { ans -> ans == e.contentString.lowercase() ||
+                                ans in e.contentString.lowercase()
+                                || (e.contentString.length >= 5 && e.contentString.lowercase() in ans)}))
                         return@collect
                     val replyText = buildString {
                         appendLine("恭喜您猜中了哦~")
@@ -82,7 +84,7 @@ class GuessGame(
                     }
                     val cover = images.getCoverById(music.id)
                     if (cover.exists())
-                        e.replyWithImage(replyText, cover)
+                        e.reply(replyText.toPlainText() + cover.toImage())
                     else
                         e.reply(replyText)
                     finished = true
@@ -96,17 +98,15 @@ class GuessGame(
                         appendLine(desc)
                         if (index == options - 1)
                             appendLine("30秒后将揭晓答案哦~")
-                    }.trimEnd(), msgSeq = seq++)
+                    }.trimEnd())
                     delay(cooldown)
                 }
                 if (options == descriptions.size + 1) {
-                    replyWithImage(
+                    reply(
                         buildString {
                             appendLine()
                             appendLine("这首歌的封面部分如图，30秒后将揭晓答案哦~")
-                        }.trimEnd(),
-                        images.getCoverBitmap(music.id).randomSlice().encode(PNG),
-                        msgSeq = seq++
+                        }.trimEnd() + images.getCoverBitmap(music.id).randomSlice().encode(PNG).toImage()
                     )
                 }
                 delay(30000L)
@@ -116,9 +116,9 @@ class GuessGame(
                 }
                 val cover = images.getCoverById(music.id)
                 if (cover.exists())
-                    replyWithImage(replyText, cover, msgSeq = seq++, retry = true)
+                    reply(replyText.toPlainText() + cover.toImage())
                 else
-                    reply(replyText, msgSeq = seq++)
+                    reply(replyText)
                 finished = true
             }
             launch {

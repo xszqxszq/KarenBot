@@ -1,6 +1,6 @@
 @file:Suppress("MemberVisibilityCanBePrivate", "SpellCheckingInspection")
 
-package xyz.xszq.bot
+package xyz.xszq.bot.image
 
 import com.soywiz.korim.bitmap.Bitmap
 import com.soywiz.korim.bitmap.NativeImageOrBitmap32

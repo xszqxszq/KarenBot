@@ -3,6 +3,8 @@ package xyz.xszq.nereides
 import io.github.oshai.kotlinlogging.KLogger
 import io.ktor.client.call.*
 import io.ktor.client.statement.*
+import xyz.xszq.nereides.message.*
+import xyz.xszq.nereides.payload.event.GuildAtMessageCreate
 import xyz.xszq.nereides.payload.message.MessageArk
 import xyz.xszq.nereides.payload.message.MessageEmbed
 import xyz.xszq.nereides.payload.message.MessageMarkdown
@@ -61,4 +63,33 @@ interface GuildApi {
         referMsgId = referMsgId
     )
     suspend fun getBotInfo() = get("/users/@me").body<GuildUser>()
+    fun parseContent(data: GuildAtMessageCreate): MessageChain {
+        val result = MessageChain()
+
+        var str = data.content.trim()
+        val regex = buildMap {
+            put("emoji", Regex("<emoji:(\\d+)>"))
+            put("at", Regex("<@!?(\\d+)>"))
+        }
+        while (true) {
+            regex.map { (type, r) ->
+                Pair(type, r.find(str))
+            }.filter { it.second != null }.sortedBy { it.second ?.range ?.first }.firstOrNull() ?.let { (type, r) ->
+                if (r!!.range.first != 0) {
+                    result += PlainText(str.substring(0 until r.range.first).trim())
+                }
+                val message = when (type) {
+                    "emoji" -> Face(1, r.groupValues[1])
+                    "at" -> At(r.groupValues[1])
+                    else -> return@let
+                }
+                result += message
+                str = str.substring(r.range.last + 1 until str.length).trim()
+            } ?: break
+        }
+        if (str.isNotEmpty())
+            result += PlainText(str)
+
+        return result
+    }
 }

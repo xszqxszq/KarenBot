@@ -4,6 +4,11 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.ktor.client.call.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import xyz.xszq.nereides.message.Face
+import xyz.xszq.nereides.message.MessageChain
+import xyz.xszq.nereides.message.PlainText
+import xyz.xszq.nereides.message.RemoteImage
+import xyz.xszq.nereides.payload.event.GroupAtMessageCreate
 import xyz.xszq.nereides.payload.message.Media
 import xyz.xszq.nereides.payload.message.MessageArk
 import xyz.xszq.nereides.payload.message.MessageMarkdownC2C
@@ -56,23 +61,46 @@ interface C2CApi {
         send: Boolean = false
     ): Media? =
         kotlin.runCatching {
-            call(
+            val response = call(
                 HttpMethod.Post,
                 "/v2/groups/${groupId}/files",
                 PostGroupFile(fileType, url, false)
-            ).body<Media>()
+            )
+//            println(response.bodyAsText())
+            response.body<Media>()
         }.onFailure {
             it.printStackTrace()
             return null
         }.getOrNull()
-    suspend fun sendGroupImage(
-        groupId: String,
-        url: String,
-        msgId: String
-    ): Boolean {
-        uploadFile(groupId, url, FileType.IMAGE, false) ?.let { media ->
-            sendGroupMessage(groupId, " ", MsgType.RICH, msgId, media = Media(fileInfo = media.fileInfo))
+
+    fun parseContent(data: GroupAtMessageCreate): MessageChain {
+        val result = MessageChain()
+
+        var str = data.content.trim()
+        val base64 = "[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4}"
+        val regex = Regex("<faceType=(\\d),faceId=\"(\\d+)\",ext=\"($base64)\">")
+        while (true) {
+            regex.find(str) ?.let {
+                val faceType = it.groupValues[1]
+                val faceId = it.groupValues[2]
+                // val ext = it.groupValues[3] // UNUSED
+                if (it.range.first != 0) {
+                    result += PlainText(str.substring(0 until it.range.first).trim())
+                }
+                result += Face(faceType.toIntOrNull() ?: 1, faceId)
+                str = str.substring(it.range.last + 1 until str.length).trim()
+            } ?: break
         }
-        return false
+        if (str.isNotEmpty())
+            result += PlainText(str)
+
+        if (data.attachments?.isNotEmpty() == true)
+            data.attachments.forEach { att ->
+                if (att.isImage()) {
+                    result += RemoteImage(att.filename, att.url)
+                }
+            }
+
+        return result
     }
 }

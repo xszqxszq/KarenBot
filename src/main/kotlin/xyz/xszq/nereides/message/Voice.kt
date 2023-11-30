@@ -1,8 +1,8 @@
 package xyz.xszq.nereides.message
 
-interface Image: RichMedia {
+interface Voice: RichMedia {
     val id: String
     override fun contentToString(): String {
-        return "[image:$id]"
+        return "[voice:$id]"
     }
 }

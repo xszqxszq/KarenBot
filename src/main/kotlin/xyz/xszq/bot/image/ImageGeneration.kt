@@ -1,4 +1,4 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.image
 
 import com.soywiz.korim.bitmap.Bitmap32
 import com.soywiz.korim.format.PNG

@@ -1,4 +1,4 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.maimai
 
 import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
@@ -29,12 +29,8 @@ object QueueForArcades {
     fun init() {
         clear()
         GlobalScope.launch {
-            val time = LocalDateTime.now()
-            if (time.hour == 0 && time.minute == 0) {
-                clear()
-                delay(60000L)
-            }
-            delay(1000L)
+            clear()
+            delay(3600000L)
         }
     }
     suspend fun getQueueGroup(openId: String) = suspendedTransactionAsync(Dispatchers.IO) {
@@ -52,7 +48,7 @@ object QueueForArcades {
     suspend fun handle(event: MessageEvent) = event.run {
         if (event !is GroupAtMessageEvent)
             return@run
-        val command = content.trim().lowercase()
+        val command = contentString.trim().lowercase()
         newSuspendedTransaction(Dispatchers.IO) {
             val groupId = ArcadeCenterQueueGroup.findById(event.groupId) ?: run {
                 if (command in arrayOf("几", "j", "机厅几", "/j"))

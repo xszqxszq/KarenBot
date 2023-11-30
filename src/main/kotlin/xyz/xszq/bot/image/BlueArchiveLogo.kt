@@ -1,67 +1,33 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.image
 
 import com.soywiz.korim.bitmap.Bitmap
-import com.soywiz.korim.bitmap.Bitmap32
 import com.soywiz.korim.bitmap.NativeImageOrBitmap32
 import com.soywiz.korim.bitmap.context2d
 import com.soywiz.korim.color.Colors
-import com.soywiz.korim.color.RGB
 import com.soywiz.korim.color.RGBA
-import com.soywiz.korim.font.SystemFontRegistry
-import com.soywiz.korim.font.TextMetrics
-import com.soywiz.korim.font.TextMetricsResult
 import com.soywiz.korim.font.measureTextGlyphs
-import com.soywiz.korim.format.PNG
-import com.soywiz.korim.format.encode
 import com.soywiz.korim.format.readNativeImage
-import com.soywiz.korim.paint.ColorPaint
-import com.soywiz.korim.paint.Paint
 import com.soywiz.korim.text.TextAlignment
-import com.soywiz.korim.vector.Context2d
 import com.soywiz.korio.file.std.localCurrentDirVfs
-import kotlinx.coroutines.delay
-import xyz.xszq.bot.maimai.ItemPosition
 import xyz.xszq.bot.maimai.MultiPlatformNativeSystemFontProvider
-import xyz.xszq.bot.maimai.drawText
-import kotlin.properties.Delegates
 
-class BlueArchiveLogo(
-    val transparentBg: Boolean,
-    val canvasHeight: Int = 250,
-    val canvasWidth: Int = 900,
-    val size: Int = 84,
-    val textBaseLine: Double = 0.68,
-    val horizontalTilt: Double = -0.4,
-    val paddingX: Int = 10,
-    val graphOffsetX: Int = -15,
-    val graphOffsetY: Int = 0
-) {
-    lateinit var textMetricsL: TextMetricsResult
-    lateinit var textMetricsR: TextMetricsResult
-    var textWidthL by Delegates.notNull<Double>()
-    var textWidthR by Delegates.notNull<Double>()
-    var canvasWidthL by Delegates.notNull<Double>()
-    var canvasWidthR by Delegates.notNull<Double>()
-    var realWidth by Delegates.notNull<Double>()
-    val fonts = MultiPlatformNativeSystemFontProvider(localCurrentDirVfs["font"].absolutePath)
+object BlueArchiveLogo {
+    private const val transparentBg: Boolean = false
+    private const val canvasHeight: Int = 250
+    private const val size: Int = 84
+    private const val textBaseLine: Double = 0.68
+    private const val horizontalTilt: Double = -0.4
+    private const val paddingX: Int = 10
+    private const val graphOffsetX: Int = -15
+    private const val graphOffsetY: Int = 0
+    private val fonts = MultiPlatformNativeSystemFontProvider(localCurrentDirVfs["font"].absolutePath)
     private val hollowPath = listOf(
         Pair(284, 136),
         Pair(321, 153),
         Pair(159, 410),
         Pair(148, 403)
     )
-    private fun Context2d.setWidth() {
-        textWidthL =
-            textMetricsL.metrics.width -
-        (textBaseLine * canvasHeight + textMetricsL.fmetrics.bottom - textMetricsL.fmetrics.baseline) * horizontalTilt
-        textWidthR =
-            textMetricsR.metrics.width +
-        (textBaseLine * canvasHeight - textMetricsL.fmetrics.bottom - textMetricsL.fmetrics.baseline) * horizontalTilt
-        canvasWidthL = textWidthL + paddingX
-        canvasWidthR = textWidthR + paddingX
-        realWidth = canvasWidthL + canvasWidthR + 80
-    }
-    fun getFont(text: String): String {
+    private fun getFont(text: String): String {
         val now = fonts.loadFontByName("RoGSanSrfStd-Bd")!!
         text.forEach {
             val glyphs = now.measureTextGlyphs(size.toDouble(), it.toString())
@@ -71,16 +37,20 @@ class BlueArchiveLogo(
         return "RoGSanSrfStd-Bd"
     }
     suspend fun draw(textL: String, textR: String): Bitmap {
-        var result = NativeImageOrBitmap32(canvasWidth, canvasHeight, true)
         val fontL = getFont(textL)
         val fontR = getFont(textR)
-        result.context2d {
-            fontSize = size.toDouble()
-            textMetricsL = fonts.loadFontByName(fontL)!!.measureTextGlyphs(fontSize, textL)
-            textMetricsR = fonts.loadFontByName(fontR)!!.measureTextGlyphs(fontSize, textR)
-            setWidth()
-        }
-        result = NativeImageOrBitmap32(realWidth.toInt(), canvasHeight, true)
+        val textMetricsL = fonts.loadFontByName(fontL)!!.measureTextGlyphs(size.toDouble(), textL)
+        val textMetricsR = fonts.loadFontByName(fontR)!!.measureTextGlyphs(size.toDouble(), textR)
+        val textWidthL = textMetricsL.metrics.width -
+                (textBaseLine * canvasHeight + textMetricsL.fmetrics.bottom - textMetricsL.fmetrics.baseline) *
+                horizontalTilt
+        val textWidthR = textMetricsR.metrics.width +
+                (textBaseLine * canvasHeight - textMetricsL.fmetrics.bottom - textMetricsL.fmetrics.baseline) *
+                horizontalTilt
+        val canvasWidthL = textWidthL + paddingX
+        val canvasWidthR = textWidthR + paddingX
+        val realWidth = canvasWidthL + canvasWidthR + 80
+        val result = NativeImageOrBitmap32(realWidth.toInt(), canvasHeight, true)
         return result.context2d {
             fontSize = size.toDouble()
             if (!transparentBg) {
@@ -116,7 +86,7 @@ class BlueArchiveLogo(
             moveTo(
                 graphX + (hollowPath[0].first / 500.0) * canvasHeight,
                 graphY + (hollowPath[0].second / 500.0) * canvasHeight
-            );
+            )
             for (i in 1 until 4) {
                 lineTo(
                     graphX + (hollowPath[i].first / 500.0) * canvasHeight,

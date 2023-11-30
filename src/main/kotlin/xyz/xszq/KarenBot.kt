@@ -3,39 +3,58 @@ package xyz.xszq
 import com.soywiz.korim.format.PNG
 import com.soywiz.korim.format.encode
 import com.soywiz.korio.file.std.localCurrentDirVfs
+import com.soywiz.korio.file.std.rootLocalVfs
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import xyz.xszq.bot.*
+import xyz.xszq.bot.config.BinConfig
+import xyz.xszq.bot.config.BotConfig
 import xyz.xszq.bot.dao.*
+import xyz.xszq.bot.ffmpeg.FFMpegTask
+import xyz.xszq.bot.image.*
 import xyz.xszq.bot.maimai.Maimai
+import xyz.xszq.bot.maimai.QueueForArcades
+import xyz.xszq.bot.text.AutoQA
 import xyz.xszq.nereides.Bot
 import xyz.xszq.nereides.event.GlobalEventChannel
 import xyz.xszq.nereides.event.GroupAtMessageEvent
+import xyz.xszq.nereides.message.Image
+import xyz.xszq.nereides.message.MessageChain
+import xyz.xszq.nereides.message.toImage
+import xyz.xszq.nereides.message.toVoice
 import xyz.xszq.nereides.toArgsList
 import xyz.xszq.nereides.toArgsListByLn
 
 lateinit var database: Database
 lateinit var config: BotConfig
+lateinit var binConfig: BinConfig
 
 suspend fun init() {
     config = BotConfig.load(localCurrentDirVfs["config.yml"])
+
+    binConfig = BinConfig.load(localCurrentDirVfs["bin.yml"])
+    FFMpegTask.ffmpegBin = binConfig.ffmpeg
+    FFMpegTask.ffmpegPath = binConfig.ffmpegPath
+    FFMpegTask.checkFFMpeg()
+
     database = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
         config.databaseUser, config.databasePassword)
+
     QueueForArcades.init()
+
     RandomImage.load("reply")
     RandomImage.load("gif", "reply")
     RandomImage.load("afraid", "reply")
+
     Maimai.init()
 }
 
 fun subscribe() {
     GlobalEventChannel.subscribePublicMessages {
         equalsTo("") {
-            sendImage(RandomImage.getRandom("reply"))
+            reply(RandomImage.getRandom("reply").toImage())
         }
         startsWith("/ping") {
             reply("bot在")
@@ -47,7 +66,7 @@ fun subscribe() {
             }
             try {
                 val image = LaTeX.generateLaTeX(text)
-                sendImage(image)
+                reply(image.toImage())
             } catch (e: Exception) {
                 if (e is org.scilab.forge.jlatexmath.ParseException) {
                     reply(e.message!!)
@@ -56,12 +75,11 @@ fun subscribe() {
         }
         startsWith("/搜番") {
             if (this is GroupAtMessageEvent) {
-                val img = attachments.firstOrNull { it.isImage()}
-                if (img == null) {
+                message.filterIsInstance<Image>().firstOrNull() ?.let { img ->
+                    reply(TraceMoe.doHandleTraceMoe(img.url))
+                } ?: run {
                     reply("使用搜番命令时，请同时发送想要搜索的动漫截图！")
-                    return@startsWith
                 }
-                reply(TraceMoe.doHandleTraceMoe(img.url))
             }
         }
         startsWith("/生成") { raw ->
@@ -69,35 +87,39 @@ fun subscribe() {
                 return@startsWith
             val args = raw.toArgsList()
             if (args.isEmpty()) {
-                reply("使用方法：/生成 模式\n当前支持的模式如下：\n对称 球面化 反球面化")
-                return@startsWith
-            }
-
-            val img = attachments.firstOrNull { it.isImage()}
-            if (img == null) {
-                reply("使用生成命令时，请同时发送一张图片！")
+                reply("使用方法：/生成 模式\n当前支持的模式如下：\n对称 球面化 反球面化 5k 碧蔚档案logo(指令为/ba 左侧文本 右侧文本)")
                 return@startsWith
             }
             when (args[0]) {
                 "对称" -> {
-                    var seq = 1
-                    ImageGeneration.flipImage(img.url).forEach {
-                        replyWithImage(" ", it, msgSeq = seq ++)
-                        delay(500L)
+                    val img = message.filterIsInstance<Image>().firstOrNull() ?: run {
+                        reply("使用生成命令时，请同时发送一张图片！")
+                        return@startsWith
                     }
+                    reply(MessageChain(ImageGeneration.flipImage(img.url).map {
+                        it.toImage()
+                    }))
                 }
                 "球面化" -> {
-                    sendImage(ImageGeneration.spherize(img.url))
+                    val img = message.filterIsInstance<Image>().firstOrNull() ?: run {
+                        reply("使用生成命令时，请同时发送一张图片！")
+                        return@startsWith
+                    }
+                    reply(ImageGeneration.spherize(img.url).toImage())
                 }
                 "反球面化" -> {
-                    sendImage(ImageGeneration.pincushion(img.url))
+                    val img = message.filterIsInstance<Image>().firstOrNull() ?: run {
+                        reply("使用生成命令时，请同时发送一张图片！")
+                        return@startsWith
+                    }
+                    reply(ImageGeneration.pincushion(img.url).toImage())
                 }
                 "5k" -> {
                     val nowArgs = raw.trim().substringAfter("5k").toArgsListByLn()
                     when (nowArgs.size) {
                         0 -> reply("使用方法：\n/生成 5k 第一行文本\n第二行文本（可选）")
-                        1 -> sendImage(FiveThousandChoyen.generate(nowArgs.first().trim(), " ").encode(PNG))
-                        else -> sendImage(FiveThousandChoyen.generate(nowArgs[0].trim(), nowArgs[1].trim()).encode(PNG))
+                        1 -> reply(FiveThousandChoyen.generate(nowArgs.first().trim(), " ").encode(PNG).toImage())
+                        else -> reply(FiveThousandChoyen.generate(nowArgs[0].trim(), nowArgs[1].trim()).encode(PNG).toImage())
                     }
                 }
                 "蔚蓝档案logo" -> {
@@ -106,7 +128,7 @@ fun subscribe() {
                 "ba" -> {
                     val nowArgs = raw.trim().substringAfter("ba").toArgsList()
                     when (nowArgs.size) {
-                        2 -> sendImage(BlueArchiveLogo(false).draw(nowArgs[0].trim(), nowArgs[1].trim()).encode(PNG))
+                        2 -> reply(BlueArchiveLogo.draw(nowArgs[0].trim(), nowArgs[1].trim()).encode(PNG).toImage())
                         else -> reply("使用方法：\n/ba 左侧文本 右侧文本")
                     }
                 }
@@ -116,7 +138,7 @@ fun subscribe() {
             }
         }
         startsWith("/自助问答") {
-
+            reply("此功能仍在调试，敬请期待！")
         }
         startsWith("/功能管理") {
 
@@ -236,8 +258,7 @@ fun subscribe() {
             QueueForArcades.handle(this)
         }
         always {
-            if (this is GroupAtMessageEvent)
-                AutoQA.handle(this)
+            AutoQA.handle(this)
         }
         startsWith(listOf(
             "/5k", "5k",
@@ -247,8 +268,8 @@ fun subscribe() {
             val args = raw.toArgsListByLn()
             when (args.size) {
                 0 -> reply("使用方法：\n/5k 第一行文本\n第二行文本（可选）")
-                1 -> sendImage(FiveThousandChoyen.generate(args.first().trim(), " ").encode(PNG))
-                else -> sendImage(FiveThousandChoyen.generate(args[0].trim(), args[1].trim()).encode(PNG))
+                1 -> reply(FiveThousandChoyen.generate(args.first().trim(), " ").encode(PNG).toImage())
+                else -> reply(FiveThousandChoyen.generate(args[0].trim(), args[1].trim()).encode(PNG).toImage())
             }
         }
         startsWith(listOf(
@@ -256,7 +277,7 @@ fun subscribe() {
         )) { raw ->
             val args = raw.toArgsList()
             when (args.size) {
-                2 -> sendImage(BlueArchiveLogo(false).draw(args[0].trim(), args[1].trim()).encode(PNG))
+                2 -> reply(BlueArchiveLogo.draw(args[0].trim(), args[1].trim()).encode(PNG).toImage())
                 else -> reply("使用方法：\n/ba 左侧文本 右侧文本")
             }
         }

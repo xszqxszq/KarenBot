@@ -1,4 +1,4 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.config
 
 import com.soywiz.korio.file.VfsFile
 import kotlinx.serialization.Serializable

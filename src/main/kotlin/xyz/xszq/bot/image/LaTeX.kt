@@ -1,4 +1,4 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.image
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

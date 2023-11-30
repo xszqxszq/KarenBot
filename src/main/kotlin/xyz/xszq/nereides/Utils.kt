@@ -45,3 +45,5 @@ fun newTempFile(prefix: String = "", suffix: String = ""): File = tempDir.resolv
 suspend fun File.readAsImage(): Bitmap32 = withContext(Dispatchers.IO) {
     ImageIO.read(this@readAsImage).toBMP32()
 }
+
+val audioExts = listOf("mp3", "wav", "ogg", "m4a")

@@ -1,4 +1,4 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.image
 
 import com.soywiz.korio.file.std.localCurrentDirVfs
 import java.io.File

@@ -21,6 +21,7 @@ repositories {
 
 dependencies {
     implementation(kotlin("reflect"))
+    implementation("com.soywiz.korlibs.korau:korau-jvm:$korlibsVersion")
     implementation("com.soywiz.korlibs.korim:korim-jvm:$korlibsVersion")
     implementation("com.soywiz.korlibs.korio:korio-jvm:$korlibsVersion")
     implementation("io.ktor:ktor-client-core:$ktorVersion")
@@ -35,6 +36,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
     implementation("ch.qos.logback:logback-classic:1.4.11")
     implementation("io.github.oshai:kotlin-logging-jvm:5.1.0")
+    implementation("io.github.kasukusakura:silk-codec:0.0.5")
     implementation("net.mamoe.yamlkt:yamlkt:0.10.2")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.1.4")
     implementation("org.scilab.forge:jlatexmath:1.0.7")

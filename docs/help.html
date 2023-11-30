@@ -1,0 +1,51 @@
+<html>
+<head>
+    <meta charSet="UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <script src="https://unpkg.com/vue@next"></script>
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-plus"></script>
+    <title>Element Plus demo</title>
+</head>
+<body>
+<div id="app">
+    <el-container>
+        <el-main>
+            <el-row :gutter="20">
+                <el-col :span="5" :offset="7">
+                    <el-descriptions title="搜番功能" size="large" border>
+                        <el-descriptions-item label="示例" span=3><el-text tag="b">/搜番</el-text> <el-text tag="i">[附带一张图片]</el-text></el-descriptions-item>
+                        <el-descriptions-item label="说明" span=3>
+                            <el-space direction="vertical">
+                                <el-text>根据发送的动漫截图在 trace.moe 上搜索出处。使用此命令时需要同时发送一张图片，而不是分开发送。</el-text>
+                                <el-text>手机端 QQ 可以在输入命令后在下方勾选图片，然后点击<el-text tag="b">文本框右侧</el-text>的发送按钮</el-text>
+                            </el-space>
+                        </el-descriptions-item>
+                    </el-descriptions>
+                </el-col>
+                <el-col :span="5">
+                    <el-descriptions title="LaTeX 功能" size="large" border>
+                        <el-descriptions-item label="示例" span=3><el-text tag="b">/latex</el-text> <el-text tag="i">\LaTeX</el-text></el-descriptions-item>
+                        <el-descriptions-item label="说明" span=3>根据 LaTeX 文本生成对应的图片</el-descriptions-item>
+                    </el-descriptions>
+                </el-col>
+            </el-row>
+        </el-main>
+    </el-container>
+</div>
+<script>
+    const App = {
+        data() {
+            return {
+                message: "Hello Element Plus",
+            };
+        },
+    };
+    const app = Vue.createApp(App);
+    app.use(ElementPlus);
+    app.mount("#app");
+</script>
+</body>
+</html>

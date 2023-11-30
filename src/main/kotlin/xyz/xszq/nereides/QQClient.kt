@@ -19,6 +19,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import xyz.xszq.nereides.event.*
+import xyz.xszq.nereides.message.MessageChain
 import xyz.xszq.nereides.payload.utils.AccessTokenRequest
 import xyz.xszq.nereides.payload.utils.AccessTokenResponse
 import xyz.xszq.nereides.payload.utils.WSSGatewayResponse
@@ -222,13 +223,12 @@ open class QQClient(
                 logger.info { "[${data.groupId}] ${data.author.id} -> ${data.content.trim()}" }
                 GlobalEventChannel.broadcast(
                     GroupAtMessageEvent(
-                        this,
-                        data.id,
-                        data.groupId,
-                        data.author.id,
-                        data.content.trimStart(),
-                        parseDate(data.timestamp),
-                        data.attachments ?: listOf()
+                        client = this,
+                        msgId = data.id,
+                        groupId = data.groupId,
+                        subjectId = data.author.id,
+                        message = parseContent(data),
+                        timestamp = parseDate(data.timestamp)
                     ))
             }
             "AT_MESSAGE_CREATE" -> {
@@ -236,15 +236,15 @@ open class QQClient(
                 logger.info { "[${data.channelId}] ${data.author.username} -> ${data.content.trim()}" }
                 GlobalEventChannel.broadcast(
                     GuildAtMessageEvent(
-                        this,
-                        data.id,
-                        data.channelId,
-                        data.guildId,
-                        data.author.id,
-                        data.content,
-                        parseDate(data.timestamp),
-                        data.author,
-                        data.mentions
+                        client = this,
+                        msgId = data.id,
+                        channelId = data.channelId,
+                        guildId = data.guildId,
+                        subjectId = data.author.id,
+                        message = parseContent(data),
+                        timestamp = parseDate(data.timestamp),
+                        author = data.author,
+                        mentions = data.mentions
                     )
                 )
             }

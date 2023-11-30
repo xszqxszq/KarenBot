@@ -27,6 +27,9 @@ import xyz.xszq.bot.maimai.payload.PlayerData
 import xyz.xszq.nereides.event.GlobalEventChannel
 import xyz.xszq.nereides.event.GroupAtMessageEvent
 import xyz.xszq.nereides.event.MessageEvent
+import xyz.xszq.nereides.message.plus
+import xyz.xszq.nereides.message.toImage
+import xyz.xszq.nereides.message.toPlainText
 import xyz.xszq.nereides.toArgsList
 import kotlin.random.Random
 
@@ -120,7 +123,7 @@ object Maimai {
                 reply(buildString {
                     appendLine("此指令可查询 maimai 相关信息。")
                     append("当前支持的子指令：查歌 bind b50 ap50 id info 是什么歌 有什么别名 定数查歌 分数线 进度")
-                    append(" 完成表 分数列表 随个 mai什么推分")
+                    append(" 完成表 分数列表 随个 mai什么推分 猜歌")
                 })
             }
         }
@@ -164,7 +167,7 @@ object Maimai {
                 val (status, data) = prober.getPlayerData(type, credential)
                 when (status) {
                     HttpStatusCode.OK -> {
-                        sendImage(images.generateBest(data!!))
+                        reply(images.generateBest(data!!).toImage())
                     }
                     HttpStatusCode.BadRequest -> {
                         reply("您的QQ未绑定查分器账号或所查询的用户名不存在，" +
@@ -189,7 +192,7 @@ object Maimai {
                 val records = prober.getDataByVersion(type, credential, getPlateVerList("all"))
                 when (status) {
                     HttpStatusCode.OK -> {
-                        sendImage(images.generateAP50(data!!, records.second!!.verList))
+                        reply(images.generateAP50(data!!, records.second!!.verList).toImage())
                     }
                     HttpStatusCode.BadRequest -> {
                         reply("您的QQ未绑定查分器账号或所查询的用户名不存在，" +
@@ -208,7 +211,7 @@ object Maimai {
                 }.toIntOrNull()?.toString() ?: return@startsWith
                 val cover = images.getCoverById(id)
                 if (cover.exists())
-                    replyWithImage(musics.getInfo(id), cover)
+                    reply(musics.getInfo(id).toPlainText() + cover.toImage())
                 else
                     reply(musics.getInfo(id))
             }
@@ -224,7 +227,7 @@ object Maimai {
                         val music = result.first()
                         val cover = images.getCoverById(music.id)
                         if (cover.exists())
-                            replyWithImage(musics.getInfo(music.id), cover)
+                            reply(musics.getInfo(music.id).toPlainText() + cover.toImage())
                         else
                             reply(musics.getInfo(music.id))
                     }
@@ -250,7 +253,7 @@ object Maimai {
                         val music = result.first()
                         val cover = images.getCoverById(music.id)
                         if (cover.exists())
-                            replyWithImage(musics.getInfo(music.id), cover)
+                            reply(musics.getInfo(music.id).toPlainText() + cover.toImage())
                         else
                             reply(musics.getInfo(music.id))
                     }
@@ -358,7 +361,7 @@ object Maimai {
                     if (ver != "" && type != "霸者" && ver != "舞")
                         startsWith("${ver}${type}完成表") { arg ->
                             val data = getVersionData(ver, arg, this) ?: return@startsWith
-                            sendImage(images.plateProgress(ver, type, getPlateVerList(ver),data.verList))
+                            reply(images.plateProgress(ver, type, getPlateVerList(ver),data.verList).toImage())
                         }
                 }
             }
@@ -370,11 +373,11 @@ object Maimai {
                     }
                 }
                 startsWith("${level}定数表") {
-                    sendImage(images.getImage("ds/${level}.png").encode(PNG))
+                    reply(images.getImage("ds/${level}.png").encode(PNG).toImage())
                 }
                 startsWith("${level}完成表") { arg ->
                     val data = getVersionData("all", arg, this) ?: return@startsWith
-                    sendImage(images.dsProgress(level, data.verList))
+                    reply(images.dsProgress(level, data.verList).toImage())
                 }
                 startsWith("${level}分数列表") { raw ->
                     val args = raw.toArgsList()
@@ -396,7 +399,7 @@ object Maimai {
                     if (basicInfo == null)
                         return@startsWith
                     val records = prober.getDataByVersion(type, credential, getPlateVerList("all"))
-                    sendImage(images.getLevelRecordList(level, page, basicInfo, records.second!!.verList))
+                    reply(images.getLevelRecordList(level, page, basicInfo, records.second!!.verList).toImage())
                 }
             }
             difficulties.forEachIndexed { difficulty, name ->
@@ -406,7 +409,7 @@ object Maimai {
                     val id = raw.filter { it.isDigit() }.toIntOrNull() ?.toString() ?: return@startsWith
                     val cover = images.getCoverById(id)
                     if (cover.exists())
-                        replyWithImage(musics.getInfoWithDifficulty(id, difficulty), cover)
+                        reply(musics.getInfoWithDifficulty(id, difficulty).toPlainText() + cover.toImage())
                     else
                         reply(musics.getInfo(id))
                 }
@@ -426,7 +429,7 @@ object Maimai {
                         musics.getRandom(level, difficulty) ?.let {
                             val cover = images.getCoverById(it.id)
                             if (cover.exists())
-                                replyWithImage(musics.getInfo(it.id), cover)
+                                reply(musics.getInfo(it.id).toPlainText() + cover.toImage())
                             else
                                 reply(musics.getInfo(it.id))
                         }
@@ -454,7 +457,7 @@ object Maimai {
                     musics.getRandom("", Random.nextInt(0, 4)) ?.let {
                         val cover = images.getCoverById(it.id)
                         if (cover.exists())
-                            replyWithImage(musics.getInfo(it.id), cover)
+                            reply(musics.getInfo(it.id).toPlainText() + cover.toImage())
                         else
                             reply(musics.getInfo(it.id))
                     }
@@ -489,19 +492,19 @@ object Maimai {
                 val data = getVersionData("all", username,this) ?: return@startsWith
                 if (musics.any { it.id == music }) {
                     images.musicInfo(music, data.verList) ?.let {
-                        sendImage(it)
+                        reply(it.toImage())
                     }
                 } else {
                     musics.filter {
                         it.basicInfo.title.lowercase() == music.lowercase()
                     }.firstOrNull() ?.let {
                         images.musicInfo(it.id, data.verList) ?.let { img ->
-                            sendImage(img)
+                            reply(img.toImage())
                         }
                     } ?: run {
                         aliases.findByAlias(music).firstOrNull() ?.let {
                             images.musicInfo(it.id, data.verList) ?.let { img ->
-                                sendImage(img)
+                                reply(img.toImage())
                             }
                         } ?: run {
                             reply("使用方法：info id/歌名/别名")

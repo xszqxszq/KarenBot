@@ -1,4 +1,4 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.image
 
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*

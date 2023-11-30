@@ -13,7 +13,7 @@ class PublicMessageSubscribeBuilder(
         GlobalEventChannel.subscribePublicMessage {
             if (permName.isNotBlank() && Permissions.isNotPermitted(contextId, permName))
                 return@subscribePublicMessage
-            if (prefix.isBlank() || !forcePrefix || content.removeChannelAtPrefix(this).trim().startsWith(prefix))
+            if (prefix.isBlank() || !forcePrefix || message.text.removeChannelAtPrefix(this).trim().startsWith(prefix))
                 block(this)
         }
     }
@@ -29,7 +29,7 @@ class PublicMessageSubscribeBuilder(
         GlobalEventChannel.subscribePublicMessage {
             if (permName.isNotBlank() && Permissions.isNotPermitted(contextId, permName))
                 return@subscribePublicMessage
-            if (content.removeChannelAtPrefix(this).trim() in list) {
+            if (message.text.removeChannelAtPrefix(this).trim() in list) {
                 block(this)
             }
         }
@@ -44,13 +44,14 @@ class PublicMessageSubscribeBuilder(
                 nowList.addAll(text)
             nowList
         } else text
+
         GlobalEventChannel.subscribePublicMessage {
             if (permName.isNotBlank() && Permissions.isNotPermitted(contextId, permName))
                 return@subscribePublicMessage
             list.find {
-                content.removeChannelAtPrefix(this).trim().startsWith(it)
+                message.text.trim().startsWith(it)
             } ?.let {
-                val arg = content.removeChannelAtPrefix(this).trim().substringAfter(it).trim()
+                val arg = message.text.trim().substringAfter(it).trim()
                 block(this, arg)
             }
         }
@@ -69,9 +70,9 @@ class PublicMessageSubscribeBuilder(
             if (permName.isNotBlank() && Permissions.isNotPermitted(contextId, permName))
                 return@subscribePublicMessage
             list.find {
-                content.removeChannelAtPrefix(this).trim().endsWith(it)
+                message.text.removeChannelAtPrefix(this).trim().endsWith(it)
             } ?.let {
-                val arg = content.removeChannelAtPrefix(this).substringAfter(prefix).trim().substringBefore(it).trim()
+                val arg = message.text.removeChannelAtPrefix(this).substringAfter(prefix).trim().substringBefore(it).trim()
                 block(this, arg)
             }
         }
