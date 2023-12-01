@@ -9,6 +9,7 @@ import xyz.xszq.bot.dao.ArcadeCenterQueueGroup
 import xyz.xszq.bot.dao.ArcadeQueueGroup
 import xyz.xszq.nereides.event.GroupAtMessageEvent
 import xyz.xszq.nereides.event.MessageEvent
+import xyz.xszq.nereides.event.PublicMessageEvent
 import xyz.xszq.nereides.isSameDay
 import java.time.Duration
 import java.time.LocalDateTime
@@ -45,12 +46,10 @@ object QueueForArcades {
             this
         }
     }.await()
-    suspend fun handle(event: MessageEvent) = event.run {
-        if (event !is GroupAtMessageEvent)
-            return@run
-        val command = contentString.trim().lowercase()
+    suspend fun handle(event: PublicMessageEvent) = event.run {
+        val command = message.text.trim().lowercase()
         newSuspendedTransaction(Dispatchers.IO) {
-            val groupId = ArcadeCenterQueueGroup.findById(event.groupId) ?: run {
+            val groupId = ArcadeCenterQueueGroup.findById(event.contextId) ?: run {
                 if (command in arrayOf("几", "j", "机厅几", "/j"))
                     reply("当前群未绑定任何机厅。")
                 return@newSuspendedTransaction

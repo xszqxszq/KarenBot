@@ -2,26 +2,30 @@ package xyz.xszq.nereides.message
 
 import com.soywiz.korio.file.VfsFile
 import com.soywiz.korio.file.baseName
+import com.soywiz.korio.file.std.toVfs
 import xyz.xszq.bot.ffmpeg.toMp3BeforeSilk
 import xyz.xszq.bot.ffmpeg.toSilk
 import xyz.xszq.nereides.NetworkUtils
+import xyz.xszq.nereides.newTempFile
 import java.io.File
 import java.util.UUID
 
 suspend fun File.toImage(): Image {
-    return LocalImage(id = this.name, url = NetworkUtils.upload(this))
+    return LocalImage(toVfs(), id = this.name)
 }
 suspend fun VfsFile.toImage(): Image {
-    return LocalImage(id = this.baseName, url = NetworkUtils.upload(File(this.absolutePath)))
+    return LocalImage(this, id = this.baseName)
 }
 suspend fun ByteArray.toImage(): Image {
-    return LocalImage(id = UUID.randomUUID().toString(), url = NetworkUtils.uploadBinary(this))
+    val file = newTempFile().toVfs()
+    file.writeBytes(this)
+    return LocalImage(file, id = file.baseName)
 }
 suspend fun File.toVoice(): Voice {
-    return LocalVoice(id = this.name, url = NetworkUtils.upload(toSilk()))
+    return LocalVoice(toVfs(), id = this.name)
 }
 suspend fun VfsFile.toVoice(): Voice {
-    return LocalVoice(id = this.baseName, url = NetworkUtils.upload(toSilk()))
+    return LocalVoice(this, id = this.baseName)
 }
 fun String.toPlainText() = PlainText(this)
 operator fun <A: Message, B: Message> A.plus(message: B): MessageChain {

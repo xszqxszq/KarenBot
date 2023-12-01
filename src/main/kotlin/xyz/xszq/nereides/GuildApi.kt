@@ -1,8 +1,12 @@
 package xyz.xszq.nereides
 
+import com.soywiz.korio.file.VfsFile
+import com.soywiz.korio.file.baseName
 import io.github.oshai.kotlinlogging.KLogger
 import io.ktor.client.call.*
 import io.ktor.client.statement.*
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import xyz.xszq.nereides.message.*
 import xyz.xszq.nereides.payload.event.GuildAtMessageCreate
 import xyz.xszq.nereides.payload.message.MessageArk
@@ -16,6 +20,7 @@ interface GuildApi {
     val logger: KLogger
     suspend fun get(api: String): HttpResponse
     suspend fun post(api: String, payload: Any): HttpResponse
+    suspend fun multipart(api: String, values: Map<String, String>, file: Pair<String, VfsFile>): HttpResponse
     suspend fun sendChannelMessage(
         channelId: String,
         content: String? = null,
@@ -26,42 +31,43 @@ interface GuildApi {
         eventId: String? = null,
         replyMsgId: String? = null,
         referMsgId: String? = null
-    ) = post("/channels/$channelId/messages", PostChannelMessage(
-        content = content,
-        image = image,
-        embed = embed,
-        ark = ark,
-        markdown = markdown,
-        eventId = eventId,
-        msgId = replyMsgId,
-        messageReference = referMsgId ?.let {
-            MessageReference(referMsgId, true)
-        }
-    ))
-    suspend fun sendChannelText(
+    ): HttpResponse {
+        val response = post("/channels/$channelId/messages", PostChannelMessage(
+            content = content,
+            image = image,
+            embed = embed,
+            ark = ark,
+            markdown = markdown,
+            eventId = eventId,
+            msgId = replyMsgId,
+            messageReference = referMsgId?.let {
+                MessageReference(referMsgId, true)
+            }
+        ))
+        logger.info { "[$channelId] <- $content" }
+        return response
+    }
+    suspend fun sendChannelMessageByMultipart(
         channelId: String,
-        content: String,
-        replyMsgId: String? = null,
-        referMsgId: String? = null,
-        eventId: String? = null
-    ) = sendChannelMessage(
-        channelId = channelId,
-        content = content,
-        replyMsgId = replyMsgId,
-        referMsgId = referMsgId
-    )
-    suspend fun sendChannelImageByUrl(
-        channelId: String,
-        url: String,
-        replyMsgId: String? = null,
-        referMsgId: String? = null,
-        eventId: String? = null
-    ) = sendChannelMessage(
-        channelId = channelId,
-        image = url,
-        replyMsgId = replyMsgId,
-        referMsgId = referMsgId
-    )
+        fileImage: VfsFile,
+        content: String? = null,
+        eventId: String? = null,
+        replyMsgId: String? = null
+    ): HttpResponse {
+        val response = multipart("/channels/$channelId/messages", buildMap {
+            content?.let {
+                put("content", it)
+            }
+            eventId?.let {
+                put("event_id", it)
+            }
+            replyMsgId?.let {
+                put("msg_id", replyMsgId)
+            }
+        }, Pair("file_image", fileImage))
+        logger.info { "[$channelId] <- ${content?:""} [image:${fileImage.baseName}]" }
+        return response
+    }
     suspend fun getBotInfo() = get("/users/@me").body<GuildUser>()
     fun parseContent(data: GuildAtMessageCreate): MessageChain {
         val result = MessageChain()

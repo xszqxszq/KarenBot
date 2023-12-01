@@ -123,14 +123,12 @@ object Maimai {
                 reply(buildString {
                     appendLine("此指令可查询 maimai 相关信息。")
                     append("当前支持的子指令：查歌 bind b50 ap50 id info 是什么歌 有什么别名 定数查歌 分数线 进度")
-                    append(" 完成表 分数列表 随个 mai什么推分 猜歌")
+                    append(" 完成表 分数列表 随个 mai什么推分")
                 })
             }
         }
         GlobalEventChannel.subscribePublicMessages("/mai", permName = "maimai") {
             startsWith("bind") { raw ->
-                if (this !is GroupAtMessageEvent)
-                    return@startsWith
                 val args = raw.toArgsList()
                 if (args.size != 2) {
                     reply(buildString {
@@ -204,8 +202,6 @@ object Maimai {
                 }
             }
             startsWith("id") { raw ->
-                if (this !is GroupAtMessageEvent)
-                    return@startsWith
                 val id = raw.filter {
                     it.isDigit()
                 }.toIntOrNull()?.toString() ?: return@startsWith
@@ -216,8 +212,6 @@ object Maimai {
                     reply(musics.getInfo(id))
             }
             startsWith("查歌") { name ->
-                if (this !is GroupAtMessageEvent)
-                    return@startsWith
                 val result = musics.findByName(name)
                 when (result.size) {
                     0 -> {
@@ -242,8 +236,6 @@ object Maimai {
                 }
             }
             endsWith("是什么歌") { alias ->
-                if (this !is GroupAtMessageEvent)
-                    return@endsWith
                 val result = aliases.findByAlias(alias)
                 when (result.size) {
                     0 -> {
@@ -404,8 +396,6 @@ object Maimai {
             }
             difficulties.forEachIndexed { difficulty, name ->
                 startsWith("${name}id") { raw ->
-                    if (this !is GroupAtMessageEvent)
-                        return@startsWith
                     val id = raw.filter { it.isDigit() }.toIntOrNull() ?.toString() ?: return@startsWith
                     val cover = images.getCoverById(id)
                     if (cover.exists())
@@ -415,8 +405,6 @@ object Maimai {
                 }
             }
             startsWith("随个") { raw ->
-                if (this !is GroupAtMessageEvent)
-                    return@startsWith
                 if (raw.isNotEmpty()) {
                     var difficulty: Int? = -1
                     val level = if (!raw[0].isDigit()) {
@@ -437,8 +425,6 @@ object Maimai {
                 }
             }
             startsWith("mai什么") { raw ->
-                if (this !is GroupAtMessageEvent)
-                    return@startsWith
                 val args = raw.toArgsList()
                 val data = getPlayerData(
                     if (args.size > 1) args[1] else "",
@@ -533,8 +519,7 @@ object Maimai {
         }
         GlobalEventChannel.subscribePublicMessages("/mai", permName = "maimai.guess") {
             equalsTo("猜歌") {
-                if (this is GroupAtMessageEvent)
-                    guessGame.start(this)
+                // guessGame.start(this)
             }
         }
     }

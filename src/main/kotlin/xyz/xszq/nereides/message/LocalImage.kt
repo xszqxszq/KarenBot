@@ -2,4 +2,10 @@
 
 package xyz.xszq.nereides.message
 
-class LocalImage(override val id: String = "", override var url: String = "") : Image
+import com.soywiz.korio.file.VfsFile
+
+class LocalImage(
+    override val file: VfsFile,
+    override val id: String = "",
+    override var url: String = ""
+) : Image, LocalRichMedia

@@ -5,7 +5,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
-class ProgramExecutor(private val command: String, private val builder: Builder.() -> Unit = {}) {
+class ProgramExecutor(
+    private val command: String,
+    private val showOutput: Boolean = false,
+    private val builder: Builder.() -> Unit = {}
+) {
     inner class Builder {
         var env = emptyArray<String>()
         var timeout: Long? = null
@@ -31,7 +35,9 @@ class ProgramExecutor(private val command: String, private val builder: Builder.
             listOf("/bin/bash", "-c", command)
         else
             listOf("C:\\Windows\\System32\\cmd.exe", "/C", command)
-        val proc = procBuilder.inheritIO().command(realCommand).start()
+        val proc =
+            if (showOutput) procBuilder.inheritIO().command(realCommand).start()
+            else procBuilder.command(realCommand).start()
         timeout ?.let {
             proc.waitFor(it, TimeUnit.MILLISECONDS)
         } ?: run {

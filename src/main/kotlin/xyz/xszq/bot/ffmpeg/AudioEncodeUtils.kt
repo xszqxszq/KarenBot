@@ -4,19 +4,22 @@ import com.soywiz.korau.format.readSoundInfo
 import com.soywiz.korio.file.VfsFile
 import com.soywiz.korio.file.std.toVfs
 import io.github.kasukusakura.silkcodec.SilkCoder
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import xyz.xszq.nereides.newTempFile
 import java.io.File
 
 
-suspend fun getAudioDuration(file: File): Double {
-    return file.toVfs().readSoundInfo()?.duration?.seconds ?: 0.0
-}
 suspend fun VfsFile.getAudioDuration(): Double {
-    return readSoundInfo()?.duration?.seconds ?: 0.0
+    return readSoundInfo()?.duration?.seconds ?: FFProbe(
+        this, showStreams = false, showFormat = true
+    ).getResult().format!!.duration.toDouble()
 }
 fun File.getAudioDuration(): Double = runBlocking {
-    toVfs().readSoundInfo()?.duration?.seconds ?: 0.0
+    withContext(Dispatchers.IO) {
+        toVfs().getAudioDuration()
+    }
 }
 
 suspend fun File.toMp3BeforeSilk(): File? =
@@ -59,6 +62,11 @@ suspend fun File.cropPeriod(
             audioChannels(1)
         }
     }.getResult()
+suspend fun VfsFile.cropPeriod(
+    startPoint: Double,
+    duration: Double,
+    forSilk: Boolean = true
+) = File(absolutePath).cropPeriod(startPoint, duration, forSilk)?.toVfs()
 suspend fun File.toSilk(): File {
     val silk = newTempFile(suffix = ".silk")
     silk.outputStream().use { os ->

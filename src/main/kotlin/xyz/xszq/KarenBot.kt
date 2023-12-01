@@ -9,23 +9,26 @@ import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import xyz.xszq.bot.audio.RandomMusic
 import xyz.xszq.bot.config.BinConfig
 import xyz.xszq.bot.config.BotConfig
 import xyz.xszq.bot.dao.*
 import xyz.xszq.bot.ffmpeg.FFMpegTask
+import xyz.xszq.bot.ffmpeg.cropPeriod
+import xyz.xszq.bot.ffmpeg.getAudioDuration
 import xyz.xszq.bot.image.*
 import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.QueueForArcades
 import xyz.xszq.bot.text.AutoQA
+import xyz.xszq.bot.text.Bilibili
 import xyz.xszq.nereides.Bot
 import xyz.xszq.nereides.event.GlobalEventChannel
 import xyz.xszq.nereides.event.GroupAtMessageEvent
-import xyz.xszq.nereides.message.Image
-import xyz.xszq.nereides.message.MessageChain
-import xyz.xszq.nereides.message.toImage
-import xyz.xszq.nereides.message.toVoice
+import xyz.xszq.nereides.event.GuildAtMessageEvent
+import xyz.xszq.nereides.message.*
 import xyz.xszq.nereides.toArgsList
 import xyz.xszq.nereides.toArgsListByLn
+import kotlin.random.Random
 
 lateinit var database: Database
 lateinit var config: BotConfig
@@ -83,11 +86,38 @@ fun subscribe() {
             }
         }
         startsWith("/生成") { raw ->
+            if (this is GuildAtMessageEvent) {
+                reply(buildString {
+                    appendLine("频道当前支持的模式如下：")
+                    appendLine()
+                    appendLine("[5000兆円欲しい] 指令为：")
+                    appendLine("\t/5k 第一行文本")
+                    appendLine("\t第二行文本")
+                    appendLine("[蔚蓝档案LOGO风格] 指令为：")
+                    appendLine("\t/ba 左侧文本 右侧文本")
+                }.trimEnd())
+                return@startsWith
+            }
             if (this !is GroupAtMessageEvent)
                 return@startsWith
             val args = raw.toArgsList()
             if (args.isEmpty()) {
-                reply("使用方法：/生成 模式\n当前支持的模式如下：\n对称 球面化 反球面化 5k 碧蔚档案logo(指令为/ba 左侧文本 右侧文本)")
+                reply(buildString {
+                    appendLine()
+                    appendLine("群聊当前支持的模式如下：")
+                    appendLine()
+                    appendLine("[对称] 指令为：")
+                    appendLine("\t/生成 对称")
+                    appendLine("[球面化] 指令为：")
+                    appendLine("\t/生成 球面化")
+                    appendLine("[反球面化] 指令为：")
+                    appendLine("\t/生成 反球面化")
+                    appendLine("[5000兆円欲しい] 指令为：")
+                    appendLine("\t/5k 第一行文本")
+                    appendLine("\t第二行文本")
+                    appendLine("[蔚蓝档案LOGO风格] 指令为：")
+                    appendLine("\t/ba 左侧文本 右侧文本")
+                }.trimEnd())
                 return@startsWith
             }
             when (args[0]) {
@@ -133,7 +163,7 @@ fun subscribe() {
                     }
                 }
                 else -> {
-                    reply("当前支持的模式如下：\n对称 球面化 反球面化 5k 碧蔚档案logo(指令为/ba 左侧文本 右侧文本)")
+                    reply("当前支持的模式如下：\n对称 球面化 反球面化 5k 蔚蓝档案logo(指令为/ba 左侧文本 右侧文本)")
                 }
             }
         }
@@ -144,8 +174,6 @@ fun subscribe() {
 
         }
         startsWith("/排卡管理") { raw ->
-            if (this !is GroupAtMessageEvent)
-                return@startsWith
             val args = raw.toArgsList()
             if (args.size < 2) {
                 reply(buildString {
@@ -166,7 +194,7 @@ fun subscribe() {
                         ArcadeQueueGroup.find {
                             ArcadeQueueGroups.name eq name
                         }.firstOrNull() ?.let { group ->
-                            ArcadeCenterQueueGroup.new(groupId) {
+                            ArcadeCenterQueueGroup.new(contextId) {
                                 this.group = group.id
                             }
                             reply("加入成功！")
@@ -177,7 +205,7 @@ fun subscribe() {
                 }
                 "添加机厅" -> {
                     newSuspendedTransaction(Dispatchers.IO) {
-                        val queueGroup = QueueForArcades.getQueueGroup(groupId)
+                        val queueGroup = QueueForArcades.getQueueGroup(contextId)
                         ArcadeCenter.new {
                             this.group = queueGroup.id
                             this.name = name
@@ -189,7 +217,7 @@ fun subscribe() {
                 }
                 "删除机厅" -> {
                     newSuspendedTransaction(Dispatchers.IO) {
-                        val queueGroup = QueueForArcades.getQueueGroup(groupId)
+                        val queueGroup = QueueForArcades.getQueueGroup(contextId)
                         ArcadeCenter.find {
                             (ArcadeCenters.group eq queueGroup.id) and (ArcadeCenters.name eq name)
                         }.firstOrNull() ?.let {
@@ -207,7 +235,7 @@ fun subscribe() {
                     }
                     val alias = args[2]
                     newSuspendedTransaction(Dispatchers.IO) {
-                        val queueGroup = QueueForArcades.getQueueGroup(groupId)
+                        val queueGroup = QueueForArcades.getQueueGroup(contextId)
                         ArcadeCenter.find {
                             (ArcadeCenters.group eq queueGroup.id) and (ArcadeCenters.name eq name)
                         }.firstOrNull() ?.let {
@@ -227,7 +255,7 @@ fun subscribe() {
                     }
                     val alias = args[2]
                     newSuspendedTransaction(Dispatchers.IO) {
-                        val queueGroup = QueueForArcades.getQueueGroup(groupId)
+                        val queueGroup = QueueForArcades.getQueueGroup(contextId)
                         ArcadeCenter.find {
                             (ArcadeCenters.group eq queueGroup.id) and (ArcadeCenters.name eq name)
                         }.firstOrNull() ?.let {
@@ -242,7 +270,7 @@ fun subscribe() {
                 }
                 "查看别名" -> {
                     newSuspendedTransaction(Dispatchers.IO) {
-                        val queueGroup = QueueForArcades.getQueueGroup(groupId)
+                        val queueGroup = QueueForArcades.getQueueGroup(contextId)
                         ArcadeCenter.find {
                             (ArcadeCenters.group eq queueGroup.id) and (ArcadeCenters.name eq name)
                         }.firstOrNull() ?.let {
@@ -280,6 +308,24 @@ fun subscribe() {
                 2 -> reply(BlueArchiveLogo.draw(args[0].trim(), args[1].trim()).encode(PNG).toImage())
                 else -> reply("使用方法：\n/ba 左侧文本 右侧文本")
             }
+        }
+        startsWith(listOf("随机东方原曲", "/随机东方原曲")) {
+            if (this !is GroupAtMessageEvent)
+                return@startsWith
+            val duration = 15.0
+            val file = RandomMusic.get("touhou")
+            file.cropPeriod(Random.nextDouble(
+                0.0,
+                file.getAudioDuration() - duration
+            ), duration)?.let { v ->
+                reply(v.toVoice())
+            }
+        }
+        startsWith(listOf("av", "BV", "https://b23.tv", "b23.tv")) {
+            reply(Bilibili.getVideoDetails(message.text))
+        }
+        startsWith(listOf("help", "/help", "!help")) {
+            reply(localCurrentDirVfs["image/help.png"].toImage() + localCurrentDirVfs["image/QR.png"].toImage())
         }
     }
     Maimai.subscribe()

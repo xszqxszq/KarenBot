@@ -13,7 +13,7 @@ interface MessageEvent: Event {
     val message: MessageChain
     val contentString: String
     val timestamp: Long
-    suspend fun reply(content: String): PostGroupMessageResponse?
-    suspend fun reply(content: Message): PostGroupMessageResponse?
-    suspend fun reply(content: MessageChain): PostGroupMessageResponse?
+    suspend fun reply(content: String): Boolean
+    suspend fun reply(content: Message): Boolean
+    suspend fun reply(content: MessageChain): Boolean
 }

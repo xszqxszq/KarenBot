@@ -1,5 +1,7 @@
 package xyz.xszq.nereides
 
+import com.soywiz.korio.file.VfsFile
+import com.soywiz.korio.file.baseName
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -7,6 +9,7 @@ import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.*
@@ -17,15 +20,13 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 import xyz.xszq.nereides.event.*
-import xyz.xszq.nereides.message.MessageChain
-import xyz.xszq.nereides.payload.utils.AccessTokenRequest
-import xyz.xszq.nereides.payload.utils.AccessTokenResponse
-import xyz.xszq.nereides.payload.utils.WSSGatewayResponse
 import xyz.xszq.nereides.payload.event.GroupAtMessageCreate
 import xyz.xszq.nereides.payload.event.GuildAtMessageCreate
 import xyz.xszq.nereides.payload.user.GuildUser
+import xyz.xszq.nereides.payload.utils.AccessTokenRequest
+import xyz.xszq.nereides.payload.utils.AccessTokenResponse
+import xyz.xszq.nereides.payload.utils.WSSGatewayResponse
 import xyz.xszq.nereides.payload.websocket.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.properties.Delegates
@@ -70,6 +71,35 @@ open class QQClient(
         call(HttpMethod.Get, api, null)
     override suspend fun post(api: String, payload: Any): HttpResponse =
         call(HttpMethod.Post, api, payload).body()
+    override suspend fun multipart(
+        api: String,
+        values: Map<String, String>,
+        file: Pair<String, VfsFile>
+    ): HttpResponse {
+        return client.submitForm(
+            "${server}${api}",
+        ) {
+            method = HttpMethod.Post
+            headers {
+                contentType(ContentType.MultiPart.FormData)
+                setHeaders()
+            }
+            setBody(MultiPartFormDataContent(
+                formData {
+                    values.forEach { (key, value) ->
+                        append(key, value)
+                    }
+                    append(
+                        file.first,
+                        runBlocking { file.second.readBytes() },
+                        Headers.build {
+                            append(HttpHeaders.ContentDisposition, "filename=${file.second.baseName}")
+                        }
+                    )
+                }
+            ))
+        }
+    }
 
     override val coroutineContext: CoroutineContext = Job()
 

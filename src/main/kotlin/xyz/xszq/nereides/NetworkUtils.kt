@@ -1,5 +1,7 @@
 package xyz.xszq.nereides
 
+import com.soywiz.korio.file.VfsFile
+import com.soywiz.korio.file.baseName
 import com.soywiz.korio.util.UUID
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
@@ -20,13 +22,14 @@ import java.io.InputStream
 object NetworkUtils {
     private val client = HttpClient(OkHttp) {
     }
-    suspend fun upload(file: File): String {
+    suspend fun upload(file: VfsFile): String {
+        val bytes = file.readBytes()
         return try {
             config.uploadServer + client.submitFormWithBinaryData(
                 url = "${config.uploadServer}/upload",
                 formData = formData {
-                    append("file", file.readBytes(), Headers.build {
-                        append(HttpHeaders.ContentDisposition, "filename=${file.name}")
+                    append("file", bytes, Headers.build {
+                        append(HttpHeaders.ContentDisposition, "filename=${file.baseName}")
                     })
                 }
             ) {

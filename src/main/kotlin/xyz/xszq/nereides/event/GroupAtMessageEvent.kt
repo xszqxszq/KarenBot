@@ -1,5 +1,6 @@
 package xyz.xszq.nereides.event
 
+import xyz.xszq.nereides.NetworkUtils
 import xyz.xszq.nereides.payload.utils.FileType
 import xyz.xszq.nereides.payload.utils.MsgType
 import xyz.xszq.nereides.QQClient
@@ -16,21 +17,21 @@ class GroupAtMessageEvent(
     override val timestamp: Long
 ): GroupEvent, PublicMessageEvent(groupId) {
     private var replySeq = 1
-    override suspend fun reply(content: String): PostGroupMessageResponse? {
+    override suspend fun reply(content: String): Boolean {
         return client.sendGroupMessage(
             groupId = groupId,
             content = content,
             msgType = MsgType.TEXT,
             msgId = msgId,
             msgSeq = replySeq ++
-        )
+        ) != null
     }
     override suspend fun reply(content: Message) = reply(MessageChain(content))
-    override suspend fun reply(content: MessageChain): PostGroupMessageResponse? {
-        val files = content.filterIsInstance<RichMedia>().map {
+    override suspend fun reply(content: MessageChain): Boolean {
+        val files = content.filterIsInstance<LocalRichMedia>().map {
             client.uploadFile(
                 groupId = groupId,
-                url = it.url,
+                url = NetworkUtils.upload(it.file),
                 fileType = when (it) {
                     is Image -> FileType.IMAGE
                     is Voice -> FileType.VOICE
@@ -59,6 +60,6 @@ class GroupAtMessageEvent(
                 )
             }
         }
-        return response
+        return response != null
     }
 }

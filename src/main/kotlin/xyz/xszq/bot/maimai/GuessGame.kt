@@ -14,6 +14,7 @@ import xyz.xszq.bot.maimai.payload.ChartStat
 import xyz.xszq.bot.maimai.payload.MusicInfo
 import xyz.xszq.nereides.event.GlobalEventChannel
 import xyz.xszq.nereides.event.GroupAtMessageEvent
+import xyz.xszq.nereides.event.PublicMessageEvent
 import xyz.xszq.nereides.message.plus
 import xyz.xszq.nereides.message.toImage
 import xyz.xszq.nereides.message.toPlainText
@@ -40,7 +41,7 @@ class GuessGame(
         if (song.type=="DX") "是 DX 谱面" else if (musics
                 .getById(toDXId(song.id)) != null) "既有 DX 谱面也有标准谱面" else "没有 DX 谱面"
     )
-    suspend fun start(event: GroupAtMessageEvent, hints: Int = 6) = event.run {
+    suspend fun start(event: PublicMessageEvent, hints: Int = 6) = event.run {
         if (started[contextId] == true) {
             reply("当前群有正在进行的猜歌哦~")
             return@run
