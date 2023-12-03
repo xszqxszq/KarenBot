@@ -18,9 +18,9 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: OtomadBot
-email: admin@xszq.tk
-description: Mirai-based Bot developed for Otomad QQ groups
+title: 可怜Bot
+email: admin@xszq.xszq
+description: QQ Bot developed for Otomad/maimai/anime QQ groups
 #baseurl: "/OtomadBot" # the subpath of your site, e.g. /blog
 #url: "https://xszqxszq.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 

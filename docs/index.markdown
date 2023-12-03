@@ -5,7 +5,7 @@
 layout: home
 ---
 
-# 可怜Bot[about.markdown](_pages%2Fabout.markdown)
+# 可怜Bot
 
 音MAD/音游/动漫/娱乐多功能工具机器人
 
