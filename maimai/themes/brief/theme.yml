@@ -1,0 +1,201 @@
+b50:
+  bg: b50_bg.png
+  coverWidth: 46
+  oldCols: 5
+  newCols: 5
+  gapX: 8
+  gapY: 2
+  ellipsizeWidth: 166
+  pos:
+    cover:
+      x: 10
+      y: 10
+    name:
+      fontName: Alibaba-PuHuiTi-B
+      size: 26
+      x: 163
+      y: 116
+    dxrating:
+      fontName: Alibaba-PuHuiTi-H
+      size: 18
+      x: 313
+      y: 75
+      color: "#ffff00"
+      xScale: 0.97
+      stroke: 2.0
+    chTitle:
+      fontName: Alibaba-PuHuiTi-B
+      size: 16
+      x: 59
+      y: 34
+      color: "#ffffff"
+      xScale: 0.94
+    ratingInfo:
+      fontName: Alibaba-PuHuiTi-B
+      size: 14
+      x: 285
+      y: 145
+      color: "#4d4d4d"
+      stroke: 1.0
+      strokeColor: "#ffffff"
+      xScale: 1.1
+    chAchievements:
+      fontName: Alibaba-PuHuiTi-H
+      size: 24
+      x: 58
+      y: 56
+      color: "#ffffff"
+      xScale: 0.96
+    chRank:
+      fontName: Alibaba-PuHuiTi-H
+      size: 13
+      x: 10
+      y: 79
+      color: "#5d5d5d"
+    chBase:
+      fontName: Alibaba-PuHuiTi-H
+      size: 13
+      x: 42
+      y: 79
+      color: "#5d5d5d"
+      xScale: 0.94
+    rateIcon:
+      x: 180
+      y: 38
+    fcIcon:
+      x: 188
+      y: 62
+    fsIcon:
+      x: 208
+      y: 62
+    dxStar:
+      x: 137
+      y: 69
+    type:
+      x: 210
+      y: 6
+    newIcon:
+      x: 565
+      y: 865
+    oldCharts:
+      x: 33
+      y: 192
+    newCharts:
+      x: 33
+      y: 943
+    ratingBg:
+      x: 153
+      y: 49
+    dani:
+      x: 338
+      y: 90
+    icon:
+      x: 50
+      y: 50
+    plate:
+      x: 35
+      y: 37
+    headerBg:
+      x: 0
+      y: 0
+dsList:
+  bg: ds_bg.png
+  coverWidth: 64
+  gapX: 7
+  gapY: 7
+  pos:
+    level:
+      x: -25
+      y: -5
+    ver:
+      x: 36
+      y: 46
+    title:
+      x: 222
+      y: 68
+    allClear:
+      x: 360
+      y: 18
+    botInfo:
+      x: 364
+      y: 62
+    dsBg:
+      x: -109
+      y: -16
+    dsText:
+      fontName: Alibaba-PuHuiTi-H
+      size: 28
+      x: -64
+      y: 45
+      color: "#ffffff"
+      xScale: 0.94
+    coverBg:
+      x: -5
+      y: -5
+    list:
+      x: 157
+      y: 174
+    lineGap:
+      x: 0
+      y: 40
+    rateIcon:
+      x: -5
+      y: -5
+info:
+  bg: bg_info.png
+  coverWidth: 150
+  gapY: 48
+  pos:
+    cover:
+      x: 78
+      y: 196
+    id:
+      fontName: Alibaba-PuHuiTi-H
+      size: 24
+      x: 245
+      y: 216
+      color: "#ffffff"
+      xScale: 0.96
+    artist:
+      fontName: Alibaba-PuHuiTi-B
+      size: 20
+      x: 245
+      y: 262
+      color: "#ffffff"
+      xScale: 0.96
+    title:
+      fontName: Alibaba-PuHuiTi-H
+      size: 40
+      x: 245
+      y: 310
+      color: "#ffffff"
+      xScale: 0.96
+    achievements:
+      fontName: Alibaba-PuHuiTi-H
+      size: 20
+      x: 200
+      y: 45
+      color: "#135399"
+      xScale: 1.02
+    ds:
+      fontName: Alibaba-PuHuiTi-H
+      size: 20
+      x: 690
+      y: 47
+      color: "#6d6d6d"
+      xScale: 0.94
+    header:
+      x: 0
+      y: 20
+    list:
+      x: 20
+      y: 348
+    rateIcon:
+      x: 320
+      y: 0
+    fcIcon:
+      x: 380
+      y: 0
+    fsIcon:
+      x: 425
+      y: 0

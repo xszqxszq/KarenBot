@@ -1,0 +1,13 @@
+---
+# Feel free to add content and custom Front Matter to this file.
+# To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
+
+layout: home
+---
+
+# 可怜Bot[about.markdown](_pages%2Fabout.markdown)
+
+音MAD/音游/动漫/娱乐多功能工具机器人
+
+**[使用说明](guide) [关于](about)**
+

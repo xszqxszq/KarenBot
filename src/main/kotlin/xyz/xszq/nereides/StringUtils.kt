@@ -1,5 +1,8 @@
 package xyz.xszq.nereides
 
+import com.soywiz.kmem.extract8
+import com.soywiz.korim.color.RGBA
+
 fun String.toArgsList(): List<String> = this.trim().split(" +".toRegex()).toMutableList().filter { isNotBlank() }
 fun String.toArgsListByLn(): List<String> = this.trim().split("\n").toMutableList().filter {
     isNotBlank()
@@ -41,17 +44,6 @@ fun String.toSBC(): String {
 
 fun Char.isDBC() = this.code in DBC_SPACE..DBC_CHAR_END
 
-fun String.ellipsize(max: Int): String {
-    var result = ""
-    var cnt = 0
-    forEach {
-        cnt += if (it.isDBC()) 1 else 2
-        if (cnt > max) return@forEach
-        result += it
-    }
-    return result + if (result.length != length) "…" else ""
-}
-
 fun String.limitDecimal(limit: Int = 4): String {
     if (toDoubleOrNull() == null)
         throw IllegalArgumentException("Only decimal String is allowed")
@@ -62,4 +54,9 @@ fun String.limitDecimal(limit: Int = 4): String {
     else
         afterPart.substring(0, limit)
     return result
+}
+
+fun String.hexToRGBA(): RGBA {
+    val int = substring(1).toInt(16)
+    return RGBA.Companion.invoke(int.extract8(16), int.extract8(8), int.extract8(0), 0xff)
 }

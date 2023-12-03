@@ -6,16 +6,13 @@ import com.soywiz.korio.file.std.localCurrentDirVfs
 import com.soywiz.korio.lang.substr
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.http.*
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import xyz.xszq.bot.dao.MaimaiBinding
 import xyz.xszq.bot.dao.Permissions
-import xyz.xszq.bot.maimai.DXProberClient.Companion.getPlateVerList
 import xyz.xszq.bot.maimai.MaimaiUtils.difficulties
+import xyz.xszq.bot.maimai.MaimaiUtils.getPlateVerList
 import xyz.xszq.bot.maimai.MaimaiUtils.levels
 import xyz.xszq.bot.maimai.MaimaiUtils.name2Difficulty
 import xyz.xszq.bot.maimai.MaimaiUtils.plateCategories
@@ -25,7 +22,6 @@ import xyz.xszq.bot.maimai.payload.ChartNotes
 import xyz.xszq.bot.maimai.payload.PlateResponse
 import xyz.xszq.bot.maimai.payload.PlayerData
 import xyz.xszq.nereides.event.GlobalEventChannel
-import xyz.xszq.nereides.event.GroupAtMessageEvent
 import xyz.xszq.nereides.event.MessageEvent
 import xyz.xszq.nereides.message.plus
 import xyz.xszq.nereides.message.toImage
@@ -81,13 +77,25 @@ object Maimai {
             logger.info { "maimai 功能加载完成。" }
         }
     }
+    fun testLoad() {
+        runBlocking {
+            config = MaimaiConfig.load(localCurrentDirVfs["maimai/settings.yml"])
+
+            logger.info { "正在获取歌曲数据……" }
+            musics.updateMusicInfo(prober.getMusicList())
+
+            logger.info { "正在加载图片中……" }
+            images.load(config.theme)
+            logger.info { "maimai 功能加载完成。" }
+        }
+    }
     private suspend fun getCredential(arg: String, event: MessageEvent): Pair<String, String>? = event.run {
         if (arg.isNotBlank()) Pair("username", arg)
         else queryBindings(subjectId) ?: run {
             reply(buildString {
-                appendLine("使用方法：/mai b50 用户名")
-                appendLine("您也可以使用 /mai bind 绑定查分器账号进行快速查询 (此绑定与查分器绑定无关)")
-            })
+                appendLine("未绑定账号信息，请指定用户名，或先进行绑定操作！")
+                appendLine("您可以使用 /mai bind 绑定查分器账号进行快速查询 (此绑定与查分器绑定无关)")
+            }.trimEnd())
             null
         }
     }
@@ -165,7 +173,7 @@ object Maimai {
                 val (status, data) = prober.getPlayerData(type, credential)
                 when (status) {
                     HttpStatusCode.OK -> {
-                        reply(images.generateBest(data!!).toImage())
+                        reply(images.generateBest(data!!, subjectId).toImage())
                     }
                     HttpStatusCode.BadRequest -> {
                         reply("您的QQ未绑定查分器账号或所查询的用户名不存在，" +
@@ -190,7 +198,7 @@ object Maimai {
                 val records = prober.getDataByVersion(type, credential, getPlateVerList("all"))
                 when (status) {
                     HttpStatusCode.OK -> {
-                        reply(images.generateAP50(data!!, records.second!!.verList).toImage())
+                        reply(images.generateAP50(data!!, records.second!!.verList, subjectId).toImage())
                     }
                     HttpStatusCode.BadRequest -> {
                         reply("您的QQ未绑定查分器账号或所查询的用户名不存在，" +
@@ -353,7 +361,7 @@ object Maimai {
                     if (ver != "" && type != "霸者" && ver != "舞")
                         startsWith("${ver}${type}完成表") { arg ->
                             val data = getVersionData(ver, arg, this) ?: return@startsWith
-                            reply(images.plateProgress(ver, type, getPlateVerList(ver),data.verList).toImage())
+                            reply(images.plateProgress(ver, type, getPlateVerList(ver), data.verList).toImage())
                         }
                 }
             }
@@ -391,7 +399,13 @@ object Maimai {
                     if (basicInfo == null)
                         return@startsWith
                     val records = prober.getDataByVersion(type, credential, getPlateVerList("all"))
-                    reply(images.getLevelRecordList(level, page, basicInfo, records.second!!.verList).toImage())
+                    reply(images.getLevelRecordList(
+                        level,
+                        page,
+                        basicInfo,
+                        records.second!!.verList,
+                        subjectId
+                    ).toImage())
                 }
             }
             difficulties.forEachIndexed { difficulty, name ->

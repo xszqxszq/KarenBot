@@ -109,6 +109,15 @@ class MusicsInfo(val logger: KLogger) {
 
     fun getStats(id: String) = stats[id]
 
+    fun getSongWithDSByLevel(level: String): Map<Double, List<Pair<MusicInfo, Int>>> {
+        val pre = map {
+            it.level.mapIndexed { index, s -> if (s == level) Pair(it, index) else null }.filterNotNull()
+        }.flatten()
+        return pre.map { it.first.ds[it.second] }.distinct().sortedDescending().associateWith { d ->
+            pre.filter { m -> m.first.ds[m.second] == d }
+        }
+    }
+
     fun findByDS(range: ClosedFloatingPointRange<Double>): String {
         val result = buildString {
             musics.values.filter { music ->

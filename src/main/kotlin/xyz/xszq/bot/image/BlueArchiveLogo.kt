@@ -58,7 +58,7 @@ object BlueArchiveLogo {
                 fillRect(0, 0, this.width, this.height)
             }
             fillStyle = RGBA(0x12, 0x8a, 0xfa, 0xff)
-            alignment = TextAlignment.RIGHT
+            // alignment = TextAlignment.RIGHT
             setTransform(1.0, 0.0, horizontalTilt, 1.0, 0.0, 0.0)
             font = fonts.loadFontByName(fontL)
             fillText(textL, canvasWidthL - textWidthL + 30 + if (fontL == "RoGSanSrfStd-Bd") 45 else 40, height * textBaseLine)
@@ -71,7 +71,7 @@ object BlueArchiveLogo {
                 canvasHeight
             )
             fillStyle = RGBA(0x2b, 0x2b, 0x2b, 0xff)
-            alignment = TextAlignment.LEFT
+            // alignment = TextAlignment.LEFT
             strokeStyle = Colors.WHITE
             lineWidth = 12.0
             setTransform(1.0, 0.0, horizontalTilt, 1.0, 0.0, 0.0)

@@ -37,7 +37,7 @@ out/
 
 ### Bot Files ###
 /image/
-/maimai/
+/maimai/covers/
 /config.yml
 /src/test/
 /music/

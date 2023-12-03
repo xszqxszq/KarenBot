@@ -1,0 +1,31 @@
+package xyz.xszq.bot.maimai
+
+import kotlinx.coroutines.Dispatchers
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
+import org.jetbrains.exposed.sql.upsert
+import xyz.xszq.bot.dao.MaimaiSettings
+
+object CustomSettings {
+    suspend fun get(key: String, subjectId: String) = suspendedTransactionAsync(Dispatchers.IO) {
+        MaimaiSettings.select {
+            (MaimaiSettings.openid eq subjectId) and (MaimaiSettings.name eq key)
+        }.firstOrNull()
+    }.await()
+    suspend fun set(key: String, value: String, subjectId: String): Unit = newSuspendedTransaction(Dispatchers.IO) {
+        MaimaiSettings.upsert {
+            it[openid] = subjectId
+            it[name] = key
+            it[this.value] = value
+        }
+    }
+    suspend fun getSettings(subjectId: String) = suspendedTransactionAsync(Dispatchers.IO) {
+        MaimaiSettings.select {
+            MaimaiSettings.openid eq subjectId
+        }.associate {
+            Pair(it[MaimaiSettings.name], it[MaimaiSettings.value])
+        }
+    }.await()
+}

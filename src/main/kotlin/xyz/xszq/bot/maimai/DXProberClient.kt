@@ -80,33 +80,4 @@ class DXProberClient {
     ): Pair<HttpStatusCode, PlateResponse?> = getInfo("api/maimaidxprober/query/plate", type, id) {
         put("version", JsonArray(versions.map { JsonPrimitive(it) }))
     }
-
-    companion object {
-        fun getPlateVerList(version: String) = when (version) {
-            "真" -> listOf("maimai", "maimai PLUS")
-            "超" -> listOf("maimai GreeN")
-            "檄" -> listOf("maimai GreeN PLUS")
-            "橙" -> listOf("maimai ORANGE")
-            "晓" -> listOf("maimai ORANGE PLUS")
-            "桃" -> listOf("maimai PiNK")
-            "樱" -> listOf("maimai PiNK PLUS")
-            "紫" -> listOf("maimai MURASAKi")
-            "堇" -> listOf("maimai MURASAKi PLUS")
-            "白" -> listOf("maimai MiLK")
-            "雪" -> listOf("MiLK PLUS")
-            "辉" -> listOf("maimai FiNALE")
-            in listOf("熊", "华") -> listOf("maimai でらっくす", "maimai でらっくす PLUS")
-            in listOf("爽", "煌") -> listOf("maimai でらっくす Splash")
-            in listOf("宙", "星") -> listOf("maimai でらっくす UNiVERSE")
-            in listOf("舞", "") -> listOf("maimai", "maimai PLUS", "maimai GreeN", "maimai GreeN PLUS", "maimai ORANGE",
-                "maimai ORANGE PLUS", "maimai PiNK", "maimai PiNK PLUS", "maimai MURASAKi", "maimai MURASAKi PLUS",
-                "maimai MiLK", "MiLK PLUS", "maimai FiNALE")
-            "all" -> listOf("maimai", "maimai PLUS", "maimai GreeN", "maimai GreeN PLUS", "maimai ORANGE",
-                "maimai ORANGE PLUS", "maimai PiNK", "maimai PiNK PLUS", "maimai MURASAKi", "maimai MURASAKi PLUS",
-                "maimai MiLK", "MiLK PLUS", "maimai FiNALE", "maimai でらっくす", "maimai でらっくす PLUS",
-                "maimai でらっくす Splash", "maimai でらっくす Splash PLUS", "maimai でらっくす UNiVERSE",
-                "maimai でらっくす UNiVERSE PLUS", "maimai でらっくす FESTiVAL", "maimai でらっくす FESTiVAL PLUS")
-            else -> emptyList()
-        }
-    }
 }

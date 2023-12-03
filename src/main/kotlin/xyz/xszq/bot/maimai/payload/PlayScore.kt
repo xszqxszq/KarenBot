@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 open class PlayScore(
     val achievements: Double,
     val ds: Double,
+    val dxScore: Int,
     val fc: String,
     val fs: String,
     val level: String,
@@ -25,7 +26,7 @@ open class PlayScore(
         fun fillEmpty(list: List<PlayScore>, target: Int): List<PlayScore> {
             val result = list.toMutableList()
             for (i in 1..(target-list.size))
-                result.add(PlayScore(0.0, .0, "", "", "",
+                result.add(PlayScore(0.0, .0, 0, "", "", "",
                     0, "", 0, "", -1, "", ""))
             return result
         }

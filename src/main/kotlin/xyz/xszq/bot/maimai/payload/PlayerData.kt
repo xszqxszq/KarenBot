@@ -10,5 +10,6 @@ data class PlayerData(
     @SerialName("additional_rating")
     val additionalRating: Int ?= null,
     val username: String,
+    val plate: String,
     val charts: Map<String, List<PlayScore>>
 )

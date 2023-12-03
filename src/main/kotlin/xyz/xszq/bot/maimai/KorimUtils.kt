@@ -6,14 +6,11 @@ import com.soywiz.klock.measureTimeWithResult
 import com.soywiz.klock.milliseconds
 import com.soywiz.korim.bitmap.Bitmap
 import com.soywiz.korim.bitmap.Bitmap32
-import com.soywiz.korim.bitmap.effect.BitmapEffect
-import com.soywiz.korim.bitmap.effect.applyEffect
 import com.soywiz.korim.bitmap.sliceWithSize
 import com.soywiz.korim.color.Colors
 import com.soywiz.korim.color.RGBA
-import com.soywiz.korim.font.DefaultTtfFont
-import com.soywiz.korim.font.TtfFont
-import com.soywiz.korim.font.TtfNativeSystemFontProvider
+import com.soywiz.korim.font.*
+import com.soywiz.korim.paint.Paint
 import com.soywiz.korim.text.HorizontalAlign
 import com.soywiz.korim.text.TextAlignment
 import com.soywiz.korim.vector.Context2d
@@ -24,6 +21,7 @@ import com.soywiz.korio.file.baseName
 import com.soywiz.korio.file.std.localVfs
 import com.soywiz.korio.lang.Environment
 import com.soywiz.korio.lang.expand
+import xyz.xszq.nereides.hexToRGBA
 
 
 private val linuxFolders get() = listOf("/usr/share/fonts", "/usr/local/share/fonts", "~/.fonts")
@@ -106,45 +104,123 @@ open class MultiPlatformNativeSystemFontProvider(
     override fun loadFontByName(name: String, freeze: Boolean): TtfFont? =
         runBlockingNoJs { namesMapLC[name.normalizeName()]?.let { TtfFont(it.readAll(), freeze = freeze) } }
 }
-
-fun Context2d.drawText(text: String, attr: ItemPosition, color: RGBA = Colors.BLACK,
-                       align: TextAlignment = TextAlignment.LEFT) {
-    if (attr.fontName.isNotBlank())
-        this.font = MaimaiImage.fonts[attr.fontName]
-    this.fontSize = attr.size.toDouble()
-    this.alignment = align
-    this.fillStyle = createColor(color)
-    // TODO: Submit issue to korim to fix alignment, this is only a TEMPORARY solution
-    val offsetx = if (this.alignment.horizontal == HorizontalAlign.RIGHT) -1 * (attr.size - 1) * (text.length / 2) else 0
-    fillText(text, attr.x.toDouble() + offsetx, attr.y.toDouble())
-}
-fun Context2d.drawTextRelative(text: String, x: Int, y: Int, attr: ItemPosition,
-                               color: RGBA = Colors.BLACK, align: TextAlignment = TextAlignment.LEFT) {
-    this.font = MaimaiImage.fonts[attr.fontName]
-    this.fontSize = attr.size.toDouble()
-    this.alignment = align
-    this.fillStyle = createColor(color)
-    // TODO: Submit issue to korim to fix alignment, this is only a TEMPORARY solution
-    val offsetx = if (this.alignment.horizontal == HorizontalAlign.RIGHT) -1 * (attr.size - 1) * (text.length / 2) else 0
-    fillText(text, x + attr.x.toDouble() + offsetx, y + attr.y.toDouble())
-}
-
-fun Bitmap32.blurFixedSize(radius: Int) = applyEffect(BitmapEffect(radius))
-    .removeAlpha().sliceWithSize(radius, radius, width, height).extract()
-fun Bitmap32.brightness(ratio: Float = 0.6f): Bitmap32 {
-    if (ratio > 1f || ratio < -1f)
-        throw IllegalArgumentException("Ratio must be in [-1, 1]")
-    val real = ratio / 2f + 0.5f
-    updateColors {
-        it.times(RGBA.float(real, real, real, 1f))
+fun Font.ellipsize(rawText: String, fontSize: Double, maxWidth: Double, xScale: Double = 1.0): String {
+    var metrics = measureTextGlyphs(fontSize, rawText)
+    if (metrics.metrics.width * xScale < maxWidth)
+        return rawText
+    var text = rawText
+    while (text.isNotEmpty()) {
+        metrics = measureTextGlyphs(fontSize, "$text...")
+        if (metrics.metrics.width * xScale < maxWidth)
+            return "$text..."
+        text = text.substring(0 until text.length - 1)
     }
-    return this
+    return "$text..."
 }
-fun Bitmap32.removeAlpha(): Bitmap32 {
-    forEach { _, x, y ->
-        this[x, y] = RGBA(this[x, y].r, this[x, y].g, this[x, y].b, 255)
+fun Context2d.drawText(
+    rawText: String,
+    x: Double,
+    y: Double,
+    color: RGBA = Colors.BLACK,
+    font: TtfFont,
+    fontSize: Double,
+    align: TextAlignment = TextAlignment.LEFT,
+    xScale: Double = 1.0,
+    stroke: Double = 0.0,
+    strokeColor: RGBA = Colors.BLACK,
+    ellipsizeWidth: Double? = null
+) {
+    this.font = font
+    this.fontSize = fontSize
+    this.alignment = align
+    if (stroke != 0.0) {
+        this.lineWidth = stroke
+        this.strokeStyle = strokeColor
+    } else {
+        this.lineWidth = 0.0
     }
-    return this
+    // TODO: Submit issue to korim to fix alignment, this is only a TEMPORARY solution
+    val text = ellipsizeWidth ?.let {
+        font.ellipsize(rawText, fontSize, ellipsizeWidth, xScale)
+    } ?: rawText
+    if (xScale != 1.0) {
+        drawTextWithXScale(text, x, y, xScale, createColor(color), createColor(strokeColor))
+    } else {
+        val offsetX = when (this.alignment.horizontal) {
+            HorizontalAlign.RIGHT -> -1 * (font.measureTextGlyphs(fontSize, text).metrics.width)
+            HorizontalAlign.CENTER -> -1 * (font.measureTextGlyphs(fontSize, text).metrics.width / 2)
+            else -> 0.0
+        }
+        if (stroke != 0.0)
+            strokeText(text, x + offsetX, y)
+        this.fillStyle = createColor(color)
+        fillText(text, x + offsetX, y)
+    }
+    this.lineWidth = 0.0
 }
+fun Context2d.drawTextWithXScale(
+    text: String,
+    startX: Double,
+    y: Double,
+    xScale: Double = 1.0,
+    fillStyle: Paint,
+    strokeStyle: Paint
+) {
+    val offsetX = when (this.alignment.horizontal) {
+        HorizontalAlign.RIGHT -> -1 * (font!!.measureTextGlyphs(fontSize, text).metrics.width * xScale)
+        HorizontalAlign.CENTER -> -1 * (font!!.measureTextGlyphs(fontSize, text).metrics.width * xScale / 2)
+        else -> 0.0
+    }
+    var x = startX + offsetX
+    text.forEach { c ->
+        val metrics = font!!.measureTextGlyphs(fontSize, c.toString())
+        if (lineWidth != 0.0) {
+            this.strokeStyle = strokeStyle
+            strokeText(c.toString(), x, y)
+        }
+        this.fillStyle = fillStyle
+        fillText(c.toString(), x, y)
+        x += metrics.glyphs.first().metrics.xadvance * xScale
+    }
+}
+
+fun Context2d.drawText(
+    text: String,
+    attr: ItemProperties,
+    align: TextAlignment = TextAlignment.LEFT,
+    ellipsizeWidth: Double? = null
+) = drawText(
+    text,
+    attr.x.toDouble(),
+    attr.y.toDouble(),
+    attr.color.hexToRGBA(),
+    MaimaiImage.fonts[attr.fontName]!!,
+    attr.size.toDouble(),
+    align,
+    attr.xScale,
+    attr.stroke,
+    attr.strokeColor.hexToRGBA(),
+    ellipsizeWidth
+)
+fun Context2d.drawTextRelative(
+    text: String,
+    x: Int,
+    y: Int,
+    attr: ItemProperties,
+    align: TextAlignment = TextAlignment.LEFT,
+    ellipsizeWidth: Double? = null
+)  = drawText(
+    text,
+    x + attr.x.toDouble(),
+    y + attr.y.toDouble(),
+    attr.color.hexToRGBA(),
+    MaimaiImage.fonts[attr.fontName]!!,
+    attr.size.toDouble(),
+    align,
+    attr.xScale,
+    attr.stroke,
+    attr.strokeColor.hexToRGBA(),
+    ellipsizeWidth
+)
 fun Bitmap.randomSlice(size: Int = 66) =
     sliceWithSize((0..width - size).random(), (0..height - size).random(), size, size).extract()

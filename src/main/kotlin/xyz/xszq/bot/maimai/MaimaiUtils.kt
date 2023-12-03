@@ -2,11 +2,41 @@ package xyz.xszq.bot.maimai
 
 import com.soywiz.kmem.toIntFloor
 import com.soywiz.korim.color.RGBA
+import com.soywiz.korio.lang.substr
 import xyz.xszq.bot.maimai.payload.MusicInfo
 import xyz.xszq.bot.maimai.payload.PlayScore
 import kotlin.math.min
 
 object MaimaiUtils {
+    val levels = listOf("1", "2", "3", "4", "5", "6", "7", "7+", "8", "8+", "9", "9+", "10", "10+", "11", "11+", "12",
+        "12+", "13", "13+", "14", "14+", "15")
+    val versionsBrief = listOf("真", "超", "檄", "橙", "晓", "桃", "樱", "紫", "堇", "白", "雪", "辉", "舞", "熊", "华", "爽",
+        "煌", "宙", "星", "")
+    val plateCategories = listOf("极", "将", "神", "舞舞", "霸者")
+    val recordCategories = listOf("s", "s+", "ss", "ss+", "sss", "sss+", "ap", "ap+", "fc", "fc+", "fs", "fs+", "fdx", "fdx+",
+        "clear")
+    val difficulties = arrayOf("绿", "黄", "红", "紫", "白")
+    val plateExcluded = listOf("201", "332", "336", "367", "486", "645")
+    val remasterExcluded = listOf("158", "139", "571", "25", "72", "135", "257", "131", "351", "503", "168",
+        "299", "159", "269", "138", "275", "67", "92", "108", "85", "173", "339", "369", "49")
+
+    fun calcB50Change(b50: MutableList<PlayScore>,
+                      music: MusicInfo, difficulty: Int, acc: Double,
+                      b35Floor: Int, b15Floor: Int) : Int {
+        val ra = getNewRa(music.ds[difficulty], acc)
+        b50.find { it.songId.toString() == music.id && it.levelIndex == difficulty } ?.let { score ->
+            val scoreRa = getNewRa(score.ds, score.achievements)
+            if (ra > scoreRa)
+                return ra - scoreRa
+            else
+                return 0
+        }
+        if (music.basicInfo.isNew && ra > b15Floor)
+            return ra - b15Floor
+        if (!music.basicInfo.isNew && ra > b35Floor)
+            return ra - b35Floor
+        return 0
+    }
     fun ratingColor(rating: Int): String = when (rating) {
         in 0..999 -> "01"
         in 1000..1999 -> "02"
@@ -133,23 +163,6 @@ object MaimaiUtils {
             in 100.5..101.0 -> "sssp"
             else -> ""
         }
-    fun calcB50Change(b50: MutableList<PlayScore>,
-                      music: MusicInfo, difficulty: Int, acc: Double,
-                      b35Floor: Int, b15Floor: Int) : Int {
-        val ra = getNewRa(music.ds[difficulty], acc)
-        b50.find { it.songId.toString() == music.id && it.levelIndex == difficulty } ?.let { score ->
-            val scoreRa = getNewRa(score.ds, score.achievements)
-            if (ra > scoreRa)
-                return ra - scoreRa
-            else
-                return 0
-        }
-        if (music.basicInfo.isNew && ra > b15Floor)
-            return ra - b15Floor
-        if (!music.basicInfo.isNew && ra > b35Floor)
-            return ra - b35Floor
-        return 0
-    }
     fun toDXId(id: String): String = when (id.length) {
         5 -> id
         4 -> "1$id"
@@ -157,19 +170,90 @@ object MaimaiUtils {
         2 -> "100$id"
         else -> id
     }
-    val difficulty2Color = listOf(
-        RGBA(124, 216, 79), RGBA(245, 187, 11), RGBA(255, 128, 140),
-        RGBA(178, 91, 245), RGBA(244, 212, 255)
-    )
-    val levels = listOf("1", "2", "3", "4", "5", "6", "7", "7+", "8", "8+", "9", "9+", "10", "10+", "11", "11+", "12",
-        "12+", "13", "13+", "14", "14+", "15")
-    val versionsBrief = listOf("真", "超", "檄", "橙", "晓", "桃", "樱", "紫", "堇", "白", "雪", "辉", "舞", "熊", "华", "爽",
-    "煌", "宙", "星", "")
-    val plateCategories = listOf("极", "将", "神", "舞舞", "霸者")
-    val recordCategories = listOf("s", "s+", "ss", "ss+", "sss", "sss+", "ap", "ap+", "fc", "fc+", "fs", "fs+", "fdx", "fdx+",
-        "clear")
-    val difficulties = arrayOf("绿", "黄", "红", "紫", "白")
-    val plateExcluded = listOf("201", "332", "336", "367", "486", "645")
-    val remasterExcluded = listOf("158", "139", "571", "25", "72", "135", "257", "131", "351", "503", "168",
-        "299", "159", "269", "138", "275", "67", "92", "108", "85", "173", "339", "369", "49")
+    fun getPlateVerList(version: String) = when (version) {
+        "真" -> listOf("maimai", "maimai PLUS")
+        "超" -> listOf("maimai GreeN")
+        "檄" -> listOf("maimai GreeN PLUS")
+        "橙" -> listOf("maimai ORANGE")
+        in listOf("晓", "暁") -> listOf("maimai ORANGE PLUS")
+        "桃" -> listOf("maimai PiNK")
+        "樱" -> listOf("maimai PiNK PLUS")
+        "紫" -> listOf("maimai MURASAKi")
+        in listOf("堇", "菫") -> listOf("maimai MURASAKi PLUS")
+        "白" -> listOf("maimai MiLK")
+        "雪" -> listOf("MiLK PLUS")
+        in listOf("辉", "輝") -> listOf("maimai FiNALE")
+        in listOf("熊", "华") -> listOf("maimai でらっくす", "maimai でらっくす PLUS")
+        in listOf("爽", "煌") -> listOf("maimai でらっくす Splash")
+        in listOf("宙", "星") -> listOf("maimai でらっくす UNiVERSE")
+        in listOf("舞", "") -> listOf("maimai", "maimai PLUS", "maimai GreeN", "maimai GreeN PLUS", "maimai ORANGE",
+            "maimai ORANGE PLUS", "maimai PiNK", "maimai PiNK PLUS", "maimai MURASAKi", "maimai MURASAKi PLUS",
+            "maimai MiLK", "MiLK PLUS", "maimai FiNALE")
+        "all" -> listOf("maimai", "maimai PLUS", "maimai GreeN", "maimai GreeN PLUS", "maimai ORANGE",
+            "maimai ORANGE PLUS", "maimai PiNK", "maimai PiNK PLUS", "maimai MURASAKi", "maimai MURASAKi PLUS",
+            "maimai MiLK", "MiLK PLUS", "maimai FiNALE", "maimai でらっくす", "maimai でらっくす PLUS",
+            "maimai でらっくす Splash", "maimai でらっくす Splash PLUS", "maimai でらっくす UNiVERSE",
+            "maimai でらっくす UNiVERSE PLUS", "maimai でらっくす FESTiVAL", "maimai でらっくす FESTiVAL PLUS")
+        else -> emptyList()
+    }
+    val plateStartOffset = buildMap {
+        put("真", 6101)
+        put("超", 6104)
+        put("檄", 6108)
+        put("橙", 6112)
+        put("暁", 6116)
+        put("桃", 6120)
+        put("櫻", 6124)
+        put("紫", 6128)
+        put("菫", 6132)
+        put("白", 6136)
+        put("雪", 6140)
+        put("輝", 6144)
+        put("舞", 6149)
+        put("熊", 55101)
+        put("華", 109101)
+        put("爽", 159101)
+        put("煌", 209101)
+        put("宙", 259101)
+        put("星", 309101)
+        put("祭", 359101)
+    }
+    fun getPlateFilename(plate: String): String? {
+        if (plate == "霸者")
+            return "UI_Plate_006148.png"
+
+        val fileId = when {
+            plate.length == 2 -> when (plate[1]) {
+                '極' -> 0
+                '将' -> 1
+                '神' -> 2
+                else -> return null
+            }
+            plate.length == 3 && plate.substr(1) == "舞舞" -> 3
+            else -> return null
+        } + (plateStartOffset[plate[0].toString()] ?: return null)
+        return "UI_Plate_${fileId.toString().padStart(6, '0')}.png"
+    }
+    fun plateVerToVerId(ver: String) = when (ver) {
+        "真" -> "100"
+        "超" -> "120"
+        "檄" -> "130"
+        "橙" -> "140"
+        in listOf("晓", "暁") -> "150"
+        "桃" -> "160"
+        "樱" -> "170"
+        "紫" -> "180"
+        in listOf("堇", "菫") -> "185"
+        "白" -> "190"
+        "雪" -> "195"
+        in listOf("辉", "輝") -> "199"
+        "熊" -> "200"
+        "华" -> "210"
+        "爽" -> "214"
+        "煌" -> "215"
+        "宙" -> "220"
+        "星" -> "225"
+        "祭" -> "230"
+        else -> ""
+    }
 }
