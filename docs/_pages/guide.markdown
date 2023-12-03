@@ -7,6 +7,9 @@ permalink: /guide/
 # ！！注意！！
 所有功能必须 **@可怜Bot** 才能使用！！！**必须@才行！否则没有反应！**
 
+![](https://pic.imgdb.cn/item/656c80f2c458853aef985435.png)
+![](https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/QR.png)
+
 # 支持的功能
 ### 音游功能
 
@@ -35,8 +38,8 @@ permalink: /guide/
 |-----------|---------------------------------------|------|------|
 | 查看总排卡人数   | **/j**                                | 是    | 是    |
 | 设置群聊/频道机厅 | **/排卡管理**                             | 是    | 是    |
-| 设置排卡人数    | **&lt;机厅名&gt;[人数]人**<br>例：csyx5<br>例：fyzq7人 | 是    | 是    |
-| 查看机厅人数    | **&lt;机厅名&gt;几**<br>例：dfc几                  | 是    | 是    |
+| 设置排卡人数    | **&lt;机厅名&gt;[人数]人** <br>例：csyx5 <br>例：fyzq7人 | 是    | 是    |
+| 查看机厅人数    | **&lt;机厅名&gt;几** <br>例：dfc几                  | 是    | 是    |
 
 ###  图片功能
 
