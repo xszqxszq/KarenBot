@@ -18,17 +18,24 @@ object GlobalEventChannel: CoroutineScope {
         launch {
             channel.collect { event ->
                 if (event is T) {
-                    kotlin.runCatching {
-                        block(event)
-                    }.onFailure { e ->
-                        e.printStackTrace()
+                    launch {
+                        kotlin.runCatching {
+                            block(event)
+                        }.onFailure { e ->
+                            e.printStackTrace()
+                        }
                     }
                 }
             }
         }
     }
     fun subscribePublicMessage(block: suspend PublicMessageEvent.() -> Unit) = subscribe<PublicMessageEvent>(block)
-    fun subscribePublicMessages(prefix: String = "", permName: String = "", block: PublicMessageSubscribeBuilder.() -> Unit) {
-        block(PublicMessageSubscribeBuilder(prefix, permName = permName))
+    fun subscribePublicMessages(
+        prefix: String = "",
+        permName: String = "",
+        forcePrefix: Boolean = false,
+        block: PublicMessageSubscribeBuilder.() -> Unit
+    ) {
+        block(PublicMessageSubscribeBuilder(prefix, permName = permName, forcePrefix = forcePrefix))
     }
 }

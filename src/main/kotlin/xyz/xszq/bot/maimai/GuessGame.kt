@@ -64,24 +64,23 @@ class GuessGame(
         }
         ansList.replaceAll { it.lowercase() }
         println(ansList)
-        reply("请各位发挥自己的聪明才智，根据我的提示来猜一猜这是哪一首歌曲吧！\n" +
+        reply("请各位发挥自己的聪明才智，根据我的提示来猜一猜这是哪一首歌曲吧！记得要 @可怜Bot 作答哦~\n" +
                 "作答时，歌曲 id、歌曲标题（请尽量回答完整）、歌曲别名都将被视作有效答案哦~\n" +
                 "(致管理员：您可以使用“/mai 设置猜歌”指令开启或者关闭本群的猜歌功能)")
         var finished = false
         coroutineScope {
-            val job1 = launch {
-                GlobalEventChannel.channel.collect { e ->
-                    if (e !is GroupAtMessageEvent ||
+            launch {
+                GlobalEventChannel.channel.takeWhile { !finished }.collect { e ->
+                    if (e !is PublicMessageEvent ||
                                 e.contextId != contextId)
                         return@collect
-                    println(e.contentString)
                     if (!(ansList.any { ans -> ans == e.contentString.lowercase() ||
                                 ans in e.contentString.lowercase()
                                 || (e.contentString.length >= 5 && e.contentString.lowercase() in ans)}))
                         return@collect
                     val replyText = buildString {
                         appendLine("恭喜您猜中了哦~")
-                        append(musics.getInfo(music.id))
+                        append(musics.getInfo(music.id).trim())
                     }
                     val cover = images.getCoverById(music.id)
                     if (cover.exists())
@@ -89,11 +88,14 @@ class GuessGame(
                     else
                         e.reply(replyText)
                     finished = true
-                    return@collect
+                    started[contextId] = false
                 }
             }
-            val job2 = launch {
+            launch {
+                delay(cooldown)
                 descriptions.forEachIndexed { index, desc ->
+                    if (finished)
+                        return@launch
                     reply(buildString {
                         appendLine()
                         appendLine(desc)
@@ -102,15 +104,19 @@ class GuessGame(
                     }.trimEnd())
                     delay(cooldown)
                 }
+                if (finished)
+                    return@launch
                 if (options == descriptions.size + 1) {
                     reply(
                         buildString {
                             appendLine()
                             appendLine("这首歌的封面部分如图，30秒后将揭晓答案哦~")
-                        }.trimEnd() + images.getCoverBitmap(music.id).randomSlice().encode(PNG).toImage()
+                        }.trimEnd().toPlainText() + images.getCoverBitmap(music.id).randomSlice().encode(PNG).toImage()
                     )
                 }
                 delay(30000L)
+                if (finished)
+                    return@launch
                 val replyText = buildString {
                     appendLine("很遗憾，没有人猜中哦")
                     append(musics.getInfo(music.id))
@@ -121,18 +127,8 @@ class GuessGame(
                 else
                     reply(replyText)
                 finished = true
-            }
-            launch {
-                while (!finished) {
-                    delay(100L)
-                }
-                if (job1.isActive)
-                    job1.cancel()
-                if (job2.isActive)
-                    job2.cancel()
+                started[contextId] = false
             }
         }
-
-        started[contextId] = false
     }
 }

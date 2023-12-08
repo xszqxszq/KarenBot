@@ -2,8 +2,19 @@ package xyz.xszq.nereides
 
 import com.soywiz.kmem.extract8
 import com.soywiz.korim.color.RGBA
+import net.sourceforge.pinyin4j.PinyinHelper
+import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType
+import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat
+import net.sourceforge.pinyin4j.format.HanyuPinyinToneType
+import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType
+import xyz.xszq.config
 
 fun String.toArgsList(): List<String> = this.trim().split(" +".toRegex()).toMutableList().filter { isNotBlank() }
+fun List<String>.subArgsList(): List<String> {
+    if (size < 2)
+        return listOf()
+    return subList(1, size)
+}
 fun String.toArgsListByLn(): List<String> = this.trim().split("\n").toMutableList().filter {
     isNotBlank()
 }
@@ -59,4 +70,23 @@ fun String.limitDecimal(limit: Int = 4): String {
 fun String.hexToRGBA(): RGBA {
     val int = substring(1).toInt(16)
     return RGBA.Companion.invoke(int.extract8(16), int.extract8(8), int.extract8(0), 0xff)
+}
+
+fun String.toPinyinList() = PinyinHelper.toHanYuPinyinString(this, HanyuPinyinOutputFormat().apply {
+    caseType = HanyuPinyinCaseType.LOWERCASE
+    toneType = HanyuPinyinToneType.WITHOUT_TONE
+    vCharType = HanyuPinyinVCharType.WITH_V
+}, ",", false).trim().split(",")
+
+fun String.toPinyinAbbr(): String = toPinyinList().filter { it.isNotBlank() }.map { it.first() }.joinToString(separator="")
+
+val domains = Regex("((?:[a-zA-Z][a-zA-Z0-9]{0,62}\\.)?[a-zA-Z][a-zA-Z0-9]{0,62}\\.[a-zA-Z0-9]{2,62})")
+fun String.filterURL(whitelist: List<String> = config.domainWhitelist): String {
+    var text = this
+    domains.findAll(text).forEach {
+        val domain = it.groupValues[0]
+        if (domain !in whitelist)
+            text = text.replace(it.groupValues[0], it.groupValues[0].replace(".", ". "))
+    }
+    return text
 }

@@ -1,5 +1,3 @@
-import java.net.URI
-
 val ktorVersion: String by project
 val kotlinVersion: String by project
 val korlibsVersion: String by project
@@ -35,13 +33,22 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
     implementation("ch.qos.logback:logback-classic:1.4.11")
+    implementation("com.sksamuel.scrimage:scrimage-core:4.1.1")
+    implementation("com.sksamuel.scrimage:scrimage-filters:4.1.1")
+    implementation("com.xenomachina:kotlin-argparser:2.0.7")
     implementation("io.github.oshai:kotlin-logging-jvm:5.1.0")
     implementation("io.github.kasukusakura:silk-codec:0.0.5")
+    implementation("io.github.zhangethan:pinyin4j:2.6.1")
     implementation("net.mamoe.yamlkt:yamlkt:0.10.2")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.1.4")
+    implementation("org.openpnp:opencv:4.8.1-0")
     implementation("org.scilab.forge:jlatexmath:1.0.7")
+    implementation(kotlin("stdlib-jdk8"))
 }
 
 application {
     mainClass = "xyz.xszq.KarenBotKt"
+}
+kotlin {
+    jvmToolchain(11)
 }

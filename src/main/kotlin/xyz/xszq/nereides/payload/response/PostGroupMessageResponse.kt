@@ -7,5 +7,6 @@ import kotlinx.serialization.Serializable
 data class PostGroupMessageResponse(
     @SerialName("group_code")
     val groupCode: String,
-    val msg: String
+    val msg: String,
+    val ret: Int?
 )

@@ -1,5 +1,6 @@
 package xyz.xszq.bot.maimai
 
+import com.soywiz.korio.async.launch
 import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
@@ -26,13 +27,8 @@ object QueueForArcades {
             }
         }
     }
-    @OptIn(DelicateCoroutinesApi::class)
     fun init() {
         clear()
-        GlobalScope.launch {
-            clear()
-            delay(3600000L)
-        }
     }
     suspend fun getQueueGroup(openId: String) = suspendedTransactionAsync(Dispatchers.IO) {
         ArcadeCenterQueueGroup.findById(openId) ?.let {
@@ -60,6 +56,7 @@ object QueueForArcades {
                 return@newSuspendedTransaction
             }
             if (command in arrayOf("几", "j", "机厅几", "/j")) {
+                clear()
                 val nowTime = LocalDateTime.now()
                 reply(buildString {
                     appendLine("机厅排卡人数：")
@@ -86,6 +83,7 @@ object QueueForArcades {
                     if (!command.startsWith(name))
                         return@names
                     if ("几" in command.substringAfter(name) && command.substringBefore("几") == name) {
+                        clear()
                         val nowTime = LocalDateTime.now()
                         reply(buildString {
                             append(arcade.name)

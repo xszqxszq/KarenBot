@@ -8,8 +8,8 @@ import xyz.xszq.nereides.audioExts
 import java.io.File
 
 object RandomMusic {
-    val musicDir = localCurrentDirVfs["music"]
-    suspend fun get(type: String): VfsFile = musicDir[type].listSimple().filter {
+    private val musicDir = localCurrentDirVfs["music"]
+    suspend fun get(type: String): VfsFile = musicDir[type].listRecursiveSimple().filter {
         it.extension in audioExts
     }.random()
 }

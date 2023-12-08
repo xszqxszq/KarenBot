@@ -27,6 +27,8 @@ class FFMpegTask(
         fun audioFilter(filter: String) = insert(Argument("af", filter))
         fun acodec(type: String) = insert(Argument("acodec", type))
         fun forceFormat(format: String) = insert(Argument("f", format))
+        fun filterComplex(filter: String) = insert(Argument("filter_complex", filter))
+        fun map(map: String) = insert(Argument("map", map))
     }
     private fun buildCommand(): String {
         var result = ffmpegBin
@@ -42,7 +44,7 @@ class FFMpegTask(
         println(command)
         return try {
             runBlocking {
-                ProgramExecutor(command) {
+                ProgramExecutor(command, true) {
                     environment {
                         append(ffmpegPath)
                     }

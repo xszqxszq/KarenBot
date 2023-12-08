@@ -34,7 +34,11 @@ object TraceMoe {
         }
     }
     suspend fun doHandleTraceMoe(url: String): String {
-        val response = client.get("https://api.trace.moe/search?anilistInfo&url=$url")
+        val response = kotlin.runCatching {
+            client.get("https://api.trace.moe/search?anilistInfo&url=$url")
+        }.onFailure {
+            return "网络错误，可能当前搜番请求过多，请重试"
+        }.getOrThrow()
         if (response.status == HttpStatusCode.OK) {
             val result = json.decodeFromString<TraceMoeResults>(response.bodyAsText())
             try {
@@ -46,19 +50,20 @@ object TraceMoe {
                     return "没有找到相关番剧……"
                 }
                 return buildString {
-                    val similarity = DecimalFormat("0.##").format(realResult.similarity * 100.0)
-                    append("[$similarity%] ")
-                    append("${realResult.anilist?.title?.get("native")} ")
                     try {
+                        val similarity = DecimalFormat("0.##").format(realResult.similarity * 100.0)
+                        append("[$similarity%] ")
+                        append("${realResult.anilist?.title?.get("native")} ")
                         append(realResult.episode ?.let {"第${realResult.episode}集 "} ?: "")
+                        append("%d:%02d".format(
+                            realResult.from.roundToInt() / 60,
+                            realResult.from.roundToInt() % 60
+                        ))
+                        append("\n" +
+                                "结果来自 TraceMoe")
                     } catch (_: Exception) {
+                        return "没有找到相关番剧……"
                     }
-                    append("%d:%02d".format(
-                        realResult.from.roundToInt() / 60,
-                        realResult.from.roundToInt() % 60
-                    ))
-                    append("\n" +
-                            "结果来自 TraceMoe")
                 }
             } catch (e: Exception) {
                 return "没有找到相关番剧……"

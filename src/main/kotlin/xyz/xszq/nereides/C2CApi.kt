@@ -45,8 +45,7 @@ interface C2CApi {
                 msgSeq = msgSeq
             )
         )
-        logger.info { "[$groupId] <- $content" }
-        println(response.bodyAsText())
+        logger.info { "[$groupId] <- ${media?.fileUUID?.let { " ${media.fileUUID}" } ?: ""}$content" }
         return try {
             val msg = response.body<PostGroupMessageResponse>()
             msg
@@ -59,19 +58,17 @@ interface C2CApi {
         url: String,
         fileType: Int,
         send: Boolean = false
-    ): Media? =
-        kotlin.runCatching {
-            val response = call(
-                HttpMethod.Post,
-                "/v2/groups/${groupId}/files",
-                PostGroupFile(fileType, url, false)
-            )
-//            println(response.bodyAsText())
-            response.body<Media>()
-        }.onFailure {
-            it.printStackTrace()
-            return null
-        }.getOrNull()
+    ): Media? = kotlin.runCatching {
+        val response = call(
+            HttpMethod.Post,
+            "/v2/groups/${groupId}/files",
+            PostGroupFile(fileType, url, false)
+        )
+//        println(response.bodyAsText())
+        response.body<Media>()
+    }.onFailure {
+        logger.error { "上传图片失败！" }
+    }.getOrNull()
 
     fun parseContent(data: GroupAtMessageCreate): MessageChain {
         val result = MessageChain()

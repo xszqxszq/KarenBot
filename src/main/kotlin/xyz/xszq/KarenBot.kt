@@ -2,14 +2,19 @@ package xyz.xszq
 
 import com.soywiz.korim.format.PNG
 import com.soywiz.korim.format.encode
+import com.soywiz.korim.format.readNativeImage
+import com.soywiz.korio.async.launch
 import com.soywiz.korio.file.std.localCurrentDirVfs
 import com.soywiz.korio.file.std.rootLocalVfs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import nu.pattern.OpenCV
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import xyz.xszq.bot.audio.OttoVoice
 import xyz.xszq.bot.audio.RandomMusic
+import xyz.xszq.bot.audio.TouhouGuessGame
 import xyz.xszq.bot.config.BinConfig
 import xyz.xszq.bot.config.BotConfig
 import xyz.xszq.bot.dao.*
@@ -21,11 +26,13 @@ import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.QueueForArcades
 import xyz.xszq.bot.text.AutoQA
 import xyz.xszq.bot.text.Bilibili
+import xyz.xszq.bot.text.RandomStereotypes
 import xyz.xszq.nereides.Bot
 import xyz.xszq.nereides.event.GlobalEventChannel
 import xyz.xszq.nereides.event.GroupAtMessageEvent
 import xyz.xszq.nereides.event.GuildAtMessageEvent
 import xyz.xszq.nereides.message.*
+import xyz.xszq.nereides.subArgsList
 import xyz.xszq.nereides.toArgsList
 import xyz.xszq.nereides.toArgsListByLn
 import kotlin.random.Random
@@ -35,6 +42,7 @@ lateinit var config: BotConfig
 lateinit var binConfig: BinConfig
 
 suspend fun init() {
+    OpenCV.loadLocally()
     config = BotConfig.load(localCurrentDirVfs["config.yml"])
 
     binConfig = BinConfig.load(localCurrentDirVfs["bin.yml"])
@@ -45,7 +53,9 @@ suspend fun init() {
     database = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
         config.databaseUser, config.databasePassword)
 
-    QueueForArcades.init()
+    launch(Dispatchers.IO) {
+        QueueForArcades.init()
+    }
 
     RandomImage.load("reply")
     RandomImage.load("gif", "reply")
@@ -82,88 +92,6 @@ fun subscribe() {
                     reply(TraceMoe.doHandleTraceMoe(img.url))
                 } ?: run {
                     reply("使用搜番命令时，请同时发送想要搜索的动漫截图！")
-                }
-            }
-        }
-        startsWith("/生成") { raw ->
-            if (this is GuildAtMessageEvent) {
-                reply(buildString {
-                    appendLine("频道当前支持的模式如下：")
-                    appendLine()
-                    appendLine("[5000兆円欲しい] 指令为：")
-                    appendLine("\t/5k 第一行文本")
-                    appendLine("\t第二行文本")
-                    appendLine("[蔚蓝档案LOGO风格] 指令为：")
-                    appendLine("\t/ba 左侧文本 右侧文本")
-                }.trimEnd())
-                return@startsWith
-            }
-            if (this !is GroupAtMessageEvent)
-                return@startsWith
-            val args = raw.toArgsList()
-            if (args.isEmpty()) {
-                reply(buildString {
-                    appendLine()
-                    appendLine("群聊当前支持的模式如下：")
-                    appendLine()
-                    appendLine("[对称] 指令为：")
-                    appendLine("\t/生成 对称")
-                    appendLine("[球面化] 指令为：")
-                    appendLine("\t/生成 球面化")
-                    appendLine("[反球面化] 指令为：")
-                    appendLine("\t/生成 反球面化")
-                    appendLine("[5000兆円欲しい] 指令为：")
-                    appendLine("\t/5k 第一行文本")
-                    appendLine("\t第二行文本")
-                    appendLine("[蔚蓝档案LOGO风格] 指令为：")
-                    appendLine("\t/ba 左侧文本 右侧文本")
-                }.trimEnd())
-                return@startsWith
-            }
-            when (args[0]) {
-                "对称" -> {
-                    val img = message.filterIsInstance<Image>().firstOrNull() ?: run {
-                        reply("使用生成命令时，请同时发送一张图片！")
-                        return@startsWith
-                    }
-                    reply(MessageChain(ImageGeneration.flipImage(img.url).map {
-                        it.toImage()
-                    }))
-                }
-                "球面化" -> {
-                    val img = message.filterIsInstance<Image>().firstOrNull() ?: run {
-                        reply("使用生成命令时，请同时发送一张图片！")
-                        return@startsWith
-                    }
-                    reply(ImageGeneration.spherize(img.url).toImage())
-                }
-                "反球面化" -> {
-                    val img = message.filterIsInstance<Image>().firstOrNull() ?: run {
-                        reply("使用生成命令时，请同时发送一张图片！")
-                        return@startsWith
-                    }
-                    reply(ImageGeneration.pincushion(img.url).toImage())
-                }
-                "5k" -> {
-                    val nowArgs = raw.trim().substringAfter("5k").toArgsListByLn()
-                    when (nowArgs.size) {
-                        0 -> reply("使用方法：\n/生成 5k 第一行文本\n第二行文本（可选）")
-                        1 -> reply(FiveThousandChoyen.generate(nowArgs.first().trim(), " ").encode(PNG).toImage())
-                        else -> reply(FiveThousandChoyen.generate(nowArgs[0].trim(), nowArgs[1].trim()).encode(PNG).toImage())
-                    }
-                }
-                "蔚蓝档案logo" -> {
-                    reply("使用方法：\n/ba 左侧文本 右侧文本")
-                }
-                "ba" -> {
-                    val nowArgs = raw.trim().substringAfter("ba").toArgsList()
-                    when (nowArgs.size) {
-                        2 -> reply(BlueArchiveLogo.draw(nowArgs[0].trim(), nowArgs[1].trim()).encode(PNG).toImage())
-                        else -> reply("使用方法：\n/ba 左侧文本 右侧文本")
-                    }
-                }
-                else -> {
-                    reply("当前支持的模式如下：\n对称 球面化 反球面化 5k 蔚蓝档案logo(指令为/ba 左侧文本 右侧文本)")
                 }
             }
         }
@@ -300,9 +228,7 @@ fun subscribe() {
                 else -> reply(FiveThousandChoyen.generate(args[0].trim(), args[1].trim()).encode(PNG).toImage())
             }
         }
-        startsWith(listOf(
-            "/ba", "ba"
-        )) { raw ->
+        startsWith("/ba") { raw ->
             val args = raw.toArgsList()
             when (args.size) {
                 2 -> reply(BlueArchiveLogo.draw(args[0].trim(), args[1].trim()).encode(PNG).toImage())
@@ -327,8 +253,168 @@ fun subscribe() {
         startsWith(listOf("help", "/help", "!help")) {
             reply(localCurrentDirVfs["image/help.png"].toImage() + localCurrentDirVfs["image/QR.png"].toImage())
         }
+        startsWith(listOf("原曲认知测验", "/原曲认知测验")) { raw ->
+            if (this !is GroupAtMessageEvent)
+                return@startsWith
+            val args = raw.toArgsList()
+            if (args.isEmpty()) {
+                reply(buildString {
+                    appendLine("使用方法：/原曲认知测验 [难度] [范围]")
+                    appendLine("\t例：/原曲认知测验 easy")
+                    appendLine("\t例：/原曲认知测验 lunatic 心绮楼后")
+                    appendLine("目前支持的难度：easy normal hard lunatic")
+                    appendLine("目前支持的范围：辉针城前 心绮楼后 全部")
+                })
+                return@startsWith
+            }
+            val difficulty = when (args[0].lowercase()) {
+                "easy" -> TouhouGuessGame.Difficulty.Easy
+                "normal" -> TouhouGuessGame.Difficulty.Normal
+                "hard" -> TouhouGuessGame.Difficulty.Hard
+                "lunatic" -> TouhouGuessGame.Difficulty.Lunatic
+                else -> {
+                    reply("格式有误，请使用 /原曲认知测验 查看说明。")
+                    return@startsWith
+                }
+            }
+            val range = when {
+                args.size < 2 || args[1] == "全部" -> TouhouGuessGame.Range.AllNew
+                args[1] == "辉针城前" -> TouhouGuessGame.Range.BeforeKishinjou
+                args[1] == "心绮楼后" -> TouhouGuessGame.Range.AfterShinkirou
+                args[1] == "弹幕作" -> TouhouGuessGame.Range.STGOnly
+                args[1] == "旧作" -> TouhouGuessGame.Range.Old
+                else -> {
+                    reply("格式有误，请使用 /原曲认知测验 查看说明。")
+                    return@startsWith
+                }
+            }
+            launch(Dispatchers.IO) {
+                TouhouGuessGame.start(this, difficulty, range)
+            }
+        }
     }
     Maimai.subscribe()
+    GlobalEventChannel.subscribePublicMessages(permName = "image.generate") {
+        startsWith("/生成") { raw ->
+            if (this is GuildAtMessageEvent) {
+                reply(buildString {
+                    appendLine("频道当前支持的模式如下：")
+                    appendLine()
+                    appendLine("[5000兆円欲しい] 指令为：")
+                    appendLine("\t/5k 第一行文本")
+                    appendLine("\t第二行文本")
+                    appendLine("[蔚蓝档案LOGO风格] 指令为：")
+                    appendLine("\t/ba 左侧文本 右侧文本")
+                }.trimEnd())
+                return@startsWith
+            }
+            val args = raw.toArgsList()
+            if (args.isEmpty() || (args.size == 1 && args.first() == "帮助")) {
+                reply(buildString {
+                    appendLine()
+                    append("群聊当前支持的模式如下：对称 球面化 反球面化 5k 蔚蓝档案logo")
+                    appendLine(MemeGenerator.getList())
+                    appendLine("使用”/生成 帮助 [模式]“来查看该模式的帮助说明。")
+                    appendLine("部分功能实现逻辑及资源文件来自 meme-generator")
+                }.trimEnd())
+                return@startsWith
+            }
+            when (args[0]) {
+                "对称" -> {
+                    val img = message.filterIsInstance<Image>().firstOrNull() ?: run {
+                        reply("使用生成命令时，请同时发送一张图片！")
+                        return@startsWith
+                    }
+                    reply(MessageChain(ImageGeneration.flipImage(img.url).map {
+                        it.toImage()
+                    }))
+                }
+                "球面化" -> {
+                    val img = message.filterIsInstance<Image>().firstOrNull() ?: run {
+                        reply("使用生成命令时，请同时发送一张图片！")
+                        return@startsWith
+                    }
+                    reply(ImageGeneration.spherize(img.url).toImage())
+                }
+                "反球面化" -> {
+                    val img = message.filterIsInstance<Image>().firstOrNull() ?: run {
+                        reply("使用生成命令时，请同时发送一张图片！")
+                        return@startsWith
+                    }
+                    reply(ImageGeneration.pincushion(img.url).toImage())
+                }
+                "5k" -> {
+                    val nowArgs = raw.trim().substringAfter("5k").toArgsListByLn()
+                    when (nowArgs.size) {
+                        0 -> reply("使用方法：\n/生成 5k 第一行文本\n第二行文本（可选）")
+                        1 -> reply(FiveThousandChoyen.generate(nowArgs.first().trim(), " ").encode(PNG).toImage())
+                        else -> reply(FiveThousandChoyen.generate(nowArgs[0].trim(), nowArgs[1].trim()).encode(PNG).toImage())
+                    }
+                }
+                "蔚蓝档案logo" -> {
+                    reply("使用方法：\n/ba 左侧文本 右侧文本")
+                }
+                "ba" -> {
+                    val nowArgs = raw.trim().substringAfter("ba").toArgsList()
+                    when (nowArgs.size) {
+                        2 -> reply(BlueArchiveLogo.draw(nowArgs[0].trim(), nowArgs[1].trim()).encode(PNG).toImage())
+                        else -> reply("使用方法：\n/ba 左侧文本 右侧文本")
+                    }
+                }
+                "帮助" -> {
+                    reply(when(val type = args[1]) {
+                        in listOf("对称", "球面化", "反球面化") -> "使用方法：\n/生成 模式 [图片]，使用时请务必发送一张图片！"
+                        "5k" -> "使用方法：\n/生成 5k 第一行文本\n第二行文本（可选）"
+                        in listOf("蔚蓝档案logo", "ba") -> "使用方法：\n/ba 左侧文本 右侧文本"
+                        else -> MemeGenerator.getHelpText(type)
+                    }.trimEnd().ifBlank { "未找到该类别" })
+                }
+                else -> {
+                    if (this !is GroupAtMessageEvent)
+                        return@startsWith
+                    kotlin.runCatching {
+                        reply(MemeGenerator.handle(
+                            args.first(),
+                            args.subArgsList(),
+                            message.filterIsInstance<RemoteImage>().map {
+                                it.getFile().readNativeImage().toMemeBuilder()
+                            }
+                        ).toImage())
+                    }.onFailure {
+                        when (it) {
+                            is TextOrNameNotEnoughException -> reply("文本长度过短，请使用 /生成 查看帮助。")
+                            is TextOverLengthException -> reply("文本长度过长，请缩短后再尝试")
+                            is UnsupportedOperationException -> reply("不存在该模式，请使用 /生成 查看帮助。")
+                            else -> {
+                                val help = MemeGenerator.getHelpText(args.first())
+                                reply("使用方法有误，可能缺少了必要的参数（如图片）。请使用 /生成 查看帮助。\n$help")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    GlobalEventChannel.subscribePublicMessages(permName = "text.stereotypes") {
+        startsWith("/发病") { name ->
+            if (name.isBlank()) {
+                reply("使用方法：/发病 名字")
+                return@startsWith
+            }
+            reply(RandomStereotypes.handle(name))
+        }
+    }
+    GlobalEventChannel.subscribePublicMessages(permName = "audio.voice") {
+        startsWith("/活字印刷") { text ->
+            if (text.isBlank()) {
+                reply("使用方法：/活字印刷 文本")
+                return@startsWith
+            }
+            OttoVoice.generate(text) ?.toVoice() ?.let {
+                reply(it)
+            }
+        }
+    }
 }
 
 fun main() {

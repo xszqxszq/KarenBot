@@ -2,6 +2,7 @@ package xyz.xszq.bot.maimai
 
 import com.soywiz.korim.format.PNG
 import com.soywiz.korim.format.encode
+import com.soywiz.korio.async.launch
 import com.soywiz.korio.file.std.localCurrentDirVfs
 import com.soywiz.korio.lang.substr
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -11,6 +12,7 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import xyz.xszq.bot.dao.MaimaiBinding
 import xyz.xszq.bot.dao.Permissions
+import xyz.xszq.bot.image.toJPEG
 import xyz.xszq.bot.maimai.MaimaiUtils.difficulties
 import xyz.xszq.bot.maimai.MaimaiUtils.getPlateVerList
 import xyz.xszq.bot.maimai.MaimaiUtils.levels
@@ -32,8 +34,8 @@ import kotlin.random.Random
 object Maimai {
     private val logger = KotlinLogging.logger("Maimai")
 
-    private val musics = MusicsInfo(logger)
-    val prober = DXProberClient()
+    val musics = MusicsInfo(logger)
+    val prober = DXProberClient(logger)
     val images = MaimaiImage(musics, logger, localCurrentDirVfs["maimai"])
     private val aliases = Aliases(musics)
     private val guessGame = GuessGame(musics, images, aliases)
@@ -64,7 +66,13 @@ object Maimai {
             musics.updateHot()
 
             logger.info { "正在更新别名数据……" }
-            aliases.updateXrayAliases(config.xrayAliasUrl)
+            kotlin.runCatching {
+                aliases.updateXrayAliases(config.xrayAliasUrl)
+            }.onFailure {
+                logger.error { "别名更新失败！" }
+            }.onSuccess {
+                logger.error { "别名更新成功！" }
+            }
 
             logger.info { "正在缓存歌曲封面中……" }
             images.downloadCovers(config, musics.getAll())
@@ -75,6 +83,17 @@ object Maimai {
             logger.info { "正在生成定数表中……" }
             images.preGenerateDsList()
             logger.info { "maimai 功能加载完成。" }
+        }
+        GlobalScope.launch {
+            delay(3600 * 1000L)
+            kotlin.runCatching {
+                aliases.updateXrayAliases(config.xrayAliasUrl)
+            }.onFailure {
+                it.printStackTrace()
+                logger.error { "别名定时更新失败！" }
+            }.onSuccess {
+                logger.error { "别名定时更新成功！" }
+            }
         }
     }
     fun testLoad() {
@@ -131,14 +150,14 @@ object Maimai {
                 reply(buildString {
                     appendLine("此指令可查询 maimai 相关信息。")
                     append("当前支持的子指令：查歌 bind b50 ap50 id info 是什么歌 有什么别名 定数查歌 分数线 进度")
-                    append(" 完成表 分数列表 随个 mai什么推分")
+                    append(" 完成表 分数列表 随个 mai什么推分 猜歌 设置猜歌")
                 })
             }
         }
         GlobalEventChannel.subscribePublicMessages("/mai", permName = "maimai") {
             startsWith("bind") { raw ->
                 val args = raw.toArgsList()
-                if (args.size != 2) {
+                if (args.size < 2) {
                     reply(buildString {
                         appendLine("使用方法（二选一，建议绑qq）：")
                         appendLine("/mai bind qq qq号")
@@ -150,12 +169,11 @@ object Maimai {
                     "qq" -> updateBindings(subjectId, "qq", args[1])
                     "username" -> updateBindings(subjectId, "username", args[1])
                     else -> {
-                        reply(buildString {
-                            appendLine("使用方法（二选一，建议绑qq）：")
-                            appendLine("/mai bind qq qq号")
-                            appendLine("/mai bind username 用户名")
-                        })
-                        return@startsWith
+                        val id = args[0]
+                        if (id.toLongOrNull() != null)
+                            updateBindings(subjectId, "qq", id)
+                        else
+                            updateBindings(subjectId, "username", id)
                     }
                 }
                 reply("绑定成功。")
@@ -182,6 +200,20 @@ object Maimai {
                     HttpStatusCode.Forbidden -> {
                         reply("该玩家已禁止他人查询成绩")
                     }
+                }
+            }
+            startsWith(listOf("mb50", "/mb50")) { arg ->
+                val (type, credential) =
+                    if (arg.isNotBlank()) Pair("username", arg)
+                    else queryBindings(subjectId) ?: run {
+                        reply(buildString {
+                            appendLine("使用方法：/mai b50 用户名")
+                            appendLine("您也可以使用 /mai bind 绑定查分器账号进行快速查询 (此绑定与查分器绑定无关)")
+                        })
+                        return@startsWith
+                    }
+                prober.getPlayerDataManually(type, credential)?.let { data ->
+                    reply(images.generateBest(data, subjectId).toImage())
                 }
             }
             startsWith(listOf("ap50", "/ap50")) { arg ->
@@ -223,7 +255,7 @@ object Maimai {
                 val result = musics.findByName(name)
                 when (result.size) {
                     0 -> {
-                        reply("未搜索到歌曲，请检查拼写。")
+                        reply("未搜索到歌曲，请检查拼写。\n按别名搜索请发送“XXX是什么歌”")
                     }
                     1 -> {
                         val music = result.first()
@@ -247,7 +279,7 @@ object Maimai {
                 val result = aliases.findByAlias(alias)
                 when (result.size) {
                     0 -> {
-                        reply("未找到相关歌曲。\n使用方法：XXX是什么歌")
+                        reply("未找到相关歌曲。\n使用方法：XXX是什么歌\n按歌曲名称查询请用/mai 查歌")
                     }
                     1 -> {
                         val music = result.first()
@@ -367,17 +399,28 @@ object Maimai {
             }
             levels.forEach { level ->
                 recordCategories.forEach { type ->
-                    startsWith("${level}${type}进度") { arg ->
+                    val commands = mutableListOf("${level}${type}进度")
+                    when (type) {
+                        "sss" -> commands.add("${level}将进度")
+                        "sss+" -> commands.add("${level}鸟加进度")
+                        "fc" -> commands.add("${level}极进度")
+                        "ap" -> commands.add("${level}神进度")
+                        "fdx" -> commands.add("${level}舞舞进度")
+                        "clear" -> commands.add("${level}霸者进度")
+                    }
+                    startsWith(commands) { arg ->
                         val data = getVersionData("all", arg, this) ?: return@startsWith
                         reply(musics.dsProgress(level, type, data.verList))
                     }
                 }
                 startsWith("${level}定数表") {
-                    reply(images.getImage("ds/${level}.png").encode(PNG).toImage())
+                    val result = images.getImage("ds/${level}.png")
+                    !reply(result.encode(PNG).toImage())
                 }
                 startsWith("${level}完成表") { arg ->
                     val data = getVersionData("all", arg, this) ?: return@startsWith
-                    reply(images.dsProgress(level, data.verList).toImage())
+                    val result = images.dsProgress(level, data.verList)
+                    reply(result.toImage())
                 }
                 startsWith("${level}分数列表") { raw ->
                     val args = raw.toArgsList()
@@ -530,10 +573,20 @@ object Maimai {
                     })
                 }
             }
+            // TODO: FINISH this
+            startsWith("添加别名") { raw ->
+                val args = raw.toArgsList()
+                if (args.size != 2) {
+                    reply("使用方法：/mai 添加别名 id 别名\n例：/mai 添加别名 834 潘")
+                    return@startsWith
+                }
+            }
         }
         GlobalEventChannel.subscribePublicMessages("/mai", permName = "maimai.guess") {
             equalsTo("猜歌") {
-                // guessGame.start(this)
+                launch(Dispatchers.IO) {
+                    guessGame.start(this)
+                }
             }
         }
     }

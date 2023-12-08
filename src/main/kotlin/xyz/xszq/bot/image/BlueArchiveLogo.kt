@@ -5,6 +5,7 @@ import com.soywiz.korim.bitmap.NativeImageOrBitmap32
 import com.soywiz.korim.bitmap.context2d
 import com.soywiz.korim.color.Colors
 import com.soywiz.korim.color.RGBA
+import com.soywiz.korim.font.Font
 import com.soywiz.korim.font.measureTextGlyphs
 import com.soywiz.korim.format.readNativeImage
 import com.soywiz.korim.text.TextAlignment
@@ -20,27 +21,31 @@ object BlueArchiveLogo {
     private const val paddingX: Int = 10
     private const val graphOffsetX: Int = -15
     private const val graphOffsetY: Int = 0
-    private val fonts = MultiPlatformNativeSystemFontProvider(localCurrentDirVfs["font"].absolutePath)
+    private val defaultFont = globalFontRegistry.loadFontByName("RoGSanSrfStd-Bd")
+        ?: globalFontRegistry.defaultFont()
+    private val fallbackFont = globalFontRegistry.loadFontByName("Glow Sans SC Normal Heavy")
+        ?: globalFontRegistry.defaultFont()
     private val hollowPath = listOf(
         Pair(284, 136),
         Pair(321, 153),
         Pair(159, 410),
         Pair(148, 403)
     )
-    private fun getFont(text: String): String {
-        val now = fonts.loadFontByName("RoGSanSrfStd-Bd")!!
+    private fun getFont(text: String): Font {
+        if (text.any { defaultFont[it] == null })
+            return fallbackFont
         text.forEach {
-            val glyphs = now.measureTextGlyphs(size.toDouble(), it.toString())
+            val glyphs = defaultFont.measureTextGlyphs(size.toDouble(), it.toString())
             if (it.code > 255 && glyphs.metrics.width < 16.0)
-                return "Glow Sans SC Normal Heavy"
+                return fallbackFont
         }
-        return "RoGSanSrfStd-Bd"
+        return defaultFont
     }
     suspend fun draw(textL: String, textR: String): Bitmap {
         val fontL = getFont(textL)
         val fontR = getFont(textR)
-        val textMetricsL = fonts.loadFontByName(fontL)!!.measureTextGlyphs(size.toDouble(), textL)
-        val textMetricsR = fonts.loadFontByName(fontR)!!.measureTextGlyphs(size.toDouble(), textR)
+        val textMetricsL = fontL.measureTextGlyphs(size.toDouble(), textL)
+        val textMetricsR = fontR.measureTextGlyphs(size.toDouble(), textR)
         val textWidthL = textMetricsL.metrics.width -
                 (textBaseLine * canvasHeight + textMetricsL.fmetrics.bottom - textMetricsL.fmetrics.baseline) *
                 horizontalTilt
@@ -60,8 +65,9 @@ object BlueArchiveLogo {
             fillStyle = RGBA(0x12, 0x8a, 0xfa, 0xff)
             // alignment = TextAlignment.RIGHT
             setTransform(1.0, 0.0, horizontalTilt, 1.0, 0.0, 0.0)
-            font = fonts.loadFontByName(fontL)
-            fillText(textL, canvasWidthL - textWidthL + 30 + if (fontL == "RoGSanSrfStd-Bd") 45 else 40, height * textBaseLine)
+            font = fontL
+            fillText(textL, canvasWidthL - textWidthL + 30 +
+                    if (fontL.name == "RoGSanSrfStd-Bd") 45 else 40, height * textBaseLine)
             setTransform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
             drawImage(
                 localCurrentDirVfs["image/BlueArchive/halo.png"].readNativeImage(),
@@ -75,7 +81,7 @@ object BlueArchiveLogo {
             strokeStyle = Colors.WHITE
             lineWidth = 12.0
             setTransform(1.0, 0.0, horizontalTilt, 1.0, 0.0, 0.0)
-            font = fonts.loadFontByName(fontR)
+            font = fontR
             strokeText(textR, canvasWidthL + 30, height * textBaseLine)
             fillStyle = Colors.BLACK
             fillText(textR, canvasWidthL + 30, height * textBaseLine)
