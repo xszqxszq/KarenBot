@@ -4,11 +4,15 @@ import com.sksamuel.scrimage.filter.Filter
 import com.soywiz.korau.sound.readAudioStream
 import com.soywiz.korau.sound.toData
 import com.soywiz.korau.sound.toSound
+import com.soywiz.korim.bitmap.NativeImage
+import com.soywiz.korim.color.Colors
+import com.soywiz.korim.color.RGBA
 import com.soywiz.korim.format.PNG
 import com.soywiz.korim.format.encode
 import com.soywiz.korim.format.showImageAndWait
 import com.soywiz.korio.file.std.localCurrentDirVfs
 import com.soywiz.korio.file.std.rootLocalVfs
+import com.soywiz.korma.geom.vector.arcTo
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import nu.pattern.OpenCV
@@ -157,16 +161,17 @@ suspend fun ByteArray.showImageAndWait() {
     file.delete()
 }
 suspend fun testMeme() {
+    BuildImage.init()
     OpenCV.loadLocally()
     config = BotConfig.load(localCurrentDirVfs["config.yml"])
-//    rootLocalVfs["D:/Temp/test.gif"].writeBytes(MemeGenerator.handle("我想上的",
-////        args = listOf("发种子"),
-//        images = listOf(BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]))
-//    ))
-    MemeGenerator.handle("注意力涣散",
-        args = listOf("ads"),
-        images = listOf(BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]),BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]))
-    ).showImageAndWait()
+    rootLocalVfs["D:/Temp/test.gif"].writeBytes(MemeGenerator.handle("波奇手稿",
+//        args = listOf("波奇手稿"),
+        images = listOf(BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]), BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]))
+    ))
+//    MemeGenerator.handle("不文明",
+////        args = listOf("可怜Bot"),
+//        images = listOf(BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]),BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]))
+//    ).showImageAndWait()
 //    BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]).rotate(-25.0).saveJpg().showImageAndWait()
 }
 fun showFonts() {
@@ -175,5 +180,5 @@ fun showFonts() {
     }
 }
 suspend fun main() {
-    println()
+    testMeme()
 }

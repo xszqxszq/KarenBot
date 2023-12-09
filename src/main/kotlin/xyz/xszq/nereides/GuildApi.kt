@@ -5,8 +5,6 @@ import com.soywiz.korio.file.baseName
 import io.github.oshai.kotlinlogging.KLogger
 import io.ktor.client.call.*
 import io.ktor.client.statement.*
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import xyz.xszq.nereides.message.*
 import xyz.xszq.nereides.payload.event.GuildAtMessageCreate
 import xyz.xszq.nereides.payload.message.MessageArk
@@ -14,6 +12,7 @@ import xyz.xszq.nereides.payload.message.MessageEmbed
 import xyz.xszq.nereides.payload.message.MessageMarkdown
 import xyz.xszq.nereides.payload.message.MessageReference
 import xyz.xszq.nereides.payload.post.PostChannelMessage
+import xyz.xszq.nereides.payload.user.GuildMember
 import xyz.xszq.nereides.payload.user.GuildUser
 
 interface GuildApi {
@@ -69,7 +68,8 @@ interface GuildApi {
         return response
     }
     suspend fun getBotInfo() = get("/users/@me").body<GuildUser>()
-    fun parseContent(data: GuildAtMessageCreate): MessageChain {
+    suspend fun getMember(guildId: String, userId: String) = get("/guilds/$guildId/members/$userId").body<GuildMember>()
+    suspend fun parseContent(data: GuildAtMessageCreate): MessageChain {
         val result = MessageChain()
 
         var str = data.content.trim()
@@ -86,7 +86,11 @@ interface GuildApi {
                 }
                 val message = when (type) {
                     "emoji" -> Face(1, r.groupValues[1])
-                    "at" -> At(r.groupValues[1])
+                    "at" -> {
+                        val id = r.groupValues[1]
+                        val member = getMember(data.guildId, id)
+                        GuildAt(member, member.user!!)
+                    }
                     else -> return@let
                 }
                 result += message

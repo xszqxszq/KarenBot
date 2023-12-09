@@ -2,7 +2,8 @@
 
 package xyz.xszq.bot.image
 
-import com.sksamuel.scrimage.filter.LensBlurFilter
+import com.sksamuel.scrimage.filter.Filter
+import com.sksamuel.scrimage.filter.GrayscaleFilter
 import com.sksamuel.scrimage.filter.MotionBlurFilter
 import com.sksamuel.scrimage.nio.AnimatedGif
 import com.sksamuel.scrimage.nio.AnimatedGifReader
@@ -12,22 +13,24 @@ import com.soywiz.korim.bitmap.Bitmap
 import com.soywiz.korim.bitmap.NativeImage
 import com.soywiz.korim.color.Colors
 import com.soywiz.korim.color.RGBA
+import com.soywiz.korim.font.Font
+import com.soywiz.korim.font.TtfFont
+import com.soywiz.korim.font.readTtfFont
 import com.soywiz.korim.format.PNG
 import com.soywiz.korim.format.encode
 import com.soywiz.korim.format.readNativeImage
 import com.soywiz.korim.text.HorizontalAlign
 import com.soywiz.korim.text.VerticalAlign
 import com.soywiz.korio.file.VfsFile
+import com.soywiz.korio.file.std.localCurrentDirVfs
 import com.soywiz.korio.net.MimeType
 import com.soywiz.korio.net.mimeType
 import com.soywiz.korma.geom.Size
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.opencv.core.Core
-import org.opencv.core.CvType.*
+import org.opencv.core.CvType.CV_32FC3
 import org.opencv.core.Mat
 import org.opencv.core.MatOfByte
-import org.opencv.core.MatOfPoint
 import org.opencv.core.MatOfPoint2f
 import org.opencv.core.Point
 import org.opencv.imgcodecs.Imgcodecs
@@ -58,8 +61,13 @@ class BuildImage(var image: Bitmap) {
     val isAnimated
         get() = rawGifFile != null
     fun copy() = BuildImage(image.clone())
-    fun convert(mode: String) = copy().apply {
-        this.mode = mode
+    suspend fun convert(mode: String) = when(mode) {
+        "L" -> {
+            BuildImage(image.toImmutableImage().filter(GrayscaleFilter()).toBitmap())
+        }
+        else -> copy().apply {
+            this.mode = mode
+        }
     }
     fun resize(
         size: Size,
@@ -148,13 +156,30 @@ class BuildImage(var image: Bitmap) {
             restore()
         })
     }
+    fun crop(bounds: List<Int>): BuildImage {
+        return BuildImage(NativeImage(bounds[2] - bounds[0], bounds[3] - bounds[1]).modify {
+            fillStyle = Colors.WHITE
+            fillRect(0, 0, this.width, this.height)
+            drawImage(image, -bounds[0], -bounds[1])
+        })
+    }
     fun square(): BuildImage {
         val length = min(width, height)
         return resizeCanvas(Size(length, length))
     }
-    fun circle(): BuildImage {
+    suspend fun circle(): BuildImage {
         val image = square().convert("RGBA").image
         val circle = getKorimCircle(max(image.width, image.height))
+
+        image.forEach { _, x, y ->
+            if (circle.getRgba(x, y).a == 0)
+                image.setRgba(x, y, RGBA(0, 0, 0, 0))
+        }
+        return BuildImage(image)
+    }
+    suspend fun circleCorner(r: Double): BuildImage {
+        val image = convert("RGBA").image
+        val circle = getKorimRoundedRectangle(r, width, height)
 
         image.forEach { _, x, y ->
             if (circle.getRgba(x, y).a == 0)
@@ -166,10 +191,15 @@ class BuildImage(var image: Bitmap) {
         img: Bitmap,
         pos: Pair<Int, Int> = Pair(0, 0),
         alpha: Boolean = false, // Useless, since all Bitmap is RGBA
-        below: Boolean = false
+        below: Boolean = false,
+        bgColor: RGBA? = null
     ): BuildImage {
         val newImage = if (below) NativeImage(width, height) else this.image.clone()
         newImage.modify {
+            bgColor ?.let {
+                fillStyle = bgColor
+                fillRect(0, 0, this.width, this.height)
+            }
             drawImage(img, pos.first, pos.second)
         }
         if (below)
@@ -201,7 +231,7 @@ class BuildImage(var image: Bitmap) {
         strokeFill: RGBA? = null,
         fontFallback: Boolean = true,
         fontName: String? = null,
-        fallbackFonts: List<String> = listOf()
+        fallbackFonts: List<String> = defaultFallbackFonts
     ): BuildImage {
         if (xy.size == 2) {
             Text2Image.fromText(
@@ -298,6 +328,44 @@ class BuildImage(var image: Bitmap) {
         }
         return this
     }
+    suspend fun colorMask(color: RGBA): BuildImage { // TODO: Fix this
+        val img = toMat()
+        val imgGray = Mat()
+        Imgproc.cvtColor(img, imgGray, Imgproc.COLOR_RGB2GRAY)
+        val imgHsl = Mat()
+        Imgproc.cvtColor(img, imgHsl, Imgproc.COLOR_RGB2HLS)
+        val imgNew = Mat.zeros(height, width, CV_32FC3)
+        val r = color.b
+        val g = color.g
+        val b = color.r
+        val rgbSum = r + g + b
+        for (i in 0 until height) {
+            for (j in 0 until width) {
+                val value = imgGray[i, j][0]
+                imgNew.put(i, j, if (rgbSum != 0) floatArrayOf(
+                    (value * r / rgbSum).toFloat(),
+                    (value * g / rgbSum).toFloat(),
+                    (value * b / rgbSum).toFloat()
+                ) else floatArrayOf(0.0f, 0.0f, 0.0f))
+            }
+        }
+        val imgNewHsl = Mat()
+        Imgproc.cvtColor(imgNew, imgNewHsl, Imgproc.COLOR_RGB2HLS)
+        val result = Mat(height, width, CV_32FC3)
+        for (i in 0 until height) {
+            for (j in 0 until width) {
+                result.put(i, j, floatArrayOf(
+                    imgNewHsl[i, j][0].toFloat(),
+                    imgHsl[i, j][1].toFloat(),
+                    imgNewHsl[i, j][2].toFloat()
+                ))
+            }
+        }
+        Imgproc.cvtColor(result, result, Imgproc.COLOR_HLS2RGB)
+        return BuildImage(result.toBufferedImage().toAwtNativeImage())
+    }
+    suspend fun filter(filter: Filter): BuildImage = BuildImage(image.toImmutableImage().filter(filter).toBitmap())
+
     suspend fun save(format: String): ByteArray = when (format) {
         "png" -> image.encode(PNG)
         in listOf("jpg", "jpeg") -> image.toJPEG()
@@ -316,7 +384,15 @@ class BuildImage(var image: Bitmap) {
         return img.save("png")
     }
     companion object {
-         fun new(mode: String, size: Size, color: RGBA? = null) =
+        val fonts = mutableMapOf<String, TtfFont>()
+        suspend fun init() {
+            val fontDir = localCurrentDirVfs["font"]
+            fontDir.list().collect {
+                val font = it.readTtfFont()
+                fonts[font.ttfName] = font
+            }
+        }
+        fun new(mode: String, size: Size, color: RGBA? = null) =
             BuildImage(NativeImage(size.width.toInt(), size.height.toInt()).modify {
                 if (mode != "RGBA" && color == null) {
                     fillStyle = Colors.BLACK
@@ -337,6 +413,32 @@ class BuildImage(var image: Bitmap) {
                 return builder
             }
             return BuildImage(file.readNativeImage())
+        }
+        val defaultFallbackFonts = listOf(
+            "Glow Sans SC Normal Book",
+            "Glow Sans SC Normal Regular",
+            "Glow Sans SC Normal Bold",
+            "Glow Sans SC Normal Heavy",
+            "Source Han Sans CN Bold",
+            "Source Han Serif SC Bold"
+        )
+        fun getProperFont(
+            text: String,
+            fontName: String? = null,
+            fallbackFonts: List<String> = defaultFallbackFonts,
+            defaultFontName: String = "Glow Sans SC Normal Book"
+        ): Font {
+            val fonts = fallbackFonts.toMutableList()
+            fontName ?.let {
+                fonts.add(0, it)
+            }
+            fonts.forEach { f ->
+                BuildImage.fonts[f] ?.let { font ->
+                    if (!text.any { font[it] == null })
+                        return font
+                }
+            }
+            return BuildImage.fonts[defaultFontName]!!
         }
     }
 }

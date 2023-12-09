@@ -1,6 +1,8 @@
 package xyz.xszq.bot.image
 
+import com.sksamuel.scrimage.DisposeMethod
 import com.sksamuel.scrimage.ImmutableImage
+import com.sksamuel.scrimage.filter.BufferedOpFilter
 import com.sksamuel.scrimage.nio.AnimatedGif
 import com.sksamuel.scrimage.nio.StreamingGifWriter
 import com.soywiz.korim.awt.toBMP32
@@ -8,21 +10,21 @@ import com.soywiz.korim.bitmap.Bitmap
 import com.soywiz.korim.bitmap.NativeImage
 import com.soywiz.korim.color.Colors
 import com.soywiz.korim.color.RGBA
-import com.soywiz.korim.font.Font
 import com.soywiz.korim.format.PNG
 import com.soywiz.korim.format.encode
 import com.soywiz.korim.vector.Context2d
 import com.soywiz.korio.file.std.localCurrentDirVfs
 import com.soywiz.korma.geom.Angle
 import com.soywiz.korma.geom.vector.arc
-import org.checkerframework.checker.units.qual.m
+import com.soywiz.korma.geom.vector.arcTo
 import org.opencv.core.Mat
 import org.opencv.core.MatOfByte
 import org.opencv.imgcodecs.Imgcodecs
+import thirdparty.jhlabs.image.GaussianFilter
 import xyz.xszq.bot.maimai.MultiPlatformNativeSystemFontProvider
 import xyz.xszq.config
 import java.awt.image.BufferedImage
-import java.awt.image.DataBufferByte
+import java.awt.image.BufferedImageOp
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.time.Duration
@@ -58,9 +60,19 @@ fun ImmutableImage.toBitmap(): Bitmap = toNewBufferedImage(BufferedImage.TYPE_IN
 enum class FrameAlignPolicy {
     NoExtend, ExtendFirst, ExtendLast, ExtendLoop
 }
+suspend fun makePngOrGif(
+    img: BuildImage,
+    func: suspend BuildImage.() -> BuildImage
+): ByteArray {
+    if (!img.isAnimated)
+        return func(img).image.encode(PNG)
+    val duration = getAvgDuration(img.rawGifFile!!) / 1000.0
+    val frames = splitGif(img.rawGifFile!!).map { frame -> func(BuildImage(frame)).image }
+    return saveGif(frames, duration)
+}
 suspend fun makeJpgOrGif(
     img: BuildImage,
-    func: BuildImage.() -> BuildImage
+    func: suspend BuildImage.() -> BuildImage
 ): ByteArray {
     if (!img.isAnimated)
         return func(img).image.toJPEG()
@@ -74,7 +86,7 @@ suspend fun makeGifOrCombinedGif(
     duration: Double,
     frameAlign: FrameAlignPolicy = FrameAlignPolicy.NoExtend,
     inputBased: Boolean = false,
-    maker: BuildImage.(Int) -> BuildImage
+    maker: suspend BuildImage.(Int) -> BuildImage
 ): ByteArray {
     if (!img.isAnimated)
         return saveGif((0 until frameNum).map { i -> maker(img, i).image }, duration)
@@ -142,24 +154,6 @@ fun List<String>.ifBlank(defaultValue: () -> String): String {
     return defaultValue()
 }
 val globalFontRegistry = MultiPlatformNativeSystemFontProvider(localCurrentDirVfs["font"].absolutePath)
-fun getProperFont(
-    text: String,
-    fontName: String? = null,
-    fallbackFonts: List<String> = listOf(),
-    defaultFontName: String = "Glow Sans SC Normal Book"
-): Font {
-    val fonts = fallbackFonts.toMutableList()
-    fontName ?.let {
-        fonts.add(0, it)
-    }
-    fonts.forEach { f ->
-        globalFontRegistry.loadFontByName(f) ?.let { font ->
-            if (text.all { font[it] != null })
-                return font
-        }
-    }
-    return globalFontRegistry.loadFontByName(defaultFontName)!!
-}
 suspend fun Bitmap.toImmutableImage(): ImmutableImage = ImmutableImage.loader().fromBytes(encode(PNG)).toImmutableImage()
 suspend fun saveGif(frames: List<Bitmap>, duration: Double): ByteArray {
     val output = encodeGif(frames, (duration * 1000L).toLong())
@@ -177,7 +171,7 @@ suspend fun encodeGif(frames: List<Bitmap>, duration: Long, compressed: Boolean 
     val os = ByteArrayOutputStream()
     writer.prepareStream(os, BufferedImage.TYPE_INT_ARGB).use { gifStream ->
         frames.forEach {
-            gifStream.writeFrame(it.toImmutableImage())
+            gifStream.writeFrame(it.toImmutableImage(), DisposeMethod.RESTORE_TO_BACKGROUND_COLOR)
         }
     }
     os.close()
@@ -199,3 +193,38 @@ fun getKorimCircle(size: Int, color: RGBA = Colors.WHITE, bg: RGBA = RGBA(0, 0, 
         fillStyle = color
         fill()
     }
+fun getKorimRoundedRectangle(r1: Double, width: Int, height: Int, color: RGBA = Colors.WHITE, bg: RGBA = RGBA(0, 0, 0, 0)) =
+    NativeImage(width * 5, height * 5).modify {
+        fillStyle = bg
+        fillRect(0, 0, width, height)
+        val w = width.toDouble() * 5
+        val h = height.toDouble() * 5
+
+        val r = if (w < 2 * r1 * 5) w / 2.0 else if (h < 2 * r1 * 5) h / 2.0 else r1 * 5
+        beginPath()
+        this.moveTo(r, 0.0)
+        this.arcTo(w, 0.0, w, h, r)
+        this.arcTo(w, h, 0.0, h, r)
+        this.arcTo(0.0, h, 0.0, 0.0, r)
+        this.arcTo(0.0, 0.0, w, 0.0, r)
+        this.close()
+        fillStyle = color
+        fill()
+    }.toBMP32().scaled(width, height, true)
+fun Bitmap.alpha(amount: Int): Bitmap {
+    val result = clone()
+    result.forEach { _, x, y ->
+        val rgba = result.getRgba(x, y)
+        result.setRgba(x, y, RGBA(rgba.r, rgba.g, rgba.b, amount))
+    }
+    return result
+}
+
+
+class GaussianBlurFilter @JvmOverloads constructor(private val radius: Double = 2.0) : BufferedOpFilter() {
+    override fun op(): BufferedImageOp {
+        return GaussianFilter(radius.toFloat())
+    }
+}
+
+

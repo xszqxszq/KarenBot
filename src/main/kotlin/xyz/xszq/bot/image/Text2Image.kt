@@ -1,12 +1,16 @@
 package xyz.xszq.bot.image
 
 import com.soywiz.korim.bitmap.Bitmap
+import com.soywiz.korim.bitmap.NativeImage
 import com.soywiz.korim.bitmap.context2d
 import com.soywiz.korim.color.Colors
 import com.soywiz.korim.color.RGBA
 import com.soywiz.korim.font.Font
 import com.soywiz.korim.font.measureTextGlyphs
 import com.soywiz.korim.text.HorizontalAlign
+import xyz.xszq.bot.image.BuildImage.Companion.defaultFallbackFonts
+import xyz.xszq.bot.image.BuildImage.Companion.getProperFont
+import java.lang.annotation.Native
 import kotlin.properties.Delegates
 
 class Text2Image(
@@ -58,6 +62,51 @@ class Text2Image(
         lines = newLines
         return this
     }
+    fun toImage(bgColor: RGBA? = null, padding: List<Int> = listOf(0, 0)): Bitmap {
+        var paddingLeft = padding[0]
+        var paddingRight = padding[0]
+        var paddingTop = padding[1]
+        var paddingBottom = padding[1]
+        if (padding.size == 4) {
+            paddingLeft = padding[0]
+            paddingTop = padding[1]
+            paddingRight = padding[2]
+            paddingBottom = padding[3]
+        }
+        return NativeImage(
+            width.toInt() + paddingLeft + paddingRight,
+            height.toInt() + paddingTop + paddingBottom
+        ).modify {
+            bgColor?.let {
+                fillStyle = it
+                fillRect(0, 0, this.width, this.height)
+            }
+            var top = paddingTop.toDouble()
+            kotlin.runCatching {
+                lines.forEach { line ->
+                    font = line.font
+                    fontSize = line.fontSize.toDouble()
+                    val (x, y) = Pair(paddingLeft.toDouble() + when (line.align) {
+                        HorizontalAlign.CENTER -> (width - line.width) / 2
+                        HorizontalAlign.RIGHT -> width - line.width
+                        else -> 0.0
+                    }, top + line.ascent)
+                    strokeFill ?.let {
+                        if (strokeWidth != 0.0) {
+                            lineWidth = strokeWidth
+                            strokeStyle = it
+                            strokeText(line.chars, x, y)
+                        }
+                    }
+                    fillStyle = fill
+                    fillText(line.chars, x, y)
+                    top += line.ascent + spacing
+                }
+            }.onFailure {
+                it.printStackTrace()
+            }
+        }
+    }
     companion object {
 
         fun fromText(
@@ -65,19 +114,20 @@ class Text2Image(
             fontSize: Int = 16,
             fill: RGBA = Colors.BLACK,
             spacing: Int = 4,
-            align: HorizontalAlign = HorizontalAlign.CENTER,
+            align: HorizontalAlign = HorizontalAlign.LEFT,
             strokeWidth: Int = 0,
             strokeFill: RGBA? = null,
             fontFallback: Boolean = true,
             fontName: String? = null,
-            fallbackFonts: List<String> = listOf()
+            fallbackFonts: List<String> = defaultFallbackFonts
         ): Text2Image {
             if (!fontFallback) {
                 if (fontName.isNullOrBlank())
                     throw IllegalArgumentException("`fontFallback` 为 `false` 时必须指定 `fontName`")
             }
 
-            return Text2Image(text.split('\n', '\r').map { Line(it, align, fontSize, getProperFont(
+            return Text2Image(text.split('\n', '\r').map {
+                Line(it, align, fontSize, getProperFont(
                 it, fontName=fontName, fallbackFonts=fallbackFonts)
             ) }, spacing, fill, strokeWidth.toDouble(), strokeFill)
         }

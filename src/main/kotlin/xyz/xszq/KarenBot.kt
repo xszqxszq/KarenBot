@@ -6,6 +6,7 @@ import com.soywiz.korim.format.readNativeImage
 import com.soywiz.korio.async.launch
 import com.soywiz.korio.file.std.localCurrentDirVfs
 import com.soywiz.korio.file.std.rootLocalVfs
+import com.soywiz.korio.file.std.toVfs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import nu.pattern.OpenCV
@@ -27,14 +28,11 @@ import xyz.xszq.bot.maimai.QueueForArcades
 import xyz.xszq.bot.text.AutoQA
 import xyz.xszq.bot.text.Bilibili
 import xyz.xszq.bot.text.RandomStereotypes
-import xyz.xszq.nereides.Bot
+import xyz.xszq.nereides.*
 import xyz.xszq.nereides.event.GlobalEventChannel
 import xyz.xszq.nereides.event.GroupAtMessageEvent
 import xyz.xszq.nereides.event.GuildAtMessageEvent
 import xyz.xszq.nereides.message.*
-import xyz.xszq.nereides.subArgsList
-import xyz.xszq.nereides.toArgsList
-import xyz.xszq.nereides.toArgsListByLn
 import kotlin.random.Random
 
 lateinit var database: Database
@@ -56,6 +54,8 @@ suspend fun init() {
     launch(Dispatchers.IO) {
         QueueForArcades.init()
     }
+
+    BuildImage.init()
 
     RandomImage.load("reply")
     RandomImage.load("gif", "reply")
@@ -295,53 +295,56 @@ fun subscribe() {
     }
     Maimai.subscribe()
     GlobalEventChannel.subscribePublicMessages(permName = "image.generate") {
-        startsWith("/生成") { raw ->
-            if (this is GuildAtMessageEvent) {
-                reply(buildString {
-                    appendLine("频道当前支持的模式如下：")
-                    appendLine()
-                    appendLine("[5000兆円欲しい] 指令为：")
-                    appendLine("\t/5k 第一行文本")
-                    appendLine("\t第二行文本")
-                    appendLine("[蔚蓝档案LOGO风格] 指令为：")
-                    appendLine("\t/ba 左侧文本 右侧文本")
-                }.trimEnd())
-                return@startsWith
-            }
+        startsWith(listOf("生成", "/生成")) { raw ->
             val args = raw.toArgsList()
+            val images = when (this) {
+                is GroupAtMessageEvent -> message.filterIsInstance<RemoteImage>().map {
+                    it.getFile().readNativeImage()
+                }
+                is GuildAtMessageEvent -> {
+                    message.filterIsInstance<GuildAt>().filter { it.target != bot.botGuildInfo.id }
+                        .map { it.user.avatar }.ifEmpty { listOf(author.avatar) }.map {
+                            NetworkUtils.downloadTempFile(it)!!.toVfs().readNativeImage()
+                        }
+                }
+                else -> return@startsWith
+            }
             if (args.isEmpty() || (args.size == 1 && args.first() == "帮助")) {
                 reply(buildString {
                     appendLine()
-                    append("群聊当前支持的模式如下：对称 球面化 反球面化 5k 蔚蓝档案logo")
+                    append("当前支持的模式如下：对称 球面化 反球面化 5k 蔚蓝档案logo")
                     appendLine(MemeGenerator.getList())
                     appendLine("使用”/生成 帮助 [模式]“来查看该模式的帮助说明。")
+                    if (this@startsWith is GuildAtMessageEvent) {
+                        appendLine("由于频道机器人无法接收图片，因此在使用本命令时，可以@自己或别人来将头像作为参数传入。")
+                    }
                     appendLine("部分功能实现逻辑及资源文件来自 meme-generator")
                 }.trimEnd())
                 return@startsWith
             }
             when (args[0]) {
                 "对称" -> {
-                    val img = message.filterIsInstance<Image>().firstOrNull() ?: run {
+                    val img = images.firstOrNull() ?: run {
                         reply("使用生成命令时，请同时发送一张图片！")
                         return@startsWith
                     }
-                    reply(MessageChain(ImageGeneration.flipImage(img.url).map {
+                    reply(MessageChain(ImageGeneration.flipImage(img).map {
                         it.toImage()
                     }))
                 }
                 "球面化" -> {
-                    val img = message.filterIsInstance<Image>().firstOrNull() ?: run {
+                    val img = images.firstOrNull() ?: run {
                         reply("使用生成命令时，请同时发送一张图片！")
                         return@startsWith
                     }
-                    reply(ImageGeneration.spherize(img.url).toImage())
+                    reply(ImageGeneration.spherize(img).toImage())
                 }
                 "反球面化" -> {
-                    val img = message.filterIsInstance<Image>().firstOrNull() ?: run {
+                    val img = images.firstOrNull() ?: run {
                         reply("使用生成命令时，请同时发送一张图片！")
                         return@startsWith
                     }
-                    reply(ImageGeneration.pincushion(img.url).toImage())
+                    reply(ImageGeneration.pincushion(img).toImage())
                 }
                 "5k" -> {
                     val nowArgs = raw.trim().substringAfter("5k").toArgsListByLn()
@@ -370,15 +373,11 @@ fun subscribe() {
                     }.trimEnd().ifBlank { "未找到该类别" })
                 }
                 else -> {
-                    if (this !is GroupAtMessageEvent)
-                        return@startsWith
                     kotlin.runCatching {
                         reply(MemeGenerator.handle(
                             args.first(),
                             args.subArgsList(),
-                            message.filterIsInstance<RemoteImage>().map {
-                                it.getFile().readNativeImage().toMemeBuilder()
-                            }
+                            images.map { it.toMemeBuilder() }
                         ).toImage())
                     }.onFailure {
                         when (it) {
@@ -387,7 +386,7 @@ fun subscribe() {
                             is UnsupportedOperationException -> reply("不存在该模式，请使用 /生成 查看帮助。")
                             else -> {
                                 val help = MemeGenerator.getHelpText(args.first())
-                                reply("使用方法有误，可能缺少了必要的参数（如图片）。请使用 /生成 查看帮助。\n$help")
+                                reply("使用方法有误，可能缺少了必要的参数（如图片或者文本）。请使用 /生成 查看帮助。\n$help")
                             }
                         }
                     }
@@ -396,7 +395,7 @@ fun subscribe() {
         }
     }
     GlobalEventChannel.subscribePublicMessages(permName = "text.stereotypes") {
-        startsWith("/发病") { name ->
+        startsWith(listOf("发病", "/发病")) { name ->
             if (name.isBlank()) {
                 reply("使用方法：/发病 名字")
                 return@startsWith
@@ -405,7 +404,7 @@ fun subscribe() {
         }
     }
     GlobalEventChannel.subscribePublicMessages(permName = "audio.voice") {
-        startsWith("/活字印刷") { text ->
+        startsWith(listOf("活字印刷", "/活字印刷")) { text ->
             if (text.isBlank()) {
                 reply("使用方法：/活字印刷 文本")
                 return@startsWith
@@ -416,12 +415,12 @@ fun subscribe() {
         }
     }
 }
-
+lateinit var bot: Bot
 fun main() {
     runBlocking {
         init()
     }
-    val bot = Bot(
+    bot = Bot(
         appId = config.appId,
         clientSecret = config.clientSecret,
         easyToken = config.token

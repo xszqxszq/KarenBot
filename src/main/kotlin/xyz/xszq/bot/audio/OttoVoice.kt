@@ -50,7 +50,8 @@ object OttoVoice {
         }
         return FFMpegTask(FFMpegFileType.MP3) {
             files.forEach { input(it) }
-            filterComplex("[0:0][1:0][2:0][3:0]concat=n=${files.size}:v=0:a=1[out]")
+            filterComplex(List(files.size) { index -> "[$index:0]"}.joinToString("") +
+                    "concat=n=${files.size}:v=0:a=1[out]")
             map("[out]")
         }.getResult()
     }
