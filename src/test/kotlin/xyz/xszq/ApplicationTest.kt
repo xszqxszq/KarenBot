@@ -164,8 +164,8 @@ suspend fun testMeme() {
     BuildImage.init()
     OpenCV.loadLocally()
     config = BotConfig.load(localCurrentDirVfs["config.yml"])
-    rootLocalVfs["D:/Temp/test.gif"].writeBytes(MemeGenerator.handle("波奇手稿",
-//        args = listOf("波奇手稿"),
+    rootLocalVfs["D:/Temp/test.gif"].writeBytes(MemeGenerator.handle("追列车",
+        args = listOf("可怜Bot", "阿斯蒂芬"),
         images = listOf(BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]), BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]))
     ))
 //    MemeGenerator.handle("不文明",

@@ -26,6 +26,7 @@ import com.soywiz.korio.file.std.localCurrentDirVfs
 import com.soywiz.korio.net.MimeType
 import com.soywiz.korio.net.mimeType
 import com.soywiz.korma.geom.Size
+import com.soywiz.korma.geom.degrees
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.opencv.core.CvType.CV_32FC3
@@ -35,6 +36,8 @@ import org.opencv.core.MatOfPoint2f
 import org.opencv.core.Point
 import org.opencv.imgcodecs.Imgcodecs
 import org.opencv.imgproc.Imgproc
+import xyz.xszq.nereides.imageType
+import xyz.xszq.nereides.radTo180Deg
 import java.io.File
 import kotlin.math.*
 
@@ -134,21 +137,29 @@ class BuildImage(var image: Bitmap) {
         bgColor: RGBA? = null
     ) = resize(Size(this.width * height / this.height, height), resample, keepRatio, inside, direction, bgColor)
     fun rotate(angle: Double, expand: Boolean = false): BuildImage {
-        val beta = -angle * Math.PI / 180.0
+        val beta = (-angle).degrees.radians.radTo180Deg()
         val alpha = beta.absoluteValue
-        val newWidth = image.width * cos(alpha) + image.height * sin(alpha)
-        val newHeight = image.width * sin(alpha) + image.height * cos(alpha)
-        val xOffset = if (beta > 0) image.height * sin(alpha) else 0.0
-        val yOffset = if (beta < 0) image.width * sin(alpha) else 0.0
+        val newWidth = image.width * cos(alpha).absoluteValue + image.height * sin(alpha)
+        val newHeight = image.width * sin(alpha) + image.height * cos(alpha).absoluteValue
+        val xOffset = when {
+            beta >= Math.PI / 2.0 -> newWidth
+            beta <= -Math.PI / 2.0 -> width * cos(alpha).absoluteValue
+            beta > 0.0 -> image.height * sin(alpha)
+            else -> 0.0
+        }
+        val yOffset = when {
+            beta >= Math.PI / 2.0 -> height * cos(alpha).absoluteValue
+            beta <= -Math.PI / 2.0 -> newHeight
+            beta < 0.0 -> image.width * sin(alpha)
+            else -> 0.0
+        }
         return BuildImage(when {
             !expand -> NativeImage(width, height)
-            beta.absoluteValue == 90.0 -> NativeImage(height, width)
             else -> NativeImage(newWidth.toInt(), newHeight.toInt())
         }.modify {
             save()
             when {
                 !expand -> translate(xOffset - (newWidth - width) / 2.0, yOffset - (newHeight - height) / 2.0)
-                beta.absoluteValue == 90.0 -> {}
                 else -> translate(xOffset, yOffset)
             }
             rotate(beta)
@@ -283,23 +294,22 @@ class BuildImage(var image: Bitmap) {
         val pointsH = points.toList().map { it.y }
         val newW = pointsW.max() - pointsW.min()
         val newH = pointsH.max() - pointsH.min()
-        val img = resize(Size(newW, newH)).toMat()
         val warpMat = Imgproc.getPerspectiveTransform(MatOfPoint2f(
             Point(0.0, 0.0),
             Point(width.toDouble(), 0.0),
-            Point(0.0, height.toDouble()),
-            Point(width.toDouble(), height.toDouble())
+            Point(width.toDouble(), height.toDouble()),
+            Point(0.0, height.toDouble())
         ), points)
         val destImage = Mat()
-        Imgproc.warpPerspective(img, destImage, warpMat, img.size())
+        Imgproc.warpPerspective(toMat(), destImage, warpMat, org.opencv.core.Size(newW, newH))
         return BuildImage(destImage.toBufferedImage().toAwtNativeImage())
     }
     suspend fun perspective(points: List<Pair<Int, Int>>): BuildImage = perspective(
         MatOfPoint2f(
             Point(points[0].first.toDouble(), points[0].second.toDouble()),
             Point(points[1].first.toDouble(), points[1].second.toDouble()),
-            Point(points[3].first.toDouble(), points[3].second.toDouble()),
-            Point(points[2].first.toDouble(), points[2].second.toDouble())
+            Point(points[2].first.toDouble(), points[2].second.toDouble()),
+            Point(points[3].first.toDouble(), points[3].second.toDouble())
         )
     )
     suspend fun motionBlur(angle: Double = 0.0, degree: Int): BuildImage {

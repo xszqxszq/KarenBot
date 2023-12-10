@@ -3,6 +3,7 @@
 package xyz.xszq.bot.image
 
 import com.sksamuel.scrimage.filter.BrightnessFilter
+import com.sksamuel.scrimage.filter.InvertFilter
 import com.soywiz.korim.bitmap.Bitmap
 import com.soywiz.korim.bitmap.NativeImage
 import com.soywiz.korim.color.Colors
@@ -11,8 +12,10 @@ import com.soywiz.korim.text.HorizontalAlign
 import com.soywiz.korim.text.VerticalAlign
 import com.soywiz.korio.file.std.localCurrentDirVfs
 import com.soywiz.korma.geom.Size
+import com.soywiz.korma.geom.degrees
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
+import xyz.xszq.bot.text.LibreTranslate
 import xyz.xszq.nereides.hexToRGBA
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -189,7 +192,6 @@ object MemeGenerator {
             else -> alwaysAlways(img, true)
         }
     }
-
     @Meme(
         "我永远喜欢",
         help = "需要附带一对或多对文字+图片，且文字数量需要与图片相等\n\t例：/生成 我永远喜欢 心爱 [图片]\n\t例：/生成 我永远喜欢 心爱 虹夏 [图片] [图片]"
@@ -2082,7 +2084,7 @@ object MemeGenerator {
             Pair(Pair(-66, 36), listOf(Pair(0, 0), Pair(182, 5), Pair(184, 194), Pair(1, 185))),
             Pair(Pair(-231, 55), listOf(Pair(0, 0), Pair(259, 4), Pair(276, 281), Pair(13, 278))),
         )
-        val img = images[0].convert("RGBA").square().resize(Size(100, 100))
+        val img = images[0].convert("RGBA").square().resize(Size(150, 150))
         val imgs = locs.map { (_, points) ->
             img.perspective(points)
         }
@@ -2775,6 +2777,940 @@ object MemeGenerator {
             frame.paste(img.perspective(points), pos,  below=true).image
         }
         saveGif(frames, 0.08)
+    }
 
+    @Meme("小天使", help = "需要发送昵称和头像")
+    val littleAngel: Maker = { images, texts ->
+        val imgW = 500
+        val imgH = images[0].heightIfResized(500)
+        val frame = BuildImage.new("RGBA", Size(600, imgH + 230), Colors.WHITE)
+        var text = "非常可爱！简直就是小天使"
+        frame.drawText(
+            listOf(10, imgH + 120, 590,  imgH + 185), text, maxFontSize=48
+        )
+
+        val ta = if (texts.size >= 2 && texts[1].isNotBlank()) texts[1] else "她"
+        text = "${ta}没失踪也没怎么样  我只是觉得你们都该看一下"
+        frame.drawText(
+            listOf(20, imgH + 180, 580,  imgH + 215), text, maxFontSize=26
+        )
+
+        val name = texts[0]
+        text = "请问你们看到${name}了吗?"
+        kotlin.runCatching {
+            frame.drawText(
+                listOf(20, 0, 580,  110), text, maxFontSize=70, minFontSize=25
+            )
+        }.onFailure {
+            throw TextOverLengthException()
+        }
+
+        makeJpgOrGif(images[0]) {
+            val img = convert("RGBA").resizeWidth(500)
+            frame.copy().paste(img, Pair((300 - imgW / 2),  110),  alpha=true)
+        }
+    }
+    @Meme("看扁", help="可以自定义比例和文本。\n\t例：/生成 看扁 4.0\n\t例：/生成 看扁 0.5 可恶...被人看高了")
+    val look_flat: Maker = { images, texts ->
+        val text = if (texts.size >= 2 && texts[1].isNotBlank()) texts[1] else "可恶...被人看扁了"
+        val ratio = if (texts.isNotEmpty()) texts[0].toDoubleOrNull() ?: 3.0 else 3.0
+
+        val imgW = 500
+        val textH = 80
+        val textFrame = BuildImage.new("RGBA", Size(imgW, textH), Colors.WHITE)
+        kotlin.runCatching {
+            textFrame.drawText(
+                listOf(10, 0, imgW - 10,  textH),
+                text,
+                maxFontSize=55,
+                minFontSize=30
+            )
+        }.onFailure {
+            throw TextOverLengthException()
+        }
+
+        makeJpgOrGif(images[0]) {
+            var img = convert("RGBA").resizeWidth(imgW)
+            img = img.resize(Size(imgW, (img.height / ratio).toInt()))
+            val imgH = img.height
+            val frame = BuildImage.new("RGBA", Size(imgW, imgH + textH), Colors.WHITE)
+            frame.paste(img,  alpha=true).paste(textFrame, Pair(0,  imgH),  alpha=true)
+        }
+
+    }
+    @Meme("咖波说")
+    val capooSay: Maker = { _, rawTexts ->
+        val capooSayOneLoop: suspend (String) -> List<Bitmap> =  { text ->
+            val textFrame = BuildImage.new("RGBA", Size(80, 80))
+            kotlin.runCatching {
+                textFrame.drawText(
+                    listOf(0, 0, 80, 80),
+                    text,
+                    maxFontSize = 80,
+                    minFontSize = 20,
+                    allowWrap = true,
+                    fontName = "FZKaTong-M19S",
+                    linesAlign = HorizontalAlign.CENTER,
+                )
+            }.onFailure {
+                throw TextOverLengthException()
+            }
+
+            val params = listOf(
+                null,
+                null,
+                null,
+                listOf(45, 45, 74, 112, 25),
+                listOf(73, 73, 41, 42, 17),
+                listOf(80, 80, 43, 36, 0),
+                listOf(80, 80, 43, 30, 0),
+                listOf(78, 78, 44, 30, 0),
+                listOf(78, 78, 44, 29, 0),
+                null,
+            )
+
+            (0 until 10).mapNotNull {
+                val frame = BuildImage.open(imgDir["capoo_say/$it.png"])
+                val param = params[it]
+                if (param != null) {
+                    val (x, y, w, h, angle) = param
+                    frame.paste(
+                        textFrame.resize(Size(x, y)).rotate(angle.toDouble(), expand = true), Pair(w, h), alpha = true
+                    ).image
+                } else {
+                    null
+                }
+            }
+        }
+        val texts = if (rawTexts.isEmpty() || rawTexts.first().isBlank()) listOf("寄") else rawTexts
+        val frames = texts.map { capooSayOneLoop(it) }.flatten()
+        saveGif(frames, 0.1)
+
+    }
+    class HandArgs(parser: ArgParser) {
+        val pos by parser.storing("枪的位置").default("left")
+    }
+    @Meme("手枪", help = "可以用 --pos <位置> 指定枪的位置，如left, right, both")
+    val gun: Maker = { images, texts ->
+        val frame = images[0].convert("RGBA").resize(Size(500, 500), keepRatio = true)
+        val gun = BuildImage.open(imgDir["gun/0.png"])
+        val args = ArgParser(texts.toTypedArray()).parseInto(::HandArgs)
+        val position = args.pos
+        val left = position in listOf("left", "both")
+        val right = position in listOf("right", "both")
+        if (left) {
+            frame.paste(gun, alpha = true)
+        }
+        if (right) {
+            frame.paste(gun.image.toImmutableImage().flipX().toBitmap(), alpha = true)
+        }
+        frame.saveJpg()
+    }
+    @Meme("奶茶")
+    val bubbleTea: Maker = { images, texts ->
+        val frame = images[0].convert("RGBA").resize(Size(500, 500), keepRatio = true)
+        val bubbleTea = BuildImage.open(imgDir["bubble_tea/0.png"])
+        val args = ArgParser(texts.toTypedArray()).parseInto(::HandArgs)
+        val position = args.pos
+        if (position in listOf("right", "both")) {
+            frame.paste(bubbleTea, alpha = true)
+        }
+        if (position in listOf("left", "both")) {
+            frame.paste(bubbleTea.image.toImmutableImage().flipX().toBitmap(), alpha = true)
+        }
+        frame.saveJpg()
+    }
+    @Meme("入典", "典中典,黑白草图")
+    val dianzhongdian: Maker =  { images, rawTexts ->
+        val maker: suspend (BuildImage, String, String) -> ByteArray = { image, text, trans ->
+            val img = image.convert("L").resizeWidth(500)
+            val textImg1 = BuildImage.new("RGBA", Size(500, 60))
+            val textImg2 = BuildImage.new("RGBA", Size(500, 35))
+
+            kotlin.runCatching {
+                textImg1.drawText(
+                    listOf(20, 0, textImg1.width - 20, textImg1.height),
+                    text,
+                    maxFontSize = 50,
+                    minFontSize = 25,
+                    fill = Colors.WHITE,
+                )
+            }.onFailure {
+                throw TextOverLengthException()
+            }
+
+            kotlin.runCatching {
+                textImg2.drawText(
+                    listOf(20, 0, textImg2.width - 20, textImg2.height),
+                    trans,
+                    maxFontSize = 25,
+                    minFontSize = 10,
+                    fill = Colors.WHITE,
+                )
+            }.onFailure {
+                throw TextOverLengthException()
+            }
+
+            val frame = BuildImage.new("RGBA", Size(500, img.height + 100), Colors.BLACK)
+            frame.paste(img, alpha = true)
+            frame.paste(textImg1, Pair(0, img.height), alpha = true)
+            frame.paste(textImg2, Pair(0, img.height + 60), alpha = true)
+            frame.saveJpg()
+        }
+
+        val texts = if (rawTexts.isEmpty() || rawTexts.first().isBlank()) listOf("救命啊") else rawTexts
+        val (text, trans) = if (texts.size == 1) {
+            Pair(texts[0], LibreTranslate.translate(texts[0], LibreTranslate.Language.Auto, LibreTranslate.Language.Japanese))
+        } else {
+            Pair(texts[0], texts[1])
+        }
+        maker(images[0], text,  trans)
+    }
+    @Meme("唐可可举牌")
+    val tankukuRaiseSign: Maker = { images, _ ->
+        val img = images[0].convert("RGBA").resize(Size(300, 230), keepRatio = true)
+        val params = listOf(
+            Pair(listOf(Pair(0, 46), Pair(320, 0), Pair(350, 214), Pair(38, 260)), Pair(68, 91)),
+            Pair(listOf(Pair(18, 0), Pair(328, 28), Pair(298, 227), Pair(0, 197)), Pair(184, 77)),
+            Pair(listOf(Pair(15, 0), Pair(294, 28), Pair(278, 216), Pair(0, 188)), Pair(194, 65)),
+            Pair(listOf(Pair(14, 0), Pair(279, 27), Pair(262, 205), Pair(0, 178)), Pair(203, 55)),
+            Pair(listOf(Pair(14, 0), Pair(270, 25), Pair(252, 195), Pair(0, 170)), Pair(209, 49)),
+            Pair(listOf(Pair(15, 0), Pair(260, 25), Pair(242, 186), Pair(0, 164)), Pair(215, 41)),
+            Pair(listOf(Pair(10, 0), Pair(245, 21), Pair(230, 180), Pair(0, 157)), Pair(223, 35)),
+            Pair(listOf(Pair(13, 0), Pair(230, 21), Pair(218, 168), Pair(0, 147)), Pair(231, 25)),
+            Pair(listOf(Pair(13, 0), Pair(220, 23), Pair(210, 167), Pair(0, 140)), Pair(238, 21)),
+            Pair(listOf(Pair(27, 0), Pair(226, 46), Pair(196, 182), Pair(0, 135)), Pair(254, 13)),
+            Pair(listOf(Pair(27, 0), Pair(226, 46), Pair(196, 182), Pair(0, 135)), Pair(254, 13)),
+            Pair(listOf(Pair(27, 0), Pair(226, 46), Pair(196, 182), Pair(0, 135)), Pair(254, 13)),
+            Pair(listOf(Pair(0, 35), Pair(200, 0), Pair(224, 133), Pair(25, 169)), Pair(175, 9)),
+            Pair(listOf(Pair(0, 35), Pair(200, 0), Pair(224, 133), Pair(25, 169)), Pair(195, 17)),
+            Pair(listOf(Pair(0, 35), Pair(200, 0), Pair(224, 133), Pair(25, 169)), Pair(195, 17))
+        )
+        val frames = (0 until 15).map {
+            val (points, pos) = params[it]
+            val frame = BuildImage.open(imgDir["tankuku_raisesign/$it.png"])
+            frame.paste(img.perspective(points), pos, below = true).image
+        }
+        saveGif(frames, 0.2)
+    }
+    @Meme("万花筒", "万华镜,万花镜", help = "可以指定参数 --circle 来将图片变为圆形")
+    val kaleidoscope: Maker = { images, texts ->
+        val isCircle = texts.isNotEmpty() && texts[0] == "--circle"
+        makeJpgOrGif(images[0]) {
+            val circleNum = 10
+            val imgPerCircle = 4
+            var initAngle = 0.0
+            val angleStep = 360.0 / imgPerCircle
+            val radius: (Int) -> Int = { n ->
+                n * 50 + 100
+            }
+            val cx = radius(circleNum)
+            val cy = radius(circleNum)
+
+            val img = convert("RGBA")
+            val frame = BuildImage.new("RGBA", Size(cx * 2, cy * 2), Colors.WHITE)
+            (0 until circleNum).forEach { i ->
+                val r = radius(i)
+                val imgW = i * 35 + 100
+                var im = img.resizeWidth(imgW)
+                if (isCircle)
+                    im = im.circle()
+                (0 until imgPerCircle).forEach { j ->
+                    val angle = initAngle + angleStep * j
+                    val imRot = im.rotate(angle - 90, expand = true)
+                    val x = (cx + r * cos(angle.degrees.radians) - imRot.width / 2.0).roundToInt()
+                    val y = (cy - r * sin(angle.degrees.radians) - imRot.height / 2.0).roundToInt()
+                    frame.paste(imRot, Pair(x, y), alpha = true)
+                }
+                initAngle += angleStep / 2.0
+            }
+            frame
+        }
+    }
+    @Meme("滚屏", help = "需要文本")
+    val scroll: Maker = { _, texts ->
+        val text = texts.ifBlank { "你们说话啊" }
+        val text2image = Text2Image.fromText(text, 40).wrap(600.0)
+        if (text2image.lines.size > 5) {
+            throw TextOverLengthException()
+        }
+        val textImg = text2image.toImage()
+        val textW = textImg.width
+        val textH = textImg.height
+
+        val boxW = textW + 140
+        val boxH = max(textH + 103, 150)
+        val box = BuildImage.new("RGBA", Size(boxW, boxH), "#eaedf4".hexToRGBA())
+        val corner1 = BuildImage.open(imgDir["scroll/corner1.png"])
+        val corner2 = BuildImage.open(imgDir["scroll/corner2.png"])
+        val corner3 = BuildImage.open(imgDir["scroll/corner3.png"])
+        val corner4 = BuildImage.open(imgDir["scroll/corner4.png"])
+        box.paste(corner1, Pair(0,  0))
+        box.paste(corner2, Pair(0,  boxH - 75))
+        box.paste(corner3, Pair(textW + 70,  0))
+        box.paste(corner4, Pair(textW + 70,  boxH - 75))
+        box.paste(BuildImage.new("RGBA", Size(textW,  boxH - 40),  Colors.WHITE), Pair(70,  20))
+        box.paste(BuildImage.new("RGBA", Size(textW + 88,  boxH - 150),  Colors.WHITE), Pair(27,  75))
+        box.paste(textImg, Pair(70, 17 + (boxH - 40 - textH) / 2),  alpha=true)
+
+        val dialog = BuildImage.new("RGBA", Size(boxW, boxH * 4), "#eaedf4".hexToRGBA())
+        (0 until 4).forEach { i ->
+            dialog.paste(box, Pair(0,  boxH * i))
+        }
+
+        val num = 30
+        val dy = dialog.height / num
+        val frames = (0 until num).map { i ->
+            val frame = BuildImage.new("RGBA", dialog.size)
+            frame.paste(dialog, Pair(0,  -dy * i))
+            frame.paste(dialog, Pair(0,  dialog.height - dy * i)).image
+        }
+        saveGif(frames, 0.05)
+
+    }
+    @Meme("看书")
+    val readBook: Maker = { images, texts ->
+        val frame = BuildImage.open(imgDir["read_book/0.png"])
+        val points = listOf(Pair(0, 108), Pair(1092, 0), Pair(1023, 1134), Pair(29, 1134))
+        val img = images[0].convert("RGBA")
+            .resize(Size(1000, 1100), keepRatio = true, direction = BuildImage.DirectionType.North)
+        val cover = img.perspective(points)
+        frame.paste(cover, Pair(1138, 1172), below = true)
+
+        val chars = if (texts.isEmpty() || texts.first().isBlank()) "エロ本" else texts.joinToString(" ")
+
+        val pieces = chars.map { char ->
+            val piece = BuildImage(
+                Text2Image.fromText(char.toString(), 150, fill = Colors.WHITE).toImage()
+            )
+            if (Regex("[a-zA-Z0-9\\s]").matches(char.toString()))
+                piece.rotate(-90.0, expand = true)
+            else
+                piece.resizeCanvas(Size(piece.width, piece.height - 40), BuildImage.DirectionType.North)
+        }
+        var w = pieces.maxOf { it.width }
+        var h = pieces.sumOf { it.height }
+        if (w > 265 || h > 3000) {
+            throw TextOverLengthException()
+        }
+
+        var textImg = BuildImage.new("RGBA", Size(w, h))
+        h = 0
+        pieces.forEach { piece ->
+            textImg.paste(piece, Pair((w - piece.width) / 2, h), alpha = true)
+            h += piece.height
+        }
+        if (h > 780) {
+            val ratio = 780.0 / h
+            textImg = textImg.resize(Size((w * ratio).toInt(), (h * ratio).toInt()))
+        }
+        w = textImg.width
+        h = textImg.height
+        frame.paste(textImg, Pair(870 + (240 - w) / 2, 1500 + (780-h) / 2), alpha = true)
+
+        frame.saveJpg()
+    }
+    @Meme("狗都不玩", help = "可以指定参数 --circle 来将图片变为圆形")
+    val dogDislike: Maker = { images, texts ->
+        val isCircle = texts.isNotEmpty() && texts[0] == "--circle"
+        val location = listOf(
+            Pair(36, 408), Pair(36, 410), Pair(40, 375), Pair(40, 355), Pair(36, 325), Pair(28, 305), Pair(28, 305),
+            Pair(28, 305), Pair(28, 305), Pair(28, 285), Pair(28, 285), Pair(28, 285), Pair(28, 285), Pair(28, 290),
+            Pair(30, 295), Pair(30, 300), Pair(30, 300), Pair(30, 300), Pair(30, 300), Pair(30, 300), Pair(30, 300),
+            Pair(28, 298), Pair(26, 296), Pair(24, 294), Pair(28, 294), Pair(26, 294), Pair(24, 294), Pair(35, 294),
+            Pair(115, 330), Pair(150, 355), Pair(180, 420), Pair(180, 450), Pair(150, 450), Pair(150, 450)
+        )
+        var head = images[0].convert("RGBA").resize(Size(122, 122), keepRatio=true)
+        if (isCircle) {
+            head = head.circle()
+        }
+        val frames = (0 until 34).map {
+            val frame = BuildImage.open(imgDir["dog_dislike/$it.png"])
+            frame.paste(head, location[it],  alpha=true).image
+        }
+        saveGif(frames, 0.08)
+    }
+    @Meme("闪瞎", "可以自定义文本")
+    val flashBlind: Maker = { images, texts ->
+        val img = images[0].convert("RGB").resizeWidth(500)
+        val frames = mutableListOf<BuildImage>()
+        frames.add(img)
+        frames.add(img.filter(InvertFilter()))
+        val imgEnlarge = img.resizeCanvas(Size(450, img.height * 450 / 500)).resize(Size(500,  img.height))
+        frames.add(imgEnlarge)
+        frames.add(img.filter(InvertFilter()))
+
+        val text = texts.ifBlank { "闪瞎你们的狗眼" }
+        val textH = 65
+
+        kotlin.runCatching {
+            val textFrameBlack = BuildImage.new("RGB", Size(500, textH), Colors.BLACK)
+            val textFrameWhite = BuildImage.new("RGB", Size(500, textH), Colors.WHITE)
+            textFrameBlack.drawText(
+                listOf(10, 0, 490,  textH),
+                text,
+                maxFontSize=50,
+                minFontSize=20,
+                fill=Colors.WHITE,
+            )
+            textFrameWhite.drawText(
+                listOf(10, 0, 490,  textH),
+                text,
+                maxFontSize=50,
+                minFontSize=20,
+                fill=Colors.BLACK,
+            )
+            frames[0].paste(textFrameBlack.image, Pair(0,  img.height - textH))
+            frames[1].paste(textFrameWhite.image, Pair(0,  img.height - textH))
+            frames[2].paste(textFrameBlack.image, Pair(0,  img.height - textH))
+            frames[3].paste(textFrameWhite.image, Pair(0,  img.height - textH))
+        }.onFailure {
+            throw TextOverLengthException()
+        }
+
+        saveGif(frames.map { it.image }, 0.03)
+    }
+    @Meme("打穿", "打穿屏幕")
+    val hit_screen: Maker = { images, _ ->
+        val params = listOf(
+            Pair(listOf(Pair(1,  10), Pair(138,  1), Pair(140,  119), Pair(7,  154)), Pair(32,  37)),
+            Pair(listOf(Pair(1,  10), Pair(138,  1), Pair(140,  121), Pair(7,  154)), Pair(32,  37)),
+            Pair(listOf(Pair(1,  10), Pair(138,  1), Pair(139,  125), Pair(10,  159)), Pair(32,  37)),
+            Pair(listOf(Pair(1,  12), Pair(136,  1), Pair(137,  125), Pair(8,  159)), Pair(34,  37)),
+            Pair(listOf(Pair(1,  9), Pair(137,  1), Pair(139,  122), Pair(9,  154)), Pair(35,  41)),
+            Pair(listOf(Pair(1,  8), Pair(144,  1), Pair(144,  123), Pair(12,  155)), Pair(30,  45)),
+            Pair(listOf(Pair(1,  8), Pair(140,  1), Pair(141,  121), Pair(10,  155)), Pair(29,  49)),
+            Pair(listOf(Pair(1,  9), Pair(140,  1), Pair(139,  118), Pair(10,  153)), Pair(27,  53)),
+            Pair(listOf(Pair(1,  7), Pair(144,  1), Pair(145,  117), Pair(13,  153)), Pair(19,  57)),
+            Pair(listOf(Pair(1,  7), Pair(144,  1), Pair(143,  116), Pair(13,  153)), Pair(19,  57)),
+            Pair(listOf(Pair(1,  8), Pair(139,  1), Pair(141,  119), Pair(12,  154)), Pair(19,  55)),
+            Pair(listOf(Pair(1,  13), Pair(140,  1), Pair(143,  117), Pair(12,  156)), Pair(16,  57)),
+            Pair(listOf(Pair(1,  10), Pair(138,  1), Pair(142,  117), Pair(11,  149)), Pair(14,  61)),
+            Pair(listOf(Pair(1,  10), Pair(141,  1), Pair(148,  125), Pair(13,  153)), Pair(11,  57)),
+            Pair(listOf(Pair(1,  12), Pair(141,  1), Pair(147,  130), Pair(16,  150)), Pair(11,  60)),
+            Pair(listOf(Pair(1,  15), Pair(165,  1), Pair(175,  135), Pair(1,  171)), Pair(-6,  46))
+        )
+
+        makeGifOrCombinedGif(
+            images[0], 29, 0.2, FrameAlignPolicy.ExtendFirst
+        ) {
+            val img = convert("RGBA").resize(Size(140, 120), keepRatio=true)
+            val frame = BuildImage.open(imgDir["hit_screen/$it.png"])
+            if (it in 6 until 22) {
+                val (points, pos) = params[it - 6]
+                frame.paste(img.perspective(points), pos, below = true)
+            }
+            frame
+        }
+    }
+    @Meme("咖波撕")
+    val capooRip: Maker = { images, _ ->
+        val img = images[0].convert("RGBA").resize(Size(150, 100), keepRatio=true)
+        val imgLeft = img.crop(listOf(0, 0, 75, 100))
+        val imgRight = img.crop(listOf(75, 0, 150, 100))
+        val params1 = listOf(
+            Pair(Pair(61,  196), listOf(Pair(140,  68), Pair(0,  59), Pair(33,  0), Pair(165,  8))),
+            Pair(Pair(63,  196), listOf(Pair(136,  68), Pair(0,  59), Pair(29,  0), Pair(158,  13))),
+            Pair(Pair(62,  195), listOf(Pair(137,  72), Pair(0,  58), Pair(27,  0), Pair(167,  11))),
+            Pair(Pair(95,  152), listOf(Pair(0,  8), Pair(155,  0), Pair(163,  107), Pair(13,  112))),
+            Pair(Pair(108,  129), listOf(Pair(0,  6), Pair(128,  0), Pair(136,  113), Pair(10,  117))),
+            Pair(Pair(84,  160), listOf(Pair(0,  6), Pair(184,  0), Pair(190,  90), Pair(10,  97)))
+        )
+        val params2 = listOf(
+            Pair(
+                Pair(Pair(78,  158), listOf(Pair(0,  3), Pair(86,  0), Pair(97,  106), Pair(16,  106))),
+                Pair(Pair(195,  156), listOf(Pair(0,  4), Pair(82,  0), Pair(85,  106), Pair(15,  110)))
+            ),
+            Pair(
+                Pair(Pair(89,  156), listOf(Pair(0,  0), Pair(80,  0), Pair(94,  100), Pair(14,  100))),
+                Pair(Pair(192,  151), listOf(Pair(0,  7), Pair(79,  3), Pair(82,  107), Pair(11,  112)))
+            )
+        )
+        val rawFrames = (0 until 8).map { BuildImage.open(imgDir["capoo_rip/$it.png"]) }
+        (0 until 6).forEach {
+            val (pos, points) = params1[it]
+            rawFrames[it].paste(img.perspective(points), pos,  below=true)
+        }
+        (0 until 2).forEach {
+            val (a, b) = params2[it]
+            val (pos1, points1) = a
+            val (pos2, points2) = b
+            rawFrames[it + 6].paste(imgLeft.perspective(points1), pos1, below = true)
+            rawFrames[it + 6].paste(imgRight.perspective(points2), pos2, below = true)
+        }
+
+        val newFrames = mutableListOf<BuildImage>()
+        repeat(3) {
+            newFrames.addAll(rawFrames.subList(0, 3))
+            newFrames.addAll(rawFrames.subList(3, rawFrames.size))
+        }
+        saveGif(newFrames.map { it.image }, 0.1)
+    }
+
+    @Meme("我推的网友")
+    val oshiNoKo: Maker = { images, texts ->
+        val name = texts.ifBlank { "网友" }
+
+        val textFrame1 = BuildImage.open(imgDir["oshi_no_ko/text1.png"])
+        val textFrame2 = BuildImage.open(imgDir["oshi_no_ko/text2.png"])
+
+        val biasY = 5
+        val textFrame3 = BuildImage(
+            Text2Image.fromText(
+                name,
+                fontName="HiraginoMin",
+                fontSize=150,
+                strokeWidth=8,
+                strokeFill=Colors.WHITE
+            ).toImage()
+        ).resizeHeight(textFrame1.height + biasY)
+        if (textFrame3.width > 800) {
+            throw TextOverLengthException()
+        }
+
+        var textFrame = BuildImage.new(
+            "RGBA",
+            Size(textFrame1.width + textFrame2.width + textFrame3.width,  textFrame2.height)
+        )
+        textFrame.paste(textFrame1, Pair(0,  0),  alpha=true)
+            .paste(textFrame3, Pair(textFrame1.width,  biasY), alpha=true)
+        textFrame = textFrame.resizeWidth(663)
+
+        val background = BuildImage.open(imgDir["oshi_no_ko/background.png"])
+        val foreground = BuildImage.open(imgDir["oshi_no_ko/foreground.png"])
+
+        makePngOrGif(images[0]) {
+            val img = convert("RGBA").resize(Size(681, 692), keepRatio=true)
+            background.copy()
+                .paste(img,  alpha=true)
+                .paste(textFrame, Pair(9,  102 - textFrame.height / 2),  alpha=true)
+                .paste(foreground,  alpha=true)
+        }
+
+    }
+    @Meme("卡比锤", "卡比重锤", help = "可以指定参数 --circle 来将图片变为圆形")
+    val kirbyHammer: Maker = { images, texts ->
+        val isCircle = texts.isNotEmpty() && texts[0] == "--circle"
+        val positions = listOf(
+            Pair(318, 163), Pair(319, 173), Pair(320, 183), Pair(317, 193), Pair(312, 199), Pair(297, 212),
+            Pair(289, 218), Pair(280, 224), Pair(278, 223), Pair(278, 220), Pair(280, 215), Pair(280, 213),
+            Pair(280, 210), Pair(280, 206), Pair(280, 201), Pair(280, 192), Pair(280, 188), Pair(280, 184),
+            Pair(280, 179)
+        )
+        makeGifOrCombinedGif(
+            images[0], 62, 0.05, FrameAlignPolicy.ExtendLoop
+        ) {
+
+            var img = convert("RGBA")
+            if (isCircle)
+                img = img.circle()
+            img = img.resizeHeight(80)
+            if (img.width < 80)
+                img = img.resize(Size(80, 80), keepRatio = true)
+            val frame = BuildImage.open(imgDir["kirby_hammer/$it.png"])
+            if (it <= 18) {
+                var (x, y) = positions[it]
+                x = x + 40 - img.width / 2
+                frame.paste(img, Pair(x, y),  alpha=true)
+            } else if (it <= 39) {
+                var (x, y) = positions[18]
+                x = x + 40 - img.width / 2
+                frame.paste(img, Pair(x, y), alpha = true)
+            }
+            frame
+        }
+    }
+    @Meme("yt", "youtube", help="需要两段文本")
+    val youtube: Maker = { _, rawTexts ->
+        val texts = if (rawTexts.isEmpty() || rawTexts.first().isBlank()) listOf("Bili", "Bili") else rawTexts
+        val leftImg = Text2Image.fromText(texts[0], fontSize = 200, fill=Colors.BLACK)
+            .toImage(bgColor=Colors.WHITE, padding=listOf(30,  20))
+
+        val rightImg = BuildImage(Text2Image.fromText(
+            texts[1], fontSize=200, fill=Colors.WHITE
+        ).toImage(bgColor = RGBA(230, 33, 23), padding = listOf(50, 20))).run {
+            resizeCanvas(
+                Size(max(width,  400),  height), bgColor=RGBA(230, 33,  23)
+            ).circleCorner(height / 2.0)
+        }
+
+        var frame = BuildImage.new(
+            "RGBA",
+            Size(leftImg.width + rightImg.width, max(leftImg.height,  rightImg.height)),
+            Colors.WHITE
+        )
+        frame.paste(leftImg, Pair(0,  frame.height - leftImg.height))
+        frame = frame.resizeCanvas(Size(frame.width + 100,  frame.height + 100), bgColor=Colors.WHITE)
+
+        var corner = BuildImage.open(imgDir["youtube/corner.png"])
+        val ratio = rightImg.height / 2.0 / corner.height
+        corner = corner.resize(Size(corner.width * ratio, corner.height * ratio))
+        val x0 = leftImg.width + 50
+        val y0 = frame.height - rightImg.height - 50
+        val x1 = frame.width - corner.width - 50
+        val y1 = frame.height - corner.height - 50
+        frame.paste(corner, Pair(x0,  y0 - 1),  alpha=true).paste(
+            corner.image.toImmutableImage().flipY().toBitmap(), Pair(x0,  y1 + 1), alpha=true
+        ).paste(
+            corner.image.toImmutableImage().flipX().toBitmap(), Pair(x1,  y0 - 1), alpha=true
+        ).paste(
+            corner.image.toImmutableImage().flipX().flipY().toBitmap(), Pair(x1,  y1 + 1), alpha=true
+        ).paste(
+            rightImg, Pair(x0,  y0), alpha=true
+        )
+        frame.saveJpg()
+    }
+    @Meme("小丑")
+    val clown: Maker = { images, _ ->
+        val avatar = images[0].convert("RGBA").resize(Size(554, 442), keepRatio=true)
+        val frame = BuildImage.open(imgDir["clown/circle.png"]).convert("RGBA")
+
+        val imgSize = frame.size
+        val bg = BuildImage.new("RGBA", imgSize, RGBA(255, 255, 255))
+
+        val leftPart = avatar.crop(
+            listOf(0, 0, avatar.width / 2,  avatar.height)
+        ).rotate(26.0, expand = true)
+        val rightPart = avatar.crop(
+            listOf(avatar.width / 2, 0, avatar.width,  avatar.height)
+        ).rotate(-26.0, expand = true)
+
+        val imgW = bg.width
+        val (leftCenterX, centerY) = Pair(153, 341)
+        val leftTopX = leftCenterX - leftPart.width / 2
+        val topY = centerY - leftPart.height / 2
+        val rightTopX = imgW - leftTopX - rightPart.width
+
+        bg.paste(leftPart, Pair(leftTopX,  topY),  alpha=true)
+        bg.paste(rightPart, Pair(rightTopX,  topY),  alpha=true)
+        bg.paste(frame,  alpha=true)
+
+        bg.savePng()
+
+    }
+    @Meme("拿捏", "戏弄")
+    val tease: Maker = { images, _ ->
+        val img = images[0].convert("RGBA").square()
+        val params = listOf(
+            Pair(Pair(21,  75), listOf(Pair(0,  0), Pair(129,  3), Pair(155,  123), Pair(12,  142))),
+            Pair(Pair(18,  73), listOf(Pair(0,  29), Pair(128,  0), Pair(149,  118), Pair(30,  147))),
+            Pair(Pair(22,  78), listOf(Pair(0,  37), Pair(136,  1), Pair(160,  97), Pair(16,  152))),
+            Pair(Pair(22,  58), listOf(Pair(0,  58), Pair(169,  1), Pair(194,  92), Pair(24,  170))),
+            Pair(Pair(43,  23), listOf(Pair(0,  114), Pair(166,  1), Pair(168,  98), Pair(41,  205))),
+            Pair(Pair(38,  24), listOf(Pair(0,  112), Pair(171,  0), Pair(169,  113), Pair(45,  195))),
+            Pair(Pair(31,  54), listOf(Pair(0,  73), Pair(148,  0), Pair(172,  81), Pair(45,  170))),
+            Pair(Pair(24,  62), listOf(Pair(0,  62), Pair(159,  1), Pair(177,  81), Pair(47,  155))),
+            Pair(Pair(31,  75), listOf(Pair(1,  45), Pair(126,  1), Pair(158,  81), Pair(29,  145))),
+            Pair(Pair(18,  61), listOf(Pair(0,  63), Pair(161,  1), Pair(190,  88), Pair(42,  153))),
+            Pair(Pair(20,  66), listOf(Pair(0,  57), Pair(152,  0), Pair(195,  82), Pair(40,  149))),
+            Pair(Pair(16,  77), listOf(Pair(0,  41), Pair(141,  0), Pair(170,  90), Pair(27,  138))),
+            Pair(Pair(28,  105), listOf(Pair(0,  1), Pair(132,  0), Pair(131,  112), Pair(1,  114))),
+            Pair(Pair(21,  107), listOf(Pair(0,  1), Pair(132,  0), Pair(131,  112), Pair(1,  114))),
+            Pair(Pair(11,  113), listOf(Pair(1,  7), Pair(138,  0), Pair(141,  126), Pair(4,  131))),
+            Pair(Pair(10,  114), listOf(Pair(0,  0), Pair(142,  0), Pair(142,  131), Pair(0,  131))),
+            Pair(Pair(5,  121), listOf(Pair(0,  0), Pair(147,  0), Pair(147,  115), Pair(0,  115))),
+            Pair(Pair(0,  119), listOf(Pair(0,  0), Pair(158,  0), Pair(158,  102), Pair(0,  102))),
+            Pair(Pair(0,  116), listOf(Pair(0,  0), Pair(158,  0), Pair(158,  107), Pair(0,  107))),
+            Pair(Pair(0,  119), listOf(Pair(0,  0), Pair(158,  0), Pair(158,  103), Pair(0,  101))),
+            Pair(Pair(2,  101), listOf(Pair(0,  0), Pair(153,  0), Pair(153,  122), Pair(0,  120))),
+            Pair(Pair(-18,  85), listOf(Pair(61,  0), Pair(194,  15), Pair(143,  146), Pair(0,  133))),
+            Pair(Pair(0,  66), listOf(Pair(88,  1), Pair(173,  17), Pair(123,  182), Pair(0,  131))),
+            Pair(Pair(0,  29), listOf(Pair(118,  3), Pair(201,  48), Pair(111,  220), Pair(1,  168)))
+        )
+        val frames = (0 until 24).map {
+            val frame = BuildImage.open(imgDir["tease/$it.png"])
+            val (pos, points) = params[it]
+            frame.paste(img.perspective(points), pos,  below=true).image
+        }
+
+        saveGif(frames, 0.05)
+    }
+    @Meme("为什么要有手", help = "需要文本和图片")
+    val why_have_hands: Maker = { images, texts ->
+        val img = images[0].convert("RGBA")
+
+        if (texts.isEmpty() || texts.first().isEmpty()) {
+            throw TextOrNameNotEnoughException()
+        }
+        val name = texts[0]
+
+        val frame = BuildImage.open(imgDir["why_have_hands/0.png"])
+        frame.paste(img.circle().resize(Size(250,  250)), Pair(350,  670),  alpha=true)
+        frame.paste(
+            img.resize(Size(250,  250),  keepRatio=true).rotate(15.0), Pair(1001,  668), below=true
+        )
+        frame.paste(img.resize(Size(250,  170),  keepRatio=true), Pair(275,  1100),  below=true)
+        frame.paste(
+            img.resize(Size(300,  400), keepRatio=true, inside=true,
+                direction=BuildImage.DirectionType.Northwest),
+            Pair(1100,  1060),
+            alpha=true
+        )
+        kotlin.runCatching {
+            val textFrame = BuildImage.new("RGBA", Size(600, 100)).drawText(
+                listOf(0, 0, 600,  100),
+                "摸摸$name!",
+                maxFontSize=70,
+                minFontSize=30,
+                hAlign=HorizontalAlign.LEFT
+            )
+            frame.paste(textFrame.rotate(-15.0,  expand=true), Pair(75,  825),  alpha=true)
+            frame.drawText(
+                listOf(840, 960, 1440,  1060),
+                "托托$name!",
+                maxFontSize=70,
+                minFontSize=30,
+            )
+            frame.drawText(
+                listOf(50, 1325, 650,  1475),
+                "赞美$name!",
+                maxFontSize=90,
+                minFontSize=30,
+                vAlign=VerticalAlign.TOP,
+            )
+            frame.drawText(
+                listOf(700, 1340, 1075,  1490),
+                "为${name}奉献所有财产!",
+                maxFontSize=70,
+                minFontSize=30,
+                allowWrap=true,
+            )
+        }.onFailure {
+            throw TextOverLengthException()
+        }
+        frame.saveJpg()
+    }
+    @Meme("douyin", help = "需要文本")
+    val douyin: Maker = { _, texts ->
+        val text = texts[0]
+        val fontsize = 200
+        val offset = (fontsize * 0.05).roundToInt()
+        val px = 70
+        val py = 30
+        val bgColor = "#1C0B1B".hexToRGBA()
+        val image = Text2Image.fromText(
+            text, fontsize, fill="#FF0050".hexToRGBA(), strokeFill="#FF0050".hexToRGBA(), strokeWidth=5
+        ).toImage(bgColor = bgColor, padding = listOf(px + offset * 2, py + offset * 2, px, py))
+        Text2Image.fromText(
+            text, fontsize, fill="#00F5EB".hexToRGBA(), strokeFill="#00F5EB".hexToRGBA(), strokeWidth=5
+        ).drawOnImage(image, Pair(px.toDouble(), py.toDouble()))
+        Text2Image.fromText(
+            text, fontsize, fill=Colors.WHITE, strokeFill=Colors.WHITE, strokeWidth=5
+        ).drawOnImage(image, Pair((px + offset).toDouble(), (py + offset).toDouble()))
+        val frame = BuildImage(image)
+
+        val width = frame.width - px
+        val height = frame.height - py
+        val frameNum = 10
+        val devideNum = 6
+        val seed = 20 * 0.05
+        val frames = (0 until frameNum).map {
+            var newFrame = frame.copy()
+            var hSeeds = (0 until devideNum).map {
+                (sin(Random.nextDouble() * devideNum)).absoluteValue
+            }
+            val hSeedSum = hSeeds.sum()
+            hSeeds = hSeeds.map { s ->
+                s / hSeedSum
+            }
+            val direction = 1
+            var lastYn = 0
+            var lastH = 0
+            (0 until devideNum).forEach { i ->
+                val yn = lastYn + lastH
+                val h = max((height * hSeeds[i]).roundToInt(), 2)
+                lastYn = yn
+                lastH = h
+                val piece = newFrame.copy().crop(listOf(px, yn, px + width, yn + h))
+                newFrame.paste(piece, Pair(px + (i * direction * seed).roundToInt(),  yn))
+            }
+            val moveX = 64
+            val points = listOf(
+                Pair(moveX,  0),
+                Pair(newFrame.width + moveX,  0),
+                Pair(newFrame.width,  newFrame.height),
+                Pair(0,  newFrame.height)
+            )
+            newFrame = newFrame.perspective(points)
+            val bg = BuildImage.new("RGBA", newFrame.size, bgColor)
+            bg.paste(newFrame,  alpha=true).image
+        }
+
+        saveGif(frames, 0.2)
+    }
+    @Meme("奖状", "证书", "支持3~4段参数")
+    val certificate: Maker = { _, rawTexts ->
+        val texts = if (rawTexts.size < 3) listOf("小王", "优秀学生", "一年一班") else rawTexts
+        val time = LocalDateTime.now()
+        val frame = BuildImage.open(imgDir["certificate/0.png"])
+
+        kotlin.runCatching {
+            frame.drawText(
+                listOf(340, 660, 770,  800),
+                texts[0],
+                allowWrap=false,
+                maxFontSize=80,
+                minFontSize=20,
+            )
+        }.onFailure {
+            throw TextOverLengthException()
+        }
+        kotlin.runCatching {
+            frame.drawText(
+                listOf(565, 1040, 2100,  1320),
+                texts[1],
+                fill=Colors.RED,
+                allowWrap=true,
+                maxFontSize=120,
+                minFontSize=60,
+            )
+        }.onFailure {
+            throw TextOverLengthException()
+        }
+        kotlin.runCatching {
+            frame.drawText(
+                listOf(1500, 1400, 2020,  1520),
+                texts[2],
+                allowWrap=false,
+                maxFontSize=60,
+                minFontSize=20,
+            )
+        }.onFailure {
+            throw TextOverLengthException()
+        }
+        kotlin.runCatching {
+            frame.drawText(
+                listOf(450, 850, 2270,  1080),
+                if (texts.size >= 4) texts[3]  else "　　在本学年第一学期中表现优秀，被我校决定评为",
+                allowWrap=true,
+                maxFontSize=80,
+                minFontSize=40,
+                hAlign= HorizontalAlign.LEFT,
+                vAlign= VerticalAlign.TOP,
+            )
+        }.onFailure {
+            throw TextOverLengthException()
+        }
+
+        frame.drawText(
+            listOf(1565,  1527),
+            "%04d".format(time.year),
+            allowWrap=false,
+            fontSize=60,
+        )
+        frame.drawText(
+            listOf(1752,  1527),
+            "%02d".format(time.monthValue),
+            allowWrap=false,
+            fontSize=60,
+        )
+        frame.drawText(
+            listOf(1865,  1527),
+            "%02d".format(time.dayOfMonth),
+            allowWrap=false,
+            fontSize=60,
+        )
+
+        frame.savePng()
+    }
+    @Meme("可达鸭", help = "需要两段文本")
+    val psyduck: Maker = { _, texts ->
+        val leftImg = BuildImage.new("RGBA", Size(155, 100))
+        val rightImg = BuildImage.new("RGBA", Size(155, 100))
+
+        val draw: suspend (BuildImage, String) -> Unit = { frame, text ->
+            kotlin.runCatching {
+                frame.drawText(
+                    listOf(5, 5, 150,  95),
+                    text,
+                    maxFontSize=80,
+                    minFontSize=30,
+                    allowWrap=true,
+                    fontName="FZSJ-QINGCRJ",
+                )
+            }.onFailure {
+                throw TextOverLengthException()
+            }
+        }
+
+        draw(leftImg,  texts[0])
+        draw(rightImg,  texts[1])
+
+        val params = listOf(
+            listOf("left", listOf(Pair(0,  11), Pair(154,  0), Pair(161,  89), Pair(20,  104)), Pair(18,  42)),
+            listOf("left", listOf(Pair(0,  9), Pair(153,  0), Pair(159,  89), Pair(20,  101)), Pair(15,  38)),
+            listOf("left", listOf(Pair(0,  7), Pair(148,  0), Pair(156,  89), Pair(21,  97)), Pair(14,  23)),
+            null,
+            listOf("right", listOf(Pair(10,  0), Pair(143,  17), Pair(124,  104), Pair(0,  84)), Pair(298,  18)),
+            listOf("right", listOf(Pair(13,  0), Pair(143,  27), Pair(125,  113), Pair(0,  83)), Pair(298,  30)),
+            listOf("right", listOf(Pair(13,  0), Pair(143,  27), Pair(125,  113), Pair(0,  83)), Pair(298,  26)),
+            listOf("right", listOf(Pair(13,  0), Pair(143,  27), Pair(125,  113), Pair(0,  83)), Pair(298,  30)),
+            listOf("right", listOf(Pair(13,  0), Pair(143,  27), Pair(125,  113), Pair(0,  83)), Pair(302,  20)),
+            listOf("right", listOf(Pair(13,  0), Pair(141,  23), Pair(120,  102), Pair(0,  82)), Pair(300,  24)),
+            listOf("right", listOf(Pair(13,  0), Pair(140,  22), Pair(118,  100), Pair(0,  82)), Pair(299,  22)),
+            listOf("right", listOf(Pair(9,  0), Pair(128,  16), Pair(109,  89), Pair(0,  80)), Pair(303,  23)),
+            null,
+            listOf("left", listOf(Pair(0,  13), Pair(152,  0), Pair(158,  89), Pair(17,  109)), Pair(35,  36)),
+            listOf("left", listOf(Pair(0,  13), Pair(152,  0), Pair(158,  89), Pair(17,  109)), Pair(31,  29)),
+            listOf("left", listOf(Pair(0,  17), Pair(149,  0), Pair(155,  90), Pair(17,  120)), Pair(45,  33)),
+            listOf("left", listOf(Pair(0,  14), Pair(152,  0), Pair(156,  91), Pair(17,  115)), Pair(40,  27)),
+            listOf("left", listOf(Pair(0,  12), Pair(154,  0), Pair(158,  90), Pair(17,  109)), Pair(35,  28))
+        )
+
+        val frames = (0 until 18).map {
+            val frame = BuildImage.open(imgDir["psyduck/$it.jpg"])
+            val param = params[it]
+            if (param != null) {
+                val (side, points, pos) = param
+                if (side == "left") {
+                    frame.paste(leftImg.perspective(points as List<Pair<Int, Int>>), pos as Pair<Int, Int>,  alpha=true)
+                } else if (side == "right") {
+                    frame.paste(rightImg.perspective(points as List<Pair<Int, Int>>), pos as Pair<Int, Int>, alpha = true)
+                }
+            }
+            frame.image
+        }
+        saveGif(frames, 0.2)
+    }
+    @Meme("追列车", "追火车")
+    val chase_train: Maker = { images, _ ->
+        val img = images[0].convert("RGBA").square().resize(Size(42, 42))
+        val locs = listOf(
+            listOf(35, 34, 128, 44), listOf(35, 33, 132, 40), listOf(33, 34, 133, 36), listOf(33, 38, 135, 41),
+            listOf(34, 34, 136, 38), listOf(35, 35, 136, 33), listOf(33, 34, 138, 38), listOf(36, 35, 138, 34),
+            listOf(38, 34, 139, 32), listOf(40, 35, 139, 37), listOf(36, 35, 139, 33), listOf(39, 36, 138, 28),
+            listOf(40, 35, 138, 33), listOf(37, 34, 138, 31), listOf(43, 36, 135, 27), listOf(36, 37, 136, 32),
+            listOf(38, 40, 135, 26), listOf(37, 35, 133, 26), listOf(33, 36, 132, 30), listOf(33, 39, 132, 25),
+            listOf(32, 36, 131, 23), listOf(33, 36, 130, 31), listOf(35, 39, 128, 25), listOf(33, 35, 127, 23),
+            listOf(34, 36, 126, 29), listOf(34, 40, 124, 25), listOf(39, 36, 119, 23), listOf(35, 36, 119, 32),
+            listOf(35, 37, 116, 27), listOf(36, 38, 113, 23), listOf(34, 35, 113, 32), listOf(39, 36, 113, 23),
+            listOf(36, 35, 114, 17), listOf(36, 38, 111, 13), listOf(34, 37, 114, 15), listOf(34, 39, 111, 10),
+            listOf(33, 39, 109, 11), listOf(36, 35, 104, 17), listOf(34, 36, 102, 14), listOf(34, 35, 99, 14),
+            listOf(35, 38, 96, 16), listOf(35, 35, 93, 14), listOf(36, 35, 89, 15), listOf(36, 36, 86, 18),
+            listOf(36, 39, 83, 14), listOf(34, 36, 81, 16), listOf(40, 41, 74, 17), listOf(38, 36, 74, 15),
+            listOf(39, 35, 70, 16), listOf(33, 35, 69, 20), listOf(36, 35, 66, 17), listOf(36, 35, 62, 17),
+            listOf(37, 36, 57, 21), listOf(35, 39, 57, 15), listOf(35, 36, 53, 17), listOf(35, 38, 51, 20),
+            listOf(37, 36, 47, 19), listOf(37, 35, 47, 18), listOf(40, 36, 43, 19), listOf(38, 35, 42, 22),
+            listOf(40, 34, 38, 20), listOf(38, 34, 37, 21), listOf(39, 32, 35, 24), listOf(39, 33, 33, 22),
+            listOf(39, 36, 32, 22), listOf(38, 35, 32, 25), listOf(35, 37, 31, 22), listOf(37, 37, 31, 23),
+            listOf(36, 31, 31, 28), listOf(37, 34, 32, 25), listOf(36, 37, 32, 23), listOf(36, 33, 33, 30),
+            listOf(35, 34, 33, 27), listOf(38, 33, 33, 28), listOf(37, 34, 33, 29), listOf(36, 35, 35, 28),
+            listOf(36, 37, 36, 27), listOf(43, 39, 33, 30), listOf(35, 34, 38, 31), listOf(37, 34, 39, 30),
+            listOf(36, 34, 40, 30), listOf(39, 35, 41, 30), listOf(41, 36, 41, 29), listOf(40, 37, 44, 32),
+            listOf(40, 37, 45, 29), listOf(39, 38, 48, 28), listOf(38, 33, 50, 33), listOf(35, 38, 53, 28),
+            listOf(37, 34, 54, 31), listOf(38, 34, 57, 32), listOf(41, 35, 57, 29), listOf(35, 34, 63, 29),
+            listOf(41, 35, 62, 29), listOf(38, 35, 66, 28), listOf(35, 33, 70, 29), listOf(40, 39, 70, 28),
+            listOf(36, 36, 74, 28), listOf(37, 35, 77, 26), listOf(37, 35, 79, 28), listOf(38, 35, 81, 27),
+            listOf(36, 35, 85, 27), listOf(37, 36, 88, 29), listOf(36, 34, 91, 27), listOf(38, 39, 94, 24),
+            listOf(39, 34, 95, 27), listOf(37, 34, 98, 26), listOf(36, 35, 103, 24), listOf(37, 36, 99, 28),
+            listOf(34, 36, 97, 34), listOf(34, 38, 102, 38), listOf(37, 37, 99, 40), listOf(39, 36, 101, 47),
+            listOf(36, 36, 106, 43), listOf(35, 35, 109, 40), listOf(35, 39, 112, 43), listOf(33, 36, 116, 41),
+            listOf(36, 36, 116, 39), listOf(34, 37, 121, 45), listOf(35, 41, 123, 38), listOf(34, 37, 126, 35))
+        val frames = (0 until 120).map {
+            val frame = BuildImage.open(imgDir["chase_train/$it.png"])
+            val (w, h, x, y) = locs[it]
+            frame.paste(img.resize(Size(w,  h)), Pair(x,  y),  below=true).image
+        }
+        saveGif(frames, 0.05)
     }
 }
