@@ -17,6 +17,7 @@ import xyz.xszq.bot.dao.Permissions
 import xyz.xszq.bot.maimai.MaimaiUtils.dailyOps
 import xyz.xszq.bot.maimai.MaimaiUtils.difficulties
 import xyz.xszq.bot.maimai.MaimaiUtils.getPlateByFilename
+import xyz.xszq.bot.maimai.MaimaiUtils.getPlateFilename
 import xyz.xszq.bot.maimai.MaimaiUtils.getPlateVerList
 import xyz.xszq.bot.maimai.MaimaiUtils.levels
 import xyz.xszq.bot.maimai.MaimaiUtils.name2Difficulty
@@ -646,6 +647,8 @@ object Maimai {
                         appendLine("例：/mai 设置b50 头像 UI_Icon_003304")
                         appendLine("例：/mai 设置b50 牌子 UI_Plate_209502")
                         appendLine("例：/mai 设置b50 牌子 使用查分器设置")
+                        appendLine("例：/mai 设置b50 牌子 晓将")
+                        appendLine("头像和牌子列表可以在https://karenbot.xszq.xyz/maimai_icons 和 https://karenbot.xszq.xyz/maimai_plates 查看")
                     })
                     return@startsWith
                 }
@@ -676,29 +679,30 @@ object Maimai {
                                 reply("设置成功。")
                                 return@newSuspendedTransaction
                             }
-                            images.getImageFilename("themes/${config.theme}/plate", name) ?.let { filename ->
-                                getPlateByFilename(filename)?.let { (ver, type) ->
-                                    val data = getVersionData(ver, "", this@startsWith) ?: return@newSuspendedTransaction
-                                    val remains = musics.getPlateRemains(ver, type, getPlateVerList(ver), data.verList)
-                                    if (remains[3].isNotEmpty() || remains[4].isNotEmpty()) {
-                                        reply("您未达成该牌子的领取条件！")
-                                        return@newSuspendedTransaction
-                                    }
-                                }
-                                MaimaiSettings.upsert {
-                                    it[this.openid] = subjectId
-                                    it[this.name] = "PLATE_FILENAME"
-                                    it[this.value] = filename
-                                }
-                                MaimaiSettings.upsert {
-                                    it[this.openid] = subjectId
-                                    it[this.name] = "IS_PREFERRING_PROBER_PLATE"
-                                    it[this.value] = "false"
-                                }
-                                reply("设置成功。")
-                            } ?: run {
+                            val filename = getPlateFilename(name) ?: images.getImageFilename(
+                                "themes/${config.theme}/plate", name) ?: run {
                                 reply("该牌子不存在！")
+                                return@newSuspendedTransaction
                             }
+                            getPlateByFilename(filename)?.let { (ver, type) ->
+                                val data = getVersionData(ver, "", this@startsWith) ?: return@newSuspendedTransaction
+                                val remains = musics.getPlateRemains(ver, type, getPlateVerList(ver), data.verList)
+                                if (remains[3].isNotEmpty() || remains[4].isNotEmpty()) {
+                                    reply("您未达成该牌子的领取条件！")
+                                    return@newSuspendedTransaction
+                                }
+                            }
+                            MaimaiSettings.upsert {
+                                it[this.openid] = subjectId
+                                it[this.name] = "PLATE_FILENAME"
+                                it[this.value] = filename
+                            }
+                            MaimaiSettings.upsert {
+                                it[this.openid] = subjectId
+                                it[this.name] = "IS_PREFERRING_PROBER_PLATE"
+                                it[this.value] = "false"
+                            }
+                            reply("设置成功。")
                         }
                     }
                     else -> {
