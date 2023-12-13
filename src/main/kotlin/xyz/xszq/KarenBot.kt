@@ -66,25 +66,13 @@ suspend fun init() {
 
 fun subscribe() {
     GlobalEventChannel.subscribePublicMessages {
-        equalsTo("") {
-            reply(RandomImage.getRandom("reply").toImage())
+        if (!config.auditMode) {
+            equalsTo("") {
+                reply(RandomImage.getRandom("reply").toImage())
+            }
         }
         startsWith("/ping") {
             reply("bot在")
-        }
-        startsWith("/latex") { text ->
-            if (text.isBlank()) {
-                reply("用法：/latex LaTeX文本")
-                return@startsWith
-            }
-            try {
-                val image = LaTeX.generateLaTeX(text)
-                reply(image.toImage())
-            } catch (e: Exception) {
-                if (e is org.scilab.forge.jlatexmath.ParseException) {
-                    reply(e.message!!)
-                }
-            }
         }
         startsWith("/搜番") {
             if (this is GroupAtMessageEvent) {
@@ -95,12 +83,25 @@ fun subscribe() {
                 }
             }
         }
-        startsWith("/自助问答") {
-            reply("此功能仍在调试，敬请期待！")
+        always {
+            AutoQA.handle(this)
         }
-        startsWith("/功能管理") {
-
+        if (!config.auditMode) {
+            startsWith(listOf("av", "BV", "https://b23.tv", "b23.tv")) {
+                reply(Bilibili.getVideoDetails(message.text))
+            }
         }
+        startsWith(listOf("help", "/help", "!help", "帮助", "/帮助")) {
+            val help = localCurrentDirVfs["image/help.png"].toImage()
+            if (config.auditMode) {
+                reply(help)
+            } else {
+                reply(help + localCurrentDirVfs["image/QR.png"].toImage())
+            }
+        }
+    }
+    Maimai.subscribe()
+    GlobalEventChannel.subscribePublicMessages(permName = "arcade") {
         startsWith("/排卡管理") { raw ->
             val args = raw.toArgsList()
             if (args.size < 2) {
@@ -213,31 +214,12 @@ fun subscribe() {
         always {
             QueueForArcades.handle(this)
         }
-        always {
-            AutoQA.handle(this)
-        }
-        startsWith(listOf(
-            "/5k", "5k",
-            "/gocho", "gocho",
-            "/choyen", "choyen"
-        )) { raw ->
-            val args = raw.toArgsListByLn()
-            when (args.size) {
-                0 -> reply("使用方法：\n/5k 第一行文本\n第二行文本（可选）")
-                1 -> reply(FiveThousandChoyen.generate(args.first().trim(), " ").encode(PNG).toImage())
-                else -> reply(FiveThousandChoyen.generate(args[0].trim(), args[1].trim()).encode(PNG).toImage())
-            }
-        }
-        startsWith("/ba") { raw ->
-            val args = raw.toArgsList()
-            when (args.size) {
-                2 -> reply(BlueArchiveLogo.draw(args[0].trim(), args[1].trim()).encode(PNG).toImage())
-                else -> reply("使用方法：\n/ba 左侧文本 右侧文本")
-            }
-        }
+    }
+    GlobalEventChannel.subscribePublicMessages(permName = "audio.touhou") {
         startsWith(listOf("随机东方原曲", "/随机东方原曲")) {
             if (this !is GroupAtMessageEvent)
                 return@startsWith
+            reply("正在发送中……")
             val duration = 15.0
             val file = RandomMusic.get("touhou")
             file.cropPeriod(Random.nextDouble(
@@ -246,12 +228,6 @@ fun subscribe() {
             ), duration)?.let { v ->
                 reply(v.toVoice())
             }
-        }
-        startsWith(listOf("av", "BV", "https://b23.tv", "b23.tv")) {
-            reply(Bilibili.getVideoDetails(message.text))
-        }
-        startsWith(listOf("help", "/help", "!help")) {
-            reply(localCurrentDirVfs["image/help.png"].toImage() + localCurrentDirVfs["image/QR.png"].toImage())
         }
         startsWith(listOf("原曲认知测验", "/原曲认知测验")) { raw ->
             if (this !is GroupAtMessageEvent)
@@ -293,7 +269,6 @@ fun subscribe() {
             }
         }
     }
-    Maimai.subscribe()
     GlobalEventChannel.subscribePublicMessages(permName = "image.generate") {
         startsWith(listOf("生成", "/生成")) { raw ->
             val args = raw.toArgsList()
@@ -393,11 +368,44 @@ fun subscribe() {
                 }
             }
         }
+        startsWith("/latex") { text ->
+            if (text.isBlank()) {
+                reply("用法：/latex LaTeX文本\n例：/latex \\LaTeX")
+                return@startsWith
+            }
+            try {
+                val image = LaTeX.generateLaTeX(text)
+                reply(image.toImage())
+            } catch (e: Exception) {
+                if (e is org.scilab.forge.jlatexmath.ParseException) {
+                    reply(e.message!!)
+                }
+            }
+        }
+        startsWith(listOf(
+            "/5k", "5k",
+            "/gocho", "gocho",
+            "/choyen", "choyen"
+        )) { raw ->
+            val args = raw.toArgsListByLn()
+            when (args.size) {
+                0 -> reply("使用方法：\n/5k 第一行文本\n第二行文本（可选）\n\n例：/5k 干什么！")
+                1 -> reply(FiveThousandChoyen.generate(args.first().trim(), " ").encode(PNG).toImage())
+                else -> reply(FiveThousandChoyen.generate(args[0].trim(), args[1].trim()).encode(PNG).toImage())
+            }
+        }
+        startsWith("/ba") { raw ->
+            val args = raw.toArgsList()
+            when (args.size) {
+                2 -> reply(BlueArchiveLogo.draw(args[0].trim(), args[1].trim()).encode(PNG).toImage())
+                else -> reply("使用方法：\n/ba 左侧文本 右侧文本\n例：/ba Blue Archive")
+            }
+        }
     }
     GlobalEventChannel.subscribePublicMessages(permName = "text.stereotypes") {
         startsWith(listOf("发病", "/发病")) { name ->
             if (name.isBlank()) {
-                reply("使用方法：/发病 名字")
+                reply("使用方法：/发病 名字\n例：/发病 小冰")
                 return@startsWith
             }
             reply(RandomStereotypes.handle(name))
@@ -406,7 +414,7 @@ fun subscribe() {
     GlobalEventChannel.subscribePublicMessages(permName = "audio.voice") {
         startsWith(listOf("活字印刷", "/活字印刷")) { text ->
             if (text.isBlank()) {
-                reply("使用方法：/活字印刷 文本")
+                reply("使用方法：/活字印刷 文本\n例：/活字印刷 大家好啊，我是可怜Bot")
                 return@startsWith
             }
             OttoVoice.generate(text) ?.toVoice() ?.let {

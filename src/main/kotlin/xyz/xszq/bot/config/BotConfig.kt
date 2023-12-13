@@ -17,7 +17,8 @@ data class BotConfig(
     val databasePassword: String,
     val domainWhitelist: List<String>,
     val gifMaxSize: Double,
-    val gifMaxFrames: Int
+    val gifMaxFrames: Int,
+    val auditMode: Boolean
 ) {
     companion object {
         private val yaml = Yaml {  }

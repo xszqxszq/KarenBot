@@ -137,7 +137,12 @@ class MusicsInfo(val logger: KLogger) {
             "没有找到歌曲。\n使用方法：\n\t/定数查歌 定数\n\t/定数查歌 下限 上限"
         }
     }
-    fun plateProgress(version: String, type: String, vList: List<String>, data: List<BriefScore>): String {
+    fun getPlateRemains(
+        version: String,
+        type: String,
+        vList: List<String>,
+        data: List<BriefScore>
+    ): MutableList<MutableList<Pair<String, Int>>> {
         val remains = MutableList<MutableList<Pair<String, Int>>>(5) { mutableListOf() }
         data.filter {
             when (type) {
@@ -168,6 +173,10 @@ class MusicsInfo(val logger: KLogger) {
             l.removeIf { it.first in plateExcluded }
         }
         remains[4].removeIf { it.first in remasterExcluded }
+        return remains
+    }
+    fun plateProgress(version: String, type: String, vList: List<String>, data: List<BriefScore>): String {
+        val remains = getPlateRemains(version, type, vList, data)
         return buildString {
             when {
                 remains.all { it.isEmpty() } -> {
@@ -242,6 +251,7 @@ class MusicsInfo(val logger: KLogger) {
             (level in it.level && it.level.size > difficulty && difficulty != -1 && it.level[difficulty] == level)
                     || (level == "" && it.level.size > difficulty)
                     || (difficulty == -1 && level in it.level)}.randomOrNull()
+    fun getRandom() = musics.values.random()
 
     fun getRandomForRatingUp(
         target: Int = 1,

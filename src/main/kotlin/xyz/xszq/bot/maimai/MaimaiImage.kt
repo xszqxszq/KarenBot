@@ -120,6 +120,13 @@ class MaimaiImage(
     }
     fun contains(name: String): Boolean = imageCache.containsKey(name)
 
+    suspend fun getImageFilename(path: String, name: String): String? {
+        listOf(name, "$name.png", "$name.jpg", name.split(".").first()).forEach { filename ->
+            if (resourceDir[path][filename].exists())
+                return filename
+        }
+        return null
+    }
     suspend fun getImage(name: String): Bitmap {
         listOf(name, "$name.png", "$name.jpg", name.split(".").first()).forEach {
             if (imageCache.containsKey(it))

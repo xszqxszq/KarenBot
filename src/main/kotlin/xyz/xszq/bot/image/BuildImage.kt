@@ -5,6 +5,8 @@ package xyz.xszq.bot.image
 import com.sksamuel.scrimage.filter.Filter
 import com.sksamuel.scrimage.filter.GrayscaleFilter
 import com.sksamuel.scrimage.filter.MotionBlurFilter
+import com.sksamuel.scrimage.format.Format
+import com.sksamuel.scrimage.format.FormatDetector
 import com.sksamuel.scrimage.nio.AnimatedGif
 import com.sksamuel.scrimage.nio.AnimatedGifReader
 import com.sksamuel.scrimage.nio.ImageSource
@@ -28,6 +30,8 @@ import com.soywiz.korio.net.mimeType
 import com.soywiz.korma.geom.Size
 import com.soywiz.korma.geom.degrees
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.opencv.core.CvType.CV_32FC3
 import org.opencv.core.Mat
@@ -36,9 +40,9 @@ import org.opencv.core.MatOfPoint2f
 import org.opencv.core.Point
 import org.opencv.imgcodecs.Imgcodecs
 import org.opencv.imgproc.Imgproc
-import xyz.xszq.nereides.imageType
 import xyz.xszq.nereides.radTo180Deg
 import java.io.File
+import kotlin.jvm.optionals.getOrNull
 import kotlin.math.*
 
 class BuildImage(var image: Bitmap) {
@@ -226,7 +230,7 @@ class BuildImage(var image: Bitmap) {
         alpha: Boolean = false,
         below: Boolean = false
     ) = paste(img.image, pos, alpha, below)
-    fun drawText(
+    suspend fun drawText(
         xy: List<Int>,
         text: String,
         fontSize: Int = 16,
@@ -395,6 +399,7 @@ class BuildImage(var image: Bitmap) {
     }
     companion object {
         val fonts = mutableMapOf<String, TtfFont>()
+        val fontMutex = Mutex()
         suspend fun init() {
             val fontDir = localCurrentDirVfs["font"]
             fontDir.list().collect {
@@ -416,7 +421,7 @@ class BuildImage(var image: Bitmap) {
                 this.mode = mode
             }
         suspend fun open(file: VfsFile): BuildImage {
-            if (file.mimeType() == MimeType.IMAGE_GIF) {
+            if (FormatDetector.detect(File(file.absolutePath).inputStream()).getOrNull() == Format.GIF) {
                 val gifFile = AnimatedGifReader.read(ImageSource.of(File(file.absolutePath)))
                 val builder = BuildImage(gifFile.frames.first().toBitmap())
                 builder.rawGifFile = gifFile
@@ -432,12 +437,12 @@ class BuildImage(var image: Bitmap) {
             "Source Han Sans CN Bold",
             "Source Han Serif SC Bold"
         )
-        fun getProperFont(
+        suspend fun getProperFont(
             text: String,
             fontName: String? = null,
             fallbackFonts: List<String> = defaultFallbackFonts,
             defaultFontName: String = "Glow Sans SC Normal Book"
-        ): Font {
+        ): Font = fontMutex.withLock {
             val fonts = fallbackFonts.toMutableList()
             fontName ?.let {
                 fonts.add(0, it)

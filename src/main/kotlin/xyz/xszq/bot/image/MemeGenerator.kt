@@ -1804,7 +1804,7 @@ object MemeGenerator {
             "我们是谁？", "XX人！", "到XX大学来做什么？", "混！", "将来毕业后要做什么样的人？", "混混！"
         )
         val frame = BuildImage.open(imgDir["slogan/0.jpg"])
-        val draw: (List<Int>, String) -> Unit = { pos, text ->
+        val draw: suspend (List<Int>, String) -> Unit = { pos, text ->
             kotlin.runCatching {
                 frame.drawText(
                     pos, text, maxFontSize = 40, minFontSize = 15, allowWrap = true
@@ -1828,7 +1828,7 @@ object MemeGenerator {
             "高情商", "低情商"
         )
         val frame = BuildImage.open(imgDir["high_EQ/0.jpg"])
-        val draw: (List<Int>, String) -> Unit = { pos, text ->
+        val draw: suspend (List<Int>, String) -> Unit = { pos, text ->
             kotlin.runCatching {
                 frame.drawText(
                     pos,
@@ -1882,7 +1882,7 @@ object MemeGenerator {
         )
         val frame = BuildImage.open(imgDir["find_chips/0.jpg"])
 
-        val draw: (List<Int>, String) -> Unit = { pos, text ->
+        val draw: suspend (List<Int>, String) -> Unit = { pos, text ->
             kotlin.runCatching {
                 frame.drawText(
                     pos, text, maxFontSize = 30, minFontSize = 12, allowWrap = true
@@ -2729,7 +2729,7 @@ object MemeGenerator {
     @Meme("吴京xx中国xx", "吴京,吴京中国", help = "需要两段文本")
     val wujing: Maker = { _, texts ->
         val frame = BuildImage.open(imgDir["wujing/0.jpg"])
-        val draw: (List<Int>, String, HorizontalAlign) -> Unit = { pos, text, align ->
+        val draw: suspend (List<Int>, String, HorizontalAlign) -> Unit = { pos, text, align ->
             kotlin.runCatching {
                 frame.drawText(
                     pos,

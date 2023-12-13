@@ -10,10 +10,13 @@ import io.ktor.http.*
 import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
+import org.jetbrains.exposed.sql.upsert
 import xyz.xszq.bot.dao.MaimaiBinding
+import xyz.xszq.bot.dao.MaimaiSettings
 import xyz.xszq.bot.dao.Permissions
-import xyz.xszq.bot.image.toJPEG
+import xyz.xszq.bot.maimai.MaimaiUtils.dailyOps
 import xyz.xszq.bot.maimai.MaimaiUtils.difficulties
+import xyz.xszq.bot.maimai.MaimaiUtils.getPlateByFilename
 import xyz.xszq.bot.maimai.MaimaiUtils.getPlateVerList
 import xyz.xszq.bot.maimai.MaimaiUtils.levels
 import xyz.xszq.bot.maimai.MaimaiUtils.name2Difficulty
@@ -29,6 +32,8 @@ import xyz.xszq.nereides.message.plus
 import xyz.xszq.nereides.message.toImage
 import xyz.xszq.nereides.message.toPlainText
 import xyz.xszq.nereides.toArgsList
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.random.Random
 
 object Maimai {
@@ -123,7 +128,7 @@ object Maimai {
         val (status, data) = prober.getDataByVersion(credentialType, credential, getPlateVerList(version))
         when (status) {
             HttpStatusCode.BadRequest ->
-                reply("用户名不存在，请确认用户名对应的玩家在 Diving-Fish 的舞萌 DX 查分器上已注册")
+                reply("绑定的账号/指定的用户名不存在，请确认用户名对应的玩家在 Diving-Fish 的舞萌 DX 查分器上已注册")
             HttpStatusCode.Forbidden ->
                 reply("该玩家已禁止他人查询。如果是您本人账号且已绑定QQ号，请不带用户名再次尝试查询一次")
         }
@@ -149,19 +154,20 @@ object Maimai {
             equalsTo("/mai") {
                 reply(buildString {
                     appendLine("此指令可查询 maimai 相关信息。")
-                    append("当前支持的子指令：查歌 bind b50 ap50 id info 是什么歌 有什么别名 定数查歌 分数线 进度")
-                    append(" 完成表 分数列表 随个 mai什么推分 猜歌 设置猜歌")
+                    append("当前支持的子指令：查歌 bind b50 ap50 id info 是什么歌 有什么别名 添加别名 删除别名 定数查歌 分数线 进度")
+                    append(" 完成表 分数列表 随个 mai什么推分 猜歌 设置猜歌 今日舞萌")
                 })
             }
         }
         GlobalEventChannel.subscribePublicMessages("/mai", permName = "maimai") {
             startsWith("bind") { raw ->
                 val args = raw.toArgsList()
-                if (args.size < 2) {
+                if (args.isEmpty()) {
                     reply(buildString {
                         appendLine("使用方法（二选一，建议绑qq）：")
-                        appendLine("/mai bind qq qq号")
-                        appendLine("/mai bind username 用户名")
+                        appendLine("/mai bind qq号")
+                        appendLine("/mai bind 用户名")
+                        appendLine("也可以使用“/mai bind qq qq号”或者“/mai bind username 用户名”来指名绑定的类型。")
                     })
                     return@startsWith
                 }
@@ -191,10 +197,11 @@ object Maimai {
                 val (status, data) = prober.getPlayerData(type, credential)
                 when (status) {
                     HttpStatusCode.OK -> {
+                        reply("正在生成中……")
                         reply(images.generateBest(data!!, subjectId).toImage())
                     }
                     HttpStatusCode.BadRequest -> {
-                        reply("您的QQ未绑定查分器账号或所查询的用户名不存在，" +
+                        reply("您的QQ未绑定查分器账号（详见/mai bind）或所查询的用户名不存在，" +
                                 "请确认用户名对应的玩家在 Diving-Fish 的舞萌 DX 查分器上已注册")
                     }
                     HttpStatusCode.Forbidden -> {
@@ -233,7 +240,7 @@ object Maimai {
                         reply(images.generateAP50(data!!, records.second!!.verList, subjectId).toImage())
                     }
                     HttpStatusCode.BadRequest -> {
-                        reply("您的QQ未绑定查分器账号或所查询的用户名不存在，" +
+                        reply("您的QQ未绑定查分器账号（详见/mai bind）或所查询的用户名不存在，" +
                                 "请确认用户名对应的玩家在 Diving-Fish 的舞萌 DX 查分器上已注册")
                     }
                     HttpStatusCode.Forbidden -> {
@@ -279,7 +286,7 @@ object Maimai {
                 val result = aliases.findByAlias(alias)
                 when (result.size) {
                     0 -> {
-                        reply("未找到相关歌曲。\n使用方法：XXX是什么歌\n按歌曲名称查询请用/mai 查歌")
+                        reply("未找到相关歌曲。\n使用方法：XXX是什么歌\n按歌曲名称查询请用/mai 查歌，添加别名请使用“/mai 添加别名”")
                     }
                     1 -> {
                         val music = result.first()
@@ -313,7 +320,44 @@ object Maimai {
                     aliases.getAllAliases(id).forEach {
                         appendLine(it)
                     }
+                    appendLine()
+                    appendLine("可以使用“/mai 添加别名 id 别名”来添加别名。")
                 })
+            }
+            startsWith("添加别名") { raw ->
+                val args = raw.toArgsList()
+                if (args.size != 2) {
+                    reply("使用方法：/mai 添加别名 id 别名\n例：/mai 添加别名 834 潘")
+                    return@startsWith
+                }
+                val (id, alias) = args.take(2)
+                if (musics.getById(id) == null) {
+                    reply("该id的歌曲不存在！")
+                    return@startsWith
+                }
+                aliases.add(id, alias)
+                val nowAliases = aliases.getAllAliases(id)
+                reply("添加成功，当前该歌曲别名有：" + nowAliases.joinToString(", "))
+            }
+            startsWith("删除别名") { raw ->
+                val args = raw.toArgsList()
+                if (args.size != 2) {
+                    reply("使用方法：/mai 删除别名 id 别名\n例：/mai 删除别名 834 asd")
+                    return@startsWith
+                }
+                val (id, alias) = args.take(2)
+                if (musics.getById(id) == null) {
+                    reply("该id的歌曲不存在！")
+                    return@startsWith
+                }
+                val nowAliases = aliases.getAllAliases(id).toMutableList()
+                if (alias !in nowAliases) {
+                    reply("该别名不存在！")
+                    return@startsWith
+                }
+                aliases.remove(id, alias)
+                nowAliases.remove(alias)
+                reply("添加成功，当前该歌曲别名有：" + nowAliases.joinToString(", "))
             }
             startsWith("定数查歌") { raw ->
                 val args = raw.toArgsList().mapNotNull { it.toDoubleOrNull() }
@@ -573,17 +617,99 @@ object Maimai {
                     })
                 }
             }
-            // TODO: FINISH this
-            startsWith("添加别名") { raw ->
+            startsWith("今日舞萌") {
+                val time = LocalDateTime.now()
+                val hash = ((subjectId + time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))).toByteArray())
+                    .hashCode()
+                var h = hash
+                val dailyMusic = musics.getRandom()
+                reply(buildString {
+                    appendLine(time.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日 E")))
+                    appendLine("今日幸运指数为 ${hash % 100 + 1}")
+                    dailyOps.forEach {
+                        val now = h and 3
+                        if (now == 3)
+                            appendLine("宜 $it")
+                        else if (now == 0)
+                            appendLine("忌 $it")
+                        h = h shr 2
+                    }
+                    appendLine("今日推荐歌曲：")
+                    appendLine(musics.getInfo(dailyMusic.id))
+                }.toPlainText() + images.getCoverById(dailyMusic.id).toImage())
+            }
+            startsWith("设置b50") { raw ->
                 val args = raw.toArgsList()
                 if (args.size != 2) {
-                    reply("使用方法：/mai 添加别名 id 别名\n例：/mai 添加别名 834 潘")
+                    reply(buildString {
+                        appendLine("使用方法：/mai 设置b50 选项 值")
+                        appendLine("例：/mai 设置b50 头像 UI_Icon_003304")
+                        appendLine("例：/mai 设置b50 牌子 UI_Plate_209502")
+                        appendLine("例：/mai 设置b50 牌子 使用查分器设置")
+                    })
                     return@startsWith
+                }
+                val name = args[1]
+                when (args[0]) {
+                    "头像" -> {
+                        images.getImageFilename("themes/${config.theme}/icon", name) ?.let { filename ->
+                            newSuspendedTransaction {
+                                MaimaiSettings.upsert {
+                                    it[this.openid] = subjectId
+                                    it[this.name] = "ICON_FILENAME"
+                                    it[this.value] = filename
+                                }
+                            }
+                            reply("设置成功。")
+                        } ?: run {
+                            reply("该头像不存在！")
+                        }
+                    }
+                    "牌子" -> {
+                        newSuspendedTransaction {
+                            if (name == "使用查分器设置") {
+                                MaimaiSettings.upsert {
+                                    it[this.openid] = subjectId
+                                    it[this.name] = "IS_PREFERRING_PROBER_PLATE"
+                                    it[this.value] = "true"
+                                }
+                                reply("设置成功。")
+                                return@newSuspendedTransaction
+                            }
+                            images.getImageFilename("themes/${config.theme}/plate", name) ?.let { filename ->
+                                getPlateByFilename(filename)?.let { (ver, type) ->
+                                    val data = getVersionData(ver, "", this@startsWith) ?: return@newSuspendedTransaction
+                                    val remains = musics.getPlateRemains(ver, type, getPlateVerList(ver), data.verList)
+                                    if (remains[3].isNotEmpty() || remains[4].isNotEmpty()) {
+                                        reply("您未达成该牌子的领取条件！")
+                                        return@newSuspendedTransaction
+                                    }
+                                }
+                                MaimaiSettings.upsert {
+                                    it[this.openid] = subjectId
+                                    it[this.name] = "PLATE_FILENAME"
+                                    it[this.value] = filename
+                                }
+                                MaimaiSettings.upsert {
+                                    it[this.openid] = subjectId
+                                    it[this.name] = "IS_PREFERRING_PROBER_PLATE"
+                                    it[this.value] = "false"
+                                }
+                                reply("设置成功。")
+                            } ?: run {
+                                reply("该牌子不存在！")
+                            }
+                        }
+                    }
+                    else -> {
+                        reply("使用方法有误，请使用“/mai 设置b50”查看帮助。")
+                        return@startsWith
+                    }
                 }
             }
         }
         GlobalEventChannel.subscribePublicMessages("/mai", permName = "maimai.guess") {
-            equalsTo("猜歌") {
+            equalsTo(listOf("猜歌", "/猜歌")) {
                 launch(Dispatchers.IO) {
                     guessGame.start(this)
                 }

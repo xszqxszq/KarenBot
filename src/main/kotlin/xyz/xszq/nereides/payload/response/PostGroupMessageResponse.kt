@@ -8,5 +8,5 @@ data class PostGroupMessageResponse(
     @SerialName("group_code")
     val groupCode: String,
     val msg: String,
-    val ret: Int?
+    val ret: Int? = null
 )

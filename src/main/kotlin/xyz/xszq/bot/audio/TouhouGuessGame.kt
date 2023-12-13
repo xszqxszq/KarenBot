@@ -85,9 +85,8 @@ object TouhouGuessGame {
             println(answers)
 
             val file = musicDir[filename]
-            file.cropPeriod(Random.nextDouble(0.0, file.getAudioDuration() - time), time) ?.let {
-                reply(it.toVoice())
-            } ?: run {
+            if (file.cropPeriod(Random.nextDouble(0.0, file.getAudioDuration() - time), time)?.toVoice()
+                    ?.let { reply(it) } != true) {
                 reply("出错了，请稍后重试")
                 started[contextId] = false
                 return@newSuspendedTransaction

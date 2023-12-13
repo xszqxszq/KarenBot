@@ -109,7 +109,7 @@ class Text2Image(
     }
     companion object {
 
-        fun fromText(
+        suspend fun fromText(
             text: String,
             fontSize: Int = 16,
             fill: RGBA = Colors.BLACK,

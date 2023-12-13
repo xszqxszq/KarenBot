@@ -5,6 +5,7 @@ import com.soywiz.korim.color.RGBA
 import com.soywiz.korio.lang.substr
 import xyz.xszq.bot.maimai.payload.MusicInfo
 import xyz.xszq.bot.maimai.payload.PlayScore
+import xyz.xszq.nereides.message.toImage
 import kotlin.math.min
 
 object MaimaiUtils {
@@ -19,7 +20,9 @@ object MaimaiUtils {
     val plateExcluded = listOf("201", "332", "336", "367", "486", "645")
     val remasterExcluded = listOf("158", "139", "571", "25", "72", "135", "257", "131", "351", "503", "168",
         "299", "159", "269", "138", "275", "67", "92", "108", "85", "173", "339", "369", "49")
-
+    val dailyOps = listOf(
+        "推分", "下埋", "越级", "拼机", "单刷", "练底力", "练手法", "抓准度", "抓绝赞", "收歌", "堵门", "夜勤"
+    )
     fun calcB50Change(b50: MutableList<PlayScore>,
                       music: MusicInfo, difficulty: Int, acc: Double,
                       b35Floor: Int, b15Floor: Int) : Int {
@@ -233,6 +236,19 @@ object MaimaiUtils {
             else -> return null
         } + (plateStartOffset[plate[0].toString()] ?: return null)
         return "UI_Plate_${fileId.toString().padStart(6, '0')}.png"
+    }
+    fun getPlateByFilename(filename: String): Pair<String, String>? {
+        versionsBrief.forEach { ver ->
+            plateCategories.forEach { type ->
+                if (ver != "" || type == "霸者") {
+                    val now = getPlateFilename(ver + type)
+                    if (now == filename) {
+                        return Pair(ver, type)
+                    }
+                }
+            }
+        }
+        return null
     }
     fun plateVerToVerId(ver: String) = when (ver) {
         "真" -> "100"

@@ -47,12 +47,12 @@ object QueueForArcades {
         newSuspendedTransaction(Dispatchers.IO) {
             val groupId = ArcadeCenterQueueGroup.findById(event.contextId) ?: run {
                 if (command in arrayOf("几", "j", "机厅几", "/j"))
-                    reply("当前群未绑定任何机厅。")
+                    reply("当前群未绑定任何机厅。可以使用 /排卡管理 命令来设置。")
                 return@newSuspendedTransaction
             }
             val centers = ArcadeQueueGroup.findById(groupId.group) ?.centers ?: run {
                 if (command in arrayOf("几", "j", "机厅几", "/j"))
-                    reply("当前群未绑定任何机厅。")
+                    reply("当前群未绑定任何机厅。可以使用 /排卡管理 命令来设置")
                 return@newSuspendedTransaction
             }
             if (command in arrayOf("几", "j", "机厅几", "/j")) {

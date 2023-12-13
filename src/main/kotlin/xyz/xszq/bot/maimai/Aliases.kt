@@ -9,6 +9,7 @@ import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import xyz.xszq.bot.dao.MaimaiAliases
@@ -51,4 +52,17 @@ class Aliases(private val musicsInfo: MusicsInfo) {
             MaimaiAliases.id eq id
         }.map { it[MaimaiAliases.name] }
     }.await()
+    suspend fun add(id: String, alias: String) =
+        newSuspendedTransaction {
+            MaimaiAliases.upsert {
+                it[this.id] = id
+                it[this.name] = alias
+            }
+        }
+    suspend fun remove(id: String, alias: String) =
+        newSuspendedTransaction {
+            MaimaiAliases.deleteWhere {
+                (this.id eq id) and (name eq alias)
+            }
+        }
 }

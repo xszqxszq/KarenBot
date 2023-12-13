@@ -74,6 +74,11 @@ class GuessGame(
                     if (e !is PublicMessageEvent ||
                                 e.contextId != contextId)
                         return@collect
+                    if (e.message.text == "不玩了") {
+                        finished = true
+                        started[contextId] = false
+                        return@collect
+                    }
                     if (!(ansList.any { ans -> ans == e.contentString.lowercase() ||
                                 ans in e.contentString.lowercase()
                                 || (e.contentString.length >= 5 && e.contentString.lowercase() in ans)}))

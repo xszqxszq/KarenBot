@@ -25,27 +25,37 @@ class GroupAtMessageEvent(
     override suspend fun reply(content: String) = reply(MessageChain(content.toPlainText()))
     override suspend fun reply(content: Message) = reply(MessageChain(content))
     override suspend fun reply(content: MessageChain): Boolean {
-        val files = content.filterIsInstance<LocalRichMedia>().map {
+        val files = content.filterIsInstance<LocalRichMedia>().map { media ->
             var file = client.uploadFile(
                 groupId = groupId,
-                url = NetworkUtils.upload(when (it) {
-                    is Image -> it.file
-                    is Voice -> it.file.toSilk().toVfs()
+                url = NetworkUtils.upload(when (media) {
+                    is Image -> media.file
+                    is Voice -> media.file.toSilk().toVfs()
                     else -> throw UnsupportedOperationException()
                 }),
-                fileType = when (it) {
+                fileType = when (media) {
                     is Image -> FileType.IMAGE
                     is Voice -> FileType.VOICE
                     else -> throw UnsupportedOperationException()
                 },
                 send = false
             )
-            if (file == null && it is Image) {
-                file = client.uploadFile(
-                    groupId = groupId,
-                    url = NetworkUtils.uploadBinary(it.file.readBytes().toJPEG()),
-                    fileType = FileType.IMAGE,
-                    send = false)
+            if (file == null) {
+                if (media is Image) {
+                    file = client.uploadFile(
+                        groupId = groupId,
+                        url = NetworkUtils.uploadBinary(media.file.readBytes().toJPEG()),
+                        fileType = FileType.IMAGE,
+                        send = false
+                    )
+                } else if (media is LocalVoice) {
+                    file = client.uploadFile(
+                        groupId = groupId,
+                        url = NetworkUtils.upload(media.file.toSilk().toVfs()),
+                        fileType = FileType.VOICE,
+                        send = false
+                    )
+                }
             }
             file
         }
