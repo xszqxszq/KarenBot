@@ -1,11 +1,9 @@
 package xyz.xszq.bot.image
 
-import com.soywiz.korim.bitmap.Bitmap
-import com.soywiz.korim.bitmap.Bitmap32
-import com.soywiz.korim.format.PNG
-import com.soywiz.korim.format.encode
-import xyz.xszq.nereides.NetworkUtils
-import xyz.xszq.nereides.readAsImage
+import korlibs.image.bitmap.Bitmap
+import korlibs.image.bitmap.Bitmap32
+import korlibs.image.format.PNG
+import korlibs.image.format.encode
 import kotlin.math.*
 
 object ImageGeneration {

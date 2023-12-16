@@ -1,11 +1,9 @@
 package xyz.xszq.bot.maimai
 
-import com.soywiz.kmem.toIntFloor
-import com.soywiz.korim.color.RGBA
-import com.soywiz.korio.lang.substr
+import korlibs.io.lang.substr
+import korlibs.memory.toIntFloor
 import xyz.xszq.bot.maimai.payload.MusicInfo
 import xyz.xszq.bot.maimai.payload.PlayScore
-import xyz.xszq.nereides.message.toImage
 import kotlin.math.min
 
 object MaimaiUtils {

@@ -1,9 +1,9 @@
 package xyz.xszq.bot.ffmpeg
 
-import com.soywiz.korau.format.readSoundInfo
-import com.soywiz.korio.file.VfsFile
-import com.soywiz.korio.file.std.toVfs
 import io.github.kasukusakura.silkcodec.SilkCoder
+import korlibs.audio.format.readSoundInfo
+import korlibs.io.file.VfsFile
+import korlibs.io.file.std.toVfs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext

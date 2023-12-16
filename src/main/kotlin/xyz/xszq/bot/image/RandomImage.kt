@@ -1,6 +1,6 @@
 package xyz.xszq.bot.image
 
-import com.soywiz.korio.file.std.localCurrentDirVfs
+import korlibs.io.file.std.localCurrentDirVfs
 import java.io.File
 import java.nio.file.Files
 import kotlin.io.path.Path

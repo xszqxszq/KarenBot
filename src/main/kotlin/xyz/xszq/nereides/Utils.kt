@@ -2,9 +2,9 @@
 
 package xyz.xszq.nereides
 
-import com.soywiz.korim.awt.toBMP32
-import com.soywiz.korim.bitmap.Bitmap32
-import com.soywiz.korio.file.std.tmpdir
+import korlibs.image.awt.toBMP32
+import korlibs.image.bitmap.Bitmap32
+import korlibs.io.file.std.tmpdir
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.serializer
@@ -52,17 +52,12 @@ val audioExts = listOf("mp3", "wav", "ogg", "m4a")
 const val availableUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) " +
         "Chrome/85.0.4183.83 Safari/537.36"
 
-fun Double.radTo180Deg(): Double {
-    if (this in -Math.PI .. Math.PI)
-        return this
-    var result = this
-    return if (this > 0) {
-        while (result > Math.PI)
-            result -= Math.PI * 2
-        result
-    } else {
-        while (result < -Math.PI)
-            result += Math.PI * 2
-        result
+
+
+inline fun <T> Iterable<T>.sumOf(selector: (T) -> Float): Float {
+    var sum: Float = 0.toFloat()
+    for (element in this) {
+        sum += selector(element)
     }
+    return sum
 }

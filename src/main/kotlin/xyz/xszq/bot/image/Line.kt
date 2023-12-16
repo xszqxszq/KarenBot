@@ -1,29 +1,34 @@
 package xyz.xszq.bot.image
 
-import com.soywiz.korim.font.Font
-import com.soywiz.korim.font.measureTextGlyphs
-import com.soywiz.korim.text.HorizontalAlign
-import kotlin.math.max
+import korlibs.image.font.TtfFont
+import korlibs.image.text.HorizontalAlign
+import kotlinx.coroutines.runBlocking
+import xyz.xszq.bot.image.BuildImage.Companion.defaultFallbackFonts
+import xyz.xszq.bot.image.BuildImage.Companion.fonts
+import xyz.xszq.nereides.sumOf
+
 
 class Line(
     val chars: String,
     val align: HorizontalAlign = HorizontalAlign.LEFT,
-    val fontSize: Int = 16,
-    val font: Font = globalFontRegistry.defaultFont()
+    val fontSize: Float = 16F,
+    val font: TtfFont = fonts[defaultFallbackFonts.first()]!!
 ) {
-    val width: Double
-        get() = font.measureTextGlyphs(fontSize.toDouble(), chars).glyphs.sumOf { it.metrics.xadvance }
+    val width: Float
+        get() = runBlocking { font.measureTextGlyphs(fontSize, chars).glyphs.sumOf { it.metrics.xadvance } }
     val height
-        get() = font.measureTextGlyphs(fontSize.toDouble(), chars).metrics.height
+        get() = runBlocking { font.measureTextGlyphs(fontSize, chars).metrics.height }
     val ascent
-        get() = font.measureTextGlyphs(fontSize.toDouble(), chars.ifBlank { "A" }).metrics.ascent
+        get() = runBlocking { font.measureTextGlyphs(fontSize, chars.ifBlank { "A" }).metrics.ascent }
     val descent
-        get() = -font.measureTextGlyphs(fontSize.toDouble(), chars.ifBlank { "A" }).metrics.descent
-    fun wrap(width: Double): List<Line> {
+        get() = runBlocking { -font.measureTextGlyphs(fontSize, chars.ifBlank { "A" }).metrics.descent }
+    suspend fun wrap(width: Double): List<Line> {
         val result = mutableListOf<Line>()
         var current = ""
         chars.forEach { char ->
-            if (font.measureTextGlyphs(fontSize.toDouble(), current + char).metrics.width > width) {
+            if (kotlin.runCatching {
+                font.measureTextGlyphs(fontSize, current + char).metrics.width
+            }.getOrDefault((width + 1).toFloat()) > width) { // TODO: Fix this
                 result.add(Line(current, align, fontSize, font))
                 current = ""
             }

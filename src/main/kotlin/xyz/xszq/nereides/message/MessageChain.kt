@@ -24,8 +24,9 @@ class MessageChain() {
         }
 
     fun filter(block: Message.() -> Boolean) = MessageChain(list.filter(block))
-    fun any(block: Message.() -> Boolean) = list.any(block)
-    fun none(block: Message.() -> Boolean) = list.none(block)
+    fun any(block: (Message) -> Boolean) = list.any(block)
+    fun none(block: (Message) -> Boolean) = list.none(block)
+    fun all(block: (Message) -> Boolean) = list.all(block)
     fun find(block: Message.() -> Boolean) = list.find(block)
     fun findLast(block: Message.() -> Boolean) = list.findLast(block)
     fun first(block: Message.() -> Boolean) = list.first(block)

@@ -1,16 +1,11 @@
 package xyz.xszq.nereides.event
 
-import com.soywiz.korio.file.VfsFile
-import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import xyz.xszq.nereides.QQClient
-import xyz.xszq.nereides.message.*
-import xyz.xszq.nereides.payload.message.MessageArk
-import xyz.xszq.nereides.payload.response.PostGroupMessageResponse
+import xyz.xszq.nereides.message.LocalImage
+import xyz.xszq.nereides.message.Message
+import xyz.xszq.nereides.message.MessageChain
 import xyz.xszq.nereides.payload.user.GuildUser
-import xyz.xszq.nereides.payload.utils.FileType
-import xyz.xszq.nereides.payload.utils.MsgType
-import java.io.File
 
 class GuildAtMessageEvent(
     override val client: QQClient,

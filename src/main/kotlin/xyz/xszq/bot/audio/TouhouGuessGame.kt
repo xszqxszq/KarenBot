@@ -1,13 +1,12 @@
 package xyz.xszq.bot.audio
 
-import com.soywiz.korio.file.std.localCurrentDirVfs
+import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import xyz.xszq.bot.dao.TouhouAliases
 import xyz.xszq.bot.dao.TouhouMusics
 import xyz.xszq.bot.ffmpeg.cropPeriod
@@ -15,12 +14,8 @@ import xyz.xszq.bot.ffmpeg.getAudioDuration
 import xyz.xszq.nereides.event.GlobalEventChannel
 import xyz.xszq.nereides.event.GroupAtMessageEvent
 import xyz.xszq.nereides.event.PublicMessageEvent
-import xyz.xszq.nereides.message.plus
-import xyz.xszq.nereides.message.toImage
-import xyz.xszq.nereides.message.toPlainText
 import xyz.xszq.nereides.message.toVoice
 import xyz.xszq.nereides.toPinyinAbbr
-import xyz.xszq.nereides.toPinyinList
 import kotlin.random.Random
 
 object TouhouGuessGame {

@@ -1,41 +1,43 @@
 package xyz.xszq.bot.image
 
-import com.soywiz.korim.bitmap.Bitmap
-import com.soywiz.korim.bitmap.NativeImageOrBitmap32
-import com.soywiz.korim.bitmap.context2d
-import com.soywiz.korim.color.Colors
-import com.soywiz.korim.color.RGBA
-import com.soywiz.korim.font.Font
-import com.soywiz.korim.font.measureTextGlyphs
-import com.soywiz.korim.format.readNativeImage
-import com.soywiz.korim.text.TextAlignment
-import com.soywiz.korio.file.std.localCurrentDirVfs
-import xyz.xszq.bot.maimai.MultiPlatformNativeSystemFontProvider
+import korlibs.image.bitmap.Bitmap
+import korlibs.image.bitmap.NativeImageOrBitmap32
+import korlibs.image.bitmap.context2d
+import korlibs.image.color.Colors
+import korlibs.image.color.RGBA
+import korlibs.image.font.TtfFont
+import korlibs.image.format.readNativeImage
+import korlibs.io.file.std.localCurrentDirVfs
+import korlibs.math.geom.Point
+import korlibs.math.geom.Size
+import kotlinx.coroutines.sync.withLock
 
 object BlueArchiveLogo {
     private const val transparentBg: Boolean = false
     private const val canvasHeight: Int = 250
-    private const val size: Int = 84
+    private const val size: Float = 84F
     private const val textBaseLine: Double = 0.68
     private const val horizontalTilt: Double = -0.4
     private const val paddingX: Int = 10
     private const val graphOffsetX: Int = -15
     private const val graphOffsetY: Int = 0
-    private val defaultFont = globalFontRegistry.loadFontByName("RoGSanSrfStd-Bd")
-        ?: globalFontRegistry.defaultFont()
-    private val fallbackFont = globalFontRegistry.loadFontByName("Glow Sans SC Normal Heavy")
-        ?: globalFontRegistry.defaultFont()
+    private val defaultFont = globalFontRegistry.loadFontByName("RoGSanSrfStd-Bd")!!
+    private val fallbackFont = globalFontRegistry.loadFontByName("Glow Sans SC Normal Heavy")!!
     private val hollowPath = listOf(
         Pair(284, 136),
         Pair(321, 153),
         Pair(159, 410),
         Pair(148, 403)
     )
-    private fun getFont(text: String): Font {
-        if (text.any { defaultFont[it] == null })
+    private suspend fun getFont(text: String): TtfFont {
+        if (text.any {
+            fontLock.withLock {
+                defaultFont[it] == null
+            }
+        })
             return fallbackFont
         text.forEach {
-            val glyphs = defaultFont.measureTextGlyphs(size.toDouble(), it.toString())
+            val glyphs = defaultFont.measureTextGlyphs(size, it.toString())
             if (it.code > 255 && glyphs.metrics.width < 16.0)
                 return fallbackFont
         }
@@ -44,8 +46,8 @@ object BlueArchiveLogo {
     suspend fun draw(textL: String, textR: String): Bitmap {
         val fontL = getFont(textL)
         val fontR = getFont(textR)
-        val textMetricsL = fontL.measureTextGlyphs(size.toDouble(), textL)
-        val textMetricsR = fontR.measureTextGlyphs(size.toDouble(), textR)
+        val textMetricsL = fontL.measureTextGlyphs(size, textL)
+        val textMetricsR = fontR.measureTextGlyphs(size, textR)
         val textWidthL = textMetricsL.metrics.width -
                 (textBaseLine * canvasHeight + textMetricsL.fmetrics.bottom - textMetricsL.fmetrics.baseline) *
                 horizontalTilt
@@ -57,7 +59,7 @@ object BlueArchiveLogo {
         val realWidth = canvasWidthL + canvasWidthR + 80
         val result = NativeImageOrBitmap32(realWidth.toInt(), canvasHeight, true)
         return result.context2d {
-            fontSize = size.toDouble()
+            fontSize = size
             if (!transparentBg) {
                 fillStyle = Colors.WHITE
                 fillRect(0, 0, this.width, this.height)
@@ -66,25 +68,26 @@ object BlueArchiveLogo {
             // alignment = TextAlignment.RIGHT
             setTransform(1.0, 0.0, horizontalTilt, 1.0, 0.0, 0.0)
             font = fontL
-            fillText(textL, canvasWidthL - textWidthL + 30 +
-                    if (fontL.name == "RoGSanSrfStd-Bd") 45 else 40, height * textBaseLine)
+                fillTextSafe(textL, Point(
+                    canvasWidthL - textWidthL + 30 +
+                        if (fontL.ttfCompleteName == "RoGSanSrfStd-Bd") 45 else 40,
+                    height * textBaseLine)
+                )
             setTransform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
             drawImage(
                 localCurrentDirVfs["image/BlueArchive/halo.png"].readNativeImage(),
-                canvasWidthL - this.height / 2 + graphOffsetX,
-                graphOffsetY,
-                canvasHeight,
-                canvasHeight
+                Point(canvasWidthL - this.height / 2 + graphOffsetX, graphOffsetY),
+                Size(canvasHeight, canvasHeight)
             )
             fillStyle = RGBA(0x2b, 0x2b, 0x2b, 0xff)
             // alignment = TextAlignment.LEFT
             strokeStyle = Colors.WHITE
-            lineWidth = 12.0
+            lineWidth = 12.0F
             setTransform(1.0, 0.0, horizontalTilt, 1.0, 0.0, 0.0)
             font = fontR
-            strokeText(textR, canvasWidthL + 30, height * textBaseLine)
+            strokeTextSafe(textR, Point(canvasWidthL + 30, height * textBaseLine))
             fillStyle = Colors.BLACK
-            fillText(textR, canvasWidthL + 30, height * textBaseLine)
+            fillTextSafe(textR, Point(canvasWidthL + 30, height * textBaseLine))
             setTransform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
             val graphX = canvasWidthL - height / 2 + graphOffsetX
             val graphY = graphOffsetY
@@ -104,10 +107,8 @@ object BlueArchiveLogo {
             fill()
             drawImage(
                 localCurrentDirVfs["image/BlueArchive/cross.png"].readNativeImage(),
-                canvasWidthL - this.height / 2 + graphOffsetX,
-                graphOffsetY,
-                canvasHeight,
-                canvasHeight
+                Point(canvasWidthL - this.height / 2 + graphOffsetX, graphOffsetY),
+                Size(canvasHeight, canvasHeight)
             )
             dispose()
         }

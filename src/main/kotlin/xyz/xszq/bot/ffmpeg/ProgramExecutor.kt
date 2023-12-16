@@ -1,6 +1,6 @@
 package xyz.xszq.bot.ffmpeg
 
-import com.soywiz.kmem.Platform
+import korlibs.memory.Platform
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
@@ -31,10 +31,10 @@ class ProgramExecutor(
             val value = args.last()
             procBuilder.environment().putIfAbsent(name, value)
         }
-        val realCommand = if (Platform.os.isLinux)
-            listOf("/bin/bash", "-c", command)
-        else
+        val realCommand = if (Platform.os.isWindows)
             listOf("C:\\Windows\\System32\\cmd.exe", "/C", command)
+        else
+            listOf("/bin/bash", "-c", command)
         val proc =
             if (showOutput) procBuilder.inheritIO().command(realCommand).start()
             else procBuilder.command(realCommand).start()

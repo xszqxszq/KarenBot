@@ -5,23 +5,20 @@ import com.sksamuel.scrimage.ImmutableImage
 import com.sksamuel.scrimage.filter.BufferedOpFilter
 import com.sksamuel.scrimage.nio.AnimatedGif
 import com.sksamuel.scrimage.nio.StreamingGifWriter
-import com.soywiz.korim.awt.toBMP32
-import com.soywiz.korim.bitmap.Bitmap
-import com.soywiz.korim.bitmap.NativeImage
-import com.soywiz.korim.color.Colors
-import com.soywiz.korim.color.RGBA
-import com.soywiz.korim.format.PNG
-import com.soywiz.korim.format.encode
-import com.soywiz.korim.vector.Context2d
-import com.soywiz.korio.file.std.localCurrentDirVfs
-import com.soywiz.korma.geom.Angle
-import com.soywiz.korma.geom.vector.arc
-import com.soywiz.korma.geom.vector.arcTo
+import korlibs.image.awt.toBMP32
+import korlibs.image.bitmap.Bitmap
+import korlibs.image.bitmap.NativeImage
+import korlibs.image.color.Colors
+import korlibs.image.color.RGBA
+import korlibs.image.format.PNG
+import korlibs.image.format.encode
+import korlibs.image.vector.Context2d
+import korlibs.math.geom.Angle
+import korlibs.math.geom.Point
 import org.opencv.core.Mat
 import org.opencv.core.MatOfByte
 import org.opencv.imgcodecs.Imgcodecs
 import thirdparty.jhlabs.image.GaussianFilter
-import xyz.xszq.bot.maimai.MultiPlatformNativeSystemFontProvider
 import xyz.xszq.config
 import java.awt.image.BufferedImage
 import java.awt.image.BufferedImageOp
@@ -147,13 +144,12 @@ suspend fun makeGifOrCombinedGif(
 }
 fun splitGif(image: AnimatedGif): List<Bitmap> = image.frames.map { it.toBitmap() }
 
-fun Bitmap.toMemeBuilder() = BuildImage(this)
+fun Bitmap.toBuildImage() = BuildImage(this)
 fun List<String>.ifBlank(defaultValue: () -> String): String {
     if (this.isNotEmpty() && this.first().isNotBlank())
         return this.first()
     return defaultValue()
 }
-val globalFontRegistry = MultiPlatformNativeSystemFontProvider(localCurrentDirVfs["font"].absolutePath)
 suspend fun Bitmap.toImmutableImage(): ImmutableImage = ImmutableImage.loader().fromBytes(encode(PNG)).toImmutableImage()
 suspend fun saveGif(frames: List<Bitmap>, duration: Double): ByteArray {
     val output = encodeGif(frames, (duration * 1000L).toLong())
@@ -189,7 +185,7 @@ fun getKorimCircle(size: Int, color: RGBA = Colors.WHITE, bg: RGBA = RGBA(0, 0, 
         fillStyle = bg
         fillRect(0, 0, width, height)
         beginPath()
-        arc(size / 2, size / 2, size / 2, Angle.fromDegrees(0), Angle.fromDegrees(360))
+        arc(Point(size / 2, size / 2), size / 2F, Angle.fromDegrees(0), Angle.fromDegrees(360))
         fillStyle = color
         fill()
     }
@@ -197,16 +193,16 @@ fun getKorimRoundedRectangle(r1: Double, width: Int, height: Int, color: RGBA = 
     NativeImage(width * 5, height * 5).modify {
         fillStyle = bg
         fillRect(0, 0, width, height)
-        val w = width.toDouble() * 5
-        val h = height.toDouble() * 5
+        val w = width.toFloat() * 5
+        val h = height.toFloat() * 5
 
         val r = if (w < 2 * r1 * 5) w / 2.0 else if (h < 2 * r1 * 5) h / 2.0 else r1 * 5
         beginPath()
         this.moveTo(r, 0.0)
-        this.arcTo(w, 0.0, w, h, r)
-        this.arcTo(w, h, 0.0, h, r)
-        this.arcTo(0.0, h, 0.0, 0.0, r)
-        this.arcTo(0.0, 0.0, w, 0.0, r)
+        this.arcTo(Point(w, 0.0F), Point(w, h), r)
+        this.arcTo(Point(w, h), Point(0.0F, h), r)
+        this.arcTo(Point(0.0F, h), Point(0.0, 0.0), r)
+        this.arcTo(Point(0.0, 0.0), Point(w, 0.0F), r)
         this.close()
         fillStyle = color
         fill()

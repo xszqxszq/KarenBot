@@ -1,16 +1,14 @@
 package xyz.xszq.nereides.event
 
-import com.soywiz.korio.file.std.toVfs
+import korlibs.io.file.std.toVfs
 import xyz.xszq.bot.ffmpeg.toSilk
 import xyz.xszq.bot.image.toJPEG
-import xyz.xszq.config
 import xyz.xszq.nereides.NetworkUtils
-import xyz.xszq.nereides.payload.utils.FileType
-import xyz.xszq.nereides.payload.utils.MsgType
 import xyz.xszq.nereides.QQClient
 import xyz.xszq.nereides.filterURL
 import xyz.xszq.nereides.message.*
-import xyz.xszq.nereides.payload.response.PostGroupMessageResponse
+import xyz.xszq.nereides.payload.utils.FileType
+import xyz.xszq.nereides.payload.utils.MsgType
 
 class GroupAtMessageEvent(
     override val client: QQClient,
@@ -63,21 +61,32 @@ class GroupAtMessageEvent(
             println("重传失败，消息发送不成功")
             return false
         }
+        val type = when {
+            content.all { it is PlainText } -> MsgType.TEXT
+            content.all { it is PlainText || it is RichMedia } -> MsgType.RICH
+            content.any { it is Ark } -> MsgType.ARK
+            else -> MsgType.TEXT
+        }
         var response = client.sendGroupMessage(
             groupId = groupId,
-            content = content.text,
-            msgType = if (files.isEmpty()) MsgType.TEXT else MsgType.RICH,
+            content = when (type) {
+                MsgType.ARK -> ""
+                else -> content.text
+            },
+            msgType = type,
             msgId = msgId,
             msgSeq = replySeq ++,
-            media = files.firstOrNull()
+            media = files.firstOrNull(),
+            ark = content.filterIsInstance<Ark>().firstOrNull() ?.ark
         )
+        println(response)
         response ?.ret ?.let { ret ->
             when (ret) {
                 10009 -> { // 有未加白域名/腾讯错误检测
                     response = client.sendGroupMessage(
                         groupId = groupId,
                         content = content.text.filterURL(),
-                        msgType = if (files.isEmpty()) MsgType.TEXT else MsgType.RICH,
+                        msgType = type,
                         msgId = msgId,
                         msgSeq = replySeq ++,
                         media = files.firstOrNull()

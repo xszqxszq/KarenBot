@@ -1,6 +1,6 @@
 package xyz.xszq.bot.config
 
-import com.soywiz.korio.file.VfsFile
+import korlibs.io.file.VfsFile
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import net.mamoe.yamlkt.Yaml

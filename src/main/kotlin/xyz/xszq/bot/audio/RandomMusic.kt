@@ -1,11 +1,9 @@
 package xyz.xszq.bot.audio
 
-import com.soywiz.korio.file.VfsFile
-import com.soywiz.korio.file.extension
-import com.soywiz.korio.file.std.localCurrentDirVfs
-import kotlinx.coroutines.flow.filter
+import korlibs.io.file.VfsFile
+import korlibs.io.file.extension
+import korlibs.io.file.std.localCurrentDirVfs
 import xyz.xszq.nereides.audioExts
-import java.io.File
 
 object RandomMusic {
     private val musicDir = localCurrentDirVfs["music"]

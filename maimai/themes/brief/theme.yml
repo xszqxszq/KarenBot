@@ -170,6 +170,7 @@ info:
       y: 310
       color: "#ffffff"
       xScale: 0.96
+      ellipsizeWidth: 473
     achievements:
       fontName: Alibaba-PuHuiTi-H
       size: 20
@@ -180,7 +181,7 @@ info:
     ds:
       fontName: Alibaba-PuHuiTi-H
       size: 20
-      x: 690
+      x: 700
       y: 47
       color: "#6d6d6d"
       xScale: 0.94

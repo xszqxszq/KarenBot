@@ -1,25 +1,30 @@
 package xyz.xszq.bot.maimai
 
-import com.soywiz.korim.format.PNG
-import com.soywiz.korim.format.encode
-import com.soywiz.korio.async.launch
-import com.soywiz.korma.math.roundDecimalPlaces
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
+import korlibs.image.format.PNG
+import korlibs.image.format.encode
+import korlibs.image.format.readNativeImage
+import korlibs.image.text.HorizontalAlign
+import korlibs.image.text.VerticalAlign
+import korlibs.io.file.std.localCurrentDirVfs
+import korlibs.math.roundDecimalPlaces
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.takeWhile
+import kotlinx.coroutines.launch
+import xyz.xszq.bot.image.BuildImage
+import xyz.xszq.bot.image.randomSlice
+import xyz.xszq.bot.image.toBuildImage
 import xyz.xszq.bot.maimai.MaimaiUtils.toDXId
 import xyz.xszq.bot.maimai.payload.ChartStat
 import xyz.xszq.bot.maimai.payload.MusicInfo
 import xyz.xszq.nereides.event.GlobalEventChannel
-import xyz.xszq.nereides.event.GroupAtMessageEvent
 import xyz.xszq.nereides.event.PublicMessageEvent
+import xyz.xszq.nereides.message.Ark
+import xyz.xszq.nereides.message.ark.ListArk
 import xyz.xszq.nereides.message.plus
 import xyz.xszq.nereides.message.toImage
 import xyz.xszq.nereides.message.toPlainText
-import xyz.xszq.nereides.pass
-import kotlin.coroutines.CoroutineContext
+import xyz.xszq.nereides.toDBC
 
 class GuessGame(
     private val musics: MusicsInfo,
@@ -41,9 +46,9 @@ class GuessGame(
         if (song.type=="DX") "是 DX 谱面" else if (musics
                 .getById(toDXId(song.id)) != null) "既有 DX 谱面也有标准谱面" else "没有 DX 谱面"
     )
-    suspend fun start(event: PublicMessageEvent, hints: Int = 6) = event.run {
+    suspend fun startClassical(event: PublicMessageEvent, hints: Int = 6) = event.run {
         if (started[contextId] == true) {
-            reply("当前群有正在进行的猜歌哦~")
+            reply("当前群有正在进行的猜歌/开字母哦~")
             return@run
         }
         started[contextId] = true
@@ -133,6 +138,129 @@ class GuessGame(
                     reply(replyText)
                 finished = true
                 started[contextId] = false
+            }
+        }
+    }
+    private suspend fun showOpeningStatus(
+        nowMusics: List<Pair<MusicInfo, Boolean>>,
+        nowChars: List<Char>,
+        all: Boolean = false
+    ): Ark = ListArk.build {
+        desc { "舞萌开字母猜歌小游戏" }
+        prompt { "舞萌开字母" }
+        text { "已开出字母：[${nowChars.joinToString(", ")}]" }
+        text { "题目如下：" }
+
+        nowMusics.forEach { (music, status) ->
+            if (status) {
+                text { "[√]: ${music.title}" }
+            } else {
+                text { "[X]: " + music.title.map { c ->
+                    if (c.lowercase().toDBC().first() !in nowChars && c.toString().isNotBlank() && !all) '?' else c
+                }.joinToString("") }
+            }
+        }
+    }
+    suspend fun startOpening(event: PublicMessageEvent) = event.run {
+        if (started[contextId] == true) {
+            reply("当前群有正在进行的猜歌/开字母哦~")
+            return@run
+        }
+        started[contextId] = true
+        var finished = false
+        val nowMusics = musics.getRandomHot(15).map { Pair(it, false) }.toMutableList()
+        println(nowMusics.map { it.first.id })
+        val nowChars = mutableListOf<Char>()
+        reply(ListArk.build {
+            desc { "舞萌开字母猜歌小游戏" }
+            prompt { "舞萌开字母" }
+            text { "这是一个 maimai 猜歌小游戏~" }
+            text { "你需要猜出十五首来自 maimai 的歌曲曲名！可以@可怜Bot说：“开字母”来尝试开一次字母，说“开歌”来直接开出歌曲，说“不玩了”可以结束游戏哦" }
+        })
+        reply("\n")
+        coroutineScope {
+            launch {
+                reply(showOpeningStatus(nowMusics, nowChars))
+                GlobalEventChannel.channel.takeWhile { !finished }.collect { e ->
+                    kotlin.runCatching {
+                        if (e !is PublicMessageEvent ||
+                            e.contextId != contextId)
+                            return@collect
+                        if (e.message.text == "不玩了") {
+                            finished = true
+                            started[contextId] = false
+                            e.reply(showOpeningStatus(nowMusics, nowChars, true))
+                            return@collect
+                        }
+                        if (e.message.text.trim().startsWith("开字母")) {
+                            val char = e.message.text.trim().substringAfter("开字母").trim().firstOrNull()
+                                ?: return@collect
+                            if (char in nowChars) {
+                                e.reply(ListArk.build {
+                                    desc { "舞萌开字母猜歌小游戏" }
+                                    prompt { "舞萌开字母" }
+                                    text { "字母“${char}”已经开过了！" }
+                                })
+                                return@collect
+                            }
+                            nowChars.add(char.lowercase().toDBC().first())
+                            nowMusics.forEachIndexed { index, music ->
+                                if (!music.second && music.first.title.all { it.lowercase().toDBC().first() in nowChars })
+                                    nowMusics[index] = Pair(music.first, true)
+                            }
+                        } else if (e.message.text.trim().startsWith("开歌")) {
+                            val name = e.message.text.trim().substringAfter("开歌").trim().lowercase().toDBC()
+                            var musicIndex: Int? = null
+                            var notFound = true
+                            musics.getById(name.substringAfter("id")) ?.let { music ->
+                                notFound = false
+                                if (nowMusics.any { it.first.title == music.title })
+                                    musicIndex = nowMusics.indexOfFirst { it.first.title == music.title }
+                            }
+                            musics.filter { it.title == name }.firstOrNull() ?.let { music ->
+                                notFound = false
+                                if (nowMusics.any { it.first.title == music.title })
+                                    musicIndex = nowMusics.indexOfFirst { it.first.title == music.title }
+                            }
+                            aliases.findByAlias(name).forEach { music ->
+                                notFound = false
+                                nowMusics.mapIndexedNotNull { index, now ->
+                                    if (!now.second && now.first.title == music.title)
+                                        index
+                                    else null
+                                }.firstOrNull() ?.let {
+                                    musicIndex = it
+                                }
+                            }
+                            musicIndex ?.let {
+                                nowMusics[it] = Pair(nowMusics[it].first, true)
+                            } ?: run {
+                                e.reply(ListArk.build {
+                                    desc { "舞萌开字母猜歌小游戏" }
+                                    prompt { "舞萌开字母" }
+                                    text { if (notFound) "歌曲不存在！" else "歌曲不在题目列表中！" }
+                                })
+                                return@collect
+                            }
+                        } else {
+                            return@collect
+                        }
+                        if (nowMusics.all { it.second }) {
+                            e.reply(ListArk.build {
+                                desc { "舞萌开字母猜歌小游戏" }
+                                prompt { "舞萌开字母" }
+                                text { "恭喜！全部歌曲已开出" }
+                            })
+                            e.reply(showOpeningStatus(nowMusics, nowChars))
+                            finished = true
+                            started[contextId] = false
+                            return@collect
+                        }
+                        e.reply(showOpeningStatus(nowMusics, nowChars))
+                    }.onFailure {
+                        it.printStackTrace()
+                    }
+                }
             }
         }
     }

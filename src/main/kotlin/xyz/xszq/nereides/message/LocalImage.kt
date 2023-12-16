@@ -2,7 +2,7 @@
 
 package xyz.xszq.nereides.message
 
-import com.soywiz.korio.file.VfsFile
+import korlibs.io.file.VfsFile
 
 class LocalImage(
     override val file: VfsFile,

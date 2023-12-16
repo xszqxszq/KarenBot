@@ -2,7 +2,10 @@ package xyz.xszq.nereides.payload.post
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import xyz.xszq.nereides.payload.message.*
+import xyz.xszq.nereides.payload.message.MessageArk
+import xyz.xszq.nereides.payload.message.MessageEmbed
+import xyz.xszq.nereides.payload.message.MessageMarkdown
+import xyz.xszq.nereides.payload.message.MessageReference
 
 @Serializable
 data class PostChannelMessage(

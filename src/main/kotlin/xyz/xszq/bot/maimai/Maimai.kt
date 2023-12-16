@@ -1,12 +1,13 @@
 package xyz.xszq.bot.maimai
 
-import com.soywiz.korim.format.PNG
-import com.soywiz.korim.format.encode
-import com.soywiz.korio.async.launch
-import com.soywiz.korio.file.std.localCurrentDirVfs
-import com.soywiz.korio.lang.substr
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.http.*
+import korlibs.image.format.PNG
+import korlibs.image.format.encode
+import korlibs.io.async.launch
+import korlibs.io.file.std.localCurrentDirVfs
+import korlibs.io.lang.substr
+import korlibs.memory.toIntCeil
 import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
@@ -29,6 +30,7 @@ import xyz.xszq.bot.maimai.payload.PlateResponse
 import xyz.xszq.bot.maimai.payload.PlayerData
 import xyz.xszq.nereides.event.GlobalEventChannel
 import xyz.xszq.nereides.event.MessageEvent
+import xyz.xszq.nereides.message.ark.ListArk
 import xyz.xszq.nereides.message.plus
 import xyz.xszq.nereides.message.toImage
 import xyz.xszq.nereides.message.toPlainText
@@ -43,8 +45,8 @@ object Maimai {
     val musics = MusicsInfo(logger)
     val prober = DXProberClient(logger)
     val images = MaimaiImage(musics, logger, localCurrentDirVfs["maimai"])
-    private val aliases = Aliases(musics)
-    private val guessGame = GuessGame(musics, images, aliases)
+    val aliases = Aliases(musics)
+    val guessGame = GuessGame(musics, images, aliases)
     private lateinit var config: MaimaiConfig
     private suspend fun queryBindings(openId: String): Pair<String, String>? = suspendedTransactionAsync(Dispatchers.IO) {
         val bindings = MaimaiBinding.findById(openId) ?: return@suspendedTransactionAsync null
@@ -61,34 +63,38 @@ object Maimai {
             }
         }
     }
+    suspend fun initBlocking() {
+        config = MaimaiConfig.load(localCurrentDirVfs["maimai/settings.yml"])
+
+        logger.info { "正在获取歌曲数据……" }
+        musics.updateMusicInfo(prober.getMusicList())
+        musics.updateStats(prober.getChartStat())
+        musics.updateHot()
+
+        logger.info { "正在更新别名数据……" }
+        kotlin.runCatching {
+            aliases.updateXrayAliases(config.xrayAliasUrl)
+        }.onFailure {
+            it.printStackTrace()
+            logger.error { "别名更新失败！" }
+        }.onSuccess {
+            logger.error { "别名更新成功！" }
+        }
+
+        logger.info { "正在缓存歌曲封面中……" }
+        images.downloadCovers(config, musics.getAll())
+
+        logger.info { "正在加载图片中……" }
+        images.load(config.theme)
+
+        logger.info { "正在生成定数表中……" }
+        images.preGenerateDsList()
+        logger.info { "maimai 功能加载完成。" }
+    }
     @OptIn(DelicateCoroutinesApi::class)
     fun init() {
         GlobalScope.launch {
-            config = MaimaiConfig.load(localCurrentDirVfs["maimai/settings.yml"])
-
-            logger.info { "正在获取歌曲数据……" }
-            musics.updateMusicInfo(prober.getMusicList())
-            musics.updateStats(prober.getChartStat())
-            musics.updateHot()
-
-            logger.info { "正在更新别名数据……" }
-            kotlin.runCatching {
-                aliases.updateXrayAliases(config.xrayAliasUrl)
-            }.onFailure {
-                logger.error { "别名更新失败！" }
-            }.onSuccess {
-                logger.error { "别名更新成功！" }
-            }
-
-            logger.info { "正在缓存歌曲封面中……" }
-            images.downloadCovers(config, musics.getAll())
-
-            logger.info { "正在加载图片中……" }
-            images.load(config.theme)
-
-            logger.info { "正在生成定数表中……" }
-            images.preGenerateDsList()
-            logger.info { "maimai 功能加载完成。" }
+            initBlocking()
         }
         GlobalScope.launch {
             delay(3600 * 1000L)
@@ -119,7 +125,7 @@ object Maimai {
         else queryBindings(subjectId) ?: run {
             reply(buildString {
                 appendLine("未绑定账号信息，请指定用户名，或先进行绑定操作！")
-                appendLine("您可以使用 /mai bind 绑定查分器账号进行快速查询 (此绑定与查分器绑定无关)")
+                appendLine("您可以使用 /mai bind 绑定查分器账号进行快速查询 (此绑定与查分器绑定无关，在查分器绑定之后仍需在Bot这里绑定一次)")
             }.trimEnd())
             null
         }
@@ -156,7 +162,7 @@ object Maimai {
                 reply(buildString {
                     appendLine("此指令可查询 maimai 相关信息。")
                     append("当前支持的子指令：查歌 bind b50 ap50 id info 是什么歌 有什么别名 添加别名 删除别名 定数查歌 分数线 进度")
-                    append(" 完成表 分数列表 随个 mai什么推分 猜歌 设置猜歌 今日舞萌")
+                    append(" 完成表 分数列表 随个 mai什么推分 猜歌 舞萌开字母 设置猜歌 今日舞萌 设置b50 谱师查歌 正则查歌")
                 })
             }
         }
@@ -198,7 +204,6 @@ object Maimai {
                 val (status, data) = prober.getPlayerData(type, credential)
                 when (status) {
                     HttpStatusCode.OK -> {
-                        reply("正在生成中……")
                         reply(images.generateBest(data!!, subjectId).toImage())
                     }
                     HttpStatusCode.BadRequest -> {
@@ -274,10 +279,12 @@ object Maimai {
                             reply(musics.getInfo(music.id))
                     }
                     else -> {
-                        reply(buildString {
-                            appendLine("您要找的歌曲可能是：")
+                        reply(ListArk.build {
+                            desc { "maimai 查歌" }
+                            prompt { "查歌结果" }
+                            text { "您要找的歌曲可能是：" }
                             result.forEach { music ->
-                                appendLine("${music.id}. ${music.title}")
+                                text { "${music.id}. ${music.title}" }
                             }
                         })
                     }
@@ -298,10 +305,85 @@ object Maimai {
                             reply(musics.getInfo(music.id))
                     }
                     else -> {
-                        reply(buildString {
-                            appendLine("您要找的歌曲可能是：")
+                        reply(ListArk.build {
+                            desc { "maimai 按别名查歌" }
+                            prompt { "别名查歌结果" }
+                            text { "您要找的歌曲可能是：" }
                             result.forEach { music ->
-                                appendLine("${music.id}. ${music.title}")
+                                text { "${music.id}. ${music.title}" }
+                            }
+                        })
+                    }
+                }
+            }
+            startsWith("正则查歌") { rawRegex ->
+                if (rawRegex.isBlank()) {
+                    reply("使用方法：/mai 正则查歌 正则表达式\n例：/mai 正则查歌 ^(?i)w.*(?i)ing\$")
+                }
+                val regex = kotlin.runCatching {
+                    Regex(rawRegex)
+                }.getOrNull() ?: run {
+                    reply("请使用正确的正则表达式查询。\n使用方法：/mai 正则查歌 正则表达式")
+                    return@startsWith
+                }
+                val result = musics.findByRegex(regex)
+                when (result.size) {
+                    0 -> {
+                        reply("未搜索到歌曲，请检查正则表达式。")
+                    }
+                    1 -> {
+                        val music = result.first()
+                        val cover = images.getCoverById(music.id)
+                        if (cover.exists())
+                            reply(musics.getInfo(music.id).toPlainText() + cover.toImage())
+                        else
+                            reply(musics.getInfo(music.id))
+                    }
+                    else -> {
+                        reply(ListArk.build {
+                            desc { "maimai 正则查歌" }
+                            prompt { "正则查歌结果" }
+                            text { "您要找的歌曲可能是：" }
+                            result.forEach { music ->
+                                text { "${music.id}. ${music.title}" }
+                            }
+                        })
+                    }
+                }
+            }
+            startsWith("谱师查歌") { raw ->
+                val args = raw.toArgsList()
+                if (args.isEmpty()) {
+                    reply("用法：/mai 谱师查歌 谱师名称 页数\n例：/mai 谱师查歌 翠楼屋 2\n例：/mai 谱师查歌 合作だよ")
+                    return@startsWith
+                }
+                val charter = args[0]
+                val page = args[1].toIntOrNull() ?: 1
+                val total = musics.findByCharter(charter)
+                val result = if (page in 1..(total.size / 16.0).toIntCeil()) {
+                    total.subList((page - 1) * 16, total.size).take(16)
+                } else {
+                    emptyList()
+                }
+                when (result.size) {
+                    0 -> {
+                        reply("未搜索到歌曲，请检查谱师名称拼写或者页数。\n按别名搜索请发送“XXX是什么歌”")
+                    }
+                    1 -> {
+                        val music = result.first()
+                        val cover = images.getCoverById(music.id)
+                        if (cover.exists())
+                            reply(musics.getInfo(music.id).toPlainText() + cover.toImage())
+                        else
+                            reply(musics.getInfo(music.id))
+                    }
+                    else -> {
+                        reply(ListArk.build {
+                            desc { "maimai 谱师查歌" }
+                            prompt { "谱师查歌结果" }
+                            text { "您要找的歌曲可能是：" }
+                            result.forEach { music ->
+                                text { "${music.id}. ${music.title}" }
                             }
                         })
                     }
@@ -316,13 +398,20 @@ object Maimai {
                     })
                     return@endsWith
                 }
-                reply(buildString {
-                    appendLine("${music.id}. ${music.title} 有如下别名：")
-                    aliases.getAllAliases(id).forEach {
-                        appendLine(it)
+                val nowAliases = aliases.getAllAliases(id)
+                if (nowAliases.isEmpty()) {
+                    reply("该歌曲无别名。您可以使用“/mai 添加别名 id 别名”来添加别名。")
+                    return@endsWith
+                }
+                reply(ListArk.build {
+                    desc { "maimai 别名查看" }
+                    prompt { "别名列表" }
+                    text { "${music.id}. ${music.title} 有如下别名：" }
+                    nowAliases.forEach {
+                        text { it }
                     }
-                    appendLine()
-                    appendLine("可以使用“/mai 添加别名 id 别名”来添加别名。")
+                    text { "" }
+                    text { "可以使用“/mai 添加别名 id 别名”来添加别名。" }
                 })
             }
             startsWith("添加别名") { raw ->
@@ -648,7 +737,7 @@ object Maimai {
                         appendLine("例：/mai 设置b50 牌子 UI_Plate_209502")
                         appendLine("例：/mai 设置b50 牌子 使用查分器设置")
                         appendLine("例：/mai 设置b50 牌子 晓将")
-                        appendLine("头像和牌子列表可以在https://karenbot.xszq.xyz/maimai_icons 和 https://karenbot.xszq.xyz/maimai_plates 查看")
+                        appendLine("头像和牌子列表可以在https://otmdb.cn/karenbot/maimai_icons 和 https://otmdb.cn/karenbot/maimai_plates 查看")
                     })
                     return@startsWith
                 }
@@ -715,7 +804,12 @@ object Maimai {
         GlobalEventChannel.subscribePublicMessages("/mai", permName = "maimai.guess") {
             equalsTo(listOf("猜歌", "/猜歌")) {
                 launch(Dispatchers.IO) {
-                    guessGame.start(this)
+                    guessGame.startClassical(this)
+                }
+            }
+            equalsTo(listOf("舞萌开字母", "/舞萌开字母", "出你字母")) {
+                launch(Dispatchers.IO) {
+                    guessGame.startOpening(this)
                 }
             }
         }

@@ -1,17 +1,15 @@
 package xyz.xszq.bot.maimai
 
-import com.soywiz.korio.async.launch
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import org.jetbrains.exposed.sql.transactions.transaction
 import xyz.xszq.bot.dao.ArcadeCenter
 import xyz.xszq.bot.dao.ArcadeCenterQueueGroup
 import xyz.xszq.bot.dao.ArcadeQueueGroup
-import xyz.xszq.nereides.event.GroupAtMessageEvent
-import xyz.xszq.nereides.event.MessageEvent
 import xyz.xszq.nereides.event.PublicMessageEvent
 import xyz.xszq.nereides.isSameDay
+import xyz.xszq.nereides.message.ark.ListArk
 import java.time.Duration
 import java.time.LocalDateTime
 
@@ -42,6 +40,30 @@ object QueueForArcades {
             this
         }
     }.await()
+    private suspend fun getQueueInfo(centers: List<ArcadeCenter>) = ListArk.build {
+        val nowTime = LocalDateTime.now()
+        desc { "机厅排卡" }
+        prompt { "机厅排卡" }
+        text { "机厅排卡人数：" }
+        text { "" }
+        centers.forEach { arcade ->
+            text {
+                buildString {
+                    append("${arcade.name}: ${arcade.value}人 (")
+                    append(if (arcade.modified == initTime) {
+                        "今日未更新数据"
+                    } else if (Duration.between(arcade.modified, nowTime).toHours() < 1L){
+                        "更新于 1 小时内"
+                    } else {
+                        "更新于 ${Duration.between(arcade.modified, nowTime).toHours()} 小时前"
+                    })
+                    append(")")
+                }
+            }
+        }
+        text { "" }
+        text { "更新数据请使用“机厅名+数量”的格式，如 “jt3” 或 “jt+1” 或 “jt-1”。" }
+    }
     suspend fun handle(event: PublicMessageEvent) = event.run {
         val command = message.text.trim().lowercase()
         newSuspendedTransaction(Dispatchers.IO) {
@@ -57,25 +79,7 @@ object QueueForArcades {
             }
             if (command in arrayOf("几", "j", "机厅几", "/j")) {
                 clear()
-                val nowTime = LocalDateTime.now()
-                reply(buildString {
-                    appendLine("机厅排卡人数：")
-                    centers.forEach { arcade ->
-                        appendLine(buildString {
-                            append("${arcade.name}: ${arcade.value}人 (")
-                            append(if (arcade.modified == initTime) {
-                                "今日未更新数据"
-                            } else if (Duration.between(arcade.modified, nowTime).toHours() < 1L){
-                                "更新于 1 小时内"
-                            } else {
-                                "更新于 ${Duration.between(arcade.modified, nowTime).toHours()} 小时前"
-                            })
-                            append(")")
-                        })
-                    }
-                    appendLine()
-                    appendLine("更新数据请使用“机厅名+数量”的格式，如 “jt3” 或 “jt+1” 或 “jt-1”。")
-                })
+                reply(getQueueInfo(centers.toList()))
                 return@newSuspendedTransaction
             }
             centers.forEach { arcade ->
@@ -84,19 +88,7 @@ object QueueForArcades {
                         return@names
                     if ("几" in command.substringAfter(name) && command.substringBefore("几") == name) {
                         clear()
-                        val nowTime = LocalDateTime.now()
-                        reply(buildString {
-                            append(arcade.name)
-                            append("现在${arcade.value}人 (")
-                            if (arcade.modified == initTime) {
-                                append("今日未更新数据")
-                            } else if (Duration.between(arcade.modified, nowTime).toHours() < 1L) {
-                                append("更新于 1 小时内")
-                            } else {
-                                append("更新于 ${Duration.between(arcade.modified, nowTime).toHours()} 小时前")
-                            }
-                            append(")\n更新数据请使用“机厅名+数量”的格式，如 “jt3” 或 “jt+1” 或 “jt-1”。")
-                        })
+                        reply(getQueueInfo(listOf(arcade)))
                         return@newSuspendedTransaction
                     }
                     var newValue = when {

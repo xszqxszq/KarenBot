@@ -1,10 +1,9 @@
 package xyz.xszq.bot.maimai
 
-import com.soywiz.kmem.toIntCeil
-import com.soywiz.kmem.toIntFloor
-import com.soywiz.korma.math.roundDecimalPlaces
 import io.github.oshai.kotlinlogging.KLogger
-import io.ktor.http.*
+import korlibs.math.roundDecimalPlaces
+import korlibs.memory.toIntCeil
+import korlibs.memory.toIntFloor
 import xyz.xszq.bot.maimai.MaimaiUtils.calcB50Change
 import xyz.xszq.bot.maimai.MaimaiUtils.difficulty2Name
 import xyz.xszq.bot.maimai.MaimaiUtils.getNewRa
@@ -95,7 +94,13 @@ class MusicsInfo(val logger: KLogger) {
 
     fun findByName(name: String): List<MusicInfo> = musics.values.filter {
         name.lowercase() in it.title.lowercase()
-    }.take(50)
+    }.take(16)
+    fun findByRegex(regex: Regex): List<MusicInfo> = musics.values.filter {
+        regex.find(it.title.lowercase()) != null
+    }.take(16)
+    fun findByCharter(charter: String): List<MusicInfo> = musics.values.filter {
+        (charter.lowercase() in it.charts[3].charter) || (it.charts.size == 5 && charter.lowercase() in it.charts[4].charter)
+    }
 
     fun filter(block: (MusicInfo) -> Boolean) = musics.values.filter(block)
     fun any(block: (MusicInfo) -> Boolean) = musics.values.any(block)
@@ -294,5 +299,8 @@ class MusicsInfo(val logger: KLogger) {
         val target = randomHotMusics.first()
         randomHotMusics.removeFirst()
         return target
+    }
+    fun getRandomHot(num: Int): List<MusicInfo> {
+        return musics.values.shuffled().take(num)
     }
 }

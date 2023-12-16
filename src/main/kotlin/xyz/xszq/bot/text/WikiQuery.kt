@@ -1,13 +1,5 @@
 package xyz.xszq.bot.text
 
-import com.soywiz.korio.net.URL
-import io.ktor.client.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import kotlinx.serialization.json.Json
-import xyz.xszq.bot.payload.MWSearchResult
-
 object WikiQuery {
 //    val client = HttpClient()
 //    val json = Json {

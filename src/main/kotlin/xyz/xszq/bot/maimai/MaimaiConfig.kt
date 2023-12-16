@@ -1,7 +1,6 @@
 package xyz.xszq.bot.maimai
 
-import com.soywiz.korio.file.VfsFile
-import com.soywiz.korio.file.std.rootLocalVfs
+import korlibs.io.file.VfsFile
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import net.mamoe.yamlkt.Yaml

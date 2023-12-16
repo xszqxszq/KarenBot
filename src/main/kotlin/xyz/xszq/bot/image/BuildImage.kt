@@ -10,25 +10,25 @@ import com.sksamuel.scrimage.format.FormatDetector
 import com.sksamuel.scrimage.nio.AnimatedGif
 import com.sksamuel.scrimage.nio.AnimatedGifReader
 import com.sksamuel.scrimage.nio.ImageSource
-import com.soywiz.korim.awt.toAwtNativeImage
-import com.soywiz.korim.bitmap.Bitmap
-import com.soywiz.korim.bitmap.NativeImage
-import com.soywiz.korim.color.Colors
-import com.soywiz.korim.color.RGBA
-import com.soywiz.korim.font.Font
-import com.soywiz.korim.font.TtfFont
-import com.soywiz.korim.font.readTtfFont
-import com.soywiz.korim.format.PNG
-import com.soywiz.korim.format.encode
-import com.soywiz.korim.format.readNativeImage
-import com.soywiz.korim.text.HorizontalAlign
-import com.soywiz.korim.text.VerticalAlign
-import com.soywiz.korio.file.VfsFile
-import com.soywiz.korio.file.std.localCurrentDirVfs
-import com.soywiz.korio.net.MimeType
-import com.soywiz.korio.net.mimeType
-import com.soywiz.korma.geom.Size
-import com.soywiz.korma.geom.degrees
+import korlibs.image.awt.toAwtNativeImage
+import korlibs.image.bitmap.Bitmap
+import korlibs.image.bitmap.NativeImage
+import korlibs.image.color.Colors
+import korlibs.image.color.RGBA
+import korlibs.image.font.TtfFont
+import korlibs.image.font.readTtfFont
+import korlibs.image.format.PNG
+import korlibs.image.format.encode
+import korlibs.image.format.readNativeImage
+import korlibs.image.format.showImageAndWait
+import korlibs.image.text.HorizontalAlign
+import korlibs.image.text.VerticalAlign
+import korlibs.io.file.VfsFile
+import korlibs.io.file.std.localCurrentDirVfs
+import korlibs.math.geom.Angle
+import korlibs.math.geom.Point
+import korlibs.math.geom.SizeInt
+import korlibs.math.geom.degrees
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -37,10 +37,8 @@ import org.opencv.core.CvType.CV_32FC3
 import org.opencv.core.Mat
 import org.opencv.core.MatOfByte
 import org.opencv.core.MatOfPoint2f
-import org.opencv.core.Point
 import org.opencv.imgcodecs.Imgcodecs
 import org.opencv.imgproc.Imgproc
-import xyz.xszq.nereides.radTo180Deg
 import java.io.File
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.*
@@ -77,7 +75,7 @@ class BuildImage(var image: Bitmap) {
         }
     }
     fun resize(
-        size: Size,
+        size: SizeInt,
         resample: Boolean = true,
         keepRatio: Boolean = false,
         inside: Boolean = false,
@@ -87,39 +85,39 @@ class BuildImage(var image: Bitmap) {
         var width = size.width
         var height = size.height
         if (keepRatio) {
-            val ratio = listOf(width / this.width, height / this.height).run {
+            val ratio = listOf(1.0F * width / this.width, 1.0F * height / this.height).run {
                 if (inside)
                     this.min()
                 else
                     this.max()
             }
-            width = this.width * ratio
-            height = this.height * ratio
+            width = (this.width * ratio).toInt()
+            height = (this.height * ratio).toInt()
         }
-        var image = BuildImage(this.image.toBMP32().scaled(width.toInt(), height.toInt(), resample))
+        var image = BuildImage(this.image.toBMP32().scaled(width, height, resample))
         if (keepRatio)
             image = image.resizeCanvas(size, direction, bgColor)
         return image
     }
     fun resizeCanvas(
-        size: Size,
+        size: SizeInt,
         direction: DirectionType = DirectionType.Center,
         bgColor: RGBA? = null
     ): BuildImage {
-        val w = size.width
-        val h = size.height
+        val w = size.width * 1.0F
+        val h = size.height * 1.0F
         var x = (w - this.width) / 2
         var y = (h - this.height) / 2
         if (direction in listOf(DirectionType.North, DirectionType.Northwest, DirectionType.Northeast))
-            y = 0.0
+            y = 0F
         else if (direction in listOf(DirectionType.South, DirectionType.Southwest, DirectionType.Southeast))
             y = h - this.height
         if (direction in listOf(DirectionType.West, DirectionType.Northwest, DirectionType.Southwest))
-            x = 0.0
+            x = 0F
         else if (direction in listOf(DirectionType.East, DirectionType.Northeast, DirectionType.Southeast))
             y = w - this.width
         val image = new(this.mode, size, bgColor)
-        image.paste(this.image, Pair(x.toInt(), y.toInt()))
+        image.paste(this.image, Point(x, y))
         return image
     }
     fun resizeWidth(
@@ -129,7 +127,7 @@ class BuildImage(var image: Bitmap) {
         inside: Boolean = false,
         direction: DirectionType = DirectionType.Center,
         bgColor: RGBA? = null
-    ) = resize(Size(width, this.height * width / this.width), resample, keepRatio, inside, direction, bgColor)
+    ) = resize(SizeInt(width, this.height * width / this.width), resample, keepRatio, inside, direction, bgColor)
     fun heightIfResized(width: Int) = this.height * width / this.width
     fun widthIfResized(height: Int) = this.width * height / this.height
     fun resizeHeight(
@@ -139,7 +137,7 @@ class BuildImage(var image: Bitmap) {
         inside: Boolean = false,
         direction: DirectionType = DirectionType.Center,
         bgColor: RGBA? = null
-    ) = resize(Size(this.width * height / this.height, height), resample, keepRatio, inside, direction, bgColor)
+    ) = resize(SizeInt(this.width * height / this.height, height), resample, keepRatio, inside, direction, bgColor)
     fun rotate(angle: Double, expand: Boolean = false): BuildImage {
         val beta = (-angle).degrees.radians.radTo180Deg()
         val alpha = beta.absoluteValue
@@ -149,13 +147,13 @@ class BuildImage(var image: Bitmap) {
             beta >= Math.PI / 2.0 -> newWidth
             beta <= -Math.PI / 2.0 -> width * cos(alpha).absoluteValue
             beta > 0.0 -> image.height * sin(alpha)
-            else -> 0.0
+            else -> 0.0F
         }
         val yOffset = when {
             beta >= Math.PI / 2.0 -> height * cos(alpha).absoluteValue
             beta <= -Math.PI / 2.0 -> newHeight
             beta < 0.0 -> image.width * sin(alpha)
-            else -> 0.0
+            else -> 0.0F
         }
         return BuildImage(when {
             !expand -> NativeImage(width, height)
@@ -166,8 +164,8 @@ class BuildImage(var image: Bitmap) {
                 !expand -> translate(xOffset - (newWidth - width) / 2.0, yOffset - (newHeight - height) / 2.0)
                 else -> translate(xOffset, yOffset)
             }
-            rotate(beta)
-            drawImage(image, 0, 0)
+            rotate(Angle.Companion.fromRadians(beta))
+            drawImage(image, Point(0F, 0F))
             restore()
         })
     }
@@ -175,12 +173,12 @@ class BuildImage(var image: Bitmap) {
         return BuildImage(NativeImage(bounds[2] - bounds[0], bounds[3] - bounds[1]).modify {
             fillStyle = Colors.WHITE
             fillRect(0, 0, this.width, this.height)
-            drawImage(image, -bounds[0], -bounds[1])
+            drawImage(image, Point(-bounds[0], -bounds[1]))
         })
     }
     fun square(): BuildImage {
         val length = min(width, height)
-        return resizeCanvas(Size(length, length))
+        return resizeCanvas(SizeInt(length, length))
     }
     suspend fun circle(): BuildImage {
         val image = square().convert("RGBA").image
@@ -204,7 +202,7 @@ class BuildImage(var image: Bitmap) {
     }
     fun paste(
         img: Bitmap,
-        pos: Pair<Int, Int> = Pair(0, 0),
+        pos: Point = Point(0, 0),
         alpha: Boolean = false, // Useless, since all Bitmap is RGBA
         below: Boolean = false,
         bgColor: RGBA? = null
@@ -215,18 +213,18 @@ class BuildImage(var image: Bitmap) {
                 fillStyle = bgColor
                 fillRect(0, 0, this.width, this.height)
             }
-            drawImage(img, pos.first, pos.second)
+            drawImage(img, pos)
         }
         if (below)
             newImage.modify {
-                drawImage(this@BuildImage.image, 0, 0)
+                drawImage(this@BuildImage.image, Point(0, 0))
             }
         this.image = newImage
         return this
     }
     fun paste(
         img: BuildImage,
-        pos: Pair<Int, Int> = Pair(0, 0),
+        pos: Point = Point(0, 0),
         alpha: Boolean = false,
         below: Boolean = false
     ) = paste(img.image, pos, alpha, below)
@@ -252,7 +250,7 @@ class BuildImage(var image: Bitmap) {
             Text2Image.fromText(
                 text, fontSize, fill, spacing, linesAlign, (fontSize * strokeRatio).toInt(), strokeFill,
                 fontFallback, fontName, fallbackFonts
-            ).drawOnImage(image, Pair(xy.first().toDouble(), xy.last().toDouble()))
+            ).drawOnImage(image, Point(xy.first().toDouble(), xy.last().toDouble()))
             return this
         }
         val left = xy[0]
@@ -265,8 +263,12 @@ class BuildImage(var image: Bitmap) {
                 text, nowFontSize, fill, spacing, linesAlign, (nowFontSize * strokeRatio).toInt(), strokeFill,
                 fontFallback, fontName, fallbackFonts
             )
-            var textW = text2Image.width
-            var textH = text2Image.height
+            var textW = kotlin.runCatching { // TODO: Fix this
+                text2Image.width
+            }.getOrDefault(width + 1.0F)
+            var textH = kotlin.runCatching { // TODO: Fix this
+                text2Image.height
+            }.getOrDefault(height + 1.0F)
             if (textW > width && allowWrap) {
                 text2Image.wrap(width.toDouble())
                 textW = text2Image.width
@@ -288,7 +290,7 @@ class BuildImage(var image: Bitmap) {
                 else if (vAlign == VerticalAlign.BOTTOM)
                     y += height - textH
 
-                text2Image.drawOnImage(image, Pair(x, y))
+                text2Image.drawOnImage(image, Point(x, y))
                 return this
             }
         }
@@ -299,21 +301,21 @@ class BuildImage(var image: Bitmap) {
         val newW = pointsW.max() - pointsW.min()
         val newH = pointsH.max() - pointsH.min()
         val warpMat = Imgproc.getPerspectiveTransform(MatOfPoint2f(
-            Point(0.0, 0.0),
-            Point(width.toDouble(), 0.0),
-            Point(width.toDouble(), height.toDouble()),
-            Point(0.0, height.toDouble())
+            org.opencv.core.Point(0.0, 0.0),
+            org.opencv.core.Point(width.toDouble(), 0.0),
+            org.opencv.core.Point(width.toDouble(), height.toDouble()),
+            org.opencv.core.Point(0.0, height.toDouble())
         ), points)
         val destImage = Mat()
         Imgproc.warpPerspective(toMat(), destImage, warpMat, org.opencv.core.Size(newW, newH))
         return BuildImage(destImage.toBufferedImage().toAwtNativeImage())
     }
-    suspend fun perspective(points: List<Pair<Int, Int>>): BuildImage = perspective(
+    suspend fun perspective(points: List<Point>): BuildImage = perspective(
         MatOfPoint2f(
-            Point(points[0].first.toDouble(), points[0].second.toDouble()),
-            Point(points[1].first.toDouble(), points[1].second.toDouble()),
-            Point(points[2].first.toDouble(), points[2].second.toDouble()),
-            Point(points[3].first.toDouble(), points[3].second.toDouble())
+            org.opencv.core.Point(points[0].xD, points[0].yD),
+            org.opencv.core.Point(points[1].xD, points[1].yD),
+            org.opencv.core.Point(points[2].xD, points[2].yD),
+            org.opencv.core.Point(points[3].xD, points[3].yD)
         )
     )
     suspend fun motionBlur(angle: Double = 0.0, degree: Int): BuildImage {
@@ -407,8 +409,8 @@ class BuildImage(var image: Bitmap) {
                 fonts[font.ttfName] = font
             }
         }
-        fun new(mode: String, size: Size, color: RGBA? = null) =
-            BuildImage(NativeImage(size.width.toInt(), size.height.toInt()).modify {
+        fun new(mode: String, size: SizeInt, color: RGBA? = null) =
+            BuildImage(NativeImage(size.width, size.height).modify {
                 if (mode != "RGBA" && color == null) {
                     fillStyle = Colors.BLACK
                     fillRect(0, 0, size.width, size.height)
@@ -435,14 +437,15 @@ class BuildImage(var image: Bitmap) {
             "Glow Sans SC Normal Bold",
             "Glow Sans SC Normal Heavy",
             "Source Han Sans CN Bold",
-            "Source Han Serif SC Bold"
+            "Source Han Serif SC Bold",
+            "Noto Emoji Bold"
         )
         suspend fun getProperFont(
             text: String,
             fontName: String? = null,
             fallbackFonts: List<String> = defaultFallbackFonts,
             defaultFontName: String = "Glow Sans SC Normal Book"
-        ): Font = fontMutex.withLock {
+        ): TtfFont = fontMutex.withLock {
             val fonts = fallbackFonts.toMutableList()
             fontName ?.let {
                 fonts.add(0, it)

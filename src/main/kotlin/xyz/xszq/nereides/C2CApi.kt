@@ -15,8 +15,6 @@ import xyz.xszq.nereides.payload.message.MessageMarkdownC2C
 import xyz.xszq.nereides.payload.post.PostGroupFile
 import xyz.xszq.nereides.payload.post.PostGroupMessage
 import xyz.xszq.nereides.payload.response.PostGroupMessageResponse
-import xyz.xszq.nereides.payload.utils.FileType
-import xyz.xszq.nereides.payload.utils.MsgType
 
 interface C2CApi {
     val logger: KLogger
@@ -46,6 +44,7 @@ interface C2CApi {
             )
         )
         logger.info { "[$groupId] <- ${media?.fileUUID?.let { " ${media.fileUUID}" } ?: ""}$content" }
+        println(response.bodyAsText())
         return try {
             val msg = response.body<PostGroupMessageResponse>()
             msg

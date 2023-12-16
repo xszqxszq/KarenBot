@@ -27,8 +27,8 @@ class Aliases(private val musicsInfo: MusicsInfo) {
     }
     suspend fun updateXrayAliases(url: String) {
         val data = client.get(url).body<Map<String, List<String>>>().flatMap { entry ->
-            entry.value.map { id ->
-                Pair(id, entry.key)
+            entry.value.map { name ->
+                Pair(entry.key, name)
             }
         }
         newSuspendedTransaction(Dispatchers.IO) {
@@ -45,7 +45,7 @@ class Aliases(private val musicsInfo: MusicsInfo) {
         }
         if (result.count() == 0L)
             listOf<MusicInfo>()
-        result.mapNotNull { musicsInfo.getById(it[MaimaiAliases.id]) }.take(50)
+        result.mapNotNull { musicsInfo.getById(it[MaimaiAliases.id]) }.take(16)
     }.await()
     suspend fun getAllAliases(id: String) = suspendedTransactionAsync(Dispatchers.IO) {
         MaimaiAliases.select {

@@ -1,7 +1,7 @@
 package xyz.xszq.nereides
 
-import com.soywiz.kmem.extract8
-import com.soywiz.korim.color.RGBA
+import korlibs.image.color.RGBA
+import korlibs.memory.extract8
 import net.sourceforge.pinyin4j.PinyinHelper
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat

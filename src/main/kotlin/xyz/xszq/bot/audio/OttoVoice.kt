@@ -1,9 +1,7 @@
 package xyz.xszq.bot.audio
 
-import com.soywiz.korio.file.baseNameWithoutCompoundExtension
-import com.soywiz.korio.file.baseNameWithoutExtension
-import com.soywiz.korio.file.std.localCurrentDirVfs
-import kotlinx.coroutines.delay
+import korlibs.io.file.baseNameWithoutCompoundExtension
+import korlibs.io.file.std.localCurrentDirVfs
 import net.sourceforge.pinyin4j.PinyinHelper
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat
@@ -95,24 +93,43 @@ object OttoVoice {
         put("9", "JIU")
     }
     private val presets = buildMap {
-        put("bobi", listOf("波比是我爹", "阿玛波比是我爹", "阿巴波比是我爹", "波比是我妈爹"))
-        put("djha", listOf("大家好啊", "大家好"))
-        put("jtld", listOf("今天来点大家想看的东西", "今天来点儿大家想看的东西"))
-        put("miyu", listOf("啊米浴说的道理", "米浴说的道理"))
+        put("miyu", listOf("米浴说的道理", "啊米浴说的道理"))
+        put("djha", listOf("大家好啊"))
         put("wssddl", listOf("我是说的道理"))
+        put("jtlaidian", listOf("今天来点大家想看的东西", "今天来点儿大家想看的东西"))
         put("sddl", listOf("说的道理"))
-        put("ydglm", listOf("一德格拉米"))
-        put("by", listOf("白银"))
-        put("ds", listOf("大司"))
-        put("d", listOf("爹"))
-        put("ga", listOf("滚啊", "滚"))
-        put("snr", listOf("山泥若"))
-        put("kzzll", listOf("卡在这里了"))
-        put("jyxa", listOf("救一下啊", "救一下"))
-        put("gwysmgx", listOf("跟我有什么关系"))
-        put("nzmzmca", listOf("你怎么这么菜啊", "你怎么这么菜"))
-        put("wao", listOf("哇袄", "哇奥"))
-        put("omns", listOf("阿米诺斯", "阿弥诺斯"))
-        put("wcsndm", listOf("我阐述你的梦"))
+        put("bobi", listOf("波比是我爹", "啊嘛波比是我爹"))
+        put("aksa", listOf("奥克苏恩"))
+        put("alaf", listOf("奥利安费", "奥力安费"))
+        put("anxu", listOf("安修"))
+        put("ands", listOf("欧内的手"))
+        put("hbx", listOf("哈比下", "哈陛下", "哈比霞", "哈毙霞"))
+        put("hh", listOf("好汉"))
+        put("hlldxf", listOf("哈里路大旋风", "哈利路大旋风"))
+        put("wow", listOf("哇袄", "哇奥", "沃袄"))
+        put("hj", listOf("获嘉", "获加"))
+        put("jb", listOf("击败", "鸡掰"))
+        put("wsm", listOf("为什么"))
+        put("wsmy", listOf("为什么耶", "为什么呀"))
+        put("xg", listOf("炫狗"))
+        put("zn", listOf("尊尼"))
+        put("yzd", listOf("原子弹"))
+        put("alala", listOf("奥利奥利安"))
+        put("cc", listOf("冲刺"))
+        put("hm", listOf("哈姆"))
+        put("wuzi", listOf("乌兹"))
+        put("yyds", listOf("永远的神"))
+        put("yts", listOf("一坨屎", "一坨史", "一拖四", "一坨四", "依托史"))
+        put("ytszg", listOf("一坨史这个"))
+        put("sfrs", listOf("释放忍术"))
+        put("wsfrs", listOf("我释放忍术"))
+        put("nmyyq", listOf("纳米悠悠球"))
+        put("yfsszz", listOf("影分身十字斩"))
+        put("xwyt", listOf("吓我一跳我释放忍术"))
+        put("wxhn", listOf("我喜欢你"))
+        put("nxhw", listOf("你喜欢我"))
+        put("xhn", listOf("喜欢你"))
+        put("xhw", listOf("喜欢我"))
+        put("xh", listOf("喜欢"))
     }
 }

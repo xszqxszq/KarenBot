@@ -1,7 +1,5 @@
 package xyz.xszq.nereides
 
-import com.soywiz.korio.file.VfsFile
-import com.soywiz.korio.file.baseName
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -15,6 +13,8 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.websocket.*
+import korlibs.io.file.VfsFile
+import korlibs.io.file.baseName
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.sync.Mutex

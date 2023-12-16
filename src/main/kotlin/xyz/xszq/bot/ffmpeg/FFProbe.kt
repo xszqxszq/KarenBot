@@ -1,9 +1,8 @@
 package xyz.xszq.bot.ffmpeg
 
-import com.soywiz.korio.file.VfsFile
+import korlibs.io.file.VfsFile
 import kotlinx.serialization.json.Json
 import xyz.xszq.nereides.newTempFile
-import java.io.File
 
 class FFProbe(
     private val target: VfsFile,

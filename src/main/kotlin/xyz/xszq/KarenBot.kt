@@ -1,12 +1,11 @@
 package xyz.xszq
 
-import com.soywiz.korim.format.PNG
-import com.soywiz.korim.format.encode
-import com.soywiz.korim.format.readNativeImage
-import com.soywiz.korio.async.launch
-import com.soywiz.korio.file.std.localCurrentDirVfs
-import com.soywiz.korio.file.std.rootLocalVfs
-import com.soywiz.korio.file.std.toVfs
+import korlibs.image.format.PNG
+import korlibs.image.format.encode
+import korlibs.image.format.readNativeImage
+import korlibs.io.async.launch
+import korlibs.io.file.std.localCurrentDirVfs
+import korlibs.io.file.std.toVfs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import nu.pattern.OpenCV
@@ -27,12 +26,16 @@ import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.QueueForArcades
 import xyz.xszq.bot.text.AutoQA
 import xyz.xszq.bot.text.Bilibili
-import xyz.xszq.bot.text.RandomStereotypes
+import xyz.xszq.bot.text.RandomText
 import xyz.xszq.nereides.*
 import xyz.xszq.nereides.event.GlobalEventChannel
 import xyz.xszq.nereides.event.GroupAtMessageEvent
 import xyz.xszq.nereides.event.GuildAtMessageEvent
 import xyz.xszq.nereides.message.*
+import xyz.xszq.nereides.message.ark.ListArk
+import xyz.xszq.nereides.payload.message.MessageArk
+import xyz.xszq.nereides.payload.message.MessageArkKv
+import xyz.xszq.nereides.payload.message.MessageArkObj
 import kotlin.random.Random
 
 lateinit var database: Database
@@ -62,6 +65,7 @@ suspend fun init() {
     RandomImage.load("afraid", "reply")
 
     Maimai.init()
+    RandomText.loadSaizeriya()
 }
 
 fun subscribe() {
@@ -219,7 +223,6 @@ fun subscribe() {
         startsWith(listOf("随机东方原曲", "/随机东方原曲")) {
             if (this !is GroupAtMessageEvent)
                 return@startsWith
-            reply("正在发送中……")
             val duration = 15.0
             val file = RandomMusic.get("touhou")
             file.cropPeriod(Random.nextDouble(
@@ -352,7 +355,7 @@ fun subscribe() {
                         reply(MemeGenerator.handle(
                             args.first(),
                             args.subArgsList(),
-                            images.map { it.toMemeBuilder() }
+                            images.map { it.toBuildImage() }
                         ).toImage())
                     }.onFailure {
                         when (it) {
@@ -408,7 +411,7 @@ fun subscribe() {
                 reply("使用方法：/发病 名字\n例：/发病 小冰")
                 return@startsWith
             }
-            reply(RandomStereotypes.handle(name))
+            reply(RandomText.randomStereotypes(name))
         }
     }
     GlobalEventChannel.subscribePublicMessages(permName = "audio.voice") {
@@ -422,6 +425,24 @@ fun subscribe() {
             }
         }
     }
+    GlobalEventChannel.subscribePublicMessages(permName = "random") {
+        startsWith(listOf("/萨吃什么", "萨吃什么")) {
+            reply(RandomText.saizeriya())
+        }
+    }
+//    GlobalEventChannel.subscribePublicMessages {
+//        startsWith("/test") {
+//            reply(Ark(MessageArk(
+//                37, buildList {
+//                    add(MessageArkKv("#PROMPT#", "通知提醒"))
+//                    add(MessageArkKv("#METATITLE#", "标题"))
+//                    add(MessageArkKv("#METASUBTITLE#", "子标题"))
+//                    add(MessageArkKv("#METACOVER#", "https://otmdb.cn/jump/files/files/bf0ed01635493790634.jpg"))
+//                    add(MessageArkKv("#METAURL#", "https://otmdb.cn/jump/aira"))
+//                }
+//            )))
+//        }
+//    }
 }
 lateinit var bot: Bot
 fun main() {

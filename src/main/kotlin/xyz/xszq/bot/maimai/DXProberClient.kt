@@ -2,17 +2,16 @@
 
 package xyz.xszq.bot.maimai
 
-import com.soywiz.korio.file.std.localCurrentDirVfs
 import io.github.oshai.kotlinlogging.KLogger
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.serialization.json.*
 import xyz.xszq.bot.maimai.MaimaiUtils.acc2rate
 import xyz.xszq.bot.maimai.MaimaiUtils.getNewRa

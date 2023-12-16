@@ -1,23 +1,22 @@
 package xyz.xszq.bot.image
 
-import com.soywiz.korim.bitmap.Bitmap
-import com.soywiz.korim.bitmap.NativeImage
-import com.soywiz.korim.bitmap.context2d
-import com.soywiz.korim.color.Colors
-import com.soywiz.korim.color.RGBA
-import com.soywiz.korim.font.Font
-import com.soywiz.korim.font.measureTextGlyphs
-import com.soywiz.korim.text.HorizontalAlign
+import korlibs.image.bitmap.Bitmap
+import korlibs.image.bitmap.NativeImage
+import korlibs.image.bitmap.context2d
+import korlibs.image.color.Colors
+import korlibs.image.color.RGBA
+import korlibs.image.text.HorizontalAlign
+import korlibs.math.geom.Point
+import kotlinx.coroutines.sync.withLock
 import xyz.xszq.bot.image.BuildImage.Companion.defaultFallbackFonts
 import xyz.xszq.bot.image.BuildImage.Companion.getProperFont
-import java.lang.annotation.Native
-import kotlin.properties.Delegates
+import xyz.xszq.nereides.sumOf
 
 class Text2Image(
     var lines: List<Line>,
     private val spacing: Int = 4,
     private val fill: RGBA = Colors.BLACK,
-    private val strokeWidth: Double = 0.0,
+    private val strokeWidth: Float = 0.0F,
     private val strokeFill: RGBA? = null
 ) {
     val width
@@ -25,28 +24,29 @@ class Text2Image(
     val height
         get() = lines.sumOf { it.ascent } + lines.last().descent + spacing * (lines.size - 1) + strokeWidth * 2
 
-    fun drawOnImage(image: Bitmap, pos: Pair<Double, Double>) {
-        var top = pos.second
+    suspend fun drawOnImage(image: Bitmap, pos: Point) {
+        var top = pos.y
         image.context2d {
             kotlin.runCatching {
                 lines.forEach { line ->
                     font = line.font
-                    fontSize = line.fontSize.toDouble()
-                    var left = pos.first
+                    fontSize = line.fontSize
+                    var left = pos.x
                     if (line.align == HorizontalAlign.CENTER)
                         left += (width - line.width) / 2
                     else if (line.align == HorizontalAlign.RIGHT)
                         left += width - line.width
 
-                    val x = left
-                    val y = top + line.ascent
-                    if (strokeWidth != 0.0) {
+                    val point = Point(left, top + line.ascent)
+                    if (strokeWidth != 0.0F) {
                         strokeStyle = strokeFill ?: Colors.WHITE
                         lineWidth = strokeWidth
-                        strokeText(line.chars, x, y)
+                        strokeText(line.chars, point)
                     }
                     fillStyle = fill
-                    fillText(line.chars, x, y)
+                    fontLock.withLock {
+                        fillText(line.chars, point)
+                    }
                     top += line.ascent + spacing
                 }
             }.onFailure {
@@ -54,7 +54,7 @@ class Text2Image(
             }
         }
     }
-    fun wrap(width: Double): Text2Image {
+    suspend fun wrap(width: Double): Text2Image {
         val newLines = mutableListOf<Line>()
         lines.forEach { line ->
             newLines.addAll(line.wrap(width))
@@ -62,7 +62,7 @@ class Text2Image(
         lines = newLines
         return this
     }
-    fun toImage(bgColor: RGBA? = null, padding: List<Int> = listOf(0, 0)): Bitmap {
+    suspend fun toImage(bgColor: RGBA? = null, padding: List<Int> = listOf(0, 0)): Bitmap {
         var paddingLeft = padding[0]
         var paddingRight = padding[0]
         var paddingTop = padding[1]
@@ -85,21 +85,23 @@ class Text2Image(
             kotlin.runCatching {
                 lines.forEach { line ->
                     font = line.font
-                    fontSize = line.fontSize.toDouble()
-                    val (x, y) = Pair(paddingLeft.toDouble() + when (line.align) {
+                    fontSize = line.fontSize
+                    val now = Point(paddingLeft.toDouble() + when (line.align) {
                         HorizontalAlign.CENTER -> (width - line.width) / 2
                         HorizontalAlign.RIGHT -> width - line.width
-                        else -> 0.0
+                        else -> 0.0F
                     }, top + line.ascent)
                     strokeFill ?.let {
-                        if (strokeWidth != 0.0) {
+                        if (strokeWidth != 0.0F) {
                             lineWidth = strokeWidth
                             strokeStyle = it
-                            strokeText(line.chars, x, y)
+                            strokeText(line.chars, now)
                         }
                     }
                     fillStyle = fill
-                    fillText(line.chars, x, y)
+                    fontLock.withLock {
+                        fillText(line.chars,now)
+                    }
                     top += line.ascent + spacing
                 }
             }.onFailure {
@@ -127,9 +129,9 @@ class Text2Image(
             }
 
             return Text2Image(text.split('\n', '\r').map {
-                Line(it, align, fontSize, getProperFont(
+                Line(it, align, fontSize.toFloat(), getProperFont(
                 it, fontName=fontName, fallbackFonts=fallbackFonts)
-            ) }, spacing, fill, strokeWidth.toDouble(), strokeFill)
+            ) }, spacing, fill, strokeWidth.toFloat(), strokeFill)
         }
     }
 }
