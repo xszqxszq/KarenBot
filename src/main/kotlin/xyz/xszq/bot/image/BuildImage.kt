@@ -10,9 +10,11 @@ import com.sksamuel.scrimage.format.FormatDetector
 import com.sksamuel.scrimage.nio.AnimatedGif
 import com.sksamuel.scrimage.nio.AnimatedGifReader
 import com.sksamuel.scrimage.nio.ImageSource
+import korlibs.image.awt.toAwt
 import korlibs.image.awt.toAwtNativeImage
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.NativeImage
+import korlibs.image.bitmap.ensureNative
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.image.font.TtfFont
@@ -33,15 +35,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import org.opencv.core.CvType.CV_32FC3
-import org.opencv.core.Mat
-import org.opencv.core.MatOfByte
-import org.opencv.core.MatOfPoint2f
+import org.opencv.core.*
+import org.opencv.core.CvType.*
 import org.opencv.imgcodecs.Imgcodecs
 import org.opencv.imgproc.Imgproc
+import xyz.xszq.nereides.mapParallel
+import java.awt.image.DataBufferByte
+import java.awt.image.DataBufferInt
 import java.io.File
+import java.nio.ByteBuffer
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.*
+import kotlin.system.exitProcess
 
 class BuildImage(var image: Bitmap) {
     var rawGifFile: AnimatedGif? = null
@@ -307,7 +312,7 @@ class BuildImage(var image: Bitmap) {
             org.opencv.core.Point(0.0, height.toDouble())
         ), points)
         val destImage = Mat()
-        Imgproc.warpPerspective(toMat(), destImage, warpMat, org.opencv.core.Size(newW, newH))
+        Imgproc.warpPerspective(toMat(), destImage, warpMat, Size(newW, newH))
         return BuildImage(destImage.toBufferedImage().toAwtNativeImage())
     }
     suspend fun perspective(points: List<Point>): BuildImage = perspective(
@@ -318,7 +323,7 @@ class BuildImage(var image: Bitmap) {
             org.opencv.core.Point(points[3].xD, points[3].yD)
         )
     )
-    suspend fun motionBlur(angle: Double = 0.0, degree: Int): BuildImage {
+    fun motionBlur(angle: Double = 0.0, degree: Int): BuildImage {
         if (degree == 0)
             return copy()
         return BuildImage(
@@ -326,21 +331,23 @@ class BuildImage(var image: Bitmap) {
                 .filter(MotionBlurFilter(angle, degree.toDouble(), 0.0, 0.0))
                 .toBitmap())
     }
+
     suspend fun toMat(): Mat = withContext(Dispatchers.IO) {
-        val bytes = MatOfByte()
-        bytes.fromList(image.encode(PNG).toList())
-        Imgcodecs.imdecode(bytes, Imgcodecs.IMREAD_UNCHANGED)
+        val raw = Mat(image.height, image.width, CV_8UC4)
+        val data = (image.ensureNative().toAwt().raster.dataBuffer as DataBufferInt).data
+        val byteBuffer = ByteBuffer.allocate(data.size * 4)
+        val intBuffer = byteBuffer.asIntBuffer()
+        intBuffer.put(data)
+        raw.put(0, 0, byteBuffer.array())
+        val imgSrc = listOf(raw)
+        val imgDst = listOf(Mat(image.height, image.width, CV_8UC4))
+        Core.mixChannels(imgSrc, imgDst, MatOfInt(0, 3, 1, 2, 2, 1, 3, 0))
+        imgDst.first()
     }
-    fun drawLine(xy: List<Double>, fill: RGBA = Colors.WHITE, width: Double = 1.0): BuildImage { //TODO: FIX THIS
+    fun drawLine(xy: List<Double>, fill: RGBA = Colors.WHITE, width: Double = 1.0): BuildImage {
         image.modify {
             fillStyle = fill
-//            lineWidth = width
             fillRect(xy[0], xy[1] - width, xy[2] - xy[0], xy[3] - xy[1] + width)
-//            beginPath()
-//            moveTo(xy[0], xy[1])
-//            lineTo(xy[2], xy[3])
-//            close()
-//            fill()
         }
         return this
     }
@@ -380,7 +387,7 @@ class BuildImage(var image: Bitmap) {
         Imgproc.cvtColor(result, result, Imgproc.COLOR_HLS2RGB)
         return BuildImage(result.toBufferedImage().toAwtNativeImage())
     }
-    suspend fun filter(filter: Filter): BuildImage = BuildImage(image.toImmutableImage().filter(filter).toBitmap())
+    fun filter(filter: Filter): BuildImage = BuildImage(image.toImmutableImage().filter(filter).toBitmap())
 
     suspend fun save(format: String): ByteArray = when (format) {
         "png" -> image.encode(PNG)

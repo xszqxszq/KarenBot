@@ -13,12 +13,17 @@ import korlibs.image.color.RGBA
 import korlibs.image.format.showImageAndWait
 import korlibs.image.text.HorizontalAlign
 import korlibs.image.text.VerticalAlign
+import korlibs.io.async.async
 import korlibs.io.file.std.localCurrentDirVfs
 import korlibs.math.geom.Point
 import korlibs.math.geom.SizeInt
 import korlibs.math.geom.degrees
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import xyz.xszq.bot.text.LibreTranslate
+import xyz.xszq.nereides.forEachParallel
 import xyz.xszq.nereides.hexToRGBA
+import xyz.xszq.nereides.mapParallel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.math.*
@@ -306,7 +311,6 @@ object MemeGenerator {
     @Meme("鼓掌")
     val applaud: Maker = { images, _ ->
         val img = images[0].convert("RGBA").square().resize(SizeInt(110, 110))
-        val frames = mutableListOf<Bitmap>()
         val locs = listOf(
             listOf(109, 102, 27, 17),
             listOf(107, 105, 28, 15),
@@ -314,11 +318,14 @@ object MemeGenerator {
             listOf(109, 106, 27, 14),
             listOf(107, 108, 29, 12),
         )
-        (0 until 5).forEach {
-            val frame = BuildImage.open(imgDir["applaud/$it.png"])
-            val (w, h, x, y) = locs[it]
-            frame.paste(img.resize(SizeInt(w, h)), Point(x, y), below = true)
-            frames.add(frame.image)
+        val frames = coroutineScope {
+            (0 until 5).map {
+                async {
+                    val frame = BuildImage.open(imgDir["applaud/$it.png"])
+                    val (w, h, x, y) = locs[it]
+                    frame.paste(img.resize(SizeInt(w, h)), Point(x, y), below = true).image
+                }
+            }.awaitAll()
         }
         saveGif(frames, 0.1)
     }
@@ -450,7 +457,7 @@ object MemeGenerator {
     @Meme("木鱼")
     val woodenFish: Maker = { images, _ ->
         val img = images[0].convert("RGBA").resize(SizeInt(85, 85))
-        val frames = (0 until 66).map { i ->
+        val frames = (0 until 66).mapParallel { i ->
             BuildImage.open(imgDir["wooden_fish/$i.png"]).paste(img, Point(116, 153), below = true).image
         }
         saveGif(frames, 0.1)
@@ -498,7 +505,7 @@ object MemeGenerator {
     @Meme("吃")
     val eat: Maker = { images, _ ->
         val img = images[0].convert("RGBA").square().resize(SizeInt(34, 34))
-        val frames = (0 until 3).map { i ->
+        val frames = (0 until 3).mapParallel { i ->
             BuildImage.open(imgDir["eat/$i.png"]).paste(img, Point(2, 38), below = true).image
         }
         saveGif(frames, 0.05)
@@ -553,7 +560,7 @@ object MemeGenerator {
     @Meme("震惊")
     val shock: Maker = { images, _ ->
         val img = images[0].convert("RGBA").square().resize(SizeInt(300, 300))
-        val frames = (0 until 30).map { _ ->
+        val frames = (0 until 30).mapParallel { _ ->
             NativeImage(300, 300).modify {
                 fillStyle = Colors.WHITE
                 fillRect(0.0, 0.0, 300.0, 300.0)
@@ -607,7 +614,7 @@ object MemeGenerator {
     @Meme("啾啾")
     val jiujiu: Maker = { images, _ ->
         val img = images[0].convert("RGBA").resize(SizeInt(75, 51), keepRatio = true)
-        val frames = (0 until 8).map { i ->
+        val frames = (0 until 8).mapParallel { i ->
             BuildImage.open(imgDir["jiujiu/$i.png"]).paste(img, below = true).image
         }
         saveGif(frames, 0.06)
@@ -616,7 +623,7 @@ object MemeGenerator {
     @Meme("转")
     val turn: Maker = { images, _ ->
         val img = images[0].convert("RGBA").circle()
-        var frames = (0 until 360 step 10).map { i ->
+        var frames = (0 until 360 step 10).mapParallel { i ->
             val frame = BuildImage.new("RGBA", SizeInt(250, 250), Colors.WHITE)
             frame.paste(img.rotate(i.toDouble()).resize(SizeInt(250, 250)), alpha = true)
             frame.image
@@ -733,7 +740,7 @@ object MemeGenerator {
     val listenMusic: Maker = { images, _ ->
         val img = images[0].convert("RGBA")
         val frame = BuildImage.open(imgDir["listen_music/0.png"])
-        val frames = (0 until 360 step 10).map { i ->
+        val frames = (0 until 360 step 10).mapParallel { i ->
             frame.copy().paste(
                 img.rotate(-i.toDouble())
                     .resize(SizeInt(215, 215)), Point(100, 100), below = true
@@ -818,7 +825,7 @@ object MemeGenerator {
         val img = images[0].convert("RGBA")
         val points = listOf(Point(0, -30), Point(135, 17), Point(135, 145), Point(0, 140))
         val paint = img.square().resize(SizeInt(150, 150)).perspective(points)
-        val frames = (0 until 10).map {
+        val frames = (0 until 10).mapParallel {
             val frame = BuildImage.open(imgDir["worship/$it.png"])
             frame.paste(paint, below = true).image
         }
@@ -890,11 +897,12 @@ object MemeGenerator {
     @Meme("墙纸")
     val wallpaper: Maker = { images, _ ->
         val img = images[0].convert("RGBA").resize(SizeInt(515, 383), keepRatio = true)
-        val frames = (0 until 8).map { BuildImage.open(imgDir["wallpaper/$it.png"]).image }.toMutableList()
-        (8 until 20).forEach {
+        val frames = (0 until 20).mapParallel {
             val frame = BuildImage.open(imgDir["wallpaper/$it.png"])
-            frame.paste(img, Point(176, -9), below = true)
-            frames.add(frame.image)
+            if (it in 8 until 20) {
+                frame.paste(img, Point(176, -9), below = true)
+            }
+            frame.image
         }
         saveGif(frames, 0.07)
     }
@@ -953,8 +961,8 @@ object MemeGenerator {
     @Meme("捶爆", "爆捶")
     val thumpWildly: Maker = { images, _ ->
         val img = images[0].convert("RGBA").resize(SizeInt(122, 122), keepRatio = true)
-        val rawFrames = (0 until 31).map { BuildImage.open(imgDir["thump_wildly/$it.png"]) }
-        (0 until 14).forEach {
+        val rawFrames = (0 until 31).mapParallel { BuildImage.open(imgDir["thump_wildly/$it.png"]) }
+        (0 until 14).forEachParallel {
             rawFrames[it].paste(img, Point(203, 196), below = true)
         }
         rawFrames[14].paste(img, Point(207, 239), below = true)
@@ -1017,26 +1025,25 @@ object MemeGenerator {
             SizeInt(304, 174), keepRatio = true,
             inside = true, bgColor = Colors.WHITE, direction = BuildImage.DirectionType.South
         )
-        val frames = (0 until 115).map {
-            BuildImage.open(imgDir["printing/$it.png"])
+        val frames = (0 until 115).mapParallel {
+            val frame = BuildImage.open(imgDir["printing/$it.png"])
+            if (it in 50 until 115) {
+                frame.paste(img, Point(146, 164), below = true)
+            }
+            frame.image
         }
-        (50 until 115).forEach {
-            frames[it].paste(img, Point(146, 164), below = true)
-        }
-        saveGif(frames.map { it.image }, 0.05)
+        saveGif(frames, 0.05)
     }
 
     @Meme("永远爱你")
     val loveYou: Maker = { images, _ ->
         val img = images[0].convert("RGBA").square()
         val locs = listOf(listOf(68, 65, 70, 70), listOf(63, 59, 80, 80))
-        val frames = mutableListOf<Bitmap>()
-        (0 until 2).forEach {
+        val frames = (0 until 2).mapParallel {
             val heart = BuildImage.open(imgDir["love_you/$it.png"])
             val frame = BuildImage.new("RGBA", heart.size, Colors.WHITE)
             val (x, y, w, h) = locs[it]
-            frame.paste(img.resize(SizeInt(w, h)), Point(x, y), alpha = true).paste(heart, alpha = true)
-            frames.add(frame.image)
+            frame.paste(img.resize(SizeInt(w, h)), Point(x, y), alpha = true).paste(heart, alpha = true).image
         }
         saveGif(frames, 0.2)
     }
@@ -1048,7 +1055,7 @@ object MemeGenerator {
             listOf(25, 66, 0), listOf(25, 66, 60), listOf(23, 68, 120),
             listOf(20, 69, 180), listOf(22, 68, 240), listOf(25, 66, 300)
         )
-        val frames = (0 until 5).map {
+        val frames = (0 until 5).mapParallel {
             val frame = BuildImage.open(imgDir["twist/$it.png"])
             val (x, y, a) = locs[it]
             frame.paste(img.rotate(a.toDouble()), Point(x, y), below = true).image
@@ -1105,7 +1112,7 @@ object MemeGenerator {
             listOf(178, 174, 84, 269),
             listOf(178, 178, 84, 264)
         )
-        val frames = (0 until 4).map {
+        val frames = (0 until 4).mapParallel {
             val frame = BuildImage.open(imgDir["capoo_rub/$it.png"])
             val (w, h, x, y) = locs[it]
             frame.paste(img.resize(SizeInt(w, h)), Point(x, y), below = true).image
@@ -1142,7 +1149,7 @@ object MemeGenerator {
             listOf(55, 44, 65, 106),
             listOf(66, 85, 60, 98)
         )
-        val frames = (0 until 6).map {
+        val frames = (0 until 6).mapParallel {
             val frame = BuildImage.open(imgDir["hug_leg/$it.png"])
             val (x, y, w, h) = locs[it]
             frame.paste(img.resize(SizeInt(w, h)), Point(x, y), below = true).image
@@ -1157,7 +1164,7 @@ object MemeGenerator {
             listOf(87, 77, 0), listOf(96, 85, -45), listOf(92, 79, -90), listOf(92, 78, -135),
             listOf(92, 75, -180), listOf(92, 75, -225), listOf(93, 76, -270), listOf(90, 80, -315)
         )
-        val frames = (0 until 8).map {
+        val frames = (0 until 8).mapParallel {
             val frame = BuildImage.open(imgDir["roll/$it.png"])
             val (x, y, a) = locs[it]
             frame.paste(img.rotate(a.toDouble()), Point(x, y), below = true).image
@@ -1177,7 +1184,7 @@ object MemeGenerator {
         val bg2 = BuildImage.open(imgDir["captain/2.png"])
 
         val frame = BuildImage.new("RGBA", SizeInt(640, 440 * images.size), Colors.WHITE)
-        (0 until images.size).map { i ->
+        (0 until images.size).forEach { i ->
             var bg = if (i < images.size - 2) bg0 else if (i == images.size - 2) bg1 else bg2
             images[i] = images[i].convert("RGBA").square().resize(SizeInt(250, 250))
             bg = bg.copy().paste(images[i], Point(350, 85))
@@ -1197,7 +1204,7 @@ object MemeGenerator {
             listOf(53, 42, 4, 8),
             listOf(52, 45, 7, 7)
         )
-        val frames = (0 until 6).map {
+        val frames = (0 until 6).mapParallel {
             val frame = BuildImage.open(imgDir["scratch_head/$it.png"])
             val (w, h, x, y) = locs[it]
             frame.paste(img.resize(SizeInt(w, h)), Point(x, y), below = true).image
@@ -1213,7 +1220,7 @@ object MemeGenerator {
             listOf(46, 182, 184, 100), listOf(54, 169, 174, 110), listOf(69, 128, 144, 135),
             listOf(65, 130, 152, 124)
         )
-        val frames = (0 until 6).map {
+        val frames = (0 until 6).mapParallel {
             val frame = BuildImage.open(imgDir["hammer/$it.png"])
             val (x, y, w, h) = locs[it]
             frame.paste(img.resize(SizeInt(w, h)), Point(x, y), below = true).image
@@ -1229,7 +1236,7 @@ object MemeGenerator {
             listOf(60, 310, 215, 193), listOf(40, 320, 250, 285), listOf(48, 308, 226, 192),
             listOf(51, 301, 223, 200)
         )
-        val frames = (0 until 6).map {
+        val frames = (0 until 6).mapParallel {
             val frame = BuildImage.open(imgDir["knock/$it.png"])
             val (x, y, w, h) = locs[it]
             frame.paste(img.resize(SizeInt(w, h)), Point(x, y), below = true).image
@@ -1339,7 +1346,7 @@ object MemeGenerator {
                 Point(37, 67), Point(37, 67), Point(39, 69), Point(37, 70), Point(37, 70)
             )
         )
-        val frames = (0 until 25).map {
+        val frames = (0 until 25).mapParallel {
             val frame = BuildImage.open(imgDir["garbage/$it.png"])
             frame.paste(img, locs[it], below = true).image
         }
@@ -1354,7 +1361,7 @@ object MemeGenerator {
             listOf(150, 190, 105, 95), listOf(148, 188, 106, 98), listOf(146, 196, 110, 88),
             listOf(145, 223, 112, 61), listOf(145, 223, 112, 61)
         )
-        val frames = (0 until 8).map {
+        val frames = (0 until 8).mapParallel {
             val frame = BuildImage.open(imgDir["pound/$it.png"])
             val (x, y, w, h) = locs[it]
             frame.paste(img.resize(SizeInt(w, h)), Point(x, y), below = true).image
@@ -1370,7 +1377,7 @@ object MemeGenerator {
             Point(48, 139), Point(47, 112), Point(47, 85), Point(47, 57), Point(48, 97),
             Point(50, 136), Point(51, 176), Point(52, 169), Point(55, 181), Point(58, 153)
         )
-        val frames = (0 until 15).map {
+        val frames = (0 until 15).mapParallel {
             val frame = BuildImage.open(imgDir["kick_ball/$it.png"])
             frame.paste(img.rotate(-24.0 * it), locs[it], below = true).image
         }
@@ -1381,7 +1388,7 @@ object MemeGenerator {
     val pat: Maker = { images, _ ->
         val img = images[0].convert("RGBA").square()
         val locs = listOf(listOf(11, 73, 106, 100), listOf(8, 79, 112, 96))
-        val imgFrames = (0 until 10).map {
+        val imgFrames = (0 until 10).mapParallel {
             val frame = BuildImage.open(imgDir["pat/$it.png"])
             val (x, y, w, h) = if (it == 2) locs[1] else locs[0]
             frame.paste(img.resize(SizeInt(w, h)), Point(x, y), below = true)
@@ -1423,7 +1430,7 @@ object MemeGenerator {
             listOf(88, 78, 51, 202, 0),
             listOf(88, 86, 49, 197, 0)
         )
-        val frames = (0 until 5).map {
+        val frames = (0 until 5).mapParallel {
             val frame = BuildImage.open(imgDir["step_on/$it.png"])
             val (w, h, x, y, angle) = locs[it]
             frame.paste(img.resize(SizeInt(w, h)).rotate(angle.toDouble(), expand = true), Point(x, y), below = true).image
@@ -1492,7 +1499,7 @@ object MemeGenerator {
             Point(-50, 20), Point(-40, 10), Point(-30, 0), Point(-20, -10), Point(-10, -10), Point(0, 0),
             Point(10, 10), Point(20, 20), Point(10, 10), Point(0, 0), Point(-10, -10), Point(10, 0), Point(-30, 10)
         )
-        val frames = (0 until 13).map {
+        val frames = (0 until 13).mapParallel {
             val fist = BuildImage.open(imgDir["punch/$it.png"])
             val frame = BuildImage.new("RGBA", fist.size, Colors.WHITE)
             val (x, y) = locs[it]
@@ -1514,7 +1521,7 @@ object MemeGenerator {
             listOf(listOf(35, 35, 259, 31)),
             listOf(listOf(175, 175, -50, 220))
         )
-        val frames = (0 until 8).map {
+        val frames = (0 until 8).mapParallel {
             val frame = BuildImage.open(imgDir["throw_gif/$it.png"])
             locs[it].forEach { (w, h, x, y) ->
                 frame.paste(img.resize(SizeInt(w, h)), Point(x, y), alpha = true)
@@ -1531,14 +1538,14 @@ object MemeGenerator {
             listOf(90, 90, 105, 150), listOf(90, 83, 96, 172), listOf(90, 90, 106, 148),
             listOf(88, 88, 97, 167), listOf(90, 85, 89, 179), listOf(90, 90, 106, 151)
         )
-        val frames = (0 until 6).map {
+        val frames = (0 until 16).mapParallel {
             val frame = BuildImage.open(imgDir["bite/$it.png"])
-            val (w, h, x, y) = locs[it]
-            frame.paste(img.resize(SizeInt(w, h)), Point(x, y), below = true).image
-        }.toMutableList()
-        (6 until 16).forEach {
-            val frame = BuildImage.open(imgDir["bite/$it.png"])
-            frames.add(frame.image)
+            if (it in 0 until 6) {
+                val (w, h, x, y) = locs[it]
+                frame.paste(img.resize(SizeInt(w, h)), Point(x, y), below = true).image
+            } else {
+                frame.image
+            }
         }
         saveGif(frames, 0.07)
     }
@@ -1636,7 +1643,7 @@ object MemeGenerator {
             listOf(79, 163, 132, 55), listOf(82, 140, 127, 79), listOf(83, 152, 125, 67), listOf(75, 157, 140, 62),
             listOf(72, 165, 144, 54), listOf(80, 132, 128, 87), listOf(81, 127, 127, 92), listOf(79, 111, 132, 108)
         )
-        val frames = (0 until 12).map {
+        val frames = (0 until 12).mapParallel {
             val bg = BuildImage.open(imgDir["suck/$it.png"])
             val frame = BuildImage.new("RGBA", bg.size, Colors.WHITE)
             val (x, y, w, h) = locs[it]
@@ -1747,7 +1754,7 @@ object MemeGenerator {
             Point(-3, 170), Point(-3, 175), Point(-1, 174), Point(0, 174), Point(0, 174), Point(0, 174), Point(0, 174),
             Point(0, 174), Point(0, 174), Point(0, 174), Point(0, 174)
         )
-        val frames = (0 until 31).map {
+        val frames = (0 until 31).mapParallel {
             val frame = BuildImage.open(imgDir["klee_eat/$it.png"])
             frame.paste(img, locs[it], below = true).image
         }
@@ -2027,7 +2034,7 @@ object MemeGenerator {
             Point(92, 64), Point(135, 40), Point(84, 105), Point(80, 110), Point(155, 82), Point(60, 96), Point(50, 80),
             Point(98, 55), Point(35, 65), Point(38, 100), Point(70, 80), Point(84, 65), Point(75, 65)
         )
-        val frames = (0 until 13).map {
+        val frames = (0 until 13).mapParallel {
             val frame = BuildImage.open(imgDir["kiss/$it.png"])
             frame.paste(userHead, userLocs[it], alpha = true)
             frame.paste(selfHead, selfLocs[it], alpha = true)
@@ -2086,7 +2093,7 @@ object MemeGenerator {
             Pair(Point(-231, 55), listOf(Point(0, 0), Point(259, 4), Point(276, 281), Point(13, 278))),
         )
         val img = images[0].convert("RGBA").square().resize(SizeInt(150, 150))
-        val imgs = locs.map { (_, points) ->
+        val imgs = locs.mapParallel { (_, points) ->
             img.perspective(points)
         }
         val frames = (0 until 34).map { i ->
@@ -2160,7 +2167,7 @@ object MemeGenerator {
             Pair(listOf(Point(27, 0), Point(207, 12), Point(179, 142), Point(0, 117)), Point(30, 16)),
             Pair(listOf(Point(28, 0), Point(207, 13), Point(180, 137), Point(0, 117)), Point(34, 17))
         )
-        val rawFrames = (0 until 6).map { i -> BuildImage.open(imgDir["capoo_draw/$i.png"]) }
+        val rawFrames = (0 until 6).mapParallel { i -> BuildImage.open(imgDir["capoo_draw/$i.png"]) }
         (0 until 2).forEach { i ->
             val (points, pos) = params[i]
             rawFrames[4 + i].paste(img.perspective(points), pos, below = true)
@@ -2185,7 +2192,7 @@ object MemeGenerator {
         val locs = listOf(
             Point(2, 26), Point(10, 24), Point(15, 27), Point(17, 29), Point(10, 20), Point(2, 29), Point(3, 31), Point(1, 30)
         )
-        val frames = (0 until 8).map {
+        val frames = (0 until 8).mapParallel {
             val frame = BuildImage.open(imgDir["pass_the_buck/$it.png"])
             val text = texts.ifBlank { "你写!" }
             kotlin.runCatching {
@@ -2212,7 +2219,7 @@ object MemeGenerator {
             listOf(4, 212, 328, 100), listOf(4, 212, 328, 100), listOf(4, 212, 328, 100),
             listOf(4, 212, 328, 100), listOf(29, 195, 285, 120)
         )
-        val frames = (0 until 20).map {
+        val frames = (0 until 20).mapParallel {
             val frame = BuildImage.open(imgDir["tightly/$it.png"])
             val (x, y, w, h) = locs[it]
             frame.paste(img.resize(SizeInt(w, h)), Point(x, y), below = true).image
@@ -2253,7 +2260,7 @@ object MemeGenerator {
             listOf(121, 344, 160, 136), listOf(121, 346, 160, 134), listOf(122, 349, 159, 131),
             listOf(122, 351, 159, 129), listOf(122, 353, 159, 127), listOf(123, 355, 158, 125)
         )
-        val frames = (0 until 38).map {
+        val frames = (0 until 38).mapParallel {
             val frame = BuildImage.open(imgDir["caoshen_bite/$it.png"])
             val (x, y, w, h) = locs[it % locs.size]
             frame.paste(img.resize(SizeInt(w, h)), Point(x, y), below = true).image
@@ -2290,7 +2297,7 @@ object MemeGenerator {
         val text = texts.ifBlank { "怎么说话的你" }
         val img = images[0].convert("RGBA")
         val locs = listOf(listOf(160, 121, 76, 76), listOf(172, 124, 69, 69), listOf(208, 166, 52, 52))
-        val frames = (0 until 3).map {
+        val frames = (0 until 3).mapParallel {
             val (x, y, w, h) = locs[it]
             val head = img.resize(SizeInt(w, h), keepRatio = true).circle()
             val frame = BuildImage.open(imgDir["beat_head/$it.png"])
@@ -2349,7 +2356,7 @@ object MemeGenerator {
             Point(22, 3), Point(26, 8), Point(23, 8), Point(27, 10), Point(30, 9), Point(17, 6), Point(12, 8), Point(11, 7),
             Point(8, 6), Point(-2, 10), Point(4, 9)
         )
-        val frames = (0 until 19).map {
+        val frames = (0 until 19).mapParallel {
             val frame = BuildImage.open(imgDir["fencing/$it.png"])
             frame.paste(userHead, userLocs[it], alpha = true)
             frame.paste(selfHead, selfLocs[it], alpha = true).image
@@ -2370,7 +2377,7 @@ object MemeGenerator {
             listOf(102, 95, 70, 80, 0), listOf(108, 60, 50, 100, 0), listOf(97, 18, 65, 95, 0),
             listOf(65, 5, 75, 75, -20), listOf(95, 57, 100, 55, -70), listOf(109, 107, 65, 75, 0)
         )
-        val frames = (0 until 6).map {
+        val frames = (0 until 6).mapParallel {
             val frame = BuildImage.open(imgDir["rub/$it.png"])
             userLocs[it].let { (x, y, w, h) ->
                 frame.paste(userHead.resize(SizeInt(w, h)), Point(x, y), alpha = true)
@@ -2615,7 +2622,7 @@ object MemeGenerator {
             listOf(174, 35, 120,  94), listOf(179, 35, 109,  93), listOf(181, 54, 101,  92),
             listOf(182, 59, 98,  92), listOf(183, 71, 90,  96), listOf(180, 131, 92,  101)
         )
-        val rawFrames = (0 until 38).map {
+        val rawFrames = (0 until 38).mapParallel {
             BuildImage.open(imgDir["play/$it.png"])
         }
         val imgFrames = mutableListOf<BuildImage>()
@@ -2646,7 +2653,7 @@ object MemeGenerator {
             listOf(10, 33, 102,  84),
             listOf(12, 20, 98,  98)
         )
-        val frames = (0 until 5).map {
+        val frames = (0 until 5).mapParallel{
             val hand = BuildImage.open(imgDir["petpet/$it.png"])
             val frame = BuildImage.new("RGBA", hand.size, RGBA(255, 255, 255, 0))
             val (x, y, w, h) = locs[it]
@@ -2773,7 +2780,7 @@ object MemeGenerator {
         val idx = listOf(
             0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10,
         )
-        val frames = (0 until 23).map {
+        val frames = (0 until 23).mapParallel {
             val frame = BuildImage.open(imgDir["bocchi_draft/$it.png"])
             val (points, pos) = params[idx[it]]
             frame.paste(img.perspective(points), pos,  below=true).image
@@ -2885,7 +2892,7 @@ object MemeGenerator {
             }
         }
         val texts = if (rawTexts.isEmpty() || rawTexts.first().isBlank()) listOf("寄") else rawTexts
-        val frames = texts.map { capooSayOneLoop(it) }.flatten()
+        val frames = texts.mapParallel{ capooSayOneLoop(it) }.flatten()
         saveGif(frames, 0.1)
 
     }
@@ -2988,10 +2995,14 @@ object MemeGenerator {
             Pair(listOf(Point(0, 35), Point(200, 0), Point(224, 133), Point(25, 169)), Point(195, 17)),
             Pair(listOf(Point(0, 35), Point(200, 0), Point(224, 133), Point(25, 169)), Point(195, 17))
         )
-        val frames = (0 until 15).map {
-            val (points, pos) = params[it]
-            val frame = BuildImage.open(imgDir["tankuku_raisesign/$it.png"])
-            frame.paste(img.perspective(points), pos, below = true).image
+        val frames = coroutineScope {
+            (0 until 15).map {
+                async {
+                    val (points, pos) = params[it]
+                    val frame = BuildImage.open(localCurrentDirVfs["image/meme"]["tankuku_raisesign/$it.png"])
+                    frame.paste(img.perspective(points), pos, below = true).image
+                }
+            }.awaitAll()
         }
         saveGif(frames, 0.2)
     }
@@ -3062,7 +3073,7 @@ object MemeGenerator {
 
         val num = 30
         val dy = dialog.height / num
-        val frames = (0 until num).map { i ->
+        val frames = (0 until num).mapParallel { i ->
             val frame = BuildImage.new("RGBA", dialog.size)
             frame.paste(dialog, Point(0,  -dy * i))
             frame.paste(dialog, Point(0,  dialog.height - dy * i)).image
@@ -3126,7 +3137,7 @@ object MemeGenerator {
         if (isCircle) {
             head = head.circle()
         }
-        val frames = (0 until 34).map {
+        val frames = (0 until 34).mapParallel {
             val frame = BuildImage.open(imgDir["dog_dislike/$it.png"])
             frame.paste(head, location[it],  alpha=true).image
         }
@@ -3228,7 +3239,7 @@ object MemeGenerator {
                 Pair(Point(192,  151), listOf(Point(0,  7), Point(79,  3), Point(82,  107), Point(11,  112)))
             )
         )
-        val rawFrames = (0 until 8).map { BuildImage.open(imgDir["capoo_rip/$it.png"]) }
+        val rawFrames = (0 until 8).mapParallel { BuildImage.open(imgDir["capoo_rip/$it.png"]) }
         (0 until 6).forEach {
             val (pos, points) = params1[it]
             rawFrames[it].paste(img.perspective(points), pos,  below=true)
@@ -3419,7 +3430,7 @@ object MemeGenerator {
             Pair(Point(0,  66), listOf(Point(88,  1), Point(173,  17), Point(123,  182), Point(0,  131))),
             Pair(Point(0,  29), listOf(Point(118,  3), Point(201,  48), Point(111,  220), Point(1,  168)))
         )
-        val frames = (0 until 24).map {
+        val frames = (0 until 24).mapParallel {
             val frame = BuildImage.open(imgDir["tease/$it.png"])
             val (pos, points) = params[it]
             frame.paste(img.perspective(points), pos,  below=true).image
@@ -3660,7 +3671,7 @@ object MemeGenerator {
             listOf("left", listOf(Point(0,  12), Point(154,  0), Point(158,  90), Point(17,  109)), Point(35,  28))
         )
 
-        val frames = (0 until 18).map {
+        val frames = (0 until 18).mapParallel {
             val frame = BuildImage.open(imgDir["psyduck/$it.jpg"])
             val param = params[it]
             if (param != null) {
@@ -3709,7 +3720,7 @@ object MemeGenerator {
             listOf(34, 36, 97, 34), listOf(34, 38, 102, 38), listOf(37, 37, 99, 40), listOf(39, 36, 101, 47),
             listOf(36, 36, 106, 43), listOf(35, 35, 109, 40), listOf(35, 39, 112, 43), listOf(33, 36, 116, 41),
             listOf(36, 36, 116, 39), listOf(34, 37, 121, 45), listOf(35, 41, 123, 38), listOf(34, 37, 126, 35))
-        val frames = (0 until 120).map {
+        val frames = (0 until 120).mapParallel {
             val frame = BuildImage.open(imgDir["chase_train/$it.png"])
             val (w, h, x, y) = locs[it]
             frame.paste(img.resize(SizeInt(w,  h)), Point(x,  y),  below=true).image

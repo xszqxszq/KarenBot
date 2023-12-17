@@ -1,11 +1,9 @@
 package xyz.xszq.bot.image
 
-import com.sksamuel.scrimage.DisposeMethod
 import com.sksamuel.scrimage.ImmutableImage
 import com.sksamuel.scrimage.filter.BufferedOpFilter
 import com.sksamuel.scrimage.nio.AnimatedGif
-import com.sksamuel.scrimage.nio.StreamingGifWriter
-import korlibs.image.awt.toBMP32
+import korlibs.image.awt.toAwtNativeImage
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.NativeImage
 import korlibs.image.color.Colors
@@ -15,17 +13,15 @@ import korlibs.image.format.encode
 import korlibs.image.vector.Context2d
 import korlibs.math.geom.Angle
 import korlibs.math.geom.Point
-import org.opencv.core.Mat
-import org.opencv.core.MatOfByte
-import org.opencv.imgcodecs.Imgcodecs
 import thirdparty.jhlabs.image.GaussianFilter
+import xyz.xszq.bot.ffmpeg.FFMpegFileType
+import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.config
+import xyz.xszq.nereides.forEachParallel
+import xyz.xszq.nereides.mapParallel
+import xyz.xszq.nereides.newTempFile
 import java.awt.image.BufferedImage
 import java.awt.image.BufferedImageOp
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.time.Duration
-import javax.imageio.ImageIO
 import kotlin.math.absoluteValue
 import kotlin.math.pow
 import kotlin.math.roundToInt
@@ -53,7 +49,7 @@ fun getAvgDuration(image: AnimatedGif): Double {
     val totalDuration = List(image.frames.size) { index -> image.getDelay(index).toMillis().toDouble() }.sum()
     return totalDuration / image.frameCount
 }
-fun ImmutableImage.toBitmap(): Bitmap = toNewBufferedImage(BufferedImage.TYPE_INT_ARGB).toBMP32()
+fun ImmutableImage.toBitmap(): Bitmap = toNewBufferedImage(BufferedImage.TYPE_INT_ARGB).toAwtNativeImage()
 enum class FrameAlignPolicy {
     NoExtend, ExtendFirst, ExtendLast, ExtendLoop
 }
@@ -74,7 +70,7 @@ suspend fun makeJpgOrGif(
     if (!img.isAnimated)
         return func(img).image.toJPEG()
     val duration = getAvgDuration(img.rawGifFile!!) / 1000.0
-    val frames = splitGif(img.rawGifFile!!).map { frame -> func(BuildImage(frame)).image }
+    val frames = splitGif(img.rawGifFile!!).mapParallel { frame -> func(BuildImage(frame)).image }
     return saveGif(frames, duration)
 }
 suspend fun makeGifOrCombinedGif(
@@ -150,9 +146,8 @@ fun List<String>.ifBlank(defaultValue: () -> String): String {
         return this.first()
     return defaultValue()
 }
-suspend fun Bitmap.toImmutableImage(): ImmutableImage = ImmutableImage.loader().fromBytes(encode(PNG)).toImmutableImage()
 suspend fun saveGif(frames: List<Bitmap>, duration: Double): ByteArray {
-    val output = encodeGif(frames, (duration * 1000L).toLong())
+    val output = encodeGif(frames, (duration * 1000).toInt())
     if (output.size <= config.gifMaxSize * 10.0.pow(6))
         return output
     if (frames.size > config.gifMaxFrames) {
@@ -160,25 +155,19 @@ suspend fun saveGif(frames: List<Bitmap>, duration: Double): ByteArray {
         val index = (0 until config.gifMaxFrames).map { (it * ratio).toInt() }
         return saveGif(frames.filterIndexed { i, _ -> i in index }, duration * ratio)
     }
-    return saveGif(frames.map { it.toBMP32().scaled((it.width * 0.9).toInt(), (it.height * 0.9).toInt()) }, duration)
+    return saveGif(frames.mapParallel { it.toBMP32().scaled((it.width * 0.9).toInt(), (it.height * 0.9).toInt()) }, duration)
 }
-suspend fun encodeGif(frames: List<Bitmap>, duration: Long, compressed: Boolean = false): ByteArray {
-    val writer = StreamingGifWriter(Duration.ofMillis(duration), true, compressed)
-    val os = ByteArrayOutputStream()
-    writer.prepareStream(os, BufferedImage.TYPE_INT_ARGB).use { gifStream ->
-        frames.forEach {
-            gifStream.writeFrame(it.toImmutableImage(), DisposeMethod.RESTORE_TO_BACKGROUND_COLOR)
-        }
-    }
-    os.close()
-    return os.toByteArray()
-}
-
-// https://answers.opencv.org/question/31505/how-load-and-display-images-with-java-using-opencv-solved/
-fun Mat.toBufferedImage(): BufferedImage {
-    val mob = MatOfByte()
-    Imgcodecs.imencode(".png", this, mob)
-    return ImageIO.read(ByteArrayInputStream(mob.toArray()))
+suspend fun encodeGif(raw: List<Bitmap>, duration: Int): ByteArray {
+    val files = raw.mapParallel { newTempFile(suffix = ".png").apply { writeBytes(it.encode(PNG)) } }
+    val resultFile = FFMpegTask(FFMpegFileType.GIF) {
+        frameRate(1000.0 / duration)
+        input("\"concat:" + files.joinToString("|") { it.absolutePath } + "\"")
+        yes()
+    }.getResult()
+    val result = resultFile!!.readBytes()
+    files.forEachParallel { it.delete() }
+    resultFile.delete()
+    return result
 }
 fun getKorimCircle(size: Int, color: RGBA = Colors.WHITE, bg: RGBA = RGBA(0, 0, 0, 0)) =
     NativeImage(size, size).modify {
@@ -222,5 +211,4 @@ class GaussianBlurFilter @JvmOverloads constructor(private val radius: Double = 
         return GaussianFilter(radius.toFloat())
     }
 }
-
 

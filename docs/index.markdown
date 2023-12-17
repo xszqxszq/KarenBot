@@ -12,5 +12,5 @@ layout: home
 ![](https://pic.imgdb.cn/item/656c80f2c458853aef985435.png)
 ![](https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/QR.png)
 
-**[使用说明](guide) [关于](about)**
+**[使用说明](guide) [关于](about) [项目地址](https://github.com/xszqxszq/KarenBot)**
 

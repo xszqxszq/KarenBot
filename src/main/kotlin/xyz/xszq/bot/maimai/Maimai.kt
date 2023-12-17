@@ -731,13 +731,16 @@ object Maimai {
             startsWith("设置b50") { raw ->
                 val args = raw.toArgsList()
                 if (args.size != 2) {
-                    reply(buildString {
-                        appendLine("使用方法：/mai 设置b50 选项 值")
-                        appendLine("例：/mai 设置b50 头像 UI_Icon_003304")
-                        appendLine("例：/mai 设置b50 牌子 UI_Plate_209502")
-                        appendLine("例：/mai 设置b50 牌子 使用查分器设置")
-                        appendLine("例：/mai 设置b50 牌子 晓将")
-                        appendLine("头像和牌子列表可以在https://otmdb.cn/karenbot/maimai_icons 和 https://otmdb.cn/karenbot/maimai_plates 查看")
+                    reply(ListArk.build {
+                        desc { "设置b50" }
+                        prompt { "设置b50" }
+                        text { "使用方法：/mai 设置b50 选项 值" }
+                        text { "例：/mai 设置b50 头像 UI_Icon_003304" }
+                        text { "例：/mai 设置b50 牌子 UI_Plate_209502" }
+                        text { "例：/mai 设置b50 牌子 使用查分器设置" }
+                        text { "例：/mai 设置b50 牌子 晓将" }
+                        link("https://otmdb.cn/karenbot/maimai_icons") { "点我查看头像列表" }
+                        link("https://otmdb.cn/karenbot/maimai_plates") { "点我查看牌子列表" }
                     })
                     return@startsWith
                 }

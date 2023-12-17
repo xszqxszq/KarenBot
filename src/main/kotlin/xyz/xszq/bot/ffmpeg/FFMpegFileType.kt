@@ -5,5 +5,6 @@ data class FFMpegFileType(val ext: String, val requiredArgs: List<Argument> = em
         val MP3 = FFMpegFileType("mp3")
         val WAV = FFMpegFileType("wav")
         val PCM = FFMpegFileType("pcm")
+        val GIF = FFMpegFileType("gif")
     }
 }

@@ -25,7 +25,7 @@ interface C2CApi {
         groupId: String,
         content: String,
         msgType: Int,
-        msgId: String,
+        msgId: String?,
         markdown: MessageMarkdownC2C? = null,
         media: Media? = null,
         ark: MessageArk? = null,

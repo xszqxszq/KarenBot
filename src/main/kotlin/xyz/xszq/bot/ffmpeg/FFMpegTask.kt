@@ -2,6 +2,7 @@
 
 package xyz.xszq.bot.ffmpeg
 
+import korlibs.memory.toInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -29,22 +30,27 @@ class FFMpegTask(
         fun forceFormat(format: String) = insert(Argument("f", format))
         fun filterComplex(filter: String) = insert(Argument("filter_complex", filter))
         fun map(map: String) = insert(Argument("map", map))
+        fun frameRate(rate: Double) = insert(Argument("framerate", rate.toString()))
+        fun vFrames(frames: Int) = insert(Argument("vframes", frames.toString()))
     }
-    private fun buildCommand(): String {
-        var result = ffmpegBin
-        Builder().apply(argsBuilder).arguments.forEach { result += " $it" }
-        return result
+    private fun buildCommand(result: String): List<String> {
+        return buildList {
+            add(ffmpegBin)
+            Builder().apply(argsBuilder).arguments.forEach {
+                addAll(it.toList())
+            }
+            add(result)
+        }
     }
     private fun getOutputFile(): File = newTempFile(suffix=".${outputFormat.ext}")
     private fun getResultBlocking(): File? {
         checkFFMpeg()
         val result = getOutputFile()
-        var command = buildCommand()
-        command += " ${result.absolutePath}"
-        println(command)
+        val command = buildCommand(result.absolutePath)
+//        println(command)
         return try {
             runBlocking {
-                ProgramExecutor(command, true) {
+                ProgramExecutor(command, false) {
                     environment {
                         append(ffmpegPath)
                     }

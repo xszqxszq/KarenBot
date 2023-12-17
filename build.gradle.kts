@@ -40,6 +40,7 @@ dependencies {
     implementation("io.github.kasukusakura:silk-codec:0.0.5")
     implementation("io.github.zhangethan:pinyin4j:2.6.1")
     implementation("net.mamoe.yamlkt:yamlkt:0.10.2")
+    implementation("org.im4java:im4java:1.4.0")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.1.4")
     implementation("org.openpnp:opencv:4.8.1-0")
     implementation("org.scilab.forge:jlatexmath:1.0.7")

@@ -1,2 +1,2 @@
-ffmpeg: "ffmpeg"
+ffmpeg: "C:/Windows/ffmpeg.exe"
 ffmpegPath: ""

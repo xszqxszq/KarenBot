@@ -1,14 +1,22 @@
 package xyz.xszq
 
+import korlibs.image.awt.toAwtNativeImage
+import korlibs.image.color.RGBA
 import korlibs.image.format.PNG
 import korlibs.image.format.encode
 import korlibs.image.format.readNativeImage
 import korlibs.image.format.showImageAndWait
+import korlibs.io.async.async
 import korlibs.io.async.launch
 import korlibs.io.file.std.localCurrentDirVfs
 import korlibs.io.file.std.rootLocalVfs
+import korlibs.math.geom.Point
+import korlibs.math.geom.SizeInt
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import nu.pattern.OpenCV
@@ -164,40 +172,42 @@ suspend fun testMeme() {
     OpenCV.loadLocally()
     config = BotConfig.load(localCurrentDirVfs["config.yml"])
 
-    MemeGenerator.handle("阿尼亚喜欢",
-        args = listOf("可怜Bot"),
-        images = listOf(BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]),BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]))
-    ).showImageAndWait()
-//    rootLocalVfs["D:/Temp/test.gif"].writeBytes(MemeGenerator.handle("虹夏举牌",
-//        args = listOf("\uD83D\uDE0A", "阿斯蒂芬"),
-//        images = listOf(BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]), BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]))
-//    ))
-//    BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]).rotate(-25.0).saveJpg().showImageAndWait()
-}
-suspend fun testMaimaiOpening() {
-    config = BotConfig.load(localCurrentDirVfs["config.yml"])
-    database = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
-        config.databaseUser, config.databasePassword)
-
-    BuildImage.init()
-    Maimai.testLoad()
-    val nowMusics = Maimai.musics.getRandomHot(15).map { Pair(it, false) }.toMutableList()
-    var nowChars = mutableListOf<Char>('a', 'b', 'c', 'e','i', 'o', 'u')
-    Maimai.guessGame.drawNowOpeningStatus(
-        localCurrentDirVfs["maimai/guess_game_bg.png"].readNativeImage().toBuildImage(),
-        nowMusics,
-        nowChars,
-        true
-    ).image.showImageAndWait()
+//    MemeGenerator.handle("阿尼亚喜欢",
+//        args = listOf("可怜Bot"),
+//        images = listOf(BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]),BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]))
+//    ).showImageAndWait()
+    rootLocalVfs["D:/Temp/test.jpg"].writeBytes(MemeGenerator.handle("虹夏举牌",
+        args = listOf("阿斯蒂芬"),
+        images = listOf(BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]), BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]))
+    ))
 }
 fun printFonts() {
     println(globalFontRegistry.listFontNames())
 }
 suspend fun main() {
-//    testMeme()
-//    printFonts()
-//    showFonts()
-    testMaimaiOpening()
-//    BuildImage.init()
-//    BuildImage.new("RGBA", Size(500, 500)).drawText(listOf(65, 65, 735, 735), "System “Z”")
+    BuildImage.init()
+    OpenCV.loadLocally()
+    config = BotConfig.load(localCurrentDirVfs["config.yml"])
+//    rootLocalVfs["D:/Temp/test.gif"].writeBytes(MemeGenerator.handle("唐可可举牌",
+//        args = listOf("阿斯蒂芬"),
+//        images = listOf(BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]), BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]))
+//    ))
+//    BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]).toMat().toBufferedImage().toAwtNativeImage().showImageAndWait()
+//    BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]).toMatOld().toBufferedImage().toAwtNativeImage().showImageAndWait()
+//    val mat = BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]).toMat()
+//    mat.toBufferedImage().toAwtNativeImage().showImageAndWait()
+
+    rootLocalVfs["D:/Temp/test1.gif"].writeBytes(MemeGenerator.handle("添乱",
+        args = listOf("阿斯蒂芬", "dawef"),
+        images = listOf(BuildImage.open(localCurrentDirVfs["D:/Temp/test.gif"]), BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]))
+    ))
+//    val new = measureTime {
+//        repeat(5) {
+//            MemeGenerator.handle("可达鸭",
+//                args = listOf("阿斯蒂芬", "dawef"),
+//                images = listOf(BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]), BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]))
+//            )
+//        }
+//    }.inWholeMilliseconds / 1000.0
+//    println("新版耗时：${new / 5}s")
 }

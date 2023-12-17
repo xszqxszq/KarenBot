@@ -11,15 +11,15 @@ class FFProbe(
 ) {
     suspend fun getResult(): FFProbeResult {
         val result = newTempFile(suffix=".json")
-        ProgramExecutor(buildString {
-            append(ffprobeBin)
-            append(" \"${target.absolutePath}\"")
-            append(" -print_format json")
+        ProgramExecutor(buildList {
+            add(ffprobeBin)
+            add("\"${target.absolutePath}\"")
+            add("-print_format json")
             if (showStreams)
-                append(" -show_streams")
+                add("-show_streams")
             if (showFormat)
-                append(" -show_format")
-            append(" > \"${result.absolutePath}\"")
+                add("-show_format")
+            add("> \"${result.absolutePath}\"")
         }) {
             environment {
                 append(ffprobePath)

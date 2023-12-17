@@ -5,8 +5,7 @@ package xyz.xszq.nereides
 import korlibs.image.awt.toBMP32
 import korlibs.image.bitmap.Bitmap32
 import korlibs.io.file.std.tmpdir
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
@@ -60,4 +59,32 @@ inline fun <T> Iterable<T>.sumOf(selector: (T) -> Float): Float {
         sum += selector(element)
     }
     return sum
+}
+
+suspend inline fun <T, R> Iterable<T>.mapParallel(crossinline transform: suspend (T) -> R): List<R> {
+    return runBlocking(Dispatchers.IO) {
+        map {
+            async {
+                transform(it)
+            }
+        }.awaitAll()
+    }
+}
+suspend inline fun IntArray.mapParallel(crossinline transform: suspend (Int) -> Int): IntArray {
+    return runBlocking(Dispatchers.IO) {
+        map {
+            async {
+                transform(it)
+            }
+        }.awaitAll().toTypedArray().toIntArray()
+    }
+}
+suspend inline fun <T> Iterable<T>.forEachParallel(crossinline action: suspend (T) -> Unit) {
+    return coroutineScope {
+        map {
+            async {
+                action(it)
+            }
+        }.awaitAll()
+    }
 }

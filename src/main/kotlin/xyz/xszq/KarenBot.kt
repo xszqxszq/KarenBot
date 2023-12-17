@@ -11,6 +11,7 @@ import kotlinx.coroutines.runBlocking
 import nu.pattern.OpenCV
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import xyz.xszq.bot.audio.OttoVoice
 import xyz.xszq.bot.audio.RandomMusic
@@ -69,6 +70,16 @@ suspend fun init() {
 }
 
 fun subscribe() {
+    GlobalEventChannel.subscribePublicMessages {
+        always {
+            newSuspendedTransaction {
+                AccessLog.insert {
+                    it[openid] = subjectId
+                    it[context] = contextId
+                }
+            }
+        }
+    }
     GlobalEventChannel.subscribePublicMessages {
         if (!config.auditMode) {
             equalsTo("") {
@@ -371,6 +382,9 @@ fun subscribe() {
                 }
             }
         }
+        startsWith(listOf("球面化", "/球面化", "我巨爽", "/我巨爽", "反球面化", "/反球面化")) {
+            reply("请使用/生成 指令！")
+        }
         startsWith("/latex") { text ->
             if (text.isBlank()) {
                 reply("用法：/latex LaTeX文本\n例：/latex \\LaTeX")
@@ -430,19 +444,6 @@ fun subscribe() {
             reply(RandomText.saizeriya())
         }
     }
-//    GlobalEventChannel.subscribePublicMessages {
-//        startsWith("/test") {
-//            reply(Ark(MessageArk(
-//                37, buildList {
-//                    add(MessageArkKv("#PROMPT#", "通知提醒"))
-//                    add(MessageArkKv("#METATITLE#", "标题"))
-//                    add(MessageArkKv("#METASUBTITLE#", "子标题"))
-//                    add(MessageArkKv("#METACOVER#", "https://otmdb.cn/jump/files/files/bf0ed01635493790634.jpg"))
-//                    add(MessageArkKv("#METAURL#", "https://otmdb.cn/jump/aira"))
-//                }
-//            )))
-//        }
-//    }
 }
 lateinit var bot: Bot
 fun main() {
