@@ -21,6 +21,12 @@ class ListArk(
         })
     }))
 })) {
+    val text
+        get() = buildString {
+           list.forEach {
+               appendLine(it.link ?: it.text)
+           }
+        }
     class Builder {
         private var desc = ""
         private var prompt = ""

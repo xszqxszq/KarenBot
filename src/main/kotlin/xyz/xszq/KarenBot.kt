@@ -453,7 +453,8 @@ fun main() {
     bot = Bot(
         appId = config.appId,
         clientSecret = config.clientSecret,
-        easyToken = config.token
+        easyToken = config.token,
+        sandbox = config.sandbox
     )
     subscribe()
 

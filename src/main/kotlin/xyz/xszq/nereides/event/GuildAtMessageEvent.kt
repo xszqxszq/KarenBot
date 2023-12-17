@@ -2,9 +2,11 @@ package xyz.xszq.nereides.event
 
 import io.ktor.client.statement.*
 import xyz.xszq.nereides.QQClient
+import xyz.xszq.nereides.message.Ark
 import xyz.xszq.nereides.message.LocalImage
 import xyz.xszq.nereides.message.Message
 import xyz.xszq.nereides.message.MessageChain
+import xyz.xszq.nereides.message.ark.ListArk
 import xyz.xszq.nereides.payload.user.GuildUser
 
 class GuildAtMessageEvent(
@@ -28,6 +30,7 @@ class GuildAtMessageEvent(
 
     override suspend fun reply(content: MessageChain): Boolean {
         val files = content.filterIsInstance<LocalImage>()
+        val arks = content.filterIsInstance<ListArk>()
         var response = if (files.isNotEmpty()) {
             client.sendChannelMessageByMultipart(
                 channelId = channelId,
@@ -38,7 +41,7 @@ class GuildAtMessageEvent(
         } else {
             client.sendChannelMessage(
                 channelId = channelId,
-                content = content.text,
+                content = if (arks.isNotEmpty()) arks.first().text else content.text,
                 referMsgId = msgId,
                 replyMsgId = msgId)
         }

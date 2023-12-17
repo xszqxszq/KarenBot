@@ -34,9 +34,10 @@ import kotlin.properties.Delegates
 open class QQClient(
     private val appId: String,
     private val clientSecret: String,
-    private val easyToken: String
+    private val easyToken: String,
+    private val sandbox: Boolean
 ): CoroutineScope, C2CApi, GuildApi {
-    private val server = "https://api.sgroup.qq.com"
+    private val server = if (!sandbox) "https://api.sgroup.qq.com" else "https://sandbox.api.sgroup.qq.com"
     private val json = Json {
         isLenient = true
         prettyPrint = true
