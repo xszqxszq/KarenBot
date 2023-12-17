@@ -26,7 +26,7 @@ permalink: /meme/
 - `第二行文本`
 - 预览：
 <div align="left">
-  <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/5000choyen.jpg" width="200" />
+  <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/5000choyen.png" width="200" />
 </div>
 
 # 球面化/反球面化
@@ -36,7 +36,7 @@ permalink: /meme/
 - 需要同时发送一张图片！
 - 预览：
 <div align="left">
-  <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/spherize.jpg" width="200" />
+  <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/spherize.png" width="200" />
 </div>
 
 # 对称/我巨爽
@@ -45,7 +45,7 @@ permalink: /meme/
 - 需要同时发送一张图片！
 - 预览：
 <div align="left">
-  <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/flip.jpg" width="200" />
+  <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/flip.png" width="200" />
 </div>
 
 
@@ -2145,7 +2145,7 @@ permalink: /meme/
 - 关键词：`yt`、`youtube`
 - 需要图片数目：`0`
 - 需要文字数目：`2`
-- 默认文字：[`Porn`, `Hub`]
+- 默认文字：[`Bili`, `Bili`]
 - 预览：
 <div align="left">
   <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/youtube.jpg" width="200" />
