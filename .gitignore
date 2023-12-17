@@ -36,7 +36,6 @@ out/
 .vscode/
 
 ### Bot Files ###
-/image/
 /maimai/covers/
 /config.yml
 /src/test/
