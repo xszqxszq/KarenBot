@@ -299,16 +299,16 @@ fun subscribe() {
                 else -> return@startsWith
             }
             if (args.isEmpty() || (args.size == 1 && args.first() == "帮助")) {
-                reply(buildString {
-                    appendLine()
-                    append("当前支持的模式如下：对称 球面化 反球面化 5k 蔚蓝档案logo")
-                    appendLine(MemeGenerator.getList())
-                    appendLine("使用”/生成 帮助 [模式]“来查看该模式的帮助说明。")
+                reply(ListArk.build {
+                    desc { "生成功能帮助" }
+                    prompt { "生成功能帮助" }
+                    text { "当前支持的模式如下：对称 球面化 反球面化 5k 蔚蓝档案logo" + MemeGenerator.getList() }
+                    text { "使用”/生成 帮助 [模式]“来查看该模式的帮助说明。" }
                     if (this@startsWith is GuildAtMessageEvent) {
-                        appendLine("由于频道机器人无法接收图片，因此在使用本命令时，可以@自己或别人来将头像作为参数传入。")
+                        text { "由于频道机器人无法接收图片，因此在使用本命令时，可以@自己或别人来将头像作为参数传入。" }
                     }
-                    appendLine("部分功能实现逻辑及资源文件来自 meme-generator")
-                }.trimEnd())
+                    link("https://otmdb.cn/karenbot/meme") { "点我查看详细帮助及表情包预览" }
+                })
                 return@startsWith
             }
             when (args[0]) {

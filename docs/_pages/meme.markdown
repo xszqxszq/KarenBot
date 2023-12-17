@@ -17,7 +17,7 @@ permalink: /meme/
 - 指令：`/ba 左侧文本 右侧文本`
 - 预览：
 <div align="left">
-  <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/bluearchive.jpg" width="200" />
+  <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/bluearchive.png" width="200" />
 </div>
 
 # [5000choyen](https://github.com/yurafuca/5000choyen)
