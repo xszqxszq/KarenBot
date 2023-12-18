@@ -30,6 +30,7 @@ import xyz.xszq.bot.image.*
 import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.MaimaiUtils
 import xyz.xszq.bot.maimai.MaimaiUtils.getPlateVerList
+import xyz.xszq.nereides.NetworkUtils
 import xyz.xszq.nereides.newTempFile
 import xyz.xszq.nereides.readAsImage
 import java.io.File
@@ -197,10 +198,10 @@ suspend fun main() {
 //    val mat = BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]).toMat()
 //    mat.toBufferedImage().toAwtNativeImage().showImageAndWait()
 
-    rootLocalVfs["D:/Temp/test1.gif"].writeBytes(MemeGenerator.handle("添乱",
-        args = listOf("阿斯蒂芬", "dawef"),
-        images = listOf(BuildImage.open(localCurrentDirVfs["D:/Temp/test.gif"]), BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]))
-    ))
+//    rootLocalVfs["D:/Temp/test1.gif"].writeBytes(MemeGenerator.handle("添乱",
+//        args = listOf("阿斯蒂芬", "dawef"),
+//        images = listOf(BuildImage.open(localCurrentDirVfs["D:/Temp/test.gif"]), BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]))
+//    ))
 //    val new = measureTime {
 //        repeat(5) {
 //            MemeGenerator.handle("可达鸭",
@@ -210,4 +211,6 @@ suspend fun main() {
 //        }
 //    }.inWholeMilliseconds / 1000.0
 //    println("新版耗时：${new / 5}s")
+    println(AnimeDB.handle(localCurrentDirVfs["D:/Temp/test.jpg"]).text)
+
 }

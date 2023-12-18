@@ -1,14 +1,16 @@
 package xyz.xszq.nereides
 
+import com.qcloud.cos.COSClient
+import com.qcloud.cos.ClientConfig
+import com.qcloud.cos.auth.BasicCOSCredentials
+import com.qcloud.cos.http.HttpProtocol
+import com.qcloud.cos.model.PutObjectRequest
+import com.qcloud.cos.region.Region
+import com.qcloud.cos.transfer.TransferManager
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.request.forms.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
 import korlibs.io.file.VfsFile
-import korlibs.io.file.baseName
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import xyz.xszq.config
@@ -17,43 +19,58 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.util.*
+import java.util.concurrent.Executors
 
 object NetworkUtils {
     private val client = HttpClient(OkHttp) {
     }
-    suspend fun upload(file: VfsFile): String {
-        val bytes = file.readBytes()
-        return try {
-            config.uploadServer + client.submitFormWithBinaryData(
-                url = "${config.uploadServer}/upload",
-                formData = formData {
-                    append("file", bytes, Headers.build {
-                        append(HttpHeaders.ContentDisposition, "filename=${file.baseName}")
-                    })
-                }
-            ) {
-                headers.append("secret", config.uploadSecret)
-            }.bodyAsText()
-        } catch (e: Exception) {
-            ""
+    fun deleteFromCos(filename: String) {
+        val cosClient = COSClient(
+            BasicCOSCredentials(config.cosSecretId, config.cosSecretKey),
+            ClientConfig(Region(config.cosRegion)).also {
+                it.httpProtocol = HttpProtocol.https
+            })
+        val bucketName = config.cosAppId
+        cosClient.deleteObject(bucketName, filename)
+    }
+    @OptIn(DelicateCoroutinesApi::class)
+    fun upload(file: File): String {
+        val cosClient = COSClient(
+            BasicCOSCredentials(config.cosSecretId, config.cosSecretKey),
+            ClientConfig(Region(config.cosRegion)).also {
+            it.httpProtocol = HttpProtocol.https
+        })
+        val bucketName = config.cosAppId
+        val transferManager = TransferManager(cosClient, Executors.newFixedThreadPool(32))
+        val filename = UUID.randomUUID().toString() + "." + file.extension
+        val result = kotlin.runCatching {
+            val upload = transferManager.upload(PutObjectRequest(
+                bucketName, filename, file
+            ))
+            upload.waitForUploadResult()
+        }.onFailure {
+            it.printStackTrace()
+        }.getOrNull()
+        transferManager.shutdownNow()
+        cosClient.shutdown()
+
+        val expiration = Date(Date().time + 2 * 60 * 1000)
+        GlobalScope.launch(Dispatchers.IO) {
+            val key = filename
+            delay(2 * 60 * 1000L)
+            deleteFromCos(key)
+        }
+        return cosClient.generatePresignedUrl(bucketName, filename, expiration).toString()
+    }
+    fun uploadBinary(binary: ByteArray, suffix: String = ""): String {
+        val file = newTempFile(suffix=suffix).also {
+            it.writeBytes(binary)
+        }
+        return upload(file).also {
+            file.delete()
         }
     }
-    suspend fun uploadBinary(binary: ByteArray): String {
-        return try {
-            config.uploadServer + client.submitFormWithBinaryData(
-                url = "${config.uploadServer}/upload",
-                formData = formData {
-                    append("file", binary, Headers.build {
-                        append(HttpHeaders.ContentDisposition, "filename=${UUID.randomUUID()}")
-                    })
-                }
-            ) {
-                headers.append("secret", config.uploadSecret)
-            }.bodyAsText()
-        } catch (e: Exception) {
-            ""
-        }
-    }
+    fun upload(file: VfsFile) = upload(File(file.absolutePath))
 
     suspend fun downloadFile(
         url: String,

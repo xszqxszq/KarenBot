@@ -358,7 +358,7 @@ object Maimai {
                     return@startsWith
                 }
                 val charter = args[0]
-                val page = args.get(1)?.toIntOrNull() ?: 1
+                val page = args.getOrNull(1)?.toIntOrNull() ?: 1
                 val total = musics.findByCharter(charter)
                 val result = if (page in 1..(total.size / 16.0).toIntCeil()) {
                     total.subList((page - 1) * 16, total.size).take(16)

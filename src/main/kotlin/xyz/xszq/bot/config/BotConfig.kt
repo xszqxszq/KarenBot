@@ -10,8 +10,6 @@ data class BotConfig(
     val appId: String,
     val clientSecret: String,
     val token: String,
-    val uploadServer: String,
-    val uploadSecret: String,
     val databaseUrl: String,
     val databaseUser: String,
     val databasePassword: String,
@@ -19,7 +17,11 @@ data class BotConfig(
     val gifMaxSize: Double,
     val gifMaxFrames: Int,
     val auditMode: Boolean,
-    val sandbox: Boolean
+    val sandbox: Boolean,
+    val cosSecretId: String,
+    val cosSecretKey: String,
+    val cosRegion: String,
+    val cosAppId: String,
 ) {
     companion object {
         private val yaml = Yaml {  }

@@ -26,6 +26,8 @@ dependencies {
     implementation("io.ktor:ktor-client-websockets:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-client-okhttp-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-client-cio-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-client-java:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
@@ -33,6 +35,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
     implementation("ch.qos.logback:logback-classic:1.4.11")
+    implementation("com.qcloud:cos_api:5.6.155")
     implementation("com.sksamuel.scrimage:scrimage-core:4.1.1")
     implementation("com.sksamuel.scrimage:scrimage-filters:4.1.1")
     implementation("com.xenomachina:kotlin-argparser:2.0.7")
@@ -45,6 +48,7 @@ dependencies {
     implementation("org.openpnp:opencv:4.8.1-0")
     implementation("org.scilab.forge:jlatexmath:1.0.7")
     implementation(kotlin("stdlib-jdk8"))
+    implementation("io.ktor:ktor-client-logging-jvm:2.3.6")
 }
 
 application {

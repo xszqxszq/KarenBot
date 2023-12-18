@@ -65,7 +65,7 @@ suspend fun init() {
     RandomImage.load("gif", "reply")
     RandomImage.load("afraid", "reply")
 
-    Maimai.init()
+    Maimai.initBlocking()
     RandomText.loadSaizeriya()
 }
 
@@ -91,8 +91,12 @@ fun subscribe() {
         }
         startsWith("/搜番") {
             if (this is GroupAtMessageEvent) {
-                message.filterIsInstance<Image>().firstOrNull() ?.let { img ->
-                    reply(TraceMoe.doHandleTraceMoe(img.url))
+                message.filterIsInstance<RemoteImage>().firstOrNull() ?.let { img ->
+                    img.getFile().apply {
+                        reply(AnimeDB.handle(this))
+                    }.also {
+                        it.delete()
+                    }
                 } ?: run {
                     reply("使用搜番命令时，请同时发送想要搜索的动漫截图！")
                 }
@@ -302,12 +306,12 @@ fun subscribe() {
                 reply(ListArk.build {
                     desc { "生成功能帮助" }
                     prompt { "生成功能帮助" }
-                    text { "当前支持的模式如下：对称 球面化 反球面化 5k 蔚蓝档案logo" + MemeGenerator.getList() }
+                    text { "指令格式：”/生成 模式“" }
+                    link("https://otmdb.cn/karenbot/meme") { "点我查看功能列表及表情包预览" }
                     text { "使用”/生成 帮助 [模式]“来查看该模式的帮助说明。" }
                     if (this@startsWith is GuildAtMessageEvent) {
                         text { "由于频道机器人无法接收图片，因此在使用本命令时，可以@自己或别人来将头像作为参数传入。" }
                     }
-                    link("https://otmdb.cn/karenbot/meme") { "点我查看详细帮助及表情包预览" }
                 })
                 return@startsWith
             }
@@ -456,7 +460,9 @@ fun main() {
         easyToken = config.token,
         sandbox = config.sandbox
     )
+    bot.logger.info { "正在设置监听……" }
     subscribe()
 
+    bot.logger.info { "启动 Bot 中……" }
     bot.launch()
 }

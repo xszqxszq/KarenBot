@@ -73,10 +73,11 @@ object TouhouGuessGame {
             val name = selected[TouhouMusics.name]
             val filename = selected[TouhouMusics.filename]
             val version = selected[TouhouMusics.version]
-            val answers = TouhouAliases.select {
+            var answers = TouhouAliases.select {
                 TouhouAliases.id eq id
             }.map { it[TouhouAliases.alias] }.toMutableList()
             answers.add(name)
+            answers = answers.map { it.trim().lowercase() }.toMutableList()
             println(answers)
 
             val file = musicDir[filename]
@@ -95,7 +96,7 @@ object TouhouGuessGame {
                         if (e !is PublicMessageEvent || e.contextId != contextId)
                             return@collect
 
-                        val answer = e.message.text.trim()
+                        val answer = e.message.text.trim().lowercase()
                         if (answers.any { answer.isNotBlank() && answer in it } ||
                             answers.any { answer.toPinyinAbbr().length >= 3 && it.toPinyinAbbr().length >= 3 && answer.toPinyinAbbr() in it.toPinyinAbbr() } ||
                             answers.any { it.filter { l -> l.code > 128 }.length >= 5 &&
