@@ -8,6 +8,9 @@ class Bot(
     easyToken: String,
     sandbox: Boolean
 ) : QQClient(appId, clientSecret, easyToken, sandbox) {
+    init {
+        bot = this
+    }
     fun launch() {
         runBlocking {
             listen()

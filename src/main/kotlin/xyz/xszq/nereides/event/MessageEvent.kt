@@ -1,5 +1,6 @@
 package xyz.xszq.nereides.event
 
+import kotlinx.coroutines.Deferred
 import xyz.xszq.nereides.message.Message
 import xyz.xszq.nereides.message.MessageChain
 

@@ -1,6 +1,8 @@
 package xyz.xszq.nereides.event
 
 import io.ktor.client.statement.*
+import kotlinx.coroutines.*
+import xyz.xszq.nereides.Bot
 import xyz.xszq.nereides.QQClient
 import xyz.xszq.nereides.message.Ark
 import xyz.xszq.nereides.message.LocalImage
@@ -10,7 +12,7 @@ import xyz.xszq.nereides.message.ark.ListArk
 import xyz.xszq.nereides.payload.user.GuildUser
 
 class GuildAtMessageEvent(
-    override val client: QQClient,
+    override val bot: Bot,
     override val msgId: String,
     override val channelId: String,
     override val guildId: String,
@@ -22,7 +24,7 @@ class GuildAtMessageEvent(
     val mentions: List<GuildUser>? = null
 ) : GuildChannelEvent, PublicMessageEvent(channelId) {
     override suspend fun reply(content: String): Boolean { // TODO: Success check
-        val response = client.sendChannelMessage(channelId, content, referMsgId = msgId, replyMsgId = msgId)
+        bot.sendChannelMessage(channelId, content, referMsgId = msgId, replyMsgId = msgId)
         return true
     }
 
@@ -32,14 +34,14 @@ class GuildAtMessageEvent(
         val files = content.filterIsInstance<LocalImage>()
         val arks = content.filterIsInstance<ListArk>()
         var response = if (files.isNotEmpty()) {
-            client.sendChannelMessageByMultipart(
+            bot.sendChannelMessageByMultipart(
                 channelId = channelId,
                 fileImage = files.first().file,
                 content = content.text.ifBlank { "" },
                 replyMsgId = msgId
             )
         } else {
-            client.sendChannelMessage(
+            bot.sendChannelMessage(
                 channelId = channelId,
                 content = if (arks.isNotEmpty()) arks.first().text else content.text,
                 referMsgId = msgId,
@@ -48,7 +50,7 @@ class GuildAtMessageEvent(
         println(response.bodyAsText())
         if (files.size > 1) {
             files.subList(1, files.size).forEach { file ->
-                response = client.sendChannelMessageByMultipart(
+                response = bot.sendChannelMessageByMultipart(
                     channelId = channelId,
                     fileImage = file.file,
                     content = "",
@@ -59,5 +61,4 @@ class GuildAtMessageEvent(
         }
         return true
     }
-
 }

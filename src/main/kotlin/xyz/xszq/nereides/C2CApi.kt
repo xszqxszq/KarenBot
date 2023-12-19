@@ -4,6 +4,8 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.ktor.client.call.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import xyz.xszq.nereides.message.Face
 import xyz.xszq.nereides.message.MessageChain
 import xyz.xszq.nereides.message.PlainText
@@ -21,7 +23,7 @@ interface C2CApi {
     suspend fun call(method: HttpMethod, api: String, payload: Any?): HttpResponse
     suspend fun post(api: String, payload: Any): HttpResponse
 
-    suspend fun sendGroupMessage(
+    suspend fun sendGroupMessage (
         groupId: String,
         content: String,
         msgType: Int,
@@ -43,7 +45,6 @@ interface C2CApi {
                 msgSeq = msgSeq
             )
         )
-        logger.info { "[$groupId] <- ${media?.fileUUID?.let { " ${media.fileUUID}" } ?: ""}$content" }
         println(response.bodyAsText())
         return try {
             val msg = response.body<PostGroupMessageResponse>()

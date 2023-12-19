@@ -1,12 +1,14 @@
 package xyz.xszq.bot.maimai
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import org.jetbrains.exposed.sql.transactions.transaction
 import xyz.xszq.bot.dao.ArcadeCenter
 import xyz.xszq.bot.dao.ArcadeCenterQueueGroup
 import xyz.xszq.bot.dao.ArcadeQueueGroup
+import xyz.xszq.bot.dao.transactionWithLock
 import xyz.xszq.nereides.event.PublicMessageEvent
 import xyz.xszq.nereides.isSameDay
 import xyz.xszq.nereides.message.ark.ListArk
@@ -15,8 +17,8 @@ import java.time.LocalDateTime
 
 object QueueForArcades {
     private val initTime = LocalDateTime.of(2000, 1, 1, 0, 0)
-    private fun clear() {
-        transaction {
+    private fun clear() = runBlocking {
+        transactionWithLock {
             ArcadeCenter.all().forEach {
                 if (it.modified == initTime || LocalDateTime.now().isSameDay(it.modified))
                     return@forEach
@@ -28,7 +30,7 @@ object QueueForArcades {
     fun init() {
         clear()
     }
-    suspend fun getQueueGroup(openId: String) = suspendedTransactionAsync(Dispatchers.IO) {
+    suspend fun getQueueGroup(openId: String) = transactionWithLock {
         ArcadeCenterQueueGroup.findById(openId) ?.let {
             ArcadeQueueGroup.findById(it.group)
         } ?: ArcadeQueueGroup.new {
@@ -39,7 +41,7 @@ object QueueForArcades {
             }
             this
         }
-    }.await()
+    }
     private suspend fun getQueueInfo(centers: List<ArcadeCenter>) = ListArk.build {
         val nowTime = LocalDateTime.now()
         desc { "机厅排卡" }
@@ -66,21 +68,21 @@ object QueueForArcades {
     }
     suspend fun handle(event: PublicMessageEvent) = event.run {
         val command = message.text.trim().lowercase()
-        newSuspendedTransaction(Dispatchers.IO) {
+        transactionWithLock {
             val groupId = ArcadeCenterQueueGroup.findById(event.contextId) ?: run {
                 if (command in arrayOf("几", "j", "机厅几", "/j"))
                     reply("当前群未绑定任何机厅。可以使用 /排卡管理 命令来设置。")
-                return@newSuspendedTransaction
+                return@transactionWithLock
             }
             val centers = ArcadeQueueGroup.findById(groupId.group) ?.centers ?: run {
                 if (command in arrayOf("几", "j", "机厅几", "/j"))
                     reply("当前群未绑定任何机厅。可以使用 /排卡管理 命令来设置")
-                return@newSuspendedTransaction
+                return@transactionWithLock
             }
             if (command in arrayOf("几", "j", "机厅几", "/j")) {
                 clear()
                 reply(getQueueInfo(centers.toList()))
-                return@newSuspendedTransaction
+                return@transactionWithLock
             }
             centers.forEach { arcade ->
                 arcade.abbr.split(",").forEach names@{ name ->
@@ -89,7 +91,7 @@ object QueueForArcades {
                     if ("几" in command.substringAfter(name) && command.substringBefore("几") == name) {
                         clear()
                         reply(getQueueInfo(listOf(arcade)))
-                        return@newSuspendedTransaction
+                        return@transactionWithLock
                     }
                     var newValue = when {
                         command.startsWith("$name+") -> {

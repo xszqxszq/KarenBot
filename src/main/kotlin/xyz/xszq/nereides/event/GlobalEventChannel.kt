@@ -2,12 +2,10 @@
 
 package xyz.xszq.nereides.event
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.launch
 import xyz.xszq.config
 import kotlin.coroutines.CoroutineContext
 
@@ -18,12 +16,13 @@ object GlobalEventChannel: CoroutineScope {
         channel.emit(event)
     }
     inline fun <reified T: Event> subscribe(crossinline block: suspend T.() -> Unit) {
-        launch {
+        this.launch {
             channel.collect { event ->
-                if (event is T && (!config.sandbox ||
-                            event !is PublicMessageEvent ||
-                            event.contextId == "0532FA2F08EC28053EF1300409432E54")) {
-                    launch {
+                this.launch {
+//                if (event is T && (!config.sandbox ||
+//                            event !is PublicMessageEvent ||
+//                            event.contextId == "0532FA2F08EC28053EF1300409432E54")) {
+                    if (event is T) {
                         kotlin.runCatching {
                             block(event)
                         }.onFailure { e ->

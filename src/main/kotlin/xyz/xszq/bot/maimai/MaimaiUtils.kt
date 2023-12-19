@@ -1,6 +1,7 @@
 package xyz.xszq.bot.maimai
 
 import korlibs.io.lang.substr
+import korlibs.math.roundDecimalPlaces
 import korlibs.memory.toIntFloor
 import xyz.xszq.bot.maimai.payload.MusicInfo
 import xyz.xszq.bot.maimai.payload.PlayScore
@@ -53,7 +54,7 @@ object MaimaiUtils {
         else -> "01"
     }
     fun getNewRa(ds: Double, achievement: Double): Int {
-        val baseRa = when (achievement) {
+        val baseRa = when (achievement.roundDecimalPlaces(4)) {
             in 0.0..49.9999 ->  7.0
             in 50.0..59.9999 -> 8.0
             in 60.0..69.9999 -> 9.6
@@ -65,8 +66,10 @@ object MaimaiUtils {
             in 97.0..97.9999 -> 20.0
             in 98.0..98.9999 -> 20.3
             in 99.0..99.4999 -> 20.8
-            in 99.5..99.9999 -> 21.1
-            in 100.0..100.4999 -> 21.6
+            in 99.5..99.9998 -> 21.1
+            99.9999 -> 21.4
+            in 100.0..100.4998 -> 21.6
+            100.4999 -> 22.2
             in 100.5..101.0 -> 22.4
             else -> 0.0
         }

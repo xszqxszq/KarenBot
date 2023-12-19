@@ -6,13 +6,13 @@ import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.serialization.kotlinx.json.*
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import xyz.xszq.bot.dao.MaimaiAliases
+import xyz.xszq.bot.dao.transactionWithLock
 import xyz.xszq.bot.maimai.payload.MusicInfo
 
 class Aliases(private val musicsInfo: MusicsInfo) {
@@ -25,44 +25,68 @@ class Aliases(private val musicsInfo: MusicsInfo) {
         }
         expectSuccess = false
     }
+    var aliases = mapOf<String, List<String>>()
+    val mutex = Mutex()
+    var cacheTime = 0L
+    private suspend fun fetchFromDB() = transactionWithLock {
+        MaimaiAliases.selectAll().groupBy({ it[MaimaiAliases.id] }, { it[MaimaiAliases.name] })
+    }
+    private suspend fun update(force: Boolean = false) {
+        mutex.withLock {
+            if (force || System.currentTimeMillis() - cacheTime >= 60 * 1000L) {
+                aliases = fetchFromDB()
+            }
+            cacheTime = System.currentTimeMillis()
+        }
+    }
+    private suspend fun getAll(id: String): List<String> {
+        update()
+        return mutex.withLock {
+            aliases[id] ?: emptyList()
+        }
+    }
+    suspend fun find(query: String): List<MusicInfo> {
+        update()
+        val name = query.trim().lowercase()
+        return mutex.withLock {
+            aliases.filter { it.value.any { n -> n.trim().lowercase() == name } }.mapNotNull { musicsInfo.getById(it.key) }
+        }
+    }
     suspend fun updateXrayAliases(url: String) {
         val data = client.get(url).body<Map<String, List<String>>>().flatMap { entry ->
             entry.value.map { name ->
                 Pair(entry.key, name)
             }
         }
-        newSuspendedTransaction(Dispatchers.IO) {
+        transactionWithLock {
             MaimaiAliases.batchInsert(data, ignore = true) { (id, alias) ->
                 this[MaimaiAliases.id] = id
                 this[MaimaiAliases.name] = alias
             }
         }
+        update(true)
     }
-    suspend fun findByAlias(name: String): List<MusicInfo> = suspendedTransactionAsync(Dispatchers.IO) {
-        val alias = name.trim().lowercase()
-        val result = MaimaiAliases.select {
-            MaimaiAliases.name.trim().lowerCase() eq alias
-        }
-        if (result.count() == 0L)
-            listOf<MusicInfo>()
-        result.mapNotNull { musicsInfo.getById(it[MaimaiAliases.id]) }.take(16)
-    }.await()
-    suspend fun getAllAliases(id: String) = suspendedTransactionAsync(Dispatchers.IO) {
-        MaimaiAliases.select {
-            MaimaiAliases.id eq id
-        }.map { it[MaimaiAliases.name] }
-    }.await()
+    suspend fun findByAlias(name: String): List<MusicInfo> = transactionWithLock {
+        find(name).take(16)
+    }
+    suspend fun getAllAliases(id: String) = transactionWithLock {
+        getAll(id)
+    }
     suspend fun add(id: String, alias: String) =
-        newSuspendedTransaction {
+        transactionWithLock {
             MaimaiAliases.upsert {
                 it[this.id] = id
                 it[this.name] = alias
             }
+        }.also {
+            update(true)
         }
     suspend fun remove(id: String, alias: String) =
-        newSuspendedTransaction {
+        transactionWithLock {
             MaimaiAliases.deleteWhere {
                 (this.id eq id) and (name eq alias)
             }
+        }.also {
+            update(true)
         }
 }

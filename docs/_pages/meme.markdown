@@ -8,8 +8,9 @@ permalink: /meme/
 
 ## 说明
 
-- 本功能的逻辑实现及资源文件大部分来自 [MeetWq/meme-generator](https://github.com/MeetWq/meme-generator)，5000choyen 功能的逻辑直接来源于 [yurafuca/5000choyen](https://github.com/yurafuca/5000choyen) ，蔚蓝档案风格 LOGO 功能直接来源于 [nulla2011/bluearchive-logo](https://github.com/nulla2011/bluearchive-logo)，本项目参考以上项目以纯 Kotlin 的方式迁移实现并作了部分修改。特别感谢以上项目作者及贡献者的付出！
+- 使用时命令格式为`/生成 表情名称 [附带参数]`。**注意，表情名称是中文！！不是英文！！**
 - 移动端同时发送图片和文本的方法：先输入“/”点击快捷菜单输好指令，然后在下面选择图片的地方**勾选**需要发送的图片（不要点进去或者直接向上滑发出），最后点击**文本框右侧的“发送”按钮**即可发出。
+- 本功能的逻辑实现及资源文件大部分来自 [MeetWq/meme-generator](https://github.com/MeetWq/meme-generator)，5000choyen 功能的逻辑直接来源于 [yurafuca/5000choyen](https://github.com/yurafuca/5000choyen) ，蔚蓝档案风格 LOGO 功能直接来源于 [nulla2011/bluearchive-logo](https://github.com/nulla2011/bluearchive-logo)，本项目参考以上项目以纯 Kotlin 的方式迁移实现并作了部分修改。特别感谢以上项目作者及贡献者的付出！
 
 
 # [蔚蓝档案风格 LOGO](https://github.com/nulla2011/bluearchive-logo)
@@ -51,189 +52,192 @@ permalink: /meme/
 
 # [meme-generator](https://github.com/MeetWq/meme-generator)
 
-以下为来自 meme-generator 的表情名称、所需参数等信息及表情预览。使用时命令格式为`/生成 表情名称 [附带参数]`。
+以下为来自 meme-generator 的表情名称、所需参数等信息及表情预览。
 
 由于本项目为纯 Kotlin 实现，部分功能可能存在 bug，欢迎在 [issues](https://github.com/xszqxszq/KarenBot/issues) 反馈。
 
-按照表情的 `key` 排列
+**注意！！！使用的时候请看“关键词”一栏！！不要打英文！！！**
 
-* [add_chaos (添乱/给社会添乱)](#add_chaos)
-* [addiction (上瘾/毒瘾发作)](#addiction)
-* [alike (一样)](#alike)
-* [always (一直)](#always)
-* [always_like (我永远喜欢)](#always_like)
-* [anti_kidnap (防诱拐)](#anti_kidnap)
-* [anya_suki (阿尼亚喜欢)](#anya_suki)
-* [applaud (鼓掌)](#applaud)
-* [ascension (升天)](#ascension)
-* [back_to_work (继续干活/打工人)](#back_to_work)
-* [bad_news (悲报)](#bad_news)
-* [beat_head (拍头)](#beat_head)
-* [bite (啃)](#bite)
-* [blood_pressure (高血压)](#blood_pressure)
-* [bocchi_draft (波奇手稿)](#bocchi_draft)
-* [bronya_holdsign (布洛妮娅举牌/大鸭鸭举牌)](#bronya_holdsign)
-* [bubble_tea (奶茶)](#bubble_tea)
-* [call_110 (遇到困难请拨打)](#call_110)
-* [caoshen_bite (草神啃)](#caoshen_bite)
-* [capoo_draw (咖波画)](#capoo_draw)
-* [capoo_rip (咖波撕)](#capoo_rip)
-* [capoo_rub (咖波蹭/咖波贴)](#capoo_rub)
-* [capoo_say (咖波说)](#capoo_say)
-* [capoo_strike (咖波撞/咖波头槌)](#capoo_strike)
-* [captain (舰长)](#captain)
-* [certificate (奖状/证书)](#certificate)
-* [chase_train (追列车/追火车)](#chase_train)
-* [clown (小丑)](#clown)
-* [confuse (迷惑)](#confuse)
-* [coupon (兑换券)](#coupon)
-* [cover_face (捂脸)](#cover_face)
-* [crawl (爬)](#crawl)
-* [cyan (群青)](#cyan)
-* [daynight (白天黑夜/白天晚上)](#daynight)
-* [decent_kiss (像样的亲亲)](#decent_kiss)
-* [dianzhongdian (入典/典中典/黑白草图)](#dianzhongdian)
-* [dinosaur (恐龙/小恐龙)](#dinosaur)
-* [distracted (注意力涣散)](#distracted)
-* [divorce (离婚协议/离婚申请)](#divorce)
-* [dog_dislike (狗都不玩)](#dog_dislike)
-* [dog_of_vtb (管人痴)](#dog_of_vtb)
-* [dont_go_near (不要靠近)](#dont_go_near)
-* [dont_touch (别碰)](#dont_touch)
-* [douyin (douyin)](#douyin)
-* [eat (吃)](#eat)
-* [fanatic (狂爱/狂粉)](#fanatic)
-* [fencing (击剑/🤺)](#fencing)
-* [fill_head (满脑子)](#fill_head)
-* [find_chips (整点薯条)](#find_chips)
-* [flash_blind (闪瞎)](#flash_blind)
-* [follow (关注)](#follow)
-* [garbage (垃圾/垃圾桶)](#garbage)
-* [genshin_start (原神启动)](#genshin_start)
-* [good_news (喜报)](#good_news)
-* [gun (手枪)](#gun)
-* [hammer (锤)](#hammer)
-* [high_EQ (低情商xx高情商xx)](#high_EQ)
-* [hit_screen (打穿/打穿屏幕)](#hit_screen)
-* [hold_grudge (记仇)](#hold_grudge)
-* [hold_tight (抱紧)](#hold_tight)
-* [hug_leg (抱大腿)](#hug_leg)
-* [hutao_bite (胡桃啃)](#hutao_bite)
-* [imprison (坐牢)](#imprison)
-* [incivilization (不文明)](#incivilization)
-* [interview (采访)](#interview)
-* [jiujiu (啾啾)](#jiujiu)
-* [kaleidoscope (万花筒/万花镜)](#kaleidoscope)
-* [karyl_point (凯露指)](#karyl_point)
-* [keep_away (远离)](#keep_away)
-* [kick_ball (踢球)](#kick_ball)
-* [kirby_hammer (卡比锤/卡比重锤)](#kirby_hammer)
-* [kiss (亲/亲亲)](#kiss)
-* [klee_eat (可莉吃)](#klee_eat)
-* [knock (敲)](#knock)
-* [learn (偷学)](#learn)
-* [lim_x_0 (等价无穷小)](#lim_x_0)
-* [listen_music (听音乐)](#listen_music)
-* [little_angel (小天使)](#little_angel)
-* [loading (加载中)](#loading)
-* [look_flat (看扁)](#look_flat)
-* [look_this_icon (看图标)](#look_this_icon)
-* [love_you (永远爱你)](#love_you)
-* [luoyonghao_say (罗永浩说)](#luoyonghao_say)
-* [luxun_say (鲁迅说/鲁迅说过)](#luxun_say)
-* [maimai_awaken (旅行伙伴觉醒)](#maimai_awaken)
-* [maimai_join (旅行伙伴加入)](#maimai_join)
-* [make_friend (交个朋友)](#make_friend)
-* [marriage (结婚申请/结婚登记)](#marriage)
-* [meteor (流星)](#meteor)
-* [mihoyo (米哈游)](#mihoyo)
-* [mourning (上香)](#mourning)
-* [murmur (低语)](#murmur)
-* [my_wife (我老婆/这是我老婆)](#my_wife)
-* [need (需要/你可能需要)](#need)
-* [nekoha_holdsign (猫羽雫举牌/猫猫举牌)](#nekoha_holdsign)
-* [nijika_holdsign (伊地知虹夏举牌/虹夏举牌)](#nijika_holdsign)
-* [no_response (无响应)](#no_response)
-* [nokia (诺基亚/有内鬼)](#nokia)
-* [not_call_me (不喊我)](#not_call_me)
-* [oshi_no_ko (我推的网友)](#oshi_no_ko)
-* [osu (osu)](#osu)
-* [overtime (加班)](#overtime)
-* [paint (这像画吗)](#paint)
-* [painter (小画家)](#painter)
-* [pass_the_buck (推锅/甩锅)](#pass_the_buck)
-* [pat (拍)](#pat)
-* [perfect (完美)](#perfect)
-* [petpet (摸/摸摸/摸头/rua)](#petpet)
-* [pinch (捏/捏脸)](#pinch)
-* [play (顶/玩)](#play)
-* [play_game (玩游戏)](#play_game)
-* [pornhub (ph/pornhub)](#pornhub)
-* [potato (土豆)](#potato)
-* [pound (捣)](#pound)
-* [printing (打印)](#printing)
-* [prpr (舔/舔屏/prpr)](#prpr)
-* [psyduck (可达鸭)](#psyduck)
-* [punch (打拳)](#punch)
-* [raise_image (举)](#raise_image)
-* [raise_sign (举牌)](#raise_sign)
-* [read_book (看书)](#read_book)
-* [rip (撕)](#rip)
-* [rip_angrily (怒撕)](#rip_angrily)
-* [rise_dead (诈尸/秽土转生)](#rise_dead)
-* [roll (滚)](#roll)
-* [rub (贴/贴贴/蹭/蹭蹭)](#rub)
-* [run (快跑)](#run)
-* [safe_sense (安全感)](#safe_sense)
-* [scratch_head (挠头)](#scratch_head)
-* [scratchcard (刮刮乐)](#scratchcard)
-* [scroll (滚屏)](#scroll)
-* [shock (震惊)](#shock)
-* [shutup (别说了)](#shutup)
-* [sit_still (坐得住/坐的住)](#sit_still)
-* [slap (一巴掌)](#slap)
-* [slogan (口号)](#slogan)
-* [smash (砸)](#smash)
-* [step_on (踩)](#step_on)
-* [suck (吸/嗦)](#suck)
-* [support (精神支柱)](#support)
-* [tankuku_raisesign (唐可可举牌)](#tankuku_raisesign)
-* [taunt (嘲讽)](#taunt)
-* [teach (讲课/敲黑板)](#teach)
-* [tease (拿捏/戏弄)](#tease)
-* [think_what (想什么)](#think_what)
-* [this_chichen (这是鸡/🐔)](#this_chichen)
-* [throw (丢/扔)](#throw)
-* [throw_gif (抛/掷)](#throw_gif)
-* [thump (捶)](#thump)
-* [thump_wildly (捶爆/爆捶)](#thump_wildly)
-* [tightly (紧贴/紧紧贴着)](#tightly)
-* [together (一起)](#together)
-* [tomb_yeah (上坟/坟前比耶)](#tomb_yeah)
-* [trance (恍惚)](#trance)
-* [turn (转)](#turn)
-* [twist (搓)](#twist)
-* [universal (万能表情/空白表情)](#universal)
-* [vibrate (震动)](#vibrate)
-* [wakeup (xx起来了)](#wakeup)
-* [wallpaper (墙纸)](#wallpaper)
-* [walnut_pad (胡桃平板)](#walnut_pad)
-* [walnut_zoom (胡桃放大)](#walnut_zoom)
-* [wave (波纹)](#wave)
-* [what_I_want_to_do (我想上的)](#what_I_want_to_do)
-* [what_he_wants (最想要的东西)](#what_he_wants)
-* [why_at_me (为什么@我)](#why_at_me)
-* [why_have_hands (为什么要有手)](#why_have_hands)
-* [windmill_turn (风车转)](#windmill_turn)
-* [wish_fail (许愿失败)](#wish_fail)
-* [wooden_fish (木鱼)](#wooden_fish)
-* [worship (膜/膜拜)](#worship)
-* [wujing (吴京xx中国xx)](#wujing)
-* [youtube (yt/youtube)](#youtube)
+例：`/生成 下面有的关键词 图片/文字参数`
+
+* [添乱/给社会添乱](#add_chaos)
+* [上瘾/毒瘾发作](#addiction)
+* [一样](#alike)
+* [一直](#always)
+* [我永远喜欢](#always_like)
+* [防诱拐](#anti_kidnap)
+* [阿尼亚喜欢](#anya_suki)
+* [鼓掌](#applaud)
+* [升天](#ascension)
+* [继续干活/打工人](#back_to_work)
+* [悲报](#bad_news)
+* [拍头](#beat_head)
+* [啃](#bite)
+* [高血压](#blood_pressure)
+* [波奇手稿](#bocchi_draft)
+* [布洛妮娅举牌/大鸭鸭举牌](#bronya_holdsign)
+* [奶茶](#bubble_tea)
+* [遇到困难请拨打](#call_110)
+* [草神啃](#caoshen_bite)
+* [咖波画](#capoo_draw)
+* [咖波撕](#capoo_rip)
+* [咖波蹭/咖波贴](#capoo_rub)
+* [咖波说](#capoo_say)
+* [咖波撞/咖波头槌](#capoo_strike)
+* [舰长](#captain)
+* [奖状/证书](#certificate)
+* [追列车/追火车](#chase_train)
+* [小丑](#clown)
+* [迷惑](#confuse)
+* [兑换券](#coupon)
+* [捂脸](#cover_face)
+* [爬](#crawl)
+* [群青](#cyan)
+* [白天黑夜/白天晚上](#daynight)
+* [像样的亲亲](#decent_kiss)
+* [入典/典中典/黑白草图](#dianzhongdian)
+* [恐龙/小恐龙](#dinosaur)
+* [注意力涣散](#distracted)
+* [离婚协议/离婚申请](#divorce)
+* [狗都不玩](#dog_dislike)
+* [管人痴](#dog_of_vtb)
+* [不要靠近](#dont_go_near)
+* [别碰](#dont_touch)
+* [douyin](#douyin)
+* [吃](#eat)
+* [狂爱/狂粉](#fanatic)
+* [击剑/🤺](#fencing)
+* [满脑子](#fill_head)
+* [整点薯条](#find_chips)
+* [闪瞎](#flash_blind)
+* [关注](#follow)
+* [垃圾/垃圾桶](#garbage)
+* [原神启动](#genshin_start)
+* [喜报](#good_news)
+* [手枪](#gun)
+* [锤](#hammer)
+* [低情商xx高情商xx](#high_EQ)
+* [打穿/打穿屏幕](#hit_screen)
+* [记仇](#hold_grudge)
+* [抱紧](#hold_tight)
+* [抱大腿](#hug_leg)
+* [胡桃啃](#hutao_bite)
+* [坐牢](#imprison)
+* [不文明](#incivilization)
+* [采访](#interview)
+* [啾啾](#jiujiu)
+* [万花筒/万花镜](#kaleidoscope)
+* [凯露指](#karyl_point)
+* [远离](#keep_away)
+* [踢球](#kick_ball)
+* [卡比锤/卡比重锤](#kirby_hammer)
+* [亲/亲亲](#kiss)
+* [可莉吃](#klee_eat)
+* [敲](#knock)
+* [偷学](#learn)
+* [等价无穷小](#lim_x_0)
+* [听音乐](#listen_music)
+* [小天使](#little_angel)
+* [加载中](#loading)
+* [看扁](#look_flat)
+* [看图标](#look_this_icon)
+* [永远爱你](#love_you)
+* [罗永浩说](#luoyonghao_say)
+* [鲁迅说/鲁迅说过](#luxun_say)
+* [旅行伙伴觉醒](#maimai_awaken)
+* [旅行伙伴加入](#maimai_join)
+* [交个朋友](#make_friend)
+* [结婚申请/结婚登记](#marriage)
+* [流星](#meteor)
+* [米哈游](#mihoyo)
+* [上香](#mourning)
+* [低语](#murmur)
+* [我老婆/这是我老婆](#my_wife)
+* [需要/你可能需要](#need)
+* [猫羽雫举牌/猫猫举牌](#nekoha_holdsign)
+* [伊地知虹夏举牌/虹夏举牌](#nijika_holdsign)
+* [无响应](#no_response)
+* [诺基亚/有内鬼](#nokia)
+* [不喊我](#not_call_me)
+* [我推的网友](#oshi_no_ko)
+* [osu](#osu)
+* [加班](#overtime)
+* [这像画吗](#paint)
+* [小画家](#painter)
+* [推锅/甩锅](#pass_the_buck)
+* [拍](#pat)
+* [完美](#perfect)
+* [摸/摸摸/摸头/rua](#petpet)
+* [捏/捏脸](#pinch)
+* [顶/玩](#play)
+* [玩游戏](#play_game)
+* [ph/pornhub](#pornhub)
+* [土豆](#potato)
+* [捣](#pound)
+* [打印](#printing)
+* [舔/舔屏/prpr](#prpr)
+* [可达鸭](#psyduck)
+* [打拳](#punch)
+* [举](#raise_image)
+* [举牌](#raise_sign)
+* [看书](#read_book)
+* [撕](#rip)
+* [怒撕](#rip_angrily)
+* [诈尸/秽土转生](#rise_dead)
+* [滚](#roll)
+* [贴/贴贴/蹭/蹭蹭](#rub)
+* [快跑](#run)
+* [安全感](#safe_sense)
+* [挠头](#scratch_head)
+* [刮刮乐](#scratchcard)
+* [滚屏](#scroll)
+* [震惊](#shock)
+* [别说了](#shutup)
+* [坐得住/坐的住](#sit_still)
+* [一巴掌](#slap)
+* [口号](#slogan)
+* [砸](#smash)
+* [踩](#step_on)
+* [吸/嗦](#suck)
+* [精神支柱](#support)
+* [唐可可举牌](#tankuku_raisesign)
+* [嘲讽](#taunt)
+* [讲课/敲黑板](#teach)
+* [拿捏/戏弄](#tease)
+* [想什么](#think_what)
+* [这是鸡/🐔](#this_chichen)
+* [丢/扔](#throw)
+* [抛/掷](#throw_gif)
+* [捶](#thump)
+* [捶爆/爆捶](#thump_wildly)
+* [紧贴/紧紧贴着](#tightly)
+* [一起](#together)
+* [上坟/坟前比耶](#tomb_yeah)
+* [恍惚](#trance)
+* [转](#turn)
+* [搓](#twist)
+* [万能表情/空白表情](#universal)
+* [震动](#vibrate)
+* [xx起来了](#wakeup)
+* [墙纸](#wallpaper)
+* [胡桃平板](#walnut_pad)
+* [胡桃放大](#walnut_zoom)
+* [波纹](#wave)
+* [我想上的](#what_I_want_to_do)
+* [最想要的东西](#what_he_wants)
+* [为什么@我](#why_at_me)
+* [为什么要有手](#why_have_hands)
+* [风车转](#windmill_turn)
+* [许愿失败](#wish_fail)
+* [木鱼](#wooden_fish)
+* [膜/膜拜](#worship)
+* [吴京xx中国xx](#wujing)
+* [yt/youtube](#youtube)
 
 ## add_chaos
 
 - 关键词：`添乱`、`给社会添乱`
+- 示例：`/生成 添乱 [图片]`
 - 需要图片数目：`1`
 - 需要文字数目：`0`
 - 预览：
@@ -274,18 +278,18 @@ permalink: /meme/
         - 可选值：`normal`、`loop`、`circle`
 
 - 预览：
-    > 参数：{"mode":"normal"}
+    > 参数：--mode normal
     <div align="left">
     <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/always_instance0.jpg" width="200" />
     </div>
 
-    > 参数：{"mode":"circle"}
+    > 参数：--mode circle
     
     <div align="left">
       <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/always_instance1.jpg" width="200" />
     </div>
 
-    > 参数：{"mode":"loop"}
+    > 参数：--mode loop
     
     <div align="left">
       <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/always_instance2.gif" width="200" />
@@ -428,18 +432,18 @@ permalink: /meme/
         - 可选值：`right`、`left`、`both`
 
 - 预览：
-    > 参数：{"position":"right"}
+    > 参数：--position right
     <div align="left">
     <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/bubble_tea_instance0.jpg" width="200" />
     </div>
 
-    > 参数：{"position":"left"}
+    > 参数：--position left
     
     <div align="left">
       <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/bubble_tea_instance1.jpg" width="200" />
     </div>
     
-    > 参数：{"position":"both"}
+    > 参数：--position both
     
     <div align="left">
       <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/bubble_tea_instance2.jpg" width="200" />
@@ -686,12 +690,12 @@ permalink: /meme/
         - 默认值：`False`
 
 - 预览：
-    > 参数：{"circle":false}
+    > 参数：（无参数）
     <div align="left">
     <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/dog_dislike_instance0.gif" width="200" />
     </div>
 
-    > 参数：{"circle":true}
+    > 参数：--circle
     
     <div align="left">
       <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/dog_dislike_instance1.gif" width="200" />
@@ -857,18 +861,18 @@ permalink: /meme/
         - 可选值：`left`、`right`、`both`
 
 - 预览：
-    > 参数：{"position":"left"}
+    > 参数：--position left
     <div align="left">
     <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/gun_instance0.jpg" width="200" />
     </div>
 
-    > 参数：{"position":"right"}
+    > 参数：--position right
     
     <div align="left">
       <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/gun_instance1.jpg" width="200" />
     </div>
     
-    > 参数：{"position":"both"}
+    > 参数：--position both
     
     <div align="left">
       <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/gun_instance2.jpg" width="200" />
@@ -1002,12 +1006,12 @@ permalink: /meme/
         - 默认值：`False`
 
 - 预览：
-    > 参数：{"circle":false}
+    > 参数：(无参数)
     <div align="left">
     <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/kaleidoscope_instance0.jpg" width="200" />
     </div>
 
-    > 参数：{"circle":true}
+    > 参数：--circle
     
     <div align="left">
       <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/kaleidoscope_instance1.jpg" width="200" />
@@ -1057,12 +1061,12 @@ permalink: /meme/
         - 默认值：`False`
 
 - 预览：
-    > 参数：{"circle":false}
+    > 参数：(无参数)
     <div align="left">
     <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/kirby_hammer_instance0.gif" width="200" />
     </div>
 
-    > 参数：{"circle":true}
+    > 参数：--circle
     
     <div align="left">
       <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/kirby_hammer_instance1.gif" width="200" />
@@ -1281,12 +1285,12 @@ permalink: /meme/
         - 默认值：`False`
 
 - 预览：
-    > 参数：{"black":false}
+    > 参数：(无参数)
     <div align="left">
     <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/mourning_instance0.jpg" width="200" />
     </div>
 
-    > 参数：{"black":true}
+    > 参数：--black
     
     <div align="left">
       <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/mourning_instance1.jpg" width="200" />

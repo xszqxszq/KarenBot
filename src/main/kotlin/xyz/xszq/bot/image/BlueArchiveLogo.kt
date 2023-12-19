@@ -38,7 +38,7 @@ object BlueArchiveLogo {
             return fallbackFont
         text.forEach {
             val glyphs = defaultFont.measureTextGlyphs(size, it.toString())
-            if (it.code > 255 && glyphs.metrics.width < 16.0)
+            if (it.code > 255 && glyphs.metrics.bounds.x == 34.272F)
                 return fallbackFont
         }
         return defaultFont

@@ -6,8 +6,10 @@ import korlibs.image.format.readNativeImage
 import korlibs.io.async.launch
 import korlibs.io.file.std.localCurrentDirVfs
 import korlibs.io.file.std.toVfs
+import korlibs.io.net.URL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.withPermit
 import nu.pattern.OpenCV
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.and
@@ -28,6 +30,7 @@ import xyz.xszq.bot.maimai.QueueForArcades
 import xyz.xszq.bot.text.AutoQA
 import xyz.xszq.bot.text.Bilibili
 import xyz.xszq.bot.text.RandomText
+import xyz.xszq.bot.text.WikiQuery
 import xyz.xszq.nereides.*
 import xyz.xszq.nereides.event.GlobalEventChannel
 import xyz.xszq.nereides.event.GroupAtMessageEvent
@@ -37,6 +40,8 @@ import xyz.xszq.nereides.message.ark.ListArk
 import xyz.xszq.nereides.payload.message.MessageArk
 import xyz.xszq.nereides.payload.message.MessageArkKv
 import xyz.xszq.nereides.payload.message.MessageArkObj
+import xyz.xszq.nereides.payload.message.MessageMarkdownC2C
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
 
 lateinit var database: Database
@@ -72,7 +77,7 @@ suspend fun init() {
 fun subscribe() {
     GlobalEventChannel.subscribePublicMessages {
         always {
-            newSuspendedTransaction {
+            transactionWithLock {
                 AccessLog.insert {
                     it[openid] = subjectId
                     it[context] = contextId
@@ -105,10 +110,8 @@ fun subscribe() {
         always {
             AutoQA.handle(this)
         }
-        if (!config.auditMode) {
-            startsWith(listOf("av", "BV", "https://b23.tv", "b23.tv")) {
-                reply(Bilibili.getVideoDetails(message.text))
-            }
+        startsWith(listOf("av", "BV", "https://b23.tv", "b23.tv")) {
+            reply(Bilibili.getVideoDetails(message.text))
         }
         startsWith(listOf("help", "/help", "!help", "帮助", "/帮助")) {
             val help = localCurrentDirVfs["image/help.png"].toImage()
@@ -138,7 +141,7 @@ fun subscribe() {
             val name = args[1]
             when (args[0]) {
                 "加入分组" -> {
-                    newSuspendedTransaction(Dispatchers.IO) {
+                    transactionWithLock {
                         ArcadeQueueGroup.find {
                             ArcadeQueueGroups.name eq name
                         }.firstOrNull() ?.let { group ->
@@ -152,7 +155,7 @@ fun subscribe() {
                     }
                 }
                 "添加机厅" -> {
-                    newSuspendedTransaction(Dispatchers.IO) {
+                    transactionWithLock {
                         val queueGroup = QueueForArcades.getQueueGroup(contextId)
                         ArcadeCenter.new {
                             this.group = queueGroup.id
@@ -164,7 +167,7 @@ fun subscribe() {
                     }
                 }
                 "删除机厅" -> {
-                    newSuspendedTransaction(Dispatchers.IO) {
+                    transactionWithLock {
                         val queueGroup = QueueForArcades.getQueueGroup(contextId)
                         ArcadeCenter.find {
                             (ArcadeCenters.group eq queueGroup.id) and (ArcadeCenters.name eq name)
@@ -182,7 +185,7 @@ fun subscribe() {
                         return@startsWith
                     }
                     val alias = args[2]
-                    newSuspendedTransaction(Dispatchers.IO) {
+                    transactionWithLock {
                         val queueGroup = QueueForArcades.getQueueGroup(contextId)
                         ArcadeCenter.find {
                             (ArcadeCenters.group eq queueGroup.id) and (ArcadeCenters.name eq name)
@@ -202,7 +205,7 @@ fun subscribe() {
                         return@startsWith
                     }
                     val alias = args[2]
-                    newSuspendedTransaction(Dispatchers.IO) {
+                    transactionWithLock {
                         val queueGroup = QueueForArcades.getQueueGroup(contextId)
                         ArcadeCenter.find {
                             (ArcadeCenters.group eq queueGroup.id) and (ArcadeCenters.name eq name)
@@ -217,7 +220,7 @@ fun subscribe() {
                     }
                 }
                 "查看别名" -> {
-                    newSuspendedTransaction(Dispatchers.IO) {
+                    transactionWithLock {
                         val queueGroup = QueueForArcades.getQueueGroup(contextId)
                         ArcadeCenter.find {
                             (ArcadeCenters.group eq queueGroup.id) and (ArcadeCenters.name eq name)
@@ -446,6 +449,15 @@ fun subscribe() {
     GlobalEventChannel.subscribePublicMessages(permName = "random") {
         startsWith(listOf("/萨吃什么", "萨吃什么")) {
             reply(RandomText.saizeriya())
+        }
+    }
+    GlobalEventChannel.subscribePublicMessages(permName = "wiki") {
+        endsWith("是什么") { keyword ->
+            reply(WikiQuery.query(keyword) ?: ListArk.build {
+                desc { "Wiki 查询结果" }
+                prompt { "查询结果" }
+                text { "未在音MAD维基/THBWiki/萌娘百科上找到相关内容。" }
+            })
         }
     }
 }

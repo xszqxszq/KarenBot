@@ -15,6 +15,7 @@ import org.jetbrains.exposed.sql.upsert
 import xyz.xszq.bot.dao.MaimaiBinding
 import xyz.xszq.bot.dao.MaimaiSettings
 import xyz.xszq.bot.dao.Permissions
+import xyz.xszq.bot.dao.transactionWithLock
 import xyz.xszq.bot.maimai.MaimaiUtils.dailyOps
 import xyz.xszq.bot.maimai.MaimaiUtils.difficulties
 import xyz.xszq.bot.maimai.MaimaiUtils.getPlateByFilename
@@ -48,11 +49,11 @@ object Maimai {
     val aliases = Aliases(musics)
     val guessGame = GuessGame(musics, images, aliases)
     private lateinit var config: MaimaiConfig
-    private suspend fun queryBindings(openId: String): Pair<String, String>? = suspendedTransactionAsync(Dispatchers.IO) {
-        val bindings = MaimaiBinding.findById(openId) ?: return@suspendedTransactionAsync null
+    private suspend fun queryBindings(openId: String): Pair<String, String>? = transactionWithLock {
+        val bindings = MaimaiBinding.findById(openId) ?: return@transactionWithLock null
         Pair(bindings.type, bindings.credential)
-    }.await()
-    private suspend fun updateBindings(openId: String, type: String, credential: String) = newSuspendedTransaction(Dispatchers.IO) {
+    }
+    private suspend fun updateBindings(openId: String, type: String, credential: String) = transactionWithLock {
         MaimaiBinding.findById(openId) ?.let {
             it.type = type
             it.credential = credential
@@ -549,7 +550,7 @@ object Maimai {
                 }
                 startsWith("${level}定数表") {
                     val result = images.getImage("ds/${level}.png")
-                    !reply(result.encode(PNG).toImage())
+                    reply(result.encode(PNG).toImage())
                 }
                 startsWith("${level}完成表") { arg ->
                     val data = getVersionData("all", arg, this) ?: return@startsWith
@@ -748,7 +749,7 @@ object Maimai {
                 when (args[0]) {
                     "头像" -> {
                         images.getImageFilename("themes/${config.theme}/icon", name) ?.let { filename ->
-                            newSuspendedTransaction {
+                            transactionWithLock {
                                 MaimaiSettings.upsert {
                                     it[this.openid] = subjectId
                                     it[this.name] = "ICON_FILENAME"
@@ -761,7 +762,7 @@ object Maimai {
                         }
                     }
                     "牌子" -> {
-                        newSuspendedTransaction {
+                        transactionWithLock {
                             if (name == "使用查分器设置") {
                                 MaimaiSettings.upsert {
                                     it[this.openid] = subjectId
@@ -769,19 +770,18 @@ object Maimai {
                                     it[this.value] = "true"
                                 }
                                 reply("设置成功。")
-                                return@newSuspendedTransaction
                             }
                             val filename = getPlateFilename(name) ?: images.getImageFilename(
                                 "themes/${config.theme}/plate", name) ?: run {
                                 reply("该牌子不存在！")
-                                return@newSuspendedTransaction
+                                return@transactionWithLock
                             }
                             getPlateByFilename(filename)?.let { (ver, type) ->
-                                val data = getVersionData(ver, "", this@startsWith) ?: return@newSuspendedTransaction
+                                val data = getVersionData(ver, "", this@startsWith) ?: return@transactionWithLock
                                 val remains = musics.getPlateRemains(ver, type, getPlateVerList(ver), data.verList)
                                 if (remains[3].isNotEmpty() || remains[4].isNotEmpty()) {
                                     reply("您未达成该牌子的领取条件！")
-                                    return@newSuspendedTransaction
+                                    return@transactionWithLock
                                 }
                             }
                             MaimaiSettings.upsert {

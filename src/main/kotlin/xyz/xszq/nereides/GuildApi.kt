@@ -5,6 +5,8 @@ import io.ktor.client.call.*
 import io.ktor.client.statement.*
 import korlibs.io.file.VfsFile
 import korlibs.io.file.baseName
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import xyz.xszq.nereides.message.Face
 import xyz.xszq.nereides.message.GuildAt
 import xyz.xszq.nereides.message.MessageChain

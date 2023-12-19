@@ -22,6 +22,9 @@ data class BotConfig(
     val cosSecretKey: String,
     val cosRegion: String,
     val cosAppId: String,
+    val shardId: Int,
+    val shardTotal: Int,
+    val maxConnections: Int
 ) {
     companion object {
         private val yaml = Yaml {  }

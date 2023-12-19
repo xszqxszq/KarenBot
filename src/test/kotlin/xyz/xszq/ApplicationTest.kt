@@ -1,5 +1,7 @@
 package xyz.xszq
 
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import korlibs.image.awt.toAwtNativeImage
 import korlibs.image.color.RGBA
 import korlibs.image.format.PNG
@@ -12,9 +14,7 @@ import korlibs.io.file.std.localCurrentDirVfs
 import korlibs.io.file.std.rootLocalVfs
 import korlibs.math.geom.Point
 import korlibs.math.geom.SizeInt
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.serialization.Serializable
@@ -30,9 +30,15 @@ import xyz.xszq.bot.image.*
 import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.MaimaiUtils
 import xyz.xszq.bot.maimai.MaimaiUtils.getPlateVerList
-import xyz.xszq.nereides.NetworkUtils
-import xyz.xszq.nereides.newTempFile
-import xyz.xszq.nereides.readAsImage
+import xyz.xszq.bot.text.WikiQuery
+import xyz.xszq.nereides.*
+import xyz.xszq.nereides.event.GlobalEventChannel
+import xyz.xszq.nereides.event.GroupAtMessageEvent
+import xyz.xszq.nereides.message.MessageChain
+import xyz.xszq.nereides.message.Reply
+import xyz.xszq.nereides.message.toPlainText
+import xyz.xszq.nereides.payload.post.PostGroupMessage
+import xyz.xszq.nereides.payload.utils.MsgType
 import java.io.File
 import kotlin.time.measureTime
 
@@ -189,6 +195,9 @@ suspend fun main() {
     BuildImage.init()
     OpenCV.loadLocally()
     config = BotConfig.load(localCurrentDirVfs["config.yml"])
+
+    database = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
+        config.databaseUser, config.databasePassword)
 //    rootLocalVfs["D:/Temp/test.gif"].writeBytes(MemeGenerator.handle("唐可可举牌",
 //        args = listOf("阿斯蒂芬"),
 //        images = listOf(BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]), BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]))
@@ -211,6 +220,36 @@ suspend fun main() {
 //        }
 //    }.inWholeMilliseconds / 1000.0
 //    println("新版耗时：${new / 5}s")
-    println(AnimeDB.handle(localCurrentDirVfs["D:/Temp/test.jpg"]).text)
+
+    bot = Bot(
+        appId = config.appId,
+        clientSecret = config.clientSecret,
+        easyToken = config.token,
+        sandbox = config.sandbox
+    )
+    subscribe()
+    bot.refreshToken()
+    println(0)
+//    GlobalEventChannel.subscribePublicMessages {
+//        startsWith("/ping") {
+//            println(1)
+//            reply("bot在")
+//        }
+//    }
+    coroutineScope {
+        repeat(100) {
+            launch {
+//                println(bot.getWSSGateway())
+                GlobalEventChannel.broadcast(
+                    GroupAtMessageEvent(bot, "1", "114514", "2", MessageChain("在".toPlainText()), timestamp = 1))
+//                println(GroupAtMessageEvent(bot, "1", "114514", "2", MessageChain("/ping".toPlainText()), timestamp = 1).reply(MessageChain("ads".toPlainText())))
+
+//                println(Group(bot, "114514").sendMessage(MessageChain().also {
+//                    it.reply = Reply("ads", 1)
+//                }))
+            }
+        }
+    }
+    delay(10000L)
 
 }

@@ -4,8 +4,8 @@ import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 
-class QARule(id: EntityID<Int>): IntEntity(id) {
-    companion object : IntEntityClass<QARule>(QARules) {
+class QARuleDAO(id: EntityID<Int>): IntEntity(id) {
+    companion object : IntEntityClass<QARuleDAO>(QARules) {
         const val INCLUDE = 0
         const val EQUAL = 1
         const val REGEX = 2

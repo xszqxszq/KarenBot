@@ -11,10 +11,11 @@ class PublicMessageSubscribeBuilder(
 ) {
     fun always(block: suspend PublicMessageEvent.() -> Unit) {
         GlobalEventChannel.subscribePublicMessage {
-            if (permName.isNotBlank() && Permissions.isNotPermitted(contextId, permName))
-                return@subscribePublicMessage
-            if (prefix.isBlank() || !forcePrefix || message.text.removeChannelAtPrefix(this).trim().startsWith(prefix))
+            if (prefix.isBlank() || !forcePrefix || message.text.removeChannelAtPrefix(this).trim().startsWith(prefix)) {
+                if (permName.isNotBlank() && Permissions.isNotPermitted(contextId, permName))
+                    return@subscribePublicMessage
                 block(this)
+            }
         }
     }
     fun equalsTo(text: List<String>, block: suspend PublicMessageEvent.() -> Unit) {
@@ -27,9 +28,9 @@ class PublicMessageSubscribeBuilder(
             nowList
         } else text
         GlobalEventChannel.subscribePublicMessage {
-            if (permName.isNotBlank() && Permissions.isNotPermitted(contextId, permName))
-                return@subscribePublicMessage
             if (message.text.removeChannelAtPrefix(this).trim() in list) {
+                if (permName.isNotBlank() && Permissions.isNotPermitted(contextId, permName))
+                    return@subscribePublicMessage
                 block(this)
             }
         }
@@ -46,11 +47,11 @@ class PublicMessageSubscribeBuilder(
         } else text
 
         GlobalEventChannel.subscribePublicMessage {
-            if (permName.isNotBlank() && Permissions.isNotPermitted(contextId, permName))
-                return@subscribePublicMessage
             list.find {
                 message.text.trim().startsWith(it)
             } ?.let {
+                if (permName.isNotBlank() && Permissions.isNotPermitted(contextId, permName))
+                    return@subscribePublicMessage
                 val arg = message.text.trim().substringAfter(it).trim()
                 block(this, arg)
             }
@@ -67,11 +68,11 @@ class PublicMessageSubscribeBuilder(
             nowList
         } else text
         GlobalEventChannel.subscribePublicMessage {
-            if (permName.isNotBlank() && Permissions.isNotPermitted(contextId, permName))
-                return@subscribePublicMessage
             list.find {
                 message.text.removeChannelAtPrefix(this).trim().endsWith(it)
             } ?.let {
+                if (permName.isNotBlank() && Permissions.isNotPermitted(contextId, permName))
+                    return@subscribePublicMessage
                 val arg = message.text.removeChannelAtPrefix(this).substringAfter(prefix).trim().substringBefore(it).trim()
                 block(this, arg)
             }
@@ -80,7 +81,7 @@ class PublicMessageSubscribeBuilder(
     fun endsWith(text: String, block: suspend PublicMessageEvent.(String) -> Unit) = endsWith(listOf(text), block)
     private fun String.removeChannelAtPrefix(event: PublicMessageEvent): String {
         return if (event is GuildAtMessageEvent)
-            substringAfter("<@!${event.client.botGuildInfo.id}>")
+            substringAfter("<@!${event.bot.botGuildInfo.id}>")
         else
             this
     }

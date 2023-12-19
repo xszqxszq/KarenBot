@@ -9,6 +9,7 @@ import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import xyz.xszq.bot.dao.TouhouAliases
 import xyz.xszq.bot.dao.TouhouMusics
+import xyz.xszq.bot.dao.transactionWithLock
 import xyz.xszq.bot.ffmpeg.cropPeriod
 import xyz.xszq.bot.ffmpeg.getAudioDuration
 import xyz.xszq.nereides.event.GlobalEventChannel
@@ -63,7 +64,7 @@ object TouhouGuessGame {
             return@event
         }
         started[contextId] = true
-        newSuspendedTransaction {
+        transactionWithLock {
             val time = getTime(difficulty)
             val selected = TouhouMusics.select {
                 TouhouMusics.version inList rangeToList(range)
@@ -85,7 +86,7 @@ object TouhouGuessGame {
                     ?.let { reply(it) } != true) {
                 reply("出错了，请稍后重试")
                 started[contextId] = false
-                return@newSuspendedTransaction
+                return@transactionWithLock
             }
             reply("请回答该原曲的名称，两分钟后揭晓答案~\n(PS：作答时需要@可怜Bot哦)")
 

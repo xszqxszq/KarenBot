@@ -4,12 +4,16 @@ package xyz.xszq.nereides.message
 
 class MessageChain() {
     private var list: MutableList<Message> = mutableListOf()
+    var reply: Reply? = null
     constructor(l: List<Message>) : this() {
         list = l.toMutableList()
     }
     constructor(message: Message) : this(mutableListOf(message))
     operator fun plus(message: Message): MessageChain {
         return MessageChain((list + listOf(message)))
+    }
+    operator fun plus(chain: MessageChain): MessageChain {
+        return MessageChain(list + chain.list)
     }
 
     operator fun plusAssign(message: Message) {
@@ -18,12 +22,10 @@ class MessageChain() {
 
     val text: String
         get() {
-            if (list.all { it is RichMedia })
-                return " "
             return list.filterIsInstance<PlainText>().joinToString(separator = " ").trim()
         }
 
-    fun filter(block: Message.() -> Boolean) = MessageChain(list.filter(block))
+    fun filter(block: (Message) -> Boolean) = MessageChain(list.filter(block))
     fun any(block: (Message) -> Boolean) = list.any(block)
     fun none(block: (Message) -> Boolean) = list.none(block)
     fun all(block: (Message) -> Boolean) = list.all(block)
@@ -44,5 +46,5 @@ class MessageChain() {
     fun isEmpty() = list.isEmpty()
 
     fun clear() = list.clear()
-    fun contentToString(): String = list.joinToString(separator = "") { it.contentToString() }
+    fun contentToString(): String = list.filterNot { it is Metadata }.joinToString(separator = "") { it.contentToString() }
 }
