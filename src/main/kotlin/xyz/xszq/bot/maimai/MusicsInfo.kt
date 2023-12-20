@@ -10,6 +10,7 @@ import xyz.xszq.bot.maimai.MaimaiUtils.getNewRa
 import xyz.xszq.bot.maimai.MaimaiUtils.plateExcluded
 import xyz.xszq.bot.maimai.MaimaiUtils.remasterExcluded
 import xyz.xszq.bot.maimai.payload.*
+import xyz.xszq.nereides.message.Markdown
 
 class MusicsInfo(val logger: KLogger) {
     private val musics = mutableMapOf<String, MusicInfo>()
@@ -24,6 +25,26 @@ class MusicsInfo(val logger: KLogger) {
     }
     fun getById(id: String) = musics[id]
     fun getAll(): List<MusicInfo> = musics.values.toList()
+    suspend fun getInfoMarkdown(id: String): Markdown? {
+        val music = musics[id] ?: return null
+        val ds = music.ds.mapIndexed { index, d ->
+            if (music.level[index].endsWith("+") && d == d.toIntFloor() + 0.5)
+                music.level[index]
+            else
+                d
+        }.joinToString("/")
+
+        return Markdown.build("101999766_1702977114") {
+            append("cover_url") { "https://otmdb.cn/jump/maimai/covers/$id.jpg" }
+            append("music_id") { music.id }
+            append("title") { music.title.replace(".", " ") }
+            append("artist") { music.basicInfo.artist.replace(".", " ") }
+            append("category") { music.basicInfo.genre }
+            append("version") { music.basicInfo.from + if (music.basicInfo.isNew) " （计入b15）" else "" }
+            append("charter") { music.charts.joinToString("/") { it.charter } }
+            append("ds") { ds }
+        }
+    }
     fun getInfo(id: String): String {
         val music = musics[id] ?: return ""
         val ds = music.ds.mapIndexed { index, d ->

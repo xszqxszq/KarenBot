@@ -2,15 +2,17 @@
 
 package xyz.xszq.nereides
 
+import korlibs.io.async.launch
 import korlibs.io.file.std.toVfs
-import kotlinx.coroutines.*
-import xyz.xszq.bot.ffmpeg.toSilk
+import kotlinx.coroutines.Dispatchers
+import xyz.xszq.bot.audio.toSilk
 import xyz.xszq.bot.image.toJPEG
 import xyz.xszq.nereides.message.*
 import xyz.xszq.nereides.payload.message.Media
 import xyz.xszq.nereides.payload.response.PostGroupMessageResponse
 import xyz.xszq.nereides.payload.utils.FileType
 import xyz.xszq.nereides.payload.utils.MsgType
+import kotlin.properties.Delegates
 
 class Group(
     override val bot: Bot,
@@ -18,36 +20,51 @@ class Group(
 ) : Context {
     override val id: String = groupId
     suspend fun uploadRich(media: LocalRichMedia): Media? {
+        var uploadResult = NetworkUtils.upload(when (media) {
+            is Image -> media.file
+            is Voice -> media.file.toSilk().toVfs()
+            else -> throw UnsupportedOperationException()
+        })
         return bot.uploadFile(
             groupId = id,
-            url = NetworkUtils.upload(when (media) {
-                is Image -> media.file
-                is Voice -> media.file.toSilk().toVfs()
-                else -> throw UnsupportedOperationException()
-            }),
+            url = uploadResult.url,
             fileType = when (media) {
                 is Image -> FileType.IMAGE
                 is Voice -> FileType.VOICE
                 else -> throw UnsupportedOperationException()
             },
             send = false
-        ) ?: run { // 重传
+        ).also {
+            launch(Dispatchers.IO) {
+                NetworkUtils.deleteFromCos(uploadResult.remoteFilename)
+            }
+        } ?: run { // 重传
             when (media) {
                 is LocalImage -> {
+                    uploadResult = NetworkUtils.uploadBinary(media.file.readBytes().toJPEG())
                     bot.uploadFile(
                         groupId = id,
-                        url = NetworkUtils.uploadBinary(media.file.readBytes().toJPEG()),
+                        url = uploadResult.url,
                         fileType = FileType.IMAGE,
                         send = false
-                    )
+                    ).also {
+                        launch(Dispatchers.IO) {
+                            NetworkUtils.deleteFromCos(uploadResult.remoteFilename)
+                        }
+                    }
                 }
                 is LocalVoice -> {
+                    uploadResult = NetworkUtils.upload(media.file.toSilk().toVfs())
                     bot.uploadFile(
                         groupId = id,
-                        url = NetworkUtils.upload(media.file.toSilk().toVfs()),
+                        url = uploadResult.url,
                         fileType = FileType.VOICE,
                         send = false
-                    )
+                    ).also {
+                        launch(Dispatchers.IO) {
+                            NetworkUtils.deleteFromCos(uploadResult.remoteFilename)
+                        }
+                    }
                 }
                 else -> null
             }
@@ -86,7 +103,8 @@ class Group(
                 msgSeq = reply ?.seq,
                 media = media,
                 ark = content.filterIsInstance<Ark>().firstOrNull() ?.ark,
-                markdown = content.filterIsInstance<Markdown>().firstOrNull() ?.markdown
+                markdown = content.filterIsInstance<Markdown>().firstOrNull() ?.markdown,
+                keyboard = content.filterIsInstance<Keyboard>().firstOrNull() ?.keyboard
             )
         }
         var response = doSendMessage(text, files.firstOrNull())

@@ -63,17 +63,21 @@ open class QQClient(
     override val logger = KotlinLogging.logger("QQClient")
     private val semaphore = Semaphore(config.maxConnections)
     override suspend fun call(method: HttpMethod, api: String, payload: Any?): HttpResponse = semaphore.withPermit {
-        return client.request("${server}${api}") {
-            this.method = method
-            contentType(ContentType.Application.Json)
-            payload?.let {
-                setBody(it)
+        kotlin.runCatching {
+            client.request("${server}${api}") {
+                this.method = method
+                contentType(ContentType.Application.Json)
+                payload?.let {
+                    setBody(it)
+                }
+                headers {
+                    setHeaders()
+                }
             }
-            headers {
-                setHeaders()
-            }
+        }.onFailure {
+            it.printStackTrace()
         }
-    }
+    }.getOrThrow()
     override suspend fun get(api: String): HttpResponse =
         call(HttpMethod.Get, api, null)
     override suspend fun post(api: String, payload: Any): HttpResponse =
@@ -122,13 +126,13 @@ open class QQClient(
         set("X-Union-Appid", appId)
     }
 
-    suspend fun getToken(): String {
+    private suspend fun getToken(): String {
         if (token == null || tokenExpireTime - System.currentTimeMillis() <= 60 * 1000L) {
             refreshToken()
         }
         return token!!
     }
-    suspend fun refreshToken() {
+    private suspend fun refreshToken() {
         val response: AccessTokenResponse = client.post("https://bots.qq.com/app/getAppAccessToken") {
             contentType(ContentType.Application.Json)
             setBody(AccessTokenRequest(appId, clientSecret))
@@ -137,7 +141,7 @@ open class QQClient(
         tokenExpireTime = System.currentTimeMillis() + response.expiresIn * 1000L
     }
 
-    suspend fun getWSSGateway(): String {
+    private suspend fun getWSSGateway(): String {
         return call(HttpMethod.Get, "/gateway", null).body<WSSGatewayResponse>().url
     }
 

@@ -10,5 +10,9 @@ object DatabaseLock {
     val lock = Semaphore(32)
 }
 suspend fun <T> transactionWithLock(block: suspend Transaction.() -> T): T = DatabaseLock.lock.withPermit {
-    newSuspendedTransaction(Dispatchers.IO, statement = block)
-}
+    runCatching {
+        newSuspendedTransaction(Dispatchers.IO, statement = block)
+    }.onFailure {
+        it.printStackTrace()
+    }
+}.getOrThrow()

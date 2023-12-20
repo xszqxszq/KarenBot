@@ -22,8 +22,6 @@ import java.util.*
 import java.util.concurrent.Executors
 
 object NetworkUtils {
-    private val client = HttpClient(OkHttp) {
-    }
     fun deleteFromCos(filename: String) {
         val cosClient = COSClient(
             BasicCOSCredentials(config.cosSecretId, config.cosSecretKey),
@@ -33,8 +31,7 @@ object NetworkUtils {
         val bucketName = config.cosAppId
         cosClient.deleteObject(bucketName, filename)
     }
-    @OptIn(DelicateCoroutinesApi::class)
-    fun upload(file: File): String {
+    private fun upload(file: File): UploadResult {
         val cosClient = COSClient(
             BasicCOSCredentials(config.cosSecretId, config.cosSecretKey),
             ClientConfig(Region(config.cosRegion)).also {
@@ -55,14 +52,9 @@ object NetworkUtils {
         cosClient.shutdown()
 
         val expiration = Date(Date().time + 2 * 60 * 1000)
-        GlobalScope.launch(Dispatchers.IO) {
-            val key = filename
-            delay(2 * 60 * 1000L)
-            deleteFromCos(key)
-        }
-        return cosClient.generatePresignedUrl(bucketName, filename, expiration).toString()
+        return UploadResult(cosClient.generatePresignedUrl(bucketName, filename, expiration).toString(), filename)
     }
-    fun uploadBinary(binary: ByteArray, suffix: String = ""): String {
+    fun uploadBinary(binary: ByteArray, suffix: String = ""): UploadResult {
         val file = newTempFile(suffix=suffix).also {
             it.writeBytes(binary)
         }

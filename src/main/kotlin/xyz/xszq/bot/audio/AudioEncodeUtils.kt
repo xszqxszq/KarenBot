@@ -1,4 +1,4 @@
-package xyz.xszq.bot.ffmpeg
+package xyz.xszq.bot.audio
 
 import io.github.kasukusakura.silkcodec.SilkCoder
 import korlibs.audio.format.readSoundInfo
@@ -6,10 +6,15 @@ import korlibs.io.file.VfsFile
 import korlibs.io.file.std.toVfs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.withContext
+import xyz.xszq.bot.ffmpeg.FFMpegFileType
+import xyz.xszq.bot.ffmpeg.FFMpegTask
+import xyz.xszq.bot.ffmpeg.FFProbe
 import xyz.xszq.nereides.newTempFile
 import java.io.File
 
+val audioSemaphore = Semaphore(32)
 
 suspend fun VfsFile.getAudioDuration(): Double {
     return readSoundInfo()?.duration?.seconds ?: FFProbe(
@@ -17,9 +22,7 @@ suspend fun VfsFile.getAudioDuration(): Double {
     ).getResult().format!!.duration.toDouble()
 }
 fun File.getAudioDuration(): Double = runBlocking {
-    withContext(Dispatchers.IO) {
-        toVfs().getAudioDuration()
-    }
+    toVfs().getAudioDuration()
 }
 
 suspend fun File.toMp3BeforeSilk(): File? =

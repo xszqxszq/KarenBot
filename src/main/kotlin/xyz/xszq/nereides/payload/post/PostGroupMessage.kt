@@ -4,6 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import xyz.xszq.nereides.payload.message.Media
 import xyz.xszq.nereides.payload.message.MessageArk
+import xyz.xszq.nereides.payload.message.MessageKeyboard
 import xyz.xszq.nereides.payload.message.MessageMarkdownC2C
 
 @Serializable
@@ -12,6 +13,7 @@ data class PostGroupMessage(
     @SerialName("msg_type")
     val msgType: Int,
     val markdown: MessageMarkdownC2C? = null,
+    val keyboard: MessageKeyboard? = null,
     val media: Media? = null,
     val ark: MessageArk? = null,
     @SerialName("event_id")

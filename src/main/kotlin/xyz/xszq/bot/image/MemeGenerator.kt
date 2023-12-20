@@ -20,6 +20,8 @@ import korlibs.math.geom.SizeInt
 import korlibs.math.geom.degrees
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import xyz.xszq.bot.text.LibreTranslate
 import xyz.xszq.nereides.forEachParallel
 import xyz.xszq.nereides.hexToRGBA
@@ -35,6 +37,7 @@ typealias Args = List<String>
 typealias Maker = suspend (Images, Args)-> ByteArray
 object MemeGenerator {
     private val imgDir = localCurrentDirVfs["image/meme"]
+    val semaphore = Semaphore(16)
     suspend fun handle(
         type: String,
         args: List<String> = listOf(),
@@ -47,7 +50,13 @@ object MemeGenerator {
                     commands.addAll(settings.aliases.split(','))
                 if (type !in commands)
                     return@let
-                return (func.getter.call(this) as Maker).invoke(images, args)
+                return semaphore.withPermit {
+                    kotlin.runCatching {
+                        (func.getter.call(this) as Maker).invoke(images, args)
+                    }.onFailure {
+                        it.printStackTrace()
+                    }
+                }.getOrThrow()
             }
         }
         throw UnsupportedOperationException()
@@ -2915,7 +2924,7 @@ object MemeGenerator {
         }
         frame.saveJpg()
     }
-    @Meme("奶茶")
+    @Meme("奶茶", help = "可以用 --pos <位置> 指定枪的位置，如left, right, both")
     val bubbleTea: Maker = { images, texts ->
         val frame = images[0].convert("RGBA").resize(SizeInt(500, 500), keepRatio = true)
         val bubbleTea = BuildImage.open(imgDir["bubble_tea/0.png"])

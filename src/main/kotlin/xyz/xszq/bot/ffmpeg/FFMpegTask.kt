@@ -5,6 +5,8 @@ package xyz.xszq.bot.ffmpeg
 import korlibs.memory.toInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import xyz.xszq.nereides.newTempFile
 import java.io.File
@@ -61,12 +63,13 @@ class FFMpegTask(
             null
         }
     }
-    suspend fun getResult(): File? = withContext(Dispatchers.IO) {
+    suspend fun getResult(): File? = semaphore.withPermit {
         getResultBlocking()
     }
     companion object {
         var ffmpegBin: String = "ffmpeg"
         var ffmpegPath = ""
+        val semaphore = Semaphore(32)
         fun checkFFMpeg() {
             if (!File(ffmpegBin).exists())
                 println("Warn: FFMpeg does not exist")

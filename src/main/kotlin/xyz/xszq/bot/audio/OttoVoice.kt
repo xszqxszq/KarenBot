@@ -2,6 +2,7 @@ package xyz.xszq.bot.audio
 
 import korlibs.io.file.baseNameWithoutCompoundExtension
 import korlibs.io.file.std.localCurrentDirVfs
+import kotlinx.coroutines.sync.withPermit
 import net.sourceforge.pinyin4j.PinyinHelper
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat

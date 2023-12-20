@@ -23,6 +23,7 @@ import nu.pattern.OpenCV
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.upsert
+import xyz.xszq.bot.audio.OttoVoice
 import xyz.xszq.bot.config.BotConfig
 import xyz.xszq.bot.dao.TouhouAliases
 import xyz.xszq.bot.dao.TouhouMusics
@@ -220,36 +221,16 @@ suspend fun main() {
 //        }
 //    }.inWholeMilliseconds / 1000.0
 //    println("新版耗时：${new / 5}s")
-
-    bot = Bot(
-        appId = config.appId,
-        clientSecret = config.clientSecret,
-        easyToken = config.token,
-        sandbox = config.sandbox
-    )
-    subscribe()
-    bot.refreshToken()
-    println(0)
-//    GlobalEventChannel.subscribePublicMessages {
-//        startsWith("/ping") {
-//            println(1)
-//            reply("bot在")
-//        }
-//    }
     coroutineScope {
-        repeat(100) {
+        repeat(128) {
             launch {
-//                println(bot.getWSSGateway())
-                GlobalEventChannel.broadcast(
-                    GroupAtMessageEvent(bot, "1", "114514", "2", MessageChain("在".toPlainText()), timestamp = 1))
-//                println(GroupAtMessageEvent(bot, "1", "114514", "2", MessageChain("/ping".toPlainText()), timestamp = 1).reply(MessageChain("ads".toPlainText())))
-
-//                println(Group(bot, "114514").sendMessage(MessageChain().also {
-//                    it.reply = Reply("ads", 1)
-//                }))
+//                MemeGenerator.handle("唐可可举牌",
+//                    args = listOf("阿斯蒂芬", "dawef"),
+//                    images = listOf(BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]), BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]))
+//                )
+                OttoVoice.generate("说的对,但是《原神》是由米哈游自主研发的一款全新开放世界冒险游戏。游戏发生在一个被称作「提瓦特」的幻想世界")
             }
         }
     }
-    delay(10000L)
 
 }

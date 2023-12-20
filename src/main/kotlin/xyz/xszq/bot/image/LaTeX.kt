@@ -1,6 +1,7 @@
 package xyz.xszq.bot.image
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import org.scilab.forge.jlatexmath.TeXConstants
 import org.scilab.forge.jlatexmath.TeXFormula
@@ -9,7 +10,7 @@ import java.awt.Color
 import java.io.File
 
 object LaTeX {
-    suspend fun generateLaTeX(text: String): File {
+    suspend fun generateLaTeX(text: String): File = MemeGenerator.semaphore.withPermit {
         return withContext(Dispatchers.IO) {
             newTempFile().let { result ->
                 TeXFormula(text).createPNG(

@@ -6,12 +6,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import xyz.xszq.bot.dao.TouhouAliases
 import xyz.xszq.bot.dao.TouhouMusics
 import xyz.xszq.bot.dao.transactionWithLock
-import xyz.xszq.bot.ffmpeg.cropPeriod
-import xyz.xszq.bot.ffmpeg.getAudioDuration
 import xyz.xszq.nereides.event.GlobalEventChannel
 import xyz.xszq.nereides.event.GroupAtMessageEvent
 import xyz.xszq.nereides.event.PublicMessageEvent
@@ -97,16 +94,18 @@ object TouhouGuessGame {
                         if (e !is PublicMessageEvent || e.contextId != contextId)
                             return@collect
 
-                        val answer = e.message.text.trim().lowercase()
-                        if (answers.any { answer.isNotBlank() && answer in it } ||
-                            answers.any { answer.toPinyinAbbr().length >= 3 && it.toPinyinAbbr().length >= 3 && answer.toPinyinAbbr() in it.toPinyinAbbr() } ||
-                            answers.any { it.filter { l -> l.code > 128 }.length >= 5 &&
-                                    it.filter { l -> l.code > 128 }.toSet().intersect(
-                                        answer.filter { l -> l.code > 128 }.toSet()
-                                    ).size >= 3 }) {
-                            e.reply("恭喜你猜中了！原曲是$name")
-                            finished = true
-                            started[contextId] = false
+                        launch {
+                            val answer = e.message.text.trim().lowercase()
+                            if (answers.any { answer.isNotBlank() && answer in it } ||
+                                answers.any { answer.toPinyinAbbr().length >= 3 && it.toPinyinAbbr().length >= 3 && answer.toPinyinAbbr() in it.toPinyinAbbr() } ||
+                                answers.any { it.filter { l -> l.code > 128 }.length >= 5 &&
+                                        it.filter { l -> l.code > 128 }.toSet().intersect(
+                                            answer.filter { l -> l.code > 128 }.toSet()
+                                        ).size >= 3 }) {
+                                e.reply("恭喜你猜中了！原曲是$name")
+                                finished = true
+                                started[contextId] = false
+                            }
                         }
                     }
                 }

@@ -424,26 +424,28 @@ permalink: /meme/
 - 关键词：`奶茶`
 - 需要图片数目：`1`
 - 需要文字数目：`0`
+- 示例：`/生成 奶茶 (附带一张图片)`
+- 示例：`/生成 奶茶 --pos left (附带一张图片)`
 - 其他参数：
-    - `position`
+    - `pos`
         - 描述：奶茶的位置
         - 类型：`string`
         - 默认值：`right`
         - 可选值：`right`、`left`、`both`
 
 - 预览：
-    > 参数：--position right
+    > 参数：--pos right
     <div align="left">
     <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/bubble_tea_instance0.jpg" width="200" />
     </div>
 
-    > 参数：--position left
+    > 参数：--pos left
     
     <div align="left">
       <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/bubble_tea_instance1.jpg" width="200" />
     </div>
     
-    > 参数：--position both
+    > 参数：--pos both
     
     <div align="left">
       <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/bubble_tea_instance2.jpg" width="200" />
@@ -853,26 +855,28 @@ permalink: /meme/
 - 关键词：`手枪`
 - 需要图片数目：`1`
 - 需要文字数目：`0`
+- 示例：`/生成 手枪 (附带一张图片)`
+- 示例：`/生成 手枪 --pos left (附带一张图片)`
 - 其他参数：
-    - `position`
+    - `pos`
         - 描述：枪的位置
         - 类型：`string`
         - 默认值：`left`
         - 可选值：`left`、`right`、`both`
 
 - 预览：
-    > 参数：--position left
+    > 参数：--pos left
     <div align="left">
     <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/gun_instance0.jpg" width="200" />
     </div>
 
-    > 参数：--position right
+    > 参数：--pos right
     
     <div align="left">
       <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/gun_instance1.jpg" width="200" />
     </div>
     
-    > 参数：--position both
+    > 参数：--pos both
     
     <div align="left">
       <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/gun_instance2.jpg" width="200" />

@@ -6,7 +6,6 @@ import korlibs.image.format.readNativeImage
 import korlibs.io.async.launch
 import korlibs.io.file.std.localCurrentDirVfs
 import korlibs.io.file.std.toVfs
-import korlibs.io.net.URL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.withPermit
@@ -14,34 +13,23 @@ import nu.pattern.OpenCV
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import xyz.xszq.bot.audio.OttoVoice
-import xyz.xszq.bot.audio.RandomMusic
-import xyz.xszq.bot.audio.TouhouGuessGame
+import xyz.xszq.bot.audio.*
 import xyz.xszq.bot.config.BinConfig
 import xyz.xszq.bot.config.BotConfig
 import xyz.xszq.bot.dao.*
 import xyz.xszq.bot.ffmpeg.FFMpegTask
-import xyz.xszq.bot.ffmpeg.cropPeriod
-import xyz.xszq.bot.ffmpeg.getAudioDuration
 import xyz.xszq.bot.image.*
 import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.QueueForArcades
-import xyz.xszq.bot.text.AutoQA
-import xyz.xszq.bot.text.Bilibili
-import xyz.xszq.bot.text.RandomText
-import xyz.xszq.bot.text.WikiQuery
+import xyz.xszq.bot.text.*
 import xyz.xszq.nereides.*
 import xyz.xszq.nereides.event.GlobalEventChannel
 import xyz.xszq.nereides.event.GroupAtMessageEvent
 import xyz.xszq.nereides.event.GuildAtMessageEvent
 import xyz.xszq.nereides.message.*
 import xyz.xszq.nereides.message.ark.ListArk
-import xyz.xszq.nereides.payload.message.MessageArk
-import xyz.xszq.nereides.payload.message.MessageArkKv
-import xyz.xszq.nereides.payload.message.MessageArkObj
+import xyz.xszq.nereides.payload.message.MessageKeyboard
 import xyz.xszq.nereides.payload.message.MessageMarkdownC2C
-import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
 
 lateinit var database: Database
@@ -86,11 +74,6 @@ fun subscribe() {
         }
     }
     GlobalEventChannel.subscribePublicMessages {
-        if (!config.auditMode) {
-            equalsTo("") {
-                reply(RandomImage.getRandom("reply").toImage())
-            }
-        }
         startsWith("/ping") {
             reply("bot在")
         }
@@ -441,8 +424,14 @@ fun subscribe() {
                 reply("使用方法：/活字印刷 文本\n例：/活字印刷 大家好啊，我是可怜Bot")
                 return@startsWith
             }
-            OttoVoice.generate(text) ?.toVoice() ?.let {
-                reply(it)
+            audioSemaphore.withPermit {
+                kotlin.runCatching {
+                    OttoVoice.generate(text) ?.toVoice() ?.let {
+                        reply(it)
+                    }
+                }.onFailure {
+                    reply("生成失败，请检查内容是否为中文/英文/数字。")
+                }
             }
         }
     }
@@ -460,6 +449,37 @@ fun subscribe() {
             })
         }
     }
+    GlobalEventChannel.subscribePublicMessages(permName = "image.random") {
+        equalsTo("") {
+            reply(RandomImage.getRandom("reply").toImage())
+        }
+        startsWith(listOf("黄毛", "/黄毛", "来点黄毛", "/来点黄毛", "来张黄毛", "/来张黄毛")) {
+            reply(RandomImage.getRandom("reply").toImage())
+        }
+    }
+//    GlobalEventChannel.subscribePublicMessages {
+//        startsWith("/test") {
+//            reply(Markdown.build("101999766_1702977114") {
+//                append("cover_url") { "https://otmdb.cn/jump/2c4915fa9d0e29e08d3b4946af7a3aa3.png" }
+//                append("music_id") { "200" }
+//                append("title") { "Bad Apple!! feat nomico" }
+//                append("artist") { "Masayoshi Minoshima" }
+//                append("category") { "东方Project" }
+//                append("version") { "maimai GreeN" }
+//                append("charter") { "-/-/譜面-100号/mai-Star/合作だよ" }
+//                append("ds") { "3.0/6.8/10.6/12.5/13.3" }
+//            } + Keyboard(MessageKeyboard("101999766_1702978372")))
+//        }
+//    }
+//    GlobalEventChannel.subscribePublicMessages(permName = "sleep") {
+//        equalsTo(listOf("晚安", "/晚安", "睡觉", "/睡觉")) {
+//            WakeSleep.sleep(contextId, subjectId) ?.let {
+//                "晚安~你是本${if (this is GroupAtMessageEvent) "群" else "频道"}第${it}个入睡的"
+//            } ?: run {
+//                "你已经睡过了！"
+//            }
+//        }
+//    }
 }
 lateinit var bot: Bot
 fun main() {

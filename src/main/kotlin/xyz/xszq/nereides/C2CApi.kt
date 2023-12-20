@@ -13,6 +13,7 @@ import xyz.xszq.nereides.message.RemoteImage
 import xyz.xszq.nereides.payload.event.GroupAtMessageCreate
 import xyz.xszq.nereides.payload.message.Media
 import xyz.xszq.nereides.payload.message.MessageArk
+import xyz.xszq.nereides.payload.message.MessageKeyboard
 import xyz.xszq.nereides.payload.message.MessageMarkdownC2C
 import xyz.xszq.nereides.payload.post.PostGroupFile
 import xyz.xszq.nereides.payload.post.PostGroupMessage
@@ -23,12 +24,13 @@ interface C2CApi {
     suspend fun call(method: HttpMethod, api: String, payload: Any?): HttpResponse
     suspend fun post(api: String, payload: Any): HttpResponse
 
-    suspend fun sendGroupMessage (
+    suspend fun sendGroupMessage(
         groupId: String,
         content: String,
         msgType: Int,
         msgId: String?,
         markdown: MessageMarkdownC2C? = null,
+        keyboard: MessageKeyboard? = null,
         media: Media? = null,
         ark: MessageArk? = null,
         msgSeq: Int? = null
@@ -40,6 +42,7 @@ interface C2CApi {
                 msgType = msgType,
                 msgId = msgId,
                 markdown = markdown,
+                keyboard = keyboard,
                 media = media,
                 ark = ark,
                 msgSeq = msgSeq

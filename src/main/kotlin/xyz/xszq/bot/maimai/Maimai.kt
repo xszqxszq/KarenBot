@@ -30,6 +30,7 @@ import xyz.xszq.bot.maimai.payload.ChartNotes
 import xyz.xszq.bot.maimai.payload.PlateResponse
 import xyz.xszq.bot.maimai.payload.PlayerData
 import xyz.xszq.nereides.event.GlobalEventChannel
+import xyz.xszq.nereides.event.GroupAtMessageEvent
 import xyz.xszq.nereides.event.MessageEvent
 import xyz.xszq.nereides.message.ark.ListArk
 import xyz.xszq.nereides.message.plus
@@ -593,7 +594,7 @@ object Maimai {
                     if (cover.exists())
                         reply(musics.getInfoWithDifficulty(id, difficulty).toPlainText() + cover.toImage())
                     else
-                        reply(musics.getInfo(id))
+                        reply(musics.getInfoWithDifficulty(id, difficulty).toPlainText())
                 }
             }
             startsWith("随个") { raw ->

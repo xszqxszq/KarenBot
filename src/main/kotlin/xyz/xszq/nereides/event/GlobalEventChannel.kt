@@ -19,10 +19,10 @@ object GlobalEventChannel: CoroutineScope {
         this.launch {
             channel.collect { event ->
                 this.launch {
-//                if (event is T && (!config.sandbox ||
-//                            event !is PublicMessageEvent ||
-//                            event.contextId == "0532FA2F08EC28053EF1300409432E54")) {
-                    if (event is T) {
+                if (event is T && (!config.sandbox ||
+                            event !is PublicMessageEvent ||
+                            event.contextId == "0532FA2F08EC28053EF1300409432E54")) {
+//                    if (event is T) {
                         kotlin.runCatching {
                             block(event)
                         }.onFailure { e ->

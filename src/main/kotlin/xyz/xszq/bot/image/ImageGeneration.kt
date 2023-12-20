@@ -4,10 +4,11 @@ import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.Bitmap32
 import korlibs.image.format.PNG
 import korlibs.image.format.encode
+import kotlinx.coroutines.sync.withPermit
 import kotlin.math.*
 
 object ImageGeneration {
-    suspend fun flipImage(img: Bitmap): List<ByteArray> {
+    suspend fun flipImage(img: Bitmap): List<ByteArray> = MemeGenerator.semaphore.withPermit {
         val flipped = img.clone().flipX()
 
         val resultA = img.clone()
@@ -18,7 +19,7 @@ object ImageGeneration {
 
         return listOf(resultA.encode(PNG), resultB.encode(PNG))
     }
-    suspend fun spherize(img: Bitmap, a: Double = 1.0, b: Double = 3.0, c: Double = -9.0): ByteArray {
+    suspend fun spherize(img: Bitmap, a: Double = 1.0, b: Double = 3.0, c: Double = -9.0): ByteArray = MemeGenerator.semaphore.withPermit {
         val d = 1.0 - a - b - c
         val radius = min(img.width, img.height) / 2
         val result = Bitmap32(img.width, img.height) { x, y ->
@@ -35,7 +36,7 @@ object ImageGeneration {
         return result.encode(PNG)
     }
 
-    suspend fun pincushion(img: Bitmap, strength: Double = 7.0, zoom: Double = 1.5): ByteArray {
+    suspend fun pincushion(img: Bitmap, strength: Double = 7.0, zoom: Double = 1.5): ByteArray = MemeGenerator.semaphore.withPermit {
         val midW = img.width / 2.0
         val midH = img.height / 2.0
         val correctionRadius = sqrt(img.width.toDouble().pow(2) + img.height.toDouble().pow(2)) / strength

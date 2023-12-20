@@ -9,6 +9,7 @@ import korlibs.image.font.TtfFont
 import korlibs.image.vector.Context2d
 import korlibs.math.geom.Point
 import korlibs.math.geom.vector.LineJoin
+import kotlinx.coroutines.sync.withPermit
 
 object FiveThousandChoyen {
     val topFont: TtfFont = globalFontRegistry.loadFontByName("Source Han Sans CN Bold")!!
@@ -20,23 +21,27 @@ object FiveThousandChoyen {
     const val bottomX = 250
     const val bottomY = 230
 
-    suspend fun generate(top: String, bottom: String): Bitmap {
-        val result = NativeImageOrBitmap32(1500, 270, true)
-        var rightBorder = 1500.0F
-        result.context2d {
-            setTransform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
-            fillStyle = RGBA(255, 255, 255, if (transparency) 0 else 255)
-            fillRect(0, 0, width, height)
-            setTransform(1.0, 0.0, -0.45, 1.0, 0.0, 0.0)
-            lineJoin = LineJoin.ROUND
-            rightBorder = generateTop(top,this, topFont)!!
-            rightBorder = kotlin.math.max(rightBorder,
-                generateBottom(bottom, this, bottomFont)!!
-            )
-            dispose()
+    suspend fun generate(top: String, bottom: String): Bitmap = MemeGenerator.semaphore.withPermit {
+        kotlin.runCatching {
+            val result = NativeImageOrBitmap32(1500, 270, true)
+            var rightBorder = 1500.0F
+            result.context2d {
+                setTransform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
+                fillStyle = RGBA(255, 255, 255, if (transparency) 0 else 255)
+                fillRect(0, 0, width, height)
+                setTransform(1.0, 0.0, -0.45, 1.0, 0.0, 0.0)
+                lineJoin = LineJoin.ROUND
+                rightBorder = generateTop(top,this, topFont)!!
+                rightBorder = kotlin.math.max(rightBorder,
+                    generateBottom(bottom, this, bottomFont)!!
+                )
+                dispose()
+            }
+            result.sliceWithSize(0, 0, (rightBorder + 30).toInt(), result.height).extract()
+        }.onFailure {
+            it.printStackTrace()
         }
-        return result.sliceWithSize(0, 0, (rightBorder + 30).toInt(), result.height).extract()
-    }
+    }.getOrThrow()
     suspend fun generateTop(top: String, ctx: Context2d, nowFont: TtfFont, x: Int = topX, y: Int = topY) = ctx.run {
         font = nowFont
         fontSize = size.toFloat()

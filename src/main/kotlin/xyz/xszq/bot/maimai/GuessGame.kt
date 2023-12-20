@@ -48,7 +48,7 @@ class GuessGame(
     )
     suspend fun startClassical(event: PublicMessageEvent, hints: Int = 6) = event.run {
         if (started[contextId] == true) {
-            reply("当前群有正在进行的猜歌/开字母哦~")
+            reply("当前群有正在进行的猜歌/开字母哦~\n输入”不玩了“可以结束上一局")
             return@run
         }
         started[contextId] = true
@@ -163,7 +163,7 @@ class GuessGame(
     }
     suspend fun startOpening(event: PublicMessageEvent) = event.run {
         if (started[contextId] == true) {
-            reply("当前群有正在进行的猜歌/开字母哦~")
+            reply("当前群有正在进行的猜歌/开字母哦~\n输入”不玩了“可以结束上一局")
             return@run
         }
         started[contextId] = true
