@@ -199,6 +199,7 @@ suspend fun main() {
 
     database = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
         config.databaseUser, config.databasePassword)
+    OttoVoice.generate("我是.说的道理")
 //    rootLocalVfs["D:/Temp/test.gif"].writeBytes(MemeGenerator.handle("唐可可举牌",
 //        args = listOf("阿斯蒂芬"),
 //        images = listOf(BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]), BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]))
@@ -221,16 +222,5 @@ suspend fun main() {
 //        }
 //    }.inWholeMilliseconds / 1000.0
 //    println("新版耗时：${new / 5}s")
-    coroutineScope {
-        repeat(128) {
-            launch {
-//                MemeGenerator.handle("唐可可举牌",
-//                    args = listOf("阿斯蒂芬", "dawef"),
-//                    images = listOf(BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]), BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]))
-//                )
-                OttoVoice.generate("说的对,但是《原神》是由米哈游自主研发的一款全新开放世界冒险游戏。游戏发生在一个被称作「提瓦特」的幻想世界")
-            }
-        }
-    }
 
 }

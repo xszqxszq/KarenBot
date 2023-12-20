@@ -2,12 +2,6 @@ package xyz.xszq.bot.audio
 
 import korlibs.io.file.baseNameWithoutCompoundExtension
 import korlibs.io.file.std.localCurrentDirVfs
-import kotlinx.coroutines.sync.withPermit
-import net.sourceforge.pinyin4j.PinyinHelper
-import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType
-import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat
-import net.sourceforge.pinyin4j.format.HanyuPinyinToneType
-import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType
 import xyz.xszq.bot.ffmpeg.FFMpegFileType
 import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.nereides.toPinyinList
@@ -17,31 +11,28 @@ object OttoVoice {
     val voiceDir = localCurrentDirVfs["audio/otto"]
     val tokensDir = voiceDir["tokens"]
     val presetsDir = voiceDir["ysddTokens"]
-    fun asciiToPinyin(text: String): String {
-        var result = text.lowercase()
-        charTable.forEach { (char, py) ->
-            result = result.replace(char, ",$py,")
+    fun asciiToPinyin(text: List<String>): List<String> {
+        val result = text.toMutableList()
+        result.forEachIndexed { index, t ->
+            charTable.forEach { (char, py) ->
+                if (char == t)
+                    result[index] = py
+            }
         }
         return result
     }
     suspend fun generate(text: String): File? {
         var chars =
-            PinyinHelper.toHanYuPinyinString(
-                asciiToPinyin(text.filter { it.isLetter() || it.isDigit() || it.code in 0x4e00..0x9fff }),
-                HanyuPinyinOutputFormat().apply {
-                    caseType = HanyuPinyinCaseType.LOWERCASE
-                    toneType = HanyuPinyinToneType.WITHOUT_TONE
-                    vCharType = HanyuPinyinVCharType.WITH_V
-                },
-                ",",
-                true
-            ).trim().split(",").filter { it.isNotBlank() }.joinToString(",") { it.lowercase() }
+            asciiToPinyin(text.lowercase().filter {
+                it.isLetter() || it.isDigit() || it.code in 0x4e00..0x9fff || it == '.'
+            }.toPinyinList()).filter { it.isNotBlank() }.joinToString(",")
         presets.forEach { (id, names) ->
             names.forEach { name ->
                 val pinyin = name.toPinyinList().joinToString(",")
                 chars = chars.replace(pinyin, ",$id,")
             }
         }
+        chars = chars.lowercase()
         val files = chars.split(",").filter { it.isNotBlank() }.mapNotNull {  id ->
             (tokensDir.listRecursiveSimple() + presetsDir.listRecursiveSimple()).firstOrNull {
                 it.baseNameWithoutCompoundExtension == id

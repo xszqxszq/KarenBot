@@ -278,18 +278,18 @@ permalink: /meme/
         - 可选值：`normal`、`loop`、`circle`
 
 - 预览：
-    > 参数：--mode normal
+    - 参数：--mode normal
     <div align="left">
     <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/always_instance0.jpg" width="200" />
     </div>
 
-    > 参数：--mode circle
+    - 参数：--mode circle
     
     <div align="left">
       <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/always_instance1.jpg" width="200" />
     </div>
 
-    > 参数：--mode loop
+    - 参数：--mode loop
     
     <div align="left">
       <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/always_instance2.gif" width="200" />
@@ -697,7 +697,7 @@ permalink: /meme/
     <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/dog_dislike_instance0.gif" width="200" />
     </div>
 
-    > 参数：--circle
+    - 参数：--circle
     
     <div align="left">
       <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/dog_dislike_instance1.gif" width="200" />
@@ -1015,7 +1015,7 @@ permalink: /meme/
     <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/kaleidoscope_instance0.jpg" width="200" />
     </div>
 
-    > 参数：--circle
+    - 参数：--circle
     
     <div align="left">
       <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/kaleidoscope_instance1.jpg" width="200" />
@@ -1070,7 +1070,7 @@ permalink: /meme/
     <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/kirby_hammer_instance0.gif" width="200" />
     </div>
 
-    > 参数：--circle
+    - 参数：--circle
     
     <div align="left">
       <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/kirby_hammer_instance1.gif" width="200" />
