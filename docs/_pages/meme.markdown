@@ -434,18 +434,18 @@ permalink: /meme/
         - 可选值：`right`、`left`、`both`
 
 - 预览：
-    > 参数：--pos right
+    - 参数：--pos right
     <div align="left">
     <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/bubble_tea_instance0.jpg" width="200" />
     </div>
 
-    > 参数：--pos left
+    - 参数：--pos left
     
     <div align="left">
       <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/bubble_tea_instance1.jpg" width="200" />
     </div>
-    
-    > 参数：--pos both
+
+    - 参数：--pos both
     
     <div align="left">
       <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/bubble_tea_instance2.jpg" width="200" />
@@ -864,23 +864,23 @@ permalink: /meme/
         - 默认值：`left`
         - 可选值：`left`、`right`、`both`
 
-- 预览：
-    > 参数：--pos left
-    <div align="left">
-    <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/gun_instance0.jpg" width="200" />
-    </div>
+- 预览： 
+  - 参数：--pos left
+      <div align="left">
+      <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/gun_instance0.jpg" width="200" />
+      </div>
+  
+  - 参数：--pos right
+    
+      <div align="left">
+        <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/gun_instance1.jpg" width="200" />
+      </div>
 
-    > 参数：--pos right
+  - 参数：--pos both
     
-    <div align="left">
-      <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/gun_instance1.jpg" width="200" />
-    </div>
-    
-    > 参数：--pos both
-    
-    <div align="left">
-      <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/gun_instance2.jpg" width="200" />
-    </div>
+      <div align="left">
+        <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/gun_instance2.jpg" width="200" />
+      </div>
 
 ## hammer
 
