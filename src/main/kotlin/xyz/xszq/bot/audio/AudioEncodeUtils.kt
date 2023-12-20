@@ -14,7 +14,7 @@ import xyz.xszq.bot.ffmpeg.FFProbe
 import xyz.xszq.nereides.newTempFile
 import java.io.File
 
-val audioSemaphore = Semaphore(32)
+val audioSemaphore = Semaphore(16)
 
 suspend fun VfsFile.getAudioDuration(): Double {
     return readSoundInfo()?.duration?.seconds ?: FFProbe(

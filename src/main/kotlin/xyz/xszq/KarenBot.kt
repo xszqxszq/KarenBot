@@ -1,5 +1,7 @@
 package xyz.xszq
 
+import com.mongodb.kotlin.client.coroutine.MongoClient
+import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import korlibs.image.format.PNG
 import korlibs.image.format.encode
 import korlibs.image.format.readNativeImage
@@ -13,6 +15,7 @@ import nu.pattern.OpenCV
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
+import xyz.xszq.bot.dao.AccessLogs
 import xyz.xszq.bot.audio.*
 import xyz.xszq.bot.config.BinConfig
 import xyz.xszq.bot.config.BotConfig
@@ -28,13 +31,19 @@ import xyz.xszq.nereides.event.GroupAtMessageEvent
 import xyz.xszq.nereides.event.GuildAtMessageEvent
 import xyz.xszq.nereides.message.*
 import xyz.xszq.nereides.message.ark.ListArk
-import xyz.xszq.nereides.payload.message.MessageKeyboard
-import xyz.xszq.nereides.payload.message.MessageMarkdownC2C
 import kotlin.random.Random
 
-lateinit var database: Database
+lateinit var mariadb: Database
+lateinit var mongoClient: MongoClient
+lateinit var mongodb: MongoDatabase
 lateinit var config: BotConfig
 lateinit var binConfig: BinConfig
+
+fun initMongo() {
+    mongoClient = MongoClient.create(config.mongoUrl)
+    mongodb = mongoClient.getDatabase("karenbot")
+    AccessLogs.collection = mongodb.getCollection<AccessLog>("accessLog")
+}
 
 suspend fun init() {
     OpenCV.loadLocally()
@@ -45,8 +54,9 @@ suspend fun init() {
     FFMpegTask.ffmpegPath = binConfig.ffmpegPath
     FFMpegTask.checkFFMpeg()
 
-    database = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
+    mariadb = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
         config.databaseUser, config.databasePassword)
+    initMongo()
 
     launch(Dispatchers.IO) {
         QueueForArcades.init()
@@ -65,11 +75,8 @@ suspend fun init() {
 fun subscribe() {
     GlobalEventChannel.subscribePublicMessages {
         always {
-            transactionWithLock {
-                AccessLog.insert {
-                    it[openid] = subjectId
-                    it[context] = contextId
-                }
+            launch(Dispatchers.IO) {
+                AccessLogs.saveLog(subjectId, contextId, contentString)
             }
         }
     }

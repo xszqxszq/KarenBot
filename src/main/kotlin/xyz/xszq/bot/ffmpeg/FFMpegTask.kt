@@ -69,7 +69,7 @@ class FFMpegTask(
     companion object {
         var ffmpegBin: String = "ffmpeg"
         var ffmpegPath = ""
-        val semaphore = Semaphore(32)
+        val semaphore = Semaphore(16)
         fun checkFFMpeg() {
             if (!File(ffmpegBin).exists())
                 println("Warn: FFMpeg does not exist")

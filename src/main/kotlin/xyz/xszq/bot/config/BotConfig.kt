@@ -13,6 +13,7 @@ data class BotConfig(
     val databaseUrl: String,
     val databaseUser: String,
     val databasePassword: String,
+    val mongoUrl: String,
     val domainWhitelist: List<String>,
     val gifMaxSize: Double,
     val gifMaxFrames: Int,

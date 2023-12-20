@@ -1,22 +1,11 @@
 package xyz.xszq
 
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import korlibs.image.awt.toAwtNativeImage
-import korlibs.image.color.RGBA
+import com.mongodb.kotlin.client.coroutine.MongoClient
 import korlibs.image.format.PNG
 import korlibs.image.format.encode
-import korlibs.image.format.readNativeImage
 import korlibs.image.format.showImageAndWait
-import korlibs.io.async.async
-import korlibs.io.async.launch
 import korlibs.io.file.std.localCurrentDirVfs
 import korlibs.io.file.std.rootLocalVfs
-import korlibs.math.geom.Point
-import korlibs.math.geom.SizeInt
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import nu.pattern.OpenCV
@@ -27,26 +16,22 @@ import xyz.xszq.bot.audio.OttoVoice
 import xyz.xszq.bot.config.BotConfig
 import xyz.xszq.bot.dao.TouhouAliases
 import xyz.xszq.bot.dao.TouhouMusics
-import xyz.xszq.bot.image.*
+import xyz.xszq.bot.image.BlueArchiveLogo
+import xyz.xszq.bot.image.BuildImage
+import xyz.xszq.bot.image.MemeGenerator
+import xyz.xszq.bot.image.globalFontRegistry
 import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.MaimaiUtils
 import xyz.xszq.bot.maimai.MaimaiUtils.getPlateVerList
-import xyz.xszq.bot.text.WikiQuery
-import xyz.xszq.nereides.*
-import xyz.xszq.nereides.event.GlobalEventChannel
-import xyz.xszq.nereides.event.GroupAtMessageEvent
-import xyz.xszq.nereides.message.MessageChain
-import xyz.xszq.nereides.message.Reply
-import xyz.xszq.nereides.message.toPlainText
-import xyz.xszq.nereides.payload.post.PostGroupMessage
-import xyz.xszq.nereides.payload.utils.MsgType
+import xyz.xszq.nereides.newTempFile
+import xyz.xszq.nereides.readAsImage
 import java.io.File
 import kotlin.time.measureTime
 
 suspend fun testMaimaiB50(type: String = "qq", id: String = "943551369") {
     config = BotConfig.load(localCurrentDirVfs["config.yml"])
 
-    database = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
+    mariadb = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
         config.databaseUser, config.databasePassword)
 
     Maimai.initBlocking()
@@ -62,7 +47,7 @@ suspend fun testMaimaiB50(type: String = "qq", id: String = "943551369") {
 }
 suspend fun testMaimaiScoreList(type: String = "qq", id: String = "943551369") {
     config = BotConfig.load(localCurrentDirVfs["config.yml"])
-    database = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
+    mariadb = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
         config.databaseUser, config.databasePassword)
 
     Maimai.testLoad()
@@ -78,7 +63,7 @@ suspend fun testMaimaiScoreList(type: String = "qq", id: String = "943551369") {
 }
 suspend fun testMaimaiDsList() {
     config = BotConfig.load(localCurrentDirVfs["config.yml"])
-    database = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
+    mariadb = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
         config.databaseUser, config.databasePassword)
 
     Maimai.testLoad()
@@ -92,7 +77,7 @@ suspend fun testMaimaiDsList() {
 }
 suspend fun testMaimaiDsProgress(type: String = "qq", id: String = "943551369") {
     config = BotConfig.load(localCurrentDirVfs["config.yml"])
-    database = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
+    mariadb = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
         config.databaseUser, config.databasePassword)
 
     Maimai.testLoad()
@@ -108,7 +93,7 @@ suspend fun testMaimaiDsProgress(type: String = "qq", id: String = "943551369") 
 }
 suspend fun testMaimaiPlateProgress(type: String = "qq", id: String = "943551369") {
     config = BotConfig.load(localCurrentDirVfs["config.yml"])
-    database = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
+    mariadb = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
         config.databaseUser, config.databasePassword)
 
     Maimai.testLoad()
@@ -123,7 +108,7 @@ suspend fun testMaimaiPlateProgress(type: String = "qq", id: String = "943551369
 }
 suspend fun testMaimaiInfo(type: String = "username", id: String = "xszqxszq", songId: String = "11451") {
     config = BotConfig.load(localCurrentDirVfs["config.yml"])
-    database = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
+    mariadb = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
         config.databaseUser, config.databasePassword)
 
     Maimai.testLoad()
@@ -143,7 +128,7 @@ suspend fun importTouhou() {
     @Serializable
     data class Music(val name: String, val alias: List<String>)
     config = BotConfig.load(localCurrentDirVfs["config.yml"])
-    database = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
+    mariadb = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
         config.databaseUser, config.databasePassword)
     newSuspendedTransaction {
         val result = Json.decodeFromString<List<Map<String, Music>>>(File("E:\\Workspace\\KarenBot7.0\\result.json").readText())
@@ -197,8 +182,9 @@ suspend fun main() {
     OpenCV.loadLocally()
     config = BotConfig.load(localCurrentDirVfs["config.yml"])
 
-    database = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
+    mariadb = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
         config.databaseUser, config.databasePassword)
+    mongoClient = MongoClient.create(config.mongoUrl)
     OttoVoice.generate("我是.说的道理")
 //    rootLocalVfs["D:/Temp/test.gif"].writeBytes(MemeGenerator.handle("唐可可举牌",
 //        args = listOf("阿斯蒂芬"),

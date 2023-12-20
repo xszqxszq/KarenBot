@@ -14,6 +14,9 @@
     <logger name="Exposed" level="error" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
+    <logger name="org.mongodb.driver" level="error" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
 
     <root level="info">
         <appender-ref ref="CONSOLE"/>

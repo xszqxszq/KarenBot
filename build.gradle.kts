@@ -28,6 +28,7 @@ dependencies {
     implementation("io.ktor:ktor-client-okhttp-jvm:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-apache5:$ktorVersion")
+    implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
@@ -45,10 +46,10 @@ dependencies {
     implementation("net.mamoe.yamlkt:yamlkt:0.10.2")
     implementation("org.im4java:im4java:1.4.0")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.1.4")
+    implementation("org.mongodb:mongodb-driver-kotlin-coroutine:4.11.0")
     implementation("org.openpnp:opencv:4.3.0-3")
     implementation("org.scilab.forge:jlatexmath:1.0.7")
     implementation(kotlin("stdlib-jdk8"))
-    implementation("io.ktor:ktor-client-logging-jvm:2.3.6")
 }
 
 application {

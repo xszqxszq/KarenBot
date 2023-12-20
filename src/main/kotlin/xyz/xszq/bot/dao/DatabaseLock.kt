@@ -7,7 +7,7 @@ import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
 object DatabaseLock {
-    val lock = Semaphore(32)
+    val lock = Semaphore(16)
 }
 suspend fun <T> transactionWithLock(block: suspend Transaction.() -> T): T = DatabaseLock.lock.withPermit {
     runCatching {
