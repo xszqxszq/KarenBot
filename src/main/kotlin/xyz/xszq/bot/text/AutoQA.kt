@@ -18,9 +18,9 @@ class QARule(
     var createTime: LocalDateTime
 )
 object AutoQA {
-    var rules = listOf<QARule>()
-    val mutex = Mutex()
-    var cacheTime = 0L
+    private var rules = listOf<QARule>()
+    private val mutex = Mutex()
+    private var cacheTime = 0L
     private suspend fun fetchFromDB() = transactionWithLock {
         QARules.selectAll().map { QARule(
             it[QARules.openid],
@@ -39,7 +39,7 @@ object AutoQA {
             cacheTime = System.currentTimeMillis()
         }
     }
-    private suspend fun matchText(msg: String, contextId: String): String? = transactionWithLock {
+    private suspend fun matchText(msg: String, contextId: String): String? {
         update()
         mutex.withLock {
             rules.filter { it.openid == "-1" || it.openid == contextId }
@@ -63,9 +63,9 @@ object AutoQA {
                 else -> false
             }
             if (matched)
-                return@transactionWithLock rule.reply
+                return rule.reply
         }
-        return@transactionWithLock null
+        return null
     }
     suspend fun handle(event: PublicMessageEvent) = event.run {
         matchText(message.text, contextId) ?.let {

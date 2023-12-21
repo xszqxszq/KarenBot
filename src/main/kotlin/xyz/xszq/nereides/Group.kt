@@ -73,12 +73,11 @@ class Group(
     override suspend fun sendMessage(
         content: MessageChain
     ): Boolean {
-        val rawList = content.filter { it !is Metadata }
         val type = when {
-            rawList.all { it is PlainText } -> MsgType.TEXT
-            rawList.all { it is PlainText || it is RichMedia } -> MsgType.RICH
-            rawList.any { it is Ark } -> MsgType.ARK
-            rawList.any { it is Markdown } -> MsgType.MARKDOWN
+            content.all { it is PlainText } -> MsgType.TEXT
+            content.all { it is PlainText || it is RichMedia } -> MsgType.RICH
+            content.any { it is Ark } -> MsgType.ARK
+            content.any { it is Markdown } -> MsgType.MARKDOWN
             else -> MsgType.TEXT
         }
         val text = when (type) {

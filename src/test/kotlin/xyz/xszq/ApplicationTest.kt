@@ -4,16 +4,21 @@ import com.mongodb.kotlin.client.coroutine.MongoClient
 import korlibs.image.format.PNG
 import korlibs.image.format.encode
 import korlibs.image.format.showImageAndWait
+import korlibs.io.async.launch
 import korlibs.io.file.std.localCurrentDirVfs
 import korlibs.io.file.std.rootLocalVfs
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import nu.pattern.OpenCV
+import okhttp3.internal.toHexString
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.upsert
 import xyz.xszq.bot.audio.OttoVoice
 import xyz.xszq.bot.config.BotConfig
+import xyz.xszq.bot.dao.AccessLogs
 import xyz.xszq.bot.dao.TouhouAliases
 import xyz.xszq.bot.dao.TouhouMusics
 import xyz.xszq.bot.image.BlueArchiveLogo
@@ -23,9 +28,16 @@ import xyz.xszq.bot.image.globalFontRegistry
 import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.MaimaiUtils
 import xyz.xszq.bot.maimai.MaimaiUtils.getPlateVerList
+import xyz.xszq.nereides.Bot
+import xyz.xszq.nereides.event.GlobalEventChannel
+import xyz.xszq.nereides.event.GroupAtMessageEvent
+import xyz.xszq.nereides.message.MessageChain
+import xyz.xszq.nereides.message.toPlainText
 import xyz.xszq.nereides.newTempFile
 import xyz.xszq.nereides.readAsImage
 import java.io.File
+import java.time.LocalDateTime
+import kotlin.random.Random
 import kotlin.time.measureTime
 
 suspend fun testMaimaiB50(type: String = "qq", id: String = "943551369") {
@@ -184,8 +196,7 @@ suspend fun main() {
 
     mariadb = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
         config.databaseUser, config.databasePassword)
-    mongoClient = MongoClient.create(config.mongoUrl)
-    OttoVoice.generate("我是.说的道理")
+    initMongo()
 //    rootLocalVfs["D:/Temp/test.gif"].writeBytes(MemeGenerator.handle("唐可可举牌",
 //        args = listOf("阿斯蒂芬"),
 //        images = listOf(BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]), BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]))
@@ -208,5 +219,25 @@ suspend fun main() {
 //        }
 //    }.inWholeMilliseconds / 1000.0
 //    println("新版耗时：${new / 5}s")
+    bot = Bot(
+        appId = config.appId,
+        clientSecret = config.clientSecret,
+        easyToken = config.token,
+        sandbox = config.sandbox
+    )
+    GlobalEventChannel.subscribePublicMessages {
+        always {
+            launch(Dispatchers.IO) {
+                AccessLogs.saveLog(subjectId, contextId, contentString)
+            }
+        }
+    }
+    repeat(1000000) {
+        GlobalEventChannel.broadcast(GroupAtMessageEvent(bot, Random.nextLong().toHexString(),
+            Random.nextLong().toHexString(), Random.nextLong().toHexString(),
+            MessageChain(Random.nextLong().toHexString().toPlainText()),
+            timestamp = System.currentTimeMillis()))
+    }
+    delay(20000L)
 
 }

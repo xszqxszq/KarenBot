@@ -31,6 +31,7 @@ import xyz.xszq.nereides.event.GroupAtMessageEvent
 import xyz.xszq.nereides.event.GuildAtMessageEvent
 import xyz.xszq.nereides.message.*
 import xyz.xszq.nereides.message.ark.ListArk
+import xyz.xszq.nereides.payload.message.MessageKeyboard
 import kotlin.random.Random
 
 lateinit var mariadb: Database
@@ -145,8 +146,8 @@ fun subscribe() {
                     }
                 }
                 "添加机厅" -> {
+                    val queueGroup = QueueForArcades.getQueueGroup(contextId)
                     transactionWithLock {
-                        val queueGroup = QueueForArcades.getQueueGroup(contextId)
                         ArcadeCenter.new {
                             this.group = queueGroup.id
                             this.name = name
@@ -157,8 +158,8 @@ fun subscribe() {
                     }
                 }
                 "删除机厅" -> {
+                    val queueGroup = QueueForArcades.getQueueGroup(contextId)
                     transactionWithLock {
-                        val queueGroup = QueueForArcades.getQueueGroup(contextId)
                         ArcadeCenter.find {
                             (ArcadeCenters.group eq queueGroup.id) and (ArcadeCenters.name eq name)
                         }.firstOrNull() ?.let {
@@ -175,8 +176,8 @@ fun subscribe() {
                         return@startsWith
                     }
                     val alias = args[2]
+                    val queueGroup = QueueForArcades.getQueueGroup(contextId)
                     transactionWithLock {
-                        val queueGroup = QueueForArcades.getQueueGroup(contextId)
                         ArcadeCenter.find {
                             (ArcadeCenters.group eq queueGroup.id) and (ArcadeCenters.name eq name)
                         }.firstOrNull() ?.let {
@@ -464,20 +465,14 @@ fun subscribe() {
             reply(RandomImage.getRandom("reply").toImage())
         }
     }
-//    GlobalEventChannel.subscribePublicMessages {
-//        startsWith("/test") {
-//            reply(Markdown.build("101999766_1702977114") {
-//                append("cover_url") { "https://otmdb.cn/jump/2c4915fa9d0e29e08d3b4946af7a3aa3.png" }
-//                append("music_id") { "200" }
-//                append("title") { "Bad Apple!! feat nomico" }
-//                append("artist") { "Masayoshi Minoshima" }
-//                append("category") { "东方Project" }
-//                append("version") { "maimai GreeN" }
-//                append("charter") { "-/-/譜面-100号/mai-Star/合作だよ" }
-//                append("ds") { "3.0/6.8/10.6/12.5/13.3" }
-//            } + Keyboard(MessageKeyboard("101999766_1702978372")))
-//        }
-//    }
+    GlobalEventChannel.subscribePublicMessages {
+        startsWith("/test") {
+            reply(Markdown.build("101999766_1702985925") {
+                append("title") { "请点击下面的按钮验证管理员身份！" }
+//                append("result") { "3.0/6.8/10.6/12.5/13.3" }
+            } + Keyboard(MessageKeyboard("101999766_1702988150")))
+        }
+    }
 //    GlobalEventChannel.subscribePublicMessages(permName = "sleep") {
 //        equalsTo(listOf("晚安", "/晚安", "睡觉", "/睡觉")) {
 //            WakeSleep.sleep(contextId, subjectId) ?.let {
