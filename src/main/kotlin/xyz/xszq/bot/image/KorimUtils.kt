@@ -14,6 +14,7 @@ import korlibs.image.text.TextRenderer
 import korlibs.image.vector.Context2d
 import korlibs.io.file.std.localCurrentDirVfs
 import korlibs.math.geom.Point
+import korlibs.math.geom.vector.LineJoin
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.sync.Mutex
@@ -157,5 +158,6 @@ suspend fun Context2d.fillTextSafe(text: String, pos: Point) = fontLock.withLock
     fillText(text, pos)
 }
 suspend fun Context2d.strokeTextSafe(text: String, pos: Point) = fontLock.withLock {
+    lineJoin = LineJoin.ROUND
     strokeText(text, pos)
 }

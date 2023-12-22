@@ -48,7 +48,7 @@ interface C2CApi {
                 msgSeq = msgSeq
             )
         )
-        println(response.bodyAsText())
+//        println(response.bodyAsText())
         return try {
             val msg = response.body<PostGroupMessageResponse>()
             msg

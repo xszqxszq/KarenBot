@@ -8,9 +8,20 @@ permalink: /meme/
 
 ## 说明
 
-- 使用时命令格式为`/生成 表情名称 [附带参数]`。**注意，表情名称是中文！！不是英文！！**
+这是一个生成各种表情包的功能，使用时命令格式为`/生成 表情名称 [附带参数]`。**注意，表情名称是中文！！不是英文！！**
+
 - 移动端同时发送图片和文本的方法：先输入“/”点击快捷菜单输好指令，然后在下面选择图片的地方**勾选**需要发送的图片（不要点进去或者直接向上滑发出），最后点击**文本框右侧的“发送”按钮**即可发出。
 - 本功能的逻辑实现及资源文件大部分来自 [MeetWq/meme-generator](https://github.com/MeetWq/meme-generator)，5000choyen 功能的逻辑直接来源于 [yurafuca/5000choyen](https://github.com/yurafuca/5000choyen) ，蔚蓝档案风格 LOGO 功能直接来源于 [nulla2011/bluearchive-logo](https://github.com/nulla2011/bluearchive-logo)，本项目参考以上项目以纯 Kotlin 的方式迁移实现并作了部分修改。特别感谢以上项目作者及贡献者的付出！
+
+# [PJSK表情包生成](/pjsk)
+
+- 详细说明请点击[这里](/pjsk)查看
+- 指令：`/pjsk 人物+编号 文本（支持多行）`
+- 例：`/pjsk 初音6 纳尼`
+- 预览：
+<div align="left">
+  <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/pjsk.png" width="200" />
+</div>
 
 
 # [蔚蓝档案风格 LOGO](https://github.com/nulla2011/bluearchive-logo)

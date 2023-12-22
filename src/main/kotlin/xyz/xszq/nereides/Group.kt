@@ -90,7 +90,7 @@ class Group(
         }
         val reply = content.reply
         if (files.any { it == null }) {
-            println("重传失败，消息发送不成功")
+            bot.logger.error { "重传失败，消息发送不成功" }
             return false
         }
         val doSendMessage: suspend (String, Media?) -> PostGroupMessageResponse? = { nowText, media ->
@@ -108,7 +108,7 @@ class Group(
         }
         var response = doSendMessage(text, files.firstOrNull())
         reply ?.let { it.seq ++ }
-        println(response)
+//        println(response)
 
         // 错误重传处理
         response ?.ret ?.let { ret ->

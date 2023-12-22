@@ -19,6 +19,7 @@ import xyz.xszq.bot.dao.AccessLogs
 import xyz.xszq.bot.audio.*
 import xyz.xszq.bot.config.BinConfig
 import xyz.xszq.bot.config.BotConfig
+import xyz.xszq.bot.config.PJSKConfig
 import xyz.xszq.bot.dao.*
 import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.bot.image.*
@@ -54,6 +55,8 @@ suspend fun init() {
     FFMpegTask.ffmpegBin = binConfig.ffmpeg
     FFMpegTask.ffmpegPath = binConfig.ffmpegPath
     FFMpegTask.checkFFMpeg()
+
+    PJSKSticker.config = PJSKConfig.load(localCurrentDirVfs["image/pjsk/characters.json"])
 
     mariadb = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
         config.databaseUser, config.databasePassword)
@@ -300,6 +303,7 @@ fun subscribe() {
                 reply(ListArk.build {
                     desc { "生成功能帮助" }
                     prompt { "生成功能帮助" }
+                    text { "这是一个制作表情包的功能。您需要向机器人提供文本/图片作为输入来制作表情包。" }
                     text { "指令格式：”/生成 模式“" }
                     link("https://otmdb.cn/karenbot/meme") { "点我查看功能列表及表情包预览" }
                     text { "使用”/生成 帮助 [模式]“来查看该模式的帮助说明。" }
@@ -465,12 +469,47 @@ fun subscribe() {
             reply(RandomImage.getRandom("reply").toImage())
         }
     }
-    GlobalEventChannel.subscribePublicMessages {
-        startsWith("/test") {
-            reply(Markdown.build("101999766_1702985925") {
-                append("title") { "请点击下面的按钮验证管理员身份！" }
-//                append("result") { "3.0/6.8/10.6/12.5/13.3" }
-            } + Keyboard(MessageKeyboard("101999766_1702988150")))
+    GlobalEventChannel.subscribePublicMessages(permName = "image.pjsk") {
+        startsWith("/pjsk") { raw ->
+            if (PJSKSticker.aliases.none { it.value.any { alias -> raw.trim().startsWith(alias) } }) {
+                reply(ListArk.build {
+                    desc { "PJSK表情包功能帮助" }
+                    prompt { "PJSK帮助" }
+                    text { "这是一个生成PJSK（プロセカ）表情包的功能。" }
+                    text { "使用方法：/pjsk 角色名+图片编号 文本" }
+                    text { "\t例：/pjsk 初音6 已举办" }
+                    text { "\t例：/pjsk ena9 喜欢你" }
+                    link("https://otmdb.cn/karenbot/pjsk") { "点我查看可选的图片列表" }
+                })
+                return@startsWith
+            }
+            val list = raw.split(" ", limit = 2)
+            if (list.size < 2) {
+                reply("使用方法有误，请使用/pjsk查看说明！")
+                return@startsWith
+            }
+            println("asd")
+            val (templateName, text) = list
+            val (character, alias) = PJSKSticker.aliases.mapNotNull { (character, aliases) ->
+                aliases.forEach { alias ->
+                    if (templateName.lowercase().startsWith(alias))
+                        return@mapNotNull Pair(character, alias)
+                }
+                return@mapNotNull null
+            }.firstOrNull() ?: run {
+                reply("使用方法有误，请使用/pjsk查看说明！")
+                return@startsWith
+            }
+            println(templateName.substringAfter(alias))
+            val picId = templateName.substringAfter(alias).toIntOrNull() ?: run {
+                reply("使用方法有误，请使用/pjsk查看说明！")
+                return@startsWith
+            }
+            val config = PJSKSticker.config.characters.first {
+                it.character == character &&
+                        it.name.split(" ").last().toInt() == picId
+            }
+            reply(PJSKSticker.draw(config, text).savePng().toImage())
         }
     }
 //    GlobalEventChannel.subscribePublicMessages(permName = "sleep") {

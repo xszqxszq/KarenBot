@@ -6,8 +6,8 @@ permalink: /maimai_icons/
 
 # 头像列表
 
-| 头像文件名    | 预览 |
-|---------|----------------------------------------------------------------------------------------|------|------|
+| 头像文件名              | 预览                                                                                                                          |
+|--------------------|-----------------------------------------------------------------------------------------------------------------------------|
 | UI_Icon_000000.png | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/maimai/themes/brief/icon/UI_Icon_000000.png) |
 | UI_Icon_000001.png | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/maimai/themes/brief/icon/UI_Icon_000001.png) |
 | UI_Icon_000002.png | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/maimai/themes/brief/icon/UI_Icon_000002.png) |

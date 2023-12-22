@@ -174,6 +174,23 @@ class BuildImage(var image: Bitmap) {
             restore()
         })
     }
+    fun trim(): BuildImage {
+        var minX = width
+        var minY = height
+        var maxX = 0
+        var maxY = 0
+        image.forEach { _, x, y ->
+            if (image.getRgba(x, y).a != 0) {
+                minX = min(minX, x)
+                minY = min(minY, y)
+                maxX = max(maxX, x)
+                maxY = max(maxY, y)
+            }
+        }
+        return BuildImage(NativeImage(maxX - minX, maxY - minY).modify {
+            drawImage(image, Point(-minX, -minY))
+        })
+    }
     fun crop(bounds: List<Int>): BuildImage {
         return BuildImage(NativeImage(bounds[2] - bounds[0], bounds[3] - bounds[1]).modify {
             fillStyle = Colors.WHITE
@@ -249,11 +266,12 @@ class BuildImage(var image: Bitmap) {
         strokeFill: RGBA? = null,
         fontFallback: Boolean = true,
         fontName: String? = null,
-        fallbackFonts: List<String> = defaultFallbackFonts
+        fallbackFonts: List<String> = defaultFallbackFonts,
+        strokeWidth: Int? = null
     ): BuildImage {
         if (xy.size == 2) {
             Text2Image.fromText(
-                text, fontSize, fill, spacing, linesAlign, (fontSize * strokeRatio).toInt(), strokeFill,
+                text, fontSize, fill, spacing, linesAlign, strokeWidth ?: (fontSize * strokeRatio).toInt(), strokeFill,
                 fontFallback, fontName, fallbackFonts
             ).drawOnImage(image, Point(xy.first().toDouble(), xy.last().toDouble()))
             return this
@@ -265,7 +283,7 @@ class BuildImage(var image: Bitmap) {
         var nowFontSize = maxFontSize
         while (true) {
             val text2Image = Text2Image.fromText(
-                text, nowFontSize, fill, spacing, linesAlign, (nowFontSize * strokeRatio).toInt(), strokeFill,
+                text, nowFontSize, fill, spacing, linesAlign, strokeWidth ?: (nowFontSize * strokeRatio).toInt(), strokeFill,
                 fontFallback, fontName, fallbackFonts
             )
             var textW = kotlin.runCatching { // TODO: Fix this
@@ -413,7 +431,7 @@ class BuildImage(var image: Bitmap) {
             val fontDir = localCurrentDirVfs["font"]
             fontDir.list().collect {
                 val font = it.readTtfFont()
-                fonts[font.ttfName] = font
+                fonts[font.ttfCompleteName] = font
             }
         }
         fun new(mode: String, size: SizeInt, color: RGBA? = null) =
@@ -459,7 +477,7 @@ class BuildImage(var image: Bitmap) {
             }
             fonts.forEach { f ->
                 BuildImage.fonts[f] ?.let { font ->
-                    if (!text.any { font[it] == null })
+                    if (text.all { font[it] != null })
                         return font
                 }
             }

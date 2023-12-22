@@ -32,11 +32,12 @@ object AutoQA {
         ) }
     }
     private suspend fun update(force: Boolean = false) {
-        mutex.withLock {
-            if (force || System.currentTimeMillis() - cacheTime >= 60 * 1000L) {
-                rules = fetchFromDB()
+        if (force || System.currentTimeMillis() - cacheTime >= 60 * 1000L) {
+            val data = fetchFromDB()
+            mutex.withLock {
+                rules = data
+                cacheTime = System.currentTimeMillis()
             }
-            cacheTime = System.currentTimeMillis()
         }
     }
     private suspend fun matchText(msg: String, contextId: String): String? {

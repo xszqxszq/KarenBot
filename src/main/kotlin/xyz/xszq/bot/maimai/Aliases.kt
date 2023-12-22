@@ -25,18 +25,19 @@ class Aliases(private val musicsInfo: MusicsInfo) {
         }
         expectSuccess = false
     }
-    var aliases = mapOf<String, List<String>>()
-    val mutex = Mutex()
-    var cacheTime = 0L
+    private var aliases = mapOf<String, List<String>>()
+    private val mutex = Mutex()
+    private var cacheTime = 0L
     private suspend fun fetchFromDB() = transactionWithLock {
         MaimaiAliases.selectAll().groupBy({ it[MaimaiAliases.id] }, { it[MaimaiAliases.name] })
     }
     private suspend fun update(force: Boolean = false) {
-        mutex.withLock {
-            if (force || System.currentTimeMillis() - cacheTime >= 60 * 1000L) {
-                aliases = fetchFromDB()
+        if (force || System.currentTimeMillis() - cacheTime >= 60 * 1000L) {
+            val data = fetchFromDB()
+            mutex.withLock {
+                aliases = data
+                cacheTime = System.currentTimeMillis()
             }
-            cacheTime = System.currentTimeMillis()
         }
     }
     private suspend fun getAll(id: String): List<String> {

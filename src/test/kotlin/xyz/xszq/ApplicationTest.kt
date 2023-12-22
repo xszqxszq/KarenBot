@@ -18,13 +18,11 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import org.jetbrains.exposed.sql.upsert
 import xyz.xszq.bot.audio.OttoVoice
 import xyz.xszq.bot.config.BotConfig
+import xyz.xszq.bot.config.PJSKConfig
 import xyz.xszq.bot.dao.AccessLogs
 import xyz.xszq.bot.dao.TouhouAliases
 import xyz.xszq.bot.dao.TouhouMusics
-import xyz.xszq.bot.image.BlueArchiveLogo
-import xyz.xszq.bot.image.BuildImage
-import xyz.xszq.bot.image.MemeGenerator
-import xyz.xszq.bot.image.globalFontRegistry
+import xyz.xszq.bot.image.*
 import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.MaimaiUtils
 import xyz.xszq.bot.maimai.MaimaiUtils.getPlateVerList
@@ -197,6 +195,8 @@ suspend fun main() {
     mariadb = Database.connect(config.databaseUrl, driver = "org.mariadb.jdbc.Driver",
         config.databaseUser, config.databasePassword)
     initMongo()
+    PJSKSticker.config = PJSKConfig.load(localCurrentDirVfs["image/pjsk/characters.json"])
+    rootLocalVfs["D:/Temp/pjsk.png"].writeBytes(PJSKSticker.draw(PJSKSticker.config.characters.first { it.id == "257" }, "我有四只手").savePng())
 //    rootLocalVfs["D:/Temp/test.gif"].writeBytes(MemeGenerator.handle("唐可可举牌",
 //        args = listOf("阿斯蒂芬"),
 //        images = listOf(BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]), BuildImage.open(localCurrentDirVfs["E:\\Workspace\\meme-generator\\test.jpg"]))
@@ -219,25 +219,25 @@ suspend fun main() {
 //        }
 //    }.inWholeMilliseconds / 1000.0
 //    println("新版耗时：${new / 5}s")
-    bot = Bot(
-        appId = config.appId,
-        clientSecret = config.clientSecret,
-        easyToken = config.token,
-        sandbox = config.sandbox
-    )
-    GlobalEventChannel.subscribePublicMessages {
-        always {
-            launch(Dispatchers.IO) {
-                AccessLogs.saveLog(subjectId, contextId, contentString)
-            }
-        }
-    }
-    repeat(1000000) {
-        GlobalEventChannel.broadcast(GroupAtMessageEvent(bot, Random.nextLong().toHexString(),
-            Random.nextLong().toHexString(), Random.nextLong().toHexString(),
-            MessageChain(Random.nextLong().toHexString().toPlainText()),
-            timestamp = System.currentTimeMillis()))
-    }
-    delay(20000L)
+//    bot = Bot(
+//        appId = config.appId,
+//        clientSecret = config.clientSecret,
+//        easyToken = config.token,
+//        sandbox = config.sandbox
+//    )
+//    GlobalEventChannel.subscribePublicMessages {
+//        always {
+//            launch(Dispatchers.IO) {
+//                AccessLogs.saveLog(subjectId, contextId, contentString)
+//            }
+//        }
+//    }
+//    repeat(1000000) {
+//        GlobalEventChannel.broadcast(GroupAtMessageEvent(bot, Random.nextLong().toHexString(),
+//            Random.nextLong().toHexString(), Random.nextLong().toHexString(),
+//            MessageChain(Random.nextLong().toHexString().toPlainText()),
+//            timestamp = System.currentTimeMillis()))
+//    }
+//    delay(20000L)
 
 }

@@ -24,11 +24,12 @@ object Permissions: Table("permission") {
         selectAll().associateBy ({ Pair(it[openId], it[perm]) }, { it[status] })
     }
     private suspend fun update(force: Boolean = false) {
-        mutex.withLock {
-            if (force || System.currentTimeMillis() - cacheTime >= 60 * 1000L) {
-                permissions = fetchFromDB()
+        if (force || System.currentTimeMillis() - cacheTime >= 60 * 1000L) {
+            val data = fetchFromDB()
+            mutex.withLock {
+                permissions = data
+                cacheTime = System.currentTimeMillis()
             }
-            cacheTime = System.currentTimeMillis()
         }
     }
     suspend fun getContextStatus(

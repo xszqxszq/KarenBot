@@ -7,10 +7,12 @@ import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.image.text.HorizontalAlign
 import korlibs.math.geom.Point
+import korlibs.math.geom.vector.LineJoin
 import kotlinx.coroutines.sync.withLock
 import xyz.xszq.bot.image.BuildImage.Companion.defaultFallbackFonts
 import xyz.xszq.bot.image.BuildImage.Companion.getProperFont
 import xyz.xszq.nereides.sumOf
+import java.awt.BasicStroke
 
 class Text2Image(
     var lines: List<Line>,
@@ -27,6 +29,7 @@ class Text2Image(
     suspend fun drawOnImage(image: Bitmap, pos: Point) {
         var top = pos.y
         image.context2d {
+            lineJoin = LineJoin.ROUND
             kotlin.runCatching {
                 lines.forEach { line ->
                     font = line.font
@@ -77,6 +80,7 @@ class Text2Image(
             width.toInt() + paddingLeft + paddingRight,
             height.toInt() + paddingTop + paddingBottom
         ).modify {
+            lineJoin = LineJoin.ROUND
             bgColor?.let {
                 fillStyle = it
                 fillRect(0, 0, this.width, this.height)

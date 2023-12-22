@@ -6,8 +6,8 @@ permalink: /maimai_plates/
 
 # 头像列表
 
-| 头像文件名    | 预览 |
-|---------|----------------------------------------------------------------------------------------|------|------|
+| 头像文件名               | 预览                                                                                                                            |
+|---------------------|-------------------------------------------------------------------------------------------------------------------------------|
 | UI_Plate_000000.png | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/maimai/themes/brief/plate/UI_Plate_000000.png) |
 | UI_Plate_000001.png | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/maimai/themes/brief/plate/UI_Plate_000001.png) |
 | UI_Plate_000002.png | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/maimai/themes/brief/plate/UI_Plate_000002.png) |
