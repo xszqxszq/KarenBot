@@ -8,73 +8,21 @@ permalink: /meme/
 
 ## 说明
 
-这是一个生成各种表情包的功能，使用时命令格式为`/生成 表情名称 [附带参数]`。**注意，表情名称是中文！！不是英文！！**
+这是一个生成各种表情包的功能，使用时命令格式为`/生成 表情名称 [附带参数]`。
 
-- 移动端同时发送图片和文本的方法：先输入“/”点击快捷菜单输好指令，然后在下面选择图片的地方**勾选**需要发送的图片（不要点进去或者直接向上滑发出），最后点击**文本框右侧的“发送”按钮**即可发出。
-- 本功能的逻辑实现及资源文件大部分来自 [MeetWq/meme-generator](https://github.com/MeetWq/meme-generator)，5000choyen 功能的逻辑直接来源于 [yurafuca/5000choyen](https://github.com/yurafuca/5000choyen) ，蔚蓝档案风格 LOGO 功能直接来源于 [nulla2011/bluearchive-logo](https://github.com/nulla2011/bluearchive-logo)，本项目参考以上项目以纯 Kotlin 的方式迁移实现并作了部分修改。特别感谢以上项目作者及贡献者的付出！
-
-# [PJSK表情包生成](/pjsk)
-
-- 详细说明请点击[这里](/pjsk)查看
-- 指令：`/pjsk 人物+编号 文本（支持多行）`
-- 例：`/pjsk 初音6 纳尼`
-- 预览：
-<div align="left">
-  <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/pjsk.png" width="200" />
-</div>
-
-
-# [蔚蓝档案风格 LOGO](https://github.com/nulla2011/bluearchive-logo)
-
-- 指令：`/ba 左侧文本 右侧文本`
-- 预览：
-<div align="left">
-  <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/bluearchive.png" width="200" />
-</div>
-
-# [5000choyen](https://github.com/yurafuca/5000choyen)
-
-- 命令：`/5k 第一行文本`
-- `第二行文本`
-- 预览：
-<div align="left">
-  <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/5000choyen.png" width="200" />
-</div>
-
-# 球面化/反球面化
-
-- 命令：`/生成 球面化`
-- 命令：`/生成 反球面化`
-- 需要同时发送一张图片！
-- 预览：
-<div align="left">
-  <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/spherize.png" width="200" />
-</div>
-
-# 对称/我巨爽
-
-- 命令：`/生成 对称`
-- 需要同时发送一张图片！
-- 预览：
-<div align="left">
-  <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/flip.png" width="200" />
-</div>
-
-
-# [meme-generator](https://github.com/MeetWq/meme-generator)
-
-以下为来自 meme-generator 的表情名称、所需参数等信息及表情预览。
-
-由于本项目为纯 Kotlin 实现，部分功能可能存在 bug，欢迎在 [issues](https://github.com/xszqxszq/KarenBot/issues) 反馈。
-
-**注意！！！使用的时候请看“关键词”一栏！！不要打英文！！！**
+**注意！！！指令前面一定要加`/生成`！！！不是直接发送关键词！！！**
 
 例：`/生成 下面有的关键词 图片/文字参数`
 
-**不是at机器人直接打关键词！！** 前面要加`/生成` ！！！
-
 下面列表中的关键词的那个斜杠“/”代表的意思是或，比如`添乱/给社会添乱`代表可以用`/生成 添乱`或者`/生成 给社会添乱`，**不是`/生成 添乱/给社会添乱`！！**
 
+手机/平板同时发送图片和文本的方法：先输入“/”点击快捷菜单输好指令，然后在下面选择图片的地方**勾选**需要发送的图片（不要点进去或者直接向上滑发出），最后点击**文本框右侧的“发送”按钮**即可发出。
+
+* [PJSK表情包生成](#PJSK表情包生成)
+* [蔚蓝档案风格LOGO](#蔚蓝档案风格LOGO)
+* [5000choyen](#5000choyen)
+* [球面化/反球面化](#球面化)
+* [对称/我巨爽](#对称)
 * [添乱/给社会添乱](#add_chaos)
 * [上瘾/毒瘾发作](#addiction)
 * [一样](#alike)
@@ -248,6 +196,60 @@ permalink: /meme/
 * [膜/膜拜](#worship)
 * [吴京xx中国xx](#wujing)
 * [yt/youtube](#youtube)
+
+# PJSK表情包生成
+
+- 详细说明请点击[这里](/pjsk)查看
+- 指令：`/pjsk 人物+编号 文本（支持多行）`
+- 例：`/pjsk 初音6 纳尼`
+- 预览：
+<div align="left">
+  <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/pjsk.png" width="200" />
+</div>
+
+
+# 蔚蓝档案风格LOGO
+
+- 指令：`/ba 左侧文本 右侧文本`
+- 预览：
+<div align="left">
+  <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/bluearchive.png" width="200" />
+</div>
+
+# 5000choyen
+
+- 命令：`/5k 第一行文本`
+- `第二行文本`
+- 预览：
+<div align="left">
+  <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/5000choyen.png" width="200" />
+</div>
+
+# 球面化
+
+- 命令：`/生成 球面化`
+- 命令：`/生成 反球面化`
+- 需要同时发送一张图片！
+- 预览：
+<div align="left">
+  <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/spherize.png" width="200" />
+</div>
+
+# 对称
+
+- 命令：`/生成 对称`
+- 需要同时发送一张图片！
+- 预览：
+<div align="left">
+  <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/flip.png" width="200" />
+</div>
+
+
+# [meme-generator](https://github.com/MeetWq/meme-generator)
+
+以下为来自 meme-generator 的表情名称、所需参数等信息及表情预览。
+
+由于本项目为纯 Kotlin 实现，部分功能可能存在 bug，欢迎在 [issues](https://github.com/xszqxszq/KarenBot/issues) 反馈。
 
 ## add_chaos
 
@@ -2173,3 +2175,9 @@ permalink: /meme/
 <div align="left">
   <img src="https://mirror.ghproxy.com/https://raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/docs/youtube.jpg" width="200" />
 </div>
+
+# 鸣谢
+
+本功能的逻辑实现及资源文件大部分来自 [MeetWq/meme-generator](https://github.com/MeetWq/meme-generator)，5000choyen 功能的逻辑直接来源于 [yurafuca/5000choyen](https://github.com/yurafuca/5000choyen) ，蔚蓝档案风格 LOGO 功能直接来源于 [nulla2011/bluearchive-logo](https://github.com/nulla2011/bluearchive-logo)，本项目参考以上项目以纯 Kotlin 的方式迁移实现并作了部分修改。特别感谢以上项目作者及贡献者的付出！
+
+鸣 谢 榆 木 华

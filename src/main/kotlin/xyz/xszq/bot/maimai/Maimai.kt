@@ -92,12 +92,6 @@ object Maimai {
         logger.info { "正在生成定数表中……" }
         images.preGenerateDsList()
         logger.info { "maimai 功能加载完成。" }
-    }
-    @OptIn(DelicateCoroutinesApi::class)
-    fun init() {
-        GlobalScope.launch {
-            initBlocking()
-        }
         GlobalScope.launch {
             delay(3600 * 1000L)
             kotlin.runCatching {
@@ -125,10 +119,15 @@ object Maimai {
     private suspend fun getCredential(arg: String, event: MessageEvent): Pair<String, String>? = event.run {
         if (arg.isNotBlank()) Pair("username", arg)
         else queryBindings(subjectId) ?: run {
-            reply(buildString {
-                appendLine("未绑定账号信息，请指定用户名，或先进行绑定操作！")
-                appendLine("您可以使用 /mai bind 绑定查分器账号进行快速查询 (此绑定与查分器绑定无关，在查分器绑定之后仍需在Bot这里绑定一次)")
-            }.trimEnd())
+            reply(ListArk.build {
+                desc { "maimai功能说明" }
+                prompt { "maimai" }
+                text { "您暂未在机器人处绑定账号信息，请指定用户名，或先进行绑定操作！" }
+                text { "请使用使用“/mai bind 用户名或qq号”来绑定(此绑定与查分器绑定无关，在查分器绑定之后仍需在Bot这里绑定一次)" }
+                text { "" }
+                text { "（常见问题：为什么需要再在机器人这里绑定一次QQ号？答：因为机器人获取不到QQ号！！获取不到！！）" }
+                link("https://otmdb.cn/jump/maimaidxprober") { "点我进入查分器" }
+            })
             null
         }
     }
@@ -137,7 +136,15 @@ object Maimai {
         val (status, data) = prober.getDataByVersion(credentialType, credential, getPlateVerList(version))
         when (status) {
             HttpStatusCode.BadRequest ->
-                reply("绑定的账号/指定的用户名不存在，请确认用户名对应的玩家在 Diving-Fish 的舞萌 DX 查分器上已注册")
+                reply(ListArk.build {
+                    desc { "maimai功能说明" }
+                    prompt { "maimai" }
+                    text { "绑定的账号/指定的用户名不存在，请确认用户名对应的玩家在 Diving-Fish 的舞萌 DX 查分器上已注册" }
+                    text { "请使用使用“/mai bind 用户名或qq号”来绑定（这个绑定与查分器上面的绑定无关！！！无！关！）" }
+                    text { "" }
+                    text { "（常见问题：为什么需要再在机器人这里绑定一次QQ号？答：因为机器人获取不到QQ号！！获取不到！！）" }
+                    link("https://otmdb.cn/jump/maimaidxprober") { "点我进入查分器" }
+                })
             HttpStatusCode.Forbidden ->
                 reply("该玩家已禁止他人查询。如果是您本人账号且已绑定QQ号，请不带用户名再次尝试查询一次")
         }
@@ -150,7 +157,15 @@ object Maimai {
         val (status, data) = prober.getPlayerData(credentialType, credential)
         when (status) {
             HttpStatusCode.BadRequest ->
-                reply("用户名不存在，请确认用户名对应的玩家在 Diving-Fish 的舞萌 DX 查分器上已注册")
+                reply(ListArk.build {
+                    desc { "maimai功能说明" }
+                    prompt { "maimai" }
+                    text { "绑定的账号/指定的用户名不存在，请确认用户名对应的玩家在 Diving-Fish 的舞萌 DX 查分器上已注册" }
+                    text { "这个绑定与查分器上面的绑定无关！！！无！关！" }
+                    text { "" }
+                    text { "（常见问题：为什么需要再在机器人这里绑定一次QQ号？答：因为机器人获取不到QQ号！！获取不到！！）" }
+                    link("https://otmdb.cn/jump/maimaidxprober") { "点我进入查分器" }
+                })
             HttpStatusCode.Forbidden ->
                 reply("该玩家已禁止他人查询。如果是您本人账号且已绑定QQ号，请不带用户名再次尝试查询一次")
         }
@@ -172,13 +187,17 @@ object Maimai {
             startsWith("bind") { raw ->
                 val args = raw.toArgsList()
                 if (args.isEmpty()) {
-                    reply(buildString {
-                        appendLine("使用方法（以下两种二选一，建议绑qq）：")
-                        appendLine("/mai bind qq号。例：/mai bind 123456")
-                        appendLine("/mai bind 用户名。例：/mai bind maxscore")
-                        appendLine("也可以使用“/mai bind qq qq号”或者“/mai bind username 用户名”来指名绑定的类型。")
-                        appendLine()
-                        appendLine("（常见问题：为什么需要再在机器人这里绑定一次QQ号？答：因为机器人获取不到QQ号！！获取不到！！）")
+                    reply(ListArk.build {
+                        desc { "maimai绑定说明" }
+                        prompt { "maimai绑定" }
+                        text { "在使用maimai功能前，您需要在机器人处绑定您的查分器账号。" }
+                        text { "使用方法（以下两种二选一，建议绑qq）：" }
+                        text { "/mai bind qq号。例：/mai bind 123456" }
+                        text { "/mai bind 用户名。例：/mai bind maxscore" }
+                        text { "也可以使用“/mai bind qq qq号”或者“/mai bind username 用户名”来指名绑定的类型。" }
+                        text { "" }
+                        text { "（常见问题：为什么需要再在机器人这里绑定一次QQ号？答：因为机器人获取不到QQ号！！获取不到！！）" }
+                        link("https://otmdb.cn/jump/maimaidxprober") { "点我进入查分器" }
                     })
                     return@startsWith
                 }
@@ -199,12 +218,15 @@ object Maimai {
                 val (type, credential) =
                     if (arg.isNotBlank()) Pair("username", arg)
                     else queryBindings(subjectId) ?: run {
-                        reply(buildString {
-                            appendLine("您未在本机器人绑定账号（这个绑定与查分器上面的绑定无关！！！无！关！）")
-                            appendLine("请使用“/mai bind 用户名或qq号”来绑定！不是“/b50 bind”而是“/mai bind”！")
-                            appendLine("或者使用“/b50 用户名”来按用户名查询")
-                            appendLine()
-                            appendLine("（常见问题：为什么需要再在机器人这里绑定一次QQ号？答：因为机器人获取不到QQ号！！获取不到！！）")
+                        reply(ListArk.build {
+                            desc { "b50功能说明" }
+                            prompt { "b50" }
+                            text { "您未在本机器人绑定账号（这个绑定与查分器上面的绑定无关！！！无！关！）" }
+                            text { "请使用“/mai bind 用户名或qq号”来绑定！" }
+                            text { "或者使用“/b50 用户名”来按用户名查询" }
+                            text { "" }
+                            text { "（常见问题：为什么需要再在机器人这里绑定一次QQ号？答：因为机器人获取不到QQ号！！获取不到！！）" }
+                            link("https://otmdb.cn/jump/maimaidxprober") { "点我进入查分器" }
                         })
                         return@startsWith
                     }
@@ -214,8 +236,19 @@ object Maimai {
                         reply(images.generateBest(data!!, subjectId).toImage())
                     }
                     HttpStatusCode.BadRequest -> {
-                        reply("您的QQ未在机器人处绑定查分器账号（详见/mai bind）或所查询的用户名不存在，" +
-                                "请确认用户名对应的玩家在 Diving-Fish 的舞萌 DX 查分器上已注册")
+                        if (credential.startsWith("bind")) {
+                            reply("笑死，你把“/mai bind”打成了“/b50 bind”，哈哈哈哈哈")
+                            return@startsWith
+                        }
+                        reply(ListArk.build {
+                            desc { "b50功能说明" }
+                            prompt { "b50" }
+                            text { "您的QQ未在机器人处绑定查分器账号（详见/mai bind）或所查询的用户名不存在，" +
+                                    "请确认用户名对应的玩家在 Diving-Fish 的舞萌 DX 查分器上已注册"}
+                            text { "" }
+                            text { "（常见问题：为什么需要再在机器人这里绑定一次QQ号？答：因为机器人获取不到QQ号！！获取不到！！）" }
+                            link("https://otmdb.cn/jump/maimaidxprober") { "点我进入查分器" }
+                        })
                     }
                     HttpStatusCode.Forbidden -> {
                         reply("该玩家已禁止他人查询成绩")
@@ -226,12 +259,15 @@ object Maimai {
                 val (type, credential) =
                     if (arg.isNotBlank()) Pair("username", arg)
                     else queryBindings(subjectId) ?: run {
-                        reply(buildString {
-                            appendLine("您未在本机器人绑定账号（这个绑定与查分器上面的绑定无关！！！无！关！）")
-                            appendLine("请使用“/mai bind 用户名或qq号”来绑定！")
-                            appendLine("或者使用“/mai mb50 用户名”来按用户名查询")
-                            appendLine()
-                            appendLine("（常见问题：为什么需要再在机器人这里绑定一次QQ号？答：因为机器人获取不到QQ号！！获取不到！！）")
+                        reply(ListArk.build {
+                            desc { "mb50功能说明" }
+                            prompt { "mb50" }
+                            text { "您未在本机器人绑定账号（这个绑定与查分器上面的绑定无关！！！无！关！）" }
+                            text { "请使用“/mai bind 用户名或qq号”来绑定！" }
+                            text { "或者使用“/mai mb50 用户名”来按用户名查询" }
+                            text { "" }
+                            text { "（常见问题：为什么需要再在机器人这里绑定一次QQ号？答：因为机器人获取不到QQ号！！获取不到！！）" }
+                            link("https://otmdb.cn/jump/maimaidxprober") { "点我进入查分器" }
                         })
                         return@startsWith
                     }
@@ -243,12 +279,15 @@ object Maimai {
                 val (type, credential) =
                     if (arg.isNotBlank()) Pair("username", arg)
                     else queryBindings(subjectId) ?: run {
-                        reply(buildString {
-                            appendLine("您未在本机器人绑定账号（这个绑定与查分器上面的绑定无关！！！无！关！）")
-                            appendLine("请使用“/mai bind 用户名或qq号”来绑定！")
-                            appendLine("或者使用“/mai ap50 用户名”来按用户名查询")
-                            appendLine()
-                            appendLine("（常见问题：为什么需要再在机器人这里绑定一次QQ号？答：因为机器人获取不到QQ号！！获取不到！！）")
+                        reply(ListArk.build {
+                            desc { "ap50功能说明" }
+                            prompt { "ap50" }
+                            text { "您未在本机器人绑定账号（这个绑定与查分器上面的绑定无关！！！无！关！）" }
+                            text { "请使用“/mai bind 用户名或qq号”来绑定！" }
+                            text { "或者使用“/mai ap50 用户名”来按用户名查询" }
+                            text { "" }
+                            text { "（常见问题：为什么需要再在机器人这里绑定一次QQ号？答：因为机器人获取不到QQ号！！获取不到！！）" }
+                            link("https://otmdb.cn/jump/maimaidxprober") { "点我进入查分器" }
                         })
                         return@startsWith
                     }
@@ -259,8 +298,15 @@ object Maimai {
                         reply(images.generateAP50(data!!, records.second!!.verList, subjectId).toImage())
                     }
                     HttpStatusCode.BadRequest -> {
-                        reply("您的QQ未绑定查分器账号（详见/mai bind）或所查询的用户名不存在，" +
-                                "请确认用户名对应的玩家在 Diving-Fish 的舞萌 DX 查分器上已注册")
+                        reply(ListArk.build {
+                            desc { "ap50功能说明" }
+                            prompt { "ap50" }
+                            text { "您的QQ未在机器人处绑定查分器账号（详见/mai bind）或所查询的用户名不存在，" +
+                                    "请确认用户名对应的玩家在 Diving-Fish 的舞萌 DX 查分器上已注册"}
+                            text { "" }
+                            text { "（常见问题：为什么需要再在机器人这里绑定一次QQ号？答：因为机器人获取不到QQ号！！获取不到！！）" }
+                            link("https://otmdb.cn/jump/maimaidxprober") { "点我进入查分器" }
+                        })
                     }
                     HttpStatusCode.Forbidden -> {
                         reply("该玩家已禁止他人查询成绩")

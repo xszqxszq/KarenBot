@@ -305,6 +305,7 @@ fun subscribe() {
                     prompt { "生成功能帮助" }
                     text { "这是一个制作表情包的功能。您需要向机器人提供文本/图片作为输入来制作表情包。" }
                     text { "指令格式：”/生成 模式“" }
+                    text { "注意！！！！不是直接@可怜Bot发送“模式”！！！前面要加“/生成”！！！" }
                     link("https://otmdb.cn/karenbot/meme") { "点我查看功能列表及表情包预览" }
                     text { "使用”/生成 帮助 [模式]“来查看该模式的帮助说明。" }
                     if (this@startsWith is GuildAtMessageEvent) {
@@ -374,10 +375,22 @@ fun subscribe() {
                         when (it) {
                             is TextOrNameNotEnoughException -> reply("文本长度过短，请使用 /生成 查看帮助。")
                             is TextOverLengthException -> reply("文本长度过长，请缩短后再尝试")
-                            is UnsupportedOperationException -> reply("不存在该模式，请使用 /生成 查看帮助。")
+                            is UnsupportedOperationException ->
+                                reply(ListArk.build {
+                                    desc { "生成功能帮助" }
+                                    prompt { "生成功能帮助" }
+                                    text { "不存在该表情包模板，请使用“/生成”查看帮助。" }
+                                    link("https://otmdb.cn/karenbot/meme") { "点我查看表情包列表及预览" }
+                                })
                             else -> {
                                 val help = MemeGenerator.getHelpText(args.first())
-                                reply("使用方法有误，可能缺少了必要的参数（如图片或者文本）。请使用 /生成 查看帮助。\n$help")
+                                reply(ListArk.build {
+                                    desc { "生成功能帮助" }
+                                    prompt { "生成功能帮助" }
+                                    text { "使用方法有误，可能缺少了必要的参数（如图片或者文本）。请使用 /生成 查看帮助。" }
+                                    text { help }
+                                    link("https://otmdb.cn/karenbot/meme") { "点我查看表情包列表及预览" }
+                                })
                             }
                         }
                     }
@@ -509,7 +522,11 @@ fun subscribe() {
                 it.character == character &&
                         it.name.split(" ").last().toInt() == picId
             }
-            reply(PJSKSticker.draw(config, text).savePng().toImage())
+            MemeGenerator.semaphore.withPermit {
+                kotlin.runCatching {
+                    reply(PJSKSticker.draw(config, text).savePng().toImage())
+                }
+            }
         }
     }
 //    GlobalEventChannel.subscribePublicMessages(permName = "sleep") {

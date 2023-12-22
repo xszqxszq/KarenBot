@@ -9,7 +9,6 @@ import korlibs.math.geom.Point
 import korlibs.math.geom.Size
 import korlibs.math.geom.SizeInt
 import korlibs.math.geom.radians
-import korlibs.math.squared
 import xyz.xszq.bot.config.PJSKCharacter
 import xyz.xszq.bot.config.PJSKConfig
 import xyz.xszq.nereides.hexToRGBA
