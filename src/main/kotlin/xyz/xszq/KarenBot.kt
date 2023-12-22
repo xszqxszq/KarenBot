@@ -501,7 +501,6 @@ fun subscribe() {
                 reply("使用方法有误，请使用/pjsk查看说明！")
                 return@startsWith
             }
-            println("asd")
             val (templateName, text) = list
             val (character, alias) = PJSKSticker.aliases.mapNotNull { (character, aliases) ->
                 aliases.forEach { alias ->
@@ -513,7 +512,6 @@ fun subscribe() {
                 reply("使用方法有误，请使用/pjsk查看说明！")
                 return@startsWith
             }
-            println(templateName.substringAfter(alias))
             val picId = templateName.substringAfter(alias).toIntOrNull() ?: run {
                 reply("使用方法有误，请使用/pjsk查看说明！")
                 return@startsWith
