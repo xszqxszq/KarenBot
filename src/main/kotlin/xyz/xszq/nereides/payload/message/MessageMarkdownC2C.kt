@@ -2,8 +2,6 @@ package xyz.xszq.nereides.payload.message
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import xyz.xszq.nereides.message.ark.ListArk
-import xyz.xszq.nereides.message.ark.ListArkItem
 
 @Serializable
 data class MessageMarkdownC2C(

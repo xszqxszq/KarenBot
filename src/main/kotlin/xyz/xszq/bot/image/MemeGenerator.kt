@@ -10,7 +10,6 @@ import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.NativeImage
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
-import korlibs.image.format.showImageAndWait
 import korlibs.image.text.HorizontalAlign
 import korlibs.image.text.VerticalAlign
 import korlibs.io.async.async
@@ -37,7 +36,7 @@ typealias Args = List<String>
 typealias Maker = suspend (Images, Args)-> ByteArray
 object MemeGenerator {
     private val imgDir = localCurrentDirVfs["image/meme"]
-    val semaphore = Semaphore(16)
+    val semaphore = Semaphore(32)
     suspend fun handle(
         type: String,
         args: List<String> = listOf(),
@@ -51,12 +50,8 @@ object MemeGenerator {
                 if (type !in commands)
                     return@let
                 return semaphore.withPermit {
-                    kotlin.runCatching {
-                        (func.getter.call(this) as Maker).invoke(images, args)
-                    }.onFailure {
-                        it.printStackTrace()
-                    }
-                }.getOrThrow()
+                    (func.getter.call(this) as Maker).invoke(images, args)
+                }
             }
         }
         throw UnsupportedOperationException()

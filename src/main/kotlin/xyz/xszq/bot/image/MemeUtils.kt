@@ -18,8 +18,8 @@ import xyz.xszq.bot.ffmpeg.FFMpegFileType
 import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.config
 import xyz.xszq.nereides.forEachParallel
+import xyz.xszq.nereides.getTempFile
 import xyz.xszq.nereides.mapParallel
-import xyz.xszq.nereides.newTempFile
 import java.awt.image.BufferedImage
 import java.awt.image.BufferedImageOp
 import kotlin.math.absoluteValue
@@ -158,13 +158,13 @@ suspend fun saveGif(frames: List<Bitmap>, duration: Double): ByteArray {
     return saveGif(frames.mapParallel { it.toBMP32().scaled((it.width * 0.9).toInt(), (it.height * 0.9).toInt()) }, duration)
 }
 suspend fun encodeGif(raw: List<Bitmap>, duration: Int): ByteArray {
-    val files = raw.mapParallel { newTempFile(suffix = ".png").apply { writeBytes(it.encode(PNG)) } }
+    val files = raw.mapParallel { getTempFile(suffix = ".png").apply { writeBytes(it.encode(PNG)) } }
     val resultFile = FFMpegTask(FFMpegFileType.GIF) {
         frameRate(1000.0 / duration)
         input("\"concat:" + files.joinToString("|") { it.absolutePath } + "\"")
         yes()
     }.getResult()
-    val result = resultFile!!.readBytes()
+    val result = resultFile.readBytes()
     files.forEachParallel { it.delete() }
     resultFile.delete()
     return result

@@ -9,10 +9,10 @@ import java.time.LocalDateTime
 
 object AccessLogs {
     lateinit var collection: MongoCollection<AccessLog>
-    private val lock = Semaphore(32)
+//    private val lock = Semaphore(128)
     suspend fun saveLog(subject: String, context: String, content: String) = kotlin.runCatching {
-        lock.withPermit {
+//        lock.withPermit {
             collection.insertOne(AccessLog(ObjectId(), subject, context, content, LocalDateTime.now()))
-        }
+//        }
     }
 }

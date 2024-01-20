@@ -12,9 +12,13 @@ fun List<String>.subArgsList(): List<String> {
         return listOf()
     return subList(1, size)
 }
-fun String.toArgsListByLn(): List<String> = this.trim().split("\n").toMutableList().filter {
+fun String.toArgsListByLn(): List<String> = this.trim().split("\r\n", "\r", "\n").toMutableList().filter {
     isNotBlank()
 }
+fun String.toArgsListByLnOrSpace(): List<String> = if ("\r" in this || "\n" in this)
+    toArgsListByLn()
+else
+    toArgsList()
 
 const val DBC_SPACE = 32
 const val SBC_SPACE = 12288

@@ -14,8 +14,6 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.websocket.*
-import korlibs.io.file.VfsFile
-import korlibs.io.file.baseName
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.sync.Semaphore
@@ -23,11 +21,14 @@ import kotlinx.coroutines.sync.withPermit
 import kotlinx.serialization.json.Json
 import xyz.xszq.config
 import xyz.xszq.nereides.event.*
+import xyz.xszq.nereides.payload.event.GroupAddBot
 import xyz.xszq.nereides.payload.event.GroupAtMessageCreate
+import xyz.xszq.nereides.payload.event.GroupDelBot
 import xyz.xszq.nereides.payload.event.GuildAtMessageCreate
 import xyz.xszq.nereides.payload.user.GuildUser
 import xyz.xszq.nereides.payload.utils.AccessTokenRequest
 import xyz.xszq.nereides.payload.utils.AccessTokenResponse
+import xyz.xszq.nereides.payload.utils.WSSGatewayBotResponse
 import xyz.xszq.nereides.payload.utils.WSSGatewayResponse
 import xyz.xszq.nereides.payload.websocket.*
 import java.util.concurrent.atomic.AtomicInteger
@@ -41,6 +42,7 @@ open class QQClient(
     private val sandbox: Boolean
 ): CoroutineScope, C2CApi, GuildApi {
     var bot: Bot by Delegates.notNull()
+    var restarting: Boolean = false
     private val server = "https://api.sgroup.qq.com"
     private val json = Json {
         isLenient = true
@@ -61,9 +63,8 @@ open class QQClient(
         }
     }
     override val logger = KotlinLogging.logger("QQClient")
-    private val semaphore = Semaphore(config.maxConnections)
-    override suspend fun call(method: HttpMethod, api: String, payload: Any?): HttpResponse = semaphore.withPermit {
-        kotlin.runCatching {
+    override suspend fun call(method: HttpMethod, api: String, payload: Any?): HttpResponse {
+        return kotlin.runCatching {
             client.request("${server}${api}") {
                 this.method = method
                 contentType(ContentType.Application.Json)
@@ -76,8 +77,8 @@ open class QQClient(
             }
         }.onFailure {
             it.printStackTrace()
-        }
-    }.getOrThrow()
+        }.getOrThrow()
+    }
     override suspend fun get(api: String): HttpResponse =
         call(HttpMethod.Get, api, null)
     override suspend fun post(api: String, payload: Any): HttpResponse =
@@ -85,7 +86,7 @@ open class QQClient(
     override suspend fun multipart(
         api: String,
         values: Map<String, String>,
-        file: Pair<String, VfsFile>
+        file: Pair<String, Pair<String, ByteArray>>
     ): HttpResponse {
         return client.submitForm(
             "${server}${api}",
@@ -102,9 +103,9 @@ open class QQClient(
                     }
                     append(
                         file.first,
-                        runBlocking { file.second.readBytes() },
+                        file.second.second,
                         Headers.build {
-                            append(HttpHeaders.ContentDisposition, "filename=${file.second.baseName}")
+                            append(HttpHeaders.ContentDisposition, "filename=${file.second.first}")
                         }
                     )
                 }
@@ -144,6 +145,9 @@ open class QQClient(
     private suspend fun getWSSGateway(): String {
         return call(HttpMethod.Get, "/gateway", null).body<WSSGatewayResponse>().url
     }
+    private suspend fun getShards(): WSSGatewayBotResponse {
+        return call(HttpMethod.Get, "/gateway/bot", null).body<WSSGatewayBotResponse>()
+    }
 
     private suspend fun DefaultClientWebSocketSession.identify() {
         sendSerialized(
@@ -174,62 +178,62 @@ open class QQClient(
             )
         )
     }
-    private fun DefaultClientWebSocketSession.launchHeartbeatTask() {
-        launch {
-            while (true) {
-                sendSerialized(
-                    PayloadSend(
-                        OpCode.Heartbeat,
-                        seq.get()
-                    )
+    private fun DefaultClientWebSocketSession.launchHeartbeatTask() = launch {
+        while (true) {
+            sendSerialized(
+                PayloadSend(
+                    OpCode.Heartbeat,
+                    seq.get()
                 )
-                delay(heartbeatInterval)
-            }
-        }
-    }
-    private suspend fun DefaultClientWebSocketSession.handlePayload(frame: Frame, resume: Boolean) {
-        val payload = json.decodeFromString<PayloadRecv>((frame as Frame.Text).readText())
-        logger.debug { payload }
-        when (payload.op) {
-            OpCode.Hello -> {
-                val data = json.decodeFromString<HelloResponse>(payload.d!!)
-                heartbeatInterval = data.heartbeatInterval
-                if (resume)
-                    resume()
-                else
-                    identify()
-                botGuildInfo = getBotInfo()
-                launchHeartbeatTask()
-            }
-            OpCode.Reconnect -> {
-                this@handlePayload.close()
-            }
-            OpCode.InvalidSession -> {
-                logger.error { "建立连接时连接出错，请重启！" }
-            }
-            OpCode.Dispatch -> {
-                try {
-                    handleEvent(payload)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-            OpCode.HeartbeatACK -> {
-                logger.debug { "收到心跳包响应" }
-            }
-            else -> {
-
-            }
+            )
+            delay(heartbeatInterval)
         }
     }
     suspend fun listen() {
         var resume = false
+        var heartbeat: Job by Delegates.notNull()
+        val handlePayload: suspend DefaultClientWebSocketSession.(Frame,Boolean) -> Unit = { frame, resume ->
+            val payload = json.decodeFromString<PayloadRecv>((frame as Frame.Text).readText())
+            logger.debug { payload }
+            when (payload.op) {
+                OpCode.Hello -> {
+                    val data = json.decodeFromString<HelloResponse>(payload.d!!)
+                    heartbeatInterval = data.heartbeatInterval
+                    if (resume)
+                        resume()
+                    else
+                        identify()
+                    botGuildInfo = getBotInfo()
+                    heartbeat = launchHeartbeatTask()
+                }
+                OpCode.Reconnect -> {
+                    heartbeat.cancel()
+                    this.close()
+                }
+                OpCode.InvalidSession -> {
+                    logger.error { "建立连接时连接出错，请重启！" }
+                }
+                OpCode.Dispatch -> {
+                    try {
+                        handleEvent(payload)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+                OpCode.HeartbeatACK -> {
+                    logger.debug { "收到心跳包响应" }
+                }
+                else -> {
+
+                }
+            }
+        }
         while (true) {
             try {
                 wsClient.webSocket(getWSSGateway()) {
                     incoming.consumeEach {
                         launch {
-                            handlePayload(it, resume)
+                            handlePayload.invoke(this@webSocket, it, resume)
                         }
                     }
                 }
@@ -286,6 +290,28 @@ open class QQClient(
                         timestamp = parseDate(data.timestamp),
                         author = data.author,
                         mentions = data.mentions
+                    )
+                )
+            }
+            "GROUP_ADD_ROBOT" -> {
+                val data = json.decodeFromString<GroupAddBot>(payload.d!!)
+                logger.info { "机器人加入了群 [${data.groupId}]，操作人：[${data.operator}]" }
+                GlobalEventChannel.broadcast(
+                    BotJoinGroupEvent(
+                        bot = bot,
+                        groupId = data.groupId,
+                        operator = data.operator
+                    )
+                )
+            }
+            "GROUP_DEL_ROBOT" -> {
+                val data = json.decodeFromString<GroupDelBot>(payload.d!!)
+                logger.info { "机器人离开了群 [${data.groupId}]，操作人：[${data.operator}]" }
+                GlobalEventChannel.broadcast(
+                    BotJoinGroupEvent(
+                        bot = bot,
+                        groupId = data.groupId,
+                        operator = data.operator
                     )
                 )
             }

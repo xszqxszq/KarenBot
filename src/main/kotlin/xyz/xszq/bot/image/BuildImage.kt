@@ -18,35 +18,25 @@ import korlibs.image.bitmap.ensureNative
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.image.font.TtfFont
-import korlibs.image.font.readTtfFont
 import korlibs.image.format.PNG
 import korlibs.image.format.encode
 import korlibs.image.format.readNativeImage
-import korlibs.image.format.showImageAndWait
 import korlibs.image.text.HorizontalAlign
 import korlibs.image.text.VerticalAlign
 import korlibs.io.file.VfsFile
-import korlibs.io.file.std.localCurrentDirVfs
 import korlibs.math.geom.Angle
 import korlibs.math.geom.Point
 import korlibs.math.geom.SizeInt
 import korlibs.math.geom.degrees
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import org.opencv.core.*
-import org.opencv.core.CvType.*
-import org.opencv.imgcodecs.Imgcodecs
+import org.opencv.core.CvType.CV_32FC3
+import org.opencv.core.CvType.CV_8UC4
 import org.opencv.imgproc.Imgproc
-import xyz.xszq.nereides.mapParallel
-import java.awt.image.DataBufferByte
 import java.awt.image.DataBufferInt
 import java.io.File
 import java.nio.ByteBuffer
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.*
-import kotlin.system.exitProcess
 
 class BuildImage(var image: Bitmap) {
     var rawGifFile: AnimatedGif? = null
@@ -350,7 +340,7 @@ class BuildImage(var image: Bitmap) {
                 .toBitmap())
     }
 
-    suspend fun toMat(): Mat = withContext(Dispatchers.IO) {
+    fun toMat(): Mat {
         val raw = Mat(image.height, image.width, CV_8UC4)
         val data = (image.ensureNative().toAwt().raster.dataBuffer as DataBufferInt).data
         val byteBuffer = ByteBuffer.allocate(data.size * 4)
@@ -360,7 +350,7 @@ class BuildImage(var image: Bitmap) {
         val imgSrc = listOf(raw)
         val imgDst = listOf(Mat(image.height, image.width, CV_8UC4))
         Core.mixChannels(imgSrc, imgDst, MatOfInt(0, 3, 1, 2, 2, 1, 3, 0))
-        imgDst.first()
+        return imgDst.first()
     }
     fun drawLine(xy: List<Double>, fill: RGBA = Colors.WHITE, width: Double = 1.0): BuildImage {
         image.modify {
@@ -369,7 +359,7 @@ class BuildImage(var image: Bitmap) {
         }
         return this
     }
-    suspend fun colorMask(color: RGBA): BuildImage { // TODO: Fix this
+    fun colorMask(color: RGBA): BuildImage { // TODO: Fix this
         val img = toMat()
         val imgGray = Mat()
         Imgproc.cvtColor(img, imgGray, Imgproc.COLOR_RGB2GRAY)
@@ -425,15 +415,6 @@ class BuildImage(var image: Bitmap) {
         return img.save("png")
     }
     companion object {
-        val fonts = mutableMapOf<String, TtfFont>()
-        val fontMutex = Mutex()
-        suspend fun init() {
-            val fontDir = localCurrentDirVfs["font"]
-            fontDir.list().collect {
-                val font = it.readTtfFont()
-                fonts[font.ttfCompleteName] = font
-            }
-        }
         fun new(mode: String, size: SizeInt, color: RGBA? = null) =
             BuildImage(NativeImage(size.width, size.height).modify {
                 if (mode != "RGBA" && color == null) {
@@ -448,7 +429,7 @@ class BuildImage(var image: Bitmap) {
                 this.mode = mode
             }
         suspend fun open(file: VfsFile): BuildImage {
-            if (FormatDetector.detect(File(file.absolutePath).inputStream()).getOrNull() == Format.GIF) {
+            if (File(file.absolutePath).inputStream().use { FormatDetector.detect(it).getOrNull() } == Format.GIF) {
                 val gifFile = AnimatedGifReader.read(ImageSource.of(File(file.absolutePath)))
                 val builder = BuildImage(gifFile.frames.first().toBitmap())
                 builder.rawGifFile = gifFile
@@ -465,23 +446,23 @@ class BuildImage(var image: Bitmap) {
             "Source Han Serif SC Bold",
             "Noto Emoji Bold"
         )
-        suspend fun getProperFont(
+        fun getProperFont(
             text: String,
             fontName: String? = null,
             fallbackFonts: List<String> = defaultFallbackFonts,
             defaultFontName: String = "Glow Sans SC Normal Book"
-        ): TtfFont = fontMutex.withLock {
+        ): TtfFont {
             val fonts = fallbackFonts.toMutableList()
             fontName ?.let {
                 fonts.add(0, it)
             }
             fonts.forEach { f ->
-                BuildImage.fonts[f] ?.let { font ->
+                globalFontRegistry.loadFontByName(f) ?.let { font ->
                     if (text.all { font[it] != null })
                         return font
                 }
             }
-            return BuildImage.fonts[defaultFontName]!!
+            return globalFontRegistry.loadFontByName(defaultFontName)!!
         }
     }
 }

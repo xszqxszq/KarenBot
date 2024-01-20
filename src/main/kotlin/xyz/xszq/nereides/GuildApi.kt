@@ -3,10 +3,7 @@ package xyz.xszq.nereides
 import io.github.oshai.kotlinlogging.KLogger
 import io.ktor.client.call.*
 import io.ktor.client.statement.*
-import korlibs.io.file.VfsFile
-import korlibs.io.file.baseName
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import korlibs.io.util.UUID
 import xyz.xszq.nereides.message.Face
 import xyz.xszq.nereides.message.GuildAt
 import xyz.xszq.nereides.message.MessageChain
@@ -24,7 +21,7 @@ interface GuildApi {
     val logger: KLogger
     suspend fun get(api: String): HttpResponse
     suspend fun post(api: String, payload: Any): HttpResponse
-    suspend fun multipart(api: String, values: Map<String, String>, file: Pair<String, VfsFile>): HttpResponse
+    suspend fun multipart(api: String, values: Map<String, String>, file: Pair<String, Pair<String, ByteArray>>): HttpResponse
     suspend fun sendChannelMessage(
         channelId: String,
         content: String? = null,
@@ -53,10 +50,11 @@ interface GuildApi {
     }
     suspend fun sendChannelMessageByMultipart(
         channelId: String,
-        fileImage: VfsFile,
+        fileImage: ByteArray,
         content: String? = null,
         eventId: String? = null,
-        replyMsgId: String? = null
+        replyMsgId: String? = null,
+        filename: String = UUID.randomUUID().toString()
     ): HttpResponse {
         val response = multipart("/channels/$channelId/messages", buildMap {
             content?.let {
@@ -68,8 +66,8 @@ interface GuildApi {
             replyMsgId?.let {
                 put("msg_id", replyMsgId)
             }
-        }, Pair("file_image", fileImage))
-        logger.info { "[$channelId] <- ${content?:""} [image:${fileImage.baseName}]" }
+        }, Pair("file_image", Pair(filename, fileImage)))
+        logger.info { "[$channelId] <- ${content?:""} [image:$filename]" }
         return response
     }
     suspend fun getBotInfo() = get("/users/@me").body<GuildUser>()

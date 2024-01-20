@@ -4,7 +4,8 @@ package xyz.xszq.nereides
 
 import korlibs.image.awt.toBMP32
 import korlibs.image.bitmap.Bitmap32
-import korlibs.io.file.std.tmpdir
+import korlibs.io.file.VfsFile
+import korlibs.io.file.std.tempVfs
 import kotlinx.coroutines.*
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.JsonElement
@@ -36,11 +37,14 @@ fun LocalDateTime.toTimeStamp(timezone: String = "Asia/Shanghai"): Long {
 
 fun LocalDateTime.isSameDay(b: LocalDateTime): Boolean =
     year == b.year && month == b.month && dayOfMonth == b.dayOfMonth
+suspend fun <R> useTempFile(prefix: String = "", suffix: String = "", block: suspend (VfsFile) -> R): R {
+    val file = tempVfs[prefix + UUID.randomUUID().toString() + suffix]
+    return block(file).also {
+        file.delete()
+    }
+}
 
-val tempDir = File(tmpdir)
-
-fun newTempFile(prefix: String = "", suffix: String = ""): File = tempDir.resolve(prefix +
-        UUID.randomUUID().toString() + suffix)
+fun getTempFile(prefix: String = "", suffix: String = "") = tempVfs[prefix + UUID.randomUUID().toString() + suffix]
 
 suspend fun File.readAsImage(): Bitmap32 = withContext(Dispatchers.IO) {
     ImageIO.read(this@readAsImage).toBMP32()
@@ -87,4 +91,19 @@ suspend inline fun <T> Iterable<T>.forEachParallel(crossinline action: suspend (
             }
         }.awaitAll()
     }
+}
+
+suspend fun <R> VfsFile.useTempFile(block: suspend (VfsFile) -> R): R {
+    return block(this).also { File(absolutePath).delete() }
+}
+
+inline fun <T, R> T.retry(times: Int, block: T.() -> R): R? {
+    repeat(times) {
+        runCatching {
+            block(this)
+        }.getOrNull() ?.let {
+            return it
+        }
+    }
+    return null
 }

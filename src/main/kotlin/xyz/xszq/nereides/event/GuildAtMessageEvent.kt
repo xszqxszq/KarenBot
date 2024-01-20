@@ -1,10 +1,9 @@
 package xyz.xszq.nereides.event
 
 import io.ktor.client.statement.*
-import kotlinx.coroutines.*
+import korlibs.io.file.baseName
+import korlibs.io.util.UUID
 import xyz.xszq.nereides.Bot
-import xyz.xszq.nereides.QQClient
-import xyz.xszq.nereides.message.Ark
 import xyz.xszq.nereides.message.LocalImage
 import xyz.xszq.nereides.message.Message
 import xyz.xszq.nereides.message.MessageChain
@@ -36,14 +35,15 @@ class GuildAtMessageEvent(
         var response = if (files.isNotEmpty()) {
             bot.sendChannelMessageByMultipart(
                 channelId = channelId,
-                fileImage = files.first().file,
-                content = content.text.ifBlank { "" },
-                replyMsgId = msgId
+                fileImage = files.first().file ?.readBytes() ?: files.first().bytes!!,
+                content = if (content.all { it is LocalImage }) "" else content.text,
+                replyMsgId = msgId,
+                filename = files.first().file ?.baseName ?: UUID.randomUUID().toString()
             )
         } else {
             bot.sendChannelMessage(
                 channelId = channelId,
-                content = if (arks.isNotEmpty()) arks.first().text else content.text,
+                content = if (arks.isNotEmpty()) arks.first().text.replace("https://", "") else content.text,
                 referMsgId = msgId,
                 replyMsgId = msgId)
         }
@@ -52,9 +52,10 @@ class GuildAtMessageEvent(
             files.subList(1, files.size).forEach { file ->
                 response = bot.sendChannelMessageByMultipart(
                     channelId = channelId,
-                    fileImage = file.file,
+                    fileImage = file.file ?.readBytes() ?: file.bytes!!,
                     content = "",
-                    replyMsgId = msgId
+                    replyMsgId = msgId,
+                    filename = file.file ?.baseName ?: UUID.randomUUID().toString()
                 )
                 println(response.bodyAsText())
             }

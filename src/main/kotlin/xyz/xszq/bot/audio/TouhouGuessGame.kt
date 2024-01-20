@@ -9,11 +9,13 @@ import org.jetbrains.exposed.sql.select
 import xyz.xszq.bot.dao.TouhouAliases
 import xyz.xszq.bot.dao.TouhouMusics
 import xyz.xszq.bot.dao.transactionWithLock
+import xyz.xszq.nereides.event.BotRestartEvent
 import xyz.xszq.nereides.event.GlobalEventChannel
 import xyz.xszq.nereides.event.GroupAtMessageEvent
 import xyz.xszq.nereides.event.PublicMessageEvent
 import xyz.xszq.nereides.message.toVoice
 import xyz.xszq.nereides.toPinyinAbbr
+import xyz.xszq.nereides.useTempFile
 import kotlin.random.Random
 
 object TouhouGuessGame {
@@ -56,19 +58,23 @@ object TouhouGuessGame {
         }
     }
     suspend fun start(event: GroupAtMessageEvent, difficulty: Difficulty, range: Range) = event.run event@{
+        if (bot.restarting) {
+            reply("bot即将重启，请等两三分钟后再试！")
+            return@event
+        }
         if (started[contextId] == true) {
             reply("当前群有正在进行的猜歌哦~")
             return@event
         }
-        started[contextId] = true
-        transactionWithLock {
-            val time = getTime(difficulty)
+        val time = getTime(difficulty)
+        lateinit var name: String
+        val answers = transactionWithLock {
             val selected = TouhouMusics.select {
                 TouhouMusics.version inList rangeToList(range)
             }.toList().random()
             println(selected)
+            name = selected[TouhouMusics.name]
             val id = selected[TouhouMusics.id].value
-            val name = selected[TouhouMusics.name]
             val filename = selected[TouhouMusics.filename]
             val version = selected[TouhouMusics.version]
             var answers = TouhouAliases.select {
@@ -76,26 +82,35 @@ object TouhouGuessGame {
             }.map { it[TouhouAliases.alias] }.toMutableList()
             answers.add(name)
             answers = answers.map { it.trim().lowercase() }.toMutableList()
-            println(answers)
-
             val file = musicDir[filename]
-            if (file.cropPeriod(Random.nextDouble(0.0, file.getAudioDuration() - time), time)?.toVoice()
-                    ?.let { reply(it) } != true) {
+            if (!file.cropPeriod(Random.nextDouble(0.0, file.getAudioDuration() - time), time).useTempFile {
+                    reply(it.toVoice())
+                }) {
                 reply("出错了，请稍后重试")
-                started[contextId] = false
-                return@transactionWithLock
+                return@transactionWithLock null
             }
             reply("请回答该原曲的名称，两分钟后揭晓答案~\n(PS：作答时需要@可怜Bot哦)")
+            return@transactionWithLock answers
+        } ?: return@event
+        println(answers)
 
-            var finished = false
-            coroutineScope {
-                launch {
-                    GlobalEventChannel.channel.takeWhile { !finished }.collect { e ->
-                        if (e !is PublicMessageEvent || e.contextId != contextId)
-                            return@collect
 
-                        launch {
-                            val answer = e.message.text.trim().lowercase()
+        started[contextId] = true
+        var finished = false
+        coroutineScope {
+            launch {
+                GlobalEventChannel.channel.takeWhile { !finished }.collect { e ->
+                    if (e is BotRestartEvent) {
+                        finished = true
+                        started[contextId] = false
+                        reply("bot即将重启，已暂时终止游戏，为您带来不便深感抱歉。本轮原曲是$name")
+                        return@collect
+                    }
+                    if (e !is PublicMessageEvent || e.contextId != contextId)
+                        return@collect
+                    launch {
+                        val answer = e.message.text.trim().lowercase()
+                        runCatching {
                             if (answers.any { answer.isNotBlank() && answer in it } ||
                                 answers.any { answer.toPinyinAbbr().length >= 3 && it.toPinyinAbbr().length >= 3 && answer.toPinyinAbbr() in it.toPinyinAbbr() } ||
                                 answers.any { it.filter { l -> l.code > 128 }.length >= 5 &&
@@ -109,14 +124,14 @@ object TouhouGuessGame {
                         }
                     }
                 }
-                launch {
-                    delay(120000L + (time * 1000L).toLong())
-                    if (finished)
-                        return@launch
-                    finished = true
-                    started[contextId] = false
-                    reply("很遗憾，无人猜中，原曲是$name")
-                }
+            }
+            launch {
+                delay(120000L + (time * 1000L).toLong())
+                if (finished)
+                    return@launch
+                finished = true
+                started[contextId] = false
+                reply("很遗憾，无人猜中，原曲是$name")
             }
         }
     }

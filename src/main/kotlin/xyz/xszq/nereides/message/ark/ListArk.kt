@@ -1,6 +1,5 @@
 package xyz.xszq.nereides.message.ark
 
-import xyz.xszq.nereides.message.Ark
 import xyz.xszq.nereides.payload.message.MessageArk
 import xyz.xszq.nereides.payload.message.MessageArkKv
 import xyz.xszq.nereides.payload.message.MessageArkObj

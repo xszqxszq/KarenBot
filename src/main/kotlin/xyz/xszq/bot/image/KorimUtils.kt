@@ -5,7 +5,10 @@ import korlibs.image.bitmap.extract
 import korlibs.image.bitmap.sliceWithSize
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
-import korlibs.image.font.*
+import korlibs.image.font.FolderBasedNativeSystemFontProvider
+import korlibs.image.font.Font
+import korlibs.image.font.TtfFont
+import korlibs.image.font.getTextBoundsWithGlyphs
 import korlibs.image.paint.Paint
 import korlibs.image.text.DefaultStringTextRenderer
 import korlibs.image.text.HorizontalAlign
@@ -15,16 +18,12 @@ import korlibs.image.vector.Context2d
 import korlibs.io.file.std.localCurrentDirVfs
 import korlibs.math.geom.Point
 import korlibs.math.geom.vector.LineJoin
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import xyz.xszq.bot.maimai.ItemProperties
-import xyz.xszq.bot.maimai.MaimaiImage
+import kotlinx.coroutines.*
+import xyz.xszq.bot.rhythmgame.image.ItemProperties
 import xyz.xszq.nereides.hexToRGBA
 
 
-suspend fun Font.ellipsize(rawText: String, fontSize: Float, maxWidth: Float, xScale: Float = 1.0F): String {
+fun Font.ellipsize(rawText: String, fontSize: Float, maxWidth: Float, xScale: Float = 1.0F): String {
     var metrics = measureTextGlyphs(fontSize, rawText)
     if (metrics.metrics.width * xScale < maxWidth)
         return rawText
@@ -37,7 +36,7 @@ suspend fun Font.ellipsize(rawText: String, fontSize: Float, maxWidth: Float, xS
     }
     return "$text..."
 }
-suspend fun Context2d.drawText(
+fun Context2d.drawText(
     rawText: String,
     pos: Point,
     color: RGBA = Colors.BLACK,
@@ -73,11 +72,11 @@ suspend fun Context2d.drawText(
         if (stroke != 0.0F)
             strokeTextSafe(text, Point(pos.x + offsetX, pos.y))
         this.fillStyle = createColor(color)
-        fillTextSafe(text, Point(pos.x + offsetX, pos.y))
+        fillText(text, Point(pos.x + offsetX, pos.y))
     }
     this.lineWidth = 0.0F
 }
-suspend fun Context2d.drawTextWithXScale(
+fun Context2d.drawTextWithXScale(
     text: String,
     pos: Point,
     xScale: Float = 1.0F,
@@ -97,21 +96,22 @@ suspend fun Context2d.drawTextWithXScale(
             strokeTextSafe(c.toString(), Point(x, pos.y))
         }
         this.fillStyle = fillStyle
-        fillTextSafe(c.toString(), Point(x, pos.y))
+        fillText(c.toString(), Point(x, pos.y))
         x += metrics.glyphs.first().metrics.xadvance * xScale
     }
 }
 
-suspend fun Context2d.drawText(
+fun Context2d.drawText(
     text: String,
     attr: ItemProperties,
     align: TextAlignment = TextAlignment.LEFT,
-    ellipsizeWidth: Float? = null
+    ellipsizeWidth: Float? = null,
+    font: TtfFont
 ) = drawText(
     text,
     Point(attr.x, attr.y),
     attr.color.hexToRGBA(),
-    MaimaiImage.fonts[attr.fontName]!!,
+    font,
     attr.size.toFloat(),
     align,
     attr.xScale,
@@ -119,17 +119,18 @@ suspend fun Context2d.drawText(
     attr.strokeColor.hexToRGBA(),
     ellipsizeWidth
 )
-suspend fun Context2d.drawTextRelative(
+fun Context2d.drawTextRelative(
     text: String,
     pos: Point,
     attr: ItemProperties,
     align: TextAlignment = TextAlignment.LEFT,
-    ellipsizeWidth: Float? = null
+    ellipsizeWidth: Float? = null,
+    font: TtfFont
 )  = drawText(
     text,
     Point(pos.x + attr.x, pos.y + attr.y),
     attr.color.hexToRGBA(),
-    MaimaiImage.fonts[attr.fontName]!!,
+    font,
     attr.size.toFloat(),
     align,
     attr.xScale,
@@ -139,25 +140,19 @@ suspend fun Context2d.drawTextRelative(
 )
 fun Bitmap.randomSlice(size: Int = 66) =
     sliceWithSize((0..width - size).random(), (0..height - size).random(), size, size).extract()
-@OptIn(DelicateCoroutinesApi::class)
+@OptIn(DelicateCoroutinesApi::class, InternalCoroutinesApi::class)
 val globalFontRegistry = FolderBasedNativeSystemFontProvider(
-    GlobalScope.coroutineContext, listOf(localCurrentDirVfs["font"].absolutePath)
+    Dispatchers.IO.newCoroutineContext(GlobalScope.coroutineContext), listOf(localCurrentDirVfs["font"].absolutePath)
 )
-val fontLock = Mutex()
 
 @Suppress("UNCHECKED_CAST")
-suspend fun <T> Font.measureTextGlyphs(
+fun <T> Font.measureTextGlyphs(
     size: Float,
     text: T,
     renderer: TextRenderer<T> = DefaultStringTextRenderer as TextRenderer<T>,
     align: TextAlignment = TextAlignment.BASELINE_LEFT
-) = fontLock.withLock {
-    getTextBoundsWithGlyphs(size, text, renderer, align)
-}
-suspend fun Context2d.fillTextSafe(text: String, pos: Point) = fontLock.withLock {
-    fillText(text, pos)
-}
-suspend fun Context2d.strokeTextSafe(text: String, pos: Point) = fontLock.withLock {
+) = getTextBoundsWithGlyphs(size, text, renderer, align)
+fun Context2d.strokeTextSafe(text: String, pos: Point) {
     lineJoin = LineJoin.ROUND
     strokeText(text, pos)
 }

@@ -2,13 +2,11 @@
 
 package xyz.xszq.bot.dao
 
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
+import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.upsert
 
 object Permissions: Table("permission") {
     val openId = varchar("openid", 32)
@@ -73,7 +71,7 @@ object Permissions: Table("permission") {
         context: String,
         permName: String,
         allowed: Boolean
-    ) = withContext(Dispatchers.IO) {
+    ) {
         transactionWithLock {
             upsert {
                 it[openId] = context

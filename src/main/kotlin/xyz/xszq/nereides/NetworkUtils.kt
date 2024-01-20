@@ -7,10 +7,10 @@ import com.qcloud.cos.http.HttpProtocol
 import com.qcloud.cos.model.PutObjectRequest
 import com.qcloud.cos.region.Region
 import com.qcloud.cos.transfer.TransferManager
-import io.ktor.client.*
-import io.ktor.client.engine.okhttp.*
 import korlibs.io.file.VfsFile
-import kotlinx.coroutines.*
+import korlibs.io.file.std.tempVfs
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import xyz.xszq.config
@@ -30,6 +30,7 @@ object NetworkUtils {
             })
         val bucketName = config.cosAppId
         cosClient.deleteObject(bucketName, filename)
+        cosClient.shutdown()
     }
     private fun upload(file: File): UploadResult {
         val cosClient = COSClient(
@@ -54,22 +55,20 @@ object NetworkUtils {
         val expiration = Date(Date().time + 2 * 60 * 1000)
         return UploadResult(cosClient.generatePresignedUrl(bucketName, filename, expiration).toString(), filename)
     }
-    fun uploadBinary(binary: ByteArray, suffix: String = ""): UploadResult {
-        val file = newTempFile(suffix=suffix).also {
+    suspend fun uploadBinary(binary: ByteArray, suffix: String = ""): UploadResult {
+        return useTempFile(suffix=suffix) {
             it.writeBytes(binary)
-        }
-        return upload(file).also {
-            file.delete()
+            upload(it)
         }
     }
     fun upload(file: VfsFile) = upload(File(file.absolutePath))
 
-    suspend fun downloadFile(
+    private suspend fun downloadFile(
         url: String,
-        dir: File,
+        dir: VfsFile,
         filename: String,
         headers: List<Pair<String, String>> = emptyList()
-    ): File? = withContext(Dispatchers.IO) {
+    ): VfsFile? = withContext(Dispatchers.IO) {
         val requestBuilder = Request.Builder()
             .url(url)
             .get()
@@ -86,8 +85,8 @@ object NetworkUtils {
                     inputStream = response.body!!.byteStream()
                     val buff = ByteArray(1024 * 4)
                     var downloaded = 0L
-                    val result = File(dir, filename)
-                    val output = FileOutputStream(result)
+                    val result = dir[filename]
+                    val output = FileOutputStream(File(result.absolutePath))
                     while (true) {
                         val readed = inputStream.read(buff)
                         if (readed == -1)
@@ -98,9 +97,8 @@ object NetworkUtils {
                     output.flush()
                     output.close()
                     return@withContext result
-                } catch (ignore: IOException) {
-                    println("警告：下载文件过程中出现了 Exception")
-                    ignore.printStackTrace()
+                } catch (e: IOException) {
+                    e.printStackTrace()
                 } finally {
                     inputStream?.close()
                 }
@@ -110,7 +108,24 @@ object NetworkUtils {
         }
         return@withContext null
     }
-    suspend fun downloadTempFile(url: String, headers: List<Pair<String, String>> = emptyList(), ext: String = "")
-            = downloadFile(url, tempDir, UUID.randomUUID().toString() + if (ext.isNotEmpty()) ".$ext" else "",
+    private suspend fun downloadTempFile(
+        url: String,
+        headers: List<Pair<String, String>> = emptyList(),
+        ext: String = ""
+    ) = downloadFile(url, tempVfs, UUID.randomUUID().toString() + if (ext.isNotEmpty()) ".$ext" else "",
         headers)
+    suspend fun <R> useNetFile(
+        url: String,
+        headers: List<Pair<String, String>> = emptyList(),
+        ext: String = "",
+        block: suspend (VfsFile) -> R
+    ): R {
+        return downloadTempFile(url, headers, ext) ?.let { file ->
+            block(file).also {
+                file.delete()
+            }
+        } ?: run {
+            throw Exception("网络异常")
+        }
+    }
 }

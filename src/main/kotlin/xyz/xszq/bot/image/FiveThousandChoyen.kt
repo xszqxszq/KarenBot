@@ -12,8 +12,8 @@ import korlibs.math.geom.vector.LineJoin
 import kotlinx.coroutines.sync.withPermit
 
 object FiveThousandChoyen {
-    val topFont: TtfFont = globalFontRegistry.loadFontByName("Source Han Sans CN Bold")!!
-    val bottomFont: TtfFont = globalFontRegistry.loadFontByName("Source Han Serif SC Bold")!!
+    const val topFont = "Source Han Sans CN Bold"
+    const val bottomFont = "Source Han Serif SC Bold"
     const val transparency: Boolean = false
     const val size: Double = 100.0
     const val topX = 70
@@ -31,9 +31,9 @@ object FiveThousandChoyen {
                 fillRect(0, 0, width, height)
                 setTransform(1.0, 0.0, -0.45, 1.0, 0.0, 0.0)
                 lineJoin = LineJoin.ROUND
-                rightBorder = generateTop(top,this, topFont)!!
+                rightBorder = generateTop(top,this, globalFontRegistry.loadFontByName(topFont)!!)!!
                 rightBorder = kotlin.math.max(rightBorder,
-                    generateBottom(bottom, this, bottomFont)!!
+                    generateBottom(bottom, this, globalFontRegistry.loadFontByName(bottomFont)!!)!!
                 )
                 dispose()
             }
@@ -42,7 +42,7 @@ object FiveThousandChoyen {
             it.printStackTrace()
         }
     }.getOrThrow()
-    suspend fun generateTop(top: String, ctx: Context2d, nowFont: TtfFont, x: Int = topX, y: Int = topY) = ctx.run {
+    fun generateTop(top: String, ctx: Context2d, nowFont: TtfFont, x: Int = topX, y: Int = topY) = ctx.run {
         font = nowFont
         fontSize = size.toFloat()
         // Black
@@ -118,13 +118,13 @@ object FiveThousandChoyen {
                 add(0.51, RGBA(240, 0, 0))
                 add(1.0, RGBA(5, 0, 0))
             }
-            fillTextSafe(top, Point(x, y - 3))
+            fillText(top, Point(x, y - 3))
         }
         font?.measureTextGlyphs(fontSize, top)?.glyphs?.maxByOrNull { it.pos.x } ?.let {
             x + it.pos.x + it.metrics.bounds.width
         }
     }
-    suspend fun generateBottom(bottom: String, ctx: Context2d, nowFont: TtfFont, x: Int = bottomX, y: Int = bottomY) = ctx.run {
+    fun generateBottom(bottom: String, ctx: Context2d, nowFont: TtfFont, x: Int = bottomX, y: Int = bottomY) = ctx.run {
         font = nowFont
         fontSize = size.toFloat()
         // Black
@@ -183,7 +183,7 @@ object FiveThousandChoyen {
                 add(0.52, RGBA(196, 215, 222))
                 add(1.0, RGBA(255, 255, 255))
             }
-            fillTextSafe(bottom, Point(x, y - 3))
+            fillText(bottom, Point(x, y - 3))
         }
         font?.measureTextGlyphs(fontSize, bottom)?.glyphs?.maxByOrNull { it.pos.x } ?.let {
             x + it.pos.x + it.metrics.bounds.width

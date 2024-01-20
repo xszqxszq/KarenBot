@@ -36,7 +36,7 @@ object Bilibili {
         }
         expectSuccess = false
     }
-    suspend fun queryAv(aid: String): BilibiliApiResponse<BilibiliVideoInfo> =
+    private suspend fun queryAv(aid: String): BilibiliApiResponse<BilibiliVideoInfo> =
         client.get("https://api.bilibili.com/x/web-interface/view") {
             url {
                 parameters.append("aid", aid)
@@ -45,7 +45,7 @@ object Bilibili {
                 append(HttpHeaders.UserAgent, availableUA)
             }
         }.body()
-    suspend fun queryBv(bvid: String): BilibiliApiResponse<BilibiliVideoInfo> =
+    private suspend fun queryBv(bvid: String): BilibiliApiResponse<BilibiliVideoInfo> =
         client.get("https://api.bilibili.com/x/web-interface/view") {
             url {
                 parameters.append("bvid", bvid)
@@ -54,7 +54,7 @@ object Bilibili {
                 append("User-Agent", availableUA)
             }
         }.body()
-    fun getAvBv(link: String?): String {
+    private fun getAvBv(link: String?): String {
         link ?.let {
             return OkHttpClient.Builder()
                 .addNetworkInterceptor(Interceptor { chain ->
@@ -90,7 +90,8 @@ object Bilibili {
             appendLine("简介：")
             appendLine(info.data.desc.take(50) + (if (info.data.desc.length > 50) "……" else ""))
         }.trimEnd()
-        val cover = NetworkUtils.downloadTempFile(info.data.pic)
-        return (cover?.toImage() ?: "".toPlainText()) + result.toPlainText()
+        return NetworkUtils.useNetFile(info.data.pic) {
+            it.readBytes().toImage() + result.toPlainText()
+        }
     }
 }

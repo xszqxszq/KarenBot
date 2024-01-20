@@ -4,5 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class MessageKeyboard(
-    val id: String
+    val id: String? = "",
+    val content: InlineKeyboard? = null
 )

@@ -12,7 +12,9 @@ import korlibs.io.file.VfsFile
 import korlibs.io.file.baseName
 import kotlinx.serialization.json.Json
 import xyz.xszq.bot.payload.AnimeDBResult
+import xyz.xszq.nereides.availableUA
 import xyz.xszq.nereides.message.ark.ListArk
+import xyz.xszq.nereides.retry
 import kotlin.jvm.optionals.getOrNull
 
 object AnimeDB {
@@ -23,9 +25,7 @@ object AnimeDB {
         prettyPrint = true
         ignoreUnknownKeys = true
     }
-    private val client = HttpClient(OkHttp) {
-
-    }
+    private val client = HttpClient(OkHttp)
 
     suspend fun handle(image: VfsFile): ListArk {
         val bytes = image.readBytes()
@@ -41,17 +41,33 @@ object AnimeDB {
             ContentType.Image.GIF -> ".gif"
             else -> throw Exception()
         }
-        val response = client.submitFormWithBinaryData(url, formData {
-            append("\"image\"", bytes, Headers.build {
-                append(HttpHeaders.ContentDisposition, "filename=\"${image.baseName}$suffix\"")
-                append(HttpHeaders.ContentType, type.toString())
-            })
-        }) {
-            headers {
-                userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        val response = retry(3) {
+            client.submitFormWithBinaryData(url, formData {
+                append("\"image\"", bytes, Headers.build {
+                    append(HttpHeaders.ContentDisposition, "filename=\"${image.baseName}$suffix\"")
+                    append(HttpHeaders.ContentType, type.toString())
+                })
+            }) {
+                headers {
+                    userAgent(availableUA)
+                }
+            }
+        } ?: run {
+            return ListArk.build {
+                desc { "搜番结果" }
+                prompt { "搜番结果" }
+                text { "网络错误，请重试" }
             }
         }
-        val result = json.decodeFromString<AnimeDBResult>(response.bodyAsText())
+        val result = runCatching {
+            json.decodeFromString<AnimeDBResult>(response.bodyAsText())
+        }.onFailure {
+            return ListArk.build {
+                desc { "搜番结果" }
+                prompt { "搜番结果" }
+                text { "网络错误，请重试" }
+            }
+        }.getOrThrow()
 
         return ListArk.build {
             desc { "搜番结果" }

@@ -3,16 +3,16 @@
 package xyz.xszq.nereides
 
 import korlibs.io.async.launch
-import korlibs.io.file.std.toVfs
 import kotlinx.coroutines.Dispatchers
 import xyz.xszq.bot.audio.toSilk
 import xyz.xszq.bot.image.toJPEG
 import xyz.xszq.nereides.message.*
+import xyz.xszq.nereides.message.ark.Ark
+import xyz.xszq.nereides.message.Keyboard
 import xyz.xszq.nereides.payload.message.Media
 import xyz.xszq.nereides.payload.response.PostGroupMessageResponse
 import xyz.xszq.nereides.payload.utils.FileType
 import xyz.xszq.nereides.payload.utils.MsgType
-import kotlin.properties.Delegates
 
 class Group(
     override val bot: Bot,
@@ -20,17 +20,21 @@ class Group(
 ) : Context {
     override val id: String = groupId
     suspend fun uploadRich(media: LocalRichMedia): Media? {
-        var uploadResult = NetworkUtils.upload(when (media) {
-            is Image -> media.file
-            is Voice -> media.file.toSilk().toVfs()
+        var uploadResult = when (media) {
+            is LocalImage -> media.file ?.let {
+                NetworkUtils.upload(it)
+            } ?: run {
+                NetworkUtils.uploadBinary(media.bytes!!)
+            }
+            is LocalVoice -> media.file.useTempFile { NetworkUtils.upload(it.toSilk()) }
             else -> throw UnsupportedOperationException()
-        })
+        }
         return bot.uploadFile(
             groupId = id,
             url = uploadResult.url,
             fileType = when (media) {
-                is Image -> FileType.IMAGE
-                is Voice -> FileType.VOICE
+                is LocalImage -> FileType.IMAGE
+                is LocalVoice -> FileType.VOICE
                 else -> throw UnsupportedOperationException()
             },
             send = false
@@ -41,7 +45,7 @@ class Group(
         } ?: run { // 重传
             when (media) {
                 is LocalImage -> {
-                    uploadResult = NetworkUtils.uploadBinary(media.file.readBytes().toJPEG())
+                    uploadResult = NetworkUtils.uploadBinary((media.file?.readBytes()?:media.bytes!!).toJPEG())
                     bot.uploadFile(
                         groupId = id,
                         url = uploadResult.url,
@@ -54,7 +58,7 @@ class Group(
                     }
                 }
                 is LocalVoice -> {
-                    uploadResult = NetworkUtils.upload(media.file.toSilk().toVfs())
+                    uploadResult = media.file.useTempFile { NetworkUtils.upload(it.toSilk()) }
                     bot.uploadFile(
                         groupId = id,
                         url = uploadResult.url,
@@ -108,17 +112,17 @@ class Group(
         }
         var response = doSendMessage(text, files.firstOrNull())
         reply ?.let { it.seq ++ }
-//        println(response)
+        println(response)
 
         // 错误重传处理
-        response ?.ret ?.let { ret ->
+        response ?.code ?.let { ret ->
             when (ret) {
                 10009 -> when {
-                    response!!.msg.startsWith("url not allowed") -> { // 有未加白域名
+                    response!!.message ?.startsWith("url not allowed") == true -> { // 有未加白域名
                         response = doSendMessage(content.text.filterURL(), files.firstOrNull())
                         reply ?.let { it.seq ++ }
                     }
-                    response!!.msg == "0xc56 ret=241" -> { // seq重复
+                    response!!.message == "0xc56 ret=241" -> { // seq重复
                         response = doSendMessage(text, files.firstOrNull())
                         reply ?.let { it.seq ++ }
                     }

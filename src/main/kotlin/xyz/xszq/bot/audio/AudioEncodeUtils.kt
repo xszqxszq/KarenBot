@@ -3,29 +3,23 @@ package xyz.xszq.bot.audio
 import io.github.kasukusakura.silkcodec.SilkCoder
 import korlibs.audio.format.readSoundInfo
 import korlibs.io.file.VfsFile
-import korlibs.io.file.std.toVfs
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.withContext
 import xyz.xszq.bot.ffmpeg.FFMpegFileType
 import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.bot.ffmpeg.FFProbe
-import xyz.xszq.nereides.newTempFile
+import xyz.xszq.nereides.getTempFile
+import xyz.xszq.nereides.useTempFile
 import java.io.File
 
-val audioSemaphore = Semaphore(16)
+val audioSemaphore = Semaphore(64)
 
 suspend fun VfsFile.getAudioDuration(): Double {
     return readSoundInfo()?.duration?.seconds ?: FFProbe(
         this, showStreams = false, showFormat = true
     ).getResult().format!!.duration.toDouble()
 }
-fun File.getAudioDuration(): Double = runBlocking {
-    toVfs().getAudioDuration()
-}
 
-suspend fun File.toMp3BeforeSilk(): File? =
+suspend fun VfsFile.toMp3BeforeSilk() =
     FFMpegTask(FFMpegFileType.MP3) {
         input(this@toMp3BeforeSilk)
         yes()
@@ -36,12 +30,12 @@ suspend fun File.toMp3BeforeSilk(): File? =
         audioRate("24k")
         audioChannels(1)
     }.getResult()
-suspend fun File.toMp3(): File? =
+suspend fun VfsFile.toMp3() =
     FFMpegTask(FFMpegFileType.MP3) {
         input(this@toMp3)
         yes()
     }.getResult()
-suspend fun File.toPCM(): File? =
+suspend fun VfsFile.toPCM() =
     FFMpegTask(FFMpegFileType.PCM) {
         input(this@toPCM)
         forceFormat("s16le")
@@ -50,11 +44,11 @@ suspend fun File.toPCM(): File? =
         audioChannels(1)
         yes()
     }.getResult()
-suspend fun File.cropPeriod(
+suspend fun VfsFile.cropPeriod(
     startPoint: Double,
     duration: Double,
     forSilk: Boolean = true
-): File? =
+) =
     FFMpegTask(FFMpegFileType.MP3) {
         input(this@cropPeriod)
         yes()
@@ -65,23 +59,16 @@ suspend fun File.cropPeriod(
             audioChannels(1)
         }
     }.getResult()
-suspend fun VfsFile.cropPeriod(
-    startPoint: Double,
-    duration: Double,
-    forSilk: Boolean = true
-) = File(absolutePath).cropPeriod(startPoint, duration, forSilk)?.toVfs()
-suspend fun File.toSilk(): File {
-    val silk = newTempFile(suffix = ".silk")
-    silk.outputStream().use { os ->
-        toMp3BeforeSilk() ?.toPCM() ?.apply {
-            SilkCoder.encode(
-                inputStream(),
-                os,
-                24000
-            )
+suspend fun VfsFile.toSilk(): VfsFile {
+    val silk = getTempFile(suffix = ".silk")
+    File(silk.absolutePath).outputStream().use { outputStream ->
+        toMp3BeforeSilk().useTempFile { mp3 ->
+            mp3.toPCM().useTempFile { pcm ->
+                File(pcm.absolutePath).inputStream().use { inputStream ->
+                    SilkCoder.encode(inputStream, outputStream, 24000)
+                }
+            }
         }
     }
-    silk.deleteOnExit()
     return silk
 }
-suspend fun VfsFile.toSilk() = File(absolutePath).toSilk()

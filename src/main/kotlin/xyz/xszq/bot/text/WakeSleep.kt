@@ -1,10 +1,8 @@
 package xyz.xszq.bot.text
 
-import korlibs.time.days
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.LocalDateTime
-import java.util.concurrent.ConcurrentHashMap
 
 object WakeSleep {
     private val sleep = mutableMapOf<String, MutableList<Pair<String, LocalDateTime>>>()

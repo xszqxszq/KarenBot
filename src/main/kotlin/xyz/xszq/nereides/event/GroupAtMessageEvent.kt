@@ -2,11 +2,6 @@
 
 package xyz.xszq.nereides.event
 
-import korlibs.io.async.async
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.withContext
 import xyz.xszq.nereides.Bot
 import xyz.xszq.nereides.Group
 import xyz.xszq.nereides.message.Message

@@ -1,17 +1,18 @@
 package xyz.xszq.bot.audio
 
+import korlibs.io.file.VfsFile
 import korlibs.io.file.baseNameWithoutCompoundExtension
 import korlibs.io.file.std.localCurrentDirVfs
+import kotlinx.coroutines.flow.firstOrNull
 import xyz.xszq.bot.ffmpeg.FFMpegFileType
 import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.nereides.toPinyinList
-import java.io.File
 
 object OttoVoice {
-    val voiceDir = localCurrentDirVfs["audio/otto"]
-    val tokensDir = voiceDir["tokens"]
-    val presetsDir = voiceDir["ysddTokens"]
-    fun asciiToPinyin(text: List<String>): List<String> {
+    private val voiceDir = localCurrentDirVfs["audio/otto"]
+    private val tokensDir = voiceDir["tokens"]
+    private val presetsDir = voiceDir["ysddTokens"]
+    private fun asciiToPinyin(text: List<String>): List<String> {
         val result = text.toMutableList()
         result.forEachIndexed { index, t ->
             charTable.forEach { (char, py) ->
@@ -21,23 +22,25 @@ object OttoVoice {
         }
         return result
     }
-    suspend fun generate(text: String): File? {
+    suspend fun generate(text: String): VfsFile {
         var chars =
             asciiToPinyin(text.lowercase().filter {
                 it.isLetter() || it.isDigit() || it.code in 0x4e00..0x9fff || it == '.'
             }.toPinyinList()).filter { it.isNotBlank() }.joinToString(",")
         presets.forEach { (id, names) ->
             names.forEach { name ->
-                val pinyin = name.toPinyinList().joinToString(",")
+                val pinyin = asciiToPinyin(name.toPinyinList()).joinToString(",")
                 chars = chars.replace(pinyin, ",$id,")
             }
         }
         chars = chars.lowercase()
         val files = chars.split(",").filter { it.isNotBlank() }.mapNotNull {  id ->
-            (tokensDir.listRecursiveSimple() + presetsDir.listRecursiveSimple()).firstOrNull {
+            (tokensDir.list().firstOrNull {
                 it.baseNameWithoutCompoundExtension == id
-            } ?.absolutePath
-        }
+            } ?: presetsDir.list().firstOrNull {
+                it.baseNameWithoutCompoundExtension == id
+            }) ?.absolutePath
+        }.take(120)
         return FFMpegTask(FFMpegFileType.MP3) {
             files.forEach { input(it) }
             filterComplex(List(files.size) { index -> "[$index:0]"}.joinToString("") +
@@ -88,11 +91,12 @@ object OttoVoice {
         put("miyu", listOf("米浴说的道理", "啊米浴说的道理"))
         put("djha", listOf("大家好啊"))
         put("wssddl", listOf("我是说的道理"))
-        put("jtlaidian", listOf("今天来点大家想看的东西", "今天来点儿大家想看的东西"))
+        put("jtlaidian", listOf("今天来点大家想看的东西", "今天来点儿大家想看的东西", "今天来点大家想看的东西啊"))
         put("sddl", listOf("说的道理"))
         put("bobi", listOf("波比是我爹", "啊嘛波比是我爹"))
         put("aksa", listOf("奥克苏恩"))
         put("alaf", listOf("奥利安费", "奥力安费"))
+        put("wsmy", listOf("为什么耶", "为什么呀"))
         put("anxu", listOf("安修"))
         put("ands", listOf("欧内的手"))
         put("hbx", listOf("哈比下", "哈陛下", "哈比霞", "哈毙霞"))
@@ -101,9 +105,8 @@ object OttoVoice {
         put("wow", listOf("哇袄", "哇奥", "沃袄"))
         put("hj", listOf("获嘉", "获加"))
         put("jb", listOf("击败", "鸡掰"))
-        put("wsm", listOf("为什么"))
-        put("wsmy", listOf("为什么耶", "为什么呀"))
         put("xg", listOf("炫狗"))
+        put("znhj", listOf("尊尼获加"))
         put("zn", listOf("尊尼"))
         put("yzd", listOf("原子弹"))
         put("alala", listOf("奥利奥利安"))
@@ -123,5 +126,133 @@ object OttoVoice {
         put("xhn", listOf("喜欢你"))
         put("xhw", listOf("喜欢我"))
         put("xh", listOf("喜欢"))
+        put("fm", listOf("凤鸣"))
+        put("yw", listOf("一五"))
+        put("ahhhhh", listOf("啊哈哈哈哈哈哈", "呵呵呵呵呵呵", "啊呵呵呵呵呵", "哈哈哈哈哈哈"))
+        put("kn", listOf("凯南"))
+        put("kda", listOf("开大啊"))
+        put("cnmkd", listOf("草拟嘛开大"))
+        put("bzl", listOf("憋追了", "憋追啦"))
+        put("wcsndm", listOf("我草似你的马"))
+        put("wc", listOf("我草", "我超"))
+        put("zbb", listOf("猪鼻吧"))
+        put("zb", listOf("猪鼻"))
+        put("zzmzmca", listOf("这怎么这么菜啊"))
+        put("zzmzmc", listOf("这怎么这么菜"))
+        put("dyndynjyxa", listOf("队友呢队友呢救一下啊"))
+        put("dynjyxa", listOf("队友呢救一下啊"))
+        put("dyndyn", listOf("队友呢队友呢"))
+        put("dyn", listOf("队友呢"))
+        put("llkla", listOf("拉了胯了啊", "拉了胯了呀"))
+        put("llk", listOf("拉了胯"))
+        put("dhdjbtmd", listOf("大伙都几把挺猛的", "大伙都挺猛的"))
+        put("dnzkzmj", listOf("到你这块怎么就", "怎么到你这块就", "到你这块就"))
+        put("dydzwwjjdnmblp", listOf("打野的走位我就觉得你麻痹离谱", "打野的走位我就觉得离谱"))
+        put("lp", listOf("离谱"))
+        put("nmblp", listOf("你麻痹离谱"))
+        put("nltmxzsnnbslgsmwye", listOf("你老他妈想着刷你那逼三狼干什么玩意儿", "你老他妈想着刷你那逼三狼干什么玩意啊", "你老他妈想着刷你那逼三狼干什么玩意儿啊"))
+        put("nltmxzsnnbsl", listOf("你老他妈想着刷你那逼三狼"))
+        put("bsl", listOf("逼三狼"))
+        put("ybmr", listOf("一把米若", "一把米诺"))
+        put("oxgoxg", listOf("欧西给欧西给"))
+        put("oxg", listOf("欧西给"))
+        put("aymn", listOf("哎呀米诺", "哎呀米若", "啊呀米诺"))
+        put("ah", listOf("啊哈"))
+        put("ml", listOf("没了", "没啦"))
+        put("rq", listOf("rq"))
+        put("amns", listOf("啊米诺斯", "啊米若斯", "哈米诺斯", "哈米诺"))
+        put("padorupadoru", listOf("padorupadoru"))
+        put("padoru", listOf("padoru"))
+        put("hjm", listOf("哈基米"))
+        put("fengmi", listOf("蜂蜜"))
+        put("nwqdzg", listOf("那我缺的这个"))
+        put("zgyyzykd", listOf("这个营养这一块的", "这个营养这一块"))
+        put("yyzykd", listOf("营养这一块的", "营养这一块"))
+        put("zykd", listOf("这一块的", "这一块"))
+        put("sgwba", listOf("谁给我补啊"))
+        put("bbd", listOf("饱饱的"))
+        put("jchz", listOf("韭菜盒子"))
+        put("cjbgj", listOf("臭几把杠精"))
+        put("ngwshl", listOf("你给我说话来", "你给我说话"))
+        put("gj", listOf("杠精"))
+        put("dfg", listOf("低分狗"))
+        put("tg", listOf("抬杠"))
+        put("hz", listOf("患者"))
+        put("nbyjdswdg", listOf("你白银觉得是我的锅"))
+        put("njswdg", listOf("那就是我的锅"))
+        put("wsmnzdm", listOf("为什么你知道吗"))
+        put("ywbysdh", listOf("因为白银说的话"))
+        put("jxsyg", listOf("就像是一个"))
+        put("azwq", listOf("癌症晚期"))
+        put("sdhyy", listOf("说的话一样"))
+        put("tdyjzyl", listOf("他都已经这样了"))
+        put("nwsmbsct", listOf("你为什么不顺从他"))
+        put("nzygr", listOf("你总要给人"))
+        put("zhydsj", listOf("最后一段时间"))
+        put("yghdhyb", listOf("一个好的回忆吧", "一个好的回忆"))
+        put("zhdsgl", listOf("最后的时光里", "最后的时光了", "最后的时光"))
+        put("byzg", listOf("白银这个"))
+        put("byhj", listOf("白银黄金"))
+        put("zwsyd", listOf("再往上一点儿", "再往上一点"))
+        put("bjzs", listOf("白金钻石"))
+        put("kns", listOf("可能说"))
+        put("aydsl", listOf("哎有点实力", "诶有点实力"))
+        put("nczyx", listOf("能操作一下"))
+        put("bywx", listOf("白银往下"))
+        put("ydw", listOf("一到五"))
+        put("arjs", listOf("啊人家是"))
+        put("rjs", listOf("人家是"))
+        put("cswyxd", listOf("纯属玩游戏的"))
+        put("wyx", listOf("玩游戏"))
+        put("ywtljl", listOf("因为太垃圾了"))
+        put("tljl", listOf("太垃圾了"))
+        put("zjyzdzj", listOf("自己也知道自己"))
+        put("msmsl", listOf("没什么实力"))
+        put("sbqxbld", listOf("上不去下不来的"))
+        put("sbqxbl", listOf("上不去下不来"))
+        put("zgdw", listOf("这个段位"))
+        put("htdr", listOf("黄铜的人"))
+        put("htszljd", listOf("黄铜是最垃圾的"))
+        put("zljd", listOf("最垃圾的"))
+        put("txsq", listOf("他想上去"))
+        put("tysbq", listOf("他又上不去"))
+        put("zgfdszggd", listOf("这个分段是最尴尬的"))
+        put("kzzll", listOf("卡在这里了"))
+        put("yczbql", listOf("又操作不起来"))
+        put("dxqb", listOf("掉下去吧"))
+        put("tyjd", listOf("他又觉得"))
+        put("bzd", listOf("不值得"))
+        put("whbrychtdd", listOf("我好不容易从黄铜打到"))
+        put("ddbyl", listOf("打到白银了"))
+        put("byl", listOf("白银了"))
+        put("wwsmhydxqn", listOf("我为什么还要掉下去呢"))
+        put("yyg", listOf("优越狗"))
+        put("wzm", listOf("我最猛"))
+        put("wsmxzhbq", listOf("为什么现在还不q"))
+        put("wsmbq", listOf("为什么不q"))
+        put("aq", listOf("aq"))
+        put("qddbrdea", listOf("q打断别人的e啊"))
+        put("jxs", listOf("就像是"))
+        put("wdg", listOf("我的锅"))
+        put("dsn", listOf("但是呢"))
+        put("tby", listOf("他白银"))
+        put("tjd", listOf("他觉得"))
+        put("yqw", listOf("一起玩"))
+        put("mbf", listOf("没办法"))
+        put("xcz", listOf("想操作"))
+        put("hgg", listOf("很尴尬"))
+        put("by", listOf("白银"))
+        put("ht", listOf("黄铜"))
+        put("huangjin", listOf("黄金"))
+        put("yinwei", listOf("因为"))
+        put("dw", listOf("段位"))
+        put("sy", listOf("所以"))
+        put("jd", listOf("觉得"))
+        put("gg", listOf("尴尬"))
+        put("bp", listOf("不配"))
+        put("gt", listOf("跟他"))
+        put("yq", listOf("一起"))
+        put("sb", listOf("是吧"))
+        put("wsm", listOf("为什么"))
     }
 }

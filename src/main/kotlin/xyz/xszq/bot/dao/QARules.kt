@@ -1,6 +1,5 @@
 package xyz.xszq.bot.dao
 
-import kotlinx.coroutines.sync.Semaphore
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.javatime.datetime
 

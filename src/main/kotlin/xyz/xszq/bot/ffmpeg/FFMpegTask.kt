@@ -2,18 +2,16 @@
 
 package xyz.xszq.bot.ffmpeg
 
-import korlibs.memory.toInt
-import kotlinx.coroutines.Dispatchers
+import korlibs.io.file.VfsFile
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
-import kotlinx.coroutines.withContext
-import xyz.xszq.nereides.newTempFile
+import xyz.xszq.nereides.getTempFile
 import java.io.File
 
 class FFMpegTask(
     private val outputFormat: FFMpegFileType,
-    private val argsBuilder: Builder.() -> Unit
+    private val argsBuilder: suspend Builder.() -> Unit
 ) {
     @DslMarker annotation class FFMpegBuilder
     @FFMpegBuilder
@@ -21,7 +19,7 @@ class FFMpegTask(
         val arguments = mutableListOf<Argument>()
         private fun insert(arg: Argument) = arguments.add(arg)
         fun input(path: String) = insert(Argument("i", path))
-        fun input(path: File) = insert(Argument("i", path.absolutePath))
+        fun input(path: VfsFile) = insert(Argument("i", path.absolutePath))
         fun startAt(timeInSecond: Double) = insert(Argument("ss", timeInSecond.toString()))
         fun duration(timeInSecond: Double) = insert(Argument("t", timeInSecond.toString()))
         fun audioRate(rate: String) = insert(Argument("ar", rate))
@@ -35,22 +33,19 @@ class FFMpegTask(
         fun frameRate(rate: Double) = insert(Argument("framerate", rate.toString()))
         fun vFrames(frames: Int) = insert(Argument("vframes", frames.toString()))
     }
-    private fun buildCommand(result: String): List<String> {
+    private suspend fun buildCommand(result: String): List<String> {
         return buildList {
             add(ffmpegBin)
-            Builder().apply(argsBuilder).arguments.forEach {
+            Builder().apply { argsBuilder(this@apply) }.arguments.forEach {
                 addAll(it.toList())
             }
             add(result)
         }
     }
-    private fun getOutputFile(): File = newTempFile(suffix=".${outputFormat.ext}")
-    private fun getResultBlocking(): File? {
+    suspend fun getResult(): VfsFile = semaphore.withPermit {
         checkFFMpeg()
-        val result = getOutputFile()
-        val command = buildCommand(result.absolutePath)
-//        println(command)
-        return try {
+        return getTempFile(suffix = ".${outputFormat.ext}").also {
+            val command = buildCommand(it.absolutePath)
             runBlocking {
                 ProgramExecutor(command, false) {
                     environment {
@@ -58,18 +53,12 @@ class FFMpegTask(
                     }
                 }.start()
             }
-            result
-        } catch (e: Exception) {
-            null
         }
-    }
-    suspend fun getResult(): File? = semaphore.withPermit {
-        getResultBlocking()
     }
     companion object {
         var ffmpegBin: String = "ffmpeg"
         var ffmpegPath = ""
-        val semaphore = Semaphore(32)
+        val semaphore = Semaphore(128)
         fun checkFFMpeg() {
             if (!File(ffmpegBin).exists())
                 println("Warn: FFMpeg does not exist")

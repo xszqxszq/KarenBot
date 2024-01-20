@@ -4,8 +4,6 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.ktor.client.call.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import xyz.xszq.nereides.message.Face
 import xyz.xszq.nereides.message.MessageChain
 import xyz.xszq.nereides.message.PlainText
@@ -17,6 +15,7 @@ import xyz.xszq.nereides.payload.message.MessageKeyboard
 import xyz.xszq.nereides.payload.message.MessageMarkdownC2C
 import xyz.xszq.nereides.payload.post.PostGroupFile
 import xyz.xszq.nereides.payload.post.PostGroupMessage
+import xyz.xszq.nereides.payload.post.PostGroupMessageErrorResponse
 import xyz.xszq.nereides.payload.response.PostGroupMessageResponse
 
 interface C2CApi {
@@ -50,10 +49,15 @@ interface C2CApi {
         )
 //        println(response.bodyAsText())
         return try {
-            val msg = response.body<PostGroupMessageResponse>()
-            msg
+            val msg = response.body<PostGroupMessageErrorResponse>()
+            PostGroupMessageResponse(code = msg.code, message = msg.message, traceId = msg.traceId)
         } catch (e: Exception) {
-            null
+            try {
+                val msg = response.body<PostGroupMessageResponse>()
+                msg
+            } catch (e: Exception) {
+                null
+            }
         }
     }
     suspend fun uploadFile(

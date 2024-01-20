@@ -4,7 +4,6 @@ import korlibs.image.font.TtfFont
 import korlibs.image.text.HorizontalAlign
 import kotlinx.coroutines.runBlocking
 import xyz.xszq.bot.image.BuildImage.Companion.defaultFallbackFonts
-import xyz.xszq.bot.image.BuildImage.Companion.fonts
 import xyz.xszq.nereides.sumOf
 
 
@@ -12,7 +11,7 @@ class Line(
     val chars: String,
     val align: HorizontalAlign = HorizontalAlign.LEFT,
     val fontSize: Float = 16F,
-    val font: TtfFont = fonts[defaultFallbackFonts.first()]!!
+    val font: TtfFont = globalFontRegistry.loadFontByName(defaultFallbackFonts.first())!!
 ) {
     val width: Float
         get() = runBlocking { font.measureTextGlyphs(fontSize, chars).glyphs.sumOf { it.metrics.xadvance } }

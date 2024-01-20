@@ -7,15 +7,12 @@ import korlibs.image.format.encode
 import korlibs.image.format.readNativeImage
 import korlibs.io.async.launch
 import korlibs.io.file.std.localCurrentDirVfs
-import korlibs.io.file.std.toVfs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.withPermit
 import nu.pattern.OpenCV
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.insert
-import xyz.xszq.bot.dao.AccessLogs
 import xyz.xszq.bot.audio.*
 import xyz.xszq.bot.config.BinConfig
 import xyz.xszq.bot.config.BotConfig
@@ -23,16 +20,16 @@ import xyz.xszq.bot.config.PJSKConfig
 import xyz.xszq.bot.dao.*
 import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.bot.image.*
-import xyz.xszq.bot.maimai.Maimai
-import xyz.xszq.bot.maimai.QueueForArcades
-import xyz.xszq.bot.text.*
+import xyz.xszq.bot.rhythmgame.maimai.Maimai
+import xyz.xszq.bot.rhythmgame.QueueForArcades
+import xyz.xszq.bot.text.AutoQA
+import xyz.xszq.bot.text.Bilibili
+import xyz.xszq.bot.text.RandomText
+import xyz.xszq.bot.text.WikiQuery
 import xyz.xszq.nereides.*
-import xyz.xszq.nereides.event.GlobalEventChannel
-import xyz.xszq.nereides.event.GroupAtMessageEvent
-import xyz.xszq.nereides.event.GuildAtMessageEvent
+import xyz.xszq.nereides.event.*
 import xyz.xszq.nereides.message.*
 import xyz.xszq.nereides.message.ark.ListArk
-import xyz.xszq.nereides.payload.message.MessageKeyboard
 import kotlin.random.Random
 
 lateinit var mariadb: Database
@@ -66,13 +63,11 @@ suspend fun init() {
         QueueForArcades.init()
     }
 
-    BuildImage.init()
-
     RandomImage.load("reply")
     RandomImage.load("gif", "reply")
     RandomImage.load("afraid", "reply")
 
-    Maimai.initBlocking()
+    Maimai.init()
     RandomText.loadSaizeriya()
 }
 
@@ -84,6 +79,16 @@ fun subscribe() {
             }
         }
     }
+    GlobalEventChannel.subscribe<BotJoinGroupEvent> {
+        launch(Dispatchers.IO) {
+            AccessLogs.saveLog(operator, groupId, "<joined>")
+        }
+    }
+    GlobalEventChannel.subscribe<BotLeaveGroupEvent> {
+        launch(Dispatchers.IO) {
+            AccessLogs.saveLog(operator, groupId, "<left>")
+        }
+    }
     GlobalEventChannel.subscribePublicMessages {
         startsWith("/ping") {
             reply("bot在")
@@ -91,10 +96,8 @@ fun subscribe() {
         startsWith("/搜番") {
             if (this is GroupAtMessageEvent) {
                 message.filterIsInstance<RemoteImage>().firstOrNull() ?.let { img ->
-                    img.getFile().apply {
-                        reply(AnimeDB.handle(this))
-                    }.also {
-                        it.delete()
+                    img.use {
+                        reply(AnimeDB.handle(it))
                     }
                 } ?: run {
                     reply("使用搜番命令时，请同时发送想要搜索的动漫截图！")
@@ -240,7 +243,7 @@ fun subscribe() {
             file.cropPeriod(Random.nextDouble(
                 0.0,
                 file.getAudioDuration() - duration
-            ), duration)?.let { v ->
+            ), duration).useTempFile { v ->
                 reply(v.toVoice())
             }
         }
@@ -288,13 +291,17 @@ fun subscribe() {
         startsWith(listOf("生成", "/生成")) { raw ->
             val args = raw.toArgsList()
             val images = when (this) {
-                is GroupAtMessageEvent -> message.filterIsInstance<RemoteImage>().map {
-                    it.getFile().readNativeImage()
+                is GroupAtMessageEvent -> message.filterIsInstance<RemoteImage>().map { r ->
+                    r.use {
+                        it.readNativeImage()
+                    }
                 }
                 is GuildAtMessageEvent -> {
                     message.filterIsInstance<GuildAt>().filter { it.target != bot.botGuildInfo.id }
                         .map { it.user.avatar }.ifEmpty { listOf(author.avatar) }.map {
-                            NetworkUtils.downloadTempFile(it)!!.toVfs().readNativeImage()
+                            NetworkUtils.useNetFile(it) { f ->
+                                f.readNativeImage()
+                            }
                         }
                 }
                 else -> return@startsWith
@@ -339,7 +346,7 @@ fun subscribe() {
                     reply(ImageGeneration.pincushion(img).toImage())
                 }
                 "5k" -> {
-                    val nowArgs = raw.trim().substringAfter("5k").toArgsListByLn()
+                    val nowArgs = raw.trim().substringAfter("5k").toArgsListByLnOrSpace()
                     when (nowArgs.size) {
                         0 -> reply("使用方法：\n/生成 5k 第一行文本\n第二行文本（可选）")
                         1 -> reply(FiveThousandChoyen.generate(nowArgs.first().trim(), " ").encode(PNG).toImage())
@@ -406,8 +413,9 @@ fun subscribe() {
                 return@startsWith
             }
             try {
-                val image = LaTeX.generateLaTeX(text)
-                reply(image.toImage())
+                LaTeX.generateLaTeX(text).useTempFile {
+                    reply(it.toImage())
+                }
             } catch (e: Exception) {
                 if (e is org.scilab.forge.jlatexmath.ParseException) {
                     reply(e.message!!)
@@ -419,7 +427,7 @@ fun subscribe() {
             "/gocho", "gocho",
             "/choyen", "choyen"
         )) { raw ->
-            val args = raw.toArgsListByLn()
+            val args = raw.toArgsListByLnOrSpace()
             when (args.size) {
                 0 -> reply("使用方法：\n/5k 第一行文本\n第二行文本（可选）\n\n例：/5k 干什么！")
                 1 -> reply(FiveThousandChoyen.generate(args.first().trim(), " ").encode(PNG).toImage())
@@ -445,14 +453,14 @@ fun subscribe() {
     }
     GlobalEventChannel.subscribePublicMessages(permName = "audio.voice") {
         startsWith(listOf("活字印刷", "/活字印刷")) { text ->
-            if (text.isBlank()) {
-                reply("使用方法：/活字印刷 文本\n例：/活字印刷 大家好啊，我是可怜Bot")
+            if (text.isBlank() || text.length >= 120) {
+                reply("使用方法：/活字印刷 文本\n字数不能超过120个字！\n例：/活字印刷 大家好啊，我是可怜Bot")
                 return@startsWith
             }
             audioSemaphore.withPermit {
                 kotlin.runCatching {
-                    OttoVoice.generate(text) ?.toVoice() ?.let {
-                        reply(it)
+                    OttoVoice.generate(text).useTempFile {
+                        reply(it.toVoice())
                     }
                 }.onFailure {
                     reply("生成失败，请检查内容是否为中文/英文/数字。")
@@ -525,6 +533,34 @@ fun subscribe() {
                     reply(PJSKSticker.draw(config, text).savePng().toImage())
                 }
             }
+        }
+    }
+    GlobalEventChannel.subscribePublicMessages {
+        startsWith("/restart") {
+            if (subjectId == "EDC8852148286B84FAB4ECF00D21C378") {
+                bot.restarting = true
+                GlobalEventChannel.broadcast(BotRestartEvent(bot))
+                reply("ok")
+            }
+        }
+    }
+    GlobalEventChannel.subscribePublicMessages {
+        startsWith("/test") {
+            reply("https://www.baidu.com")
+        }
+    }
+    GlobalEventChannel.subscribePublicMessages {
+        startsWith("/info") {
+            reply(buildString {
+                append("Subject ID: ")
+                appendLine(subjectId)
+                append("Context ID: ")
+                appendLine(contextId)
+                append("Node: ")
+                append(config.shardId)
+                append("/")
+                appendLine(config.shardTotal)
+            })
         }
     }
 //    GlobalEventChannel.subscribePublicMessages(permName = "sleep") {

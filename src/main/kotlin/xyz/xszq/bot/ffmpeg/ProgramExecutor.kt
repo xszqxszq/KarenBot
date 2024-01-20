@@ -1,8 +1,6 @@
 package xyz.xszq.bot.ffmpeg
 
 import korlibs.memory.Platform
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -28,7 +26,7 @@ class ProgramExecutor(
     private val nullFile = File(
         if (Platform.isWindows) "NUL" else "/dev/null"
     )
-    private fun startBlocking(): Unit = Builder().apply(builder).run {
+    fun start() = Builder().apply(builder).run {
         val procBuilder = ProcessBuilder()
         env.forEach {
             val args = it.split("=")
@@ -48,8 +46,5 @@ class ProgramExecutor(
         } ?: run {
             proc.waitFor()
         }
-    }
-    suspend fun start() = withContext(Dispatchers.IO) {
-        startBlocking()
     }
 }

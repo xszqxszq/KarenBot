@@ -8,11 +8,9 @@ import korlibs.image.color.RGBA
 import korlibs.image.text.HorizontalAlign
 import korlibs.math.geom.Point
 import korlibs.math.geom.vector.LineJoin
-import kotlinx.coroutines.sync.withLock
 import xyz.xszq.bot.image.BuildImage.Companion.defaultFallbackFonts
 import xyz.xszq.bot.image.BuildImage.Companion.getProperFont
 import xyz.xszq.nereides.sumOf
-import java.awt.BasicStroke
 
 class Text2Image(
     var lines: List<Line>,
@@ -26,7 +24,7 @@ class Text2Image(
     val height
         get() = lines.sumOf { it.ascent } + lines.last().descent + spacing * (lines.size - 1) + strokeWidth * 2
 
-    suspend fun drawOnImage(image: Bitmap, pos: Point) {
+    fun drawOnImage(image: Bitmap, pos: Point) {
         var top = pos.y
         image.context2d {
             lineJoin = LineJoin.ROUND
@@ -47,9 +45,7 @@ class Text2Image(
                         strokeText(line.chars, point)
                     }
                     fillStyle = fill
-                    fontLock.withLock {
-                        fillText(line.chars, point)
-                    }
+                    fillText(line.chars, point)
                     top += line.ascent + spacing
                 }
             }.onFailure {
@@ -65,7 +61,7 @@ class Text2Image(
         lines = newLines
         return this
     }
-    suspend fun toImage(bgColor: RGBA? = null, padding: List<Int> = listOf(0, 0)): Bitmap {
+    fun toImage(bgColor: RGBA? = null, padding: List<Int> = listOf(0, 0)): Bitmap {
         var paddingLeft = padding[0]
         var paddingRight = padding[0]
         var paddingTop = padding[1]
@@ -103,9 +99,7 @@ class Text2Image(
                         }
                     }
                     fillStyle = fill
-                    fontLock.withLock {
-                        fillText(line.chars,now)
-                    }
+                    fillText(line.chars,now)
                     top += line.ascent + spacing
                 }
             }.onFailure {
@@ -115,7 +109,7 @@ class Text2Image(
     }
     companion object {
 
-        suspend fun fromText(
+        fun fromText(
             text: String,
             fontSize: Int = 16,
             fill: RGBA = Colors.BLACK,

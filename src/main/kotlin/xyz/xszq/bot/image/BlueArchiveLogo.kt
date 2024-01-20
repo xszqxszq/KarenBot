@@ -5,12 +5,10 @@ import korlibs.image.bitmap.NativeImageOrBitmap32
 import korlibs.image.bitmap.context2d
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
-import korlibs.image.font.TtfFont
 import korlibs.image.format.readNativeImage
 import korlibs.io.file.std.localCurrentDirVfs
 import korlibs.math.geom.Point
 import korlibs.math.geom.Size
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 
 object BlueArchiveLogo {
@@ -22,23 +20,20 @@ object BlueArchiveLogo {
     private const val paddingX: Int = 10
     private const val graphOffsetX: Int = -15
     private const val graphOffsetY: Int = 0
-    private val defaultFont = globalFontRegistry.loadFontByName("RoGSanSrfStd-Bd")!!
-    private val fallbackFont = globalFontRegistry.loadFontByName("Glow Sans SC Normal Heavy")!!
+    private val defaultFont = "RoGSanSrfStd-Bd"
+    private val fallbackFont = "Glow Sans SC Normal Heavy"
     private val hollowPath = listOf(
         Pair(284, 136),
         Pair(321, 153),
         Pair(159, 410),
         Pair(148, 403)
     )
-    private suspend fun getFont(text: String): TtfFont {
-        if (text.any {
-            fontLock.withLock {
-                defaultFont[it] == null
-            }
-        })
+    private fun getFont(text: String): String {
+        val default = globalFontRegistry.loadFontByName(defaultFont)!!
+        if (text.any { default[it] == null })
             return fallbackFont
         text.forEach {
-            val glyphs = defaultFont.measureTextGlyphs(size, it.toString())
+            val glyphs = default.measureTextGlyphs(size, it.toString())
             if (it.code > 255 && glyphs.metrics.bounds.x == 34.272F)
                 return fallbackFont
         }
@@ -46,8 +41,8 @@ object BlueArchiveLogo {
     }
     suspend fun draw(textL: String, textR: String): Bitmap = MemeGenerator.semaphore.withPermit {
         kotlin.runCatching {
-            val fontL = getFont(textL)
-            val fontR = getFont(textR)
+            val fontL = globalFontRegistry.loadFontByName(getFont(textL))!!
+            val fontR = globalFontRegistry.loadFontByName(getFont(textR))!!
             val textMetricsL = fontL.measureTextGlyphs(size, textL)
             val textMetricsR = fontR.measureTextGlyphs(size, textR)
             val textWidthL = textMetricsL.metrics.width -
@@ -70,7 +65,7 @@ object BlueArchiveLogo {
                 // alignment = TextAlignment.RIGHT
                 setTransform(1.0, 0.0, horizontalTilt, 1.0, 0.0, 0.0)
                 font = fontL
-                fillTextSafe(textL, Point(
+                fillText(textL, Point(
                     canvasWidthL - textWidthL + 30 +
                             if (fontL.ttfCompleteName == "RoGSanSrfStd-Bd") 45 else 40,
                     height * textBaseLine)
@@ -89,7 +84,7 @@ object BlueArchiveLogo {
                 font = fontR
                 strokeTextSafe(textR, Point(canvasWidthL + 30, height * textBaseLine))
                 fillStyle = Colors.BLACK
-                fillTextSafe(textR, Point(canvasWidthL + 30, height * textBaseLine))
+                fillText(textR, Point(canvasWidthL + 30, height * textBaseLine))
                 setTransform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
                 val graphX = canvasWidthL - height / 2 + graphOffsetX
                 val graphY = graphOffsetY

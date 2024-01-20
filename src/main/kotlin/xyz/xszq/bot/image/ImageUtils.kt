@@ -1,9 +1,7 @@
 package xyz.xszq.bot.image
 
-import com.sksamuel.scrimage.AwtImage
 import com.sksamuel.scrimage.ImmutableImage
 import com.sksamuel.scrimage.nio.JpegWriter
-import korlibs.image.awt.AwtNativeImage
 import korlibs.image.awt.toAwt
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.ensureNative
@@ -28,12 +26,6 @@ fun Bitmap.toJPEG(): ByteArray {
     return toImmutableImage().bytes(JpegWriter().withCompression(75).withProgressive(true))
 }
 
-
-fun Mat.toBufferedImageOld(): BufferedImage {
-    val mob = MatOfByte()
-    Imgcodecs.imencode(".png", this, mob)
-    return ImageIO.read(ByteArrayInputStream(mob.toArray()))
-}
 fun Mat.toBufferedImage(): BufferedImage {
     val imgSrc = listOf(this)
     val imgDst = listOf(Mat(height(), width(), CvType.CV_8UC4))
