@@ -205,7 +205,7 @@ permalink: /meme/
 - 例：`/pjsk 初音6 纳尼`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/pjsk.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/pjsk.webp" width="200" />
 </div>
 
 
@@ -214,7 +214,7 @@ permalink: /meme/
 - 指令：`/ba 左侧文本 右侧文本`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/bluearchive.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/bluearchive.webp" width="200" />
 </div>
 
 # 5000choyen
@@ -223,7 +223,7 @@ permalink: /meme/
 - `第二行文本`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/5000choyen.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/5000choyen.webp" width="200" />
 </div>
 
 # 球面化
@@ -233,7 +233,7 @@ permalink: /meme/
 - 需要同时发送一张图片！
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/spherize.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/spherize.webp" width="200" />
 </div>
 
 # 对称
@@ -242,7 +242,7 @@ permalink: /meme/
 - 需要同时发送一张图片！
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/flip.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/flip.webp" width="200" />
 </div>
 
 
@@ -260,7 +260,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/add_chaos.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/add_chaos.webp" width="200" />
 </div>
 
 ## addiction
@@ -270,7 +270,7 @@ permalink: /meme/
 - 需要文字数目：`0` ~ `1`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/addiction.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/addiction.webp" width="200" />
 </div>
 
 ## alike
@@ -280,7 +280,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/alike.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/alike.webp" width="200" />
 </div>
 
 ## always
@@ -298,19 +298,19 @@ permalink: /meme/
 - 预览：
     - 参数：\-\-mode normal
     <div align="left">
-    <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/always_instance0.webp" width="200" />
+    <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/always_instance0.webp" width="200" />
     </div>
 
     - 参数：\-\-mode circle
     
     <div align="left">
-      <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/always_instance1.webp" width="200" />
+      <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/always_instance1.webp" width="200" />
     </div>
 
     - 参数：\-\-mode loop
     
     <div align="left">
-      <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/always_instance2.webp" width="200" />
+      <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/always_instance2.webp" width="200" />
     </div>
 
 ## always_like
@@ -320,7 +320,7 @@ permalink: /meme/
 - 需要文字数目：`0` ~ `6`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/always_like.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/always_like.webp" width="200" />
 </div>
 
 ## anti_kidnap
@@ -330,7 +330,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/anti_kidnap.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/anti_kidnap.webp" width="200" />
 </div>
 
 ## anya_suki
@@ -341,7 +341,7 @@ permalink: /meme/
 - 默认文字：[`阿尼亚喜欢这个`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/anya_suki.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/anya_suki.webp" width="200" />
 </div>
 
 ## applaud
@@ -351,7 +351,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/applaud.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/applaud.webp" width="200" />
 </div>
 
 ## ascension
@@ -362,7 +362,7 @@ permalink: /meme/
 - 默认文字：[`学的是机械`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/ascension.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/ascension.webp" width="200" />
 </div>
 
 ## back_to_work
@@ -372,7 +372,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/back_to_work.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/back_to_work.webp" width="200" />
 </div>
 
 ## bad_news
@@ -383,7 +383,7 @@ permalink: /meme/
 - 默认文字：[`喜报`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/bad_news.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/bad_news.webp" width="200" />
 </div>
 
 ## beat_head
@@ -393,7 +393,7 @@ permalink: /meme/
 - 需要文字数目：`0` ~ `1`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/beat_head.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/beat_head.webp" width="200" />
 </div>
 
 ## bite
@@ -403,7 +403,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/bite.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/bite.webp" width="200" />
 </div>
 
 ## blood_pressure
@@ -413,7 +413,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/blood_pressure.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/blood_pressure.webp" width="200" />
 </div>
 
 ## bocchi_draft
@@ -423,7 +423,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/bocchi_draft.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/bocchi_draft.webp" width="200" />
 </div>
 
 ## bronya_holdsign
@@ -434,7 +434,7 @@ permalink: /meme/
 - 默认文字：[`V我50`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/bronya_holdsign.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/bronya_holdsign.webp" width="200" />
 </div>
 
 ## bubble_tea
@@ -454,19 +454,19 @@ permalink: /meme/
 - 预览：
     - 参数：\-\-pos right
     <div align="left">
-    <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/bubble_tea_instance0.webp" width="200" />
+    <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/bubble_tea_instance0.webp" width="200" />
     </div>
 
     - 参数：\-\-pos left
     
     <div align="left">
-      <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/bubble_tea_instance1.webp" width="200" />
+      <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/bubble_tea_instance1.webp" width="200" />
     </div>
 
     - 参数：\-\-pos both
     
     <div align="left">
-      <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/bubble_tea_instance2.webp" width="200" />
+      <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/bubble_tea_instance2.webp" width="200" />
     </div>
 
 ## call_110
@@ -476,7 +476,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/call_110.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/call_110.webp" width="200" />
 </div>
 
 ## caoshen_bite
@@ -486,7 +486,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/caoshen_bite.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/caoshen_bite.webp" width="200" />
 </div>
 
 ## capoo_draw
@@ -496,7 +496,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/capoo_draw.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/capoo_draw.webp" width="200" />
 </div>
 
 ## capoo_rip
@@ -506,7 +506,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/capoo_rip.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/capoo_rip.webp" width="200" />
 </div>
 
 ## capoo_rub
@@ -516,7 +516,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/capoo_rub.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/capoo_rub.webp" width="200" />
 </div>
 
 ## capoo_say
@@ -527,7 +527,7 @@ permalink: /meme/
 - 默认文字：[`寄`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/capoo_say.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/capoo_say.webp" width="200" />
 </div>
 
 ## capoo_strike
@@ -537,7 +537,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/capoo_strike.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/capoo_strike.webp" width="200" />
 </div>
 
 ## captain
@@ -547,7 +547,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/captain.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/captain.webp" width="200" />
 </div>
 
 ## certificate
@@ -559,7 +559,7 @@ permalink: /meme/
 
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/certificate.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/certificate.webp" width="200" />
 </div>
 
 ## chase_train
@@ -569,7 +569,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/chase_train.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/chase_train.webp" width="200" />
 </div>
 
 ## clown
@@ -580,7 +580,7 @@ permalink: /meme/
 
 - 预览：
   <div align="left">
-    <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/clown_instance0.webp" width="200" />
+    <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/clown_instance0.webp" width="200" />
   </div>
 
 ## confuse
@@ -590,7 +590,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/confuse.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/confuse.webp" width="200" />
 </div>
 
 ## coupon
@@ -600,7 +600,7 @@ permalink: /meme/
 - 需要文字数目：`0` ~ `1`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/coupon.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/coupon.webp" width="200" />
 </div>
 
 ## cover_face
@@ -610,7 +610,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/cover_face.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/cover_face.webp" width="200" />
 </div>
 
 ## crawl
@@ -623,7 +623,7 @@ permalink: /meme/
         - 默认值：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/crawl.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/crawl.webp" width="200" />
 </div>
 
 ## cyan
@@ -633,7 +633,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/cyan.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/cyan.webp" width="200" />
 </div>
 
 ## daynight
@@ -643,7 +643,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/daynight.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/daynight.webp" width="200" />
 </div>
 
 ## decent_kiss
@@ -653,7 +653,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/decent_kiss.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/decent_kiss.webp" width="200" />
 </div>
 
 ## dianzhongdian
@@ -664,7 +664,7 @@ permalink: /meme/
 - 默认文字：[`救命啊`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/dianzhongdian.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/dianzhongdian.webp" width="200" />
 </div>
 
 ## dinosaur
@@ -674,7 +674,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/dinosaur.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/dinosaur.webp" width="200" />
 </div>
 
 ## distracted
@@ -684,7 +684,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/distracted.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/distracted.webp" width="200" />
 </div>
 
 ## divorce
@@ -694,7 +694,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/divorce.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/divorce.webp" width="200" />
 </div>
 
 ## dog_dislike
@@ -711,13 +711,13 @@ permalink: /meme/
 - 预览：
     > 参数：（无参数）
     <div align="left">
-    <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/dog_dislike_instance0.webp" width="200" />
+    <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/dog_dislike_instance0.webp" width="200" />
     </div>
 
     - 参数：\-\-circle
     
     <div align="left">
-      <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/dog_dislike_instance1.webp" width="200" />
+      <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/dog_dislike_instance1.webp" width="200" />
     </div>
 
 ## dog_of_vtb
@@ -727,7 +727,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/dog_of_vtb.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/dog_of_vtb.webp" width="200" />
 </div>
 
 ## dont_go_near
@@ -737,7 +737,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/dont_go_near.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/dont_go_near.webp" width="200" />
 </div>
 
 ## dont_touch
@@ -747,7 +747,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/dont_touch.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/dont_touch.webp" width="200" />
 </div>
 
 ## douyin
@@ -758,7 +758,7 @@ permalink: /meme/
 - 默认文字：[`douyin`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/douyin.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/douyin.webp" width="200" />
 </div>
 
 ## eat
@@ -768,7 +768,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/eat.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/eat.webp" width="200" />
 </div>
 
 ## fanatic
@@ -779,7 +779,7 @@ permalink: /meme/
 - 默认文字：[`洛天依`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/fanatic.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/fanatic.webp" width="200" />
 </div>
 
 ## fencing
@@ -789,7 +789,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/fencing.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/fencing.webp" width="200" />
 </div>
 
 ## fill_head
@@ -799,7 +799,7 @@ permalink: /meme/
 - 需要文字数目：`0` ~ `1`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/fill_head.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/fill_head.webp" width="200" />
 </div>
 
 ## find_chips
@@ -810,7 +810,7 @@ permalink: /meme/
 - 默认文字：[`我们要飞向何方`, `我打算待会去码头整点薯条`, `我说的是归根结底，活着是为了什么`, `为了待会去码头整点薯条`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/find_chips.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/find_chips.webp" width="200" />
 </div>
 
 ## flash_blind
@@ -821,7 +821,7 @@ permalink: /meme/
 - 默认文字：[`闪瞎你们的狗眼`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/flash_blind.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/flash_blind.webp" width="200" />
 </div>
 
 ## follow
@@ -831,7 +831,7 @@ permalink: /meme/
 - 需要文字数目：`0` ~ `1`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/follow.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/follow.webp" width="200" />
 </div>
 
 ## garbage
@@ -841,7 +841,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/garbage.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/garbage.webp" width="200" />
 </div>
 
 ## genshin_start
@@ -852,7 +852,7 @@ permalink: /meme/
 - 默认文字：[`原神，启动！`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/genshin_start.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/genshin_start.webp" width="200" />
 </div>
 
 ## good_news
@@ -863,7 +863,7 @@ permalink: /meme/
 - 默认文字：[`悲报`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/good_news.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/good_news.webp" width="200" />
 </div>
 
 ## gun
@@ -883,19 +883,19 @@ permalink: /meme/
 - 预览： 
   - 参数：\-\-pos left
       <div align="left">
-      <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/gun_instance0.webp" width="200" />
+      <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/gun_instance0.webp" width="200" />
       </div>
   
   - 参数：\-\-pos right
     
       <div align="left">
-        <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/gun_instance1.webp" width="200" />
+        <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/gun_instance1.webp" width="200" />
       </div>
 
   - 参数：\-\-pos both
     
       <div align="left">
-        <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/gun_instance2.webp" width="200" />
+        <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/gun_instance2.webp" width="200" />
       </div>
 
 ## hammer
@@ -905,7 +905,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/hammer.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/hammer.webp" width="200" />
 </div>
 
 ## high_EQ
@@ -916,7 +916,7 @@ permalink: /meme/
 - 默认文字：[`高情商`, `低情商`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/high_EQ.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/high_EQ.webp" width="200" />
 </div>
 
 ## hit_screen
@@ -926,7 +926,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/hit_screen.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/hit_screen.webp" width="200" />
 </div>
 
 ## hold_grudge
@@ -937,7 +937,7 @@ permalink: /meme/
 - 默认文字：[`群友不发好康的`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/hold_grudge.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/hold_grudge.webp" width="200" />
 </div>
 
 ## hold_tight
@@ -947,7 +947,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/hold_tight.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/hold_tight.webp" width="200" />
 </div>
 
 ## hug_leg
@@ -957,7 +957,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/hug_leg.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/hug_leg.webp" width="200" />
 </div>
 
 ## hutao_bite
@@ -967,7 +967,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/hutao_bite.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/hutao_bite.webp" width="200" />
 </div>
 
 ## imprison
@@ -978,7 +978,7 @@ permalink: /meme/
 - 默认文字：[`我发涩图被抓起来了`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/imprison.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/imprison.webp" width="200" />
 </div>
 
 ## incivilization
@@ -989,7 +989,7 @@ permalink: /meme/
 - 默认文字：[`你刚才说的话不是很礼貌！`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/incivilization.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/incivilization.webp" width="200" />
 </div>
 
 ## interview
@@ -1000,7 +1000,7 @@ permalink: /meme/
 - 默认文字：[`采访大佬经验`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/interview.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/interview.webp" width="200" />
 </div>
 
 ## jiujiu
@@ -1010,7 +1010,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/jiujiu.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/jiujiu.webp" width="200" />
 </div>
 
 ## kaleidoscope
@@ -1027,13 +1027,13 @@ permalink: /meme/
 - 预览：
     > 参数：(无参数)
     <div align="left">
-    <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/kaleidoscope_instance0.webp" width="200" />
+    <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/kaleidoscope_instance0.webp" width="200" />
     </div>
 
     - 参数：\-\-circle
     
     <div align="left">
-      <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/kaleidoscope_instance1.webp" width="200" />
+      <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/kaleidoscope_instance1.webp" width="200" />
     </div>
 
 ## karyl_point
@@ -1043,7 +1043,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/karyl_point.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/karyl_point.webp" width="200" />
 </div>
 
 ## keep_away
@@ -1055,7 +1055,7 @@ permalink: /meme/
   远离以下头像的人`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/keep_away.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/keep_away.webp" width="200" />
 </div>
 
 ## kick_ball
@@ -1065,7 +1065,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/kick_ball.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/kick_ball.webp" width="200" />
 </div>
 
 ## kirby_hammer
@@ -1082,13 +1082,13 @@ permalink: /meme/
 - 预览：
     > 参数：(无参数)
     <div align="left">
-    <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/kirby_hammer_instance0.webp" width="200" />
+    <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/kirby_hammer_instance0.webp" width="200" />
     </div>
 
     - 参数：\-\-circle
     
     <div align="left">
-      <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/kirby_hammer_instance1.webp" width="200" />
+      <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/kirby_hammer_instance1.webp" width="200" />
     </div>
 
 ## kiss
@@ -1098,7 +1098,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/kiss.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/kiss.webp" width="200" />
 </div>
 
 ## klee_eat
@@ -1108,7 +1108,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/klee_eat.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/klee_eat.webp" width="200" />
 </div>
 
 ## knock
@@ -1118,7 +1118,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/knock.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/knock.webp" width="200" />
 </div>
 
 ## learn
@@ -1129,7 +1129,7 @@ permalink: /meme/
 - 默认文字：[`偷学群友数理基础`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/learn.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/learn.webp" width="200" />
 </div>
 
 ## lim_x_0
@@ -1139,7 +1139,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/lim_x_0.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/lim_x_0.webp" width="200" />
 </div>
 
 ## listen_music
@@ -1149,7 +1149,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/listen_music.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/listen_music.webp" width="200" />
 </div>
 
 ## little_angel
@@ -1159,7 +1159,7 @@ permalink: /meme/
 - 需要文字数目：`0` ~ `1`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/little_angel.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/little_angel.webp" width="200" />
 </div>
 
 ## loading
@@ -1169,7 +1169,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/loading.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/loading.webp" width="200" />
 </div>
 
 ## look_flat
@@ -1184,7 +1184,7 @@ permalink: /meme/
 
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/look_flat.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/look_flat.webp" width="200" />
 </div>
 
 ## look_this_icon
@@ -1196,7 +1196,7 @@ permalink: /meme/
   先看看这个图标再说话`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/look_this_icon.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/look_this_icon.webp" width="200" />
 </div>
 
 ## love_you
@@ -1206,7 +1206,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/love_you.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/love_you.webp" width="200" />
 </div>
 
 ## luoyonghao_say
@@ -1217,7 +1217,7 @@ permalink: /meme/
 - 默认文字：[`又不是不能用`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/luoyonghao_say.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/luoyonghao_say.webp" width="200" />
 </div>
 
 ## luxun_say
@@ -1228,7 +1228,7 @@ permalink: /meme/
 - 默认文字：[`我没有说过这句话`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/luxun_say.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/luxun_say.webp" width="200" />
 </div>
 
 ## maimai_awaken
@@ -1238,7 +1238,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/maimai_awaken.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/maimai_awaken.webp" width="200" />
 </div>
 
 ## maimai_join
@@ -1248,7 +1248,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/maimai_join.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/maimai_join.webp" width="200" />
 </div>
 
 ## make_friend
@@ -1258,7 +1258,7 @@ permalink: /meme/
 - 需要文字数目：`0` ~ `1`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/make_friend.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/make_friend.webp" width="200" />
 </div>
 
 ## marriage
@@ -1268,7 +1268,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/marriage.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/marriage.webp" width="200" />
 </div>
 
 ## meteor
@@ -1279,7 +1279,7 @@ permalink: /meme/
 - 默认文字：[`我要对象`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/meteor.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/meteor.webp" width="200" />
 </div>
 
 ## mihoyo
@@ -1289,7 +1289,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/mihoyo.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/mihoyo.webp" width="200" />
 </div>
 
 ## mourning
@@ -1306,13 +1306,13 @@ permalink: /meme/
 - 预览：
     > 参数：(无参数)
     <div align="left">
-    <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/mourning_instance0.webp" width="200" />
+    <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/mourning_instance0.webp" width="200" />
     </div>
 
     > 参数：\-\-black
     
     <div align="left">
-      <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/mourning_instance1.webp" width="200" />
+      <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/mourning_instance1.webp" width="200" />
     </div>
 
 ## murmur
@@ -1323,7 +1323,7 @@ permalink: /meme/
 - 默认文字：[`你的假期余额不足`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/murmur.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/murmur.webp" width="200" />
 </div>
 
 ## my_wife
@@ -1333,7 +1333,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/my_wife.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/my_wife.webp" width="200" />
 </div>
 
 ## need
@@ -1343,7 +1343,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/need.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/need.webp" width="200" />
 </div>
 
 ## nekoha_holdsign
@@ -1354,7 +1354,7 @@ permalink: /meme/
 - 默认文字：[`V我50`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/nekoha_holdsign.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/nekoha_holdsign.webp" width="200" />
 </div>
 
 ## nijika_holdsign
@@ -1365,7 +1365,7 @@ permalink: /meme/
 - 默认文字：[`你可少看点二次元吧`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/nijika_holdsign.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/nijika_holdsign.webp" width="200" />
 </div>
 
 ## no_response
@@ -1375,7 +1375,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/no_response.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/no_response.webp" width="200" />
 </div>
 
 ## nokia
@@ -1386,7 +1386,7 @@ permalink: /meme/
 - 默认文字：[`无内鬼，继续交易`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/nokia.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/nokia.webp" width="200" />
 </div>
 
 ## not_call_me
@@ -1397,7 +1397,7 @@ permalink: /meme/
 - 默认文字：[`开银趴不喊我是吧`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/not_call_me.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/not_call_me.webp" width="200" />
 </div>
 
 ## oshi_no_ko
@@ -1408,7 +1408,7 @@ permalink: /meme/
 - 默认文字：[`网友`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/oshi_no_ko.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/oshi_no_ko.webp" width="200" />
 </div>
 
 ## osu
@@ -1419,7 +1419,7 @@ permalink: /meme/
 - 默认文字：[`hso!`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/osu.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/osu.webp" width="200" />
 </div>
 
 ## overtime
@@ -1429,7 +1429,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/overtime.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/overtime.webp" width="200" />
 </div>
 
 ## paint
@@ -1439,7 +1439,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/paint.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/paint.webp" width="200" />
 </div>
 
 ## painter
@@ -1449,7 +1449,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/painter.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/painter.webp" width="200" />
 </div>
 
 ## pass_the_buck
@@ -1460,7 +1460,7 @@ permalink: /meme/
 - 默认文字：[`你写!`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/pass_the_buck.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/pass_the_buck.webp" width="200" />
 </div>
 
 ## pat
@@ -1470,7 +1470,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/pat.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/pat.webp" width="200" />
 </div>
 
 ## perfect
@@ -1480,7 +1480,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/perfect.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/perfect.webp" width="200" />
 </div>
 
 ## petpet
@@ -1496,13 +1496,13 @@ permalink: /meme/
 - 预览：
     > 参数：{"circle":false}
     <div align="left">
-    <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/petpet_instance0.webp" width="200" />
+    <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/petpet_instance0.webp" width="200" />
     </div>
 
     > 参数：{"circle":true}
     
     <div align="left">
-      <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/petpet_instance1.webp" width="200" />
+      <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/petpet_instance1.webp" width="200" />
     </div>
 
 ## pinch
@@ -1512,7 +1512,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/pinch.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/pinch.webp" width="200" />
 </div>
 
 ## play
@@ -1522,7 +1522,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/play.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/play.webp" width="200" />
 </div>
 
 ## play_game
@@ -1533,7 +1533,7 @@ permalink: /meme/
 - 默认文字：[`来玩休闲游戏啊`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/play_game.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/play_game.webp" width="200" />
 </div>
 
 ## pornhub
@@ -1544,7 +1544,7 @@ permalink: /meme/
 - 默认文字：[`You`, `Tube`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/pornhub.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/pornhub.webp" width="200" />
 </div>
 
 ## potato
@@ -1554,7 +1554,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/potato.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/potato.webp" width="200" />
 </div>
 
 ## pound
@@ -1564,7 +1564,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/pound.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/pound.webp" width="200" />
 </div>
 
 ## printing
@@ -1574,7 +1574,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/printing.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/printing.webp" width="200" />
 </div>
 
 ## prpr
@@ -1584,7 +1584,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/prpr.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/prpr.webp" width="200" />
 </div>
 
 ## psyduck
@@ -1595,7 +1595,7 @@ permalink: /meme/
 - 默认文字：没有默认文本，请自己输入
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/psyduck.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/psyduck.webp" width="200" />
 </div>
 
 ## punch
@@ -1605,7 +1605,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/punch.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/punch.webp" width="200" />
 </div>
 
 ## raise_image
@@ -1615,7 +1615,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/raise_image.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/raise_image.webp" width="200" />
 </div>
 
 ## raise_sign
@@ -1626,7 +1626,7 @@ permalink: /meme/
 - 默认文字：[`大佬带带我`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/raise_sign.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/raise_sign.webp" width="200" />
 </div>
 
 ## read_book
@@ -1636,7 +1636,7 @@ permalink: /meme/
 - 需要文字数目：`0` ~ `1`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/read_book.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/read_book.webp" width="200" />
 </div>
 
 ## rip
@@ -1646,7 +1646,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/rip.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/rip.webp" width="200" />
 </div>
 
 ## rip_angrily
@@ -1656,7 +1656,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/rip_angrily.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/rip_angrily.webp" width="200" />
 </div>
 
 ## rise_dead
@@ -1666,7 +1666,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/rise_dead.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/rise_dead.webp" width="200" />
 </div>
 
 ## roll
@@ -1676,7 +1676,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/roll.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/roll.webp" width="200" />
 </div>
 
 ## rub
@@ -1686,7 +1686,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/rub.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/rub.webp" width="200" />
 </div>
 
 ## run
@@ -1697,7 +1697,7 @@ permalink: /meme/
 - 默认文字：[`快跑`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/run.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/run.webp" width="200" />
 </div>
 
 ## safe_sense
@@ -1709,7 +1709,7 @@ permalink: /meme/
   远不及它的万分之一`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/safe_sense.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/safe_sense.webp" width="200" />
 </div>
 
 ## scratch_head
@@ -1719,7 +1719,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/scratch_head.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/scratch_head.webp" width="200" />
 </div>
 
 ## scratchcard
@@ -1730,7 +1730,7 @@ permalink: /meme/
 - 默认文字：[`谢谢参与`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/scratchcard.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/scratchcard.webp" width="200" />
 </div>
 
 ## scroll
@@ -1741,7 +1741,7 @@ permalink: /meme/
 - 默认文字：[`你们说话啊`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/scroll.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/scroll.webp" width="200" />
 </div>
 
 ## shock
@@ -1751,7 +1751,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/shock.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/shock.webp" width="200" />
 </div>
 
 ## shutup
@@ -1762,7 +1762,7 @@ permalink: /meme/
 - 默认文字：[`你不要再说了`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/shutup.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/shutup.webp" width="200" />
 </div>
 
 ## sit_still
@@ -1772,7 +1772,7 @@ permalink: /meme/
 - 需要文字数目：`0` ~ `1`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/sit_still.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/sit_still.webp" width="200" />
 </div>
 
 ## slap
@@ -1782,7 +1782,7 @@ permalink: /meme/
 - 需要文字数目：`1`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/slap.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/slap.webp" width="200" />
 </div>
 
 ## slogan
@@ -1793,7 +1793,7 @@ permalink: /meme/
 - 默认文字：[`我们是谁？`, `XX人！`, `到XX大学来做什么？`, `混！`, `将来毕业后要做什么样的人？`, `混混！`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/slogan.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/slogan.webp" width="200" />
 </div>
 
 ## smash
@@ -1803,7 +1803,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/smash.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/smash.webp" width="200" />
 </div>
 
 ## step_on
@@ -1813,7 +1813,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/step_on.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/step_on.webp" width="200" />
 </div>
 
 ## suck
@@ -1823,7 +1823,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/suck.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/suck.webp" width="200" />
 </div>
 
 ## support
@@ -1833,7 +1833,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/support.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/support.webp" width="200" />
 </div>
 
 ## tankuku_raisesign
@@ -1843,7 +1843,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/tankuku_raisesign.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/tankuku_raisesign.webp" width="200" />
 </div>
 
 ## taunt
@@ -1853,7 +1853,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/taunt.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/taunt.webp" width="200" />
 </div>
 
 ## teach
@@ -1864,7 +1864,7 @@ permalink: /meme/
 - 默认文字：[`我老婆`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/teach.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/teach.webp" width="200" />
 </div>
 
 ## tease
@@ -1874,7 +1874,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/tease.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/tease.webp" width="200" />
 </div>
 
 ## think_what
@@ -1884,7 +1884,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/think_what.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/think_what.webp" width="200" />
 </div>
 
 ## this_chichen
@@ -1895,7 +1895,7 @@ permalink: /meme/
 - 默认文字：[`这是十二生肖中的鸡`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/this_chichen.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/this_chichen.webp" width="200" />
 </div>
 
 ## throw
@@ -1905,7 +1905,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/throw.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/throw.webp" width="200" />
 </div>
 
 ## throw_gif
@@ -1915,7 +1915,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/throw_gif.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/throw_gif.webp" width="200" />
 </div>
 
 ## thump
@@ -1925,7 +1925,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/thump.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/thump.webp" width="200" />
 </div>
 
 ## thump_wildly
@@ -1935,7 +1935,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/thump_wildly.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/thump_wildly.webp" width="200" />
 </div>
 
 ## tightly
@@ -1945,7 +1945,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/tightly.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/tightly.webp" width="200" />
 </div>
 
 ## together
@@ -1955,7 +1955,7 @@ permalink: /meme/
 - 需要文字数目：`0` ~ `1`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/together.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/together.webp" width="200" />
 </div>
 
 ## tomb_yeah
@@ -1965,7 +1965,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/tomb_yeah.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/tomb_yeah.webp" width="200" />
 </div>
 
 ## trance
@@ -1975,7 +1975,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/trance.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/trance.webp" width="200" />
 </div>
 
 ## turn
@@ -1985,7 +1985,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/turn.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/turn.webp" width="200" />
 </div>
 
 ## twist
@@ -1995,7 +1995,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/twist.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/twist.webp" width="200" />
 </div>
 
 ## universal
@@ -2006,7 +2006,7 @@ permalink: /meme/
 - 默认文字：[`在此处添加文字`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/universal.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/universal.webp" width="200" />
 </div>
 
 ## vibrate
@@ -2016,7 +2016,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/vibrate.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/vibrate.webp" width="200" />
 </div>
 
 ## wakeup
@@ -2027,7 +2027,7 @@ permalink: /meme/
 - 默认文字：[`好`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/wakeup.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/wakeup.webp" width="200" />
 </div>
 
 ## wallpaper
@@ -2037,7 +2037,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/wallpaper.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/wallpaper.webp" width="200" />
 </div>
 
 ## walnut_pad
@@ -2047,7 +2047,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/walnut_pad.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/walnut_pad.webp" width="200" />
 </div>
 
 ## walnut_zoom
@@ -2057,7 +2057,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/walnut_zoom.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/walnut_zoom.webp" width="200" />
 </div>
 
 ## wave
@@ -2067,7 +2067,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/wave.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/wave.webp" width="200" />
 </div>
 
 ## what_I_want_to_do
@@ -2077,7 +2077,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/what_I_want_to_do.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/what_I_want_to_do.webp" width="200" />
 </div>
 
 ## what_he_wants
@@ -2088,7 +2088,7 @@ permalink: /meme/
 - 默认文字：[`今年520`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/what_he_wants.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/what_he_wants.webp" width="200" />
 </div>
 
 ## why_at_me
@@ -2098,7 +2098,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/why_at_me.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/why_at_me.webp" width="200" />
 </div>
 
 ## why_have_hands
@@ -2108,7 +2108,7 @@ permalink: /meme/
 - 需要文字数目：`0` ~ `1`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/why_have_hands.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/why_have_hands.webp" width="200" />
 </div>
 
 ## windmill_turn
@@ -2118,7 +2118,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/windmill_turn.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/windmill_turn.webp" width="200" />
 </div>
 
 ## wish_fail
@@ -2129,7 +2129,7 @@ permalink: /meme/
 - 默认文字：[`我要对象`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/wish_fail.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/wish_fail.webp" width="200" />
 </div>
 
 ## wooden_fish
@@ -2139,7 +2139,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/wooden_fish.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/wooden_fish.webp" width="200" />
 </div>
 
 ## worship
@@ -2149,7 +2149,7 @@ permalink: /meme/
 - 需要文字数目：`0`
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/worship.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/worship.webp" width="200" />
 </div>
 
 ## wujing
@@ -2160,7 +2160,7 @@ permalink: /meme/
 - 默认文字：[`不买华为不是`, `人`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/wujing.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/wujing.webp" width="200" />
 </div>
 
 ## youtube
@@ -2171,7 +2171,7 @@ permalink: /meme/
 - 默认文字：[`Bili`, `Bili`]
 - 预览：
 <div align="left">
-  <img src="https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/docs/youtube.webp" width="200" />
+  <img src="https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/image/webp/docs/youtube.webp" width="200" />
 </div>
 
 # 鸣谢

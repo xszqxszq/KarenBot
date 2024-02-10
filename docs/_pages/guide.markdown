@@ -7,7 +7,7 @@ permalink: /guide/
 # ！！注意！！
 所有功能必须 **@可怜Bot** 才能使用！！！**必须@才行！否则没有反应！**
 
-![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/QR.png)
+![](https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/QR.png)
 
 # 支持的功能
 

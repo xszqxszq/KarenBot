@@ -11,4 +11,4 @@ permalink: /about/
 **[项目地址](https://github.com/xszqxszq/KarenBot) [作者](https://space.bilibili.com/4675183)**
 
 
-![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/QR.png)
+![](https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/QR.png)
