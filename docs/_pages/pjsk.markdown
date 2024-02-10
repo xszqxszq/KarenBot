@@ -60,19 +60,19 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1  | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/airi/Airi_01.png) |
-| 2  | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/airi/Airi_02.png) |
-| 3  | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/airi/Airi_03.png) |
-| 4  | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/airi/Airi_04.png) |
-| 6  | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/airi/Airi_06.png) |
-| 7  | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/airi/Airi_07.png) |
-| 8  | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/airi/Airi_08.png) |
-| 9  | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/airi/Airi_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/airi/Airi_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/airi/Airi_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/airi/Airi_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/airi/Airi_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/airi/Airi_16.png) |
+| 1  | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/airi/Airi_01.webp) |
+| 2  | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/airi/Airi_02.webp) |
+| 3  | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/airi/Airi_03.webp) |
+| 4  | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/airi/Airi_04.webp) |
+| 6  | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/airi/Airi_06.webp) |
+| 7  | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/airi/Airi_07.webp) |
+| 8  | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/airi/Airi_08.webp) |
+| 9  | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/airi/Airi_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/airi/Airi_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/airi/Airi_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/airi/Airi_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/airi/Airi_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/airi/Airi_16.webp) |
 
 
 ## 東雲彰人
@@ -83,19 +83,19 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                            |
 |----|---------------------------------------------------------------------------------------------------------------|
-| 1  | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/akito/Akito_01.png) |
-| 2  | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/akito/Akito_02.png) |
-| 3  | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/akito/Akito_03.png) |
-| 4  | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/akito/Akito_04.png) |
-| 6  | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/akito/Akito_06.png) |
-| 7  | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/akito/Akito_07.png) |
-| 8  | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/akito/Akito_08.png) |
-| 9  | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/akito/Akito_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/akito/Akito_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/akito/Akito_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/akito/Akito_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/akito/Akito_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/akito/Akito_16.png) |
+| 1  | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/akito/Akito_01.webp) |
+| 2  | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/akito/Akito_02.webp) |
+| 3  | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/akito/Akito_03.webp) |
+| 4  | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/akito/Akito_04.webp) |
+| 6  | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/akito/Akito_06.webp) |
+| 7  | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/akito/Akito_07.webp) |
+| 8  | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/akito/Akito_08.webp) |
+| 9  | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/akito/Akito_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/akito/Akito_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/akito/Akito_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/akito/Akito_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/akito/Akito_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/akito/Akito_16.webp) |
 
 
 ## 白石杏
@@ -106,19 +106,19 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/an/An_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/an/An_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/an/An_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/an/An_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/an/An_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/an/An_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/an/An_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/an/An_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/an/An_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/an/An_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/an/An_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/an/An_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/an/An_16.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/an/An_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/an/An_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/an/An_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/an/An_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/an/An_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/an/An_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/an/An_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/an/An_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/an/An_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/an/An_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/an/An_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/an/An_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/an/An_16.webp) |
 
 ## 鳳えむ
 
@@ -128,19 +128,19 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/emu/Emu_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/emu/Emu_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/emu/Emu_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/emu/Emu_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/emu/Emu_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/emu/Emu_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/emu/Emu_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/emu/Emu_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/emu/Emu_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/emu/Emu_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/emu/Emu_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/emu/Emu_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/emu/Emu_16.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/emu/Emu_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/emu/Emu_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/emu/Emu_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/emu/Emu_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/emu/Emu_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/emu/Emu_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/emu/Emu_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/emu/Emu_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/emu/Emu_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/emu/Emu_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/emu/Emu_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/emu/Emu_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/emu/Emu_16.webp) |
 
 ## 東雲絵名
 
@@ -150,19 +150,19 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/ena/Ena_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/ena/Ena_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/ena/Ena_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/ena/Ena_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/ena/Ena_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/ena/Ena_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/ena/Ena_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/ena/Ena_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/ena/Ena_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/ena/Ena_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/ena/Ena_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/ena/Ena_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/ena/Ena_16.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/ena/Ena_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/ena/Ena_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/ena/Ena_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/ena/Ena_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/ena/Ena_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/ena/Ena_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/ena/Ena_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/ena/Ena_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/ena/Ena_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/ena/Ena_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/ena/Ena_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/ena/Ena_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/ena/Ena_16.webp) |
 
 ## 桐谷遥
 
@@ -172,19 +172,19 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Haruka/Haruka_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Haruka/Haruka_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Haruka/Haruka_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Haruka/Haruka_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Haruka/Haruka_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Haruka/Haruka_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Haruka/Haruka_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Haruka/Haruka_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Haruka/Haruka_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Haruka/Haruka_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Haruka/Haruka_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Haruka/Haruka_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Haruka/Haruka_16.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Haruka/Haruka_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Haruka/Haruka_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Haruka/Haruka_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Haruka/Haruka_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Haruka/Haruka_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Haruka/Haruka_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Haruka/Haruka_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Haruka/Haruka_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Haruka/Haruka_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Haruka/Haruka_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Haruka/Haruka_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Haruka/Haruka_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Haruka/Haruka_16.webp) |
 
 ## 望月穂波
 
@@ -194,21 +194,21 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Honami/Honami_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Honami/Honami_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Honami/Honami_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Honami/Honami_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Honami/Honami_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Honami/Honami_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Honami/Honami_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Honami/Honami_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Honami/Honami_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Honami/Honami_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Honami/Honami_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Honami/Honami_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Honami/Honami_16.png) |
-| 17 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Honami/Honami_17.png) |
-| 18 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Honami/Honami_18.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Honami/Honami_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Honami/Honami_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Honami/Honami_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Honami/Honami_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Honami/Honami_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Honami/Honami_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Honami/Honami_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Honami/Honami_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Honami/Honami_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Honami/Honami_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Honami/Honami_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Honami/Honami_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Honami/Honami_16.webp) |
+| 17 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Honami/Honami_17.webp) |
+| 18 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Honami/Honami_18.webp) |
 
 ## 星乃一歌
 
@@ -228,19 +228,19 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/KAITO/KAITO_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/KAITO/KAITO_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/KAITO/KAITO_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/KAITO/KAITO_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/KAITO/KAITO_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/KAITO/KAITO_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/KAITO/KAITO_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/KAITO/KAITO_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/KAITO/KAITO_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/KAITO/KAITO_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/KAITO/KAITO_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/KAITO/KAITO_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/KAITO/KAITO_16.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/KAITO/KAITO_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/KAITO/KAITO_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/KAITO/KAITO_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/KAITO/KAITO_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/KAITO/KAITO_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/KAITO/KAITO_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/KAITO/KAITO_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/KAITO/KAITO_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/KAITO/KAITO_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/KAITO/KAITO_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/KAITO/KAITO_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/KAITO/KAITO_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/KAITO/KAITO_16.webp) |
 
 ## 宵崎奏
 
@@ -250,20 +250,20 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kanade/Kanade_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kanade/Kanade_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kanade/Kanade_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kanade/Kanade_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kanade/Kanade_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kanade/Kanade_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kanade/Kanade_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kanade/Kanade_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kanade/Kanade_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kanade/Kanade_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kanade/Kanade_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kanade/Kanade_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kanade/Kanade_16.png) |
-| 17 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kanade/Kanade_17.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kanade/Kanade_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kanade/Kanade_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kanade/Kanade_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kanade/Kanade_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kanade/Kanade_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kanade/Kanade_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kanade/Kanade_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kanade/Kanade_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kanade/Kanade_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kanade/Kanade_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kanade/Kanade_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kanade/Kanade_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kanade/Kanade_16.webp) |
+| 17 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kanade/Kanade_17.webp) |
 
 ## 小豆沢こはね
 
@@ -273,20 +273,20 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kohane/Kohane_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kohane/Kohane_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kohane/Kohane_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kohane/Kohane_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kohane/Kohane_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kohane/Kohane_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kohane/Kohane_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kohane/Kohane_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kohane/Kohane_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kohane/Kohane_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kohane/Kohane_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kohane/Kohane_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kohane/Kohane_16.png) |
-| 17 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Kohane/Kohane_17.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kohane/Kohane_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kohane/Kohane_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kohane/Kohane_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kohane/Kohane_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kohane/Kohane_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kohane/Kohane_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kohane/Kohane_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kohane/Kohane_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kohane/Kohane_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kohane/Kohane_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kohane/Kohane_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kohane/Kohane_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kohane/Kohane_16.webp) |
+| 17 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Kohane/Kohane_17.webp) |
 
 ## 鏡音レン
 
@@ -296,20 +296,20 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Len/Len_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Len/Len_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Len/Len_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Len/Len_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Len/Len_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Len/Len_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Len/Len_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Len/Len_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Len/Len_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Len/Len_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Len/Len_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Len/Len_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Len/Len_16.png) |
-| 17 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Len/Len_17.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Len/Len_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Len/Len_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Len/Len_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Len/Len_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Len/Len_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Len/Len_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Len/Len_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Len/Len_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Len/Len_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Len/Len_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Len/Len_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Len/Len_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Len/Len_16.webp) |
+| 17 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Len/Len_17.webp) |
 
 ## 巡音ルカ
 
@@ -319,19 +319,19 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Luka/Luka_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Luka/Luka_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Luka/Luka_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Luka/Luka_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Luka/Luka_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Luka/Luka_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Luka/Luka_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Luka/Luka_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Luka/Luka_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Luka/Luka_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Luka/Luka_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Luka/Luka_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Luka/Luka_16.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Luka/Luka_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Luka/Luka_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Luka/Luka_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Luka/Luka_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Luka/Luka_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Luka/Luka_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Luka/Luka_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Luka/Luka_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Luka/Luka_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Luka/Luka_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Luka/Luka_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Luka/Luka_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Luka/Luka_16.webp) |
 
 ## 朝比奈まふゆ
 
@@ -341,20 +341,20 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mafuyu/Mafuyu_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mafuyu/Mafuyu_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mafuyu/Mafuyu_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mafuyu/Mafuyu_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mafuyu/Mafuyu_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mafuyu/Mafuyu_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mafuyu/Mafuyu_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mafuyu/Mafuyu_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mafuyu/Mafuyu_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mafuyu/Mafuyu_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mafuyu/Mafuyu_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mafuyu/Mafuyu_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mafuyu/Mafuyu_16.png) |
-| 17 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mafuyu/Mafuyu_17.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mafuyu/Mafuyu_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mafuyu/Mafuyu_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mafuyu/Mafuyu_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mafuyu/Mafuyu_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mafuyu/Mafuyu_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mafuyu/Mafuyu_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mafuyu/Mafuyu_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mafuyu/Mafuyu_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mafuyu/Mafuyu_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mafuyu/Mafuyu_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mafuyu/Mafuyu_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mafuyu/Mafuyu_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mafuyu/Mafuyu_16.webp) |
+| 17 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mafuyu/Mafuyu_17.webp) |
 
 ## MEIKO
 
@@ -364,19 +364,19 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Meiko/Meiko_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Meiko/Meiko_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Meiko/Meiko_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Meiko/Meiko_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Meiko/Meiko_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Meiko/Meiko_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Meiko/Meiko_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Meiko/Meiko_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Meiko/Meiko_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Meiko/Meiko_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Meiko/Meiko_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Meiko/Meiko_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Meiko/Meiko_16.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Meiko/Meiko_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Meiko/Meiko_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Meiko/Meiko_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Meiko/Meiko_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Meiko/Meiko_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Meiko/Meiko_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Meiko/Meiko_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Meiko/Meiko_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Meiko/Meiko_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Meiko/Meiko_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Meiko/Meiko_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Meiko/Meiko_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Meiko/Meiko_16.webp) |
 
 ## 初音ミク
 
@@ -386,19 +386,19 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Miku/Miku_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Miku/Miku_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Miku/Miku_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Miku/Miku_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Miku/Miku_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Miku/Miku_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Miku/Miku_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Miku/Miku_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Miku/Miku_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Miku/Miku_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Miku/Miku_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Miku/Miku_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Miku/Miku_16.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Miku/Miku_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Miku/Miku_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Miku/Miku_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Miku/Miku_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Miku/Miku_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Miku/Miku_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Miku/Miku_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Miku/Miku_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Miku/Miku_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Miku/Miku_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Miku/Miku_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Miku/Miku_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Miku/Miku_16.webp) |
 
 ## 花里みのり
 
@@ -408,20 +408,20 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Minori/Minori_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Minori/Minori_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Minori/Minori_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Minori/Minori_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Minori/Minori_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Minori/Minori_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Minori/Minori_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Minori/Minori_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Minori/Minori_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Minori/Minori_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Minori/Minori_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Minori/Minori_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Minori/Minori_16.png) |
-| 17 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Minori/Minori_17.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Minori/Minori_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Minori/Minori_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Minori/Minori_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Minori/Minori_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Minori/Minori_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Minori/Minori_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Minori/Minori_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Minori/Minori_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Minori/Minori_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Minori/Minori_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Minori/Minori_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Minori/Minori_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Minori/Minori_16.webp) |
+| 17 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Minori/Minori_17.webp) |
 
 ## 暁山瑞希
 
@@ -431,20 +431,20 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mizuki/Mizuki_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mizuki/Mizuki_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mizuki/Mizuki_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mizuki/Mizuki_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mizuki/Mizuki_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mizuki/Mizuki_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mizuki/Mizuki_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mizuki/Mizuki_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mizuki/Mizuki_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mizuki/Mizuki_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mizuki/Mizuki_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mizuki/Mizuki_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mizuki/Mizuki_16.png) |
-| 17 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Mizuki/Mizuki_17.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mizuki/Mizuki_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mizuki/Mizuki_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mizuki/Mizuki_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mizuki/Mizuki_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mizuki/Mizuki_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mizuki/Mizuki_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mizuki/Mizuki_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mizuki/Mizuki_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mizuki/Mizuki_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mizuki/Mizuki_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mizuki/Mizuki_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mizuki/Mizuki_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mizuki/Mizuki_16.webp) |
+| 17 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Mizuki/Mizuki_17.webp) |
 
 ## 草薙寧々
 
@@ -454,19 +454,19 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Nene/Nene_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Nene/Nene_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Nene/Nene_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Nene/Nene_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Nene/Nene_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Nene/Nene_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Nene/Nene_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Nene/Nene_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Nene/Nene_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Nene/Nene_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Nene/Nene_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Nene/Nene_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Nene/Nene_16.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Nene/Nene_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Nene/Nene_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Nene/Nene_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Nene/Nene_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Nene/Nene_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Nene/Nene_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Nene/Nene_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Nene/Nene_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Nene/Nene_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Nene/Nene_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Nene/Nene_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Nene/Nene_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Nene/Nene_16.webp) |
 
 ## 鏡音リン
 
@@ -476,19 +476,19 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rin/Rin_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rin/Rin_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rin/Rin_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rin/Rin_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rin/Rin_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rin/Rin_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rin/Rin_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rin/Rin_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rin/Rin_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rin/Rin_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rin/Rin_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rin/Rin_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rin/Rin_16.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rin/Rin_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rin/Rin_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rin/Rin_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rin/Rin_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rin/Rin_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rin/Rin_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rin/Rin_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rin/Rin_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rin/Rin_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rin/Rin_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rin/Rin_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rin/Rin_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rin/Rin_16.webp) |
 
 ## 神代類
 
@@ -498,22 +498,22 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rui/Rui_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rui/Rui_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rui/Rui_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rui/Rui_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rui/Rui_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rui/Rui_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rui/Rui_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rui/Rui_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rui/Rui_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rui/Rui_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rui/Rui_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rui/Rui_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rui/Rui_16.png) |
-| 17 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rui/Rui_17.png) |
-| 18 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rui/Rui_18.png) |
-| 19 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Rui/Rui_19.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rui/Rui_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rui/Rui_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rui/Rui_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rui/Rui_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rui/Rui_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rui/Rui_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rui/Rui_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rui/Rui_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rui/Rui_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rui/Rui_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rui/Rui_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rui/Rui_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rui/Rui_16.webp) |
+| 17 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rui/Rui_17.webp) |
+| 18 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rui/Rui_18.webp) |
+| 19 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Rui/Rui_19.webp) |
 
 ## 天馬咲希
 
@@ -523,21 +523,21 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Saki/Saki_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Saki/Saki_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Saki/Saki_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Saki/Saki_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Saki/Saki_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Saki/Saki_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Saki/Saki_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Saki/Saki_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Saki/Saki_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Saki/Saki_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Saki/Saki_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Saki/Saki_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Saki/Saki_16.png) |
-| 17 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Saki/Saki_17.png) |
-| 18 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Saki/Saki_18.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Saki/Saki_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Saki/Saki_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Saki/Saki_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Saki/Saki_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Saki/Saki_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Saki/Saki_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Saki/Saki_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Saki/Saki_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Saki/Saki_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Saki/Saki_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Saki/Saki_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Saki/Saki_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Saki/Saki_16.webp) |
+| 17 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Saki/Saki_17.webp) |
+| 18 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Saki/Saki_18.webp) |
 
 ## 日野森志歩
 
@@ -547,21 +547,21 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shiho/Shiho_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shiho/Shiho_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shiho/Shiho_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shiho/Shiho_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shiho/Shiho_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shiho/Shiho_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shiho/Shiho_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shiho/Shiho_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shiho/Shiho_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shiho/Shiho_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shiho/Shiho_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shiho/Shiho_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shiho/Shiho_16.png) |
-| 17 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shiho/Shiho_17.png) |
-| 18 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shiho/Shiho_18.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shiho/Shiho_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shiho/Shiho_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shiho/Shiho_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shiho/Shiho_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shiho/Shiho_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shiho/Shiho_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shiho/Shiho_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shiho/Shiho_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shiho/Shiho_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shiho/Shiho_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shiho/Shiho_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shiho/Shiho_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shiho/Shiho_16.webp) |
+| 17 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shiho/Shiho_17.webp) |
+| 18 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shiho/Shiho_18.webp) |
 
 ## 日野森雫
 
@@ -571,19 +571,19 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shizuku/Shizuku_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shizuku/Shizuku_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shizuku/Shizuku_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shizuku/Shizuku_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shizuku/Shizuku_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shizuku/Shizuku_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shizuku/Shizuku_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shizuku/Shizuku_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shizuku/Shizuku_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shizuku/Shizuku_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shizuku/Shizuku_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shizuku/Shizuku_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Shizuku/Shizuku_16.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shizuku/Shizuku_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shizuku/Shizuku_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shizuku/Shizuku_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shizuku/Shizuku_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shizuku/Shizuku_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shizuku/Shizuku_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shizuku/Shizuku_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shizuku/Shizuku_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shizuku/Shizuku_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shizuku/Shizuku_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shizuku/Shizuku_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shizuku/Shizuku_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Shizuku/Shizuku_16.webp) |
 
 ## 青柳冬弥
 
@@ -593,21 +593,21 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Touya/Touya_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Touya/Touya_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Touya/Touya_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Touya/Touya_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Touya/Touya_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Touya/Touya_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Touya/Touya_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Touya/Touya_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Touya/Touya_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Touya/Touya_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Touya/Touya_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Touya/Touya_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Touya/Touya_16.png) |
-| 17 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Touya/Touya_17.png) |
-| 18 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Touya/Touya_18.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Touya/Touya_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Touya/Touya_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Touya/Touya_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Touya/Touya_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Touya/Touya_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Touya/Touya_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Touya/Touya_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Touya/Touya_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Touya/Touya_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Touya/Touya_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Touya/Touya_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Touya/Touya_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Touya/Touya_16.webp) |
+| 17 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Touya/Touya_17.webp) |
+| 18 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Touya/Touya_18.webp) |
 
 ## 天馬司
 
@@ -617,18 +617,18 @@ permalink: /pjsk/
 
 | 编号 | 预览                                                                                                          |
 |----|-------------------------------------------------------------------------------------------------------------|
-| 1 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Tsukasa/Tsukasa_01.png) |
-| 2 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Tsukasa/Tsukasa_02.png) |
-| 3 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Tsukasa/Tsukasa_03.png) |
-| 4 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Tsukasa/Tsukasa_04.png) |
-| 6 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Tsukasa/Tsukasa_06.png) |
-| 7 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Tsukasa/Tsukasa_07.png) |
-| 8 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Tsukasa/Tsukasa_08.png) |
-| 9 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Tsukasa/Tsukasa_09.png) |
-| 11 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Tsukasa/Tsukasa_11.png) |
-| 12 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Tsukasa/Tsukasa_12.png) |
-| 13 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Tsukasa/Tsukasa_13.png) |
-| 14 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Tsukasa/Tsukasa_14.png) |
-| 16 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Tsukasa/Tsukasa_16.png) |
-| 17 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Tsukasa/Tsukasa_17.png) |
-| 18 | ![](https://mirror.ghproxy.com/raw.githubusercontent.com/xszqxszq/KarenBot/7.0/image/pjsk/Tsukasa/Tsukasa_18.png) |
+| 1 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Tsukasa/Tsukasa_01.webp) |
+| 2 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Tsukasa/Tsukasa_02.webp) |
+| 3 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Tsukasa/Tsukasa_03.webp) |
+| 4 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Tsukasa/Tsukasa_04.webp) |
+| 6 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Tsukasa/Tsukasa_06.webp) |
+| 7 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Tsukasa/Tsukasa_07.webp) |
+| 8 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Tsukasa/Tsukasa_08.webp) |
+| 9 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Tsukasa/Tsukasa_09.webp) |
+| 11 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Tsukasa/Tsukasa_11.webp) |
+| 12 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Tsukasa/Tsukasa_12.webp) |
+| 13 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Tsukasa/Tsukasa_13.webp) |
+| 14 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Tsukasa/Tsukasa_14.webp) |
+| 16 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Tsukasa/Tsukasa_16.webp) |
+| 17 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Tsukasa/Tsukasa_17.webp) |
+| 18 | ![](https://botdocs-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/Tsukasa/Tsukasa_18.webp) |
