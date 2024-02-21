@@ -254,7 +254,7 @@ object OttoVoice {
         put("yq", listOf("一起"))
         put("sb", listOf("是吧"))
         put("wsm", listOf("为什么"))
-        put("anzmsl", listOf("哎你怎么死了"))
+        put("anzmsl", listOf("哎你怎么死了", "你怎么死了"))
         put("zjbhc", listOf("贼几把好吃"))
         put("lhcl", listOf("老好吃了"))
         put("ko", listOf("ko"))
@@ -262,6 +262,6 @@ object OttoVoice {
         put("tx", listOf("偷袭"))
         put("szyf", listOf("绳之以法"))
         put("xdnda", listOf("兄弟你动啊"))
-        put("ayaya", listOf("ayaya"))
+        put("ayaya", listOf("ayaya", "啊呀呀"))
     }
 }
