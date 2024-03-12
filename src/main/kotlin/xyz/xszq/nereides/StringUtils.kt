@@ -83,7 +83,7 @@ fun String.filterURL(whitelist: List<String> = config.domainWhitelist): String {
     domains.findAll(text).forEach {
         val domain = it.groupValues[0]
         if (domain !in whitelist)
-            text = text.replace(it.groupValues[0], it.groupValues[0].replace(".", ". "))
+            text = text.replace(it.groupValues[0], it.groupValues[0].replace(".", "·"))
     }
     return text
 }

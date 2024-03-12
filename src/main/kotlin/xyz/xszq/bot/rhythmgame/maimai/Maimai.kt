@@ -1,5 +1,6 @@
 package xyz.xszq.bot.rhythmgame.maimai
 
+import LXNSConfig
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.http.*
 import korlibs.image.format.PNG
@@ -48,7 +49,7 @@ object Maimai {
     val musics = MaimaiMusic(logger)
     val prober = DXProberClient(logger)
     val images = MaimaiImage(musics, logger, localCurrentDirVfs["maimai"])
-    val aliases = xyz.xszq.bot.rhythmgame.maimai.MaimaiAliases(musics)
+    val aliases = MaimaiAliases(musics)
     val guessGame = GuessGame(musics, images, aliases)
     private lateinit var config: MaimaiConfig
     private suspend fun updateBindings(openId: String, type: String, credential: String) = transactionWithLock {

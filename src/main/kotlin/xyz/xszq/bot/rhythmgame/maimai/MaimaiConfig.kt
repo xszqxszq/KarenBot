@@ -9,8 +9,7 @@ import net.mamoe.yamlkt.Yaml
 data class MaimaiConfig(
     val theme: String = "portrait",
     val zetarakuSite: String = "https://dp4p6x0xfi5o9.cloudfront.net",
-    val xrayAliasUrl: String = "https://download.fanyu.site/maimai/alias.json",
-    val lxnsSecret: String = ""
+    val xrayAliasUrl: String = "https://download.fanyu.site/maimai/alias.json"
 ) {
     companion object {
         private val yaml = Yaml {  }

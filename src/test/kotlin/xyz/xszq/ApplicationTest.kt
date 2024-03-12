@@ -13,6 +13,8 @@ import xyz.xszq.bot.config.BotConfig
 import xyz.xszq.bot.dao.TouhouAliases
 import xyz.xszq.bot.dao.TouhouMusics
 import xyz.xszq.bot.image.*
+import xyz.xszq.bot.rhythmgame.RhythmGame
+import xyz.xszq.bot.rhythmgame.chunithm.Chunithm
 import xyz.xszq.bot.rhythmgame.maimai.Maimai
 import xyz.xszq.bot.rhythmgame.maimai.MaimaiUtils
 import xyz.xszq.bot.rhythmgame.maimai.MaimaiUtils.getPlateVerList
@@ -194,10 +196,12 @@ fun printFonts() {
     println(globalFontRegistry.listFontNames())
 }
 suspend fun main() {
+    RhythmGame.init()
+    println(Chunithm.lxnsClient.getSongList())
 //    runBlocking {
 //        init()
 //    }
-    println(WikiQuery.query("抖M")!!.text)
+//    println(WikiQuery.query("抖M")!!.text)
 //    bot = Bot(
 //        appId = config.appId,
 //        clientSecret = config.clientSecret,

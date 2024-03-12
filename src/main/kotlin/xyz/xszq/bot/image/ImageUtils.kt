@@ -2,14 +2,19 @@ package xyz.xszq.bot.image
 
 import com.sksamuel.scrimage.ImmutableImage
 import com.sksamuel.scrimage.nio.JpegWriter
+import korlibs.image.awt.AwtNativeImage
 import korlibs.image.awt.toAwt
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.ensureNative
+import korlibs.image.format.readNativeImage
+import korlibs.io.file.VfsFile
+import okio.Path.Companion.toPath
 import org.opencv.core.*
 import org.opencv.imgcodecs.Imgcodecs
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import javax.imageio.ImageIO
+import kotlin.io.path.Path
 
 
 fun BufferedImage.toARGB(): BufferedImage {
@@ -42,6 +47,13 @@ fun ByteArray.toJPEG(): ByteArray = ImmutableImage.loader()
     .fromBytes(this)
     .bytes(JpegWriter().withCompression(75).withProgressive(true))
 
+suspend fun VfsFile.readImage(): Bitmap {
+    return try {
+        readNativeImage()
+    } catch(e: Exception) {
+        AwtNativeImage(ImmutableImage.loader().fromPath(Path(absolutePath)).awt())
+    }
+}
 
 fun Float.radTo180Deg(): Float {
     if (this in -Math.PI .. Math.PI)

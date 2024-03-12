@@ -4,7 +4,6 @@ import com.mongodb.kotlin.client.coroutine.MongoClient
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import korlibs.image.format.PNG
 import korlibs.image.format.encode
-import korlibs.image.format.readNativeImage
 import korlibs.io.async.launch
 import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +21,7 @@ import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.bot.image.*
 import xyz.xszq.bot.rhythmgame.maimai.Maimai
 import xyz.xszq.bot.rhythmgame.QueueForArcades
+import xyz.xszq.bot.rhythmgame.RhythmGame
 import xyz.xszq.bot.text.AutoQA
 import xyz.xszq.bot.text.Bilibili
 import xyz.xszq.bot.text.RandomText
@@ -67,7 +67,7 @@ suspend fun init() {
     RandomImage.load("gif", "reply")
     RandomImage.load("afraid", "reply")
 
-    Maimai.init()
+    RhythmGame.init()
     RandomText.loadSaizeriya()
 }
 
@@ -119,7 +119,7 @@ fun subscribe() {
             }
         }
     }
-    Maimai.subscribe()
+    RhythmGame.subscribe()
     GlobalEventChannel.subscribePublicMessages(permName = "arcade") {
         startsWith("/排卡管理") { raw ->
             val args = raw.toArgsList()
@@ -293,14 +293,14 @@ fun subscribe() {
             val images = when (this) {
                 is GroupAtMessageEvent -> message.filterIsInstance<RemoteImage>().map { r ->
                     r.use {
-                        it.readNativeImage()
+                        it.readImage()
                     }
                 }
                 is GuildAtMessageEvent -> {
                     message.filterIsInstance<GuildAt>().filter { it.target != bot.botGuildInfo.id }
                         .map { it.user.avatar }.ifEmpty { listOf(author.avatar) }.map {
                             NetworkUtils.useNetFile(it) { f ->
-                                f.readNativeImage()
+                                f.readImage()
                             }
                         }
                 }
@@ -545,8 +545,11 @@ fun subscribe() {
         }
     }
     GlobalEventChannel.subscribePublicMessages {
-        startsWith("/test") {
-            reply("https://www.baidu.com")
+        startsWith("/1") {
+            reply(Markdown.build("101999766_1709647588") {
+                append("title") { "test" }
+                append("url") { "asd" }
+            })
         }
     }
     GlobalEventChannel.subscribePublicMessages {

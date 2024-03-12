@@ -39,6 +39,8 @@ dependencies {
     implementation("com.qcloud:cos_api:5.6.155")
     implementation("com.sksamuel.scrimage:scrimage-core:4.1.1")
     implementation("com.sksamuel.scrimage:scrimage-filters:4.1.1")
+    implementation("com.sksamuel.scrimage:scrimage-formats-extra:4.1.1")
+    implementation("com.sksamuel.scrimage:scrimage-webp:4.1.1")
     implementation("com.xenomachina:kotlin-argparser:2.0.7")
     implementation("io.github.biezhi:TinyPinyin:2.0.3.RELEASE")
     implementation("io.github.kasukusakura:silk-codec:0.0.5")
