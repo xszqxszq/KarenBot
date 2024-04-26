@@ -1,9 +1,10 @@
 package xyz.xszq.otomadbot.mirai
 
 import io.ktor.client.*
-import io.ktor.client.features.json.*
-import io.ktor.client.features.json.serializer.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.Serializable
 import net.mamoe.mirai.message.data.MarketFace
 
@@ -23,15 +24,17 @@ data class MarketFaceBaseInfo(
 data class MarketFaceMd5Info(val name: String, val md5: String)
 @Suppress("EXPERIMENTAL_API_USAGE")
 suspend fun MarketFace.getAttr() = HttpClient {
-    install(JsonFeature) {
-        serializer = KotlinxSerializer(kotlinx.serialization.json.Json {
+    install(ContentNegotiation) {
+        json(kotlinx.serialization.json.Json {
             isLenient = true
             ignoreUnknownKeys = true
         })
     }
+}.get("https://gxh.vip.qq.com/qqshow/admindata/comdata/vipEmoji_item_$id/xydata.json")
+    .body<MarketFaceXYData>().data
+suspend fun MarketFace.getTmpId() = getAttr().md5Info.run {
+    find { "[${it.name}]" == name }?.md5 ?: (first().md5 + name)
 }
-    .get<MarketFaceXYData>("https://gxh.vip.qq.com/qqshow/admindata/comdata/vipEmoji_item_$id/xydata.json")
-    .data
 suspend fun MarketFace.queryUrl(size: Int = 300) = getAttr().md5Info.run {
     val md5 = find { "[${it.name}]" == name } ?.md5 ?: first().md5
     "https://gxh.vip.qq.com/club/item/parcel/item/${md5.subSequence(0, 2)}/$md5/${size}x${size}.png"

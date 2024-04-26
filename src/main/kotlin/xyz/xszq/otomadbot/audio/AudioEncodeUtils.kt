@@ -7,10 +7,12 @@ import io.github.kasukusakura.silkcodec.SilkCoder
 import kotlinx.coroutines.runBlocking
 import net.mamoe.mirai.message.data.Audio
 import net.mamoe.mirai.message.data.OnlineAudio
-import xyz.xszq.otomadbot.FFMpegFileType
-import xyz.xszq.otomadbot.FFMpegTask
 import xyz.xszq.otomadbot.NetworkUtils
+import xyz.xszq.otomadbot.ffmpeg.FFMpegFileType
+import xyz.xszq.otomadbot.ffmpeg.FFMpegTask
+import xyz.xszq.otomadbot.kotlin.getTempFile
 import xyz.xszq.otomadbot.kotlin.newTempFile
+import xyz.xszq.otomadbot.kotlin.useTempFile
 import java.io.File
 
 suspend fun getAudioDuration(file: File): Double {
@@ -24,29 +26,15 @@ fun File.getAudioDuration(): Double = runBlocking {
 }
 
 object AudioEncodeUtils {
-    private suspend fun anyToMp3BeforeSilk(file: File): File? = FFMpegTask(FFMpegFileType.MP3) {
-        input(file)
-        yes()
-        if (file.getAudioDuration() < 1.0)
-            audioFilter("apad=pad_dur=3")
-        else if (file.getAudioDuration() < 2.0)
-            audioFilter("apad=pad_dur=2")
-        audioRate("24k")
-        audioChannels(1)
-    }.getResult()
-    suspend fun anyToMp3(file: File): File? = FFMpegTask(FFMpegFileType.MP3) {
-        input(file)
-        yes()
-    }.getResult()
-    private suspend fun anyToWavBeforePy(file: File): File? = FFMpegTask(FFMpegFileType.WAV) {
+    private suspend fun anyToWavBeforePy(file: VfsFile): VfsFile = FFMpegTask(FFMpegFileType.WAV) {
         input(file)
         acodec("pcm_s16le")
         audioRate("44100")
         yes()
     }.getResult()
-    suspend fun anyToWav(file: File) = anyToWavBeforePy(file)
-    suspend fun cropPeriod(file: File, startPoint: Double,
-                           duration: Double, forSilk: Boolean = true): File? = FFMpegTask(FFMpegFileType.MP3) {
+    suspend fun anyToWav(file: VfsFile) = anyToWavBeforePy(file)
+    suspend fun cropPeriod(file: VfsFile, startPoint: Double,
+                           duration: Double, forSilk: Boolean = true): VfsFile? = FFMpegTask(FFMpegFileType.MP3) {
         input(file)
         yes()
         startAt(startPoint)
@@ -56,7 +44,7 @@ object AudioEncodeUtils {
             audioChannels(1)
         }
     }.getResult()
-    suspend fun silkToWav(silk: ByteArray): File? {
+    suspend fun silkToWav(silk: ByteArray): VfsFile {
         val pcm = newTempFile(suffix = ".pcm")
         pcm.outputStream().use {
             SilkCoder.decode(silk.inputStream(), it)
@@ -70,14 +58,41 @@ object AudioEncodeUtils {
             yes()
         }.getResult()
     }
-    suspend fun prepareAudio(file: File): File? = FFMpegTask(FFMpegFileType.WAV) {
-        input(file)
+}
+
+suspend fun Audio.toWav() =
+    AudioEncodeUtils.silkToWav(NetworkUtils.downloadAsByteArray((this as OnlineAudio).urlForDownload))
+
+suspend fun VfsFile.toMp3BeforeSilk() =
+    FFMpegTask(FFMpegFileType.MP3) {
+        input(this@toMp3BeforeSilk)
+        yes()
+        if (getAudioDuration() < 1.0)
+            audioFilter("apad=pad_dur=3")
+        else if (getAudioDuration() < 2.0)
+            audioFilter("apad=pad_dur=2")
+        audioRate("24k")
+        audioChannels(1)
+    }.getResult()
+suspend fun VfsFile.toPCM() =
+    FFMpegTask(FFMpegFileType.PCM) {
+        input(this@toPCM)
+        forceFormat("s16le")
         acodec("pcm_s16le")
         audioRate("24k")
         audioChannels(1)
         yes()
     }.getResult()
+suspend fun VfsFile.toSilk(): VfsFile {
+    val silk = getTempFile(suffix = ".silk")
+    File(silk.absolutePath).outputStream().use { outputStream ->
+        toMp3BeforeSilk().useTempFile { mp3 ->
+            mp3.toPCM().useTempFile { pcm ->
+                File(pcm.absolutePath).inputStream().use { inputStream ->
+                    SilkCoder.encode(inputStream, outputStream, 24000)
+                }
+            }
+        }
+    }
+    return silk
 }
-
-suspend fun Audio.toWav() =
-    AudioEncodeUtils.silkToWav(NetworkUtils.downloadAsByteArray((this as OnlineAudio).urlForDownload))

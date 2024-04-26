@@ -1,123 +1,129 @@
 package xyz.xszq.otomadbot.image
 
+import com.soywiz.korim.bitmap.Bitmap32
 import com.soywiz.korim.format.PNG
 import com.soywiz.korim.format.encode
-import com.soywiz.korio.file.std.toVfs
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import net.mamoe.mirai.event.subscribeMessages
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.http.content.*
+import io.ktor.serialization.kotlinx.json.*
+import kotlinx.serialization.json.Json
+import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.message.data.Image
+import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.message.data.anyIsInstance
 import net.mamoe.mirai.message.data.buildMessageChain
 import net.mamoe.mirai.message.nextMessage
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
-import org.opencv.calib3d.Calib3d.undistort
-import org.opencv.core.*
-import org.opencv.imgcodecs.Imgcodecs
-import org.opencv.imgproc.Imgproc.resize
 import org.scilab.forge.jlatexmath.TeXConstants
 import org.scilab.forge.jlatexmath.TeXFormula
 import xyz.xszq.events
 import xyz.xszq.otomadbot.*
-import xyz.xszq.otomadbot.NetworkUtils.getFile
 import xyz.xszq.otomadbot.kotlin.generateQR
 import xyz.xszq.otomadbot.kotlin.newTempFile
+import xyz.xszq.otomadbot.kotlin.substringAfterPrefix
+import xyz.xszq.otomadbot.kotlin.toArgsList
 import xyz.xszq.otomadbot.mirai.quoteReply
+import xyz.xszq.otomadbot.mirai.reply
 import xyz.xszq.otomadbot.mirai.startsWithSimple
 import java.awt.Color
-import kotlin.math.min
+import kotlin.math.*
 
-object ImageProcessor: CommandModule("图像处理", "image.process") {
+object ImageProcessor: CommandModule("生成功能", "image.process") {
     private val cooldown = Cooldown("image_processor")
     private val quota = Quota("image_effect")
+    private val memeList = mutableListOf<Meme>()
     private const val quotaExceededMessage = "今日该功能限额已经用完了哦~"
-    override suspend fun subscribe() {
-        events.subscribeMessages {
-            startsWithSimple("生成二维码", true) { _, text ->
-                ifReady(cooldown) {
-                    withContext(Dispatchers.IO) {
-                        generateQR.checkAndRun(CommandEvent(listOf(text), this@startsWithSimple))
-                    }
-                }
+    private val json = Json {
+        prettyPrint = true; isLenient = true; ignoreUnknownKeys = true
+    }
+    val disabledList = listOf("5000choyen", "acg_entrance", "bluearchive", "china_flag")
+    private val client = HttpClient {
+        install(HttpTimeout) {
+            socketTimeoutMillis = 10000
+            requestTimeoutMillis = 10000
+            connectTimeoutMillis = 10000
+        }
+        install(ContentNegotiation) {
+            json(json)
+        }
+    }
+    suspend fun reload() {
+        updateMemes()
+    }
+    suspend fun updateMemes() {
+        memeList.clear()
+        val keys = client.get("${MemeConfig.data.url}/memes/keys").body<List<String>>()
+        keys.forEach { key ->
+            if (key !in disabledList) {
+                val info = client.get("${MemeConfig.data.url}/memes/$key/info").body<Meme>()
+                memeList.add(info)
             }
-            startsWithSimple("生成latex", true) { _, text ->
+        }
+    }
+    override suspend fun subscribe() {
+        events.subscribeGroupMessages {
+//            startsWithSimple("二维码", true) { _, text ->
+//                ifReady(cooldown) {
+//                    generateQR.checkAndRun(this@startsWithSimple, text)
+//                }
+//            }
+            startsWithSimple("latex", true) { _, text ->
                 ifReady(cooldown) {
-                    withContext(Dispatchers.IO) {
-                        generateLatex.checkAndRun(CommandEvent(listOf(text), this@startsWithSimple))
-                    }
+                    generateLatex.checkAndRun(this@startsWithSimple, text)
                 }
             }
             startsWithSimple("我巨爽") { _, _ ->
                 if (available(quota)) {
-                    withContext(Dispatchers.IO) {
-                        flipImage.checkAndRun(this@startsWithSimple)
-                    }
+                    flipImage.checkAndRun(this@startsWithSimple)
                 } else {
                     quoteReply(quotaExceededMessage)
                 }
             }
             startsWithSimple("球面化") { _, _ ->
                 if (available(quota)) {
-                    withContext(Dispatchers.IO) {
-                        spherizeImage.checkAndRun(this@startsWithSimple)
-                    }
+                    spherizeImage.checkAndRun(this@startsWithSimple)
                 } else {
                     quoteReply(quotaExceededMessage)
                 }
             }
             startsWithSimple("反球面化") { _, _ ->
                 if (available(quota)) {
-                    withContext(Dispatchers.IO) {
-                        revSpherizeImage.checkAndRun(this@startsWithSimple)
-                    }
+                    revSpherizeImage.checkAndRun(this@startsWithSimple)
                 } else {
                     quoteReply(quotaExceededMessage)
                 }
             }
+            always {
+                meme.checkAndRun(this)
+            }
         }
     }
 
-
-    val spDistCoeffs = Mat(4, 1, CvType.CV_32F).apply {
-        put(0, 0, 0.6)
-    }
-    val spCam = Mat(3, 3, CvType.CV_32F).apply {
-        put(0, 2, 250.0)
-        put(1, 2, 250.0)
-        put(0, 0, 100.0)
-        put(1, 1, 100.0)
-        put(2, 2, 1.0)
-    }
-    val revSpDistCoeffs = Mat(4, 1, CvType.CV_32F).apply {
-        put(0, 0, -0.01)
-    }
-    val revSpCam = Mat(3, 3, CvType.CV_32F).apply {
-        put(0, 2, 250.0)
-        put(1, 2, 250.0)
-        put(0, 0, 50.0)
-        put(1, 1, 50.0)
-        put(2, 2, 1.0)
-    }
-
-    val generateQR = CommonCommandWithArgs("生成二维码", "generate_qr") {
-        args.first().generateQR()?.toInputStream()?.toExternalResource()?.use {
-            event.quoteReply(event.subject.uploadImage(it))
+    val generateQR = CommonCommandWithArg("二维码", "generate_qr") { text ->
+        text?.generateQR()?.toInputStream()?.toExternalResource()?.use {
+            quoteReply(subject.uploadImage(it))
+            update(cooldown)
         }
-        event.update(cooldown)
     }
-    val generateLatex = CommonCommandWithArgs("生成Latex", "generate_latex") {
-        val text = args.first()
-        val formula = TeXFormula(text)
-        val result = newTempFile()
-        formula.createPNG(
-            TeXConstants.STYLE_DISPLAY, 22.0F, result.absolutePath,
-            Color.WHITE, Color.BLACK)
-        result.toExternalResource().use {
-            event.quoteReply(event.subject.uploadImage(it))
+    val generateLatex = CommonCommandWithArg("latex", "generate_latex") { text ->
+        newTempFile().let { result ->
+            TeXFormula(text).createPNG(
+                TeXConstants.STYLE_DISPLAY, 22.0F, result.absolutePath,
+                Color.WHITE, Color.BLACK)
+            result.toExternalResource().use {
+                quoteReply(subject.uploadImage(it))
+            }
+            result.delete()
         }
-        result.delete()
-        event.update(cooldown)
+        update(cooldown)
     }
     val flipImage = CommonCommand("我巨爽", "flip") {
         val target = if (message.anyIsInstance<Image>()) {
@@ -127,35 +133,23 @@ object ImageProcessor: CommandModule("图像处理", "image.process") {
             nextMessage()
         }
         target.filterIsInstance<Image>().forEach { miraiImg ->
-            val file = miraiImg.getFile()!!
-            val img = Imgcodecs.imread(file.absolutePath)
-            val flipped = Mat()
-            Core.flip(img, flipped, 1)
+            val file = miraiImg.cacheOrDownload()!!
+            val img = file.readAsImage()
+            val flipped = img.clone().flipX()
 
             val resultA = img.clone()
             val resultB = img.clone()
 
-
-            flipped.submat(
-                0, img.rows() - 1, img.cols() / 2, img.cols() - 1
-            ).copyTo(
-                resultA.submat(
-                    0, img.rows() - 1, img.cols() / 2, img.cols() - 1
-                ))
-            flipped.submat(
-                0, img.rows() - 1, 0, img.cols() / 2
-            ).copyTo(
-                resultB.submat(
-                    0, img.rows() - 1, 0, img.cols() / 2
-                )
-            )
+            flipped.copy(0, 0, resultA, 0, 0, img.width / 2, img.height)
+            flipped.copy(img.width - img.width / 2, 0, resultB, img.width - img.width / 2, 0, img.width / 2, img.height)
             quoteReply(buildMessageChain {
                 listOf(resultA, resultB).map {
-                    it.saveToByteArray().toExternalResource().use { r ->
+                    it.encode(PNG).toExternalResource().use { r ->
                         r.uploadAsImage(subject)
                     }
                 }.forEach { add(it) }
             })
+            file.delete()
         }
         if (target.anyIsInstance<Image>())
             quota.update(subject)
@@ -168,14 +162,11 @@ object ImageProcessor: CommandModule("图像处理", "image.process") {
             nextMessage()
         }
         target.filterIsInstance<Image>().forEach { miraiImg ->
-            val file = miraiImg.getFile()!!
-            val img = file.toVfs().readAsImage().encode(PNG).toMat().square()
-            val result = Mat(img.rows(), img.cols(), img.type())
-            undistort(img, result, spCam, spDistCoeffs)
-            result.submat(148, 352, 148, 352).clone().saveToByteArray()
-                .toExternalResource().use {
-                    quoteReply(it.uploadAsImage(subject))
-                }
+            val file = miraiImg.cacheOrDownload()!!
+            val img = file.readAsImage()
+            spherize(img.toBMP32()).toExternalResource().use {
+                quoteReply(it.uploadAsImage(subject))
+            }
             file.delete()
         }
         if (target.anyIsInstance<Image>())
@@ -185,47 +176,153 @@ object ImageProcessor: CommandModule("图像处理", "image.process") {
         val target = if (message.anyIsInstance<Image>()) {
             message
         } else {
-            quoteReply("请发送欲反球面化的图片（需取消请发送不带图片的消息）：")
+            quoteReply("请发送欲球面化的图片（需取消请发送不带图片的消息）：")
             nextMessage()
         }
         target.filterIsInstance<Image>().forEach { miraiImg ->
-            val file = miraiImg.getFile()!!
-            var img = Imgcodecs.imread(file.absolutePath).square()
-            val ext = Mat(img.rows() + 50, img.cols() + 50, img.type())
-            img.copyTo(ext.submat(25, 525, 25, 525))
-            img = ext.clone()
-            val result = Mat(img.rows(), img.cols(), img.type())
-            undistort(img, result, revSpCam, revSpDistCoeffs)
-            result.saveToByteArray()
-                .toExternalResource().use {
-                    quoteReply(it.uploadAsImage(subject))
-                }
+            val file = miraiImg.cacheOrDownload()!!
+            val img = file.readAsImage()
+            pincushion(img.toBMP32()).toExternalResource().use {
+                quoteReply(it.uploadAsImage(subject))
+            }
             file.delete()
         }
         if (target.anyIsInstance<Image>())
             quota.update(subject)
     }
-}
+    val meme = CommonCommand("表情包生成", "meme") {
+        val raw: String
+        val rawArgs: List<String>
+        if (message.filterIsInstance<PlainText>().joinToString("").startsWith("生成")) {
+            raw = message.filterIsInstance<PlainText>().joinToString("").substringAfterPrefix("生成")
+            rawArgs = raw.toArgsList()
+            if (rawArgs.isEmpty()) {
+                reply(buildString {
+                    appendLine("使用方法：“生成 表情包名称 图片或文本参数”")
+                    appendLine("\t例：生成 喜报 NullPointerException")
+                    appendLine()
+                    appendLine("支持的表情包列表：https://otmdb.cn/karenbot/meme")
+                }.trim())
+                return@CommonCommand
+            }
+        } else {
+            return@CommonCommand
+        }
+        var args = listOf<String>()
+        val target = memeList.find {
+            if (it.patterns.isNotEmpty()) {
+                val groupValues = Regex(it.patterns.first()).find(raw)?.groupValues
+                if (groupValues?.isNotEmpty() == true) {
+                    args = groupValues
+                    true
+                } else {
+                    false
+                }
+            } else {
+                if (rawArgs[0] in it.keywords) {
+                    args = rawArgs.subList(1, rawArgs.size)
+                    true
+                } else {
+                    false
+                }
+            }
+        } ?: run {
+            reply("表情包不存在。\n支持的表情包列表：https://otmdb.cn/karenbot/meme")
+            return@CommonCommand
+        }
 
-fun Mat.square(size: Int = 500): Mat {
-    val target = min(rows(), cols())
-    val startR = (rows() - target) / 2
-    val startC = (cols() - target) / 2
-    val result = Mat(rows(), cols(), type())
-    resize(submat(startR, startR + target, startC, startC + target), result,
-        Size(size.toDouble(), size.toDouble()))
-    return result
-}
 
-fun ByteArray.toMat(): Mat {
-    val b = MatOfByte()
-    b.fromList(this.toMutableList())
-    return Imgcodecs.imdecode(b, Imgcodecs.IMREAD_UNCHANGED)
-}
+        val images = message.filterIsInstance<Image>()
 
-fun Mat.saveToByteArray(ext: String = ".png"): ByteArray {
-    val result = MatOfByte()
-    Imgcodecs.imencode(ext, this, result)
-    return result.toArray()
-}
+        if (images.size < target.params.minImages) {
+            reply("图片不足，此模板${getImageRequirements(target)}作为输入。")
+            return@CommonCommand
+        }
+        if (args.size < target.params.minTexts) {
+            reply("文本不足，此模板${getTextRequirements(target)}作为输入。")
+            return@CommonCommand
+        }
 
+        val localImages = images.mapNotNull { it.cacheOrDownload() }
+
+        val parts: List<PartData> = formData {
+            args.forEach {
+                append("texts", it)
+            }
+            localImages.forEach {
+                append("images", it.readBytes(), Headers.build {
+                    append(HttpHeaders.ContentDisposition, "filename=${it.name}")
+                })
+            }
+        }
+        val response = client.submitFormWithBinaryData(
+            url = "${MemeConfig.data.url}/memes/${target.key}/",
+            formData = parts
+        )
+        if (response.status == HttpStatusCode.OK) {
+            response.body<ByteArray>().toExternalResource().use {
+                reply(subject.uploadImage(it))
+            }
+        } else if (response.status.value == 542) {
+            reply("此模板${getImageRequirements(target)}且${getTextRequirements(target)}，请检查输入")
+        } else {
+            println(response)
+            println(response.bodyAsText())
+        }
+    }
+    fun getImageRequirements(target: Meme): String {
+        if (target.params.minImages == target.params.maxImages) {
+            if (target.params.minImages == 0)
+                return "不需要图片"
+            return "需要${target.params.minImages}张图片"
+        }
+        return "需要${target.params.minImages}~${target.params.maxImages}张图片"
+    }
+    fun getTextRequirements(target: Meme): String {
+        if (target.params.minTexts == target.params.maxTexts) {
+            if (target.params.minTexts == 0)
+                return "不需要文本"
+            return "需要${target.params.minTexts}段文本"
+        }
+        return "需要${target.params.minTexts}~${target.params.maxTexts}段文本"
+    }
+
+    /**
+     * Apply a Spherize Filter on the image.
+     * @param a: Affects only the outermost pixels of the image
+     * @param b: Amount of the effect
+     * @param c: Most uniform correction
+     * Reference: https://stackoverflow.com/questions/12620025/barrel-distortion-correction-algorithm-to-correct-fisheye-lens-failing-to-impl
+     */
+    suspend fun spherize(img: Bitmap32, a: Double = 1.0, b: Double = 3.0, c: Double = -9.0): ByteArray {
+        val d = 1.0 - a - b - c
+        val radius = min(img.width, img.height) / 2
+        val result = Bitmap32(img.width, img.height) { x, y ->
+            val midX = (img.width - 1) / 2.0
+            val midY = (img.height - 1) / 2.0
+            val dX = x - midX
+            val dY = y - midY
+            val dstR = sqrt((dX * dX + dY * dY) / radius / radius)
+            val factor = abs(1.0 / (a * dstR * dstR * dstR + b * dstR * dstR + c * dstR + d))
+            val srcX = (midX + dX * factor).toInt()
+            val srcY = (midY + dY * factor).toInt()
+            img[srcX, srcY]
+        }
+        return result.encode(PNG)
+    }
+    suspend fun pincushion(img: Bitmap32, strength: Double = 7.0, zoom: Double = 1.5): ByteArray {
+        val midW = img.width / 2.0
+        val midH = img.height / 2.0
+        val correctionRadius = sqrt(img.width.toDouble().pow(2) + img.height.toDouble().pow(2)) / strength
+        return Bitmap32(img.width, img.height) { x, y ->
+            val newX = x - midW
+            val newY = y - midH
+            val dis = sqrt(newX.pow(2) + newY.pow(2))
+            val r = dis / correctionRadius
+            val theta = if (r == 0.0) 1.0 else atan(r) / r
+            val srcX = midW + theta * newX * zoom
+            val srcY = midH + theta * newY * zoom
+            img[srcX.toInt(), srcY.toInt()]
+        }.encode(PNG)
+    }
+}

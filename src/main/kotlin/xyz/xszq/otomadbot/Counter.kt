@@ -1,11 +1,11 @@
 package xyz.xszq.otomadbot
 
+import kotlinx.serialization.Serializable
 import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.contact.Group
-import java.util.concurrent.ConcurrentHashMap
-import kotlinx.serialization.Serializable
 import net.mamoe.mirai.event.events.MessageEvent
 import xyz.xszq.OtomadBotCore
+import java.util.concurrent.ConcurrentHashMap
 
 open class Counter: ConcurrentHashMap<Long, Long>() {
     fun getRawId(subject: Contact) = (if (subject is Group) 1L else -1L) * subject.id
@@ -54,7 +54,10 @@ object QuotaConfig: SafeYamlConfig<MapValues>(OtomadBotCore, "quota", MapValues(
 }.toMutableMap()))
 
 
-suspend fun <T> MessageEvent.ifReady(cd: Cooldown, block: suspend () -> T): T? = if (cd.isReady(subject))
+suspend fun <T> MessageEvent.ifReady(cd: Cooldown, block: suspend () -> T): T? = if (cd.isReady(subject) ||
+    (subject is Group && (subject as Group).members.size < 500))
+    block.invoke() else null
+suspend fun <T> MessageEvent.ifReadyStrict(cd: Cooldown, block: suspend () -> T): T? = if (cd.isReady(subject))
     block.invoke() else null
 fun MessageEvent.update(cd: Cooldown) = cd.update(subject)
 fun MessageEvent.available(q: Quota) = q.available(subject) ||

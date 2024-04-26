@@ -10,9 +10,8 @@ import kotlinx.serialization.decodeFromString
 import net.mamoe.mirai.event.subscribeGroupMessages
 import xyz.xszq.OtomadBotCore
 import xyz.xszq.events
-import xyz.xszq.otomadbot.CommandEvent
 import xyz.xszq.otomadbot.CommandModule
-import xyz.xszq.otomadbot.GroupCommandWithArgs
+import xyz.xszq.otomadbot.GroupCommandWithArg
 import xyz.xszq.otomadbot.mirai.quoteReply
 import xyz.xszq.otomadbot.mirai.startsWithSimple
 
@@ -27,35 +26,35 @@ object WikiQuery: CommandModule("维基搜索", "wiki") {
     override suspend fun subscribe() {
         events.subscribeGroupMessages {
             startsWithSimple("维基搜索") { keyword, _ ->
-                otomadWiki.checkAndRun(CommandEvent(listOf(keyword), this))
+                otomadWiki.checkAndRun(this, keyword)
             }
         }
     }
     val client = HttpClient()
-    val otomadWiki = GroupCommandWithArgs("音MAD维基搜索", "otomad_wiki", false) {
-        val keyword = args.first()
-        if (keyword.trim() == "") return@GroupCommandWithArgs
+    // TODO: Refactor with ktor 2.0
+    val otomadWiki = GroupCommandWithArg("音MAD维基搜索", "otomad_wiki", false) { keyword ->
+        if (keyword!!.trim() == "") return@GroupCommandWithArg
         val searchUrl = "https://otomad.wiki/api.php?action=query&list=search&srwhat=title" +
                 "&srnamespace=0&format=json&srsearch=" + URL.encodeComponent(keyword)
         val parseUrl = "https://otomad.wiki/api.php?action=parse&format=json&page=" + URL.encodeComponent(keyword)
-        val responseExist = client.get<String>(parseUrl)
+        val responseExist = client.get(parseUrl).bodyAsText()
         if ("\"code\":\"missingtitle\"" in responseExist || "\"totalhits\":0" in responseExist) {
-            val responseSearch = client.get<HttpResponse>(searchUrl)
+            val responseSearch = client.get(searchUrl)
             if (responseSearch.status == HttpStatusCode.OK) {
-                val result = OtomadBotCore.json.decodeFromString<MWSearchResult>(responseSearch.readText())
+                val result = OtomadBotCore.json.decodeFromString<MWSearchResult>(responseSearch.bodyAsText())
                 if (result.query.searchinfo.totalhits > 10) {
-                    event.quoteReply(
+                    quoteReply(
                         "https://otomad.wiki/index.php?title=Special:%E6%90%9C%E7%B4%A2" +
                                 "&profile=advanced&fulltext=1&search=" + URL.encodeComponent(keyword)
                     )
                 } else if (result.query.searchinfo.totalhits > 0) {
-                    event.quoteReply("https://otomad.wiki/" + URL.encodeComponent(
+                    quoteReply("https://otomad.wiki/" + URL.encodeComponent(
                         result.query.search[0]["title"].toString().replace(" ", "_")
                     ))
                 }
             }
         } else {
-            event.quoteReply("https://otomad.wiki/" + URL.encodeComponent(keyword.replace(" ", "_")))
+            quoteReply("https://otomad.wiki/" + URL.encodeComponent(keyword.replace(" ", "_")))
         }
     }
 }

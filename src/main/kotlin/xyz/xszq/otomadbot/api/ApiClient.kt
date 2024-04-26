@@ -1,10 +1,9 @@
 package xyz.xszq.otomadbot.api
 
 import io.ktor.client.*
-import io.ktor.client.engine.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
-import io.ktor.client.features.json.serializer.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.Serializable
 import xyz.xszq.OtomadBotCore
 import xyz.xszq.otomadbot.SafeYamlConfig
@@ -40,8 +39,8 @@ const val availableUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/5
 
 open class ApiClient(config: HttpClientConfig<*>.() -> Unit = {}, timeout: Long = 600000L) {
     val client = HttpClient {
-        install(JsonFeature) {
-            serializer = KotlinxSerializer(kotlinx.serialization.json.Json {
+        install(ContentNegotiation) {
+            json(kotlinx.serialization.json.Json {
                 isLenient = true
                 ignoreUnknownKeys = true
             })
@@ -52,23 +51,6 @@ open class ApiClient(config: HttpClientConfig<*>.() -> Unit = {}, timeout: Long 
             socketTimeoutMillis = timeout
         }
         expectSuccess = false
-        apply(config)
-    }
-    val clientProxy = HttpClient {
-        install(JsonFeature) {
-            serializer = KotlinxSerializer(kotlinx.serialization.json.Json {
-                isLenient = true
-                ignoreUnknownKeys = true
-            })
-        }
-        expectSuccess = false
-        engine {
-            proxy =
-                if (ApiSettings.data.proxy.type.lowercase() == "socks")
-                    ProxyBuilder.socks(ApiSettings.data.proxy.addr, ApiSettings.data.proxy.port)
-                else
-                    ProxyBuilder.http("http://${ApiSettings.data.proxy.addr}:${ApiSettings.data.proxy.port}")
-        }
         apply(config)
     }
 }

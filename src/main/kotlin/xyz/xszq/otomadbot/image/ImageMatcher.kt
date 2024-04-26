@@ -4,7 +4,9 @@ import com.soywiz.kds.iterators.fastForEach
 import com.soywiz.korio.async.launchImmediately
 import com.soywiz.korio.file.VfsFile
 import com.soywiz.korio.file.std.toVfs
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import xyz.xszq.OtomadBotCore
 import xyz.xszq.otomadbot.kotlin.getMIMEType
 import java.io.File
@@ -13,8 +15,8 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 
-suspend fun VfsFile.isValidGIF(): Boolean {
-    return try {
+suspend fun VfsFile.isValidGIF(): Boolean = withContext(Dispatchers.IO) {
+    try {
         val header = readRangeBytes(0..5)
         header.contentEquals("GIF89a".toByteArray()) || header.contentEquals("GIF87a".toByteArray())
     } catch (e: Exception) {
@@ -35,7 +37,7 @@ object ImageMatcher {
             OtomadBotCore.configFolder.resolve("image/$type").toVfs().listRecursive().collect {
                 launchImmediately {
                     if (it.isFile() && isImage(Paths.get(it.absolutePath)) && !it.isValidGIF()) {
-                        hash[target]!!.add(differenceHashTriple.calc(File(it.absolutePath).toVfs()
+                        hash[target]!!.add(differenceHashTriple.calc(File(it.absolutePath)
                             .readAsImage().toBMP32()))
                     }
                 }
@@ -46,7 +48,7 @@ object ImageMatcher {
         hash[target] = mutableListOf()
     }
     suspend fun matchImage(type: String, target: File): Boolean {
-        val now = differenceHashTriple.calc(target.toVfs().readAsImage().toBMP32())
+        val now = differenceHashTriple.calc(target.readAsImage().toBMP32())
         hash[type]!!.fastForEach {
             if (differenceHashTriple.similarity(now, it) > .92 )
                 return true

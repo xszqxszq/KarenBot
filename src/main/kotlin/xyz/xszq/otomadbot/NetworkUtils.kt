@@ -3,8 +3,10 @@ package xyz.xszq.otomadbot
 import com.soywiz.kds.iterators.fastForEach
 import com.soywiz.korio.util.UUID
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.engine.*
 import io.ktor.client.request.*
+import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.mamoe.mirai.message.data.Image
@@ -109,7 +111,7 @@ object NetworkUtils {
                     append(it.first, it.second)
                 }
             }
-        }
+        }.body()
     }
     suspend fun Image.getFile(): File? = downloadTempFile(queryUrl())
     suspend fun MarketFace.getFile(): File? = downloadTempFile(queryUrl())

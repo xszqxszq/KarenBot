@@ -14,24 +14,22 @@ import net.mamoe.mirai.message.data.content
 import net.mamoe.mirai.message.nextMessage
 import xyz.xszq.OtomadBotCore
 import xyz.xszq.events
-import xyz.xszq.otomadbot.CommandEvent
 import xyz.xszq.otomadbot.CommandModule
-import xyz.xszq.otomadbot.CommonCommandWithArgs
-import xyz.xszq.otomadbot.admin.Admin.botAdmin
+import xyz.xszq.otomadbot.CommonCommandWithArgOf
 import xyz.xszq.otomadbot.mirai.quoteReply
 import xyz.xszq.otomadbot.mirai.startsWithSimple
 
 
-fun Member.isAdminCommandPermitted() = isOperator() || permitteeId.hasPermission(botAdmin)
+fun Member.isAdminCommandPermitted() = isOperator() || permitteeId.hasPermission(Admin.allowPerm)
 
 object GroupAdmin: CommandModule("", "group_admin") {
     override suspend fun subscribe() {
         events.subscribeMessages {
             startsWithSimple("/禁言") { targetMember, _ ->
-                mute.checkAndRun(CommandEvent(listOf(targetMember), this))
+                mute.checkAndRun(this, targetMember.toLong())
             }
             startsWithSimple("/踢") { targetMember, _ ->
-                kick.checkAndRun(CommandEvent(listOf(targetMember), this))
+                kick.checkAndRun(this, targetMember.toLong())
             }
         }
         events.subscribeGroupMessages {
@@ -105,22 +103,21 @@ object GroupAdmin: CommandModule("", "group_admin") {
             }
         }
     }
-    val mute = CommonCommandWithArgs("禁言", "mute") {
-        val targetMember = args.first()
-        val groups = event.bot.groups.filter { group ->
-            (group.getMember(event.sender.id) ?.isAdminCommandPermitted() ?: false)
-                    && group.contains(targetMember.toLong()) && group.botAsMember.isOperator()
+    val mute = CommonCommandWithArgOf<Long>("禁言", "mute") { targetMember ->
+        val groups = bot.groups.filter { group ->
+            (group.getMember(sender.id) ?.isAdminCommandPermitted() ?: false)
+                    && group.contains(targetMember!!) && group.botAsMember.isOperator()
         }
         if (groups.isNotEmpty()) {
             val targetGroup = if (groups.size > 1) {
                 var selectHint = "请回复欲操作的群的序号："
                 groups.forEachIndexed  { index, it -> selectHint += "\n  $index. ${it.name} (${it.id})" }
-                event.quoteReply(selectHint)
-                groups.getOrNull(event.nextMessage().content.toInt())
+                quoteReply(selectHint)
+                groups.getOrNull(nextMessage().content.toInt())
             } else groups.first()
             targetGroup ?.let {
-                event.quoteReply("请回复欲禁言的时长（支持的单位：秒/分/时/天，若无单位则默认为分钟，支持禁言1秒~30天）")
-                val duration = event.nextMessage().content
+                quoteReply("请回复欲禁言的时长（支持的单位：秒/分/时/天，若无单位则默认为分钟，支持禁言1秒~30天）")
+                val duration = nextMessage().content
                 val amount = duration.substring(0,
                     if (duration.last().isDigit()) duration.length else duration.length-1).toInt() *
                         when (duration.last()) {
@@ -130,28 +127,27 @@ object GroupAdmin: CommandModule("", "group_admin") {
                             '天' -> 24 * 60 * 60
                             else -> 60
                         }
-                val member = it.getOrFail(targetMember.toLong())
+                val member = it.getOrFail(targetMember!!)
                 member.mute(amount)
                 it.sendMessage("请遵守群规哦")
             }
         }
     }
-    val kick = CommonCommandWithArgs("踢", "kick") {
-        val targetMember = args.first()
-        val groups = event.bot.groups.filter { group ->
-            (group.getMember(event.sender.id) ?.isAdminCommandPermitted() ?: false)
-                    && group.contains(targetMember.toLong()) && group.botAsMember.isOperator()
+    val kick = CommonCommandWithArgOf<Long>("踢", "kick") { targetMember ->
+        val groups = bot.groups.filter { group ->
+            (group.getMember(sender.id) ?.isAdminCommandPermitted() ?: false)
+                    && group.contains(targetMember!!) && group.botAsMember.isOperator()
         }
         if (groups.isNotEmpty()) {
             (if (groups.size > 1) {
                 var selectHint = "请回复欲操作的群的序号："
                 groups.forEachIndexed  { index, it -> selectHint += "\n  $index. ${it.name} (${it.id})" }
-                event.quoteReply(selectHint)
-                groups.getOrNull(event.nextMessage().content.toInt())
+                quoteReply(selectHint)
+                groups.getOrNull(nextMessage().content.toInt())
             } else groups.first()) ?.let { targetGroup ->
-                val member = targetGroup.getOrFail(targetMember.toLong())
-                event.quoteReply("即将在 ${targetGroup.name} 踢出 ${member.nameCardOrNick} ($targetMember)，确认？(y/n)")
-                if (event.nextMessage().content.lowercase().first() == 'y') {
+                val member = targetGroup.getOrFail(targetMember!!)
+                quoteReply("即将在 ${targetGroup.name} 踢出 ${member.nameCardOrNick} ($targetMember)，确认？(y/n)")
+                if (nextMessage().content.lowercase().first() == 'y') {
                     member.kick("")
                 }
             }

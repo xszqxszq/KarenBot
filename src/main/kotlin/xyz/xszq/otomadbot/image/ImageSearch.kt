@@ -2,7 +2,7 @@ package xyz.xszq.otomadbot.image
 
 import io.ktor.client.*
 import io.ktor.client.engine.*
-import io.ktor.client.features.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
@@ -31,12 +31,12 @@ import kotlin.math.roundToInt
 object SearchHandler: CommandModule("图像搜索", "image.search") {
     override suspend fun subscribe() {
         events.subscribeGroupMessages {
-            startsWithSimple("搜图", true) { _, _ ->
-                sauceNao.checkAndRun(this)
-            }
-            startsWithSimple("搜番", true) { _, _ ->
-                traceMoe.checkAndRun(this)
-            }
+//            startsWithSimple("搜图", true) { _, _ ->
+//                sauceNao.checkAndRun(this)
+//            }
+//            startsWithSimple("搜番", true) { _, _ ->
+//                traceMoe.checkAndRun(this)
+//            }
         }
     }
     val client = HttpClient {
@@ -55,12 +55,12 @@ object SearchHandler: CommandModule("图像搜索", "image.search") {
     }
     private suspend fun getImageSearchByUrl(url: String): String {
         kotlin.runCatching {
-            val response = client.submitForm<HttpResponse>(url = "https://saucenao.com/search.php",
+            val response = client.submitForm(url = "https://saucenao.com/search.php",
                 formParameters = Parameters.build {
                     append("url", url)
                 })
             return if (response.status == HttpStatusCode.OK) {
-                val doc = Jsoup.parse(response.readText())
+                val doc = Jsoup.parse(response.bodyAsText())
                 val target = doc.select(".resulttablecontent")[0]
                 val similarity = target.select(".resultsimilarityinfo").text()
                 if (similarity.substringBefore('%').toDouble() < 70) {
@@ -111,10 +111,10 @@ object SearchHandler: CommandModule("图像搜索", "image.search") {
      * @param message Request message event.
      */
     private suspend fun doHandleTraceMoe(image: Image, message: MessageEvent) {
-        val response = client.get<HttpResponse>("https://api.trace.moe/search?anilistInfo" +
+        val response = client.get("https://api.trace.moe/search?anilistInfo" +
                 "&url=${image.queryUrl()}")
         if (response.status == HttpStatusCode.OK) {
-            val result = OtomadBotCore.json.decodeFromString<TraceMoeResults>(response.readText())
+            val result = OtomadBotCore.json.decodeFromString<TraceMoeResults>(response.bodyAsText())
             try {
                 if (result.result.isNotEmpty()) {
                     val realResult = result.result[0]
@@ -148,7 +148,7 @@ object SearchHandler: CommandModule("图像搜索", "image.search") {
             }
         } else {
             message.subject.sendMessage(message.message.quote() + "网络错误，可能当前搜番请求过多，请重试")
-            println(response.readText())
+            println(response.bodyAsText())
         }
     }
     val sauceNao = GroupCommand("搜图", "saucenao") {

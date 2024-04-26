@@ -9,10 +9,10 @@ import net.mamoe.mirai.message.data.content
 import net.mamoe.mirai.message.nextMessageOrNull
 import xyz.xszq.OtomadBotCore
 import xyz.xszq.events
-import xyz.xszq.otomadbot.CommandEvent
 import xyz.xszq.otomadbot.CommandModule
 import xyz.xszq.otomadbot.CommonCommand
-import xyz.xszq.otomadbot.CommonCommandWithArgs
+import xyz.xszq.otomadbot.CommonCommandWithArg
+import xyz.xszq.otomadbot.CommonCommandWithArgOf
 import xyz.xszq.otomadbot.mirai.equalsTo
 import xyz.xszq.otomadbot.mirai.quoteReply
 import java.io.BufferedReader
@@ -21,27 +21,32 @@ import java.net.NetworkInterface
 import java.util.*
 
 
-object Admin: CommandModule("管理员指令", "admin") {
+object Admin: CommandModule("", "admin") {
     override suspend fun subscribe() {
         events.subscribeMessages {
             equalsTo("/ip") {
                 ip.checkAndRun(this)
             }
             startsWith("/exec") { command ->
-                exec.checkAndRun(CommandEvent(listOf(command), this))
+                exec.checkAndRun(this, command)
             }
             equalsTo("/reload") {
                 reload.checkAndRun(this)
             }
             startsWith("/show") { raw ->
-                show.checkAndRun(CommandEvent(listOf(raw), this))
+                show.checkAndRun(this, raw)
             }
-            startsWith("/clean") { arg ->
-                clean.checkAndRun(CommandEvent(listOf(arg), this))
+//            equalsTo("/muted") {
+//                showMuted.checkAndRun(this)
+//            }
+            startsWith("/clean") { limit ->
+                clean.checkAndRun(this, limit.toLong())
             }
+//            startsWith("/stat") {
+//                showTop10.checkAndRun(this)
+//            }
         }
     }
-    val botAdmin = allowPerm
     val ip = CommonCommand("", "ip", false, checkSender = true) {
         var ips = ""
         getNetworkInterfaces().toList().forEach {
@@ -51,12 +56,12 @@ object Admin: CommandModule("管理员指令", "admin") {
         }
         quoteReply(ips)
     }
-    val exec = CommonCommandWithArgs("", "exec", false, checkSender = true) {
-        val result = handleExec(args.first())
+    val exec = CommonCommandWithArg("", "exec", false, checkSender = true) { cmd ->
+        val result = handleExec(cmd!!)
         if (result.first.isNotEmpty())
-            event.quoteReply(result.first)
+            quoteReply(result.first)
         if (result.second.isNotEmpty())
-            event.quoteReply(result.second)
+            quoteReply(result.second)
     }
     val reload = CommonCommand("", "reload", false, checkSender = true) {
         try {
@@ -67,22 +72,26 @@ object Admin: CommandModule("管理员指令", "admin") {
         }
         quoteReply("重载成功")
     }
-    val show = CommonCommandWithArgs("", "show", false, checkSender = true) {
-        event.subject.sendMessage(args.first().deserializeMiraiCode())
+    val show = CommonCommandWithArg("", "show", false, checkSender = true) { raw ->
+        subject.sendMessage(raw!!.deserializeMiraiCode())
     }
-    val clean = CommonCommandWithArgs("", "clean", false, checkSender = true) {
-        val limit = args.first().toLong()
-        event.quoteReply("有无无需清理的群？(n)")
-        event.nextMessageOrNull(120000) ?.let { raw ->
+//    val showMuted = CommonCommand("", "showMuted", false, checkSender = true) {
+//        quoteReply(OtomadBotCore.validator.bots.map { b ->
+//            b.groups.filter { it.botAsMember.isMuted }.map { "${it.name}(${it.id})" }
+//        }.flatten().joinToString("\n"))
+//    }
+    val clean = CommonCommandWithArgOf<Long>("", "clean", false, checkSender = true) { limit ->
+        quoteReply("有无无需清理的群？(n)")
+        nextMessageOrNull(120000) ?.let { raw ->
             val exclusion = raw.content.split(" ")
-            val target = event.bot.groups.filter { it.members.size < limit && it.id.toString() !in exclusion
-                    && it.members.none { m -> m.permitteeId.hasPermission(botAdmin) } }
+            val target = bot.groups.filter { it.members.size < limit!! && it.id.toString() !in exclusion
+                    && it.members.none { m -> m.permitteeId.hasPermission(allowPerm) } }
             var confirm = "以下群将主动退出，确认？（y/n）"
             target.forEach { confirm += "\n${it.id}. ${it.name} (${it.members.size} 人)"}
-            event.quoteReply(confirm)
-            event.nextMessageOrNull(120000) ?.let { ans ->
+            quoteReply(confirm)
+            nextMessageOrNull(120000) ?.let { ans ->
                 if (ans.content.lowercase() == "y") {
-                    event.quoteReply("正在退出中……")
+                    quoteReply("正在退出中……")
                     var counter = 0
                     var cycle = 0
                     target.forEach {
@@ -92,17 +101,22 @@ object Admin: CommandModule("管理员指令", "admin") {
                             counter += 1
                             cycle = (cycle + 1) % 8
                         } .onFailure {
-                            event.quoteReply("Unknown exception: " + it.stackTraceToString())
+                            quoteReply("Unknown exception: " + it.stackTraceToString())
                         }
                         if (cycle == 0) {
-                            event.quoteReply("$counter / ${target.size}")
+                            quoteReply("$counter / ${target.size}")
                         }
                     }
-                    event.quoteReply("操作完毕，已退出 ${target.size} 个群。")
+                    quoteReply("操作完毕，已退出 ${target.size} 个群。")
                 }
             }
         }
     }
+//    val showTop10 = CommonCommand("", "showTop10", false, checkSender = true) {
+//        quoteReply(Statistics.frequency.toList().sortedBy { it.second }.take(10).joinToString("\n") {
+//            "${it.first}: ${it.second}"
+//        })
+//    }
     private fun getNetworkInterfaces(): Enumeration<NetworkInterface> = NetworkInterface.getNetworkInterfaces()
     private fun handleExec(command: String): Pair<String, String> {
         val rt = Runtime.getRuntime()

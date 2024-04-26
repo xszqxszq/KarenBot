@@ -8,16 +8,18 @@ import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.starProjectedType
 
 abstract class CommandModule(val name: String, val permName: String) {
-    val allowPerm: Permission = PermissionService.INSTANCE.register(
-        PermissionId("otm", permName), "允许使用 $name 模块的所有功能")
-    val denyPerm: Permission = PermissionService.INSTANCE.register(
-        PermissionId("otm", "deny.$permName"), "禁止使用 $name 模块的所有功能")
+    lateinit var allowPerm: Permission
+    lateinit var denyPerm: Permission
     abstract suspend fun subscribe()
     suspend fun register() {
+        allowPerm = PermissionService.INSTANCE.register(
+            PermissionId("otm", permName), "允许使用 $name 模块的所有功能")
+        denyPerm = PermissionService.INSTANCE.register(
+            PermissionId("otm", "deny.$permName"), "禁止使用 $name 模块的所有功能")
         this::class.declaredMemberProperties.filter {
             it.returnType.isSubtypeOf(Command::class.starProjectedType)
         }.forEach {
-            val now = (it.call(this) as Command<*>)
+            val now = (it.call(this) as Command<*, *>)
             now.perm =
                 if (now.defaultEnabled)
                     PermissionService.INSTANCE.register(
@@ -31,8 +33,8 @@ abstract class CommandModule(val name: String, val permName: String) {
         }
         subscribe()
     }
-    fun getCommands(): List<Command<*>> =
+    fun getCommands(): List<Command<*, *>> =
         this::class.declaredMemberProperties.filter {
             it.returnType.isSubtypeOf(Command::class.starProjectedType)
-        }.map { it.call(this) as Command<*>}
+        }.map { it.call(this) as Command<*, *>}
 }

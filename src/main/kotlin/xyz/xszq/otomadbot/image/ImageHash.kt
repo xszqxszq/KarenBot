@@ -1,6 +1,5 @@
 package xyz.xszq.otomadbot.image
 
-import com.soywiz.kds.iterators.fastForEachWithIndex
 import com.soywiz.kmem.toByte
 import com.soywiz.korim.bitmap.Bitmap32
 import com.soywiz.korim.bitmap.resized
@@ -20,9 +19,9 @@ interface ImageHash {
 }
 
 fun Bitmap32.toGrayScale() = clone().apply {
-    data.fastForEachWithIndex { index, value ->
-        val gray = .2126 * value.rd + .7152 * value.gd + .0722 * value.bd
-        data[index] = RGBA.float(gray, gray, gray, 1.0)
+    forEach { _, x, y ->
+        val gray = .2126 * this[x, y].rd + .7152 * this[x, y].gd + .0722 * this[x, y].bd
+        this[x, y] = RGBA.float(gray, gray, gray, 1.0)
     }
 }
 

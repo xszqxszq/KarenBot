@@ -1,6 +1,5 @@
 package xyz.xszq.otomadbot.text
 
-import com.beust.jcommander.Strings.startsWith
 import com.soywiz.kds.iterators.fastForEach
 import kotlinx.serialization.Serializable
 import net.mamoe.mirai.event.events.GroupMessageEvent
@@ -8,12 +7,14 @@ import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.message.data.content
 import net.mamoe.mirai.message.nextMessage
-import xyz.xszq.*
-import xyz.xszq.otomadbot.image.ImageReceivedEvent
+import xyz.xszq.OtomadBotCore
 import xyz.xszq.events
-import xyz.xszq.otomadbot.*
+import xyz.xszq.otomadbot.CommandModule
+import xyz.xszq.otomadbot.GroupCommand
+import xyz.xszq.otomadbot.ImageCommand
+import xyz.xszq.otomadbot.SafeYamlConfig
 import xyz.xszq.otomadbot.admin.isAdminCommandPermitted
-import xyz.xszq.otomadbot.image.ChineseOCRLite
+import xyz.xszq.otomadbot.api.PythonApi
 import xyz.xszq.otomadbot.kotlin.pass
 import xyz.xszq.otomadbot.kotlin.toArgsList
 import xyz.xszq.otomadbot.kotlin.toSimple
@@ -145,9 +146,6 @@ object AutoReplyHandler: CommandModule("自动回复", "reply") {
         events.subscribeAlways<GroupMessageEvent> {
             reply.checkAndRun(this)
         }
-        events.subscribeAlways<ImageReceivedEvent> {
-            replyPic.checkAndRun(this)
-        }
         events.subscribeGroupMessages {
             startsWith("自动回复设置") { raw ->
                 if (!sender.isAdminCommandPermitted())
@@ -191,13 +189,11 @@ object AutoReplyHandler: CommandModule("自动回复", "reply") {
         matchText(message.filterIsInstance<PlainText>().joinToString("\n").toSimple().lowercase(),
             group.id) ?.let { quoteReply(it) }
     }
-    val replyPic = Command<ImageReceivedEvent>("自动回复图片", "reply_pic", checkSender = true) {
-        if (event is GroupMessageEvent &&
-            AutoReplyConfig.data.rules.filter {
-                it.value.group == event.group.id
-            }.isNotEmpty()) {
-            val textList = img.map { ChineseOCRLite.ocr(it.absolutePath).lowercase() }
-            matchImage(textList, event.group.id) ?.let { event.quoteReply(it) }
+    val replyPic = ImageCommand("自动回复图片", "reply_pic",
+        checkSender = true) { img ->
+        if (AutoReplyConfig.data.rules.filter { it.value.group == group.id }.isNotEmpty()) {
+            val textList = img!!.map { PythonApi.getOCR(it)!!.lowercase() }
+            matchImage(textList, group.id)?.let { quoteReply(it) }
         }
     }
 }

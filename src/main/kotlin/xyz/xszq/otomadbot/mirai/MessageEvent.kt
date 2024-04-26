@@ -127,6 +127,21 @@ suspend fun MessageEvent.quoteReply(message: MessageChain) {
     subject.sendMessage(source.quote() + message)
 }
 
+/**
+ * 引用回复消息
+ * @param message 欲回复的内容
+ */
+suspend fun MessageEvent.reply(message: String) = quoteReply(message)
+/**
+ * 引用回复消息
+ * @param message 欲回复的内容
+ */
+suspend fun MessageEvent.reply(message: MessageContent) = quoteReply(message)
+/**
+ * 引用回复消息
+ * @param message 欲回复的内容
+ */
+suspend fun MessageEvent.reply(message: MessageChain) = quoteReply(message)
 
 /**
  * 比较两个 GroupMessageEvent 是否来自同一个群
