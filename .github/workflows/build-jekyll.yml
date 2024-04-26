@@ -1,38 +1,30 @@
-name: Build and Deploy to Github Pages
-
+name: Build Jekyll site
 on:
-  push:
-    branches:
-      - 'gh-pages'
-
+ push:
+   branches: ["gh_pages"]
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 jobs:
-  build_and_deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      # Use GitHub Actions' cache to cache dependencies on servers
-      - uses: actions/cache@v4
-        with:
-          path: |
-            .asdf/**
-            vendor/bundle
-          key: ${{ runner.os }}-cache-${{ hashFiles('**/cache.key') }}
-          restore-keys: |
-            ${{ runner.os }}-cache-
-
-      - uses: jeffreytse/jekyll-deploy-action@v0.6.0
-        with:
-          provider: 'github'         # Default is github
-          token: ${{ secrets.GITHUB_TOKEN }} # It's your Personal Access Token(PAT)
-          ssh_private_key: ''        # It's your SSH private key (SSH approach)
-          repository: ''             # Default is current repository
-          branch: 'gh-pages'         # Default is gh-pages for github provider
-          jekyll_src: 'docs'           # Default is root directory
-          jekyll_cfg: '_config.yml'  # Default is _config.yml
-          jekyll_baseurl: ''         # Default is according to _config.yml
-          ruby_ver: ''               # Default is 3.2.0 version
-          bundler_ver: ''            # Default is compatible bundler version (~>2.5.0)
-          cname: ''                  # Default is to not use a cname
-          actor: ''                  # Default is the GITHUB_ACTOR
-          pre_build_commands: ''     # Installing additional dependencies (Arch Linux)
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - name: Build
+        uses: actions/jekyll-build-pages@v1
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
