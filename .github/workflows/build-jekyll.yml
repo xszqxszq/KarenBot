@@ -1,7 +1,7 @@
 name: Build Jekyll site
 on:
  push:
-   branches: ["gh_pages"]
+   branches: ["gh-pages"]
 permissions:
   contents: read
   pages: write
