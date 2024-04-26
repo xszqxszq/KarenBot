@@ -1,10 +1,8 @@
 package xyz.xszq
 
 import com.soywiz.korim.format.readNativeImage
-import com.soywiz.korio.file.std.localVfs
 import com.soywiz.korio.file.std.rootLocalVfs
-import xyz.xszq.otomadbot.image.differenceHashTriple
-import java.io.File
+import xyz.xszq.karenbot.image.differenceHashTriple
 
 suspend fun main() {
     val hash1 = differenceHashTriple.calc(rootLocalVfs["C:\\Users\\xszq\\Desktop\\images.jpg"].readNativeImage().toBMP32())

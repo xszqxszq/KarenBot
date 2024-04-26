@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "xyz.xszq"
-version = "6.0"
+version = "8.0"
 
 repositories {
     // maven("https://maven.aliyun.com/repository/public")
