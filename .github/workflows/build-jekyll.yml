@@ -26,7 +26,7 @@ jobs:
       - uses: jeffreytse/jekyll-deploy-action@v0.6.0
         with:
           provider: 'github'         # Default is github
-          token: ${{ secrets.GITHUB_TOKEN }} # It's your Personal Access Token(PAT)
+          token: ${{ secrets.GH_TOKEN }} # It's your Personal Access Token(PAT)
           ssh_private_key: ''        # It's your SSH private key (SSH approach)
           repository: ''             # Default is current repository
           branch: 'gh-pages'         # Default is gh-pages for github provider
