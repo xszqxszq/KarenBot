@@ -5,7 +5,6 @@ permalink: /guide/
 ---
 
 
-![](https://cdn.jsdelivr.net/gh/xszqxszq/KarenBot/QR.png)
 
 # 支持的功能
 
