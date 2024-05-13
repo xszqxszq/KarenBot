@@ -2174,6 +2174,12 @@ permalink: /meme/
 
 # 鸣谢
 
-本功能的逻辑实现及资源文件大部分来自 [MeetWq/meme-generator](https://github.com/MeetWq/meme-generator)，5000choyen 功能的逻辑直接来源于 [yurafuca/5000choyen](https://github.com/yurafuca/5000choyen) ，蔚蓝档案风格 LOGO 功能直接来源于 [nulla2011/bluearchive-logo](https://github.com/nulla2011/bluearchive-logo)，本项目参考以上项目以纯 Kotlin 的方式迁移实现并作了部分修改。特别感谢以上项目作者及贡献者的付出！
+本功能来自 [MeetWq/meme-generator](https://github.com/MeetWq/meme-generator)
+
+5000choyen 功能移植于 [yurafuca/5000choyen](https://github.com/yurafuca/5000choyen)
+
+蔚蓝档案风格 LOGO 移植于 [nulla2011/bluearchive-logo](https://github.com/nulla2011/bluearchive-logo)
+
+本项目参考了以上项目，并将部分功能以 Kotlin 的方式实现。特别感谢以上项目作者及贡献者的付出！
 
 鸣 谢 榆 木 华
