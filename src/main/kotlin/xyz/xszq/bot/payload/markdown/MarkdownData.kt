@@ -1,0 +1,30 @@
+package xyz.xszq.bot.payload.markdown
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import xyz.xszq.bot.message.Markdown
+
+@Serializable
+data class MarkdownData(
+    @SerialName("custom_template_id")
+    val customTemplateId: String,
+    val params: List<MarkdownParam>
+) {
+    fun toMessage(keyboard: Keyboard ?= null) = Markdown(this, keyboard)
+    fun text() = params.joinToString(", ") { "${it.key}=${it.values.first()}" }
+    class MarkdownBuilder(
+        val id: String
+    ) {
+        val data = mutableListOf<MarkdownParam>()
+        fun build() = MarkdownData(id, data)
+        operator fun String.invoke(block: () -> String) {
+            data.add(MarkdownParam(this, listOf(block.invoke())))
+        }
+    }
+    companion object {
+        fun create(
+            id: String,
+            builder: MarkdownBuilder.() -> Unit
+        ) = MarkdownBuilder(id).apply(builder).build()
+    }
+}

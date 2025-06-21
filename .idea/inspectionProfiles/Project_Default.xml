@@ -1,0 +1,19 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="IncorrectHttpHeaderInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="customHeaders">
+        <set>
+          <option value="X-Signature-Ed25519" />
+          <option value="X-Signature-Timestamp" />
+          <option value="X-Bot-Appid" />
+        </set>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="MisspelledHeader" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="CUSTOM_HEADERS">
+        <header value="Plugin-Class" />
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
