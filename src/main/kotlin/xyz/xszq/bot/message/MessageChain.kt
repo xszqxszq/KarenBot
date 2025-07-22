@@ -26,7 +26,7 @@ class MessageChain() {
      * @param images downloaded images.
      */
     @OptIn(ExperimentalEncodingApi::class)
-    constructor(raw: String, images: List<VfsFile>) : this() {
+    constructor(raw: String, images: List<VfsFile>, files: List<VfsFile>) : this() {
         /* Parse QQ Face */
         val faceRegex = Regex("""<faceType=(\d+),faceId="(\d+)",ext="([^"]+)">""")
         var index = 0
@@ -59,6 +59,8 @@ class MessageChain() {
 
         /* Add Images */
         list.addAll(images.map { Image(it) })
+        /* Add Files */
+        list.addAll(files.map { File(it) })
     }
 
     /**

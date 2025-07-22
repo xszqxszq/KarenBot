@@ -26,7 +26,7 @@ import xyz.xszq.bot.event.GroupInteractionEvent
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.InteractionEvent
 import xyz.xszq.bot.event.MessageEvent
-import xyz.xszq.bot.message.ImageManager
+import xyz.xszq.bot.message.FileManager
 import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.payload.*
 import xyz.xszq.bot.payload.event.C2CBotUpdate
@@ -102,15 +102,15 @@ fun Application.configureRouting(
     }
 }
 
-suspend fun Application.downloadImages(
+suspend fun Application.downloadFiles(
     attachments: List<Attachment>,
-    imageManager: ImageManager,
+    fileManager: FileManager,
     logger: KLogger
 ) = attachments.mapNotNull { attachment ->
     downloadFile(attachment.url, attachment.filename, logger)
 }.also {
     launch {
-        imageManager.addFiles(it)
+        fileManager.addFiles(it)
     }
 }
 
@@ -133,9 +133,12 @@ suspend fun Application.handleDispatch(
         /* 私聊消息 */
         EventType.C2C.Message -> {
             val data = json.decodeFromString<C2CMessageCreate>(payload.d!!)
-            val images = downloadImages(data.attachments, pluginLoader.images, logger)
+            val images = downloadFiles(
+                data.attachments.filter { "image" in it.contentType }, pluginLoader.files, logger)
+            val files = downloadFiles(
+                data.attachments.filter { it.contentType == "file" }, pluginLoader.files, logger)
             val content = filter.filter(data.content)
-            val message = MessageChain(content, images)
+            val message = MessageChain(content, images, files)
             logger.info {
                 "(${data.author.id}) -> ${message.content.trim().replace("\n", "\\n")}"
             }
@@ -150,9 +153,12 @@ suspend fun Application.handleDispatch(
         /* 群聊消息 */
         EventType.Group.Message -> {
             val data = json.decodeFromString<GroupAtMessageCreate>(payload.d!!)
-            val images = downloadImages(data.attachments, pluginLoader.images, logger)
+            val images = downloadFiles(
+                data.attachments.filter { "image" in it.contentType }, pluginLoader.files, logger)
+            val files = downloadFiles(
+                data.attachments.filter { it.contentType == "file" }, pluginLoader.files, logger)
             val content = filter.filter(data.content)
-            val message = MessageChain(content, images)
+            val message = MessageChain(content, images, files)
             logger.info {
                 "[${data.group}] (${data.author.id}) -> ${message.content.trim().replace("\n", "\\n")}"
             }

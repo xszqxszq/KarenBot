@@ -12,6 +12,9 @@ import korlibs.io.stream.skip
 import korlibs.io.stream.write16LE
 import korlibs.io.stream.write32LE
 import korlibs.io.stream.writeString
+import xyz.xszq.bot.ffmpeg.FFMpegFileType
+import xyz.xszq.bot.ffmpeg.FFMpegTask
+import xyz.xszq.bot.ffmpeg.FFProbe
 import java.io.File
 
 /**
@@ -104,4 +107,19 @@ object AudioHandler {
         }
         return silkFile.toVfs()
     }
+    fun VfsFile.crop(
+        start: Double,
+        duration: Double
+    ) = FFMpegTask(FFMpegFileType.PCM) {
+        input(absolutePath)
+        yes()
+        forceFormat("s16le")
+        audioCodec("pcm_s16le")
+        logLevel("warning")
+        startAt(start)
+        duration(duration)
+        audioRate("24k")
+        audioChannels(1)
+    }.result()
+    fun VfsFile.duration() = FFProbe(File(this.absolutePath)).getResult().format?.duration?.toDouble()
 }

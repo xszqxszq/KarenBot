@@ -43,6 +43,7 @@ suspend fun ReplyAble.uploadMedia(media: Media): FileResponse? {
     val fileType = when (media) {
         is Image -> FileType.IMAGE
         is Audio -> FileType.AUDIO
+        is File -> FileType.FILE
         else -> throw Exception()
     }
     val response = retry(3) {

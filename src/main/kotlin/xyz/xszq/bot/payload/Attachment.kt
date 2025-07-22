@@ -7,8 +7,8 @@ import kotlinx.serialization.Serializable
 data class Attachment(
     val url: String,
     val filename: String,
-    val width: Int,
-    val height: Int,
+    val width: Int ?= null,
+    val height: Int ?= null,
     val size: Int,
     @SerialName("content_type")
     val contentType: String,

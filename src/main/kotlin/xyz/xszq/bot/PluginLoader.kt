@@ -7,7 +7,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import xyz.xszq.bot.message.ImageManager
+import xyz.xszq.bot.message.FileManager
 import xyz.xszq.bot.subscribe.SubscribeManager
 import java.io.File
 import java.io.InputStream
@@ -25,7 +25,7 @@ class PluginLoader(
 ) {
     val bot = Bot(api, cos, this)
     val subscribes = SubscribeManager()
-    val images = ImageManager()
+    val files = FileManager()
 
     val pluginDirectory = "plugins/"
     val libsDirectory = "libs/"

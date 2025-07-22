@@ -6,14 +6,13 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
-import java.io.File
 import kotlin.coroutines.CoroutineContext
 
 /**
  * Manages all image files downloaded.
  * The image files will be lazy deleted after `expiresAfter`.
  */
-class ImageManager: CoroutineScope {
+class FileManager: CoroutineScope {
     override val coroutineContext: CoroutineContext = Job()
 
     private val expiresAfter = 5 * 60 * 1000L // 5 min
