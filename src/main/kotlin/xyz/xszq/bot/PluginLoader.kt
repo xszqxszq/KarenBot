@@ -11,6 +11,7 @@ import xyz.xszq.bot.message.FileManager
 import xyz.xszq.bot.subscribe.SubscribeManager
 import java.io.File
 import java.io.InputStream
+import java.net.URI
 import java.net.URL
 import java.net.URLClassLoader
 import java.util.jar.JarFile
@@ -216,7 +217,7 @@ class PluginLoader(
     }
 
     private fun downloadFromUrl(url: String, targetFile: File) {
-        val connection = URL(url).openConnection().apply {
+        val connection = URI(url).toURL().openConnection().apply {
             connectTimeout = 30000
             readTimeout = 60000
         }

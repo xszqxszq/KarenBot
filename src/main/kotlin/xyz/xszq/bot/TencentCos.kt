@@ -25,23 +25,38 @@ class TencentCos(
         })
     val transferManager = TransferManager(cosClient, Executors.newFixedThreadPool(32))
     fun deleteFromCos(filename: String) {
-        val bucketName = config.appId
-        cosClient.deleteObject(bucketName, filename)
+        when (config.lightMode) {
+            true -> {
+                File(config.lightDir).resolve(filename).delete()
+            }
+            false -> {
+                val bucketName = config.appId
+                cosClient.deleteObject(bucketName, filename)
+            }
+        }
     }
     fun upload(file: File): UploadResult {
-        val bucketName = config.appId
         val filename = UUID.randomUUID().toString() + "." + file.extension
-        kotlin.runCatching {
-            val upload = transferManager.upload(PutObjectRequest(
-                bucketName, filename, file
-            ))
-            upload.waitForUploadResult()
-        }.onFailure {
-            it.printStackTrace()
-        }
+        when (config.lightMode) {
+            true -> {
+                file.copyTo(File(config.lightDir).resolve(filename))
+                return UploadResult("${config.lightUrl}/${filename}", filename)
+            }
+            false -> {
+                val bucketName = config.appId
+                kotlin.runCatching {
+                    val upload = transferManager.upload(PutObjectRequest(
+                        bucketName, filename, file
+                    ))
+                    upload.waitForUploadResult()
+                }.onFailure {
+                    it.printStackTrace()
+                }
 
-        val expiration = Date(Date().time + 2 * 60 * 1000)
-        return UploadResult(cosClient.generatePresignedUrl(bucketName, filename, expiration).toString(), filename)
+                val expiration = Date(Date().time + 2 * 60 * 1000)
+                return UploadResult(cosClient.generatePresignedUrl(bucketName, filename, expiration).toString(), filename)
+            }
+        }
     }
     suspend fun uploadBinary(binary: ByteArray, suffix: String = ""): UploadResult {
         return useTempFile(suffix=suffix) {

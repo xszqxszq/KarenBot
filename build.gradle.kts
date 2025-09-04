@@ -5,8 +5,8 @@ val ktorVersion: String by project
 
 plugins {
     application
-    kotlin("jvm") version "2.0.21"
-    kotlin("plugin.serialization") version "2.0.21"
+    kotlin("jvm") version "2.2.0"
+    kotlin("plugin.serialization") version "2.2.0"
     id("com.github.johnrengelman.shadow") version "8.0.0"
 }
 
@@ -72,7 +72,7 @@ tasks.register("allPlugins") {
     }
 }
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(22)
 }
 allprojects {
     apply(plugin = "java")
