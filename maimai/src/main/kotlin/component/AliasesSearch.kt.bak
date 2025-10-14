@@ -1,0 +1,124 @@
+package xyz.xszq.bot.component
+
+import co.elastic.clients.elasticsearch.ElasticsearchClient
+import co.elastic.clients.elasticsearch.core.BulkRequest
+import co.elastic.clients.elasticsearch.core.SearchRequest
+import co.elastic.clients.elasticsearch.core.bulk.BulkOperation
+import com.sksamuel.hoplite.ConfigLoaderBuilder
+import com.sksamuel.hoplite.ExperimentalHoplite
+import com.sksamuel.hoplite.addFileSource
+import xyz.xszq.bot.Maimai
+import xyz.xszq.bot.config.ElasticsearchConfig
+import xyz.xszq.bot.database.MusicAliasesTable
+import xyz.xszq.bot.music.MusicInfo
+import xyz.xszq.bot.music.MusicNameAlias
+
+class AliasesSearch(
+    val maimai: Maimai
+) {
+    private val index = "music_name"
+    lateinit var client: ElasticsearchClient
+    @OptIn(ExperimentalHoplite::class)
+    val config: ElasticsearchConfig = ConfigLoaderBuilder.Companion.default()
+        .addFileSource("./config/elasticsearch.yml")
+        .withExplicitSealedTypes()
+        .build()
+        .loadConfigOrThrow<ElasticsearchConfig>()
+
+    suspend fun init() {
+        client = ElasticsearchClient.of { b -> b
+            .host(config.host)
+            .usernameAndPassword(config.username, config.password)
+        }
+        if (!client.indices().exists { c -> c.index(index) }.value())
+            client.indices().create { c ->
+                c.index(index).mappings { m -> m
+                    .properties("alias") { p -> p
+                        .text { t -> t
+                            .analyzer("ik_max_word")
+                            .searchAnalyzer("ik_smart")
+                        }
+                    }
+                }
+            }
+        loadAliases()
+    }
+    private fun insert(id: Int, alias: String) {
+        val data = MusicNameAlias(
+            musicId = id,
+            alias = alias
+        )
+        client.index { i -> i
+            .index(index)
+            .id(data.id)
+            .document(data)
+        }
+    }
+    private fun batchInsert(data: List<MusicNameAlias>) {
+        val ops = data.map { entry ->
+            BulkOperation.of { op ->
+                op.index { i ->
+                    i.index(index)
+                        .id(entry.id)
+                        .document(entry)
+                }
+            }
+        }
+        client.bulk(BulkRequest.Builder()
+            .operations(ops)
+            .build())
+    }
+    suspend fun loadAliases() {
+        val toInsert = maimai.musics().map { music ->
+            MusicNameAlias(music.id, music.name)
+        } + MusicAliasesTable.all().map { (id, alias) ->
+            MusicNameAlias(id, alias)
+        }
+        batchInsert(toInsert)
+    }
+    fun fuzzy(query: String): List<MusicNameAlias> {
+        val request = SearchRequest.of { s -> s
+            .index(index)
+            .query { q ->
+                q.fuzzy { t -> t
+                    .field("alias")
+                    .value(query)
+                }
+            }
+        }
+        val response = client.search(request, MusicNameAlias::class.java)
+        if (response.hits().hits().isEmpty())
+            return listOf()
+        val threshold = (response.hits().hits().maxOf { it.score()!! } * 0.5)
+        return response.hits().hits().filter { hit ->
+            hit.score() ?.let { it >= threshold } == true
+        }.mapNotNull { it.source() }.distinctBy { it.musicId }
+    }
+    suspend fun search(name: String): List<MusicInfo> {
+        var result: List<MusicInfo> = listOf()
+        if (name.startsWith("id") && name.substringAfter("id").trim().toIntOrNull() != null) {
+            val id = name.substringAfter("id").trim().toInt()
+            result = listOfNotNull(maimai.music(id))
+        }
+        if (name.trim().toIntOrNull() != null) {
+            val id = name.toInt()
+            result = listOfNotNull(maimai.music(id))
+        }
+        if (result.isNotEmpty())
+            return result
+
+        val nameMatch = maimai.musics().filter { it.name.lowercase() == name.lowercase() }
+        if (nameMatch.isNotEmpty()) {
+            return nameMatch
+        }
+        val exact = MusicAliasesTable.exact(name)
+        if (exact.isNotEmpty()) {
+            return exact.mapNotNull { maimai.music(it) }
+        }
+        val fuzzy = fuzzy(name.lowercase()).mapNotNull { maimai.music(it.musicId) }
+        if (fuzzy.isNotEmpty()) {
+            return fuzzy
+        }
+        return maimai.musics().filter { name.lowercase() in it.name.lowercase() }
+    }
+}

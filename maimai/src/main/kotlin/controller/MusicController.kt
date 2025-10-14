@@ -1,0 +1,377 @@
+package xyz.xszq.bot.controller
+
+import korlibs.io.file.VfsFile
+import korlibs.io.file.std.localCurrentDirVfs
+import xyz.xszq.bot.*
+import xyz.xszq.bot.Maimai.Companion.textMode
+import xyz.xszq.bot.database.MaimaiSettingsTable
+import xyz.xszq.bot.database.MusicAliasesTable
+import xyz.xszq.bot.database.MusicAliasesVoteTable
+import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.event.ReplyAble
+import xyz.xszq.bot.exception.IllegalArgsException
+import xyz.xszq.bot.exception.IllegalOperationException
+import xyz.xszq.bot.exception.NeedHelpException
+import xyz.xszq.bot.exception.NotFoundException
+import xyz.xszq.bot.ffmpeg.FFMpegFileType
+import xyz.xszq.bot.ffmpeg.FFMpegTask
+import xyz.xszq.bot.message.Audio
+import xyz.xszq.bot.message.Image
+import xyz.xszq.bot.music.ChartInfo
+import xyz.xszq.bot.music.MusicDifficulty
+import xyz.xszq.bot.music.MusicInfo
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import kotlin.random.Random
+
+@Suppress("unused")
+class MusicController(
+    override val maimai: Maimai
+): Controller(maimai) {
+    private val previewDir = "./data/maimai/preview/"
+    private val notFound = "未查找到相关的歌曲，请检查拼写是否有误。"
+
+    private val maxResults = 8
+    private val maxResultsLong = 40
+
+    private val jacketUrl = maimai.tokens.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")
+
+    override fun setRoute() = maimai.route("/mai") {
+        // 根据 ID 精准查找
+        startsWith("id") { raw ->
+            val id = raw.toIntOrNull() ?: return@startsWith
+            val music = maimai.music(id) ?: return@startsWith
+            if (textMode())
+                reply(music.infoText())
+            else
+                reply(music.infoMD(jacketUrl))
+        }
+        button("maimai-id", true) {
+            val id = data.toIntOrNull() ?: return@button
+            val music = maimai.music(id) ?: return@button
+            if (textMode())
+                reply(music.infoText())
+            else
+                reply(music.infoMD(jacketUrl))
+        }
+        MusicDifficulty.entries.forEach { difficulty ->
+            val name = difficulty.names.last()
+            startsWith(listOf("${name}id", name)) { raw ->
+                val id = raw.toIntOrNull() ?: return@startsWith
+                val music = maimai.music(id) ?: return@startsWith
+                val chart = music.charts.firstOrNull { it.difficulty == difficulty } ?: return@startsWith
+                reply(chartText(chart))
+            }
+        }
+
+        // 随机歌曲
+        startsWith("随个") { query ->
+            val filters = Query.filters(query)
+            val musics = Query.filterMusics(filters, maimai.musics())
+            if (musics.isEmpty()) {
+                reply(notFound)
+                return@startsWith
+            }
+            val selected = musics.random(Random(System.currentTimeMillis()))
+            if (textMode())
+                reply(selected.infoText())
+            else
+                reply(selected.infoMD(jacketUrl))
+        }
+
+        // 模糊搜索
+        startsWith("查歌") { raw ->
+            val args = raw.split("\n", limit = 2)
+            val name = args[0]
+            search(name)
+        }
+        endsWith("是什么歌") { raw ->
+            val args = raw.split("\n", limit = 2)
+            val name = args[0]
+            search(name)
+        }
+        button("search-word", true) {
+            val args = data.split("\n", limit = 2)
+            val name = args[0]
+            val page = args[1].toInt()
+            search(name, page)
+        }
+
+        // 条件查歌
+        startsWith("定数查歌") { raw ->
+            val args = raw.split(" ")
+            val levels = args.filter { '.' in it }.mapNotNull { it.toDoubleOrNull() }
+            val page = args.firstOrNull { '.' !in it } ?.toIntOrNull() ?: 1
+            when {
+                levels.size == 1 -> {
+                    searchLevel(levels[0], levels[0], page)
+                }
+                levels.size >= 2 -> {
+                    searchLevel(levels[0], levels[1], page)
+                }
+                else -> {
+                    reply(buildString {
+                        appendLine("使用方法：定数查歌 [定数] [定数] [页数]")
+                        appendLine("例：定数查歌 13.0")
+                        appendLine("例：定数查歌 13.4 13.8")
+                        appendLine("例：定数查歌 12.2 12.5 2")
+                    })
+                }
+            }
+        }
+        startsWith("谱师查歌") { raw ->
+            val args = raw.split(" ")
+            val page = args.firstOrNull { '.' !in it } ?.toIntOrNull() ?: 1
+            when {
+                args.isNotEmpty() -> {
+                    searchDesigner(args[0], page)
+                }
+                else -> {
+                    reply(buildString {
+                        appendLine("使用方法：谱师查歌 [名称] [页数]")
+                        appendLine("例：谱师查歌 翠楼屋")
+                        appendLine("例：谱师查歌 maiStar 2")
+                    })
+                }
+            }
+        }
+        startsWith("正则查歌") { raw ->
+            if (raw.isBlank()) {
+                reply(buildString{
+                    appendLine("使用方法：正则查歌 正则表达式")
+                    appendLine("例：正则查歌 ^(?i)w.*(?i)ing")
+                })
+                return@startsWith
+            }
+            val regex = kotlin.runCatching {
+                Regex(raw)
+            }.getOrNull() ?: run {
+                reply("请使用正确的正则表达式查询。")
+                return@startsWith
+            }
+            searchRegex(raw, regex)
+        }
+
+        // 别名查询/设置
+        endsWith("有什么别名") { name ->
+            maimai.aliases.search(name).firstOrNull() ?.let { music ->
+                reply(buildString {
+                    appendLine("${music.id}. ${music.name} 有如下别名：")
+
+                    MusicAliasesTable[music]
+                        .filter { it.first != music.name }
+                        .take(maxResultsLong)
+                        .forEach { (alias, _) ->
+                            appendLine(alias)
+                        }
+                    appendLine()
+                    appendLine("可以@机器人使用“添加别名 id 别名”来添加别名。")
+                }.trim().newLine())
+            }
+        }
+        startsWith("添加别名") { raw ->
+            runCatching {
+                addAlias(raw)
+            }.onFailure { e ->
+                val help = buildString {
+                    appendLine("使用方法：添加别名 id/名称 别名")
+                    appendLine("\t例：添加别名 834 潘")
+                    appendLine("\t例：添加别名 茄子 qzk")
+                }.trim().newLine()
+                when (e) {
+                    is NeedHelpException -> reply(help)
+                    is NotFoundException -> reply("未找到该歌曲。$help")
+                    is IllegalArgsException -> reply(e.message ?: "")
+                    is IllegalOperationException -> reply(e.message ?: "")
+                    else -> e.printStackTrace()
+                }
+            }
+        }
+        startsWith("今日舞萌") {
+            val time = LocalDate.now()
+            val random = Random((sender.id + time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                .hashCode())
+            val hash = random.nextInt(1, 101)
+            var h = hash
+            val dailyMusic = maimai.musics().random(random)
+            var message = dailyMusic.infoText()
+            message = buildString {
+                appendLine(time.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日 E")))
+                appendLine("今日幸运指数为 $hash")
+                dailyOps.shuffled(random).take(6).forEach {
+                    val now = h and 3
+                    if (now == 3)
+                        appendLine("宜 $it")
+                    else if (now == 0)
+                        appendLine("忌 $it")
+                    h = h shr 2
+                }
+                appendLine("今日推荐歌曲：")
+            }.toPlainText() + message
+            reply(message)
+        }
+        startsWith("预览id") { stringId ->
+            val id = stringId.toIntOrNull() ?: return@startsWith
+            val music = maimai.music(id) ?: return@startsWith
+            val file = localCurrentDirVfs[previewDir]["${music.resourceId}.ogg"]
+            if (!file.exists()) {
+                return@startsWith
+            }
+            val pcm = file.toPCM()
+            reply(Audio(pcm))
+            pcm.delete()
+        }
+    }
+
+    val dailyOps = listOf(
+        "推分", "下埋", "越级", "拼机", "单刷", "练底力", "练手法", "抓准度", "抓绝赞", "收歌", "堵门", "夜勤"
+    )
+
+    suspend fun ReplyAble.showResult(
+        type: String,
+        keyword: String,
+        result: List<MusicInfo>,
+        nowPage: Int = 1,
+        totalPages: Int = 1,
+    ) {
+        val textMode = if (this is MessageEvent)
+            MaimaiSettingsTable[sender.id, "text-mode"] == "1"
+        else
+            false
+        when (result.size) {
+            0 -> reply(notFound)
+            1 -> {
+                if (textMode)
+                    reply(result.first().infoText())
+                else
+                    reply(result.first().infoMD(jacketUrl))
+            }
+            else -> {
+                val hint =
+                    if (totalPages != 1)
+                        "您要查找的歌曲可能是 ($nowPage / $totalPages)："
+                    else
+                        "您要查找的歌曲可能是："
+                if (textMode)
+                    reply(buildString {
+                        appendLine(hint)
+                        result.forEach { music ->
+                            appendLine("${music.id}. ${music.name}")
+                        }
+                    }.trim())
+                else
+                    reply(MarkdownTemplates.Templates.result(
+                        context = this,
+                        title = hint,
+                        type = type,
+                        keyword = keyword,
+                        result = result,
+                        nowPage = nowPage,
+                        totalPages = totalPages,
+                    ))
+            }
+        }
+    }
+    suspend fun ReplyAble.search(
+        name: String,
+        page: Int = 1
+    ) {
+        val (result, nowPage, totalPages) = maimai.aliases.search(name)
+            .pagination(page, maxResults)
+        showResult("search-word", name, result, nowPage, totalPages)
+    }
+
+    suspend fun MessageEvent.searchLevel(
+        begin: Double,
+        end: Double,
+        page: Int
+    ) {
+        val (result, nowPage, totalPages) = maimai.charts()
+            .filter { it.difficulty != MusicDifficulty.Utage }
+            .filter { it.levelValue in begin..end }
+            .distinctBy { it.music.id }
+            .pagination(page, maxResults)
+        showResult("search-level", "$begin:$end:$page", result.map { it.music }, nowPage, totalPages)
+    }
+    suspend fun MessageEvent.searchDesigner(
+        designer: String,
+        page: Int
+    ) {
+        val targets = Query.designerConfig.aliases
+            .filter { (_, value) -> value.any { alias -> alias == designer || designer in alias } }
+            .map { it.key }
+        val (result, nowPage, totalPages) = maimai.charts()
+            .filter { it.notesDesigner in targets || designer == it.notesDesigner || designer in it.notesDesigner }
+            .distinctBy { it.music.id }
+            .pagination(page, maxResults)
+        showResult("search-designer", designer, result.map { it.music }, nowPage, totalPages)
+    }
+    suspend fun MessageEvent.searchRegex(
+        raw: String,
+        regex: Regex
+    ) {
+        val result = maimai.musics()
+            .filter { regex.matches(it.name) }
+            .take(maxResults)
+        showResult("search-regex", raw, result)
+    }
+    suspend fun chartText(
+        chart: ChartInfo
+    ) = Image(chart.music.cover()) + buildString {
+        appendLine("${chart.difficulty.names.last()}${chart.music.id}. ${chart.music.name}")
+        appendLine("等级: ${chart.level} (${chart.levelValue})")
+        appendLine("TAP: ${chart.notes.tap}")
+        appendLine("HOLD: ${chart.notes.hold}")
+        appendLine("SLIDE: ${chart.notes.slide}")
+        appendLine("BREAK: ${chart.notes.`break`}")
+        if (chart.notes.touch != 0)
+            appendLine("TOUCH: ${chart.notes.touch}")
+        appendLine("总物量: ${chart.notes.total}")
+        appendLine("总DX分: ${chart.maxDeluxeScore}")
+        appendLine("谱师: ${chart.notesDesigner}")
+    }.trim().newLine()
+
+    suspend fun MessageEvent.addAlias(
+        raw: String
+    ) {
+        val args = raw.trim().split(" ", limit = 2).filter { it.isNotBlank() }
+        if (args.size < 2)
+            throw NeedHelpException()
+        val (name, alias) = args.take(2)
+        if (alias.length >= 32)
+            throw IllegalArgsException("别名太长！")
+        val music = maimai.aliases.search(name).firstOrNull() ?: throw NotFoundException()
+        var votes = MusicAliasesTable[music, alias] ?.also { votes ->
+            if (votes >= 0)
+                throw IllegalOperationException("该别名已存在！")
+            if (MusicAliasesVoteTable[music, alias, sender.id]) {
+                throw IllegalOperationException("您已经投过票啦，还需${-votes}票通过")
+            }
+        }
+        MusicAliasesVoteTable.vote(music, alias, sender.id)
+        MusicAliasesTable.vote(music, alias)
+        votes ?.let {
+            votes += 1
+            if (votes >= 0) {
+                maimai.aliases.insert(music.id, alias)
+                reply("投票成功，该别名已经通过啦")
+            } else {
+                reply("投票成功，该别名还需${-votes}票通过")
+            }
+        } ?: run {
+            reply("别名添加成功，请使用“添加别名 ${music.id} ${alias}”来进行投票，当有3人投票时别名将通过")
+        }
+    }
+    companion object {
+
+        fun VfsFile.toPCM() = FFMpegTask(FFMpegFileType.PCM) {
+            input(absolutePath)
+            yes()
+            forceFormat("s16le")
+            audioCodec("pcm_s16le")
+            logLevel("warning")
+            audioRate("24k")
+            audioChannels(1)
+        }.result()
+    }
+}
