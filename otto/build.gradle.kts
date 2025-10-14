@@ -11,17 +11,21 @@ version = "1.0"
 repositories {
     mavenCentral()
     maven { url = uri("https://jitpack.io") }
+//    maven { url = uri("https://raw.githubusercontent.com/DFKI-MLT/Maven-Repository/main") }
+    maven { url = uri("https://nrgxnat.jfrog.io/artifactory/libs-release/") }
+    maven { url = uri("https://nexus.terrestris.de/repository/public/") }
 }
 
 dependencies {
     compileOnly(project(":"))
+    implementation("com.hankcs:hanlp:portable-1.8.6")
     implementation("com.sksamuel.hoplite:hoplite-core:${hopliteVersion}")
     implementation("com.sksamuel.hoplite:hoplite-yaml:${hopliteVersion}")
     implementation("com.soywiz.korge:korge-core:$korlibsVersion")
-    implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
-    implementation("com.github.houbb:pinyin:0.4.0")
-    implementation("com.github.kotlinguistics:IPA-Transcribers:v0.2")
+    implementation("de.dfki.mary:marytts-runtime:5.2.1")
+    implementation("de.dfki.mary:marytts-lang-en:5.2.1")
     implementation("io.github.kasukusakura:silk-codec:0.0.5")
+    implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
     testImplementation(kotlin("test"))
 }
