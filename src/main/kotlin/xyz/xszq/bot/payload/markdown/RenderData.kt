@@ -13,5 +13,7 @@ data class RenderData(
     companion object {
         const val GRAY = 0
         const val BLUE = 1
+        const val RED = 3
+        const val FILLED_BLUE = 4
     }
 }

@@ -11,7 +11,10 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import xyz.xszq.bot.config.ForwardConfig
 import xyz.xszq.bot.event.BotAddFriendEvent
 import xyz.xszq.bot.event.BotJoinGroupEvent
@@ -121,6 +124,7 @@ suspend fun Application.downloadFiles(
  * @param logger The Logger.
  * @param pluginLoader The Plugin Loader.
  */
+@OptIn(DelicateCoroutinesApi::class)
 suspend fun Application.handleDispatch(
     payload: Payload,
     call: RoutingCall,
@@ -308,7 +312,9 @@ suspend fun Application.handleDispatch(
         /* 无法处理的事件 */
         else -> null
     } ?.let { event ->
-        pluginLoader.subscribes.handle(event)
+        GlobalScope.launch {
+            pluginLoader.subscribes.handle(event)
+        }
     }
 }
 
@@ -396,6 +402,6 @@ suspend fun forward(
         setBody(body)
     }
 }
-fun PluginLoader.manualTrigger(event: Event) {
+fun PluginLoader.manualTrigger(event: Event) = runBlocking {
     subscribes.handle(event)
 }

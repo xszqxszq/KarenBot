@@ -7,6 +7,15 @@
           <option value="X-Signature-Ed25519" />
           <option value="X-Signature-Timestamp" />
           <option value="X-Bot-Appid" />
+          <option value="Sec-Ch-Ua" />
+          <option value="Sec-Ch-Ua-Platform" />
+          <option value="Sec-Ch-Ua-Mobile" />
+          <option value="Sec-Ch-Ua-Dest" />
+          <option value="Sec-Ch-Ua-Mode" />
+          <option value="Sec-Ch-Ua-Site" />
+          <option value="Sec-Ch-Ua-User" />
+          <option value="Sec-Gpc" />
+          <option value="Upgrade-Insecure-Requests" />
         </set>
       </option>
     </inspection_tool>

@@ -10,7 +10,7 @@ class FFProbe(
     private val showFormat: Boolean = true
 ) {
     fun getResult(): FFProbeResult {
-        return createTempFile(suffix = ".json").toFile().let {
+        return createTempFile(suffix = ".json").toFile().let { file ->
             ProgramExecutor(buildList {
                 add(ffprobeBin)
                 add("\"${target.absolutePath}\"")
@@ -19,13 +19,15 @@ class FFProbe(
                     add("-show_streams")
                 if (showFormat)
                     add("-show_format")
-                add("> \"${it.absolutePath}\"")
+                add("> \"${file.absolutePath}\"")
             }, showOutput = false) {
                 environment {
                     append(ffprobePath)
                 }
             }.start()
-            json.decodeFromString(it.readText())
+            json.decodeFromString(file.readText().also {
+                file.delete()
+            })
         }
     }
     companion object {

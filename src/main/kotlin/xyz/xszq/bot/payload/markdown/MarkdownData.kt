@@ -11,7 +11,9 @@ data class MarkdownData(
     val params: List<MarkdownParam>
 ) {
     fun toMessage(keyboard: Keyboard ?= null) = Markdown(this, keyboard)
-    fun text() = params.joinToString(", ") { "${it.key}=${it.values.first()}" }
+    fun text() = params.joinToString(", ") {
+        "${it.key}=${it.values.first().replace("\r", "\n")}"
+    }
     class MarkdownBuilder(
         val id: String
     ) {

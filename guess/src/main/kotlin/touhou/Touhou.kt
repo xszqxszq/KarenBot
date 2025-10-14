@@ -30,6 +30,8 @@ import kotlin.random.Random
 class Touhou(
     val guess: Guess
 ) {
+    val templateBrief = "102112100_1748948894"
+
     val baseDir = localCurrentDirVfs["data/audio/touhou"]
     val musics: TouhouMusics = runBlocking {
         Json.decodeFromString(baseDir["musics.json"].readString())
@@ -38,19 +40,51 @@ class Touhou(
 
     fun setRoute() = guess.route {
         startsWith("随机东方原曲") {
-            val target = baseDir[musics.categories.flatMap { it.games.flatMap { it.tracks } }.random(
+            val (game, target) = musics.categories.flatMap { category ->
+                category.games.flatMap { game ->
+                    game.tracks.map { track ->
+                        Pair(game, track)
+                    }
+                }
+            }.random(
                 Random(System.currentTimeMillis())
-            ).file]
-            val duration = target.duration() ?: run {
+            )
+            val file = baseDir[target.file]
+            val duration = file.duration() ?: run {
                 println("no duration")
                 return@startsWith
             }
-            val cropped = target.crop(
+            val cropped = file.crop(
                 Random(System.currentTimeMillis()).nextDouble(0.0, duration - RANDOM_DURATION),
                 RANDOM_DURATION
             )
             reply(Audio(cropped))
             cropped.delete()
+            reply(MarkdownData.create(templateBrief) {
+                "title" {
+                    "随机东方原曲"
+                }
+                "content" {
+                    "${target.name}\r来自${game.id}. ${game.name}"
+                }
+            }.toMessage(Keyboard.create {
+                row {
+                    button(
+                        id = "1",
+                        renderData = RenderData(
+                            label = "再来一抽",
+                            visitedLabel = "再来一抽",
+                            style = RenderData.FILLED_BLUE
+                        ),
+                        action = Action(
+                            type = Action.AT,
+                            permission = Permission(Permission.EVERYONE),
+                            data = "随机东方原曲",
+                            enter = true
+                        )
+                    )
+                }
+            }))
         }
         startsWith(listOf("原曲认知测验", "猜东方原曲")) { raw ->
             runCatching {
@@ -73,10 +107,10 @@ class Touhou(
             throw NeedHelpException()
         }
         val difficulty = when (args[0].lowercase()) {
-            "easy" -> Difficulty.Easy
-            "normal" -> Difficulty.Normal
-            "hard" -> Difficulty.Hard
-            "lunatic" -> Difficulty.Lunatic
+            in listOf("easy", "e") -> Difficulty.Easy
+            in listOf("normal", "n") -> Difficulty.Normal
+            in listOf("hard", "h") -> Difficulty.Hard
+            in listOf("lunatic", "l") -> Difficulty.Lunatic
             else -> throw IllegalArgsException("该难度不存在！")
         }
         val range = when {
@@ -184,6 +218,11 @@ class Touhou(
 
         val subscribeId = UUID.randomUUID().toString()
         bot.pluginLoader.subscribes.always(subscribeId) {
+
+            val nowId = if (this is GroupMessageEvent) group.id else sender.id
+            if (id != nowId) {
+                return@always
+            }
             if (text.trim().startsWith("不玩了")) {
                 finished = true
                 reply(MarkdownData.create("102112100_1748948894") {

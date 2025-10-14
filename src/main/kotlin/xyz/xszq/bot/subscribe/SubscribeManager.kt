@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
@@ -61,15 +62,15 @@ class SubscribeManager: CoroutineScope {
      * @param event Event to handle.
      */
     @OptIn(DelicateCoroutinesApi::class)
-    fun <E: Event> handle(event: E) {
+    suspend fun <E: Event> handle(event: E) = coroutineScope {
         temp.values.forEach { subscribe ->
-            GlobalScope.launch {
+            launch {
                 subscribe.handler(event)
             }
         }
         plugins.forEach { plugin, subscribes ->
             subscribes.forEach { subscribe ->
-                GlobalScope.launch {
+                launch {
                     subscribe.handler(event)
                 }
             }
