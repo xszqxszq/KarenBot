@@ -31,13 +31,13 @@ data class Keyboard(
             .build()
             .apply {
                 embeddedEvent ?.let {
-                    var counter = 2
+                    var counter = embeddedEvent.seq
                     content.rows.forEach { row ->
                         row.buttons.forEach { button ->
                             if (button.action.type == Action.CALLBACK)
                                 button.action.data ?.let {
-                                    button.action.data = "${embeddedEvent.id}:$counter:${button.action.data}"
                                     counter += 1
+                                    button.action.data = "${embeddedEvent.id}:$counter:${button.action.data}"
                                 }
                         }
                     }
