@@ -1,4 +1,4 @@
-package xyz.xszq.bot.theme
+package xyz.xszq.shinobu
 
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.NativeImage
@@ -20,9 +20,10 @@ import kotlin.math.min
 /**
  * Renderer for Image.
  */
-object Renderer {
+class Renderer(
+    val defaultFont: String = "Simsun"
+) {
     var fontRegistry: FontRegistry
-    const val DEFAULT_FONT = "FZLanTingHei-R-GBK"
     private fun prepare() {
         NativeImage(
             width = 100,
@@ -32,7 +33,7 @@ object Renderer {
             drawText(
                 text = "Example Text",
                 pos = Point(0, 0),
-                font = this@Renderer.fontRegistry[this@Renderer.DEFAULT_FONT],
+                font = this@Renderer.fontRegistry[this@Renderer.defaultFont],
                 size = 14.0
             )
         }
@@ -369,7 +370,7 @@ object Renderer {
         return computedElements
     }
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun renderElement(element: Element, fonts: Map<String, Font>): Bitmap? {
+    fun renderElement(element: Element, fonts: Map<String, Font>): Bitmap? {
         val x = element.padding.left.toDouble()
         val y = element.padding.top.toDouble()
         return when (element) {
@@ -438,7 +439,7 @@ object Renderer {
         return container.collectFonts().associateWith { name ->
             getFont(name)
         }.toMutableMap().also {
-            it.put("", getFont(DEFAULT_FONT))
+            it.put("", getFont(defaultFont))
         }
     }
     suspend fun render(theme: Theme, main: Container): Bitmap {

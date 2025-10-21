@@ -1,22 +1,17 @@
-package xyz.xszq.bot.theme
+package xyz.xszq.shinobu
 
 import korlibs.io.file.VfsFile
-import korlibs.io.file.std.localCurrentDirVfs
 import korlibs.io.lang.FileNotFoundException
-import kotlinx.coroutines.runBlocking
 import nl.adaptivity.xmlutil.serialization.XML
 
-object ThemeManager {
-    private const val THEME_DIR = "./data/maimai/theme/"
-    var themeBaseDir: VfsFile
+class ThemeManager(
+    val themeBaseDir: VfsFile,
+    defaultFont: String = "Simsun"
+) {
     val xml = XML(Container.module) {
         indentString = "\t"
     }
-    init {
-        runBlocking {
-            themeBaseDir = localCurrentDirVfs[THEME_DIR]
-        }
-    }
+    val renderer = Renderer(defaultFont)
     suspend fun loadTheme(name: String): Theme {
         val baseDir = themeBaseDir[name]
         if (!baseDir.exists()) {
@@ -28,6 +23,7 @@ object ThemeManager {
         }
         val theme = xml.decodeFromString(Theme.serializer(), themeFile.readString()).also {
             it.baseDir = baseDir
+            it.renderer = renderer
         }
         theme.loadFonts()
         theme.loadImages()

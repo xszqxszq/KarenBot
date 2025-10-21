@@ -1,4 +1,4 @@
-package xyz.xszq.bot.theme
+package xyz.xszq.shinobu
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient

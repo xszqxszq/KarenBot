@@ -1,4 +1,4 @@
-package xyz.xszq.bot.theme
+package xyz.xszq.shinobu
 
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.font.Font
@@ -21,12 +21,14 @@ data class Theme(
     lateinit var baseDir: VfsFile
     @Transient
     val fontCache = mutableMapOf<String, Font>()
+    @Transient
+    lateinit var renderer: Renderer
     operator fun get(id: String) = templates.first { it.id == id }.deepCopy()
     fun main() = get("main")
     fun loadFonts() {
         fontCache.clear()
         templates.forEach { container ->
-            fontCache += Renderer.loadFonts(container)
+            fontCache += renderer.loadFonts(container)
         }
     }
     enum class ImageLoadStrategy {
@@ -58,5 +60,9 @@ data class Theme(
             ImageLoadStrategy.Decoded -> bitmapCache[src]
             ImageLoadStrategy.Bytes -> bytesCache[src] ?.readBitmap()
         }
+    }
+    suspend fun render(main: Container): Bitmap {
+        main.loadImage(this)
+        return renderer.renderElement(main, fontCache)!!
     }
 }

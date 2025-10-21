@@ -1,4 +1,4 @@
-package xyz.xszq.bot.theme
+package xyz.xszq.shinobu
 
 import korlibs.image.bitmap.Bitmap
 import kotlinx.serialization.Serializable

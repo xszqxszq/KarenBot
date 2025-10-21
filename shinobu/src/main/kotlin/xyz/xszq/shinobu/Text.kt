@@ -1,4 +1,4 @@
-package xyz.xszq.bot.theme
+package xyz.xszq.shinobu
 
 import korlibs.image.font.SystemFontRegistry
 import kotlinx.serialization.Serializable
@@ -33,6 +33,6 @@ data class Text(
     }
     suspend fun isCharMissing(): Boolean = runCatching {
         val glyphs = SystemFontRegistry()[font].measureTextGlyphs(size, text.filter { it != ' ' && it != '　' })
-        return glyphs.glyphs.any { it.metrics.width == 0.0 }
+        glyphs.glyphs.any { it.metrics.width == 0.0 }
     }.getOrNull() ?: true
 }

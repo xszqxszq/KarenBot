@@ -1,4 +1,4 @@
-package xyz.xszq.bot.theme
+package xyz.xszq.shinobu
 
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.format.readNativeImage
@@ -57,9 +57,6 @@ data class Container(
     override var parent: Container? = null
     @Transient
     var backgroundImage: Bitmap? = null
-//    operator fun get(id: String): Element? = children.firstOrNull { it.id == id } ?: run {
-//        children.filterIsInstance<Container>().firstNotNullOfOrNull { it[id] }
-//    }
     fun sub(id: String): Container? {
         if (id.contains("/")) {
             var now: Container? = this
@@ -116,7 +113,7 @@ data class Container(
             theme.fetchCache(src) ?.let { bg ->
                 backgroundImage = bg
             } ?: launch {
-                backgroundImage = kotlin.runCatching { theme.baseDir[src].readNativeImage() }.getOrNull()
+                backgroundImage = runCatching { theme.baseDir[src].readNativeImage() }.getOrNull()
             }
         }
         children.forEach { child ->
@@ -126,14 +123,14 @@ data class Container(
                         theme.fetchCache(src) ?.let { img ->
                             child.image = img
                         } ?: launch {
-                            child.image = kotlin.runCatching { theme.baseDir[src].readNativeImage() }.getOrNull()
+                            child.image = runCatching { theme.baseDir[src].readNativeImage() }.getOrNull()
                         }
                     }
                     child.mask ?.let { src ->
                         theme.fetchCache(src) ?.let { image ->
                             child.maskImage = image
                         } ?: launch {
-                            child.maskImage = kotlin.runCatching { theme.baseDir[src].readNativeImage() }.getOrNull()
+                            child.maskImage = runCatching { theme.baseDir[src].readNativeImage() }.getOrNull()
                         }
                     }
                 }

@@ -1,4 +1,4 @@
-package xyz.xszq.bot.theme
+package xyz.xszq.shinobu
 
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.color.RGBA
@@ -33,15 +33,6 @@ fun ByteArray.readBitmap() = listOf(PNG, JPEG).firstNotNullOf { codec ->
         codec.read(this)
     }.getOrNull()
 }
-
-@Suppress("unused")
-suspend fun <T> timer(comment: String = "", block: suspend () -> T): T {
-    val start = System.currentTimeMillis()
-    return block().also {
-        print("$comment: ")
-        println(System.currentTimeMillis() - start)
-    }
-}
 suspend fun <T> countTime(block: suspend () -> T): Pair<Long, T> {
     val start = System.currentTimeMillis()
     val result = block()
@@ -61,7 +52,8 @@ fun <T : Any> T.deepCopy(): T {
 }
 private fun <T : Any> T.deepCopyDataClass(): T {
     val type = this::class
-    val constructor = type.primaryConstructor ?: throw IllegalArgumentException("Data class must have a primary constructor")
+    val constructor = type.primaryConstructor
+        ?: throw IllegalArgumentException("Data class must have a primary constructor")
     val args = constructor.parameters.associateWith { param ->
         @Suppress("UNCHECKED_CAST")
         val prop = type.memberProperties
