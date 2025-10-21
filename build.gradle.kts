@@ -53,7 +53,7 @@ tasks.register("allPlugins") {
     description = "Build all Plugins."
 
     val subProjects = subprojects
-        .filter { it.name != "KarenBot" }
+        .filter { it.name !in listOf("KarenBot", "shinobu") }
 
     subProjects.forEach { project ->
         dependsOn(project.tasks.named("jar"))
