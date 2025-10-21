@@ -107,6 +107,7 @@ class DivingFish(
             }
         }.associateBy { it.id }
     }
+    suspend fun getStats(): DivingFishStats = client.get("$server/chart_stats").body<DivingFishStats>()
 
     override suspend fun getGameVersions(): Map<String, GameVersion> = divingFishVersions
 

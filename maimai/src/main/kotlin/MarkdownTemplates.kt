@@ -1,5 +1,6 @@
 package xyz.xszq.bot
 
+import korlibs.io.util.toStringDecimal
 import xyz.xszq.bot.event.ReplyAble
 import xyz.xszq.bot.music.MusicDifficulty
 import xyz.xszq.bot.music.MusicInfo
@@ -16,6 +17,28 @@ object MarkdownTemplates {
     const val IMAGE = "102112100_1752678728"
 
     object Keyboards {
+        fun single(
+            data: String,
+            label: String,
+            enter: Boolean = false
+        ) = Keyboard.create {
+            row {
+                button(
+                    id = "1",
+                    action = Action(
+                        type = Action.AT,
+                        data = data,
+                        permission = Permission(Permission.EVERYONE),
+                        enter = enter
+                    ),
+                    renderData = RenderData(
+                        label = label,
+                        visitedLabel = label,
+                        style = RenderData.BLUE
+                    )
+                )
+            }
+        }
         fun music(
             music: MusicInfo
         ) = Keyboard.create {
@@ -206,27 +229,10 @@ object MarkdownTemplates {
                 )
             }
         }
-        fun tryIt(
-            command: String
-        ) = Keyboard.create {
-            row {
-                button(
-                    id = "1",
-                    action = Action(
-                        type = Action.AT,
-                        data = command.trim() + " ",
-                        permission = Permission(Permission.EVERYONE),
-                    ),
-                    renderData = RenderData(
-                        label = "⬇试一试",
-                        visitedLabel = "⬇试一试",
-                        style = RenderData.BLUE
-                    )
-                )
-            }
-        }
         fun image(
-            command: String
+            command: String,
+            nowPage: Int ?= null,
+            totalPages: Int ?= null
         ) = Keyboard.create {
             row {
                 button(
@@ -271,7 +277,51 @@ object MarkdownTemplates {
                     )
                 )
             }
+            nowPage ?.let {
+                if (totalPages == null)
+                    return@let
+                if (totalPages <= 1)
+                    return@let
+                row {
+                    if (nowPage > 1)
+                        button(
+                            id = "4",
+                            action = Action(
+                                type = Action.AT,
+                                data = "$command ${nowPage-1}",
+                                permission = Permission(Permission.EVERYONE),
+                                enter = true
+                            ),
+                            renderData = RenderData(
+                                label = "⬅\uFE0F上一页",
+                                visitedLabel = "⬅\uFE0F上一页",
+                                style = RenderData.BLUE
+                            )
+                        )
+                    if (nowPage < totalPages)
+                        button(
+                            id = "5",
+                            action = Action(
+                                type = Action.AT,
+                                data = "$command ${nowPage+1}",
+                                permission = Permission(Permission.EVERYONE),
+                                enter = true
+                            ),
+                            renderData = RenderData(
+                                label = "➡\uFE0F下一页",
+                                visitedLabel = "➡\uFE0F下一页",
+                                style = RenderData.BLUE
+                            )
+                        )
+                }
+            }
         }
+        fun tryIt(
+            command: String
+        ) = single(command.trim() + " ", "⬇试一试")
+        fun aliasVote(
+            command: String
+        ) = single(command.trim(), "点我投票", enter = true)
 
         private fun listButtons(
             result: List<MusicInfo>
@@ -903,7 +953,13 @@ object MarkdownTemplates {
                 music.bpm.toString()
             }
             "level" {
-                music.charts.joinToString("/") { it.levelValue.toString() }
+                val levelValues = music.charts.joinToString("/") {
+                    it.levelValue.toString()
+                }
+                val fitLevelValues = music.charts.joinToString("/") {
+                    it.fitLevelValue.toStringDecimal(1)
+                }
+                "$levelValues\r拟合定数: $fitLevelValues"
             }
             "charter" {
                 music.charts.joinToString("/") { it.notesDesigner }
@@ -993,7 +1049,9 @@ object MarkdownTemplates {
         fun image(
             url: String,
             command: String,
-            description: String?
+            description: String?,
+            nowPage: Int ?= null,
+            totalPages: Int ?= null
         ) = MarkdownData.create(IMAGE) {
             "title" {
                 "查询结果"
@@ -1004,7 +1062,7 @@ object MarkdownTemplates {
             "description" {
                 description ?.replace("\n", "\r") ?: " "
             }
-        }.toMessage(Keyboards.image(command))
+        }.toMessage(Keyboards.image(command, nowPage, totalPages))
         fun brief(
             title: String,
             content: String,

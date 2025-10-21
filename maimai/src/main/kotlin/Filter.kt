@@ -10,7 +10,8 @@ class Filter(
     val sortBy: (Record) -> Comparable<*> = defaultSort,
     val nowVersion: () -> GameVersion? = defaultVersion,
     val disable15: Boolean = false,
-    val name: String? = null
+    val name: String? = null,
+    val fitLevelValues: Boolean = false
 ) {
     companion object {
         val defaultChartFilter: (ChartInfo) -> Boolean = { it -> true }

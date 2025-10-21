@@ -7,6 +7,8 @@ import korlibs.io.util.toStringDecimal
 import korlibs.math.toIntRound
 import xyz.xszq.bot.config.DesignerConfig
 import xyz.xszq.bot.music.*
+import xyz.xszq.bot.payload.LocalMusicInfo
+import java.io.File
 import kotlin.random.Random
 
 object Query {
@@ -67,6 +69,9 @@ object Query {
         record.achievement - target
     })
     val noB15 = Filter(disable15 = true)
+    val fitLevelValues = Filter(fitLevelValues = true, sortBy = { record ->
+        -Rating.calc(record.chart.fitLevelValue, record.achievement)
+    })
     fun random(random: Random) = Filter(sortBy = { record ->
         random.nextInt()
     })
@@ -141,6 +146,9 @@ object Query {
     fun nowVersion(version: GameVersion) = Filter(chart = { chart ->
         chart.music.version.version <= version.version
     }, nowVersion = { version })
+    fun tag(musics: List<Int>, tag: String? = null) = Filter(chart = { chart ->
+        chart.music.id in musics
+    }, name = tag)
     val conditions = buildList {
         designerConfig.aliases.forEach { (designer, aliases) ->
             add(aliases, designer(designer))
@@ -172,6 +180,7 @@ object Query {
         add(listOf("fdx+", "fsd+", "fdxp", "fsdp"), fsdp)
         add(listOf("舞舞", "fdx", "fsd"), fsd)
         add(listOf("完整", "全"), noB15)
+        add(listOf("拟合定数", "拟合", "nh"), fitLevelValues)
         add(listOf("大将", "鸟加", "sss+", "sssp"), rate("sssp"))
         add(listOf("将", "鸟", "sss"), rate("sss"))
         add(listOf("霸", "clear"), rate("a"))
@@ -291,4 +300,8 @@ object Query {
     fun isAllRequired(
         filters: List<Filter>?,
     ) = filters ?.any { it.disable15 } ?: false
+
+    fun isFitLevelValues(
+        filters: List<Filter>?,
+    ) = filters ?.any { it.fitLevelValues } ?: false
 }

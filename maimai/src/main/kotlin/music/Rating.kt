@@ -19,7 +19,8 @@ object Rating {
         else -> 1
     }
 
-    fun calc(chart: ChartInfo, achievement: Int): Int {
+    fun calc(chart: ChartInfo, achievement: Int): Int = calc(chart.levelValue, achievement)
+    fun calc(levelValue: Double, achievement: Int): Int {
         val baseRa = when (Rate[achievement]) {
             "d" -> 7.0
             "c" -> 8.0
@@ -37,7 +38,7 @@ object Rating {
             "sssp" -> 22.4
             else -> 0.0
         }
-        return (chart.levelValue * baseRa * min(1005000, achievement) / 1000000.0).toIntFloor()
+        return (levelValue * baseRa * min(1005000, achievement) / 1000000.0).toIntFloor()
     }
 
     fun colorOld(rating: Int) = when (rating) {
@@ -82,7 +83,8 @@ object Rating {
         else -> 0
     }
 
-    fun calcOld(chart: ChartInfo, achievement: Int): Int {
+    fun calcOld(chart: ChartInfo, achievement: Int): Int = calcOld(chart.levelValue, achievement)
+    fun calcOld(levelValue: Double, achievement: Int): Int {
         val baseRa = when (Rate[achievement]) {
             "d" -> 0.0
             "c" -> 5.0
@@ -100,6 +102,6 @@ object Rating {
             "sssp" -> 14.0
             else -> 0.0
         }
-        return (chart.levelValue * baseRa * min(1005000, achievement) / 1000000.0).toIntFloor()
+        return (levelValue * baseRa * min(1005000, achievement) / 1000000.0).toIntFloor()
     }
 }

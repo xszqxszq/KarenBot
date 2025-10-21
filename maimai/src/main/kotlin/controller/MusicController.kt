@@ -356,10 +356,21 @@ class MusicController(
                 maimai.aliases.insert(music.id, alias)
                 reply("投票成功，该别名已经通过啦")
             } else {
-                reply("投票成功，该别名还需${-votes}票通过")
+                if (textMode())
+                    reply("投票成功，该别名还需${-votes}票通过。")
+                else
+                    reply(MarkdownTemplates.Templates.brief("别名投票", buildString {
+                        appendLine("投票成功，该别名还需${-votes}票通过。")
+                    }).toMessage(MarkdownTemplates.Keyboards.aliasVote("添加别名 ${music.id} $alias")))
             }
         } ?: run {
-            reply("别名添加成功，请使用“添加别名 ${music.id} ${alias}”来进行投票，当有3人投票时别名将通过")
+            if (textMode())
+                reply("别名添加成功，请使用“添加别名 ${music.id} ${alias}”来进行投票，当有3人投票时别名将通过。")
+            else
+                reply(MarkdownTemplates.Templates.brief("别名投票", buildString {
+                    appendLine("别名添加成功，当有3人投票时别名将通过。")
+                    appendLine("其他人可以点击下方按钮，或者发送“添加别名 ${music.id} ${alias}”来投票。")
+                }).toMessage(MarkdownTemplates.Keyboards.aliasVote("添加别名 ${music.id} $alias")))
         }
     }
     companion object {

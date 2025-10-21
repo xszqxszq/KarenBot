@@ -1,11 +1,13 @@
 package xyz.xszq.bot.component
 
 import korlibs.image.bitmap.Bitmap
+import korlibs.io.util.toStringDecimal
 import kotlinx.coroutines.flow.filter
 import xyz.xszq.bot.api.MaimaiAPI
 import xyz.xszq.bot.music.*
 import xyz.xszq.bot.pagination
 import xyz.xszq.bot.theme.*
+import kotlin.Boolean
 import kotlin.math.min
 
 /**
@@ -56,7 +58,8 @@ class MaimaiImage {
      */
     suspend fun Theme.score(
         index: Int,
-        record: Record
+        record: Record,
+        isFitLevelValues: Boolean = false
     ): Container = this["music"].modify {
         background = "base_${record.chart.difficulty.name}.png"
         sub("cover") {
@@ -80,7 +83,11 @@ class MaimaiImage {
             text = "%"
         }
         text("level-rating") {
-            text = "${record.chart.levelValue}→${record.rating}"
+            val levelValue = if (isFitLevelValues)
+                record.chart.fitLevelValue.toStringDecimal(1)
+            else
+                record.chart.levelValue.toStringDecimal(1)
+            text = "$levelValue→${record.rating}"
             color = when (record.chart.difficulty) {
                 MusicDifficulty.Basic -> "#45c124"
                 MusicDifficulty.Advanced -> "#f8b709"
@@ -116,7 +123,8 @@ class MaimaiImage {
         noB15: Boolean = false,
         old: Int = 35,
         new: Int = 15,
-        backend: MaimaiAPI ?= null
+        backend: MaimaiAPI ?= null,
+        isFitLevelValues: Boolean = false
     ): Bitmap {
         val theme = themes["rating"]!!
         val main = theme.main().modify {
@@ -149,7 +157,7 @@ class MaimaiImage {
 
             sub("upper/best-35") {
                 response.ratingList.take(old).forEachIndexed { index, record ->
-                    add(theme.score(index, record))
+                    add(theme.score(index, record, isFitLevelValues))
                 }
                 repeat(old - response.ratingList.take(old).size) {
                     add(theme["music"])
@@ -157,7 +165,7 @@ class MaimaiImage {
             }
             sub("upper/best-15") {
                 response.newRatingList.take(new).forEachIndexed { index, record ->
-                    add(theme.score(index, record))
+                    add(theme.score(index, record, isFitLevelValues))
                 }
                 repeat(new - response.newRatingList.take(new).size) {
                     add(theme["music"])
@@ -179,8 +187,9 @@ class MaimaiImage {
         name: String,
         page: Int,
         all: Boolean = false,
+        isFitLevelValues: Boolean = false,
         lambda: suspend List<Record>.() -> List<Record>?
-    ): Bitmap? {
+    ): Triple<Bitmap, Int, Int>? {
         var pageSize = 50
         val (records, actualPage, totalPages) = lambda(response.records) ?.let { filtered ->
             val records = filtered.sortedBy { -it.achievement }
@@ -209,7 +218,7 @@ class MaimaiImage {
 
             sub("upper/best-35") {
                 records.forEachIndexed { index, record ->
-                    add(theme.score(index, record))
+                    add(theme.score(index, record, isFitLevelValues))
                 }
                 repeat(pageSize - records.size) {
                     add(theme["music"])
@@ -220,7 +229,7 @@ class MaimaiImage {
                 src = ""
             }
         }
-        return Renderer.render(theme, main)
+        return Triple(Renderer.render(theme, main), actualPage, totalPages)
     }
 
     /**
@@ -233,9 +242,14 @@ class MaimaiImage {
         noB15: Boolean,
         nowVersion: GameVersion,
         backend: MaimaiAPI,
+        isFitLevelValues: Boolean = false,
         lambda: suspend List<Record>.() -> List<Record>?
     ): Bitmap? {
         val records = lambda(response.records) ?: return null
+        if (isFitLevelValues)
+            records.forEach {
+                it.rating = Rating.calc(it.chart.fitLevelValue, it.achievement)
+            }
         val b50 = records.take(50)
         val b35 = if (!noB15) records.filter { it.music.version != nowVersion }.take(35) else b50.take(35)
         val b15 = if (!noB15) records.filter { it.music.version == nowVersion }.take(15) else b50.subList(min(35, b35.size), b50.size)
@@ -247,7 +261,7 @@ class MaimaiImage {
             plate = response.plate,
             ratingList = b35,
             newRatingList = b15
-        ), noB15, backend = backend)
+        ), noB15, backend = backend, isFitLevelValues = isFitLevelValues)
     }
 
     /**
@@ -260,11 +274,15 @@ class MaimaiImage {
         noB15: Boolean,
         nowVersion: GameVersion,
         backend: MaimaiAPI,
+        isFitLevelValues: Boolean = false,
         lambda: suspend List<Record>.() -> List<Record>?
     ): Bitmap? {
         val records = lambda(response.records) ?: return null
         records.forEach {
-            it.rating = Rating.calcOld(it.chart, it.achievement)
+            if (isFitLevelValues)
+                it.rating = Rating.calcOld(it.chart.fitLevelValue, it.achievement)
+            else
+                it.rating = Rating.calcOld(it.chart, it.achievement)
         }
         val b40 = records.take(40)
         val b25 = if (!noB15) records.filter { it.music.version != nowVersion }.take(25) else b40.take(25)
@@ -277,7 +295,7 @@ class MaimaiImage {
             plate = response.plate,
             ratingList = b25,
             newRatingList = b15
-        ), noB15 = noB15, old = 25, new = 15, backend = backend)
+        ), noB15 = noB15, old = 25, new = 15, backend = backend, isFitLevelValues = isFitLevelValues)
     }
 
     /**
@@ -365,12 +383,23 @@ class MaimaiImage {
         title: String,
         detailed: Boolean,
         requiresType: RequiresType = RequiresType.Achievement,
-        records: List<Record>? = null
+        records: List<Record>? = null,
+        isFitLevelValues: Boolean = false,
     ): Bitmap {
         val groups = if (detailed) {
-            charts.groupBy { it.levelValue.toString() }
+            charts.groupBy {
+                if (isFitLevelValues)
+                    it.fitLevelValue.toStringDecimal(1)
+                else
+                    it.levelValue.toString()
+            }
         } else {
-            charts.groupBy { it.level }
+            charts.groupBy {
+                if (isFitLevelValues)
+                    Level.toLevel(it.fitLevelValue)
+                else
+                    it.level
+            }
         }.toSortedMap(Level.comparator).toList().reversed()
 
         val matched = charts.associateWith { chart ->
@@ -378,7 +407,6 @@ class MaimaiImage {
                 it.music.id == chart.music.id && it.chart.difficulty == chart.difficulty
             }
         }
-        matched
 
         val theme = themes["level"]!!
         val main = theme.main().modify {

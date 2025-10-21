@@ -22,7 +22,7 @@ enum class MusicGenre(val id: Int, val genreName: String, val value: String, val
         listOf("舞萌", "maimai")),
     @SerialName("オンゲキCHUNITHM")
     Chugeki(106, "音击&中二节奏", "オンゲキCHUNITHM",
-        listOf("音击中二", "音击", "中二", "オンゲキ", "chunithm", "chuni", "ongeki")),
+        listOf("音击中二", "中二音击", "chugeki", "gekichu")),
     @SerialName("宴会場")
     Utage(107, "宴会場", "宴会場",
         listOf("宴会场"));

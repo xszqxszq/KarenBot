@@ -2,6 +2,7 @@ package xyz.xszq.bot.music
 
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.localCurrentDirVfs
+import korlibs.io.util.toStringDecimal
 import xyz.xszq.bot.MarkdownTemplates
 import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.newLine
@@ -42,6 +43,9 @@ class MusicInfo(
         appendLine("版本：${version.name}${if (isNew) " (计入b15)" else ""}")
         appendLine("BPM：${bpm}")
         appendLine("定数：${charts.joinToString("/") { it.levelValue.toString() }}")
+        appendLine("拟合定数：${charts.joinToString("/") { 
+            it.fitLevelValue.toStringDecimal(1) 
+        }}")
         appendLine("谱师：${charts.joinToString("/") {
             it.notesDesigner.let { d ->
                 d.ifBlank { "-" }

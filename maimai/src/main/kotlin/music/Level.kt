@@ -1,5 +1,9 @@
 package xyz.xszq.bot.music
 
+import korlibs.math.toIntCeil
+import korlibs.math.toIntFloor
+import kotlin.math.roundToInt
+
 @Suppress("unused")
 object Level {
     var PRISM_MODE = true
@@ -19,6 +23,13 @@ object Level {
             val end = num.toDouble() + if (PRISM_MODE) 0.5 else 0.6
             return begin .. end
         }
+    }
+    fun toLevel(levelValue: Double): String {
+        val intPart = levelValue.toIntFloor()
+        val decimal = ((levelValue - intPart) * 10).roundToInt()
+        if (decimal >= 6)
+            return "$intPart+"
+        return "$intPart"
     }
     fun numberPart(level: String) = level.filter { it.isDigit() }.toIntOrNull() ?: 0
     val comparator: (String, String) -> Int = { level1, level2 ->

@@ -1,8 +1,8 @@
 package xyz.xszq.bot.controller
 
 import korlibs.image.bitmap.Bitmap
-import korlibs.image.format.PNG
-import korlibs.image.format.encode
+import korlibs.image.format.ImageEncodingProps
+import korlibs.image.format.JPEG
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -64,7 +64,7 @@ class ImageController(
                 return@commandEndsWith
             }
         }
-        commandEndsWith(listOf("分数列表", "成绩列表")) { raw ->
+        commandEndsWith(listOf("分数列表", "分数表", "成绩列表", "成绩表")) { raw ->
             val args = raw.split(" ")
             val command = args.first()
             val page = args.getOrNull(1) ?.toIntOrNull() ?: 1
@@ -178,14 +178,16 @@ class ImageController(
     suspend fun Bitmap?.sendResultImage(
         command: String,
         event: MessageEvent,
-        text: String? = null
+        text: String ?= null,
+        page: Int ?= null,
+        totalPages: Int ?= null
     ) = event.run {
         if (textMode()) {
             send(this, text)
             return
         }
         upload(event) { url ->
-            reply(MarkdownTemplates.Templates.image(url, command, text))
+            reply(MarkdownTemplates.Templates.image(url, command, text, page, totalPages))
         }
     }
 
@@ -246,10 +248,11 @@ class ImageController(
             musics.filter { it.version == nowVersion }.size < 15 || musics.none { it.version != nowVersion }
         else
             false
+        val isFitLevelValues = Query.isFitLevelValues(filters)
         var time = 0L
         maimai.query.records(event, musics, args) { response, backend ->
             countTime {
-                maimai.image.templateBest50(response, noB15, nowVersion, backend) {
+                maimai.image.templateBest50(response, noB15, nowVersion, backend, isFitLevelValues) {
                     Query.filterRecords(filters, this)
                 }
             }.let { (elapsed, result) ->
@@ -270,8 +273,9 @@ class ImageController(
             musics.filter { it.version == nowVersion }.size < 15 || musics.none { it.version != nowVersion }
         else
             false
+        val isFitLevelValues = Query.isFitLevelValues(filters)
         maimai.query.records(event, musics, args) { response, backend ->
-            maimai.image.templateBest40(response, noB15, nowVersion, backend) {
+            maimai.image.templateBest40(response, noB15, nowVersion, backend, isFitLevelValues) {
                 Query.filterRecords(filters, this)
             }
         }.sendResultImage(fullCommand+"40", event, randomTips())
@@ -350,21 +354,33 @@ class ImageController(
         val musics = Query.filterMusics(filters, maimai.musics())
         val all = Query.isAllRequired(filters)
         var time = 0L
+        var numPage = 1
+        var totalPages = 1
+        val isFitLevelValues = Query.isFitLevelValues(filters)
         maimai.query.records(event, musics) { response, _ ->
             countTime {
-                maimai.image.templateScoreList(response, fullCommand, page, all) {
+                val (image, nowPage, nowPages) = maimai.image.templateScoreList(
+                    response, fullCommand, page, all, isFitLevelValues
+                ) {
                     Query.filterRecords(filters, this) ?.also {
                         if (it.size > 1000) {
                             reply("您查询的记录过多，全分数列表最多支持1000条记录")
                             return@templateScoreList null
                         }
                     }
-                }
+                } ?: return@countTime null
+                numPage = nowPage
+                totalPages = nowPages
+                image
             }.let { (elapsed, result) ->
                 time = elapsed
                 result
             }
-        }.sendResultImage("${fullCommand}分数列表", event, "生成时间：${time}ms\r${randomTips()?:""}")
+        }.sendResultImage(
+            "${fullCommand}分数列表", event, "生成时间：${time}ms\r${randomTips()?:""}",
+            page = numPage,
+            totalPages = totalPages
+        )
     }
     suspend fun handleLevelList(
         event: MessageEvent,
@@ -372,10 +388,12 @@ class ImageController(
     ) = event.run {
         val filters = Query.filters(fullCommand)
         val (charts, detailed) = filterCharts(filters)
+        val isFitLevelValues = Query.isFitLevelValues(filters)
         maimai.image.templateLevel(
             charts,
             fullCommand + "定数表",
-            detailed
+            detailed,
+            isFitLevelValues = isFitLevelValues
         ).sendResultImage(fullCommand + "定数表", event, randomTips())
     }
     suspend fun handleLevelCompletes(
@@ -395,6 +413,7 @@ class ImageController(
             reply(maimai.query.noRecords)
             return@run
         }
+        val isFitLevelValues = Query.isFitLevelValues(filters)
         val musics = charts.map { it.music }.toSet().toList()
         maimai.query.records(event, musics, args) { response, _ ->
             maimai.image.templateLevel(
@@ -402,7 +421,9 @@ class ImageController(
                 fullCommand + "完成表",
                 detailed,
                 Query.filterTypes(filters),
-                response.records)
+                response.records,
+                isFitLevelValues = isFitLevelValues
+            )
         }.sendResultImage(fullCommand + "完成表", event, randomTips())
     }
     suspend fun handleInfoScore(
@@ -458,28 +479,28 @@ class ImageController(
         event: MessageEvent,
         message: String ?= null
     ): Unit = useTempFile { file ->
-        this ?.encode(PNG) ?.let { bytes ->
-            file.writeBytes(bytes)
-            message ?.let {
-                event.reply(xyz.xszq.bot.message.Image(file) + it.toPlainText())
-            } ?: run {
-                event.reply(xyz.xszq.bot.message.Image(file))
-            }
+        this ?: return@useTempFile
+        val bytes = JPEG.encode(this, ImageEncodingProps(quality = 0.85))
+        file.writeBytes(bytes)
+        message ?.let {
+            event.reply(xyz.xszq.bot.message.Image(file) + it.toPlainText())
+        } ?: run {
+            event.reply(xyz.xszq.bot.message.Image(file))
         }
     }
     @OptIn(DelicateCoroutinesApi::class)
     suspend fun Bitmap?.upload(
         event: MessageEvent,
         handle: suspend MessageEvent.(String) -> Unit
-    ): Unit = useTempFile(suffix = ".png") { file ->
-        this ?.encode(PNG) ?.let { bytes ->
-            file.writeBytes(bytes)
-            val uploaded = event.bot.cos.upload(file)
-            handle.invoke(event, uploaded.url)
-            GlobalScope.launch {
-                delay(10000L)
-                event.bot.cos.deleteFromCos(uploaded.filename)
-            }
+    ): Unit = useTempFile(suffix = ".jpg") { file ->
+        this ?: return@useTempFile
+        val bytes = JPEG.encode(this, ImageEncodingProps(quality = 0.85))
+        file.writeBytes(bytes)
+        val uploaded = event.bot.cos.upload(file)
+        handle.invoke(event, uploaded.url)
+        GlobalScope.launch {
+            delay(10000L)
+            event.bot.cos.deleteFromCos(uploaded.filename)
         }
     }
 

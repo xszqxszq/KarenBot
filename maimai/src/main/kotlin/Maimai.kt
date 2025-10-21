@@ -3,6 +3,8 @@ package xyz.xszq.bot
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -94,7 +96,7 @@ class Maimai: Plugin() {
     /**
      * Init Maimai Plugin.
      */
-    @OptIn(ExperimentalHoplite::class)
+    @OptIn(ExperimentalHoplite::class, DelicateCoroutinesApi::class)
     override fun load() {
         localConnector.load()
 
@@ -126,9 +128,15 @@ class Maimai: Plugin() {
                         logger.info { "[舞萌] 正在加载数据源 ${backend.name}……" }
                         backend.load()
                         if (backend.name == "local") {
-                            launch {
+                            GlobalScope.launch {
                                 logger.info { "[舞萌] 别名初始化中……" }
                                 aliases.init()
+                                logger.info { "[舞萌] 别名初始化完毕。" }
+                            }
+                            GlobalScope.launch {
+                                logger.info { "[舞萌] 载入拟合定数中……" }
+                                loadFitLevelValues()
+                                logger.info { "[舞萌] 拟合定数载入完毕。" }
                             }
                         }
                     }
@@ -161,6 +169,18 @@ class Maimai: Plugin() {
         aliases.close()
         api.close()
         logger.info { "[舞萌] 插件已卸载。" }
+    }
+
+    suspend fun loadFitLevelValues() {
+        val stats = (backend("diving-fish") as DivingFish).getStats()
+        stats.charts.forEach { (id, chartStats) ->
+            chartStats.forEachIndexed { difficulty, stat ->
+                music(id.toInt())
+                    ?.charts
+                    ?.getOrNull(difficulty)
+                    ?.fitLevelValue = stat.fitLevelValue ?: return@forEachIndexed
+            }
+        }
     }
 
     companion object {

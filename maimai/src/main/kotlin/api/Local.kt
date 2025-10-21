@@ -10,6 +10,7 @@ import xyz.xszq.bot.Query.rate
 import xyz.xszq.bot.Query.version
 import xyz.xszq.bot.add
 import xyz.xszq.bot.component.LocalConnector
+import xyz.xszq.bot.component.Tag
 import xyz.xszq.bot.database.MaimaiBindTable
 import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.event.MessageEvent
@@ -18,6 +19,7 @@ import xyz.xszq.bot.payload.LocalIconInfo
 import xyz.xszq.bot.payload.LocalMusicInfo
 import xyz.xszq.bot.payload.LocalPlateInfo
 import xyz.xszq.bot.payload.MaimaiRecord
+import xyz.xszq.bot.plus
 import xyz.xszq.bot.toSimple
 import java.io.File
 
@@ -97,6 +99,13 @@ class Local(
                 Query.conditions.add(0, Pair(listOf(designer), designer(designer)))
         }
         Query.conditions.add(listOf("s"), rate("s"))
+
+        val customTags = json.decodeFromString<Map<String, Tag>>(
+            File(dataDir.absolutePath + "/tag.json").readText(Charsets.UTF_8)
+        )
+        customTags.forEach { (id, tag) ->
+            Query.conditions.add(Pair(tag.aliases, Query.tag(tag.musics, tag.name)))
+        }
     }
 
     override suspend fun getMusicList(): Map<Int, MusicInfo> {

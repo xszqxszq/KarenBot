@@ -10,4 +10,6 @@ class ChartInfo(
 ) {
     val maxDeluxeScore: Int
         get() = notes.maxDeluxeScore
+
+    var fitLevelValue: Double = 0.0
 }
