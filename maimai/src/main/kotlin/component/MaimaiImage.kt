@@ -1,12 +1,16 @@
 package xyz.xszq.bot.component
 
 import korlibs.image.bitmap.Bitmap
+import korlibs.io.file.std.localCurrentDirVfs
 import korlibs.io.util.toStringDecimal
 import kotlinx.coroutines.flow.filter
 import xyz.xszq.bot.api.MaimaiAPI
 import xyz.xszq.bot.music.*
 import xyz.xszq.bot.pagination
-import xyz.xszq.bot.theme.*
+import xyz.xszq.shinobu.Container
+import xyz.xszq.shinobu.Image
+import xyz.xszq.shinobu.Theme
+import xyz.xszq.shinobu.ThemeManager
 import kotlin.Boolean
 import kotlin.math.min
 
@@ -16,13 +20,19 @@ import kotlin.math.min
 class MaimaiImage {
     val themes = mutableMapOf<String, Theme>()
 
+    private val themeDir = "./data/maimai/theme/"
+    val manager: ThemeManager = ThemeManager(
+        localCurrentDirVfs[themeDir],
+        "FZLanTingHei-R-GBK"
+    )
+
     /**
      * Load Images to memory.
      */
     suspend fun loadImage() {
-        ThemeManager.themeBaseDir.list().filter { it.isDirectory() }.collect { folder ->
-            val name = folder.relativePathTo(ThemeManager.themeBaseDir)!!
-            themes[name] = ThemeManager.loadTheme(name)
+        manager.themeBaseDir.list().filter { it.isDirectory() }.collect { folder ->
+            val name = folder.relativePathTo(manager.themeBaseDir)!!
+            themes[name] = manager.loadTheme(name)
         }
     }
 
@@ -39,7 +49,7 @@ class MaimaiImage {
             val color = if (old) Rating.colorOld(response.rating) else Rating.color(response.rating)
             background = "rating_base_$color.png"
             response.rating.toString().forEach { digit ->
-                add(Image(src="rating_$digit.png"))
+                add(Image(src = "rating_$digit.png"))
             }
         }
         text("name") {
@@ -172,7 +182,7 @@ class MaimaiImage {
                 }
             }
         }
-        return Renderer.render(theme, main)
+        return theme.render(main)
     }
 
     /**
@@ -229,7 +239,7 @@ class MaimaiImage {
                 src = ""
             }
         }
-        return Triple(Renderer.render(theme, main), actualPage, totalPages)
+        return Triple(theme.render(main), actualPage, totalPages)
     }
 
     /**
@@ -461,7 +471,7 @@ class MaimaiImage {
                 })}
             }
         }
-        return Renderer.render(theme, main)
+        return theme.render(main)
     }
 
     suspend fun headerInfo(
@@ -617,6 +627,6 @@ class MaimaiImage {
                 }
             }
         }
-        return Renderer.render(theme, main)
+        return theme.render(main)
     }
 }

@@ -16,7 +16,7 @@ import xyz.xszq.bot.music.ChartInfo
 import xyz.xszq.bot.music.MusicDifficulty
 import xyz.xszq.bot.music.MusicInfo
 import xyz.xszq.bot.music.Rating
-import xyz.xszq.bot.theme.countTime
+import xyz.xszq.shinobu.countTime
 import kotlin.random.Random
 
 @Suppress("unused")
