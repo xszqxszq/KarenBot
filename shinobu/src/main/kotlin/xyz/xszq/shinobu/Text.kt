@@ -1,5 +1,6 @@
 package xyz.xszq.shinobu
 
+import korlibs.image.font.BitmapFont
 import korlibs.image.font.SystemFontRegistry
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -25,6 +26,8 @@ data class Text(
     override var parent: Container? = null
     @Transient
     var descent: Double = 0.0
+    @Transient
+    var bitmapFont: BitmapFont? = null
     suspend fun calcWidth(): Int {
         val glyphs = SystemFontRegistry()[font].measureTextGlyphs(size, text)
         return glyphs.glyphs.lastOrNull()?.let {

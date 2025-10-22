@@ -46,7 +46,7 @@ class Renderer(
     }
     private fun renderText(element: Text, fonts: Map<String, Font>, x: Double, y: Double): Bitmap {
         val text = element.text
-        val font = fonts[element.font]!!
+        val font = element.bitmapFont ?: fonts[element.font]!!
         val glyphs = font.measureTextGlyphs(element.size, text)
         val fmetrics = glyphs.fmetrics
 
@@ -441,9 +441,5 @@ class Renderer(
         }.toMutableMap().also {
             it.put("", getFont(defaultFont))
         }
-    }
-    suspend fun render(theme: Theme, main: Container): Bitmap {
-        main.loadImage(theme)
-        return renderElement(main, theme.fontCache)!!
     }
 }
