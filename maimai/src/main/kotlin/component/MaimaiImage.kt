@@ -1,23 +1,30 @@
 package xyz.xszq.bot.component
 
 import korlibs.image.bitmap.Bitmap
+import korlibs.image.font.CharacterSet
+import korlibs.image.font.toBitmapFont
 import korlibs.io.file.std.localCurrentDirVfs
 import korlibs.io.util.toStringDecimal
 import kotlinx.coroutines.flow.filter
+import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.api.MaimaiAPI
 import xyz.xszq.bot.music.*
 import xyz.xszq.bot.pagination
 import xyz.xszq.shinobu.Container
 import xyz.xszq.shinobu.Image
+import xyz.xszq.shinobu.Text
 import xyz.xszq.shinobu.Theme
 import xyz.xszq.shinobu.ThemeManager
+import xyz.xszq.shinobu.hexToRGBA
 import kotlin.Boolean
 import kotlin.math.min
 
 /**
  * Image Layer for Maimai Plugin.
  */
-class MaimaiImage {
+class MaimaiImage(
+    val maimai: Maimai
+) {
     val themes = mutableMapOf<String, Theme>()
 
     private val themeDir = "./data/maimai/theme/"
@@ -33,6 +40,36 @@ class MaimaiImage {
         manager.themeBaseDir.list().filter { it.isDirectory() }.collect { folder ->
             val name = folder.relativePathTo(manager.themeBaseDir)!!
             themes[name] = manager.loadTheme(name)
+        }
+        val rating = themes["rating"]!!
+        rating.templates.first { it.id == "music" }.modify {
+            fun Text.setFont(chars: CharacterSet = CharacterSet.NUMBERS) {
+                bitmapFont = rating.fontCache[font]!!.toBitmapFont(
+                    size,
+                    chars = chars,
+                    paint = color.hexToRGBA()
+                )
+            }
+            text("index-id") {
+                setFont()
+            }
+            text("title") {
+                val chars = maimai.musics().map { it.name.toList() }.flatten().toSet()
+                    .map { it.code }.sorted().toIntArray()
+                setFont(CharacterSet(chars))
+            }
+            text("achievement-integer") {
+                setFont()
+            }
+            text("achievement-decimal") {
+                setFont(CharacterSet(('0'..'9').joinToString("") + "."))
+            }
+            text("achievement-percent") {
+                setFont(CharacterSet("%"))
+            }
+            text("level-rating") {
+                setFont(CharacterSet(('0'..'9').joinToString("") + ".→"))
+            }
         }
     }
 

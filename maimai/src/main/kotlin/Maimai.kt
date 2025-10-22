@@ -75,7 +75,7 @@ class Maimai: Plugin() {
     /**
      * Modules.
      */
-    val image = MaimaiImage()
+    val image = MaimaiImage(this)
     val query = MaimaiQuery(this)
     val aliases = AliasesSearch(this)
     val api = ApiController(this)
@@ -120,14 +120,14 @@ class Maimai: Plugin() {
             api.listen()
             coroutineScope {
                 launch {
-                    logger.info { "[舞萌] 正在加载图片中……" }
-                    image.loadImage()
-                }
-                launch {
                     backends.forEach { backend ->
                         logger.info { "[舞萌] 正在加载数据源 ${backend.name}……" }
                         backend.load()
                         if (backend.name == "local") {
+                            launch {
+                                logger.info { "[舞萌] 正在加载图片中……" }
+                                image.loadImage()
+                            }
                             GlobalScope.launch {
                                 logger.info { "[舞萌] 别名初始化中……" }
                                 aliases.init()
