@@ -95,6 +95,11 @@ class OpenAPI(
         payload: MessagePayload
     ): Boolean {
         payload.content = filter.filter(payload.content)
+        payload.markdown ?.let { markdown ->
+            markdown.params.forEach { param ->
+                param.values = param.values.map { filter.filter(it) }
+            }
+        }
         val result = kotlin.runCatching {
             client.post(url) {
                 contentType(ContentType.Application.Json)

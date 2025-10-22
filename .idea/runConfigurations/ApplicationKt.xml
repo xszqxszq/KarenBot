@@ -1,0 +1,25 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ApplicationKt" type="KtorApplicationConfigurationType" factoryName="Ktor" nameIsGenerated="true">
+    <option name="MAIN_CLASS_NAME" value="xyz.xszq.bot.ApplicationKt" />
+    <module name="KarenBot.main" />
+    <option name="VM_PARAMETERS" value="-Ddebug" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="xyz.xszq.bot.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <option name="alternativeJrePath" />
+    <option name="alternativeJrePathEnabled" value="false" />
+    <option name="includeProvidedScope" value="false" />
+    <option name="mainClass" value="xyz.xszq.bot.ApplicationKt" />
+    <option name="passParentEnvs" value="true" />
+    <option name="programParameters" value="" />
+    <option name="shortenCommandLine" />
+    <option name="vmParameters" value="-Ddebug" />
+    <option name="workingDirectory" value="E:\Workspace\KarenBot-9.0" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
