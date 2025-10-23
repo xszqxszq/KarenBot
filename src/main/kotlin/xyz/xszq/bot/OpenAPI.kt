@@ -39,12 +39,6 @@ class OpenAPI(
         install(ContentNegotiation) {
             json(json)
         }
-
-        engine {
-            System.getProperty("debug") ?.let {
-                proxy = ProxyBuilder.socks("localhost", 2080)
-            }
-        }
     }
     private var accessToken: String? = null
     private var accessTokenExpiresAt: Long? = null

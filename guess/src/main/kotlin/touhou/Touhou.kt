@@ -145,7 +145,7 @@ class Touhou(
             return
         }
         val slice = difficulty.duration()
-        val audio = musicFile.crop(
+        val cropped = musicFile.crop(
             Random(System.currentTimeMillis()).nextDouble(0.0,
                 duration - slice),
             slice
@@ -176,7 +176,8 @@ class Touhou(
         println(answers)
         var finished = false
 
-        reply(Audio(audio))
+        reply(Audio(cropped))
+        cropped.delete()
         reply(MarkdownData.create("102112100_1748948894") {
             "title" {
                 "原曲认知测验"

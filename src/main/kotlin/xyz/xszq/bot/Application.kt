@@ -68,7 +68,7 @@ fun main() {
     val pluginLoader = PluginLoader(api, cos)
     pluginLoader.reloadAllPlugins()
 
-    System.getProperty("debug") ?.let {
+    System.getProperty("cli") ?.let {
         GlobalScope.launch {
             readInput(pluginLoader)
         }

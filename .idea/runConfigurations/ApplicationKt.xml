@@ -2,7 +2,7 @@
   <configuration default="false" name="ApplicationKt" type="KtorApplicationConfigurationType" factoryName="Ktor" nameIsGenerated="true">
     <option name="MAIN_CLASS_NAME" value="xyz.xszq.bot.ApplicationKt" />
     <module name="KarenBot.main" />
-    <option name="VM_PARAMETERS" value="-Ddebug" />
+    <option name="VM_PARAMETERS" value="-Dcli" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="xyz.xszq.bot.*" />
@@ -16,7 +16,7 @@
     <option name="passParentEnvs" value="true" />
     <option name="programParameters" value="" />
     <option name="shortenCommandLine" />
-    <option name="vmParameters" value="-Ddebug" />
+    <option name="vmParameters" value="-Dcli" />
     <option name="workingDirectory" value="E:\Workspace\KarenBot-9.0" />
     <method v="2">
       <option name="Make" enabled="true" />
