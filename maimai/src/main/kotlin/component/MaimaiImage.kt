@@ -42,6 +42,14 @@ class MaimaiImage(
             themes[name] = manager.loadTheme(name)
         }
         val rating = themes["rating"]!!
+        rating.templates.first { it.id == "main" }.modify {
+            sub("upper/best-35") {
+                parallel = true
+            }
+            sub("upper/best-15") {
+                parallel = true
+            }
+        }
         rating.templates.first { it.id == "music" }.modify {
             fun Text.setFont(chars: CharacterSet = CharacterSet.NUMBERS) {
                 bitmapFont = rating.fontCache[font]!!.toBitmapFont(
