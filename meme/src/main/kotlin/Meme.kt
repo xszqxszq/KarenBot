@@ -361,7 +361,7 @@ class Meme: Plugin() {
                 name.lowercase().startsWith(alias)
             } ?.let { Pair(character, it) }
         } ?: throw NotFoundException()
-        val id = name.substringAfter(alias).toIntOrNull()
+        val id = name.substringAfter(alias).filter { it.isDigit() }.toIntOrNull()
         val config = id ?.let {
             sekai.characters.firstOrNull {
                 character == it.character && id == it.name.split(" ").last().toInt()
