@@ -12,7 +12,11 @@ import korlibs.math.geom.Anchor
 import korlibs.math.geom.Point
 import korlibs.math.geom.ScaleMode
 import korlibs.math.geom.vector.LineJoin
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import kotlin.math.max
 import kotlin.math.min
@@ -369,21 +373,40 @@ class Renderer(
         }
         return computedElements
     }
+    suspend fun <T, R> List<T>.mapParallel(
+        parallel: Boolean = false,
+        block: suspend (T) -> R
+    ): List<R> {
+        if (!parallel)
+            return map { runBlocking { block(it) } }
+        return coroutineScope {
+            map {
+                async(Dispatchers.IO) {
+                    block(it)
+                }
+            }.awaitAll()
+        }
+    }
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun renderElement(element: Element, fonts: Map<String, Font>): Bitmap? {
+    suspend fun renderElement(
+        element: Element,
+        fonts: Map<String, Font>,
+        parallel: Boolean = false
+    ): Bitmap? {
         val x = element.padding.left.toDouble()
         val y = element.padding.top.toDouble()
         return when (element) {
             is Text -> renderText(element, fonts, x, y)
             is Image -> renderImage(element, x, y)
             is Container -> {
-                val elements = element.children.mapNotNull { child ->
+                val isParallel = parallel || element.parallel
+                val elements = element.children.mapParallel(isParallel) { child ->
                     if (child is Container)
                         child.parent = element
                     renderElement(child, fonts) ?.let { rendered ->
                         Pair(child, rendered)
                     }
-                }
+                }.filterNotNull()
 
                 val (fixedWidth, fixedHeight) = fixedSize(element)
                 val (placedElements, placedWidth, placedHeight) = if (element.wrap == Wrap.Wrap) {

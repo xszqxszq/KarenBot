@@ -51,7 +51,8 @@ data class Container(
     var stretch: Boolean = false,
     var color: String? = null,
     @SerialName("color-opacity")
-    var colorOpacity: Double = 1.0
+    var colorOpacity: Double = 1.0,
+    var parallel: Boolean = false,
 ): Element {
     @Transient
     override var parent: Container? = null
