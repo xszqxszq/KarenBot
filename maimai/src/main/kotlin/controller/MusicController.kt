@@ -151,7 +151,7 @@ class MusicController(
             }
             searchRegex(raw, regex)
         }
-        startsWith("BPM查歌") { raw ->
+        startsWith(listOf("BPM查歌", "bpm查歌")) { raw ->
             if (raw.isBlank()) {
                 reply(buildString {
                     appendLine("使用方法：BPM查歌 [BPM] [页数]")
