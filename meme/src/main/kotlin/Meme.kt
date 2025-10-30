@@ -474,6 +474,6 @@ class Meme: Plugin() {
     }
 
     companion object {
-        const val BRIEF = "102112100_1748948894"
+        const val BRIEF = "102112100_1761189409"
     }
 }

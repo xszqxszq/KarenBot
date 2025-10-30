@@ -30,7 +30,7 @@ import kotlin.random.Random
 class Touhou(
     val guess: Guess
 ) {
-    val templateBrief = "102112100_1748948894"
+    val templateBrief = "102112100_1761189409"
 
     val baseDir = localCurrentDirVfs["data/audio/touhou"]
     val musics: TouhouMusics = runBlocking {
@@ -178,7 +178,7 @@ class Touhou(
 
         reply(Audio(cropped))
         cropped.delete()
-        reply(MarkdownData.create("102112100_1748948894") {
+        reply(MarkdownData.create("102112100_1761189409") {
             "title" {
                 "原曲认知测验"
             }
@@ -226,7 +226,7 @@ class Touhou(
             }
             if (text.trim().startsWith("不玩了")) {
                 finished = true
-                reply(MarkdownData.create("102112100_1748948894") {
+                reply(MarkdownData.create("102112100_1761189409") {
                     "title" {
                         "原曲认知测验"
                     }
@@ -240,7 +240,7 @@ class Touhou(
 
             if (answers.isAnswer(text.trim())) {
                 finished = true
-                reply(MarkdownData.create("102112100_1748948894") {
+                reply(MarkdownData.create("102112100_1761189409") {
                     "title" {
                         "原曲认知测验"
                     }
@@ -257,7 +257,7 @@ class Touhou(
         delay(TIMESUP)
         if (finished)
             return
-        reply(MarkdownData.create("102112100_1748948894") {
+        reply(MarkdownData.create("102112100_1761189409") {
             "title" {
                 "原曲认知测验"
             }
@@ -323,7 +323,7 @@ class Touhou(
     }
     val guessErrorHandler: ErrorHandler = { e ->
         when (e) {
-            is NeedHelpException -> reply(MarkdownData.create("102112100_1748948894") {
+            is NeedHelpException -> reply(MarkdownData.create("102112100_1761189409") {
                 "title" {
                     "原曲认知测验"
                 }

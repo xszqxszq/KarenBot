@@ -36,8 +36,8 @@ import kotlin.text.toLong
 
 @Suppress("unused")
 class Text: Plugin() {
-    val templateBrief = "102112100_1748948894"
-    val templateImage = "102112100_1752678728"
+    val templateBrief = "102112100_1761189409"
+    val templateImage = "102112100_1761189134"
     val presets = buildMap {
         put("在", "bot在")
         put("有人吗", "有bot在哦")
@@ -171,7 +171,10 @@ class Text: Plugin() {
                     video.title
                 }
                 "img" {
-                    video.pic + "@378w_378h_1c.webp"
+                    video.pic + "@672w_378h_1c.webp"
+                }
+                "img_size" {
+                    "img #672px #378px"
                 }
                 "description" {
                     buildString {

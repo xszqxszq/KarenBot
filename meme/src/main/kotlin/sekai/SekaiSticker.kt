@@ -162,7 +162,7 @@ class SekaiSticker {
         private const val STROKE = 9.0
         val aliases = buildMap {
             put("airi", listOf("airi", "桃井爱莉", "桃井", "爱莉", "桃井愛莉", "愛莉", "momoi"))
-            put("akito", listOf("akito", "東雲彰人", "東雲", "彰人", "东云彰人", "彰人", "akt"))
+            put("akito", listOf("akito", "東雲彰人", "彰人", "东云彰人", "彰人", "akt"))
             put("an", listOf("an", "白石杏", "白石", "杏"))
             put("emu", listOf("emu", "鳳えむ", "鳳", "えむ", "凤绘梦", "凤", "绘梦", "凤笑梦", "笑梦"))
             put("ena", listOf("ena", "東雲絵名", "絵名", "东云绘名", "绘名"))
@@ -182,11 +182,11 @@ class SekaiSticker {
             put("Nene", listOf("nene", "草薙寧々", "草薙", "寧々", "草薙宁宁", "宁宁"))
             put("Rin", listOf("rin", "鏡音リン", "镜音铃", "リン", "铃"))
             put("Rui", listOf("rui", "神代類", "神代", "類", "神代类", "类"))
-            put("Saki", listOf("saki", "天馬咲希", "咲希"))
+            put("Saki", listOf("saki", "天馬咲希", "天马咲希", "咲希"))
             put("Shiho", listOf("shiho", "日野森志歩", "志歩", "志步", "日野森志步"))
             put("Shizuku", listOf("shizuku", "日野森雫", "雫", "szk"))
             put("Touya", listOf("touya", "青柳冬弥", "青柳", "冬弥"))
-            put("Tsukasa", listOf("tsukasa", "天馬司", "司", "tks"))
+            put("Tsukasa", listOf("tsukasa", "天馬司", "天马司", "司", "tks"))
         }
     }
 }
