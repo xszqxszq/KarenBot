@@ -105,7 +105,7 @@ class AliasesSearch(
             if (hits.isEmpty()) return emptyList()
 
             val maxScore = hits.maxOf { it.score.toDouble() }
-            val threshold = maxScore * 0.5
+            val threshold = maxScore * 0.45
 
             return hits
                 .asSequence()

@@ -15,6 +15,8 @@ import xyz.xszq.bot.database.MaimaiBindTable
 import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.music.*
+import xyz.xszq.bot.payload.LocalCourseInfo
+import xyz.xszq.bot.payload.LocalCourseMusicInfo
 import xyz.xszq.bot.payload.LocalIconInfo
 import xyz.xszq.bot.payload.LocalMusicInfo
 import xyz.xszq.bot.payload.LocalPlateInfo
@@ -34,6 +36,7 @@ class Local(
     val musics = mutableMapOf<Int, MusicInfo>()
     val plates = mutableMapOf<Int, LocalPlateInfo>()
     val icons = mutableMapOf<Int, LocalIconInfo>()
+    val courses = mutableMapOf<Int, LocalCourseInfo>()
 
     val json = Json {
         ignoreUnknownKeys = true
@@ -51,6 +54,7 @@ class Local(
         getMusicList()
         getPlateList()
         getIconsList()
+        getCoursesList()
 
         plates.values.filter {
             it.genre == "実績" && it.requires.isNotEmpty() && it.name != "覇者"
@@ -171,6 +175,14 @@ class Local(
             File(dataDir.absolutePath + "/icon.json").readText(Charsets.UTF_8)
         ).associateBy { it.id })
         return icons
+    }
+
+    fun getCoursesList(): Map<Int, LocalCourseInfo> {
+        courses.clear()
+        courses.putAll(json.decodeFromString<List<LocalCourseInfo>>(
+            File(dataDir.absolutePath + "/course.json").readText(Charsets.UTF_8)
+        ).associateBy { it.id })
+        return courses
     }
 
     override suspend fun getPlayerRating(

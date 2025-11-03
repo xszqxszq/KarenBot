@@ -41,6 +41,16 @@ class MaimaiImage(
             val name = folder.relativePathTo(manager.themeBaseDir)!!
             themes[name] = manager.loadTheme(name)
         }
+    }
+
+    fun Text.setFont(theme: Theme, chars: CharacterSet = CharacterSet.NUMBERS) {
+        bitmapFont = theme.fontCache[font]!!.toBitmapFont(
+            size,
+            chars = chars,
+            paint = color.hexToRGBA()
+        )
+    }
+    suspend fun optimize() {
         val rating = themes["rating"]!!
         rating.templates.first { it.id == "main" }.modify {
             sub("upper/best-35") {
@@ -49,15 +59,15 @@ class MaimaiImage(
             sub("upper/best-15") {
                 parallel = true
             }
+            sub("footer") {
+                text("copyright") {
+                    val chars = text.toSet().map { it.code }.sorted().toIntArray()
+                    setFont(rating, CharacterSet(chars))
+                }
+            }
         }
         rating.templates.first { it.id == "music" }.modify {
-            fun Text.setFont(chars: CharacterSet = CharacterSet.NUMBERS) {
-                bitmapFont = rating.fontCache[font]!!.toBitmapFont(
-                    size,
-                    chars = chars,
-                    paint = color.hexToRGBA()
-                )
-            }
+            fun Text.setFont(chars: CharacterSet = CharacterSet.NUMBERS) = setFont(rating, chars)
             text("index-id") {
                 setFont()
             }
@@ -77,6 +87,32 @@ class MaimaiImage(
             }
             text("level-rating") {
                 setFont(CharacterSet(('0'..'9').joinToString("") + ".→"))
+            }
+        }
+
+        val level = themes["level"]!!
+        level.templates.first { it.id == "main" }.modify {
+            parallel = true
+            sub("footer") {
+                text("copyright") {
+                    val chars = text.toSet().map { it.code }.sorted().toIntArray()
+                    setFont(rating, CharacterSet(chars))
+                }
+            }
+        }
+        level.templates.first { it.id == "group" }.modify {
+            text("level") {
+                setFont(level, CharacterSet(('0'..'9').joinToString("") + ".+"))
+            }
+            sub("musics") {
+                parallel = true
+            }
+        }
+        level.templates.first { it.id == "music" }.modify {
+            sub("cover/info/id-container") {
+                text("id") {
+                    setFont(level, CharacterSet(('0'..'9').joinToString("")))
+                }
             }
         }
     }

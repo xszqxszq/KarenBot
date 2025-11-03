@@ -3,6 +3,7 @@ package xyz.xszq.bot.controller
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.format.ImageEncodingProps
 import korlibs.image.format.JPEG
+import korlibs.math.toIntFloor
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -16,6 +17,8 @@ import xyz.xszq.bot.music.ChartInfo
 import xyz.xszq.bot.music.MusicDifficulty
 import xyz.xszq.bot.music.MusicInfo
 import xyz.xszq.bot.music.Rating
+import xyz.xszq.bot.music.Record
+import xyz.xszq.bot.payload.LocalCourseInfo
 import xyz.xszq.shinobu.countTime
 import kotlin.random.Random
 
@@ -123,6 +126,12 @@ class ImageController(
             val (music, _) = found
             handleInfoScore(this, music)
         }
+
+//        maimai.local.courses.values.forEach { course ->
+//            startsWith(course.name.toSimple()) { args ->
+//                handleCourse(this, course, args)
+//            }
+//        }
     }
 
     val tips = listOf(
@@ -182,12 +191,15 @@ class ImageController(
         page: Int ?= null,
         totalPages: Int ?= null
     ) = event.run {
+        this@sendResultImage ?: return@run
         if (textMode()) {
             send(this, text)
             return
         }
         upload(event) { url ->
-            reply(MarkdownTemplates.Templates.image(url, command, text, page, totalPages))
+            reply(MarkdownTemplates.Templates.image(
+                url, Pair(width, height), command, text, page, totalPages
+            ))
         }
     }
 
@@ -274,11 +286,17 @@ class ImageController(
         else
             false
         val isFitLevelValues = Query.isFitLevelValues(filters)
+        var time = 0L
         maimai.query.records(event, musics, args) { response, backend ->
-            maimai.image.templateBest40(response, noB15, nowVersion, backend, isFitLevelValues) {
-                Query.filterRecords(filters, this)
+            countTime {
+                maimai.image.templateBest40(response, noB15, nowVersion, backend, isFitLevelValues) {
+                    Query.filterRecords(filters, this)
+                }
+            }.let { (elapsed, result) ->
+                time = elapsed
+                result
             }
-        }.sendResultImage(fullCommand+"40", event, randomTips())
+        }.sendResultImage(fullCommand+"40", event, "生成时间：${time}ms\r${randomTips()?:""}")
     }
 
     suspend fun handleMusicRating(
@@ -437,6 +455,76 @@ class ImageController(
         }.sendResultImage("info id${music.id}", event, randomTips())
     }
 
+    suspend fun handleCourse(
+        event: MessageEvent,
+        course: LocalCourseInfo,
+        args: String
+    ) = event.run {
+        val charts = if (course.random) {
+            val difficulties =
+                if (course.name.startsWith("MASTER"))
+                    listOf(MusicDifficulty.Master, MusicDifficulty.ReMaster)
+                else
+                    listOf(MusicDifficulty.Expert)
+            maimai.musics().flatMap { it.charts }.filter {
+                it.difficulty in difficulties && it.levelValue in course.lower..course.upper
+            }
+        } else {
+            course.musics.mapNotNull { music ->
+                maimai.music(music.id) ?.charts?.firstOrNull {
+                    it.difficulty.value == music.difficulty
+                }
+            }
+        }
+        val musics = charts.map { it.music }.toSet().toList()
+        maimai.query.records(event, musics, args) { response, _ ->
+            val scores = charts.map { chart ->
+                Pair(chart, response.records.firstOrNull { record ->
+                    chart == record.chart
+                })
+            }
+            var life = course.life
+            val remains = scores.mapIndexed { index, (chart, score) ->
+                if (life >= 0 && index != 0)
+                    life += course.recover
+                val damage = calcMinDamage(chart, score?.achievement ?: 0, course)
+                println(damage)
+                life -= damage
+                if (life <= 0) {
+                    life = 0
+                }
+                life
+            }
+            println(remains)
+        }
+    }
+    fun calcMinDamage(
+        chart: ChartInfo,
+        achievement: Int,
+        course: LocalCourseInfo
+    ): Int {
+        val totalBase = chart.notes.tap + chart.notes.touch +
+                2 * chart.notes.hold + 3 * chart.notes.slide +
+                5 * chart.notes.`break`
+        val base = 100000.0 / totalBase
+
+        val minus = 1010000 - achievement
+        val amount = minus / base
+
+        val greats = (amount / 2).toIntFloor()
+        val goods = (amount / 5).toIntFloor()
+        val misses = (amount / 10).toIntFloor()
+
+        val damages = mutableListOf<Int>()
+        if (course.damage.great != 0)
+            damages.add(course.damage.great * greats)
+        if (course.damage.good != 0)
+            damages.add(course.damage.good * goods)
+        if (course.damage.miss != 0)
+            damages.add(course.damage.miss * misses)
+        return damages.minOrNull() ?: 0
+    }
+
     fun filterCharts(
         filters: List<Filter>?
     ): Pair<List<ChartInfo>, Boolean> {
@@ -475,11 +563,10 @@ class ImageController(
         return Pair(charts, detailed)
     }
 
-    suspend fun Bitmap?.send(
+    suspend fun Bitmap.send(
         event: MessageEvent,
         message: String ?= null
     ): Unit = useTempFile { file ->
-        this ?: return@useTempFile
         val bytes = JPEG.encode(this, ImageEncodingProps(quality = 0.85))
         file.writeBytes(bytes)
         message ?.let {
@@ -489,11 +576,10 @@ class ImageController(
         }
     }
     @OptIn(DelicateCoroutinesApi::class)
-    suspend fun Bitmap?.upload(
+    suspend fun Bitmap.upload(
         event: MessageEvent,
         handle: suspend MessageEvent.(String) -> Unit
     ): Unit = useTempFile(suffix = ".jpg") { file ->
-        this ?: return@useTempFile
         val bytes = JPEG.encode(this, ImageEncodingProps(quality = 0.85))
         file.writeBytes(bytes)
         val uploaded = event.bot.cos.upload(file)

@@ -179,7 +179,9 @@ class GuessController(
                     )
                 } else {
                     val uploaded = bot.cos.upload(file)
-                    reply(MarkdownTemplates.Templates.guessImage(uploaded.url, hint))
+                    reply(MarkdownTemplates.Templates.guessCropped(
+                        uploaded.url, hint)
+                    )
                     GlobalScope.launch {
                         delay(10000L)
                         bot.cos.deleteFromCos(uploaded.filename)

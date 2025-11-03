@@ -10,11 +10,11 @@ import xyz.xszq.bot.payload.markdown.Keyboard.KeyboardRowBuilder
 object MarkdownTemplates {
     private const val MAX_RESULTS = 8
 
-    const val MUSIC_INFO = "102112100_1756944151"
+    const val MUSIC_INFO = "102112100_1761189244"
     const val GUESS = "102112100_1748875837"
-    const val BRIEF = "102112100_1748948894"
+    const val BRIEF = "102112100_1761189409"
     const val CODE_BLOCK = "102112100_1751984435"
-    const val IMAGE = "102112100_1752678728"
+    const val IMAGE = "102112100_1761189134"
 
     object Keyboards {
         fun single(
@@ -953,16 +953,17 @@ object MarkdownTemplates {
                 music.bpm.toString()
             }
             "level" {
-                val levelValues = music.charts.joinToString("/") {
+                music.charts.joinToString("/") {
                     it.levelValue.toString()
                 }
-                val fitLevelValues = music.charts.joinToString("/") {
+            }
+            "level_fit" {
+                music.charts.joinToString("/") {
                     it.fitLevelValue.toStringDecimal(1)
                 }
-                "$levelValues\r拟合定数: $fitLevelValues"
             }
             "charter" {
-                music.charts.joinToString("/") { it.notesDesigner }
+                music.charts.joinToString("/") { it.notesDesigner }.ifBlank { "-" }
             }
         }.toMessage(Keyboards.music(music))
         fun oauth(
@@ -1048,6 +1049,7 @@ object MarkdownTemplates {
         ))
         fun image(
             url: String,
+            size: Pair<Int, Int>,
             command: String,
             description: String?,
             nowPage: Int ?= null,
@@ -1058,6 +1060,9 @@ object MarkdownTemplates {
             }
             "img" {
                 url
+            }
+            "img_size" {
+                "img #${size.first}px #${size.second}px"
             }
             "description" {
                 description ?.replace("\n", "\r") ?: " "
@@ -1087,24 +1092,21 @@ object MarkdownTemplates {
             "img" {
                 url
             }
+            "img_size" {
+                "img #300px #300px"
+            }
             "description" {
                 description.replace("\n", "\r")
             }
-        }.toMessage(Keyboards.GUESS)
+        }
+        fun guessCropped(
+            url: String,
+            description: String
+        ) = guessImage(url, description).toMessage(Keyboards.GUESS)
         fun guessFinished(
             url: String,
             hint: String
-        ) = MarkdownData.create(IMAGE) {
-            "title" {
-                "maimai 猜歌"
-            }
-            "img" {
-                url
-            }
-            "description" {
-                hint.replace("\n", "\r")
-            }
-        }.toMessage(Keyboards.GUESS_AGAIN)
+        ) = guessImage(url, hint).toMessage(Keyboards.GUESS_AGAIN)
 
         val SELECT_BACKENDS = brief("舞萌DX", "您还未在查分器上绑定QQ号。请选择一个查分器来绑定您的QQ号：")
             .toMessage(Keyboards.BACKENDS)

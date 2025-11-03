@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.util.collections.ConcurrentMap
 import korlibs.io.file.VfsFile
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -134,7 +135,7 @@ class PluginLoader(
 
         runBlocking {
             pluginDir.listFiles { file -> file.extension == "jar" }?.forEach { pluginFile ->
-                GlobalScope.launch {
+                GlobalScope.launch(Dispatchers.IO) {
                     loadOrUpdatePlugin(pluginFile)
                 }
             }

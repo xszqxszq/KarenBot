@@ -9,6 +9,8 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -69,7 +71,7 @@ fun main() {
     pluginLoader.reloadAllPlugins()
 
     System.getProperty("cli") ?.let {
-        GlobalScope.launch {
+        GlobalScope.launch(Dispatchers.IO) {
             readInput(pluginLoader)
         }
     }
@@ -86,12 +88,15 @@ fun main() {
         configureRouting(logger, pluginLoader, filter, forwardConfig)
     }.start(wait = true)
 }
+@OptIn(DelicateCoroutinesApi::class)
 fun readInput(pluginLoader: PluginLoader) {
     while (true) {
         val input = readln()
-        pluginLoader.manualTrigger(
-            MessageEvent(pluginLoader.bot, "", "",
-                MessageChain(PlainText(input)), User(pluginLoader.bot, "BD11EC5ADAE7A0CA792984F3EC63A165")
-            ))
+        GlobalScope.launch(Dispatchers.IO) {
+            pluginLoader.manualTrigger(
+                MessageEvent(pluginLoader.bot, "", "",
+                    MessageChain(PlainText(input)), User(pluginLoader.bot, "BD11EC5ADAE7A0CA792984F3EC63A165")
+                ))
+        }
     }
 }

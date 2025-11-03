@@ -12,16 +12,16 @@ java {
     withSourcesJar()
 }
 group = "xyz.xszq"
-version = "1.0.2"
+version = "1.0.3"
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation("com.soywiz.korge:korge-core:${korlibsVersion}")
-    implementation("io.github.pdvrieze.xmlutil:core-jdk:0.91.0-RC1")
-    implementation("io.github.pdvrieze.xmlutil:serialization-jvm:0.91.0-RC1")
+    api("com.soywiz.korge:korge-core:${korlibsVersion}")
+    api("io.github.pdvrieze.xmlutil:core-jdk:0.91.0-RC1")
+    api("io.github.pdvrieze.xmlutil:serialization-jvm:0.91.0-RC1")
     testImplementation(kotlin("test"))
 }
 

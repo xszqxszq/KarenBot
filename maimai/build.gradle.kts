@@ -50,9 +50,10 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.3.1")
     implementation("software.amazon.awssdk:s3:2.26.29")
-    implementation("xyz.xszq:shinobu:1.0.2")
+    implementation("xyz.xszq:shinobu:1.0.3")
     testImplementation(kotlin("test"))
     testImplementation("com.soywiz.korge:korge-core:$korlibsVersion")
+    testImplementation("xyz.xszq:shinobu:1.0.3")
 }
 
 tasks.test {

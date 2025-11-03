@@ -12,6 +12,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -112,7 +113,7 @@ suspend fun Application.downloadFiles(
 ) = attachments.mapNotNull { attachment ->
     downloadFile(attachment.url, attachment.filename, logger)
 }.also {
-    launch {
+    launch(Dispatchers.IO) {
         fileManager.addFiles(it)
     }
 }
@@ -312,7 +313,7 @@ suspend fun Application.handleDispatch(
         /* 无法处理的事件 */
         else -> null
     } ?.let { event ->
-        GlobalScope.launch {
+        GlobalScope.launch(Dispatchers.IO) {
             pluginLoader.subscribes.handle(event)
         }
     }
@@ -402,6 +403,6 @@ suspend fun forward(
         setBody(body)
     }
 }
-fun PluginLoader.manualTrigger(event: Event) = runBlocking {
+suspend fun PluginLoader.manualTrigger(event: Event) {
     subscribes.handle(event)
 }
