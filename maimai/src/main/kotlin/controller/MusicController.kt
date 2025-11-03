@@ -151,7 +151,23 @@ class MusicController(
             }
             searchRegex(raw, regex)
         }
-
+        startsWith(listOf("BPM查歌", "bpm查歌")) { raw ->
+            if (raw.isBlank()) {
+                reply(buildString {
+                    appendLine("使用方法：BPM查歌 [BPM] [页数]")
+                    appendLine("例：BPM查歌 180")
+                    appendLine("例：BPM查歌 180 2")
+                })
+                return@startsWith
+            }
+            val args = raw.split(" ")
+            val bpm = args.firstOrNull()?.toIntOrNull() ?: run {
+                reply("请输入正确的BPM值。")
+                return@startsWith
+            }
+            val page = args.getOrNull(1)?.toIntOrNull() ?: 1
+            searchBPM(bpm, page)
+        }
         // 别名查询/设置
         endsWith("有什么别名") { name ->
             maimai.aliases.search(name).firstOrNull() ?.let { music ->
@@ -314,6 +330,15 @@ class MusicController(
             .filter { regex.matches(it.name) }
             .take(maxResults)
         showResult("search-regex", raw, result)
+    }
+    suspend fun MessageEvent.searchBPM(
+        bpm: Int,
+        page: Int
+    ) {
+        val (result, nowPage, totalPages) = maimai.musics()
+            .filter { it.bpm == bpm }
+            .pagination(page, maxResults)
+        showResult("search-bpm", bpm.toString(), result, nowPage, totalPages)
     }
     suspend fun chartText(
         chart: ChartInfo
