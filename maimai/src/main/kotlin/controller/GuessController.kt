@@ -236,7 +236,7 @@ class GuessController(
             if (id != nowId) {
                 return@always
             }
-            if (text.trim().startsWith("不玩了")) {
+            if (maimai.pluginStopped || text.trim().startsWith("不玩了")) {
                 reply(showOpening(musics, chars, true))
                 bot.pluginLoader.subscribes.stop(subscribeId)
                 return@always
@@ -289,7 +289,8 @@ class GuessController(
         all: Boolean = false
     ) = MarkdownData.create(MarkdownTemplates.GUESS) {
         "status" {
-            "\uD83D\uDCA1已开出字母：${chars.joinToString(", ")}"
+            "\uD83D\uDCA1已开出字母：${chars.joinToString(", ")}" +
+                    if (maimai.pluginStopped) "\r机器人重启中，该局游戏已结束" else ""
         }
         musics.forEachIndexed { index, (music, status) ->
             if (status) {

@@ -31,6 +31,7 @@ class SubscribeManager: CoroutineScope {
         plugins[plugin]?.add(subscribe as Subscribe<Event>)
     }
 
+    // TODO: Support all events
     /**
      * Add a Temporary always subscribe from the plugin.
      * @param name Name.

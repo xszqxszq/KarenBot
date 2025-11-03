@@ -95,6 +95,8 @@ class Maimai: Plugin() {
         .build()
         .loadConfigOrThrow<DatabaseConfig>()
 
+    var pluginStopped: Boolean = false
+
     /**
      * Init Maimai Plugin.
      */
@@ -170,6 +172,7 @@ class Maimai: Plugin() {
     override fun unload() {
         aliases.close()
         api.close()
+        pluginStopped = true
         logger.info { "[舞萌] 插件已卸载。" }
     }
 

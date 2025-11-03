@@ -101,7 +101,10 @@ class MusicController(
         startsWith("定数查歌") { raw ->
             val args = raw.split(" ")
             val levels = args.filter { '.' in it }.mapNotNull { it.toDoubleOrNull() }
-            val page = args.firstOrNull { '.' !in it } ?.toIntOrNull() ?: 1
+            val page =
+                if (args.size > 1 && '.' !in args.last())
+                    args.last().toIntOrNull() ?: 1
+                else 1
             when {
                 levels.size == 1 -> {
                     searchLevel(levels[0], levels[0], page)
@@ -119,9 +122,15 @@ class MusicController(
                 }
             }
         }
+        button("search-level", true) {
+            val args = data.split("\n", limit = 2)
+            val (begin, end) = args[0].split(":").map { it.toDouble() }
+            val page = args[1].toInt()
+            searchLevel(begin, end, page)
+        }
         startsWith("谱师查歌") { raw ->
             val args = raw.split(" ")
-            val page = args.firstOrNull { '.' !in it } ?.toIntOrNull() ?: 1
+            val page = args.getOrNull(1)?.toIntOrNull() ?: 1
             when {
                 args.isNotEmpty() -> {
                     searchDesigner(args[0], page)
@@ -134,6 +143,12 @@ class MusicController(
                     })
                 }
             }
+        }
+        button("search-designer", true) {
+            val args = data.split("\n", limit = 2)
+            val name = args[0]
+            val page = args[1].toInt()
+            searchDesigner(name, page)
         }
         startsWith("正则查歌") { raw ->
             if (raw.isBlank()) {
@@ -166,6 +181,12 @@ class MusicController(
                 return@startsWith
             }
             val page = args.getOrNull(1)?.toIntOrNull() ?: 1
+            searchBPM(bpm, page)
+        }
+        button("search-bpm", true) {
+            val args = data.split("\n", limit = 2)
+            val bpm = args[0].toInt()
+            val page = args[1].toInt()
             searchBPM(bpm, page)
         }
         // 别名查询/设置
@@ -297,7 +318,7 @@ class MusicController(
         showResult("search-word", name, result, nowPage, totalPages)
     }
 
-    suspend fun MessageEvent.searchLevel(
+    suspend fun ReplyAble.searchLevel(
         begin: Double,
         end: Double,
         page: Int
@@ -307,9 +328,9 @@ class MusicController(
             .filter { it.levelValue in begin..end }
             .distinctBy { it.music.id }
             .pagination(page, maxResults)
-        showResult("search-level", "$begin:$end:$page", result.map { it.music }, nowPage, totalPages)
+        showResult("search-level", "$begin:$end", result.map { it.music }, nowPage, totalPages)
     }
-    suspend fun MessageEvent.searchDesigner(
+    suspend fun ReplyAble.searchDesigner(
         designer: String,
         page: Int
     ) {
@@ -331,14 +352,14 @@ class MusicController(
             .take(maxResults)
         showResult("search-regex", raw, result)
     }
-    suspend fun MessageEvent.searchBPM(
+    suspend fun ReplyAble.searchBPM(
         bpm: Int,
         page: Int
     ) {
         val (result, nowPage, totalPages) = maimai.musics()
             .filter { it.bpm == bpm }
             .pagination(page, maxResults)
-        showResult("search-bpm", bpm.toString(), result, nowPage, totalPages)
+        showResult("search-bpm", "$bpm", result, nowPage, totalPages)
     }
     suspend fun chartText(
         chart: ChartInfo

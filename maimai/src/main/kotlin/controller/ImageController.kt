@@ -381,7 +381,7 @@ class ImageController(
                     response, fullCommand, page, all, isFitLevelValues
                 ) {
                     Query.filterRecords(filters, this) ?.also {
-                        if (it.size > 1000) {
+                        if (all && it.size > 1000) {
                             reply("您查询的记录过多，全分数列表最多支持1000条记录")
                             return@templateScoreList null
                         }
