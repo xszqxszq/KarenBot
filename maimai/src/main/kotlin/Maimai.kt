@@ -64,6 +64,8 @@ class Maimai: Plugin() {
             backend("lxns"),
         ).toMutableList()
         MaimaiSettingsTable[event.sender.id, "prober"] ?.let { prefer ->
+            if (prefer.isBlank())
+                return@let
             backends = (backends.filter { it.name == prefer })
                 .toMutableList()
         }

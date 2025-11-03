@@ -22,6 +22,8 @@ import xyz.xszq.bot.music.RecordsResponse
 import xyz.xszq.bot.newLine
 import xyz.xszq.bot.reply
 
+typealias MaimaiErrorHandler = suspend MessageEvent.(Throwable, String) -> Boolean
+
 class MaimaiQuery(
     val maimai: Maimai
 ) {
@@ -97,15 +99,22 @@ class MaimaiQuery(
         args: String,
         handler: suspend MessageEvent.(RatingResponse, MaimaiAPI) -> R?
     ): R? = event.run query@ {
+        // Temporary fix
+        // TODO: Process exception in a more elegant way
+        var lastException: Throwable? = null
         val (response, backend) = maimai.backendsWithPriority(event, args).firstNotNullOfOrNull { backend ->
             runCatching {
                 backend.getPlayerRating(this, args)
             }.onFailure { e ->
-                errorHandler(e, args)
-                return@query null
+                if (errorHandler(e, args))
+                    return@query null
+                lastException = e
             }.getOrNull() ?.let { Pair(it, backend) }
         } ?: run {
-            reply("查询失败")
+            if (lastException is UserNotFoundException)
+                messageUserNeedBind(this, args)
+            else
+                reply("查询失败")
             return@query null
         }
         return handler(response, backend)
@@ -117,15 +126,20 @@ class MaimaiQuery(
         args: String = "",
         handler: suspend MessageEvent.(RecordsResponse, MaimaiAPI) -> R?
     ): R? = event.run query@ {
+        var lastException: Throwable? = null
         val (response, backend) = maimai.backendsWithPriority(event, args).firstNotNullOfOrNull { backend ->
             runCatching {
                 backend.getPlayerRecords(this, args, musics)
             }.onFailure { e ->
-                errorHandler(e, args)
-                return@query null
+                if (errorHandler(e, args))
+                    return@query null
+                lastException = e
             }.getOrNull() ?.let { Pair(it, backend) }
         } ?: run {
-            reply("查询失败")
+            if (lastException is UserNotFoundException)
+                messageUserNeedBind(this, args)
+            else
+                reply("查询失败")
             return@query null
         }
         return handler(response, backend)
@@ -143,24 +157,29 @@ class MaimaiQuery(
         music: MusicInfo,
         handler: suspend MessageEvent.(List<Record>) -> R?
     ): R? = event.run query@ {
+        var lastException: Throwable? = null
         val response = maimai.backendsWithPriority(event, "").firstNotNullOfOrNull { backend ->
             runCatching {
                 backend.getPlayerRecord(this, "", music)
             }.onFailure { e ->
-                errorHandler(e, "")
-                return@query null
+                if (errorHandler(e, ""))
+                    return@query null
+                lastException = e
             }.getOrNull()
         } ?: run {
-            reply("查询失败")
+            if (lastException is UserNotFoundException)
+                messageUserNeedBind(this, "")
+            else
+                reply("查询失败")
             return@query null
         }
         return handler(response)
     }
 
-    val errorHandler: ErrorHandler = { e, args ->
+    val errorHandler: MaimaiErrorHandler = handler@ { e, args ->
         when (e) {
             is UserNotFoundException -> {
-                messageUserNeedBind(this, args)
+                return@handler false
             }
             is UserBindRequiredException -> {
                 messageUserNeedBind(this, args)
@@ -175,5 +194,6 @@ class MaimaiQuery(
                 e.printStackTrace()
             }
         }
+        return@handler true
     }
 }
