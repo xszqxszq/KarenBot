@@ -366,14 +366,13 @@ object MarkdownTemplates {
             )
         )
         fun selectPaged(
-            context: ReplyAble,
             button: String,
             keyword: String,
             result: List<MusicInfo>,
             nowPage: Int = 1,
             totalPages: Int = 1,
             command: String = "id"
-        ) = Keyboard.create(if (button.isBlank()) null else context) {
+        ) = Keyboard.create {
             listButtons(result).forEach { musics ->
                 row {
                     musics.forEach { music ->
@@ -1013,7 +1012,6 @@ object MarkdownTemplates {
             }
         }.toMessage(Keyboards.QUEUE_UPDATE)
         fun result(
-            context: ReplyAble,
             title: String,
             type: String,
             keyword: String,
@@ -1025,10 +1023,9 @@ object MarkdownTemplates {
                 title
             }
         }.toMessage(Keyboards.selectPaged(
-            context, type, keyword, result, nowPage, totalPages
+            type, keyword, result, nowPage, totalPages
         ))
         fun resultSimple(
-            context: ReplyAble,
             title: String,
             type: String,
             keyword: String,
@@ -1039,7 +1036,6 @@ object MarkdownTemplates {
                 title
             }
         }.toMessage(Keyboards.selectPaged(
-            context = context,
             button = "",
             keyword = keyword,
             result = result.take(MAX_RESULTS),

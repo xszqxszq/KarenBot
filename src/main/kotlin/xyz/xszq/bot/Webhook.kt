@@ -283,7 +283,7 @@ suspend fun Application.handleDispatch(
                 ChatType.GROUP -> GroupInteractionEvent(
                     bot = pluginLoader.bot,
                     eventId = payload.id!!,
-                    id = data.id,
+                    id = "",
                     data = data.data.resolved.buttonData,
                     button = data.data.resolved.buttonId,
                     sender = User(pluginLoader.bot, data.groupMemberOpenId!!),
@@ -297,14 +297,14 @@ suspend fun Application.handleDispatch(
                 ChatType.C2C -> InteractionEvent(
                     bot = pluginLoader.bot,
                     eventId = payload.id!!,
-                    id = data.id,
+                    id = "",
                     data = data.data.resolved.buttonData,
                     button = data.data.resolved.buttonId,
                     sender = User(pluginLoader.bot, data.userOpenId!!)
                 ).also {
                     logger.info {
                         "[互动] [${data.userOpenId}] " +
-                                "<${data.data.resolved.buttonId}> ${data.data.resolved.buttonData}"
+                                "<${data.data.resolved.buttonId}> ${data.data.resolved.buttonData.replace("\n", "\\n")}"
                     }
                 }
                 else -> null

@@ -24,24 +24,7 @@ data class Keyboard(
     }
     companion object {
         fun create(
-            embeddedEvent: ReplyAble ?= null,
             builder: KeyboardBuilder.() -> Unit
-        ) = KeyboardBuilder()
-            .apply(builder)
-            .build()
-            .apply {
-                embeddedEvent ?.let {
-                    var counter = embeddedEvent.seq
-                    content.rows.forEach { row ->
-                        row.buttons.forEach { button ->
-                            if (button.action.type == Action.CALLBACK)
-                                button.action.data ?.let {
-                                    counter += 1
-                                    button.action.data = "${embeddedEvent.id}:$counter:${button.action.data}"
-                                }
-                        }
-                    }
-                }
-            }
+        ) = KeyboardBuilder().apply(builder).build()
     }
 }

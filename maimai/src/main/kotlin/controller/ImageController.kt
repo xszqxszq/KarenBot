@@ -173,7 +173,6 @@ class ImageController(
                     return Pair(result.first(), difficulty)
                 else
                     reply(MarkdownTemplates.Templates.resultSimple(
-                        context = this,
                         title = "您要查找的歌曲可能是：",
                         type = type,
                         keyword = args,

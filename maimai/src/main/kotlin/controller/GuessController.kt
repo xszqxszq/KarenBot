@@ -55,7 +55,7 @@ class GuessController(
             if (this is GroupMessageEvent)
                 reply(showAdminPanel(disable = false))
         }
-        button("admin/guess", true) {
+        button("admin/guess") {
             val args = data.split(",")
             val disable = args[0].toInt() == 0
             val group = args[1]
@@ -321,7 +321,7 @@ class GuessController(
         "content" {
             "请管理员点击下方按钮确认" + (if (disable) "禁用" else "启用") + "猜歌："
         }
-    }.toMessage(Keyboard.create(this) {
+    }.toMessage(Keyboard.create {
         row {
             val display = if (disable) "⚠禁用猜歌" else "✅启用猜歌"
             button(

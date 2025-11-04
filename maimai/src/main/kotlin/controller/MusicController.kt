@@ -46,7 +46,7 @@ class MusicController(
             else
                 reply(music.infoMD(jacketUrl))
         }
-        button("maimai-id", true) {
+        button("maimai-id") {
             val id = data.toIntOrNull() ?: return@button
             val music = maimai.music(id) ?: return@button
             if (textMode())
@@ -90,7 +90,7 @@ class MusicController(
             val name = args[0]
             search(name)
         }
-        button("search-word", true) {
+        button("search-word") {
             val args = data.split("\n", limit = 2)
             val name = args[0]
             val page = args[1].toInt()
@@ -122,7 +122,7 @@ class MusicController(
                 }
             }
         }
-        button("search-level", true) {
+        button("search-level") {
             val args = data.split("\n", limit = 2)
             val (begin, end) = args[0].split(":").map { it.toDouble() }
             val page = args[1].toInt()
@@ -144,7 +144,7 @@ class MusicController(
                 }
             }
         }
-        button("search-designer", true) {
+        button("search-designer") {
             val args = data.split("\n", limit = 2)
             val name = args[0]
             val page = args[1].toInt()
@@ -183,7 +183,7 @@ class MusicController(
             val page = args.getOrNull(1)?.toIntOrNull() ?: 1
             searchBPM(bpm, page)
         }
-        button("search-bpm", true) {
+        button("search-bpm") {
             val args = data.split("\n", limit = 2)
             val bpm = args[0].toInt()
             val page = args[1].toInt()
@@ -298,7 +298,6 @@ class MusicController(
                     }.trim())
                 else
                     reply(MarkdownTemplates.Templates.result(
-                        context = this,
                         title = hint,
                         type = type,
                         keyword = keyword,

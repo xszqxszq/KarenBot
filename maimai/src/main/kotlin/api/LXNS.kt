@@ -66,6 +66,7 @@ class LXNS(
         when (response.code) {
             401 -> throw AuthorizationException(response.message)
             404 -> throw UserNotFoundException(response.message)
+            400 -> throw UserNotFoundException(response.message)
             200 -> return response.data
             else -> throw UnknownException(response.message)
         }

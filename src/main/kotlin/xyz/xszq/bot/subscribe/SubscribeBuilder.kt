@@ -59,10 +59,10 @@ class SubscribeBuilder(
         )
     }
 
-    fun button(button: String, embeddedMsgId: Boolean = false, block: suspend InteractionEvent.() -> Unit) {
+    fun button(button: String, block: suspend InteractionEvent.() -> Unit) {
         manager.subscribe(
             plugin,
-            ButtonSubscribe(button, embeddedMsgId, block)
+            ButtonSubscribe(button, block)
         )
     }
 }
