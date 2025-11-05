@@ -70,9 +70,10 @@ class AliasesSearch(
         writer.commit()
     }
     suspend fun loadAliases() {
-        val toInsert = maimai.musics().map { music ->
-            MusicNameAlias(music.id, music.name)
-        } + MusicAliasesTable.all().map { (id, alias) ->
+        maimai.musics().forEach { music ->
+            MusicAliasesTable.add(music, music.name)
+        }
+        val toInsert = MusicAliasesTable.all().map { (id, alias) ->
             MusicNameAlias(id, alias)
         }
         batchInsert(toInsert)

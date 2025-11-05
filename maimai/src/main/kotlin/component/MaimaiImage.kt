@@ -4,14 +4,19 @@ import korlibs.image.bitmap.Bitmap
 import korlibs.image.font.CharacterSet
 import korlibs.image.font.toBitmapFont
 import korlibs.io.file.std.localCurrentDirVfs
+import korlibs.io.util.isDigit
 import korlibs.io.util.toStringDecimal
+import korlibs.math.toIntFloor
 import kotlinx.coroutines.flow.filter
 import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.api.MaimaiAPI
+import xyz.xszq.bot.endsWith
 import xyz.xszq.bot.music.*
 import xyz.xszq.bot.pagination
+import xyz.xszq.bot.payload.LocalCourseInfo
 import xyz.xszq.shinobu.Container
 import xyz.xszq.shinobu.Image
+import xyz.xszq.shinobu.Spacing
 import xyz.xszq.shinobu.Text
 import xyz.xszq.shinobu.Theme
 import xyz.xszq.shinobu.ThemeManager
@@ -705,6 +710,238 @@ class MaimaiImage(
                 }
                 if (music.genre != MusicGenre.Utage && music.charts.none { it.difficulty == MusicDifficulty.ReMaster }) {
                     add(theme.scoreInfo(music.fakeReMaster, null))
+                }
+            }
+        }
+        return theme.render(main)
+    }
+
+    /**
+     * Generate a single Music Info for Course.
+     * @param chart The chart to render.
+     * @param record The record to display.
+     */
+    suspend fun Theme.courseMusic(
+        chart: ChartInfo,
+        achievement: Int,
+        life: Int,
+        damage: Int
+    ) = this["music"].modify {
+        image("result") {
+            if (life <= 0)
+                src = "result_2.png"
+        }
+        sub("music") {
+            background = "base_${chart.difficulty.name}.png"
+            image("cover") {
+                src = "../../covers/${chart.music.resourceId}.png"
+            }
+            sub("info/header") {
+                image("type") {
+                    src = "type_${chart.music.type.value}.png"
+                }
+                sub("title") {
+                    text("title") {
+                        text = chart.music.name
+                    }
+                }
+            }
+            sub("info/level") {
+                image("level") {
+                    src = "level_${chart.difficulty.value}_level.png"
+                }
+                sub("value") {
+                    val digits = chart.level.filter { it.isDigit() }
+                    digits.forEachIndexed { index, value ->
+                        add(Image(
+                            src="level_${chart.difficulty.value}_$value.png",
+                            margin = Spacing(0, 0, 0,
+                                if (index != digits.length - 1) -12 else 0
+                            )
+                        ))
+                    }
+                }
+                image("plus") {
+                    src = "level_${if (chart.level.endsWith("+")) chart.difficulty.value else 5}_plus.png"
+                }
+            }
+            sub("info/achievement") {
+                val part1 = (achievement / 10000).toString().padStart(3, ' ')
+                val part2 = (achievement % 10000).toString().padStart(4, '0')
+                val type = when {
+                    achievement < 800000 -> 1
+                    achievement < 970000 -> 2
+                    else -> 3
+                }
+                part1.forEach { char ->
+                    if (char == ' ')
+                        add(Image(
+                            src="score_1_none.png",
+                            margin=Spacing(0, 0, 0, -10)
+                        ))
+                    else
+                        add(Image(
+                            src="score_1_${type}_${char}.png",
+                            margin=Spacing(0, 0, 0, -10)
+                        ))
+                }
+                add(Image(
+                    src="score_3_${type}_dot.png",
+                    margin=Spacing(0, 0, -6, -15)
+                ))
+                part2.forEach { char ->
+                    add(Image(
+                        src="score_3_${type}_${char}.png",
+                        margin=Spacing(0, 0, 0, -10)
+                    ))
+                }
+                add(Image(src="percent_2_${type}.png"))
+            }
+            sub("info/damage") {
+                text("damage") {
+                    text = "-${damage}"
+                }
+            }
+        }
+    }
+
+    fun calcMinDamage(
+        chart: ChartInfo,
+        achievement: Int,
+        course: LocalCourseInfo
+    ): Int {
+        val totalBase = chart.notes.tap + chart.notes.touch +
+                2 * chart.notes.hold + 3 * chart.notes.slide +
+                5 * chart.notes.`break`
+        val base = 100000.0 / totalBase
+
+        val minus = 1010000 - achievement
+        val amount = minus / base
+
+        val greats = (amount / 2).toIntFloor()
+        val goods = (amount / 5).toIntFloor()
+        val misses = (amount / 10).toIntFloor()
+
+        val damages = mutableListOf<Int>()
+        if (course.damage.great != 0)
+            damages.add(course.damage.great * greats)
+        if (course.damage.good != 0)
+            damages.add(course.damage.good * goods)
+        if (course.damage.miss != 0)
+            damages.add(course.damage.miss * misses)
+        return damages.minOrNull() ?: 0
+    }
+    /**
+     * Template Course Score generation.
+     */
+    suspend fun templateCourse(
+        course: LocalCourseInfo,
+        scores: List<Pair<ChartInfo, Record?>>
+    ): Bitmap {
+        var life = course.life
+        val damages = scores.mapIndexed { index, (chart, score) ->
+            if (score ?.comboStatus ?.isAP() == true)
+                0
+            else
+                calcMinDamage(chart, score?.achievement ?: 0, course)
+        }
+        val remains = damages.mapIndexed { index, damage ->
+            if (life >= 0 && index != 0)
+                life += course.recover
+            life -= damage
+            if (life <= 0) {
+                life = 0
+            }
+            life
+        }
+        val theme = themes["course"]!!
+        val main = theme.main().modify {
+            val realId = course.id % 10000
+            background = when {
+                realId <= 1010 -> "background_1.png"
+                realId <= 1112 -> "background_2.png"
+                else -> "background_3.png"
+            }
+            sub("upper/musics") {
+                scores.forEachIndexed { index, (chart, record) ->
+                    add(theme.courseMusic(
+                        chart, record ?.achievement ?: 0, remains[index], damages[index]
+                    ))
+                }
+            }
+            sub("upper/info/status") {
+                if (life <= 0)
+                    background = "final_2.png"
+                image("course") {
+                    src = "title_${course.id}.png"
+                }
+            }
+            sub("upper/info/life") {
+                val type = when {
+                    life >= 100 -> 1
+                    life >= 10 -> 2
+                    life >= 1 -> 3
+                    else -> 4
+                }
+                background = "life_$type.png"
+                life.toString().forEach { value ->
+                    add(Image(src = "life_${type}_${value}.png"))
+                }
+            }
+            sub("upper/info/detail/achievement") {
+                val total = scores.sumOf { it.second ?.achievement ?: 0 }
+                val type = when {
+                    total < 800000 * scores.size-> 1
+                    total < 970000 * scores.size -> 2
+                    else -> 3
+                }
+
+                val part1 = (total / 10000).toString().padStart(3, ' ')
+                val part2 = (total % 10000).toString().padStart(4, '0')
+                part1.forEach { char ->
+                    if (char == ' ')
+                        add(Image(
+                            src="score_2_none.png",
+                            margin=Spacing(0, 0, 0, -10)
+                        ))
+                    else
+                        add(Image(
+                            src="score_2_${type}_${char}.png",
+                            margin=Spacing(0, 0, 0, -10)
+                        ))
+                }
+                add(Image(
+                    src="score_1_${type}_dot.png",
+                    margin=Spacing(0, 0, -18, -18)
+                ))
+                part2.forEach { char ->
+                    add(Image(
+                        src="score_1_${type}_${char}.png",
+                        margin=Spacing(0, 0, 0, -10)
+                    ))
+                }
+                add(Image(src="percent_1_${type}.png"))
+            }
+            sub("upper/info/detail/damage") {
+                sub("great") {
+                    text("value") {
+                        text = "-${course.damage.great}"
+                    }
+                }
+                sub("good") {
+                    text("value") {
+                        text = "-${course.damage.good}"
+                    }
+                }
+                sub("miss") {
+                    text("value") {
+                        text = "-${course.damage.miss}"
+                    }
+                }
+            }
+            sub("upper/info/detail/heal/heal") {
+                text("value") {
+                    text = "+${course.recover}"
                 }
             }
         }

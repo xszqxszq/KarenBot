@@ -127,11 +127,11 @@ class ImageController(
             handleInfoScore(this, music)
         }
 
-//        maimai.local.courses.values.forEach { course ->
-//            startsWith(course.name.toSimple()) { args ->
-//                handleCourse(this, course, args)
-//            }
-//        }
+        maimai.local.courses.values.forEach { course ->
+            startsWith(course.name.toSimple()) { args ->
+                handleCourse(this, course, args)
+            }
+        }
     }
 
     val tips = listOf(
@@ -465,9 +465,10 @@ class ImageController(
                     listOf(MusicDifficulty.Master, MusicDifficulty.ReMaster)
                 else
                     listOf(MusicDifficulty.Expert)
-            maimai.musics().flatMap { it.charts }.filter {
+            val list = maimai.musics().flatMap { it.charts }.filter {
                 it.difficulty in difficulties && it.levelValue in course.lower..course.upper
             }
+            List(4) { list.shuffled().first() }
         } else {
             course.musics.mapNotNull { music ->
                 maimai.music(music.id) ?.charts?.firstOrNull {
@@ -482,46 +483,9 @@ class ImageController(
                     chart == record.chart
                 })
             }
-            var life = course.life
-            val remains = scores.mapIndexed { index, (chart, score) ->
-                if (life >= 0 && index != 0)
-                    life += course.recover
-                val damage = calcMinDamage(chart, score?.achievement ?: 0, course)
-                println(damage)
-                life -= damage
-                if (life <= 0) {
-                    life = 0
-                }
-                life
-            }
-            println(remains)
+            maimai.image.templateCourse(course, scores)
+                .sendResultImage(course.name.toSimple(), event, randomTips())
         }
-    }
-    fun calcMinDamage(
-        chart: ChartInfo,
-        achievement: Int,
-        course: LocalCourseInfo
-    ): Int {
-        val totalBase = chart.notes.tap + chart.notes.touch +
-                2 * chart.notes.hold + 3 * chart.notes.slide +
-                5 * chart.notes.`break`
-        val base = 100000.0 / totalBase
-
-        val minus = 1010000 - achievement
-        val amount = minus / base
-
-        val greats = (amount / 2).toIntFloor()
-        val goods = (amount / 5).toIntFloor()
-        val misses = (amount / 10).toIntFloor()
-
-        val damages = mutableListOf<Int>()
-        if (course.damage.great != 0)
-            damages.add(course.damage.great * greats)
-        if (course.damage.good != 0)
-            damages.add(course.damage.good * goods)
-        if (course.damage.miss != 0)
-            damages.add(course.damage.miss * misses)
-        return damages.minOrNull() ?: 0
     }
 
     fun filterCharts(

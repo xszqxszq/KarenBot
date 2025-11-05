@@ -47,4 +47,21 @@ object MusicAliasesTable: Table() {
             }
         }
     }.await()
+    suspend fun add(music: MusicInfo, alias: String) = suspendedTransactionAsync {
+        if (selectAll().where {
+                (MusicAliasesTable.id eq music.id) and (name eq alias)
+            }.count() != 0L) {
+            update({ (MusicAliasesTable.id eq music.id) and (name eq alias) }) {
+                with(SqlExpressionBuilder) {
+                    it[votes] = 0
+                }
+            }
+        } else {
+            insert {
+                it[id] = music.id
+                it[name] = alias
+                it[votes] = 0
+            }
+        }
+    }.await()
 }
