@@ -34,7 +34,7 @@ class SekaiSticker {
         SystemFontRegistry()
     }
     val fonts = runBlocking {
-        listOf("FOT-Yuruka Std UB", "SSFangTangTi").map {
+        listOf("FOT-Yuruka Std UB", "SSFangTangTi", "Alibaba-PuHuiTi-H", "Alibaba-PuHuiTi-B").map {
             registry[it]
         }
     }
@@ -107,13 +107,13 @@ class SekaiSticker {
         var ascent = 0.0
         val chars = mutableListOf<Triple<Char, Font, Double>>()
         text.forEach { char ->
-            val (font, metrics) = fonts.firstNotNullOf { font ->
+            val (font, metrics) = fonts.firstNotNullOfOrNull { font ->
                 val metrics = font.getTextBoundsWithGlyphs(character.defaultText.s.toDouble(), char.toString())
-                if (char.toString().isBlank() || metrics.glyphs.first().metrics.existing)
+                if (char.toString().isBlank() || metrics.glyphs.firstOrNull()?.metrics?.existing == true)
                     Pair(font, metrics)
                 else
                     null
-            }
+            } ?: return@forEach
             val width =
                 if (metrics.metrics.width == 0.0) metrics.glyphs.first().metrics.xadvance
                 else metrics.metrics.width

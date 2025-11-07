@@ -7,6 +7,7 @@ import korlibs.image.bitmap.Bitmap
 import korlibs.image.format.PNG
 import korlibs.image.format.encode
 import korlibs.image.format.readNativeImage
+import korlibs.io.util.isDigit
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonPrimitive
 import xyz.xszq.bot.event.MessageEvent
@@ -34,6 +35,7 @@ class Meme: Plugin() {
     val fiveThousand = FiveThousandChoyen()
     val spherize = Spherize()
     val imSoHappy = ImSoHappy()
+    val emojiKitchen = EmojiKitchen()
 
     @OptIn(ExperimentalHoplite::class)
     override fun load() {
@@ -101,6 +103,12 @@ class Meme: Plugin() {
             }.onFailure { e ->
                 imSoHappyErrorHandler(e)
             }
+        }
+        startsWith("表情合成") { raw ->
+            emojiKitchen(raw)
+        }
+        always {
+            emojiKitchen()
         }
     }
     val memeErrorHandler: ErrorHandler = { e ->
@@ -428,6 +436,36 @@ class Meme: Plugin() {
         val image = message.filterIsInstance<Image>().firstOrNull() ?: throw ArgsNotEnoughException()
         imSoHappy.handle(this, image.file.readNativeImage())
     }
+    private suspend fun MessageEvent.emojiKitchen(
+        raw: String
+    ) {
+        val list = if ("+" in raw)
+            raw.split("+", limit = 2)
+        else
+            raw.splitEmojis()
+        if (list.size != 2)
+            return
+        val (a, b) = list
+        emojiKitchen(a, b)
+    }
+    private suspend fun MessageEvent.emojiKitchen() {
+        val raw = text.trim()
+        if ("+" !in raw)
+            return
+        val list = raw.split("+", limit = 2)
+        if (list.size != 2)
+            return
+        val (a, b) = list
+        emojiKitchen(a, b)
+    }
+    private suspend fun MessageEvent.emojiKitchen(
+        a: String,
+        b: String
+    ) {
+        emojiKitchen.mix(a, b) ?.let { file ->
+            reply(Image(file))
+        }
+    }
 
     private fun MutableList<String>.parseOptions(
         option: MemeOption,
@@ -475,5 +513,6 @@ class Meme: Plugin() {
 
     companion object {
         const val BRIEF = "102112100_1761189409"
+        fun String.splitEmojis() = Regex("\\X").findAll(this).map { it.value }.toList()
     }
 }
