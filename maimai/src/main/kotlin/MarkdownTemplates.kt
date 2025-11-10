@@ -319,6 +319,9 @@ object MarkdownTemplates {
         fun tryIt(
             command: String
         ) = single(command.trim() + " ", "⬇试一试")
+        fun aliases(
+            command: String
+        ) = single(command.trim(), "添加别名")
         fun aliasVote(
             command: String
         ) = single(command.trim(), "点我投票", enter = true)

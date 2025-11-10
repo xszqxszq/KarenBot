@@ -10,7 +10,6 @@ import korlibs.math.toIntFloor
 import kotlinx.coroutines.flow.filter
 import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.api.MaimaiAPI
-import xyz.xszq.bot.endsWith
 import xyz.xszq.bot.music.*
 import xyz.xszq.bot.pagination
 import xyz.xszq.bot.payload.LocalCourseInfo
@@ -888,10 +887,15 @@ class MaimaiImage(
                     add(Image(src = "life_${type}_${value}.png"))
                 }
             }
+            sub("upper/info/detail/header/life") {
+                text("value") {
+                    text = course.life.toString()
+                }
+            }
             sub("upper/info/detail/achievement") {
                 val total = scores.sumOf { it.second ?.achievement ?: 0 }
                 val type = when {
-                    total < 800000 * scores.size-> 1
+                    total < 800000 * scores.size -> 1
                     total < 970000 * scores.size -> 2
                     else -> 3
                 }

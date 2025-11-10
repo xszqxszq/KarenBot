@@ -3,7 +3,6 @@ package xyz.xszq.bot.controller
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.format.ImageEncodingProps
 import korlibs.image.format.JPEG
-import korlibs.math.toIntFloor
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -17,7 +16,6 @@ import xyz.xszq.bot.music.ChartInfo
 import xyz.xszq.bot.music.MusicDifficulty
 import xyz.xszq.bot.music.MusicInfo
 import xyz.xszq.bot.music.Rating
-import xyz.xszq.bot.music.Record
 import xyz.xszq.bot.payload.LocalCourseInfo
 import xyz.xszq.shinobu.countTime
 import kotlin.random.Random

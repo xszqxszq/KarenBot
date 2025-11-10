@@ -192,18 +192,24 @@ class MusicController(
         // 别名查询/设置
         endsWith("有什么别名") { name ->
             maimai.aliases.search(name).firstOrNull() ?.let { music ->
-                reply(buildString {
+                val aliases = MusicAliasesTable[music]
+                    .filter { it.first != music.name }
+                    .take(maxResultsLong)
+                    .joinToString("\n") { (alias, _) ->
+                        alias
+                    }
+                val text = buildString {
                     appendLine("${music.id}. ${music.name} 有如下别名：")
 
-                    MusicAliasesTable[music]
-                        .filter { it.first != music.name }
-                        .take(maxResultsLong)
-                        .forEach { (alias, _) ->
-                            appendLine(alias)
-                        }
+                    appendLine(aliases)
                     appendLine()
                     appendLine("可以@机器人使用“添加别名 id 别名”来添加别名。")
-                }.trim().newLine())
+                }.trim()
+                if (textMode())
+                    reply(text.newLine())
+                else
+                    reply(MarkdownTemplates.Templates.brief("别名列表", text)
+                        .toMessage(MarkdownTemplates.Keyboards.aliases("添加别名 id${music.id}")))
             }
         }
         startsWith("添加别名") { raw ->
@@ -406,7 +412,7 @@ class MusicController(
                 else
                     reply(MarkdownTemplates.Templates.brief("别名投票", buildString {
                         appendLine("投票成功，该别名还需${-votes}票通过。")
-                    }).toMessage(MarkdownTemplates.Keyboards.aliasVote("添加别名 ${music.id} $alias")))
+                    }).toMessage(MarkdownTemplates.Keyboards.aliasVote("添加别名 id${music.id} $alias")))
             }
         } ?: run {
             if (textMode())
@@ -415,7 +421,7 @@ class MusicController(
                 reply(MarkdownTemplates.Templates.brief("别名投票", buildString {
                     appendLine("别名添加成功，当有3人投票时别名将通过。")
                     appendLine("其他人可以点击下方按钮，或者发送“添加别名 ${music.id} ${alias}”来投票。")
-                }).toMessage(MarkdownTemplates.Keyboards.aliasVote("添加别名 ${music.id} $alias")))
+                }).toMessage(MarkdownTemplates.Keyboards.aliasVote("添加别名 id${music.id} $alias")))
         }
     }
     companion object {
