@@ -1,0 +1,4961 @@
+{
+  "categories": [{
+    "name": "整数新作",
+    "games": [{
+      "id": "th06",
+      "name": "东方红魔乡",
+      "tracks": [{
+        "id": 1,
+        "name": "比赤色更红的梦",
+        "jpn": "赤より紅い夢",
+        "file": "th06/1.ogg",
+        "aliases": [
+          "OP",
+          "标题",
+          "比赤色更红的梦",
+          "赤より紅い夢",
+          "A Dream More Scarlet than Red"
+        ]
+      },
+        {
+          "id": 2,
+          "name": "如鬼灯般的红色之魂",
+          "jpn": "ほおずきみたいに紅い魂",
+          "file": "th06/2.ogg",
+          "aliases": [
+            "宵暗的妖怪",
+            "A Soul as Scarlet as a Ground Cherry",
+            "ほおずきみたいに紅い魂",
+            "一面道中",
+            "露米娅",
+            "如鬼灯般的红色之魂"
+          ]
+        },
+        {
+          "id": 3,
+          "name": "妖魔夜行",
+          "jpn": "妖魔夜行",
+          "file": "th06/3.ogg",
+          "aliases": [
+            "一面BOSS",
+            "宵暗的妖怪",
+            "Apparitions Stalk the Night",
+            "露米娅",
+            "妖魔夜行"
+          ]
+        },
+        {
+          "id": 4,
+          "name": "Lunate Elf",
+          "jpn": "ルーネイトエルフ",
+          "file": "th06/4.ogg",
+          "aliases": [
+            "大妖精",
+            "新月般的妖精",
+            "二面道中",
+            "ルーネイトエルフ",
+            "露米娅",
+            "Lunate Elf"
+          ]
+        },
+        {
+          "id": 5,
+          "name": "活泼的纯情小姑娘",
+          "jpn": "おてんば恋娘",
+          "file": "th06/5.ogg",
+          "aliases": [
+            "Tomboyish Girl in Love",
+            "活泼的纯情小姑娘",
+            "湖上的冰精",
+            "おてんば恋娘",
+            "二面BOSS",
+            "琪露诺",
+            "快活的恋爱少女"
+          ]
+        },
+        {
+          "id": 6,
+          "name": "上海红茶馆　～ Chinese Tea",
+          "jpn": "上海紅茶館　～ Chinese Tea",
+          "file": "th06/6.ogg",
+          "aliases": [
+            "上海红茶馆 ～ Chinese Tea",
+            "上海紅茶館　～ Chinese Tea",
+            "红美铃",
+            "Shanghai Scarlet Teahouse ~ Chinese Tea",
+            "华人小姑娘",
+            "三面道中"
+          ]
+        },
+        {
+          "id": 7,
+          "name": "明治十七年的上海爱丽丝",
+          "jpn": "明治十七年の上海アリス",
+          "file": "th06/7.ogg",
+          "aliases": [
+            "明治十七年の上海アリス",
+            "红美铃",
+            "华人小姑娘",
+            "三面BOSS",
+            "明治十七年的上海爱丽丝",
+            "Shanghai Alice of Meiji 17"
+          ]
+        },
+        {
+          "id": 8,
+          "name": "伏瓦鲁魔法图书馆",
+          "jpn": "ヴワル魔法図書館",
+          "file": "th06/8.ogg",
+          "aliases": [
+            "四面道中",
+            "红美铃",
+            "小恶魔",
+            "Voile, the Magic Library",
+            "ヴワル魔法図書館",
+            "伏瓦鲁魔法图书馆"
+          ]
+        },
+        {
+          "id": 9,
+          "name": "Locked Girl　～ 少女密室",
+          "jpn": "ラクトガール　～ 少女密室",
+          "file": "th06/9.ogg",
+          "aliases": [
+            "Locked Girl ~ The Girl's Sealed Room",
+            "Locked Girl ～ 少女密室",
+            "四面BOSS",
+            "知识与避世的少女",
+            "帕秋莉·诺蕾姬",
+            "ラクトガール　～ 少女密室"
+          ]
+        },
+        {
+          "id": 10,
+          "name": "女仆与血之怀表",
+          "jpn": "メイドと血の懐中時計",
+          "file": "th06/10.ogg",
+          "aliases": [
+            "红魔馆的女仆",
+            "The Maid and the Pocket Watch of Blood",
+            "十六夜咲夜",
+            "女仆与血之怀表",
+            "五面道中",
+            "メイドと血の懐中時計"
+          ]
+        },
+        {
+          "id": 11,
+          "name": "月时计　～ Luna Dial",
+          "jpn": "月時計　～ ルナ・ダイアル",
+          "file": "th06/11.ogg",
+          "aliases": [
+            "红魔馆的女仆",
+            "Lunar Clock ~ Luna Dial",
+            "十六夜咲夜",
+            "五面BOSS",
+            "月时计 ～ Luna Dial",
+            "月時計　～ ルナ・ダイアル"
+          ]
+        },
+        {
+          "id": 12,
+          "name": "特佩斯的年幼末裔",
+          "jpn": "ツェペシュの幼き末裔",
+          "file": "th06/12.ogg",
+          "aliases": [
+            "红魔馆的女仆",
+            "十六夜咲夜",
+            "特佩斯的年幼末裔",
+            "ツェペシュの幼き末裔",
+            "The Young Descendant of Tepes",
+            "六面道中"
+          ]
+        },
+        {
+          "id": 13,
+          "name": "献给已逝公主的七重奏",
+          "jpn": "亡き王女の為のセプテット",
+          "file": "th06/13.ogg",
+          "aliases": [
+            "Septette for a Dead Princess",
+            "永远鲜红的幼月",
+            "六面BOSS",
+            "献给已逝公主的七重奏",
+            "亡き王女の為のセプテット",
+            "蕾米莉亚·斯卡蕾特"
+          ]
+        },
+        {
+          "id": 14,
+          "name": "魔法少女们的百年祭",
+          "jpn": "魔法少女達の百年祭",
+          "file": "th06/14.ogg",
+          "aliases": [
+            "EX面道中",
+            "The Centennial Festival for Magical Girls",
+            "知识与避世的少女",
+            "帕秋莉·诺蕾姬",
+            "魔法少女達の百年祭",
+            "魔法少女们的百年祭"
+          ]
+        },
+        {
+          "id": 15,
+          "name": "U.N.OWEN就是她吗？",
+          "jpn": "U.N.オーエンは彼女なのか？",
+          "file": "th06/15.ogg",
+          "aliases": [
+            "U.N.オーエンは彼女なのか？",
+            "芙兰朵露·斯卡蕾特",
+            "U.N.OWEN就是她吗？",
+            "EX面BOSS",
+            "U.N. Owen Was Her?",
+            "恶魔之妹"
+          ]
+        },
+        {
+          "id": 16,
+          "name": "比红色更虚无的永远",
+          "jpn": "紅より儚い永遠",
+          "file": "th06/16.ogg",
+          "aliases": [
+            "An Eternity More Transient than Scarlet",
+            "ENDING",
+            "结局",
+            "结尾曲",
+            "比红色更虚无的永远",
+            "紅より儚い永遠"
+          ]
+        },
+        {
+          "id": 17,
+          "name": "红楼　～ Eastern Dream...",
+          "jpn": "紅楼　～ Eastern Dream...",
+          "file": "th06/17.ogg",
+          "aliases": [
+            "Scarlet Tower ~ Eastern Dream...",
+            "制作人员",
+            "红楼 ～ Eastern Dream...",
+            "ED",
+            "STAFF",
+            "紅楼　～ Eastern Dream..."
+          ]
+        }
+      ]
+    },
+      {
+        "id": "th07",
+        "name": "东方妖妖梦",
+        "tracks": [{
+          "id": 1,
+          "name": "妖妖梦　～ Snow or Cherry Petal",
+          "jpn": "妖々夢　～ Snow or Cherry Petal",
+          "file": "th07/1.ogg",
+          "aliases": [
+            "OP",
+            "标题",
+            "Ghostly Dream ~ Snow or Cherry Petal",
+            "妖妖梦 ～ Snow or Cherry Petal",
+            "妖々夢　～ Snow or Cherry Petal"
+          ]
+        },
+          {
+            "id": 2,
+            "name": "无何有之乡　～ Deep Mountain",
+            "jpn": "無何有の郷　～ Deep Mountain",
+            "file": "th07/2.ogg",
+            "aliases": [
+              "无何有之乡 ～ Deep Mountain",
+              "似有似无之乡　～ Deep Mountain",
+              "一面道中",
+              "無何有の郷　～ Deep Mountain",
+              "Paradise ~ Deep Mountain",
+              "冰之妖怪",
+              "琪露诺"
+            ]
+          },
+          {
+            "id": 3,
+            "name": "Crystallize Silver",
+            "jpn": "クリスタライズシルバー",
+            "file": "th07/3.ogg",
+            "aliases": [
+              "蕾蒂·霍瓦特洛克",
+              "クリスタライズシルバー",
+              "Crystallize Silver",
+              "一面BOSS",
+              "冬天的遗忘之物"
+            ]
+          },
+          {
+            "id": 4,
+            "name": "远野幻想物语",
+            "jpn": "遠野幻想物語",
+            "file": "th07/4.ogg",
+            "aliases": [
+              "凶兆的黑猫",
+              "远野幻想物语",
+              "橙",
+              "二面道中",
+              "The Fantastic Tales from Tono",
+              "遠野幻想物語"
+            ]
+          },
+          {
+            "id": 5,
+            "name": "凋叶棕（withered leaf）",
+            "jpn": "ティアオイエツォン(withered leaf)",
+            "file": "th07/5.ogg",
+            "aliases": [
+              "ティアオイエツォン(withered leaf)",
+              "凶兆的黑猫",
+              "凋叶棕（withered leaf）",
+              "Diao Ye Zong (withered leaf)",
+              "橙",
+              "枯叶色（withered leaf）",
+              "二面BOSS"
+            ]
+          },
+          {
+            "id": 6,
+            "name": "布加勒斯特的人偶师",
+            "jpn": "ブクレシュティの人形師",
+            "file": "th07/6.ogg",
+            "aliases": [
+              "布加勒斯特的人偶师",
+              "七色的人偶师",
+              "爱丽丝·玛格特洛依德",
+              "The Doll Maker of Bucuresti",
+              "ブクレシュティの人形師",
+              "三面道中"
+            ]
+          },
+          {
+            "id": 7,
+            "name": "人偶裁判　～ 玩弄人形的少女",
+            "jpn": "人形裁判　～ 人の形弄びし少女",
+            "file": "th07/7.ogg",
+            "aliases": [
+              "Doll Judgement ~ The Girl Who Played with People's Shapes",
+              "人偶裁判 ～ 玩弄人形的少女",
+              "七色的人偶师",
+              "爱丽丝·玛格特洛依德",
+              "人形裁判　～ 人の形弄びし少女",
+              "三面BOSS"
+            ]
+          },
+          {
+            "id": 8,
+            "name": "天空的花都",
+            "jpn": "天空の花の都",
+            "file": "th07/8.ogg",
+            "aliases": [
+              "The Capital City of Flowers in the Sky",
+              "天空的花都",
+              "莉莉霍瓦特",
+              "四面道中",
+              "运送春天的妖精",
+              "天空的花之都",
+              "天空の花の都"
+            ]
+          },
+          {
+            "id": 9,
+            "name": "幽灵乐团　～ Phantom Ensemble",
+            "jpn": "幽霊楽団　～ Phantom Ensemble",
+            "file": "th07/9.ogg",
+            "aliases": [
+              "Phantom Band ~ Phantom Ensemble",
+              "四面BOSS",
+              "露娜萨·普莉兹姆利巴",
+              "幽霊楽団　～ Phantom Ensemble",
+              "骚灵提琴手",
+              "幽灵乐团 ～ Phantom Ensemble"
+            ]
+          },
+          {
+            "id": 10,
+            "name": "东方妖妖梦　～ Ancient Temple",
+            "jpn": "東方妖々夢　～ Ancient Temple",
+            "file": "th07/10.ogg",
+            "aliases": [
+              "東方妖々夢　～ Ancient Temple",
+              "东方妖妖梦 ～ Ancient Temple",
+              "半分虚幻的园艺师",
+              "魂魄妖梦",
+              "Eastern Ghostly Dream ~ Ancient Temple",
+              "五面道中"
+            ]
+          },
+          {
+            "id": 11,
+            "name": "广有射怪鸟事　～ Till When?",
+            "jpn": "広有射怪鳥事　～ Till When?",
+            "file": "th07/11.ogg",
+            "aliases": [
+              "五面BOSS",
+              "Hiroari Shoots a Strange Bird ~ Till When?",
+              "広有射怪鳥事　～ Till When?",
+              "半分虚幻的园艺师",
+              "魂魄妖梦",
+              "广有射怪鸟事 ～ Till When?"
+            ]
+          },
+          {
+            "id": 12,
+            "name": "Ultimate Truth",
+            "jpn": "アルティメットトゥルース",
+            "file": "th07/12.ogg",
+            "aliases": [
+              "半分虚幻的园艺师",
+              "魂魄妖梦",
+              "究极的真实",
+              "Ultimate Truth",
+              "アルティメットトゥルース",
+              "六面道中"
+            ]
+          },
+          {
+            "id": 13,
+            "name": "幽雅地绽放吧，墨染的樱花　～ Border of Life",
+            "jpn": "幽雅に咲かせ、墨染の桜　～ Border of Life",
+            "file": "th07/13.ogg",
+            "aliases": [
+              "西行寺幽幽子",
+              "幽雅地绽放吧，墨染的樱花　～ Border of Life",
+              "幽雅地绽放吧，墨染之樱 ～ Border of Life",
+              "Bloom Nobly, Ink-Black Cherry Blossom ~ Border of Life",
+              "六面BOSS",
+              "幽冥楼阁的亡灵少女",
+              "幽雅に咲かせ、墨染の桜　～ Border of Life"
+            ]
+          },
+          {
+            "id": 14,
+            "name": "Border of Life",
+            "jpn": "ボーダーオブライフ",
+            "file": "th07/14.ogg",
+            "aliases": [
+              "ボーダーオブライフ",
+              "六面BOSS",
+              "Border of Life",
+              "西行寺幽幽子（西行妖）",
+              "幽冥楼阁的亡灵少女",
+              "生死之境"
+            ]
+          },
+          {
+            "id": 15,
+            "name": "妖妖跋扈",
+            "jpn": "妖々跋扈",
+            "file": "th07/15.ogg",
+            "aliases": [
+              "EX面道中",
+              "橙",
+              "间隙妖怪的式神的式神",
+              "妖々跋扈",
+              "妖妖跋扈",
+              "Spiritual Domination"
+            ]
+          },
+          {
+            "id": 16,
+            "name": "少女幻葬　～ Necro-Fantasy",
+            "jpn": "少女幻葬　～ Necro-Fantasy",
+            "file": "th07/16.ogg",
+            "aliases": [
+              "八云蓝",
+              "间隙妖怪的式神",
+              "A Maiden's Illusionary Funeral ~ Necro-Fantasy",
+              "EX面BOSS",
+              "少女幻葬 ～ Necro-Fantasy",
+              "少女幻葬　～ Necro-Fantasy"
+            ]
+          },
+          {
+            "id": 17,
+            "name": "妖妖跋扈　～ Who done it!",
+            "jpn": "妖々跋扈　～ Who done it!",
+            "file": "th07/17.ogg",
+            "aliases": [
+              "八云蓝",
+              "间隙妖怪的式神",
+              "妖妖跋扈 ～ Who done it!",
+              "妖々跋扈　～ Who done it!",
+              "PH面道中",
+              "Spiritual Domination ~ Who done it!"
+            ]
+          },
+          {
+            "id": 18,
+            "name": "Necro-Fantasia",
+            "jpn": "ネクロファンタジア",
+            "file": "th07/18.ogg",
+            "aliases": [
+              "PH面BOSS",
+              "Necro-Fantasia",
+              "亡灵幻想曲",
+              "死亡幻想曲",
+              "神隐的主犯",
+              "ネクロファンタジア",
+              "Necrofantasia",
+              "八云紫"
+            ]
+          },
+          {
+            "id": 19,
+            "name": "春风之梦",
+            "jpn": "春風の夢",
+            "file": "th07/19.ogg",
+            "aliases": [
+              "春風の夢",
+              "ENDING",
+              "Dream of a Spring Breeze",
+              "春风之梦",
+              "结局",
+              "结尾曲"
+            ]
+          },
+          {
+            "id": 20,
+            "name": "樱花樱花　～ Japanize Dream...",
+            "jpn": "さくらさくら　～ Japanize Dream...",
+            "file": "th07/20.ogg",
+            "aliases": [
+              "樱花樱花 ～ Japanize Dream...",
+              "さくらさくら　～ Japanize Dream...",
+              "制作人员",
+              "STAFF",
+              "ED",
+              "Sakura, Sakura ~ Japanize Dream..."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "th08",
+        "name": "东方永夜抄",
+        "tracks": [
+          {
+            "id": 1,
+            "name": "永夜抄　～ Eastern Night.",
+            "jpn": "永夜抄　～ Eastern Night.",
+            "file": "th08/1.ogg",
+            "aliases": [
+              "OP",
+              "标题",
+              "永夜抄 ～ Eastern Night.",
+              "Eternal Night Vignette ~ Eastern Night",
+              "永夜抄　～ Eastern Night."
+            ]
+          },
+          {
+            "id": 2,
+            "name": "幻视之夜　～ Ghostly Eyes",
+            "jpn": "幻視の夜　～ Ghostly Eyes",
+            "file": "th08/2.ogg",
+            "aliases": [
+              "幻視の夜　～ Ghostly Eyes",
+              "一面道中",
+              "莉格露·奈特巴格",
+              "幻视之夜　～ Ghostly Eyes",
+              "Illusionary Night ~ Ghostly Eyes"
+            ]
+          },
+          {
+            "id": 3,
+            "name": "蠢蠢的秋月　～ Mooned Insect",
+            "jpn": "蠢々秋月　～ Mooned Insect",
+            "file": "th08/3.ogg",
+            "aliases": [
+              "蠢々秋月　～ Mooned Insect",
+              "一面BOSS",
+              "莉格露·奈特巴格",
+              "蠢蠢的秋月 ～ Mooned Insect",
+              "Stirring an Autumn Moon ~ Mooned Insect",
+              "暗中蠢动的光虫"
+            ]
+          },
+          {
+            "id": 4,
+            "name": "夜雀的歌声　～ Night Bird",
+            "jpn": "夜雀の歌声　～ Night Bird",
+            "file": "th08/4.ogg",
+            "aliases": [
+              "夜雀妖怪",
+              "夜雀的歌声 ～ Night Bird",
+              "二面道中",
+              "米斯蒂娅·萝蕾拉",
+              "Song of the Night Sparrow ~ Night Bird",
+              "夜雀の歌声　～ Night Bird"
+            ]
+          },
+          {
+            "id": 5,
+            "name": "已经只能听见歌声了",
+            "jpn": "もう歌しか聞こえない",
+            "file": "th08/5.ogg",
+            "aliases": [
+              "夜雀妖怪",
+              "已经只能听见歌声了",
+              "Deaf to All but the Song",
+              "米斯蒂娅·萝蕾拉",
+              "もう歌しか聞こえない",
+              "二面BOSS",
+              "只听见歌声"
+            ]
+          },
+          {
+            "id": 6,
+            "name": "令人怀念的东方之血　～ Old World",
+            "jpn": "懐かしき東方の血　～ Old World",
+            "file": "th08/6.ogg",
+            "aliases": [
+              "懐かしき東方の血　～ Old World",
+              "Nostalgic Blood of the East ~ Old World",
+              "知识与历史的半兽",
+              "令人怀念的东方之血 ～ Old World",
+              "上白泽慧音",
+              "三面道中"
+            ]
+          },
+          {
+            "id": 7,
+            "name": "Plain Asia",
+            "jpn": "プレインエイジア",
+            "file": "th08/7.ogg",
+            "aliases": [
+              "Plain Asia",
+              "プレインエイジア",
+              "一如既往的东方",
+              "东方的平原",
+              "知识与历史的半兽",
+              "三面BOSS",
+              "上白泽慧音"
+            ]
+          },
+          {
+            "id": 8,
+            "name": "永夜的报应　～ Imperishable Night",
+            "jpn": "永夜の報い　～ Imperishable Night",
+            "file": "th08/8.ogg",
+            "aliases": [
+              "乐园的可爱巫女",
+              "普通的黑魔术少女",
+              "博丽灵梦",
+              "四A面道中",
+              "永夜の報い　～ Imperishable Night",
+              "四B面道中",
+              "四A面",
+              "四B面",
+              "四面道中",
+              "永夜的报应 ～ Imperishable Night",
+              "Retribution for the Eternal Night ~ Imperishable Night",
+              "雾雨魔理沙"
+            ]
+          },
+          {
+            "id": 9,
+            "name": "少女绮想曲　～ Dream Battle",
+            "jpn": "少女綺想曲　～ Dream Battle",
+            "file": "th08/9.ogg",
+            "aliases": [
+              "少女綺想曲　～ Dream Battle",
+              "乐园的可爱巫女",
+              "普通的黑魔术少女",
+              "博丽灵梦",
+              "城管",
+              "四A面BOSS",
+              "四A面",
+              "少女绮想曲　～ Dream Battle",
+              "Maiden's Dream Battle"
+            ]
+          },
+          {
+            "id": 10,
+            "name": "恋色Master spark",
+            "jpn": "恋色マスタースパーク",
+            "file": "th08/10.ogg",
+            "aliases": [
+              "恋色マスタースパーク",
+              "雾雨魔理沙",
+              "四B面BOSS",
+              "四B面",
+              "恋色Master spark",
+              "Love-Colored Master spark"
+            ]
+          },
+          {
+            "id": 11,
+            "name": "灰姑娘的笼子　～ Kagome-Kagome",
+            "jpn": "シンデレラケージ　～ Kagome-Kagome",
+            "file": "th08/11.ogg",
+            "aliases": [
+              "Cinderella Cage ~ Kagome-Kagome",
+              "地上兔",
+              "シンデレラケージ　～ Kagome-Kagome",
+              "因幡天为",
+              "灰姑娘的笼子 ～ Kagome-Kagome",
+              "五面道中"
+            ]
+          },
+          {
+            "id": 12,
+            "name": "狂气之瞳　～ Invisible Full Moon",
+            "jpn": "狂気の瞳　～ Invisible Full Moon",
+            "file": "th08/12.ogg",
+            "aliases": [
+              "狂气之瞳 ～ Invisible Full Moon",
+              "Lunatic Eyes ~ Invisible Full Moon",
+              "五面BOSS",
+              "狂気の瞳　～ Invisible Full Moon",
+              "铃仙·优昙华院·因幡",
+              "狂气的月兔"
+            ]
+          },
+          {
+            "id": 13,
+            "name": "Voyage1969",
+            "jpn": "ヴォヤージュ1969",
+            "file": "th08/13.ogg",
+            "aliases": [
+              "月之头脑",
+              "六A面道中",
+              "Voyage 1969",
+              "Voyage1969",
+              "旅人1969",
+              "ヴォヤージュ1969",
+              "六B面道中",
+              "六面道中",
+              "八意永琳"
+            ]
+          },
+          {
+            "id": 14,
+            "name": "千年幻想乡　～ History of the Moon",
+            "jpn": "千年幻想郷　～ History of the Moon",
+            "file": "th08/14.ogg",
+            "aliases": [
+              "月之头脑",
+              "千年幻想郷　～ History of the Moon",
+              "千年幻想乡 ～ History of the Moon",
+              "六A面BOSS",
+              "六面BOSS",
+              "Gensokyo Millennium ~ History of the Moon",
+              "八意永琳"
+            ]
+          },
+          {
+            "id": 15,
+            "name": "竹取飞翔　～ Lunatic Princess",
+            "jpn": "竹取飛翔　～ Lunatic Princess",
+            "file": "th08/15.ogg",
+            "aliases": [
+              "Flight of the Bamboo Cutter ~ Lunatic Princess",
+              "竹取飞翔 ～ Lunatic Princess",
+              "蓬莱山辉夜",
+              "永远和须臾的罪人",
+              "竹取飛翔　～ Lunatic Princess",
+              "六B面BOSS",
+              "六面BOSS"
+            ]
+          },
+          {
+            "id": 16,
+            "name": "Voyage1970",
+            "jpn": "ヴォヤージュ1970",
+            "file": "th08/16.ogg",
+            "aliases": [
+              "旅人1970",
+              "Voyage 1970",
+              "Voyage1970",
+              "ヴォヤージュ1970",
+              "Final Spell"
+            ]
+          },
+          {
+            "id": 17,
+            "name": "Extend Ash　～ 蓬莱人",
+            "jpn": "エクステンドアッシュ　～ 蓬莱人",
+            "file": "th08/17.ogg",
+            "aliases": [
+              "Extend Ash ～ 蓬莱人",
+              "Extend Ash ~ Person of Hourai",
+              "EX面道中",
+              "エクステンドアッシュ　～ 蓬莱人",
+              "知识与历史的半兽",
+              "上白泽慧音"
+            ]
+          },
+          {
+            "id": 18,
+            "name": "飘上月球，不死之烟",
+            "jpn": "月まで届け、不死の煙",
+            "file": "th08/18.ogg",
+            "aliases": [
+              "Reach for the Moon, Immortal Smoke",
+              "蓬莱的人之形",
+              "月まで届け、不死の煙",
+              "EX面BOSS",
+              "藤原妹红",
+              "飘上月球，不死之烟"
+            ]
+          },
+          {
+            "id": 19,
+            "name": "月见草",
+            "jpn": "月見草",
+            "file": "th08/19.ogg",
+            "aliases": [
+              "月見草",
+              "月见草",
+              "Evening Primrose",
+              "结局",
+              "结尾曲",
+              "ENDING"
+            ]
+          },
+          {
+            "id": 20,
+            "name": "Eternal Dream　～ 幽玄的枫树",
+            "jpn": "Eternal Dream　～ 幽玄の槭樹",
+            "file": "th08/20.ogg",
+            "aliases": [
+              "Eternal Dream ~ Mystical Maple",
+              "Eternal Dream ～ 幽玄的枫树",
+              "Eternal Dream　～ 幽玄の槭樹",
+              "STAFF",
+              "ED",
+              "制作人员"
+            ]
+          },
+          {
+            "id": 21,
+            "name": "东方妖怪小町",
+            "jpn": "東方妖怪小町",
+            "file": "th08/21.ogg",
+            "aliases": [
+              "东方妖怪美人",
+              "东方妖怪小镇",
+              "東方妖怪小町",
+              "东方妖怪小町",
+              "Eastern Youkai Beauty",
+              "Last Word"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "th09",
+        "name": "东方花映塚",
+        "tracks": [{
+          "id": 1,
+          "name": "花映塚　～ Higan Retour",
+          "jpn": "花映塚　～ Higan Retour",
+          "file": "th09/1.ogg",
+          "aliases": [
+            "花映塚 ～ Higan Retour",
+            "Flower Reflecting Mound ~ Higan Retour",
+            "花映塚　～ Higan Retour",
+            "标题",
+            "OP"
+          ]
+        },
+          {
+            "id": 2,
+            "name": "春色小径　～ Colorful Path",
+            "jpn": "春色小径　～ Colorful Path",
+            "file": "th09/2.ogg",
+            "aliases": [
+              "春色小径　～ Colorful Path",
+              "Spring Lane ~ Colorful Path",
+              "博丽灵梦",
+              "春色小径 ～ Colorful Path"
+            ]
+          },
+          {
+            "id": 3,
+            "name": "Oriental Dark Flight",
+            "jpn": "オリエンタルダークフライト",
+            "file": "th09/3.ogg",
+            "aliases": [
+              "雾雨魔理沙",
+              "オリエンタルダークフライト",
+              "Oriental Dark Flight"
+            ]
+          },
+          {
+            "id": 4,
+            "name": "Flowering Night",
+            "jpn": "フラワリングナイト",
+            "file": "th09/4.ogg",
+            "aliases": [
+              "フラワリングナイト",
+              "Flowering Night",
+              "花开之夜",
+              "十六夜咲夜"
+            ]
+          },
+          {
+            "id": 5,
+            "name": "宇佐大人的白旗",
+            "jpn": "お宇佐さまの素い幡",
+            "file": "th09/5.ogg",
+            "aliases": [
+              "因幡天为",
+              "White Flag of Usa Shrine",
+              "宇佐大人的白旗",
+              "お宇佐さまの素い幡"
+            ]
+          },
+          {
+            "id": 6,
+            "name": "剧毒身体　～ Forsaken Doll",
+            "jpn": "ポイズンボディ　～ Forsaken Doll",
+            "file": "th09/6.ogg",
+            "aliases": [
+              "梅蒂欣·梅兰可莉",
+              "ポイズンボディ　～ Forsaken Doll",
+              "剧毒身体 ～ Forsaken Doll",
+              "Poison Body ~ Forsaken Doll"
+            ]
+          },
+          {
+            "id": 7,
+            "name": "今昔幻想乡　～ Flower Land",
+            "jpn": "今昔幻想郷　～ Flower Land",
+            "file": "th09/7.ogg",
+            "aliases": [
+              "Gensokyo, Past and Present ~ Flower Land",
+              "风见幽香",
+              "今昔幻想乡 ～ Flower Land",
+              "今昔幻想郷　～ Flower Land"
+            ]
+          },
+          {
+            "id": 8,
+            "name": "彼岸归航　～ Riverside View",
+            "jpn": "彼岸帰航　～ Riverside View",
+            "file": "th09/8.ogg",
+            "aliases": [
+              "彼岸帰航　～ Riverside View",
+              "Higan Retour ~ Riverside View",
+              "小野塚小町",
+              "彼岸归航 ～ Riverside View"
+            ]
+          },
+          {
+            "id": 9,
+            "name": "第六十年的东方审判　～ Fate of Sixty Years",
+            "jpn": "六十年目の東方裁判　～ Fate of Sixty Years",
+            "file": "th09/9.ogg",
+            "aliases": [
+              "六十年目の東方裁判　～ Fate of Sixty Years",
+              "四季映姬·夜摩仙那度",
+              "Eastern Judgement in the Sixtieth Year ~ Fate of Sixty Years",
+              "第六十年的东方审判 ～ Fate of Sixty Years"
+            ]
+          },
+          {
+            "id": 10,
+            "name": "映花之塚",
+            "jpn": "花の映る塚",
+            "file": "th09/10.ogg",
+            "aliases": [
+              "The Mound Where the Flowers Reflect",
+              "映花之塚",
+              "花の映る塚",
+              "对话的主题曲1"
+            ]
+          },
+          {
+            "id": 11,
+            "name": "此岸之塚",
+            "jpn": "此岸の塚",
+            "file": "th09/11.ogg",
+            "aliases": [
+              "Mound of Shigan",
+              "此岸之塚",
+              "此岸の塚",
+              "对话的主题曲2"
+            ]
+          },
+          {
+            "id": 12,
+            "name": "花如幻想一般",
+            "jpn": "花は幻想のままに",
+            "file": "th09/12.ogg",
+            "aliases": [
+              "花如幻想一般",
+              "花は幻想のままに",
+              "The Flowers Remain in Fantasy",
+              "结局",
+              "ENDING",
+              "结尾曲"
+            ]
+          },
+          {
+            "id": 13,
+            "name": "魂之花　～ Another Dream...",
+            "jpn": "魂の花　～ Another Dream...",
+            "file": "th09/13.ogg",
+            "aliases": [
+              "魂之花 ～ Another Dream...",
+              "Flower of Soul ~ Another Dream...",
+              "魂の花　～ Another Dream...",
+              "ED",
+              "STAFF",
+              "制作人员"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "th10",
+        "name": "东方风神录",
+        "tracks": [{
+          "id": 1,
+          "name": "被封印的众神",
+          "jpn": "封印されし神々",
+          "file": "th10/1.ogg",
+          "aliases": [
+            "Sealed Gods",
+            "被封印的众神",
+            "封印されし神々",
+            "标题",
+            "OP"
+          ]
+        },
+          {
+            "id": 2,
+            "name": "眷爱众生之神　～ Romantic Fall",
+            "jpn": "人恋し神様　～ Romantic Fall",
+            "file": "th10/2.ogg",
+            "aliases": [
+              "眷恋众人之神　～ Romantic Fall",
+              "人恋し神様　～ Romantic Fall",
+              "一面道中",
+              "秋静叶",
+              "A God That Misses People ~ Romantic Fall",
+              "喜爱人类的神明　～ Romantic Fall",
+              "寂寞与终焉的象征",
+              "眷爱众生之神 ～ Romantic Fall"
+            ]
+          },
+          {
+            "id": 3,
+            "name": "会受稻田姬的斥责啦",
+            "jpn": "稲田姫様に叱られるから",
+            "file": "th10/3.ogg",
+            "aliases": [
+              "一面BOSS",
+              "会被稻田公主骂的啦",
+              "秋穰子",
+              "Because Princess Inada Is Scolding Me",
+              "稲田姫様に叱られるから",
+              "丰裕与收成的象征",
+              "会受稻田姬的斥责啦"
+            ]
+          },
+          {
+            "id": 4,
+            "name": "厄神降临之路　～ Dark Road",
+            "jpn": "厄神様の通り道　～ Dark Road",
+            "file": "th10/4.ogg",
+            "aliases": [
+              "秘神流雏",
+              "二面道中",
+              "厄神降临之路 ～ Dark Road",
+              "厄神様の通り道　～ Dark Road",
+              "厄神经过的道路　～ Dark Road",
+              "The Road of the Misfortune God ~ Dark Road",
+              "键山雏"
+            ]
+          },
+          {
+            "id": 5,
+            "name": "命运的阴暗面",
+            "jpn": "運命のダークサイド",
+            "file": "th10/5.ogg",
+            "aliases": [
+              "命运的阴暗面",
+              "秘神流雏",
+              "Dark Side of Fate",
+              "命运的黑暗面",
+              "運命のダークサイド",
+              "二面BOSS",
+              "键山雏"
+            ]
+          },
+          {
+            "id": 6,
+            "name": "众神眷恋的幻想乡",
+            "jpn": "神々が恋した幻想郷",
+            "file": "th10/6.ogg",
+            "aliases": [
+              "神所眷恋的幻想乡",
+              "神々が恋した幻想郷",
+              "超妖怪弹头",
+              "众神眷恋的幻想乡",
+              "众神眷顾的幻想乡",
+              "河城荷取",
+              "The Gensokyo the Gods Loved",
+              "三面道中"
+            ]
+          },
+          {
+            "id": 7,
+            "name": "芥川龙之介的河童　～ Candid Friend",
+            "jpn": "芥川龍之介の河童　～ Candid Friend",
+            "file": "th10/7.ogg",
+            "aliases": [
+              "超妖怪弹头",
+              "芥川龙之介的河童 ～ Candid Friend",
+              "河城荷取",
+              "芥川龍之介の河童　～ Candid Friend",
+              "Akutagawa Ryuunosuke's \"Kappa\" ~ Candid Friend",
+              "三面BOSS"
+            ]
+          },
+          {
+            "id": 8,
+            "name": "Fall of Fall　～ 秋意渐浓之瀑",
+            "jpn": "フォールオブフォール　～ 秋めく滝",
+            "file": "th10/8.ogg",
+            "aliases": [
+              "犬走椛",
+              "四面道中",
+              "Fall of Fall ~ Autumnal Waterfall",
+              "フォールオブフォール　～ 秋めく滝",
+              "Fall of Fall ～ 秋意渐浓之瀑",
+              "基层警卫天狗"
+            ]
+          },
+          {
+            "id": 9,
+            "name": "妖怪之山　～ Mysterious Mountain",
+            "jpn": "妖怪の山　～ Mysterious Mountain",
+            "file": "th10/9.ogg",
+            "aliases": [
+              "妖怪の山　～ Mysterious Mountain",
+              "射命丸文",
+              "Youkai Mountain ~ Mysterious Mountain",
+              "最接近村落的天狗",
+              "四面BOSS",
+              "妖怪之山 ～ Mysterious Mountain"
+            ]
+          },
+          {
+            "id": 10,
+            "name": "少女曾见的日本原风景",
+            "jpn": "少女が見た日本の原風景",
+            "file": "th10/10.ogg",
+            "aliases": [
+              "The Primal Scene of Japan the Girl Saw",
+              "五面道中",
+              "少女が見た日本の原風景",
+              "东风谷早苗",
+              "少女曾见的日本原风景",
+              "被祭拜的风之人"
+            ]
+          },
+          {
+            "id": 11,
+            "name": "信仰是为了虚幻之人",
+            "jpn": "信仰は儚き人間の為に",
+            "file": "th10/11.ogg",
+            "aliases": [
+              "信仰は儚き人間の為に",
+              "五面BOSS",
+              "信仰是为了虚幻之人",
+              "Faith Is for the Transient People",
+              "东风谷早苗",
+              "被祭拜的风之人"
+            ]
+          },
+          {
+            "id": 12,
+            "name": "御柱的墓场　～ Grave of Being",
+            "jpn": "御柱の墓場　～ Grave of Being",
+            "file": "th10/12.ogg",
+            "aliases": [
+              "-",
+              "Cemetery of Onbashira ~ Grave of Being",
+              "御柱の墓場　～ Grave of Being",
+              "御柱的墓场 ～ Grave of Being",
+              "东风谷早苗",
+              "六面道中"
+            ]
+          },
+          {
+            "id": 13,
+            "name": "神圣庄严的古战场　～ Suwa Foughten Field",
+            "jpn": "神さびた古戦場　～ Suwa Foughten Field",
+            "file": "th10/13.ogg",
+            "aliases": [
+              "六面BOSS",
+              "神さびた古戦場　～ Suwa Foughten Field",
+              "八坂神奈子",
+              "山与湖的化身",
+              "神圣庄严的古战场 ～ Suwa Foughten Field",
+              "The Venerable Ancient Battlefield ~ Suwa Foughten Field"
+            ]
+          },
+          {
+            "id": 14,
+            "name": "明日之盛，昨日之俗",
+            "jpn": "明日ハレの日、ケの昨日",
+            "file": "th10/14.ogg",
+            "aliases": [
+              "明日之盛，昨日之俗",
+              "EX面道中",
+              "八坂神奈子",
+              "明日ハレの日、ケの昨日",
+              "山与湖的化身",
+              "Tomorrow Will Be Special, Yesterday Was Not",
+              "放晴的明日、平凡的昨日",
+              "明天的节日，是昨天的日常",
+              "每一天都是快乐的日子"
+            ]
+          },
+          {
+            "id": 15,
+            "name": "Native Faith",
+            "jpn": "ネイティブフェイス",
+            "file": "th10/15.ogg",
+            "aliases": [
+              "EX面BOSS",
+              "Native Faith",
+              "土著神的顶点",
+              "土著神的信仰",
+              "ネイティブフェイス",
+              "洩矢诹访子"
+            ]
+          },
+          {
+            "id": 16,
+            "name": "山脚的神社",
+            "jpn": "麓の神社",
+            "file": "th10/16.ogg",
+            "aliases": [
+              "Shrine at the Foot of the Mountain",
+              "麓の神社",
+              "山脚的神社",
+              "结局",
+              "ENDING",
+              "结尾曲"
+            ]
+          },
+          {
+            "id": 17,
+            "name": "神明降下恩惠之雨　～ Sylphid Dream",
+            "jpn": "神は恵みの雨を降らす　～ Sylphid Dream",
+            "file": "th10/17.ogg",
+            "aliases": [
+              "神は恵みの雨を降らす　～ Sylphid Dream",
+              "The Gods Give Us Blessed Rain ~ Sylphid Dream",
+              "神明降下恩惠之雨 ～ Sylphid Dream",
+              "ED",
+              "STAFF",
+              "制作人员"
+            ]
+          },
+          {
+            "id": 18,
+            "name": "Player's Score",
+            "jpn": "プレイヤーズスコア",
+            "file": "th10/18.ogg",
+            "aliases": [
+              "プレイヤーズスコア",
+              "玩家的分数",
+              "玩家得分",
+              "得分画面",
+              "游戏结束",
+              "Game Over",
+              "Player's Score"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "th11",
+        "name": "东方地灵殿",
+        "tracks": [{
+          "id": 1,
+          "name": "地灵们的起床",
+          "jpn": "地霊達の起床",
+          "file": "th11/1.ogg",
+          "aliases": [
+            "地霊達の起床",
+            "OP",
+            "标题",
+            "Awakening of the Earth Spirits",
+            "地灵们的起床"
+          ]
+        },
+          {
+            "id": 2,
+            "name": "昏暗的风穴",
+            "jpn": "暗闇の風穴",
+            "file": "th11/2.ogg",
+            "aliases": [
+              "The Dark Blowhole",
+              "一面道中",
+              "昏暗的风穴",
+              "可怕的水井妖怪",
+              "琪斯美",
+              "暗闇の風穴"
+            ]
+          },
+          {
+            "id": 3,
+            "name": "被封印的妖怪　～ Lost Place",
+            "jpn": "封じられた妖怪　～ Lost Place",
+            "file": "th11/3.ogg",
+            "aliases": [
+              "被封印的妖怪 ～ Lost Place",
+              "一面BOSS",
+              "The Sealed-Away Youkai ~ Lost Place",
+              "黑谷山女",
+              "封じられた妖怪　～ Lost Place",
+              "昏暗洞窟中明亮的网"
+            ]
+          },
+          {
+            "id": 4,
+            "name": "阻绝人迹之桥",
+            "jpn": "渡る者の途絶えた橋",
+            "file": "th11/4.ogg",
+            "aliases": [
+              "阻绝人迹之桥",
+              "二面道中",
+              "渡る者の途絶えた橋",
+              "The Bridge People No Longer Cross",
+              "水桥帕露西",
+              "地壳下的嫉妒心"
+            ]
+          },
+          {
+            "id": 5,
+            "name": "绿眼的嫉妒",
+            "jpn": "緑眼のジェラシー",
+            "file": "th11/5.ogg",
+            "aliases": [
+              "Green-Eyed Jealousy",
+              "绿眼的嫉妒",
+              "緑眼のジェラシー",
+              "二面BOSS",
+              "水桥帕露西",
+              "地壳下的嫉妒心"
+            ]
+          },
+          {
+            "id": 6,
+            "name": "漫游旧地狱街道",
+            "jpn": "旧地獄街道を行く",
+            "file": "th11/6.ogg",
+            "aliases": [
+              "星熊勇仪",
+              "漫游旧地狱街道",
+              "旧地獄街道を行く",
+              "Walking the Streets of a Former Hell",
+              "被谈论的怪力乱神",
+              "三面道中"
+            ]
+          },
+          {
+            "id": 7,
+            "name": "大江山的花之酒宴",
+            "jpn": "華のさかづき大江山",
+            "file": "th11/7.ogg",
+            "aliases": [
+              "星熊勇仪",
+              "大江山的花之酒宴",
+              "被谈论的怪力乱神",
+              "A Flower-Studded Sake Dish on Mt. Ooe",
+              "三面BOSS",
+              "華のさかづき大江山"
+            ]
+          },
+          {
+            "id": 8,
+            "name": "Heartfelt Fancy",
+            "jpn": "ハートフェルトファンシー",
+            "file": "th11/8.ogg",
+            "aliases": [
+              "星熊勇仪",
+              "四面道中",
+              "由衷的幻想",
+              "Heartfelt Fancy",
+              "从心底萌发的幻想",
+              "ハートフェルトファンシー",
+              "火焰猫燐（猫形态）"
+            ]
+          },
+          {
+            "id": 9,
+            "name": "少女觉　～ 3rd eye",
+            "jpn": "少女さとり　～ 3rd eye",
+            "file": "th11/9.ogg",
+            "aliases": [
+              "古明地觉",
+              "少女さとり　～ 3rd eye",
+              "四面BOSS",
+              "Satori Maiden ~ 3rd eye",
+              "少女觉 ～ 3rd eye",
+              "怨灵也为之惧怯的少女"
+            ]
+          },
+          {
+            "id": 10,
+            "name": "废狱摇篮曲",
+            "jpn": "廃獄ララバイ",
+            "file": "th11/10.ogg",
+            "aliases": [
+              "废狱摇篮曲",
+              "古明地觉",
+              "Lullaby of Deserted Hell",
+              "廃獄ララバイ",
+              "火焰猫燐（猫形态）",
+              "五面道中"
+            ]
+          },
+          {
+            "id": 11,
+            "name": "尸体旅行　～ Be of good cheer!",
+            "jpn": "死体旅行　～ Be of good cheer!",
+            "file": "th11/11.ogg",
+            "aliases": [
+              "Corpse Voyage ~ Be of good cheer!",
+              "五面BOSS",
+              "尸体旅行 ～ Be of good cheer!",
+              "火焰猫燐",
+              "死体旅行　～ Be of good cheer!",
+              "地狱的车祸"
+            ]
+          },
+          {
+            "id": 12,
+            "name": "业火地幔",
+            "jpn": "業火マントル",
+            "file": "th11/12.ogg",
+            "aliases": [
+              "Hellfire Mantle",
+              "业火地幔",
+              "火焰猫燐",
+              "業火マントル",
+              "六面道中",
+              "地狱的车祸"
+            ]
+          },
+          {
+            "id": 13,
+            "name": "灵知的太阳信仰　～ Nuclear Fusion",
+            "jpn": "霊知の太陽信仰　～ Nuclear Fusion",
+            "file": "th11/13.ogg",
+            "aliases": [
+              "Solar Sect of Mystic Wisdom ~ Nuclear Fusion",
+              "霊知の太陽信仰　～ Nuclear Fusion",
+              "六面BOSS",
+              "灵知的太阳信仰 ～ Nuclear Fusion",
+              "灵乌路空",
+              "难以驾驭的神之火"
+            ]
+          },
+          {
+            "id": 14,
+            "name": "Last Remote",
+            "jpn": "ラストリモート",
+            "file": "th11/14.ogg",
+            "aliases": [
+              "EX面道中",
+              "Last Remote",
+              "灵乌路空",
+              "东风谷早苗",
+              "ラストリモート"
+            ]
+          },
+          {
+            "id": 15,
+            "name": "哈德曼的妖怪少女",
+            "jpn": "ハルトマンの妖怪少女",
+            "file": "th11/15.ogg",
+            "aliases": [
+              "哈德曼的妖怪少女",
+              "古明地恋",
+              "ハルトマンの妖怪少女",
+              "Hartmann's Youkai Girl",
+              "EX面BOSS",
+              "紧闭的恋之瞳"
+            ]
+          },
+          {
+            "id": 16,
+            "name": "地灵们的归家",
+            "jpn": "地霊達の帰宅",
+            "file": "th11/16.ogg",
+            "aliases": [
+              "地霊達の帰宅",
+              "ENDING",
+              "The Earth Spirits' Homecoming",
+              "结局",
+              "结尾曲",
+              "地灵们的归家"
+            ]
+          },
+          {
+            "id": 17,
+            "name": "能源黎明　～ Future Dream...",
+            "jpn": "エネルギー黎明　～ Future Dream...",
+            "file": "th11/17.ogg",
+            "aliases": [
+              "Energy Daybreak ~ Future Dream...",
+              "エネルギー黎明　～ Future Dream...",
+              "制作人员",
+              "STAFF",
+              "能源黎明 ～ Future Dream...",
+              "ED"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "th12",
+        "name": "东方星莲船",
+        "tracks": [{
+          "id": 1,
+          "name": "青空之影",
+          "jpn": "青空の影",
+          "file": "th12/1.ogg",
+          "aliases": [
+            "OP",
+            "标题",
+            "A Shadow in the Blue Sky",
+            "青空之影",
+            "青空の影"
+          ]
+        },
+          {
+            "id": 2,
+            "name": "春之港湾",
+            "jpn": "春の湊に",
+            "file": "th12/2.ogg",
+            "aliases": [
+              "春天的港湾边，春之泊处",
+              "春之港湾",
+              "娜兹玲",
+              "春の湊に",
+              "春之岸边",
+              "一面道中",
+              "At the Harbor of Spring",
+              "探宝的小小大将"
+            ]
+          },
+          {
+            "id": 3,
+            "name": "小小的贤将",
+            "jpn": "小さな小さな賢将",
+            "file": "th12/3.ogg",
+            "aliases": [
+              "一面BOSS",
+              "娜兹玲",
+              "小小的贤将",
+              "小さな小さな賢将",
+              "A Tiny, Tiny, Clever Commander",
+              "小小的小不点大将",
+              "探宝的小小大将"
+            ]
+          },
+          {
+            "id": 4,
+            "name": "封闭的云中通路",
+            "jpn": "閉ざせし雲の通い路",
+            "file": "th12/4.ogg",
+            "aliases": [
+              "閉ざせし雲の通い路",
+              "封闭的云中通路",
+              "多多良小伞",
+              "二面道中",
+              "愉快的遗忘之伞",
+              "The Sealed Cloud Route",
+              "闭云通路"
+            ]
+          },
+          {
+            "id": 5,
+            "name": "请注意万年备用伞",
+            "jpn": "万年置き傘にご注意を",
+            "file": "th12/5.ogg",
+            "aliases": [
+              "Beware the Umbrella Left There Forever",
+              "万年备用的伞注意",
+              "多多良小伞",
+              "愉快的遗忘之伞",
+              "请注意万年备用伞",
+              "要注意万年备用伞",
+              "二面BOSS",
+              "万年置き傘にご注意を"
+            ]
+          },
+          {
+            "id": 6,
+            "name": "Sky Ruin",
+            "jpn": "スカイルーイン",
+            "file": "th12/6.ogg",
+            "aliases": [
+              "守护与被守护的大轮",
+              "スカイルーイン",
+              "天空遗迹",
+              "Sky Ruin",
+              "云居一轮&云山",
+              "三面道中"
+            ]
+          },
+          {
+            "id": 7,
+            "name": "守旧老爹与前卫少女",
+            "jpn": "時代親父とハイカラ少女",
+            "file": "th12/7.ogg",
+            "aliases": [
+              "時代親父とハイカラ少女",
+              "守护与被守护的大轮",
+              "守旧老爹与前卫少女",
+              "The Traditional Old Man and the Stylish Girl",
+              "传统老爸与尖端少女",
+              "三面BOSS",
+              "云居一轮&云山",
+              "守旧老爹与明治少女"
+            ]
+          },
+          {
+            "id": 8,
+            "name": "幽灵客船的穿越时空之旅",
+            "jpn": "幽霊客船の時空を越えた旅",
+            "file": "th12/8.ogg",
+            "aliases": [
+              "不明光球",
+              "四面道中",
+              "Interdimensional Voyage of a Ghostly Passenger Ship",
+              "幽灵客船的时空穿越之旅",
+              "幽灵客船的穿越时空之旅",
+              "云居一轮&云山",
+              "幽霊客船の時空を越えた旅"
+            ]
+          },
+          {
+            "id": 9,
+            "name": "Captain Murasa",
+            "jpn": "キャプテン・ムラサ",
+            "file": "th12/9.ogg",
+            "aliases": [
+              "キャプテン・ムラサ",
+              "Captain Murasa",
+              "四面BOSS",
+              "村纱船长",
+              "水难事故的念缚灵",
+              "村纱水蜜"
+            ]
+          },
+          {
+            "id": 10,
+            "name": "魔界地方都市秘境",
+            "jpn": "魔界地方都市エソテリア",
+            "file": "th12/10.ogg",
+            "aliases": [
+              "魔界地方都市エソテリア",
+              "娜兹玲",
+              "辖外魔都，秘术之城",
+              "魔界地方都市秘境",
+              "探宝的小小大将",
+              "五面道中",
+              "Rural Makai City Esoteria"
+            ]
+          },
+          {
+            "id": 11,
+            "name": "虎纹的毘沙门天",
+            "jpn": "虎柄の毘沙門天",
+            "file": "th12/11.ogg",
+            "aliases": [
+              "虎纹的毘沙门天",
+              "虎柄の毘沙門天",
+              "寅丸星",
+              "五面BOSS",
+              "毘沙门天的弟子",
+              "虎纹的毗沙门天",
+              "虎柄的毗沙门天",
+              "The Tiger-Patterned Bishamonten"
+            ]
+          },
+          {
+            "id": 12,
+            "name": "法界之火",
+            "jpn": "法界の火",
+            "file": "th12/12.ogg",
+            "aliases": [
+              "Fires of Hokkai",
+              "不明光球",
+              "法界の火",
+              "寅丸星",
+              "法界之火",
+              "六面道中"
+            ]
+          },
+          {
+            "id": 13,
+            "name": "感情的摩天楼　～ Cosmic Mind",
+            "jpn": "感情の摩天楼　～ Cosmic Mind",
+            "file": "th12/13.ogg",
+            "aliases": [
+              "圣白莲",
+              "Emotional Skyscraper ~ Cosmic Mind",
+              "被封印的大魔法使",
+              "感情的摩天楼 ～ Cosmic Mind",
+              "六面BOSS",
+              "感情の摩天楼　～ Cosmic Mind",
+              "感情的摩天大楼　～ Cosmic Mind"
+            ]
+          },
+          {
+            "id": 14,
+            "name": "夜空中的UFO恋曲",
+            "jpn": "夜空のユーフォーロマンス",
+            "file": "th12/14.ogg",
+            "aliases": [
+              "EX面道中",
+              "UFO Romance in the Night Sky",
+              "夜空のユーフォーロマンス",
+              "夜空中的UFO恋曲",
+              "多多良小伞",
+              "愉快的遗忘之伞"
+            ]
+          },
+          {
+            "id": 15,
+            "name": "平安时代的外星人",
+            "jpn": "平安のエイリアン",
+            "file": "th12/15.ogg",
+            "aliases": [
+              "封兽鵺",
+              "EX面BOSS",
+              "平安のエイリアン",
+              "未确认幻想飞行少女",
+              "Heian Alien",
+              "平安时代的外星人"
+            ]
+          },
+          {
+            "id": 16,
+            "name": "妖怪寺",
+            "jpn": "妖怪寺",
+            "file": "th12/16.ogg",
+            "aliases": [
+              "结局",
+              "结尾曲",
+              "Youkai Temple",
+              "ENDING",
+              "妖怪寺"
+            ]
+          },
+          {
+            "id": 17,
+            "name": "空中的归路　～ Sky Dream",
+            "jpn": "空の帰り道　～ Sky Dream",
+            "file": "th12/17.ogg",
+            "aliases": [
+              "空中的归路 ～ Sky Dream",
+              "Returning Home from the Sky ~ Sky Dream",
+              "制作人员",
+              "空の帰り道　～ Sky Dream",
+              "ED",
+              "STAFF"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "th13",
+        "name": "东方神灵庙",
+        "tracks": [{
+          "id": 1,
+          "name": "欲望深重的灵魂",
+          "jpn": "欲深き霊魂",
+          "file": "th13/1.ogg",
+          "aliases": [
+            "OP",
+            "标题",
+            "欲深き霊魂",
+            "强欲的灵魂",
+            "Spirit of Avarice",
+            "欲望深重的灵魂"
+          ]
+        },
+          {
+            "id": 2,
+            "name": "死灵的夜樱",
+            "jpn": "死霊の夜桜",
+            "file": "th13/2.ogg",
+            "aliases": [
+              "死灵的夜樱",
+              "Night Sakura of Dead Spirits",
+              "死霊の夜桜",
+              "一面道中"
+            ]
+          },
+          {
+            "id": 3,
+            "name": "Ghost Lead",
+            "jpn": "ゴーストリード",
+            "file": "th13/3.ogg",
+            "aliases": [
+              "西行寺幽幽子",
+              "一面BOSS",
+              "心无彷徨的亡灵",
+              "ゴーストリード",
+              "亡灵的引导",
+              "Ghost Lead"
+            ]
+          },
+          {
+            "id": 4,
+            "name": "欢迎来到妖怪寺",
+            "jpn": "妖怪寺へようこそ",
+            "file": "th13/4.ogg",
+            "aliases": [
+              "妖怪寺へようこそ",
+              "Welcome to Youkai Temple",
+              "幽谷响子",
+              "欢迎莅临妖怪寺",
+              "欢迎光临妖怪寺",
+              "二面道中",
+              "欢迎来到妖怪寺",
+              "诵经的山彦"
+            ]
+          },
+          {
+            "id": 5,
+            "name": "门前的妖怪小姑娘",
+            "jpn": "門前の妖怪小娘",
+            "file": "th13/5.ogg",
+            "aliases": [
+              "幽谷响子",
+              "门前的妖怪小姐",
+              "二面BOSS",
+              "門前の妖怪小娘",
+              "诵经的山彦",
+              "Youkai Girl at the Gate",
+              "门前的妖怪小姑娘"
+            ]
+          },
+          {
+            "id": 6,
+            "name": "在美妙的墓地里住下吧",
+            "jpn": "素敵な墓場で暮しましょ",
+            "file": "th13/6.ogg",
+            "aliases": [
+              "搬到舒适的墓地居住吧",
+              "素敵な墓場で暮しましょ",
+              "Let's Live in a Lovely Cemetery",
+              "为难的遗忘之物",
+              "在美妙的墓地里住下吧",
+              "多多良小伞",
+              "在美好的墓场中生活吧",
+              "三面道中"
+            ]
+          },
+          {
+            "id": 7,
+            "name": "Rigid Paradise",
+            "jpn": "リジッドパラダイス",
+            "file": "th13/7.ogg",
+            "aliases": [
+              "リジッドパラダイス",
+              "忠诚的尸体",
+              "僵硬的乐园",
+              "Rigid Paradise",
+              "宫古芳香",
+              "三面BOSS"
+            ]
+          },
+          {
+            "id": 8,
+            "name": "Desire Drive",
+            "jpn": "デザイアドライブ",
+            "file": "th13/8.ogg",
+            "aliases": [
+              "欲望驱动",
+              "欲望加速",
+              "四面道中",
+              "Desire Drive",
+              "穿墙的邪仙",
+              "霍青娥",
+              "デザイアドライブ"
+            ]
+          },
+          {
+            "id": 9,
+            "name": "古老的元神",
+            "jpn": "古きユアンシェン",
+            "file": "th13/9.ogg",
+            "aliases": [
+              "穿墙的邪仙",
+              "四面BOSS",
+              "古きユアンシェン",
+              "古代元神",
+              "Old Yuanxian",
+              "霍青娥",
+              "古老的元神"
+            ]
+          },
+          {
+            "id": 10,
+            "name": "梦殿大祀庙",
+            "jpn": "夢殿大祀廟",
+            "file": "th13/10.ogg",
+            "aliases": [
+              "夢殿大祀廟",
+              "神明后裔的亡灵",
+              "苏我屠自古",
+              "梦殿大祀庙",
+              "The Hall of Dreams' Great Mausoleum",
+              "五面道中"
+            ]
+          },
+          {
+            "id": 11,
+            "name": "大神神话传",
+            "jpn": "大神神話伝",
+            "file": "th13/11.ogg",
+            "aliases": [
+              "大神神话传",
+              "五面BOSS",
+              "Omiwa Legend",
+              "物部布都",
+              "大神神話伝",
+              "古代日本的尸解仙"
+            ]
+          },
+          {
+            "id": 12,
+            "name": "小小欲望的星空",
+            "jpn": "小さな欲望の星空",
+            "file": "th13/12.ogg",
+            "aliases": [
+              "-",
+              "渺小欲望的星空",
+              "小小欲望的星空",
+              "物部布都",
+              "小型欲望星空",
+              "六面道中",
+              "小さな欲望の星空"
+            ]
+          },
+          {
+            "id": 13,
+            "name": "圣德传说　～ True Administrator",
+            "jpn": "聖徳伝説　～ True Administrator",
+            "file": "th13/13.ogg",
+            "aliases": [
+              "圣德传说 ～ True Administrator",
+              "六面BOSS",
+              "丰聪耳神子",
+              "聖徳伝説　～ True Administrator",
+              "圣德道士"
+            ]
+          },
+          {
+            "id": 14,
+            "name": "后院的妖怪参拜道",
+            "jpn": "妖怪裏参道",
+            "file": "th13/14.ogg",
+            "aliases": [
+              "EX面道中",
+              "封兽鵺",
+              "后院的妖怪参拜道",
+              "妖怪裏参道",
+              "古代妖怪之一"
+            ]
+          },
+          {
+            "id": 15,
+            "name": "佐渡的二岩",
+            "jpn": "佐渡の二ッ岩",
+            "file": "th13/15.ogg",
+            "aliases": [
+              "二岩猯藏",
+              "佐渡の二ッ岩",
+              "EX面BOSS",
+              "佐渡的二岩",
+              "妖怪狸 十变化"
+            ]
+          },
+          {
+            "id": 16,
+            "name": "神社的新风",
+            "jpn": "神社の新しい風",
+            "file": "th13/16.ogg",
+            "aliases": [
+              "神社の新しい風",
+              "神社的新风",
+              "ENDING",
+              "结局",
+              "结尾曲",
+              "神社的新气象"
+            ]
+          },
+          {
+            "id": 17,
+            "name": "Desire Dream",
+            "jpn": "デザイアドリーム",
+            "file": "th13/17.ogg",
+            "aliases": [
+              "欲望之梦",
+              "制作人员",
+              "欲之梦",
+              "STAFF",
+              "ED",
+              "Desire Dream",
+              "デザイアドリーム"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "th14",
+        "name": "东方辉针城",
+        "tracks": [{
+          "id": 1,
+          "name": "不可思议的驱魔棒",
+          "jpn": "不思議なお祓い棒",
+          "file": "th14/1.ogg",
+          "aliases": [
+            "不可思议的御币",
+            "不可思议的驱魔棒",
+            "OP",
+            "不思議なお祓い棒",
+            "标题",
+            "Mysterious Purification Rod"
+          ]
+        },
+          {
+            "id": 2,
+            "name": "Mist Lake",
+            "jpn": "ミストレイク",
+            "file": "th14/2.ogg",
+            "aliases": [
+              "ミストレイク",
+              "湖的冰精",
+              "Mist Lake",
+              "雾之湖",
+              "一面道中",
+              "琪露诺"
+            ]
+          },
+          {
+            "id": 3,
+            "name": "秘境的人鱼",
+            "jpn": "秘境のマーメイド",
+            "file": "th14/3.ogg",
+            "aliases": [
+              "秘境のマーメイド",
+              "一面BOSS",
+              "若鹭姬",
+              "秘境人鱼",
+              "秘境的人鱼",
+              "栖息于淡水的人鱼",
+              "Mermaid from the Uncharted Land"
+            ]
+          },
+          {
+            "id": 4,
+            "name": "往来于运河的人与妖",
+            "jpn": "運河を行き交う人妖",
+            "file": "th14/4.ogg",
+            "aliases": [
+              "運河を行き交う人妖",
+              "往来于运河的人与妖",
+              "二面道中",
+              "辘轳首的怪奇",
+              "赤蛮奇",
+              "往来运河的人与妖",
+              "Humans and Youkai Traversing the Canal"
+            ]
+          },
+          {
+            "id": 5,
+            "name": "柳树下的杜拉罕",
+            "jpn": "柳の下のデュラハン",
+            "file": "th14/5.ogg",
+            "aliases": [
+              "柳の下のデュラハン",
+              "辘轳首的怪奇",
+              "柳树下的杜拉罕",
+              "柳下的无头骑士",
+              "赤蛮奇",
+              "二面BOSS",
+              "柳树下的无头女",
+              "Dullahan Under the Willows"
+            ]
+          },
+          {
+            "id": 6,
+            "name": "满月的竹林",
+            "jpn": "満月の竹林",
+            "file": "th14/6.ogg",
+            "aliases": [
+              "満月の竹林",
+              "满月的竹林",
+              "满月竹林",
+              "今泉影狼",
+              "竹林的Loup-Garou",
+              "Bamboo Forest of the Full Moon",
+              "三面道中"
+            ]
+          },
+          {
+            "id": 7,
+            "name": "孤独的狼人",
+            "jpn": "孤独なウェアウルフ",
+            "file": "th14/7.ogg",
+            "aliases": [
+              "Lonesome Werewolf",
+              "今泉影狼",
+              "孤独なウェアウルフ",
+              "孤独的狼人",
+              "三面BOSS",
+              "竹林的Loup-Garou"
+            ]
+          },
+          {
+            "id": 8,
+            "name": "Magical Storm",
+            "jpn": "マジカルストーム",
+            "file": "th14/8.ogg",
+            "aliases": [
+              "四面道中",
+              "古旧的琴的付丧神",
+              "Magical Storm",
+              "魔力的风暴",
+              "魔法风暴",
+              "マジカルストーム",
+              "九十九八桥（使用妖器）"
+            ]
+          },
+          {
+            "id": 9,
+            "name": "幻想净琉璃",
+            "jpn": "幻想浄瑠璃",
+            "file": "th14/9.ogg",
+            "aliases": [
+              "Illusionary Joururi",
+              "四面BOSS",
+              "幻想浄瑠璃",
+              "九十九弁弁（使用妖器）",
+              "古旧琵琶的付丧神",
+              "幻想净琉璃"
+            ]
+          },
+          {
+            "id": 10,
+            "name": "沉向空中的辉针城",
+            "jpn": "空中に沈む輝針城",
+            "file": "th14/10.ogg",
+            "aliases": [
+              "沉向空中的辉针城",
+              "The Shining Needle Castle Sinking in the Air",
+              "逆袭的天邪鬼",
+              "沉没于空中的辉针城",
+              "空中に沈む輝針城",
+              "五面道中",
+              "鬼人正邪"
+            ]
+          },
+          {
+            "id": 11,
+            "name": "Reverse Ideology",
+            "jpn": "リバースイデオロギー",
+            "file": "th14/11.ogg",
+            "aliases": [
+              "逆袭的天邪鬼",
+              "五面BOSS",
+              "颠倒世界观",
+              "倒转的世界观",
+              "リバースイデオロギー",
+              "Reverse Ideology",
+              "颠倒的观念",
+              "鬼人正邪"
+            ]
+          },
+          {
+            "id": 12,
+            "name": "针小棒大的天守阁",
+            "jpn": "針小棒大の天守閣",
+            "file": "th14/12.ogg",
+            "aliases": [
+              "针小棒大的天守阁",
+              "逆袭的天邪鬼",
+              "The Exaggerated Castle Keep",
+              "小题大做的天守阁",
+              "針小棒大の天守閣",
+              "六面道中",
+              "鬼人正邪"
+            ]
+          },
+          {
+            "id": 13,
+            "name": "辉光之针的小人族　～ Little Princess",
+            "jpn": "輝く針の小人族　～ Little Princess",
+            "file": "th14/13.ogg",
+            "aliases": [
+              "辉针城的小人族　～ Little Princess",
+              "小人的后裔",
+              "辉针小人族　～ Little Princess",
+              "Inchlings of the Shining Needle ~ Little Princess",
+              "辉光之针的小人族 ～ Little Princess",
+              "六面BOSS",
+              "輝く針の小人族　～ Little Princess",
+              "辉煌针之小人族　～ Little Princess",
+              "辉光之针的小人族　～ 小小公主",
+              "少名针妙丸"
+            ]
+          },
+          {
+            "id": 14,
+            "name": "魔力的雷云",
+            "jpn": "魔力の雷雲",
+            "file": "th14/14.ogg",
+            "aliases": [
+              "EX面道中",
+              "魔力的雷云",
+              "古旧的琴的付丧神",
+              "魔力の雷雲",
+              "魔力雷云",
+              "Thunderclouds of Magical Power",
+              "九十九八桥"
+            ]
+          },
+          {
+            "id": 15,
+            "name": "原初的节拍　～ Pristine Beat",
+            "jpn": "始原のビート　～ Pristine Beat",
+            "file": "th14/15.ogg",
+            "aliases": [
+              "原始节奏　～ Pristine Beat",
+              "EX面BOSS",
+              "始原のビート　～ Pristine Beat",
+              "原初的节拍 ～ Pristine Beat",
+              "原始的节奏　～ Pristine Beat",
+              "原始的节拍　～ Pristine Beat",
+              "堀川雷鼓",
+              "梦幻的打击乐手",
+              "Primordial Beat ~ Pristine Beat"
+            ]
+          },
+          {
+            "id": 16,
+            "name": "小槌的魔力",
+            "jpn": "小槌の魔力",
+            "file": "th14/16.ogg",
+            "aliases": [
+              "Magical Power of the Mallet",
+              "ENDING",
+              "小槌の魔力",
+              "小槌的魔力",
+              "结局",
+              "结尾曲",
+              "万宝槌的魔力"
+            ]
+          },
+          {
+            "id": 17,
+            "name": "非常非常神奇的道具们",
+            "jpn": "不思議な不思議な道具達",
+            "file": "th14/17.ogg",
+            "aliases": [
+              "神奇不可思议的道具们",
+              "非常非常神奇的道具们",
+              "不思議な不思議な道具達",
+              "ED",
+              "制作人员",
+              "STAFF",
+              "不可思议的神奇道具们",
+              "Mysterious, Mysterious Tools"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "th15",
+        "name": "东方绀珠传",
+        "tracks": [{
+          "id": 1,
+          "name": "宇宙巫女现身",
+          "jpn": "宇宙巫女現る",
+          "file": "th15/1.ogg",
+          "aliases": [
+            "OP",
+            "标题",
+            "宇宙巫女現る",
+            "宇宙巫女现身",
+            "The Space Shrine Maiden Appears"
+          ]
+        },
+          {
+            "id": 2,
+            "name": "忘不了，那曾依藉的绿意",
+            "jpn": "忘れがたき、よすがの緑",
+            "file": "th15/2.ogg",
+            "aliases": [
+              "清兰",
+              "Unforgettable, the Nostalgic Greenery",
+              "忘不了，那曾依藉的绿意",
+              "一面道中",
+              "忘れがたき、よすがの緑",
+              "浅葱色的Eagle Rabbit"
+            ]
+          },
+          {
+            "id": 3,
+            "name": "兔已着陆",
+            "jpn": "兎は舞い降りた",
+            "file": "th15/3.ogg",
+            "aliases": [
+              "清兰",
+              "The Rabbit Has Landed",
+              "一面BOSS",
+              "兎は舞い降りた",
+              "兔已着陆",
+              "浅葱色的Eagle Rabbit"
+            ]
+          },
+          {
+            "id": 4,
+            "name": "湖上倒映着洁净的月光",
+            "jpn": "湖は浄めの月光を映して",
+            "file": "th15/4.ogg",
+            "aliases": [
+              "The Lake Reflects the Cleansed Moonlight",
+              "湖は浄めの月光を映して",
+              "二面道中",
+              "铃瑚",
+              "橘色的Eagle Rabbit",
+              "湖上倒映着洁净的月光"
+            ]
+          },
+          {
+            "id": 5,
+            "name": "九月的南瓜",
+            "jpn": "九月のパンプキン",
+            "file": "th15/5.ogg",
+            "aliases": [
+              "九月的南瓜",
+              "September Pumpkin",
+              "铃瑚",
+              "九月のパンプキン",
+              "橘色的Eagle Rabbit",
+              "二面BOSS"
+            ]
+          },
+          {
+            "id": 6,
+            "name": "飞翔于宇宙的不可思议巫女",
+            "jpn": "宇宙を飛ぶ不思議な巫女",
+            "file": "th15/6.ogg",
+            "aliases": [
+              "宇宙を飛ぶ不思議な巫女",
+              "飞翔于宇宙的不可思议巫女",
+              "The Mysterious Shrine Maiden Flying Through Space",
+              "三面道中",
+              "哆来咪·苏伊特",
+              "梦之支配者"
+            ]
+          },
+          {
+            "id": 7,
+            "name": "永远的春梦",
+            "jpn": "永遠の春夢",
+            "file": "th15/7.ogg",
+            "aliases": [
+              "永遠の春夢",
+              "Eternal Spring Dream",
+              "永远的春梦",
+              "三面BOSS",
+              "哆来咪·苏伊特",
+              "梦之支配者"
+            ]
+          },
+          {
+            "id": 8,
+            "name": "冻结的永远之都",
+            "jpn": "凍り付いた永遠の都",
+            "file": "th15/8.ogg",
+            "aliases": [
+              "四面道中",
+              "The Frozen Eternal Capital",
+              "稀神探女",
+              "凍り付いた永遠の都",
+              "招来口舌之祸的女神",
+              "冻结的永远之都"
+            ]
+          },
+          {
+            "id": 9,
+            "name": "逆转的命运之轮",
+            "jpn": "逆転するホイールオブフォーチュン",
+            "file": "th15/9.ogg",
+            "aliases": [
+              "逆転するホイールオブフォーチュン",
+              "Reversed Wheel of Fortune",
+              "稀神探女",
+              "逆转的命运之轮",
+              "招来口舌之祸的女神",
+              "四面BOSS"
+            ]
+          },
+          {
+            "id": 10,
+            "name": "遥遥38万公里的航程",
+            "jpn": "遥か３８万キロのボヤージュ",
+            "file": "th15/10.ogg",
+            "aliases": [
+              "-",
+              "遥遥38万公里的航程",
+              "Faraway Voyage of 380,000 Kilometers",
+              "稀神探女",
+              "五面道中",
+              "遥か３８万キロのボヤージュ"
+            ]
+          },
+          {
+            "id": 11,
+            "name": "星条旗的小丑",
+            "jpn": "星条旗のピエロ",
+            "file": "th15/11.ogg",
+            "aliases": [
+              "地狱的妖精",
+              "Pierrot of the Star-Spangled Banner",
+              "五面BOSS",
+              "星条旗のピエロ",
+              "克劳恩皮丝",
+              "星条旗的小丑"
+            ]
+          },
+          {
+            "id": 12,
+            "name": "故乡之星倒映之海",
+            "jpn": "故郷の星が映る海",
+            "file": "th15/12.ogg",
+            "aliases": [
+              "-",
+              "故郷の星が映る海",
+              "The Sea that Reflects One's Home Planet",
+              "克劳恩皮丝",
+              "故乡之星倒映之海",
+              "六面道中"
+            ]
+          },
+          {
+            "id": 13,
+            "name": "Pure Furies　～ 心之所在",
+            "jpn": "ピュアヒューリーズ　～ 心の在処",
+            "file": "th15/13.ogg",
+            "aliases": [
+              "-",
+              "纯狐",
+              "Pure Furies ~ Whereabouts of the Heart",
+              "六面BOSS",
+              "Pure Furies ～ 心之所在",
+              "ピュアヒューリーズ　～ 心の在処"
+            ]
+          },
+          {
+            "id": 14,
+            "name": "前所未见的噩梦世界",
+            "jpn": "見た事も無い悪夢の世界",
+            "file": "th15/14.ogg",
+            "aliases": [
+              "纯狐",
+              "EX面道中",
+              "A World of Nightmares Never Seen Before",
+              "前所未见的噩梦世界",
+              "哆来咪·苏伊特",
+              "見た事も無い悪夢の世界"
+            ]
+          },
+          {
+            "id": 15,
+            "name": "Pandemonic Planet",
+            "jpn": "パンデモニックプラネット",
+            "file": "th15/15.ogg",
+            "aliases": [
+              "潘地漫尼克星球",
+              "地狱的女神",
+              "EX面BOSS",
+              "Pandemonic Planet",
+              "赫卡提亚·拉碧斯拉祖利",
+              "パンデモニックプラネット",
+              "万魔星球"
+            ]
+          },
+          {
+            "id": 16,
+            "name": "从神社所见之月",
+            "jpn": "神社から見える月",
+            "file": "th15/16.ogg",
+            "aliases": [
+              "从神社所见之月",
+              "ENDING",
+              "The Moon As Seen From the Shrine",
+              "神社から見える月",
+              "结局",
+              "结尾曲"
+            ]
+          },
+          {
+            "id": 17,
+            "name": "宇宙巫女归还",
+            "jpn": "宇宙巫女帰還する",
+            "file": "th15/17.ogg",
+            "aliases": [
+              "宇宙巫女归还",
+              "宇宙巫女帰還する",
+              "制作人员",
+              "The Space Shrine Maiden Returns Home",
+              "ED",
+              "STAFF"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "th16",
+        "name": "东方天空璋",
+        "tracks": [{
+          "id": 1,
+          "name": "樱花舞落的天空",
+          "jpn": "桜舞い散る天空",
+          "file": "th16/1.ogg",
+          "aliases": [
+            "OP",
+            "标题",
+            "The Sky Where Cherry Blossoms Flutter Down",
+            "樱花舞落的天空",
+            "桜舞い散る天空"
+          ]
+        },
+          {
+            "id": 2,
+            "name": "希望之星直升青霄",
+            "jpn": "希望の星は青霄に昇る",
+            "file": "th16/2.ogg",
+            "aliases": [
+              "希望の星は青霄に昇る",
+              "一面道中",
+              "接近神的蝴蝶妖精",
+              "A Star of Hope Rises in the Blue Sky",
+              "希望之星直升青霄",
+              "爱塔妮缇拉尔瓦"
+            ]
+          },
+          {
+            "id": 3,
+            "name": "仲夏的妖精梦",
+            "jpn": "真夏の妖精の夢",
+            "file": "th16/3.ogg",
+            "aliases": [
+              "一面BOSS",
+              "接近神的蝴蝶妖精",
+              "仲夏的妖精梦",
+              "盛夏的妖精梦",
+              "真夏の妖精の夢",
+              "A Midsummer Fairy's Dream",
+              "爱塔妮缇拉尔瓦"
+            ]
+          },
+          {
+            "id": 4,
+            "name": "妖怪山间无色风",
+            "jpn": "色無き風は妖怪の山に",
+            "file": "th16/4.ogg",
+            "aliases": [
+              "The Colorless Wind on Youkai Mountain",
+              "坂田合欢",
+              "二面道中",
+              "妖怪山间无色风",
+              "无色之风吹拂妖怪之山",
+              "色無き風は妖怪の山に",
+              "跨越浮世门关的山姥"
+            ]
+          },
+          {
+            "id": 5,
+            "name": "深山的遭遇",
+            "jpn": "山奥のエンカウンター",
+            "file": "th16/5.ogg",
+            "aliases": [
+              "山奥のエンカウンター",
+              "Deep-Mountain Encounter",
+              "坂田合欢",
+              "深山的遭遇",
+              "二面BOSS",
+              "跨越浮世门关的山姥"
+            ]
+          },
+          {
+            "id": 6,
+            "name": "徜徉于樱色之海",
+            "jpn": "桜色の海を泳いで",
+            "file": "th16/6.ogg",
+            "aliases": [
+              "泳于樱色之海",
+              "莉莉霍瓦特",
+              "坂田合欢",
+              "Swim in a Cherry Blossom-Colored Sea",
+              "徜徉于樱色之海",
+              "桜色の海を泳いで",
+              "三面道中"
+            ]
+          },
+          {
+            "id": 7,
+            "name": "成对的神兽",
+            "jpn": "一対の神獣",
+            "file": "th16/7.ogg",
+            "aliases": [
+              "醉心神佛的守护神兽",
+              "成对的神兽",
+              "A Pair of Divine Beasts",
+              "一対の神獣",
+              "高丽野阿吽",
+              "一对的神兽",
+              "三面BOSS"
+            ]
+          },
+          {
+            "id": 8,
+            "name": "幻想的白色旅人",
+            "jpn": "幻想のホワイトトラベラー",
+            "file": "th16/8.ogg",
+            "aliases": [
+              "幻想のホワイトトラベラー",
+              "四面道中",
+              "高丽野阿吽",
+              "幻想的白色旅人",
+              "Illusionary White Traveler",
+              "丁礼田舞"
+            ]
+          },
+          {
+            "id": 9,
+            "name": "魔法的笠地藏",
+            "jpn": "魔法の笠地蔵",
+            "file": "th16/9.ogg",
+            "aliases": [
+              "魔法の笠地蔵",
+              "魔法的笠地藏",
+              "The Magic Straw-Hat Jizo",
+              "四面BOSS",
+              "垂迹于森林的魔法地藏",
+              "矢田寺成美"
+            ]
+          },
+          {
+            "id": 10,
+            "name": "禁忌之门对侧，是此世还是彼世",
+            "jpn": "禁断の扉の向こうは、この世かあの世か",
+            "file": "th16/10.ogg",
+            "aliases": [
+              "禁忌之门对侧，是此世还是彼世",
+              "禁断の扉の向こうは、この世かあの世か",
+              "Does the Forbidden Door Lead to This World, or the World Beyond?",
+              "尔子田里乃",
+              "五面道中",
+              "矢田寺成美"
+            ]
+          },
+          {
+            "id": 11,
+            "name": "Crazy Back Dancers",
+            "jpn": "クレイジーバックダンサーズ",
+            "file": "th16/11.ogg",
+            "aliases": [
+              "Crazy Back Dancers",
+              "过于危险的背景舞者",
+              "クレイジーバックダンサーズ",
+              "五面BOSS",
+              "尔子田里乃",
+              "Crazy Backup Dancers",
+              "疯狂的背景舞者"
+            ]
+          },
+          {
+            "id": 12,
+            "name": "Into Backdoor",
+            "jpn": "イントゥ・バックドア",
+            "file": "th16/12.ogg",
+            "aliases": [
+              "-",
+              "Into Backdoor",
+              "进入后门",
+              "尔子田里乃",
+              "イントゥ・バックドア",
+              "六面道中"
+            ]
+          },
+          {
+            "id": 13,
+            "name": "被秘匿的四个季节",
+            "jpn": "秘匿されたフォーシーズンズ",
+            "file": "th16/13.ogg",
+            "aliases": [
+              "摩多罗隐岐奈",
+              "六面BOSS",
+              "被秘匿的四个季节",
+              "究极的绝对秘神",
+              "秘匿されたフォーシーズンズ",
+              "被秘匿的四季",
+              "The Concealed Four Seasons"
+            ]
+          },
+          {
+            "id": 14,
+            "name": "门再也进不去了",
+            "jpn": "もうドアには入れない",
+            "file": "th16/14.ogg",
+            "aliases": [
+              "EX面道中",
+              "过于危险的背景舞者",
+              "No More Going Through Doors",
+              "尔子田里乃",
+              "门再也进不去了",
+              "もうドアには入れない"
+            ]
+          },
+          {
+            "id": 15,
+            "name": "秘神摩多罗　～ Hidden Star in All Seasons.",
+            "jpn": "秘神マターラ　～ Hidden Star in All Seasons.",
+            "file": "th16/15.ogg",
+            "aliases": [
+              "秘神マターラ　～ Hidden Star in All Seasons.",
+              "秘神摩多罗 ～ Hidden Star in All Seasons.",
+              "摩多罗隐岐奈",
+              "EX面BOSS",
+              "究极的绝对秘神",
+              "Secret God Matara ~ Hidden Star in All Seasons."
+            ]
+          },
+          {
+            "id": 16,
+            "name": "不自然的自然",
+            "jpn": "不自然な自然",
+            "file": "th16/16.ogg",
+            "aliases": [
+              "结局",
+              "结尾曲",
+              "ENDING",
+              "Unnatural Nature",
+              "不自然的自然",
+              "不自然な自然"
+            ]
+          },
+          {
+            "id": 17,
+            "name": "白色旅人",
+            "jpn": "白い旅人",
+            "file": "th16/17.ogg",
+            "aliases": [
+              "白い旅人",
+              "制作人员",
+              "White Traveler",
+              "ED",
+              "STAFF",
+              "白色旅人"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "th17",
+        "name": "东方鬼形兽",
+        "tracks": [{
+          "id": 1,
+          "name": "沉默的兽灵",
+          "jpn": "物言わぬ獣の霊",
+          "file": "th17/1.ogg",
+          "aliases": [
+            "OP",
+            "Silent Beast Spirits",
+            "沉默的兽灵",
+            "标题",
+            "物言わぬ獣の霊"
+          ]
+        },
+          {
+            "id": 2,
+            "name": "只有地藏知晓的哀叹",
+            "jpn": "地蔵だけが知る哀嘆",
+            "file": "th17/2.ogg",
+            "aliases": [
+              "只有地藏知晓的哀叹",
+              "地蔵だけが知る哀嘆",
+              "The Lamentations Known Only by Jizo",
+              "一面道中",
+              "河原的偶像水子",
+              "戎璎花"
+            ]
+          },
+          {
+            "id": 3,
+            "name": "Jelly Stone",
+            "jpn": "ジェリーストーン",
+            "file": "th17/3.ogg",
+            "aliases": [
+              "ジェリーストーン",
+              "一面BOSS",
+              "Jelly Stone",
+              "水母石",
+              "河原的偶像水子",
+              "戎璎花"
+            ]
+          },
+          {
+            "id": 4,
+            "name": "Lost River",
+            "jpn": "ロストリバー",
+            "file": "th17/4.ogg",
+            "aliases": [
+              "失落之河",
+              "古代鱼的携子护卫",
+              "迷失之河",
+              "二面道中",
+              "ロストリバー",
+              "Lost River",
+              "牛崎润美"
+            ]
+          },
+          {
+            "id": 5,
+            "name": "石之婴儿与水中牛",
+            "jpn": "石の赤子と水中の牛",
+            "file": "th17/5.ogg",
+            "aliases": [
+              "古代鱼的携子护卫",
+              "The Stone Baby and the Submerged Bovine",
+              "石之婴儿与水中牛",
+              "石の赤子と水中の牛",
+              "二面BOSS",
+              "牛崎润美"
+            ]
+          },
+          {
+            "id": 6,
+            "name": "不朽的曼珠沙华",
+            "jpn": "不朽の曼珠沙華",
+            "file": "th17/6.ogg",
+            "aliases": [
+              "地狱口岸的守护神",
+              "不朽的曼珠沙华",
+              "庭渡久侘歌",
+              "不朽の曼珠沙華",
+              "Everlasting Red Spider Lily",
+              "三面道中"
+            ]
+          },
+          {
+            "id": 7,
+            "name": "Seraphic Chicken",
+            "jpn": "セラフィックチキン",
+            "file": "th17/7.ogg",
+            "aliases": [
+              "地狱口岸的守护神",
+              "庭渡久侘歌",
+              "セラフィックチキン",
+              "Seraphic Chicken",
+              "三面BOSS",
+              "如天使般的鸡"
+            ]
+          },
+          {
+            "id": 8,
+            "name": "Unlocated Hell",
+            "jpn": "アンロケイテッドヘル",
+            "file": "th17/8.ogg",
+            "aliases": [
+              "四面道中",
+              "アンロケイテッドヘル",
+              "未定位的地狱",
+              "鬼杰组组长",
+              "Unlocated Hell",
+              "吉吊八千慧"
+            ]
+          },
+          {
+            "id": 9,
+            "name": "Tortoise Dragon　～ 幸运与不幸",
+            "jpn": "トータスドラゴン　～ 幸運と不運",
+            "file": "th17/9.ogg",
+            "aliases": [
+              "四面BOSS",
+              "鬼杰组组长",
+              "トータスドラゴン　～ 幸運と不運",
+              "吉吊八千慧",
+              "Tortoise Dragon ～ 幸运与不幸"
+            ]
+          },
+          {
+            "id": 10,
+            "name": "Beast Metropolis",
+            "jpn": "ビーストメトロポリス",
+            "file": "th17/10.ogg",
+            "aliases": [
+              "野兽大都会",
+              "杖刀偶磨弓",
+              "Beast Metropolis",
+              "ビーストメトロポリス",
+              "埴轮兵长",
+              "五面道中"
+            ]
+          },
+          {
+            "id": 11,
+            "name": "陶瓷的杖刀人",
+            "jpn": "セラミックスの杖刀人",
+            "file": "th17/11.ogg",
+            "aliases": [
+              "杖刀偶磨弓",
+              "五面BOSS",
+              "陶瓷的杖刀人",
+              "Joutoujin of Ceramics",
+              "埴轮兵长",
+              "セラミックスの杖刀人"
+            ]
+          },
+          {
+            "id": 12,
+            "name": "Electric Heritage",
+            "jpn": "エレクトリックヘリテージ",
+            "file": "th17/12.ogg",
+            "aliases": [
+              "杖刀偶磨弓",
+              "エレクトリックヘリテージ",
+              "Electric Heritage",
+              "埴轮兵长",
+              "电子遗产",
+              "六面道中"
+            ]
+          },
+          {
+            "id": 13,
+            "name": "寄世界于偶像　～ Idoratrize World",
+            "jpn": "偶像に世界を委ねて　～ Idoratrize World",
+            "file": "th17/13.ogg",
+            "aliases": [
+              "Entrust this World to Idols ~ Idolatrize World",
+              "六面BOSS",
+              "孤立无援造就的造形神",
+              "偶像に世界を委ねて　～ Idoratrize World",
+              "寄世界于偶像 ～ Idoratrize World",
+              "埴安神袿姬"
+            ]
+          },
+          {
+            "id": 14,
+            "name": "闪耀的弱肉强食法则",
+            "jpn": "輝かしき弱肉強食の掟",
+            "file": "th17/14.ogg",
+            "aliases": [
+              "地狱口岸的守护神",
+              "闪耀的弱肉强食法则",
+              "EX面道中",
+              "庭渡久侘歌",
+              "The Shining Law of the Strong Eating the Weak",
+              "輝かしき弱肉強食の掟"
+            ]
+          },
+          {
+            "id": 15,
+            "name": "圣德太子的天马　～ Dark Pegasus",
+            "jpn": "聖徳太子のペガサス　～ Dark Pegasus",
+            "file": "th17/15.ogg",
+            "aliases": [
+              "EX面BOSS",
+              "骊驹早鬼",
+              "Prince Shoutoku's Pegasus ~ Dark Pegasus",
+              "劲牙组组长",
+              "圣德太子的天马 ～ Dark Pegasus",
+              "聖徳太子のペガサス　～ Dark Pegasus"
+            ]
+          },
+          {
+            "id": 16,
+            "name": "畜生们的小憩",
+            "jpn": "畜生達の休息",
+            "file": "th17/16.ogg",
+            "aliases": [
+              "结局",
+              "结尾曲",
+              "ENDING",
+              "The Animals' Rest",
+              "畜生们的小憩",
+              "畜生達の休息"
+            ]
+          },
+          {
+            "id": 17,
+            "name": "从地下的归还",
+            "jpn": "地下からの帰還",
+            "file": "th17/17.ogg",
+            "aliases": [
+              "制作人员",
+              "地下からの帰還",
+              "STAFF",
+              "ED",
+              "从地下的归还",
+              "Returning Home from the Underground"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "th18",
+        "name": "东方虹龙洞",
+        "tracks": [{
+          "id": 1,
+          "name": "架起虹桥的幻想乡",
+          "jpn": "虹の架かる幻想郷",
+          "file": "th18/1.ogg",
+          "aliases": [
+            "OP",
+            "架起虹桥的幻想乡",
+            "标题",
+            "虹の架かる幻想郷",
+            "A Rainbow Spanning Gensokyo"
+          ]
+        },
+          {
+            "id": 2,
+            "name": "妖异们的骤雨",
+            "jpn": "妖異達の通り雨",
+            "file": "th18/2.ogg",
+            "aliases": [
+              "豪德寺三花",
+              "生意兴隆的吉祥物",
+              "一面道中",
+              "A Shower of Strange Occurrences",
+              "妖異達の通り雨",
+              "妖异们的骤雨"
+            ]
+          },
+          {
+            "id": 3,
+            "name": "大吉猫咪",
+            "jpn": "大吉キトゥン",
+            "file": "th18/3.ogg",
+            "aliases": [
+              "豪德寺三花",
+              "一面BOSS",
+              "生意兴隆的吉祥物",
+              "Kitten of Great Fortune",
+              "大吉猫咪",
+              "大吉キトゥン"
+            ]
+          },
+          {
+            "id": 4,
+            "name": "深绿掩映的断崖",
+            "jpn": "深緑に隠された断崖",
+            "file": "th18/4.ogg",
+            "aliases": [
+              "深绿掩映的断崖",
+              "深山的经商妖怪",
+              "深緑に隠された断崖",
+              "二面道中",
+              "山城高岭",
+              "The Cliff Hidden in Deep Green"
+            ]
+          },
+          {
+            "id": 5,
+            "name": "Banditry Technology",
+            "jpn": "バンデットリィテクノロジー",
+            "file": "th18/5.ogg",
+            "aliases": [
+              "バンデットリィテクノロジー",
+              "深山的经商妖怪",
+              "Banditry Technology",
+              "山城高岭",
+              "二面BOSS"
+            ]
+          },
+          {
+            "id": 6,
+            "name": "驹草盛开的万年积雪",
+            "jpn": "駒草咲くパーペチュアルスノー",
+            "file": "th18/6.ogg",
+            "aliases": [
+              "驹草山如",
+              "駒草咲くパーペチュアルスノー",
+              "栖息于高地的山女郎",
+              "驹草盛开的万年积雪",
+              "The Perpetual Snow of Komakusa Blossoms",
+              "三面道中"
+            ]
+          },
+          {
+            "id": 7,
+            "name": "Smoking Dragon",
+            "jpn": "スモーキングドラゴン",
+            "file": "th18/7.ogg",
+            "aliases": [
+              "吞云吐雾的龙",
+              "Smoking Dragon",
+              "驹草山如",
+              "スモーキングドラゴン",
+              "栖息于高地的山女郎",
+              "三面BOSS"
+            ]
+          },
+          {
+            "id": 8,
+            "name": "日渐荒废的工业遗址",
+            "jpn": "廃れゆく産業遺構",
+            "file": "th18/8.ogg",
+            "aliases": [
+              "日渐荒废的工业遗址",
+              "阴阳玉",
+              "The Obsolescent Industrial Remains",
+              "四面道中",
+              "驹草山如",
+              "廃れゆく産業遺構"
+            ]
+          },
+          {
+            "id": 9,
+            "name": "神代矿石",
+            "jpn": "神代鉱石",
+            "file": "th18/9.ogg",
+            "aliases": [
+              "神代矿石",
+              "真正的勾玉匠人",
+              "神代鉱石",
+              "四面BOSS",
+              "Ore from the Age of the Gods",
+              "玉造魅须丸"
+            ]
+          },
+          {
+            "id": 10,
+            "name": "渴盼已久的逢魔之刻",
+            "jpn": "待ちわびた逢魔が時",
+            "file": "th18/10.ogg",
+            "aliases": [
+              "耳边低语的邪恶白狐",
+              "菅牧典",
+              "渴盼已久的逢魔之刻",
+              "The Long-Awaited Oumagatoki",
+              "待ちわびた逢魔が時",
+              "五面道中"
+            ]
+          },
+          {
+            "id": 11,
+            "name": "天魔之山漫天星",
+            "jpn": "星降る天魔の山",
+            "file": "th18/11.ogg",
+            "aliases": [
+              "饭纲丸龙",
+              "五面BOSS",
+              "星降る天魔の山",
+              "天魔之山漫天星",
+              "Starry Mountain of Tenma",
+              "鸦天狗的首领"
+            ]
+          },
+          {
+            "id": 12,
+            "name": "Lunar Rainbow",
+            "jpn": "ルナレインボー",
+            "file": "th18/12.ogg",
+            "aliases": [
+              "Lunar Rainbow",
+              "耳边低语的邪恶白狐",
+              "菅牧典",
+              "ルナレインボー",
+              "月虹",
+              "六面道中"
+            ]
+          },
+          {
+            "id": 13,
+            "name": "熙攘市场今何在　～ Immemorial Marketeers",
+            "jpn": "あの賑やかな市場は今どこに　～ Immemorial Marketeers",
+            "file": "th18/13.ogg",
+            "aliases": [
+              "天弓千亦",
+              "六面BOSS",
+              "无主物之神",
+              "あの賑やかな市場は今どこに　～ Immemorial Marketeers",
+              "Where Is That Bustling Marketplace Now ~ Immemorial Marketeers",
+              "熙攘市场今何在 ～ Immemorial Marketeers"
+            ]
+          },
+          {
+            "id": 14,
+            "name": "幻想地下大轨道网",
+            "jpn": "幻想の地下大線路網",
+            "file": "th18/14.ogg",
+            "aliases": [
+              "耳边低语的邪恶白狐",
+              "幻想の地下大線路網",
+              "EX面道中",
+              "菅牧典",
+              "The Great Fantastic Underground Railway Network",
+              "幻想地下大轨道网"
+            ]
+          },
+          {
+            "id": 15,
+            "name": "灭杀龙王的公主",
+            "jpn": "龍王殺しのプリンセス",
+            "file": "th18/15.ogg",
+            "aliases": [
+              "The Princess Who Slays Dragon Kings",
+              "漆黑的噬龙者",
+              "姬虫百百世",
+              "EX面BOSS",
+              "龍王殺しのプリンセス",
+              "灭杀龙王的公主"
+            ]
+          },
+          {
+            "id": 16,
+            "name": "风暴过后的星期日",
+            "jpn": "嵐の後の日曜日",
+            "file": "th18/16.ogg",
+            "aliases": [
+              "ENDING",
+              "风暴过后的星期日",
+              "结局",
+              "结尾曲",
+              "The Sunday After the Storm",
+              "嵐の後の日曜日"
+            ]
+          },
+          {
+            "id": 17,
+            "name": "虹色的世界",
+            "jpn": "虹色の世界",
+            "file": "th18/17.ogg",
+            "aliases": [
+              "The Rainbow-Colored World",
+              "制作人员",
+              "STAFF",
+              "ED",
+              "虹色の世界",
+              "虹色的世界"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "th19",
+        "name": "东方兽王园",
+        "tracks": [{
+          "id": 1,
+          "name": "兽之智慧",
+          "jpn": "獣の知性",
+          "file": "th19/1.ogg",
+          "aliases": [
+            "A Beast's Intelligence",
+            "獣の知性",
+            "兽之智慧",
+            "标题",
+            "OP"
+          ]
+        },
+          {
+            "id": 2,
+            "name": "世间万物皆可爱",
+            "jpn": "世界は可愛く出来ている",
+            "file": "th19/2.ogg",
+            "aliases": [
+              "博丽灵梦",
+              "The World Is Made in an Adorable Way",
+              "世间万物皆可爱",
+              "世界は可愛く出来ている",
+              "世界如此可爱"
+            ]
+          },
+          {
+            "id": 3,
+            "name": "魔兽紧急升空",
+            "jpn": "魔獣スクランブル",
+            "file": "th19/3.ogg",
+            "aliases": [
+              "魔兽紧急升空",
+              "魔獣スクランブル",
+              "Magical Beast Scramble",
+              "雾雨魔理沙",
+              "魔兽大乱斗"
+            ]
+          },
+          {
+            "id": 4,
+            "name": "悠久山上鬼",
+            "jpn": "鬼は悠久の山に",
+            "file": "th19/4.ogg",
+            "aliases": [
+              "鬼は悠久の山に",
+              "悠久山上鬼",
+              "伊吹萃香",
+              "The Oni Go to the Perpetual Mountain"
+            ]
+          },
+          {
+            "id": 5,
+            "name": "Tiny Shangri-La",
+            "jpn": "タイニーシャングリラ",
+            "file": "th19/5.ogg",
+            "aliases": [
+              "小小的香格里拉",
+              "タイニーシャングリラ",
+              "孙美天",
+              "Tiny Shangri-La"
+            ]
+          },
+          {
+            "id": 6,
+            "name": "勇敢又慵懒的妖兽",
+            "jpn": "勇敢で有閑な妖獣",
+            "file": "th19/6.ogg",
+            "aliases": [
+              "三头慧之子",
+              "勇敢又慵懒的妖兽",
+              "勇敢で有閑な妖獣",
+              "A Brave and Leisurely Beast"
+            ]
+          },
+          {
+            "id": 7,
+            "name": "吸血怪兽卓柏卡布拉",
+            "jpn": "吸血怪獣チュパカブラ",
+            "file": "th19/7.ogg",
+            "aliases": [
+              "吸血怪兽卓柏卡布拉",
+              "吸血怪獣チュパカブラ",
+              "Vampiric Cryptid Chupacabra",
+              "天火人血枪"
+            ]
+          },
+          {
+            "id": 8,
+            "name": "不回首的黄泉路",
+            "jpn": "振り向かない黄泉の道",
+            "file": "th19/8.ogg",
+            "aliases": [
+              "The Path to Yomi Where None Turn Back",
+              "豫母都日狭美",
+              "不回首的黄泉路",
+              "振り向かない黄泉の道"
+            ]
+          },
+          {
+            "id": 9,
+            "name": "越轨者们的无碍光　～ Kingdom of Nothingness.",
+            "jpn": "逸脱者達の無礙光　～ Kingdom of Nothingness.",
+            "file": "th19/9.ogg",
+            "aliases": [
+              "The Deviants' Unobstructed Light ~ Kingdom of Nothingness.",
+              "越轨者们的无碍光 ～ Kingdom of Nothingness.",
+              "逸脱者達の無礙光　～ Kingdom of Nothingness.",
+              "日白残无"
+            ]
+          },
+          {
+            "id": 10,
+            "name": "兽王们的小憩",
+            "jpn": "獣王達の休息",
+            "file": "th19/10.ogg",
+            "aliases": [
+              "兽王们的小憩",
+              "獣王達の休息",
+              "Beast Kings' Rest",
+              "结局",
+              "ENDING",
+              "结尾曲"
+            ]
+          },
+          {
+            "id": 11,
+            "name": "野兽有智慧吗",
+            "jpn": "獣に知性はあるか",
+            "file": "th19/11.ogg",
+            "aliases": [
+              "Do Beasts Have Intelligence?",
+              "野兽有智慧吗",
+              "獣に知性はあるか",
+              "ED",
+              "STAFF",
+              "制作人员"
+            ]
+          },
+          {
+            "id": 12,
+            "name": "战斗前会话1",
+            "jpn": "戦闘前会話1",
+            "file": "th19/12.ogg",
+            "aliases": [
+              "战斗前会话",
+              "戦闘前会話",
+              "对话用曲1",
+              "Pre-Battle Conversation Theme"
+            ]
+          },
+          {
+            "id": 13,
+            "name": "战斗前会话2",
+            "jpn": "戦闘前会話2",
+            "file": "th19/13.ogg",
+            "aliases": [
+              "战斗前会话",
+              "戦闘前会話",
+              "对话用曲2",
+              "Pre-Battle Conversation Theme"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "th20",
+        "name": "东方锦上京",
+        "tracks": [{
+          "id": 1,
+          "name": "锦上巫女",
+          "jpn": "錦の上の巫女",
+          "file": "th20/1.ogg",
+          "aliases": [
+            "錦の上の巫女",
+            "Shrine Maiden Crowned with Glory",
+            "锦上巫女"
+          ]
+        },
+          {
+            "id": 2,
+            "name": "所爱所怜的凡尘居所",
+            "jpn": "愛おしき塵の住処",
+            "file": "th20/2.ogg",
+            "aliases": [
+              "愛おしき塵の住処",
+              "栖息于圣域的山姥之长",
+              "Beloved Dwelling of Dust",
+              "一面道中",
+              "尘塚姥芽",
+              "所爱所怜的凡尘居所"
+            ]
+          },
+          {
+            "id": 3,
+            "name": "即便为世间所遗忘",
+            "jpn": "例え世界から忘れられても",
+            "file": "th20/3.ogg",
+            "aliases": [
+              "栖息于圣域的山姥之长",
+              "例え世界から忘れられても",
+              "一面BOSS",
+              "Even if Forgotten by the World",
+              "即便为世间所遗忘",
+              "尘塚姥芽"
+            ]
+          },
+          {
+            "id": 4,
+            "name": "Sacred Forest",
+            "jpn": "セイクリッドフォレスト",
+            "file": "th20/4.ogg",
+            "aliases": [
+              "Sacred Forest",
+              "二面道中",
+              "神圣森林",
+              "原形不明的反骨妖兽",
+              "封兽魑魅",
+              "セイクリッドフォレスト"
+            ]
+          },
+          {
+            "id": 5,
+            "name": "森林里面有鬼怪哦",
+            "jpn": "森にはお化けがいるよ",
+            "file": "th20/5.ogg",
+            "aliases": [
+              "森林里面有鬼怪哦",
+              "原形不明的反骨妖兽",
+              "森にはお化けがいるよ",
+              "二面BOSS",
+              "封兽魑魅",
+              "There's a Monster in the Woods"
+            ]
+          },
+          {
+            "id": 6,
+            "name": "祭司王约翰的黄金境",
+            "jpn": "プレステ・ジョアンの黄金境",
+            "file": "th20/6.ogg",
+            "aliases": [
+              "-",
+              "プレステ・ジョアンの黄金境",
+              "祭司王约翰的黄金境",
+              "Golden Land of Prester John",
+              "封兽魑魅",
+              "三面道中"
+            ]
+          },
+          {
+            "id": 7,
+            "name": "事已至此就赌上性命来猜谜吧",
+            "jpn": "どうせなら命を賭けて謎を解け",
+            "file": "th20/7.ogg",
+            "aliases": [
+              "どうせなら命を賭けて謎を解け",
+              "道神驯子",
+              "事已至此就赌上性命来猜谜吧",
+              "三面BOSS",
+              "闭门不出的圣地道祖神",
+              "Might as Well Risk Your Life to Solve the Riddle"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+    {
+      "name": "旧作",
+      "games": [{
+        "id": "th01",
+        "name": "东方灵异传",
+        "tracks": [{
+          "id": 1,
+          "name": "A Sacred Lot",
+          "jpn": "A Sacred Lot",
+          "file": "th01/1.ogg",
+          "aliases": [
+            "神圣之地",
+            "A Sacred Lot",
+            "神圣的命运",
+            "标题",
+            "OP"
+          ]
+        },
+          {
+            "id": 2,
+            "name": "永远之巫女",
+            "jpn": "永遠の巫女",
+            "file": "th01/2.ogg",
+            "aliases": [
+              "永远之巫女",
+              "永遠の巫女",
+              "Eternal Shrine Maiden",
+              "一面",
+              "四面",
+              "1至4面",
+              "一至四面",
+              "地狱16至19面",
+              "地狱十六至十九面"
+            ]
+          },
+          {
+            "id": 3,
+            "name": "Positive and Negative",
+            "jpn": "Positive and Negative",
+            "file": "th01/3.ogg",
+            "aliases": [
+              "The Positive and Negative",
+              "阴与阳",
+              "陰陽　 -The Positive and Negative",
+              "五面",
+              "神玉"
+            ]
+          },
+          {
+            "id": 4,
+            "name": "Highly Responsive to Prayers",
+            "jpn": "Highly Responsive to Prayers",
+            "file": "th01/4.ogg",
+            "aliases": [
+              "Highly Responsive to Prayers",
+              "神へ捧げる魂　　～Highly Responsive to Prayers",
+              "魔界6至9面主题曲",
+              "魔界六至九面主题曲",
+              "魔界六面",
+              "魔界九面"
+            ]
+          },
+          {
+            "id": 5,
+            "name": "东方怪奇谈",
+            "jpn": "東方怪奇談",
+            "file": "th01/5.ogg",
+            "aliases": [
+              "東方怪奇談",
+              "东方怪奇谈",
+              "Eastern Strange Discourse",
+              "地狱6至9面主题曲",
+              "地狱六至九面主题曲",
+              "地狱六面",
+              "地狱九面"
+            ]
+          },
+          {
+            "id": 6,
+            "name": "天使传说",
+            "jpn": "天使伝説",
+            "file": "th01/6.ogg",
+            "aliases": [
+              "天使伝説",
+              "Angel's Legend",
+              "天使传说",
+              "十面主题曲",
+              "幽幻魔眼",
+              "魅魔"
+            ]
+          },
+          {
+            "id": 7,
+            "name": "Oriental Magician",
+            "jpn": "Oriental Magician",
+            "file": "th01/7.ogg",
+            "aliases": [
+              "Oriental Magician",
+              "东方的魔法使",
+              "东方的魔术师",
+              "魔界11至14面主题曲",
+              "魔界十一至十四面主题曲",
+              "魔界十一面",
+              "魔界十四面"
+            ]
+          },
+          {
+            "id": 8,
+            "name": "破邪的小太刀",
+            "jpn": "破邪の小太刀",
+            "file": "th01/8.ogg",
+            "aliases": [
+              "Blade of Banishment",
+              "破邪の小太刀",
+              "破邪的小太刀",
+              "地狱11至14面主题曲",
+              "地狱十一至十四面主题曲",
+              "地狱十一面",
+              "地狱十四面"
+            ]
+          },
+          {
+            "id": 9,
+            "name": "魔镜",
+            "jpn": "魔鏡",
+            "file": "th01/9.ogg",
+            "aliases": [
+              "魔鏡",
+              "Magic Mirror",
+              "魔镜",
+              "15面主题曲",
+              "十五面主题曲",
+              "依莉斯",
+              "菊理"
+            ]
+          },
+          {
+            "id": 10,
+            "name": "The Legend of KAGE",
+            "jpn": "The Legend of KAGE",
+            "file": "th01/10.ogg",
+            "aliases": [
+              "The Legend of KAGE",
+              "影之传说",
+              "魔界16至19面主题曲",
+              "魔界十六至十九面主题曲",
+              "魔界十六面",
+              "魔界十九面"
+            ]
+          },
+          {
+            "id": 11,
+            "name": "来吧，直到倒地死去的那一刻",
+            "jpn": "いざ、倒れ逝くその時まで",
+            "file": "th01/11.ogg",
+            "aliases": [
+              "Now, Until the Moment You Die",
+              "来吧，直到倒地死去的那一刻",
+              "いざ、倒れ逝くその時まで",
+              "魔界最终面",
+              "萨丽爱尔"
+            ]
+          },
+          {
+            "id": 12,
+            "name": "同归于尽",
+            "jpn": "死なばもろとも",
+            "file": "th01/12.ogg",
+            "aliases": [
+              "死なばもろとも",
+              "同归于尽",
+              "We Shall Die Together",
+              "魔界最终面",
+              "萨丽爱尔"
+            ]
+          },
+          {
+            "id": 13,
+            "name": "星幽剑士",
+            "jpn": "星幽剣士",
+            "file": "th01/13.ogg",
+            "aliases": [
+              "星幽剑士",
+              "Swordsman of a Distant Star",
+              "星幽剣士",
+              "地狱最终面",
+              "矜羯罗"
+            ]
+          },
+          {
+            "id": 14,
+            "name": "鸢尾花",
+            "jpn": "アイリス",
+            "file": "th01/14.ogg",
+            "aliases": [
+              "鸢尾花",
+              "アイリス",
+              "Iris",
+              "结局",
+              "ENDING",
+              "结尾曲"
+            ]
+          },
+          {
+            "id": 15,
+            "name": "风之神社",
+            "jpn": "風の神社",
+            "file": "th01/15.ogg",
+            "aliases": [
+              "Shrine of the Wind",
+              "風の神社",
+              "风之神社",
+              "未使用曲"
+            ]
+          }
+        ]
+      },
+        {
+          "id": "th02",
+          "name": "东方封魔录",
+          "tracks": [{
+            "id": 1,
+            "name": "东方封魔录　～净土曼荼罗",
+            "jpn": "東方封魔録　～浄土曼荼羅",
+            "file": "th02/1.ogg",
+            "aliases": [
+              "Eastern Demon-Sealing Record ~ Pure Land Mandala",
+              "東方封魔録　～浄土曼荼羅",
+              "东方封魔录 ～净土曼荼罗",
+              "标题",
+              "OP"
+            ]
+          },
+            {
+              "id": 2,
+              "name": "博丽　～Eastern Wind",
+              "jpn": "博麗　～Eastern Wind",
+              "file": "th02/2.ogg",
+              "aliases": [
+                "博麗　～Eastern Wind",
+                "Hakurei ~ Eastern Wind",
+                "博丽 ～Eastern Wind",
+                "一面道中"
+              ]
+            },
+            {
+              "id": 3,
+              "name": "She's in a temper!!",
+              "jpn": "She's in a temper!!",
+              "file": "th02/3.ogg",
+              "aliases": [
+                "她怒了！！",
+                "She's in a temper!!",
+                "一面BOSS",
+                "里香"
+              ]
+            },
+            {
+              "id": 4,
+              "name": "End of Daylight",
+              "jpn": "End of Daylight",
+              "file": "th02/4.ogg",
+              "aliases": [
+                "二面道中",
+                "End of Daylight"
+              ]
+            },
+            {
+              "id": 5,
+              "name": "黑暗的力量",
+              "jpn": "やみのちから",
+              "file": "th02/5.ogg",
+              "aliases": [
+                "やみのちから",
+                "Power of Darkness",
+                "明罗",
+                "二面BOSS",
+                "黑暗的力量"
+              ]
+            },
+            {
+              "id": 6,
+              "name": "幻梦界",
+              "jpn": "幻夢界",
+              "file": "th02/6.ogg",
+              "aliases": [
+                "幻梦界",
+                "幻夢界",
+                "World of Fantasies",
+                "三面道中"
+              ]
+            },
+            {
+              "id": 7,
+              "name": "以死相赌",
+              "jpn": "死を賭して",
+              "file": "th02/7.ogg",
+              "aliases": [
+                "三面BOSS",
+                "死を賭して",
+                "以死相赌",
+                "Bet on Death"
+              ]
+            },
+            {
+              "id": 8,
+              "name": "神篱，如紫色火焰般燃烧",
+              "jpn": "ひもろぎ、むらさきにもえ",
+              "file": "th02/8.ogg",
+              "aliases": [
+                "神篱，如紫色火焰般燃烧",
+                "Himorogi, Burn in Violet",
+                "ひもろぎ、むらさきにもえ",
+                "四面道中"
+              ]
+            },
+            {
+              "id": 9,
+              "name": "恋色Magic",
+              "jpn": "恋色マジック",
+              "file": "th02/9.ogg",
+              "aliases": [
+                "恋色マジック",
+                "Love-Colored Magic",
+                "四面BOSS",
+                "魔理沙（魔梨沙）",
+                "恋色Magic"
+              ]
+            },
+            {
+              "id": 10,
+              "name": "东方封魔录　～幽幻乱舞",
+              "jpn": "東方封魔録　～幽幻乱舞",
+              "file": "th02/10.ogg",
+              "aliases": [
+                "-",
+                "Eastern Demon-Sealing Record ~ Spectral Boisterous Dance",
+                "东方封魔录 ～幽幻乱舞",
+                "五面道中",
+                "東方封魔録　～幽幻乱舞"
+              ]
+            },
+            {
+              "id": 11,
+              "name": "Complete Darkness",
+              "jpn": "Complete Darkness",
+              "file": "th02/11.ogg",
+              "aliases": [
+                "Complete Darkness",
+                "五面BOSS",
+                "全然黑暗",
+                "魅魔"
+              ]
+            },
+            {
+              "id": 12,
+              "name": "Extra Love",
+              "jpn": "エキストララブ",
+              "file": "th02/12.ogg",
+              "aliases": [
+                "-",
+                "EX面道中",
+                "Extra Love",
+                "额外的喜爱",
+                "エキストララブ"
+              ]
+            },
+            {
+              "id": 13,
+              "name": "战车娘所做的梦",
+              "jpn": "戦車むすめのみるゆめ",
+              "file": "th02/13.ogg",
+              "aliases": [
+                "The Tank Girl's Dream",
+                "战车娘所做的梦",
+                "里香",
+                "EX面BOSS",
+                "戦車むすめのみるゆめ"
+              ]
+            },
+            {
+              "id": 14,
+              "name": "远野之森",
+              "jpn": "遠野の森",
+              "file": "th02/14.ogg",
+              "aliases": [
+                "远野之森",
+                "遠野の森",
+                "Forest of Tono",
+                "结局",
+                "ENDING",
+                "结尾曲"
+              ]
+            },
+            {
+              "id": 15,
+              "name": "传说中的仙境",
+              "jpn": "昔話わんだーらんど",
+              "file": "th02/15.ogg",
+              "aliases": [
+                "Legendary Wonderland",
+                "昔話わんだーらんど",
+                "传说中的仙境",
+                "ED",
+                "STAFF",
+                "制作人员"
+              ]
+            },
+            {
+              "id": 16,
+              "name": "博丽神社境内",
+              "jpn": "博麗神社境内",
+              "file": "th02/16.ogg",
+              "aliases": [
+                "Hakurei Shrine Grounds",
+                "博丽神社境内",
+                "博麗神社境内"
+              ]
+            },
+            {
+              "id": 17,
+              "name": "夕阳下落",
+              "jpn": "陽落ちて",
+              "file": "th02/17.ogg",
+              "aliases": [
+                "陽落ちて",
+                "夕阳下落",
+                "Sunfall"
+              ]
+            },
+            {
+              "id": 18,
+              "name": "封魔终演",
+              "jpn": "封魔終演",
+              "file": "th02/18.ogg",
+              "aliases": [
+                "封魔終演",
+                "Demon-Sealing Finale",
+                "封魔终演"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "th03",
+          "name": "东方梦时空",
+          "tracks": [{
+            "id": 1,
+            "name": "梦想超越时空",
+            "jpn": "夢は時空を越えて",
+            "file": "th03/1.ogg",
+            "aliases": [
+              "A Dream Transcending Space-Time",
+              "梦想超越时空",
+              "夢は時空を越えて",
+              "标题",
+              "OP"
+            ]
+          },
+            {
+              "id": 2,
+              "name": "Selection",
+              "jpn": "Selection",
+              "file": "th03/2.ogg",
+              "aliases": [
+                "Selection",
+                "角色选择"
+              ]
+            },
+            {
+              "id": 3,
+              "name": "东方妖恋谈",
+              "jpn": "東方妖恋談",
+              "file": "th03/3.ogg",
+              "aliases": [
+                "東方妖恋談",
+                "Eastern Mystical Love Consultation",
+                "东方妖恋谈",
+                "博丽灵梦"
+              ]
+            },
+            {
+              "id": 4,
+              "name": "Reincarnation",
+              "jpn": "Reincarnation",
+              "file": "th03/4.ogg",
+              "aliases": [
+                "重生",
+                "Reincarnation",
+                "魅魔"
+              ]
+            },
+            {
+              "id": 5,
+              "name": "Dim. Dream",
+              "jpn": "Dim. Dream",
+              "file": "th03/5.ogg",
+              "aliases": [
+                "Dim. Dream",
+                "雾雨魔理沙"
+              ]
+            },
+            {
+              "id": 6,
+              "name": "Tabula rasa　～ 空白少女",
+              "jpn": "Tabula rasa　～空白少女",
+              "file": "th03/6.ogg",
+              "aliases": [
+                "Tabula rasa　～空白少女",
+                "Tabula rasa ~ The Empty Girl",
+                "Tabula rasa ～ 空白少女",
+                "爱莲"
+              ]
+            },
+            {
+              "id": 7,
+              "name": "Maniacal Princess",
+              "jpn": "Maniacal Princess",
+              "file": "th03/7.ogg",
+              "aliases": [
+                "Maniacal Princess",
+                "狂热的公主",
+                "疯狂的公主",
+                "小兔姬"
+              ]
+            },
+            {
+              "id": 8,
+              "name": "梦消失　～ Lost Dream",
+              "jpn": "夢消失　～Lost Dream",
+              "file": "th03/8.ogg",
+              "aliases": [
+                "夢消失　～Lost Dream",
+                "梦消失 ～ Lost Dream",
+                "Vanishing Dream ~ Lost Dream",
+                "卡娜·安娜贝拉尔"
+              ]
+            },
+            {
+              "id": 9,
+              "name": "梦幻游戏　～ Dream War",
+              "jpn": "夢幻遊戯　～Dream War",
+              "file": "th03/9.ogg",
+              "aliases": [
+                "Visionary Game ~ Dream War",
+                "梦幻游戏 ～Dream War",
+                "夢幻遊戯　～Dream War",
+                "朝仓理香子"
+              ]
+            },
+            {
+              "id": 10,
+              "name": "魔法决战！　～ Fight it out!",
+              "jpn": "魔法決戦！　～Fight it out!",
+              "file": "th03/10.ogg",
+              "aliases": [
+                "Decisive Magic Battle! ~ Fight it out!",
+                "魔法决战！ ～ Fight it out!",
+                "魔法決戦！　～Fight it out!",
+                "CPU第七人"
+              ]
+            },
+            {
+              "id": 11,
+              "name": "Sailor of Time",
+              "jpn": "Sailor of Time",
+              "file": "th03/11.ogg",
+              "aliases": [
+                "Sailor of Time",
+                "时之水手",
+                "北白河千百合"
+              ]
+            },
+            {
+              "id": 12,
+              "name": "Strawberry Crisis!!",
+              "jpn": "Strawberry Crisis!!",
+              "file": "th03/12.ogg",
+              "aliases": [
+                "草莓危机！！",
+                "Strawberry Crisis!!",
+                "冈崎梦美"
+              ]
+            },
+            {
+              "id": 13,
+              "name": "非统一魔法世界论",
+              "jpn": "非統一魔法世界論",
+              "file": "th03/13.ogg",
+              "aliases": [
+                "非统一魔法世界论",
+                "Disunified Field Theory of Magic",
+                "非統一魔法世界論",
+                "道中BOSS",
+                "中BOSS战前过场曲"
+              ]
+            },
+            {
+              "id": 14,
+              "name": "魔法钟爱",
+              "jpn": "魔法鐘愛",
+              "file": "th03/14.ogg",
+              "aliases": [
+                "Adoration of Magic",
+                "魔法钟爱",
+                "魔法鐘愛",
+                "冈崎梦美过场曲",
+                "BOSS战前过场曲",
+                "中间过场"
+              ]
+            },
+            {
+              "id": 15,
+              "name": "久远之梦",
+              "jpn": "久遠の夢",
+              "file": "th03/15.ogg",
+              "aliases": [
+                "久遠の夢",
+                "Dream of Eternity",
+                "久远之梦",
+                "结局",
+                "结尾曲",
+                "ENDING"
+              ]
+            },
+            {
+              "id": 16,
+              "name": "东方的蓝色天空",
+              "jpn": "東方の青い空",
+              "file": "th03/16.ogg",
+              "aliases": [
+                "東方の青い空",
+                "Eastern Blue Sky",
+                "东方的蓝色天空",
+                "结局",
+                "结尾曲",
+                "ENDING"
+              ]
+            },
+            {
+              "id": 17,
+              "name": "永远的满月",
+              "jpn": "永遠の満月",
+              "file": "th03/17.ogg",
+              "aliases": [
+                "永遠の満月",
+                "永远的满月",
+                "Eternal Full Moon",
+                "结局",
+                "结尾曲",
+                "ENDING"
+              ]
+            },
+            {
+              "id": 18,
+              "name": "Maple Dream...",
+              "jpn": "Maple Dream...",
+              "file": "th03/18.ogg",
+              "aliases": [
+                "Maple Dream...",
+                "枫之梦...",
+                "ED",
+                "STAFF",
+                "制作人员"
+              ]
+            },
+            {
+              "id": 19,
+              "name": "灵人的休息日",
+              "jpn": "霊人の休日",
+              "file": "th03/19.ogg",
+              "aliases": [
+                "灵人的休息日",
+                "Ghostly Person's Holiday",
+                "霊人の休日",
+                "得分画面"
+              ]
+            },
+            {
+              "id": 20,
+              "name": "胜利对话",
+              "jpn": "勝利デモ",
+              "file": "th03/20.ogg",
+              "aliases": [
+                "勝利デモ",
+                "胜利对话",
+                "Victory Demonstration",
+                "获胜的演示曲"
+              ]
+            },
+            {
+              "id": 21,
+              "name": "Game Over",
+              "jpn": "ゲームオーバー",
+              "file": "th03/21.ogg",
+              "aliases": [
+                "Game Over",
+                "ゲームオーバー",
+                "游戏结束画面曲"
+              ]
+            },
+            {
+              "id": 22,
+              "name": "时之风",
+              "jpn": "時の風",
+              "file": "th03/22.ogg",
+              "aliases": [
+                "時の風",
+                "Winds of Time",
+                "时之风"
+              ]
+            },
+            {
+              "id": 23,
+              "name": "Starbow Dream",
+              "jpn": "スターボウドリーム",
+              "file": "th03/23.ogg",
+              "aliases": [
+                "スターボウドリーム",
+                "星弧之梦",
+                "Starbow Dream"
+              ]
+            },
+            {
+              "id": 24,
+              "name": "Phantasmagoria",
+              "jpn": "Phantasmagoria",
+              "file": "th03/24.ogg",
+              "aliases": [
+                "Phantasmagoria"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "th04",
+          "name": "东方幻想乡",
+          "tracks": [{
+            "id": 1,
+            "name": "幻想乡　～ Lotus Land Story",
+            "jpn": "幻想郷　～ Lotus Land Story",
+            "file": "th04/1.ogg",
+            "aliases": [
+              "Gensokyo ~ Lotus Land Story",
+              "幻想乡 ～ Lotus Land Story",
+              "幻想郷　～ Lotus Land Story",
+              "标题",
+              "OP"
+            ]
+          },
+            {
+              "id": 2,
+              "name": "Witching Dream",
+              "jpn": "Witching Dream",
+              "file": "th04/2.ogg",
+              "aliases": [
+                "一面道中（自机为灵梦,此时时间为白天）",
+                "Witching Dream",
+                "一面道中"
+              ]
+            },
+            {
+              "id": 3,
+              "name": "Selene's light",
+              "jpn": "Selene's light",
+              "file": "th04/3.ogg",
+              "aliases": [
+                "一面道中（自机为魔理沙,此时时间为夜晚）",
+                "Selene's light",
+                "一面道中"
+              ]
+            },
+            {
+              "id": 4,
+              "name": "装饰战　～ Decoration Battle",
+              "jpn": "装飾戦　～ Decoration Battle",
+              "file": "th04/4.ogg",
+              "aliases": [
+                "妖怪",
+                "奥莲姬",
+                "一面BOSS",
+                "装飾戦　～ Decoration Battle",
+                "装饰战 ～ Decoration Battle",
+                "Decoration Battle"
+              ]
+            },
+            {
+              "id": 5,
+              "name": "Break the Sabbath",
+              "jpn": "Break the Sabbath",
+              "file": "th04/5.ogg",
+              "aliases": [
+                "胡桃",
+                "二面道中",
+                "Break the Sabbath",
+                "吸血少女",
+                "打破安息日"
+              ]
+            },
+            {
+              "id": 6,
+              "name": "红响曲　～ Scarlet Phoneme",
+              "jpn": "紅響曲　～ Scarlet Phoneme",
+              "file": "th04/6.ogg",
+              "aliases": [
+                "Scarlet Symphony ~ Scarlet Phoneme",
+                "胡桃",
+                "红响曲 ～ Scarlet Phoneme",
+                "二面BOSS",
+                "吸血少女",
+                "紅響曲　～ Scarlet Phoneme"
+              ]
+            },
+            {
+              "id": 7,
+              "name": "Bad Apple!!",
+              "jpn": "Bad Apple!!",
+              "file": "th04/7.ogg",
+              "aliases": [
+                "胡桃",
+                "Bad Apple!!",
+                "三面道中"
+              ]
+            },
+            {
+              "id": 8,
+              "name": "灵战　～ Perdition crisis",
+              "jpn": "霊戦　～ Perdition crisis",
+              "file": "th04/8.ogg",
+              "aliases": [
+                "Spirit Battle ~ Perdition crisis",
+                "霊戦　～ Perdition crisis",
+                "艾丽",
+                "三面BOSS",
+                "馆的门卫",
+                "灵战 ～ Perdition crisis"
+              ]
+            },
+            {
+              "id": 9,
+              "name": "Alice Maestra",
+              "jpn": "アリスマエステラ",
+              "file": "th04/9.ogg",
+              "aliases": [
+                "Alice Maestra",
+                "アリスマエステラ",
+                "艾丽",
+                "四面道中"
+              ]
+            },
+            {
+              "id": 10,
+              "name": "少女绮想曲　～ Capriccio",
+              "jpn": "少女綺想曲　～ Capriccio",
+              "file": "th04/10.ogg",
+              "aliases": [
+                "博丽灵梦（自机为魔理沙）",
+                "少女綺想曲　～ Capriccio",
+                "Maiden's Capriccio",
+                "四面BOSS",
+                "巫女",
+                "少女绮想曲 ～ Capriccio"
+              ]
+            },
+            {
+              "id": 11,
+              "name": "星之器　～ Casket of Star",
+              "jpn": "星の器　～ Casket of Star",
+              "file": "th04/11.ogg",
+              "aliases": [
+                "星之器 ～ Casket of Star",
+                "星の器　～ Casket of Star",
+                "魔法使",
+                "四面BOSS",
+                "雾雨魔理沙（自机为灵梦）",
+                "Vessel of Stars ~ Casket of Star"
+              ]
+            },
+            {
+              "id": 12,
+              "name": "Lotus Love",
+              "jpn": "Lotus Love",
+              "file": "th04/12.ogg",
+              "aliases": [
+                "-",
+                "莲之爱",
+                "雾雨魔理沙（自机为灵梦）",
+                "忘忧之爱",
+                "五面道中",
+                "Lotus Love"
+              ]
+            },
+            {
+              "id": 13,
+              "name": "沉睡的恐怖　～ Sleeping Terror",
+              "jpn": "眠れる恐怖　～Sleeping Terror",
+              "file": "th04/13.ogg",
+              "aliases": [
+                "沉睡的恐怖 ～ Sleeping Terror",
+                "眠れる恐怖　～Sleeping Terror",
+                "幽香",
+                "五面BOSS",
+                "Sleeping Terror",
+                "雾雨魔理沙（自机为灵梦）"
+              ]
+            },
+            {
+              "id": 14,
+              "name": "Dream Land",
+              "jpn": "Dream Land",
+              "file": "th04/14.ogg",
+              "aliases": [
+                "-",
+                "梦幻之地",
+                "Dream Land",
+                "雾雨魔理沙（自机为灵梦）",
+                "六面道中"
+              ]
+            },
+            {
+              "id": 15,
+              "name": "幽梦　～ Inanimate Dream",
+              "jpn": "幽夢　～ Inanimate Dream",
+              "file": "th04/15.ogg",
+              "aliases": [
+                "Faint Dream ~ Inanimate Dream",
+                "幽香",
+                "六面BOSS",
+                "幽夢　～ Inanimate Dream",
+                "幽梦 ～ Inanimate Dream",
+                "雾雨魔理沙（自机为灵梦）"
+              ]
+            },
+            {
+              "id": 16,
+              "name": "不可不禁止的游戏",
+              "jpn": "禁じざるをえない遊戯",
+              "file": "th04/16.ogg",
+              "aliases": [
+                "不得不禁止的游戏",
+                "EX面道中",
+                "The Inevitably Forbidden Game",
+                "无法回避的禁忌游戏",
+                "不可不禁止的游戏",
+                "雾雨魔理沙（自机为灵梦）",
+                "禁じざるをえない遊戯"
+              ]
+            },
+            {
+              "id": 17,
+              "name": "女仆幻想　～ Icemilk Magic",
+              "jpn": "メイド幻想　～ Icemilk Magic",
+              "file": "th04/17.ogg",
+              "aliases": [
+                "EX面BOSS",
+                "梦月",
+                "メイド幻想　～ Icemilk Magic",
+                "雾雨魔理沙（自机为灵梦）",
+                "Illusion of a Maid ~ Icemilk Magic",
+                "女仆幻想 ～ Icemilk Magic"
+              ]
+            },
+            {
+              "id": 18,
+              "name": "可爱的恶魔　～ Innocence",
+              "jpn": "かわいい悪魔　～ Innocence",
+              "file": "th04/18.ogg",
+              "aliases": [
+                "幻月",
+                "かわいい悪魔　～ Innocence",
+                "EX面BOSS",
+                "可爱的恶魔 ～ Innocence",
+                "Cute Devil ~ Innocence",
+                "雾雨魔理沙（自机为灵梦）"
+              ]
+            },
+            {
+              "id": 19,
+              "name": "Days",
+              "jpn": "Days",
+              "file": "th04/19.ogg",
+              "aliases": [
+                "Days",
+                "结局",
+                "ENDING",
+                "结尾曲",
+                "BE",
+                "BAD END"
+              ]
+            },
+            {
+              "id": 20,
+              "name": "Peaceful",
+              "jpn": "Peaceful",
+              "file": "th04/20.ogg",
+              "aliases": [
+                "Peaceful",
+                "结局",
+                "ENDING",
+                "结尾曲",
+                "GE",
+                "GOOD END"
+              ]
+            },
+            {
+              "id": 21,
+              "name": "Arcadian Dream",
+              "jpn": "Arcadian Dream",
+              "file": "th04/21.ogg",
+              "aliases": [
+                "Arcadian Dream",
+                "幻想之梦",
+                "ED",
+                "STAFF",
+                "制作人员"
+              ]
+            },
+            {
+              "id": 22,
+              "name": "幻想的居民",
+              "jpn": "幻想の住人",
+              "file": "th04/22.ogg",
+              "aliases": [
+                "幻想の住人",
+                "幻想的居民",
+                "Those Who Live in Illusions",
+                "得分记录"
+              ]
+            },
+            {
+              "id": 23,
+              "name": "Lotus Road",
+              "jpn": "Lotus Road",
+              "file": "th04/23.ogg",
+              "aliases": [
+                "Lotus Road",
+                "忘忧之路",
+                "莲之道",
+                "五面道中"
+              ]
+            },
+            {
+              "id": 24,
+              "name": "Dreamy pilot",
+              "jpn": "Dreamy pilot",
+              "file": "th04/24.ogg",
+              "aliases": [
+                "梦幻驾驶员",
+                "Dreamy pilot",
+                "四面道中"
+              ]
+            },
+            {
+              "id": 25,
+              "name": "Incomplete Plot",
+              "jpn": "Incomplete Plot",
+              "file": "th04/25.ogg",
+              "aliases": [
+                "Incomplete Plot",
+                "未完成的剧情"
+              ]
+            },
+            {
+              "id": 26,
+              "name": "Border Land",
+              "jpn": "Border Land",
+              "file": "th04/26.ogg",
+              "aliases": [
+                "Border Land",
+                "边境之地",
+                "六面道中"
+              ]
+            },
+            {
+              "id": 27,
+              "name": "Magic Shop of Raspberry",
+              "jpn": "Magic Shop of Raspberry",
+              "file": "th04/27.ogg",
+              "aliases": [
+                "树莓魔法店",
+                "Magic Shop of Raspberry",
+                "树莓魔法商店"
+              ]
+            },
+            {
+              "id": 28,
+              "name": "Crescent Dream",
+              "jpn": "Crescent Dream",
+              "file": "th04/28.ogg",
+              "aliases": [
+                "新月之梦",
+                "Crescent Dream",
+                "月牙之梦",
+                "ED",
+                "STAFF",
+                "制作人员"
+              ]
+            },
+            {
+              "id": 29,
+              "name": "Init",
+              "jpn": "Init",
+              "file": "th04/29.ogg",
+              "aliases": [
+                "Init",
+                "「ZUN Soft」表示音",
+                "游戏载入画面"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "th05",
+          "name": "东方怪绮谈",
+          "tracks": [{
+            "id": 1,
+            "name": "怪绮谈　～ Mystic Square",
+            "jpn": "怪綺談　～ Mystic Square",
+            "file": "th05/1.ogg",
+            "aliases": [
+              "怪绮谈 ～ Mystic Square",
+              "怪綺談　～ Mystic Square",
+              "Bizarre Romantic Story ~ Mystic Square",
+              "标题",
+              "OP"
+            ]
+          },
+            {
+              "id": 2,
+              "name": "Dream Express",
+              "jpn": "Dream Express",
+              "file": "th05/2.ogg",
+              "aliases": [
+                "梦幻快车",
+                "梦之特快车",
+                "Dream Express",
+                "一面道中"
+              ]
+            },
+            {
+              "id": 3,
+              "name": "魔法阵　～ Magic Square",
+              "jpn": "魔法陣　～ Magic Square",
+              "file": "th05/3.ogg",
+              "aliases": [
+                "魔界的门卫",
+                "一面BOSS",
+                "萨拉",
+                "Magic Square",
+                "魔法阵 ～ Magic Square",
+                "魔法陣　～ Magic Square"
+              ]
+            },
+            {
+              "id": 4,
+              "name": "梦想时空",
+              "jpn": "夢想時空",
+              "file": "th05/4.ogg",
+              "aliases": [
+                "梦想时空",
+                "萨拉",
+                "二面道中",
+                "夢想時空",
+                "Dimension of Reverie"
+              ]
+            },
+            {
+              "id": 5,
+              "name": "灵天　～ Spiritual Heaven",
+              "jpn": "霊天　～ Spiritual Heaven",
+              "file": "th05/5.ogg",
+              "aliases": [
+                "灵天 ～ Spiritual Heaven",
+                "Spiritual Heaven",
+                "魔界人",
+                "二面BOSS",
+                "露易兹",
+                "霊天　～ Spiritual Heaven"
+              ]
+            },
+            {
+              "id": 6,
+              "name": "Romantic Children",
+              "jpn": "Romantic Children",
+              "file": "th05/6.ogg",
+              "aliases": [
+                "露易兹",
+                "Romantic Children",
+                "浪漫的孩子",
+                "三面道中"
+              ]
+            },
+            {
+              "id": 7,
+              "name": "Plastic Mind",
+              "jpn": "プラスチックマインド",
+              "file": "th05/7.ogg",
+              "aliases": [
+                "死之少女",
+                "Plastic Mind",
+                "プラスチックマインド",
+                "三面BOSS",
+                "爱丽丝"
+              ]
+            },
+            {
+              "id": 8,
+              "name": "Maple Wise",
+              "jpn": "メイプルワイズ",
+              "file": "th05/8.ogg",
+              "aliases": [
+                "Maple Wise",
+                "四面道中",
+                "枫之智慧",
+                "メイプルワイズ",
+                "爱丽丝"
+              ]
+            },
+            {
+              "id": 9,
+              "name": "禁忌的魔法　～ Forbidden Magic",
+              "jpn": "禁断の魔法　～ Forbidden Magic",
+              "file": "th05/9.ogg",
+              "aliases": [
+                "魔法使",
+                "四面BOSS",
+                "禁断の魔法　～ Forbidden Magic",
+                "Forbidden Magic",
+                "雪",
+                "禁忌的魔法 ～ Forbidden Magic"
+              ]
+            },
+            {
+              "id": 10,
+              "name": "绯红的少女　～ Crimson Dead!!",
+              "jpn": "真紅の少女　～ Crimson Dead!!",
+              "file": "th05/10.ogg",
+              "aliases": [
+                "魔法使",
+                "真紅の少女　～ Crimson Dead!!",
+                "Crimson Maiden ~ Crimson Dead!!",
+                "雪（击破舞后）",
+                "四面BOSS",
+                "绯红的少女 ～ Crimson Dead!!"
+              ]
+            },
+            {
+              "id": 11,
+              "name": "背叛的少女　～ Judas Kiss",
+              "jpn": "裏切りの少女　～ Judas Kiss",
+              "file": "th05/11.ogg",
+              "aliases": [
+                "魔法使",
+                "舞（击破雪后）",
+                "四面BOSS",
+                "裏切りの少女　～ Judas Kiss",
+                "背叛的少女 ～ Judas Kiss",
+                "Treacherous Maiden ~ Judas Kiss"
+              ]
+            },
+            {
+              "id": 12,
+              "name": "the Last Judgement",
+              "jpn": "the Last Judgement",
+              "file": "th05/12.ogg",
+              "aliases": [
+                "舞（击破雪后）",
+                "the Last Judgement",
+                "五面道中",
+                "最终审判",
+                "最后的审判"
+              ]
+            },
+            {
+              "id": 13,
+              "name": "可悲的人偶　～ Doll of Misery",
+              "jpn": "悲しき人形　～ Doll of Misery",
+              "file": "th05/13.ogg",
+              "aliases": [
+                "Doll of Misery",
+                "五面BOSS",
+                "魔界女仆",
+                "悲しき人形　～ Doll of Misery",
+                "梦子",
+                "可悲的人偶 ～ Doll of Misery"
+              ]
+            },
+            {
+              "id": 14,
+              "name": "世界的尽头　～ World's End",
+              "jpn": "世界の果て　～ World's End",
+              "file": "th05/14.ogg",
+              "aliases": [
+                "-",
+                "世界の果て　～ World's End",
+                "End of the World ~ World's End",
+                "梦子",
+                "世界的尽头 ～ World's End",
+                "六面道中"
+              ]
+            },
+            {
+              "id": 15,
+              "name": "神话幻想　～ Infinite Being",
+              "jpn": "神話幻想　～ Infinite Being",
+              "file": "th05/15.ogg",
+              "aliases": [
+                "神話幻想　～ Infinite Being",
+                "神绮",
+                "六面BOSS",
+                "Legendary Illusion ~ Infinite Being",
+                "魔界之神",
+                "神话幻想 ～ Infinite Being"
+              ]
+            },
+            {
+              "id": 16,
+              "name": "不可思议之国的爱丽丝",
+              "jpn": "不思議の国のアリス",
+              "file": "th05/16.ogg",
+              "aliases": [
+                "EX面道中",
+                "不可思议之国的爱丽丝",
+                "神绮",
+                "不思議の国のアリス",
+                "Alice in Wonderland"
+              ]
+            },
+            {
+              "id": 17,
+              "name": "the Grimoire of Alice",
+              "jpn": "the Grimoire of Alice",
+              "file": "th05/17.ogg",
+              "aliases": [
+                "EX面BOSS",
+                "the Grimoire of Alice",
+                "爱丽丝",
+                "魔法之国的爱丽丝",
+                "爱丽丝的魔法书"
+              ]
+            },
+            {
+              "id": 18,
+              "name": "神社",
+              "jpn": "神社",
+              "file": "th05/18.ogg",
+              "aliases": [
+                "神社",
+                "Shinto Shrine",
+                "结局",
+                "ENDING",
+                "结尾曲",
+                "BE",
+                "BAD END"
+              ]
+            },
+            {
+              "id": 19,
+              "name": "Endless",
+              "jpn": "Endless",
+              "file": "th05/19.ogg",
+              "aliases": [
+                "Endless",
+                "结局",
+                "ENDING",
+                "结尾曲",
+                "GE",
+                "GOOD END"
+              ]
+            },
+            {
+              "id": 20,
+              "name": "永远的乐园",
+              "jpn": "久遠の楽園",
+              "file": "th05/20.ogg",
+              "aliases": [
+                "久遠の楽園",
+                "Eternal Paradise",
+                "永远的乐园",
+                "结局",
+                "ENDING",
+                "结尾曲",
+                "GE",
+                "GOOD END"
+              ]
+            },
+            {
+              "id": 21,
+              "name": "Mystic Dream",
+              "jpn": "Mystic Dream",
+              "file": "th05/21.ogg",
+              "aliases": [
+                "Mystic Dream",
+                "神秘之梦",
+                "ED",
+                "STAFF",
+                "制作人员"
+              ]
+            },
+            {
+              "id": 22,
+              "name": "Peaceful Romancer",
+              "jpn": "Peaceful Romancer",
+              "file": "th05/22.ogg",
+              "aliases": [
+                "Peaceful Romancer",
+                "结局",
+                "ENDING",
+                "结尾曲",
+                "EXTRA ENDING"
+              ]
+            },
+            {
+              "id": 23,
+              "name": "灵魂安息之所",
+              "jpn": "魂の休らむ所",
+              "file": "th05/23.ogg",
+              "aliases": [
+                "灵魂安息之所",
+                "魂の休らむ所",
+                "Soul's Resting Place",
+                "得分登记",
+                "得分画面"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
