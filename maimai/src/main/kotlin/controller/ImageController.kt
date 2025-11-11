@@ -126,8 +126,41 @@ class ImageController(
         }
 
         maimai.local.courses.values.forEach { course ->
-            startsWith(course.name.toSimple()) { args ->
+            startsWith(course.name.toSimple().lowercase()) { args ->
                 handleCourse(this, course, args)
+            }
+        }
+        courseAliases.forEach { (id, aliases) ->
+            aliases.forEach { alias ->
+                startsWith(alias.toSimple().lowercase()) { args ->
+                    maimai.local.courses[id] ?.let { course ->
+                        handleCourse(this, course, args)
+                    }
+                }
+            }
+        }
+        startsWith("段位表") { raw ->
+            val args = raw.split(" ", limit = 2).map { it.trim() }
+            val name = args.firstOrNull() ?.lowercase() ?: run {
+                reply("使用方法：段位表 段位名称\n\t例：段位表 十段\n\t例：段位表 随机紫超上")
+                return@startsWith
+            }
+            val course = maimai.local.courses.values.firstOrNull {
+                it.name.toSimple().lowercase() == name
+            } ?: run {
+                courseAliases.firstNotNullOfOrNull { (id, aliases) ->
+                    if (aliases.any { it.toSimple().lowercase() == name })
+                        id
+                    else
+                        null
+                } ?.let { id ->
+                    maimai.local.courses[id]
+                }
+            }
+            course ?.let {
+                handleCourse(this, course, args.getOrElse(1) { "" })
+            } ?: run {
+                reply("未找到该段位。\n使用方法：段位表 段位名称\n\t例：段位表 十段\n\t例：段位表 随机紫超上")
             }
         }
     }
@@ -482,7 +515,7 @@ class ImageController(
                 })
             }
             maimai.image.templateCourse(course, scores)
-                .sendResultImage(course.name.toSimple(), event, randomTips())
+                .sendResultImage(course.name.toSimple().lowercase(), event, randomTips())
         }
     }
 
@@ -559,5 +592,17 @@ class ImageController(
                 appendLine("落雪查分器：https://otmdb.cn/jump/lxnsprober_import")
             }.trim().newLine())
         else reply(MarkdownTemplates.Templates.IMPORT_DATA)
+    }
+    companion object {
+        val courseAliases = buildMap<Int, List<String>> {
+            put(452201, listOf("随机红初级", "随机expert初级", "红初级"))
+            put(452202, listOf("随机红中级", "随机expert中级", "红中级"))
+            put(452203, listOf("随机红上级", "随机expert上级", "红上级"))
+            put(452204, listOf("随机红超上级", "随机红超上", "随机expert超上级", "红超上级", "红超上"))
+            put(452301, listOf("随机紫初级", "随机初级", "随机master初级", "紫初级", "初级"))
+            put(452302, listOf("随机紫中级", "随机中级", "随机master中级", "紫中级", "中级"))
+            put(452303, listOf("随机紫上级", "随机上级", "随机master上级", "紫上级", "上级"))
+            put(452304, listOf("随机紫超上级", "随机紫超上", "随机超上级", "随机超上", "随机master超上级", "紫超上级", "紫超上", "超上"))
+        }
     }
 }

@@ -845,7 +845,7 @@ class MaimaiImage(
                 calcMinDamage(chart, score?.achievement ?: 0, course)
         }
         val remains = damages.mapIndexed { index, damage ->
-            if (life >= 0 && index != 0)
+            if (life > 0 && index != 0)
                 life += course.recover
             life -= damage
             if (life <= 0) {
