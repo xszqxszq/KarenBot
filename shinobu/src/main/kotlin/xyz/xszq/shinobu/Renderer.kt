@@ -403,7 +403,7 @@ class Renderer(
                 val elements = element.children.mapParallel(isParallel) { child ->
                     if (child is Container)
                         child.parent = element
-                    renderElement(child, fonts) ?.let { rendered ->
+                    renderElement(child, fonts, parallel) ?.let { rendered ->
                         Pair(child, rendered)
                     }
                 }.filterNotNull()
