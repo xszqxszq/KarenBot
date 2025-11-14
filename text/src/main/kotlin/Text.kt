@@ -3,36 +3,27 @@ package xyz.xszq.bot
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.delete
-import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.HttpHeaders
-import io.ktor.serialization.kotlinx.json.json
-import korlibs.io.file.std.localVfs
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import korlibs.io.util.UUID
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 import org.scilab.forge.jlatexmath.TeXConstants
 import org.scilab.forge.jlatexmath.TeXFormula
+import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.message.File
 import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.message.PlainText
 import xyz.xszq.bot.payload.BilibiliResponse
 import xyz.xszq.bot.payload.BilibiliVideoInfo
 import xyz.xszq.bot.payload.RandomOtomads
-import xyz.xszq.bot.payload.markdown.Action
-import xyz.xszq.bot.payload.markdown.Keyboard
-import xyz.xszq.bot.payload.markdown.MarkdownData
-import xyz.xszq.bot.payload.markdown.Permission
-import xyz.xszq.bot.payload.markdown.RenderData
+import xyz.xszq.bot.payload.markdown.*
 import java.awt.Color
-import kotlin.collections.random
-import kotlin.io.use
 import kotlin.random.Random
-import kotlin.text.toLong
 
 @Suppress("unused")
 class Text: Plugin() {
@@ -152,14 +143,6 @@ class Text: Plugin() {
                     video = data
                     return@repeat
                 }
-//                runCatching {
-//                    Bilibili.infoByHtml(bvid)
-//                }.onFailure {
-//                    it.printStackTrace()
-//                }.getOrNull() ?.let { info ->
-//                    video = info
-//                    return@repeat
-//                }
                 delay(500L)
             }
             video ?: run {
@@ -238,6 +221,13 @@ class Text: Plugin() {
                 )
                 reply(Image(result))
             }
+        }
+        startsWith("debug") {
+            reply(buildString {
+                appendLine("用户ID: ${sender.id}")
+                if (this@startsWith is GroupMessageEvent)
+                    appendLine("群组ID: ${group.id}")
+            }.trim().newLine())
         }
     }
     @Suppress("unused")

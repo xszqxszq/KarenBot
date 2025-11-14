@@ -1,12 +1,12 @@
 package xyz.xszq.bot
 
-import io.ktor.client.HttpClient
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.HttpHeaders
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import io.ktor.http.headers
-import io.ktor.serialization.kotlinx.json.json
+import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 import xyz.xszq.bot.payload.BilibiliHtmlResponse
 import xyz.xszq.bot.payload.BilibiliVideoInfo

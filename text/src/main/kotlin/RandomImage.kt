@@ -21,6 +21,6 @@ class RandomImage {
     fun random() = files.fastRandom()
     companion object {
         const val DIR = "data/random/kinpatsu"
-        val IMAGE_EXTS = listOf("jpg", "jpeg", "png", "gif")
+        val IMAGE_EXTS = listOf("jpg", "jpeg", "png", "gif", "webp")
     }
 }
