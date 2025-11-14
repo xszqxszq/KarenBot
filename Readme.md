@@ -12,7 +12,7 @@
 
 ## 文档
 
-[帮助](https://bot-docs.otmdb.cn/) [添加机器人](https://bot-docs.otmdb.cn/get-started.html)
+[功能](https://bot-docs.otmdb.cn/features.html) [添加机器人](https://bot-docs.otmdb.cn/get-started.html)
 
 ## 项目结构
 
@@ -20,7 +20,7 @@
 
 ```shell
 KarenBot
-├── src/        # 机器人本体功能代码
+├── src/        # 机器人本体功能
 │
 ├── maimai/     # 舞萌DX
 ├── otto/       # 活字印刷
