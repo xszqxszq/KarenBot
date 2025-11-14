@@ -1,10 +1,6 @@
 package xyz.xszq.bot
 
-import korlibs.image.bitmap.Bitmap
-import korlibs.image.bitmap.NativeImage
-import korlibs.image.bitmap.context2d
-import korlibs.image.bitmap.extract
-import korlibs.image.bitmap.sliceWithSize
+import korlibs.image.bitmap.*
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.image.font.FontRegistry

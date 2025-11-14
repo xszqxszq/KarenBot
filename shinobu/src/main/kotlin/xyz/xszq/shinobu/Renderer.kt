@@ -12,12 +12,7 @@ import korlibs.math.geom.Anchor
 import korlibs.math.geom.Point
 import korlibs.math.geom.ScaleMode
 import korlibs.math.geom.vector.LineJoin
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import kotlin.math.max
 import kotlin.math.min
 

@@ -3,7 +3,6 @@ package xyz.xszq.bot
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
-import korlibs.image.bitmap.Bitmap
 import korlibs.image.format.PNG
 import korlibs.image.format.encode
 import korlibs.image.format.readNativeImage
@@ -16,14 +15,8 @@ import xyz.xszq.bot.exception.NeedHelpException
 import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.payload.MemeOption
-import xyz.xszq.bot.payload.markdown.Action
-import xyz.xszq.bot.payload.markdown.Keyboard
-import xyz.xszq.bot.payload.markdown.MarkdownData
-import xyz.xszq.bot.payload.markdown.Permission
-import xyz.xszq.bot.payload.markdown.RenderData
+import xyz.xszq.bot.payload.markdown.*
 import xyz.xszq.bot.sekai.SekaiSticker
-import kotlin.collections.plus
-import kotlin.collections.set
 
 @Suppress("unused")
 class Meme: Plugin() {

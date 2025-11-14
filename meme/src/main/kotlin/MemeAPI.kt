@@ -1,26 +1,17 @@
 package xyz.xszq.bot
 
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.get
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
-import io.ktor.serialization.kotlinx.json.json
-import io.ktor.util.encodeBase64
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
+import io.ktor.util.*
 import korlibs.io.file.VfsFile
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import xyz.xszq.bot.message.Image
-import xyz.xszq.bot.payload.MemeGenerate
-import xyz.xszq.bot.payload.MemeImage
-import xyz.xszq.bot.payload.MemeImageId
-import xyz.xszq.bot.payload.MemeInfo
-import xyz.xszq.bot.payload.MemeOption
-import xyz.xszq.bot.payload.MemeUpload
+import xyz.xszq.bot.payload.*
 import java.io.File
 
 class MemeAPI(

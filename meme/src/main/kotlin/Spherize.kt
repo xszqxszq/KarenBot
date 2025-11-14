@@ -6,11 +6,7 @@ import korlibs.image.format.PNG
 import korlibs.image.format.encode
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.message.Image
-import kotlin.math.PI
-import kotlin.math.asin
-import kotlin.math.hypot
-import kotlin.math.min
-import kotlin.math.sin
+import kotlin.math.*
 
 class Spherize {
     fun spherize(

@@ -17,13 +17,9 @@ import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.IllegalArgsException
 import xyz.xszq.bot.exception.NeedHelpException
 import xyz.xszq.bot.message.Audio
-import xyz.xszq.bot.payload.markdown.Action
-import xyz.xszq.bot.payload.markdown.Keyboard
-import xyz.xszq.bot.payload.markdown.MarkdownData
-import xyz.xszq.bot.payload.markdown.Permission
-import xyz.xszq.bot.payload.markdown.RenderData
+import xyz.xszq.bot.payload.markdown.*
 import xyz.xszq.bot.reply
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 
