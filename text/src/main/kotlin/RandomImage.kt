@@ -12,10 +12,8 @@ import kotlinx.coroutines.runBlocking
 class RandomImage {
     @OptIn(ExperimentalCoroutinesApi::class)
     val files = runBlocking {
-        localCurrentDirVfs[DIR].list().filter { it.isDirectory() }.flatMapConcat {
-            it.listRecursive {
-                it.extensionLC in IMAGE_EXTS
-            }
+        localCurrentDirVfs[DIR].listRecursiveSimple().filter { file ->
+            file.extensionLC in IMAGE_EXTS
         }.toList()
     }
     fun random() = files.fastRandom()
