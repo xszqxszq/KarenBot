@@ -9,8 +9,8 @@ import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.Maimai.Companion.textMode
 import xyz.xszq.bot.MarkdownTemplates
 import xyz.xszq.bot.api.MaimaiAPI
-import xyz.xszq.bot.api.exception.UserDeniedException
 import xyz.xszq.bot.api.exception.UserBindRequiredException
+import xyz.xszq.bot.api.exception.UserDeniedException
 import xyz.xszq.bot.api.exception.UserNotFoundException
 import xyz.xszq.bot.api.exception.UserOARequiredException
 import xyz.xszq.bot.database.QQBindTable

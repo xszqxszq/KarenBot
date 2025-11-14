@@ -15,13 +15,7 @@ import xyz.xszq.bot.database.MaimaiBindTable
 import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.music.*
-import xyz.xszq.bot.payload.LocalCourseInfo
-import xyz.xszq.bot.payload.LocalCourseMusicInfo
-import xyz.xszq.bot.payload.LocalIconInfo
-import xyz.xszq.bot.payload.LocalMusicInfo
-import xyz.xszq.bot.payload.LocalPlateInfo
-import xyz.xszq.bot.payload.MaimaiRecord
-import xyz.xszq.bot.plus
+import xyz.xszq.bot.payload.*
 import xyz.xszq.bot.toSimple
 import java.io.File
 

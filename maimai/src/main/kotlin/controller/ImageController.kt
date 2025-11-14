@@ -286,15 +286,12 @@ class ImageController(
             event.reply(maimai.query.noRecords)
             return
         }
-        val noB15 = Query.isAllRequired(filters) || if (nowVersion == maimai.local.newestVersion)
-            musics.filter { it.version == nowVersion }.size < 15 || musics.none { it.version != nowVersion }
-        else
-            false
+        val isAllRequired = Query.isAllRequired(filters)
         val isFitLevelValues = Query.isFitLevelValues(filters)
         var time = 0L
         maimai.query.records(event, musics, args) { response, backend ->
             countTime {
-                maimai.image.templateBest50(response, noB15, nowVersion, backend, isFitLevelValues) {
+                maimai.image.templateBest50(response, nowVersion, backend, isAllRequired, isFitLevelValues) {
                     Query.filterRecords(filters, this)
                 }
             }.let { (elapsed, result) ->
@@ -311,15 +308,12 @@ class ImageController(
         val filters = Query.filters(fullCommand)
         val musics = Query.filterMusics(filters, maimai.musics())
         val nowVersion = Query.filterNowVersion(filters) ?: maimai.local.newestVersion
-        val noB15 = Query.isAllRequired(filters) || if (nowVersion == maimai.local.newestVersion)
-            musics.filter { it.version == nowVersion }.size < 15 || musics.none { it.version != nowVersion }
-        else
-            false
+        val isAllRequired = Query.isAllRequired(filters)
         val isFitLevelValues = Query.isFitLevelValues(filters)
         var time = 0L
         maimai.query.records(event, musics, args) { response, backend ->
             countTime {
-                maimai.image.templateBest40(response, noB15, nowVersion, backend, isFitLevelValues) {
+                maimai.image.templateBest40(response, nowVersion, backend, isAllRequired, isFitLevelValues) {
                     Query.filterRecords(filters, this)
                 }
             }.let { (elapsed, result) ->

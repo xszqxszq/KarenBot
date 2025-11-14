@@ -8,11 +8,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
-import xyz.xszq.bot.api.exception.AuthorizationException
-import xyz.xszq.bot.api.exception.UnknownException
-import xyz.xszq.bot.api.exception.UserBindRequiredException
-import xyz.xszq.bot.api.exception.UserNotFoundException
-import xyz.xszq.bot.api.exception.UserOARequiredException
+import xyz.xszq.bot.api.exception.*
 import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.database.QQBindTable
 import xyz.xszq.bot.event.MessageEvent

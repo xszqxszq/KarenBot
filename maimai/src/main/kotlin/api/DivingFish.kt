@@ -9,8 +9,8 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.*
 import xyz.xszq.bot.api.exception.UnknownException
-import xyz.xszq.bot.api.exception.UserDeniedException
 import xyz.xszq.bot.api.exception.UserBindRequiredException
+import xyz.xszq.bot.api.exception.UserDeniedException
 import xyz.xszq.bot.api.exception.UserNotFoundException
 import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.database.QQBindTable
@@ -111,7 +111,10 @@ class DivingFish(
 
     override suspend fun getGameVersions(): Map<String, GameVersion> = divingFishVersions
 
-    override suspend fun getPlayerRating(event: MessageEvent, args: String): RatingResponse? {
+    override suspend fun getPlayerRating(
+        event: MessageEvent,
+        args: String
+    ): RatingResponse? {
         val request = buildRequest(event, args) ?: return null
         val data = ratingRequest(request) ?: return null
 
@@ -266,10 +269,14 @@ class DivingFish(
         args: String,
         additional: JsonObjectBuilder.() -> Unit = {}
     ): JsonObject? {
+        val target = if (args.lowercase().startsWith("qq"))
+            args.lowercase().substringAfter("qq").trim().toLongOrNull()
+        else
+            null
         val request = buildJsonObject {
             put("b50", JsonPrimitive(true))
-            if (args.isEmpty()) {
-                val qq = QQBindTable[event.sender.id] ?: throw UserBindRequiredException()
+            if (args.isEmpty() || target != null) {
+                val qq = target ?: QQBindTable[event.sender.id] ?: throw UserBindRequiredException()
                 put("qq", JsonPrimitive(qq))
             } else {
                 put("username", JsonPrimitive(args))

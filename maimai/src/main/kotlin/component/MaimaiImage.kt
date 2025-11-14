@@ -13,14 +13,7 @@ import xyz.xszq.bot.api.MaimaiAPI
 import xyz.xszq.bot.music.*
 import xyz.xszq.bot.pagination
 import xyz.xszq.bot.payload.LocalCourseInfo
-import xyz.xszq.shinobu.Container
-import xyz.xszq.shinobu.Image
-import xyz.xszq.shinobu.Spacing
-import xyz.xszq.shinobu.Text
-import xyz.xszq.shinobu.Theme
-import xyz.xszq.shinobu.ThemeManager
-import xyz.xszq.shinobu.hexToRGBA
-import kotlin.Boolean
+import xyz.xszq.shinobu.*
 import kotlin.math.min
 
 /**
@@ -334,9 +327,9 @@ class MaimaiImage(
      */
     suspend fun templateBest50(
         response: RecordsResponse,
-        noB15: Boolean,
         nowVersion: GameVersion,
         backend: MaimaiAPI,
+        isAllRequired: Boolean,
         isFitLevelValues: Boolean = false,
         lambda: suspend List<Record>.() -> List<Record>?
     ): Bitmap? {
@@ -346,6 +339,10 @@ class MaimaiImage(
                 it.rating = Rating.calc(it.chart.fitLevelValue, it.achievement)
             }
         val b50 = records.take(50)
+        val noB15 = isAllRequired || if (nowVersion == maimai.local.newestVersion)
+            records.filter { it.music.version == nowVersion }.size < 15 || records.none { it.music.version != nowVersion }
+        else
+            false
         val b35 = if (!noB15) records.filter { it.music.version != nowVersion }.take(35) else b50.take(35)
         val b15 = if (!noB15) records.filter { it.music.version == nowVersion }.take(15) else b50.subList(min(35, b35.size), b50.size)
         return templateRating(RatingResponse(
@@ -366,9 +363,9 @@ class MaimaiImage(
      */
     suspend fun templateBest40(
         response: RecordsResponse,
-        noB15: Boolean,
         nowVersion: GameVersion,
         backend: MaimaiAPI,
+        isAllRequired: Boolean,
         isFitLevelValues: Boolean = false,
         lambda: suspend List<Record>.() -> List<Record>?
     ): Bitmap? {
@@ -380,6 +377,10 @@ class MaimaiImage(
                 it.rating = Rating.calcOld(it.chart, it.achievement)
         }
         val b40 = records.take(40)
+        val noB15 = isAllRequired || if (nowVersion == maimai.local.newestVersion)
+            records.filter { it.music.version == nowVersion }.size < 15 || records.none { it.music.version != nowVersion }
+        else
+            false
         val b25 = if (!noB15) records.filter { it.music.version != nowVersion }.take(25) else b40.take(25)
         val b15 = if (!noB15) records.filter { it.music.version == nowVersion }.take(15) else b40.subList(min(25, b25.size), b40.size)
         return templateRating(RatingResponse(

@@ -1,7 +1,6 @@
 package xyz.xszq.bot
 
 import korlibs.io.util.toStringDecimal
-import xyz.xszq.bot.event.ReplyAble
 import xyz.xszq.bot.music.MusicDifficulty
 import xyz.xszq.bot.music.MusicInfo
 import xyz.xszq.bot.payload.markdown.*

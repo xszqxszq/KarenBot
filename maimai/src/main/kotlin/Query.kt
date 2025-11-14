@@ -7,8 +7,6 @@ import korlibs.io.util.toStringDecimal
 import korlibs.math.toIntRound
 import xyz.xszq.bot.config.DesignerConfig
 import xyz.xszq.bot.music.*
-import xyz.xszq.bot.payload.LocalMusicInfo
-import java.io.File
 import kotlin.random.Random
 
 object Query {
