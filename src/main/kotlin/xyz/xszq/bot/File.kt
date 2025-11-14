@@ -1,13 +1,13 @@
 package xyz.xszq.bot
 
 import io.github.oshai.kotlinlogging.KLogger
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsBytes
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.tempVfs
-import java.util.UUID
+import java.util.*
 
 /**
  * Create a new Temp file.

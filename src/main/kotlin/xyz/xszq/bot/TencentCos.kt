@@ -11,8 +11,7 @@ import korlibs.io.file.VfsFile
 import xyz.xszq.bot.config.CosConfig
 import xyz.xszq.bot.payload.UploadResult
 import java.io.File
-import java.util.Date
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.Executors
 
 class TencentCos(

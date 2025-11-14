@@ -5,13 +5,7 @@ import korlibs.io.async.use
 import korlibs.io.file.VfsFile
 import korlibs.io.file.VfsOpenMode
 import korlibs.io.file.std.toVfs
-import korlibs.io.stream.readBytesUpTo
-import korlibs.io.stream.readS32LE
-import korlibs.io.stream.readString
-import korlibs.io.stream.skip
-import korlibs.io.stream.write16LE
-import korlibs.io.stream.write32LE
-import korlibs.io.stream.writeString
+import korlibs.io.stream.*
 import xyz.xszq.bot.ffmpeg.FFMpegFileType
 import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.bot.ffmpeg.FFProbe

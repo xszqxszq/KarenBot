@@ -1,7 +1,6 @@
 package xyz.xszq.bot.payload.markdown
 
 import kotlinx.serialization.Serializable
-import xyz.xszq.bot.event.ReplyAble
 
 @Serializable
 data class Keyboard(

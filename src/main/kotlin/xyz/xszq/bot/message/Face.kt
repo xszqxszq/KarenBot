@@ -1,6 +1,5 @@
 package xyz.xszq.bot.message
 
-import kotlinx.serialization.encodeToString
 import xyz.xszq.bot.json
 import xyz.xszq.bot.payload.FaceExt
 import kotlin.io.encoding.Base64

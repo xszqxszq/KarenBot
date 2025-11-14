@@ -1,11 +1,6 @@
 package xyz.xszq.bot.subscribe
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
 import kotlin.coroutines.CoroutineContext
