@@ -14,7 +14,7 @@ import xyz.xszq.bot.newTempFile
 import java.util.*
 
 class TTSParser(
-    val config: OttoConfig,
+    val config: VoicePresets,
     voiceDir: VfsFile
 ) {
     private val tokensDir = voiceDir["tokens"]

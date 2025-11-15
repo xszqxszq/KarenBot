@@ -37,7 +37,7 @@ class Text: Plugin() {
         put("有美少女吗", "(づ￣3￣)づ")
         put("？", "问我干嘛")
     }
-    lateinit var stereotypes: StereotypesConfig
+    lateinit var stereotypes: StereotypesPresets
     val randomImage = RandomImage()
 
     val client = HttpClient {
@@ -51,10 +51,10 @@ class Text: Plugin() {
     @OptIn(ExperimentalHoplite::class)
     override fun load() {
         stereotypes = ConfigLoaderBuilder.default()
-            .addFileSource("./config/stereotypes.yml")
+            .addFileSource("./data/random/stereotypes.yml")
             .withExplicitSealedTypes()
             .build()
-            .loadConfigOrThrow<StereotypesConfig>()
+            .loadConfigOrThrow<StereotypesPresets>()
 
         setRoute()
         logger.info { "[文本] 插件加载完成。" }

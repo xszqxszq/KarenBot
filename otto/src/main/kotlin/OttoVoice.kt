@@ -8,22 +8,22 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import xyz.xszq.bot.message.Audio
-import xyz.xszq.bot.voice.OttoConfig
+import xyz.xszq.bot.voice.VoicePresets
 import xyz.xszq.bot.voice.TTSParser
 
 @Suppress("unused")
 class OttoVoice: Plugin() {
-    lateinit var config: OttoConfig
+    lateinit var presets: VoicePresets
     lateinit var tts: TTSParser
     @OptIn(ExperimentalHoplite::class)
     override fun load() {
-        config = ConfigLoaderBuilder.Companion.default()
-            .addFileSource("./config/otto.yml")
+        presets = ConfigLoaderBuilder.Companion.default()
+            .addFileSource("./data/audio/otto/presets.yml")
             .withExplicitSealedTypes()
             .build()
-            .loadConfigOrThrow<OttoConfig>()
+            .loadConfigOrThrow<VoicePresets>()
 
-        tts = TTSParser(config, localCurrentDirVfs["data/audio/otto"])
+        tts = TTSParser(presets, localCurrentDirVfs["data/audio/otto"])
 
         setRoute()
         logger.info { "[活字印刷] 插件加载完成。" }
