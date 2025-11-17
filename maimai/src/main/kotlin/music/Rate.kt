@@ -36,6 +36,7 @@ object Rate {
     }
     fun greater(a: String, b: String) = floor(a) > floor(b)
     fun greater(a: Int, rate: String) = a > floor(rate)
+    fun greaterEqual(a: Int, rate: String) = a >= floor(rate)
     fun toString(acc: Int): String = buildString {
         append(acc / 10000)
         append('.')

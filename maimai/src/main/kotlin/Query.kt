@@ -76,7 +76,7 @@ object Query {
     fun rate(rate: String) = Filter(chart = { chart ->
         chart.music.genre != MusicGenre.Utage
     }, record = { record ->
-        Rate.greater(record.achievement, rate)
+        Rate.greaterEqual(record.achievement, rate)
     })
     fun achievement(achievement: Int) = Filter(chart = { chart ->
         chart.music.genre != MusicGenre.Utage
@@ -124,7 +124,7 @@ object Query {
     }, record = { record ->
         when {
             plateName.endsWith("極") -> record.comboStatus.isFC()
-            plateName.endsWith("将") -> Rate.greater(record.achievement, "sss")
+            plateName.endsWith("将") -> Rate.greaterEqual(record.achievement, "sss")
             plateName.endsWith("神") -> record.comboStatus.isAP()
             plateName.endsWith("舞舞") -> record.syncStatus.isFSD()
             plateName == "覇者" -> record.achievement >= 80
