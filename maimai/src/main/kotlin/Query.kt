@@ -127,7 +127,7 @@ object Query {
             plateName.endsWith("将") -> Rate.greaterEqual(record.achievement, "sss")
             plateName.endsWith("神") -> record.comboStatus.isAP()
             plateName.endsWith("舞舞") -> record.syncStatus.isFSD()
-            plateName == "覇者" -> record.achievement >= 80
+            plateName == "覇者" -> record.achievement >= 800000
             else -> throw UnknownError()
         }
     }, name = "plate_$plateName")
