@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.Maimai.Companion.textMode
 import xyz.xszq.bot.MarkdownTemplates
+import xyz.xszq.bot.api.LXNS
 import xyz.xszq.bot.api.MaimaiAPI
 import xyz.xszq.bot.api.exception.UserBindRequiredException
 import xyz.xszq.bot.api.exception.UserDeniedException
@@ -174,6 +175,38 @@ class MaimaiQuery(
             return@query null
         }
         return handler(response)
+    }
+    suspend fun <R> recent(
+        event: MessageEvent,
+        args: String,
+        handler: suspend MessageEvent.(RecordsResponse, MaimaiAPI) -> R?
+    ): R? = event.run query@ {
+        // Temporary fix
+        // TODO: Process exception in a more elegant way
+        var lastException: Throwable? = null
+        val (response, backend) = maimai.backendsWithPriority(event, args).also {
+            if (it.none { it is LXNS }) {
+                reply("该功能仅支持落雪查分器。")
+                return@query null
+            }
+        }.filter { it is LXNS }.firstNotNullOfOrNull { backend ->
+            if (backend !is LXNS)
+                return@query null
+            runCatching {
+                backend.getPlayerRecent(this, args)
+            }.onFailure { e ->
+                if (errorHandler(e, args))
+                    return@query null
+                lastException = e
+            }.getOrNull() ?.let { Pair(it, backend) }
+        } ?: run {
+            if (lastException is UserNotFoundException)
+                messageUserNeedBind(this, args)
+            else
+                reply("请修改落雪查分器的爬取模式为增量爬取。并重新导入一次后再进行查询。")
+            return@query null
+        }
+        return handler(response, backend)
     }
 
     val errorHandler: MaimaiErrorHandler = handler@ { e, args ->

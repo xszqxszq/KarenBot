@@ -36,6 +36,7 @@ class ImageController(
             when (command) {
                 "设置b" -> return@commandEndsWith
                 "b" -> handleRating50(this, arg)
+                "r" -> handleRecent50(this, arg)
                 "歌" -> handleMusicRating(this, args.subList(1, args.size).joinToString(" "), 35)
                 "随心配" -> reply("https://otmdb.cn/bot/maimai/combo")
                 else -> runCatching {
@@ -250,6 +251,21 @@ class ImageController(
                 result
             }
         }.sendResultImage("b50", event, "生成时间：${time}ms\r${randomTips()?:""}")
+    }
+    suspend fun handleRecent50(
+        event: MessageEvent,
+        args: String
+    ) {
+        var time = 0L
+        val nowVersion = maimai.local.newestVersion
+        maimai.query.recent(event, args) { response, backend ->
+            countTime {
+                maimai.image.templateBest50(response, nowVersion, backend, true) { this }
+            }.let { (elapsed, result) ->
+                time = elapsed
+                result
+            }
+        }.sendResultImage("r50", event, "生成时间：${time}ms\r${randomTips()?:""}")
     }
     suspend fun handleRating40(
         event: MessageEvent,

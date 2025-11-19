@@ -5,6 +5,7 @@ import io.ktor.client.call.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
@@ -182,6 +183,32 @@ class LXNS(
             deluxeScore = dxScore,
             rate = Rate[achievement],
             rating = Rating.calc(chart, achievement)
+        )
+    }
+
+    private suspend fun getRecent(
+        player: LXNSPlayer
+    ): List<Record>? = retry(3) {
+        val response = client.get("$server/player/${player.friendCode}/recents") {
+            setDeveloper()
+        }.body<LXNSResponse<List<LXNSScore>>>().data ?: return null
+        return response.mapNotNull {
+            it.toRecord()
+        }
+    }
+    suspend fun getPlayerRecent(
+        event: MessageEvent,
+        args: String
+    ): RecordsResponse? {
+        val player = getPlayerInfo(event, args) ?: return null
+        val response = getRecent(player) ?: return null
+        return RecordsResponse(
+            name = player.name,
+            rating = player.rating,
+            course = player.courseRank,
+            icon = MaimaiSettingsTable[event.sender.id, "icon"] ?.toIntOrNull() ?: player.icon?.id ?: 101,
+            plate = MaimaiSettingsTable[event.sender.id, "plate"] ?.toIntOrNull() ?: player.namePlate?.id ?: 11,
+            records = response
         )
     }
 
