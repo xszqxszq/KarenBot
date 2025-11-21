@@ -12,7 +12,7 @@ import kotlin.random.Random
 object Query {
     @OptIn(ExperimentalHoplite::class)
     val designerConfig = ConfigLoaderBuilder.Companion.default()
-        .addFileSource("./config/maimai-designer.yml")
+        .addFileSource("./data/maimai/designer.yml")
         .withExplicitSealedTypes()
         .build()
         .loadConfigOrThrow<DesignerConfig>()
