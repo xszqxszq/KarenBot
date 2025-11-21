@@ -1,0 +1,62 @@
+<Theme>
+    <Container id="main" width="1280" height="1280" background="background_prism.png" direction="column" justify-content="space-between">
+        <Container id="upper" width="1280" padding="32 32 41 0" direction="column">
+            <Container id="header" height="125" background="plate.png" padding="4" margin="4 0 3 0">
+                <Image id="avatar" width="100" height="100" src="avatars/456103.png" margin="4 0 6 0"/>
+                <Container id="info" direction="column" margin="0 0 -4 0">
+                    <Container id="rating" width="192" height="38" background="rating_base_1.png" margin="2 -4 2 0" padding="11 0 0 16" justify-content="end">
+                    </Container>
+                    <Container id="name-container" width="295" height="56" background="header_name.png" justify-content="space-between" padding="13 0 16 0">
+                        <Text id="name" size="27" font="FZLanTingHei-B-GBK">舞萌DX</Text>
+                        <Image id="course" src="dani_0.png" margin="-4 0 0 6"/>
+                    </Container>
+                    <Container width="300" background="header_shougou.png" margin="-8 0 0 0" padding="9" justify-content="center">
+                        <Text id="name-title" color="#444444" size="14" font="Alibaba-PuHuiTi-B" border="2"/>
+                    </Container>
+                </Container>
+            </Container>
+            <Container id="best-35" wrap="wrap" margin="26 0 0 0">
+            </Container>
+            <Container justify-content="center">
+                <Image id="icon-b15" src="icon_b15.png" />
+            </Container>
+            <Container id="best-15" wrap="wrap">
+            </Container>
+        </Container>
+        <Container id="footer" justify-content="center" padding="12" color="#013162">
+		<Text id="copyright" size="22" font="Alibaba-PuHuiTi-H" color="#ffffff" shadow="1">可怜Bot 9.0 by 心水湛清 617 | https://bot-docs.otmdb.cn</Text>
+        </Container>
+    </Container>
+    <Container id="music" width="238" height="96" background="base_None.png" padding="10" margin="0 -2 -1 2">
+        <Container id="cover" width="72" height="72" padding="2" margin="0 0 1 0">
+            <Image id="type"/>
+        </Container>
+        <Container id="info" direction="column" justify-content="space-between" margin="1 0 6 0">
+            <Container direction="column" width="138" height="48" justify-content="space-between">
+                <Container width="138" justify-content="space-between" margin="1 0 0 0">
+                    <Text id="index-id" color="#ffffff" size="10" font="Alibaba-PuHuiTi-B" margin="-3 0 0 0"/>
+                    <Image id="deluxe-star" margin="-1 0 0 -1"/>
+                </Container>
+                <Text id="title" color="#ffffff" size="12" font="Alibaba-PuHuiTi-B" margin="-4 0 0 0"/>
+                <Container id="achievement" margin="-18 2 0 0" align-content="end">
+                    <Text id="achievement-integer" color="#ffffff" size="30" font="Alibaba-PuHuiTi-H"/>
+                    <Text id="achievement-decimal" color="#ffffff" size="24" font="Alibaba-PuHuiTi-H"/>
+                    <Text id="achievement-percent" color="#ffffff" size="18" font="Alibaba-PuHuiTi-H"/>
+                </Container>
+            </Container>
+            <Container id="extra" width="146" padding="2" margin="5 0 0 0" justify-content="space-between">
+                <Text id="level-rating" color="#9f51dc" size="12" font="Alibaba-PuHuiTi-H" margin="1 0 0 1"
+                      border="2.5 #ffffff" shadow="1 0.2 #000000"/>
+
+                <Container width="82" margin="0 0 0 -2">
+                    <Image id="rank" margin="1 0 0 -2"/>
+                    <Image id="fc"/>
+                    <Image id="fs"/>
+                </Container>
+            </Container>
+        </Container>
+    </Container>
+    <Container id="extra">
+        <Text font="FZLTHProGBK Heavy"/>
+    </Container>
+</Theme>

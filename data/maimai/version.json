@@ -1,0 +1,97 @@
+[
+    {
+        "id": 0,
+        "name": "maimai",
+        "version": 10000
+    },
+    {
+        "id": 1,
+        "name": "maimai PLUS",
+        "version": 11000
+    },
+    {
+        "id": 2,
+        "name": "GreeN",
+        "version": 12000
+    },
+    {
+        "id": 3,
+        "name": "GreeN PLUS",
+        "version": 13000
+    },
+    {
+        "id": 4,
+        "name": "ORANGE",
+        "version": 14000
+    },
+    {
+        "id": 5,
+        "name": "ORANGE PLUS",
+        "version": 15000
+    },
+    {
+        "id": 6,
+        "name": "PiNK",
+        "version": 16000
+    },
+    {
+        "id": 7,
+        "name": "PiNK PLUS",
+        "version": 17000
+    },
+    {
+        "id": 8,
+        "name": "MURASAKi",
+        "version": 18000
+    },
+    {
+        "id": 9,
+        "name": "MURASAKi PLUS",
+        "version": 18500
+    },
+    {
+        "id": 10,
+        "name": "MiLK",
+        "version": 19000
+    },
+    {
+        "id": 11,
+        "name": "MiLK PLUS",
+        "version": 19500
+    },
+    {
+        "id": 12,
+        "name": "FiNALE",
+        "version": 19900
+    },
+    {
+        "id": 13,
+        "name": "舞萌DX",
+        "version": 20000
+    },
+    {
+        "id": 15,
+        "name": "舞萌DX 2021",
+        "version": 21000
+    },
+    {
+        "id": 17,
+        "name": "舞萌DX 2022",
+        "version": 22000
+    },
+    {
+        "id": 19,
+        "name": "舞萌DX 2023",
+        "version": 23000
+    },
+    {
+        "id": 21,
+        "name": "舞萌DX 2024",
+        "version": 24000
+    },
+    {
+        "id": 23,
+        "name": "舞萌DX 2025",
+        "version": 25000
+    }
+]

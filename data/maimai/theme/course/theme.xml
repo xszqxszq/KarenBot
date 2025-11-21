@@ -1,0 +1,70 @@
+<Theme>
+    <Container id="main" width="974" height="974" background="background_1.png" direction="column" justify-content="space-between">
+        <Container id="upper" width="974" height="974" padding="151 0 0 0" direction="column">
+            <Container id="musics" width="974" height="486" margin="0 0 146 0" justify-content="space-between" direction="column">
+            </Container>
+            <Container id="info" padding="0 0 41 0">
+                <Container id="status" width="300" height="255" margin="0 0 0 0" direction="column" align-content="center" background="final_1.png" justify-content="center">
+                    <Image id="course" src="title_451101.png" margin="42 0 0 0"/>
+                </Container>
+                <Container id="life" width="210" height="210" background="life_1.png" margin="45 0 -10 0" align-content="center" justify-content="center">
+                </Container>
+                <Container id="detail" direction="column" padding="31 0 0 0">
+                    <Container id="header">
+                        <Text font="Alibaba-PuHuiTi-H" size="18" margin="0 0 20 0" color="#02359e">合计成绩</Text>
+                        <Container id="life" width="104" height="24" background="life.png" padding="4" margin="4 0 115 0" justify-content="center">
+                            <Text id="value" font="Alibaba-PuHuiTi-H" size="12" color="#ade537" margin="0 0 60 0">100</Text>
+                        </Container>
+                    </Container>
+                    <Container id="achievement" margin="20 0 28 0" align-content="end">
+                    </Container>
+                    <Container id="damage" width="336" margin="14 0 78 0" justify-content="space-between">
+                        <Container id="great" width="104" height="24" background="damage_1.png" padding="-1 0 0 0" align-content="center" justify-content="center">
+                            <Text id="value" font="Alibaba-PuHuiTi-H" size="12" color="#b0c0fe" margin="0 0 58 0">-2</Text>
+                        </Container>
+                        <Container id="good" width="104" height="24" background="damage_2.png" padding="-1 0 0 0" align-content="center" justify-content="center">
+                            <Text id="value" font="Alibaba-PuHuiTi-H" size="12" color="#b0c0fe" margin="0 0 58 0">-3</Text>
+                        </Container>
+                        <Container id="miss" width="104" height="24" background="damage_3.png" padding="-1 0 0 0" align-content="center" justify-content="center">
+                            <Text id="value" font="Alibaba-PuHuiTi-H" size="12" color="#b0c0fe" margin="0 0 58 0">-5</Text>
+                        </Container>
+                    </Container>
+                    <Container id="heal" width="150" margin="18 0 316 0" justify-content="space-between">
+                        <Container id="heal" width="91" height="19" background="heal.png" padding="0 0 0 0" align-content="center" justify-content="center">
+                            <Text id="value" font="Alibaba-PuHuiTi-H" size="12" color="#ade537" margin="0 0 32 0">+20</Text>
+                        </Container>
+                    </Container>
+                </Container>
+            </Container>
+        </Container>
+        <Container id="footer" justify-content="center" padding="12" color="#013162">
+            <Text id="copyright" size="22" font="Alibaba-PuHuiTi-H" color="#ffffff" shadow="1">可怜Bot 9.0 by 心水湛清 617 | https://bot-docs.otmdb.cn</Text>
+        </Container>
+    </Container>
+    <Container id="music" width="690" height="120" justify-content="space-between" align-content="center">
+        <Image id="result" src="result_1.png"/>
+        <Container id="music" width="570" height="120" background="base_Master.png" padding="5" align-content="space-between">
+            <Image id="cover" width="107" height="107" margin="2 0 2 0" stretch="true" src="../../covers/0.png"/>
+            <Container id="info" width="460" direction="column">
+                <Container id="header" width="449" padding="-5 0 110 0">
+                    <Image id="type" src="type_SD.png" margin="6 0 -5 0"/>
+                    <Container id="title" width="260" margin="8 0 14 0">
+                        <Text id="title" font="Alibaba-PuHuiTi-B" size="12" color="#ffffff">QZKago Requiem</Text>
+                    </Container>
+                </Container>
+                <Container id="level" width="93" margin="3 -48 368 0" align-content="end" justify-content="space-between">
+                    <Image id="level" src="level_4_level.png"/>
+                    <Container id="value" width="46" justify-content="center">
+                    </Container>
+                    <Image id="plus" width="16" src="level_4_plus.png" margin="0 0 -8 0" />
+                </Container>
+                <Container id="achievement" margin="27 0 6 0" align-content="end">
+                </Container>
+                <Container id="damage" margin="-18 0 356 0" align-content="center">
+                    <Text font="Alibaba-PuHuiTi-H" size="12" color="#02359e">扣血</Text>
+                    <Text id="damage" font="Alibaba-PuHuiTi-H" size="12" color="#02359e" margin="0 0 20 0">-114</Text>
+                </Container>
+            </Container>
+        </Container>
+    </Container>
+</Theme>
