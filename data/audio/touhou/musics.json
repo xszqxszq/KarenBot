@@ -662,7 +662,6 @@
             "aliases": [
               "少女綺想曲　～ Dream Battle",
               "乐园的可爱巫女",
-              "普通的黑魔术少女",
               "博丽灵梦",
               "城管",
               "四A面BOSS",
@@ -678,6 +677,7 @@
             "file": "th08/10.ogg",
             "aliases": [
               "恋色マスタースパーク",
+              "普通的黑魔术少女",
               "雾雨魔理沙",
               "四B面BOSS",
               "四B面",
@@ -1179,7 +1179,6 @@
             "jpn": "御柱の墓場　～ Grave of Being",
             "file": "th10/12.ogg",
             "aliases": [
-              "-",
               "Cemetery of Onbashira ~ Grave of Being",
               "御柱の墓場　～ Grave of Being",
               "御柱的墓场 ～ Grave of Being",
@@ -1941,7 +1940,6 @@
             "jpn": "小さな欲望の星空",
             "file": "th13/12.ogg",
             "aliases": [
-              "-",
               "渺小欲望的星空",
               "小小欲望的星空",
               "物部布都",
@@ -2418,7 +2416,6 @@
             "jpn": "遥か３８万キロのボヤージュ",
             "file": "th15/10.ogg",
             "aliases": [
-              "-",
               "遥遥38万公里的航程",
               "Faraway Voyage of 380,000 Kilometers",
               "稀神探女",
@@ -2446,7 +2443,6 @@
             "jpn": "故郷の星が映る海",
             "file": "th15/12.ogg",
             "aliases": [
-              "-",
               "故郷の星が映る海",
               "The Sea that Reflects One's Home Planet",
               "克劳恩皮丝",
@@ -2460,7 +2456,6 @@
             "jpn": "ピュアヒューリーズ　～ 心の在処",
             "file": "th15/13.ogg",
             "aliases": [
-              "-",
               "纯狐",
               "Pure Furies ~ Whereabouts of the Heart",
               "六面BOSS",
@@ -2694,7 +2689,6 @@
             "jpn": "イントゥ・バックドア",
             "file": "th16/12.ogg",
             "aliases": [
-              "-",
               "Into Backdoor",
               "进入后门",
               "尔子田里乃",
@@ -3502,7 +3496,6 @@
             "jpn": "プレステ・ジョアンの黄金境",
             "file": "th20/6.ogg",
             "aliases": [
-              "-",
               "プレステ・ジョアンの黄金境",
               "祭司王约翰的黄金境",
               "Golden Land of Prester John",
@@ -3522,6 +3515,163 @@
               "三面BOSS",
               "闭门不出的圣地道祖神",
               "Might as Well Risk Your Life to Solve the Riddle"
+            ]
+          },
+          {
+            "id": 8,
+            "name": "Four-Color Labyrinth",
+            "jpn": "フォーカラーラビリンス",
+            "file": "th20/8.ogg",
+            "aliases": [
+              "フォーカラーラビリンス",
+              "维缦·浅间",
+              "锦上京的命脉",
+              "Four-Color Labyrinth",
+              "四面道中",
+              "异变敌",
+              "金字塔"
+            ]
+          },
+          {
+            "id": 9,
+            "name": "猎鹿旧忆回潮",
+            "jpn": "鹿狩りのレミニセンス",
+            "file": "th20/9.ogg",
+            "aliases": [
+              "猎鹿旧忆回潮",
+              "鹿狩りのレミニセンス",
+              "维缦·浅间",
+              "锦上京的命脉",
+              "Reminiscence of Deer-Hunting",
+              "四面BOSS"
+            ]
+          },
+          {
+            "id": 10,
+            "name": "沉入记忆深海的少女",
+            "jpn": "記憶の深海に沈む少女",
+            "file": "th20/10.ogg",
+            "aliases": [
+              "沉入记忆深海的少女",
+              "記憶の深海に沈む少女",
+              "绵月丰姬",
+              "连接三角山与海的贤者",
+              "The Maiden Sinking into the Deep Sea of Memory",
+              "五面道中",
+              "异变敌",
+              "金字塔"
+            ]
+          },
+          {
+            "id": 11,
+            "name": "绵月的符卡　～ 神海战",
+            "jpn": "綿月のスペルカード　～ 神海戦",
+            "file": "th20/11.ogg",
+            "aliases": [
+              "绵月的符卡　～ 神海战",
+              "綿月のスペルカード　～ 神海戦",
+              "绵月丰姬",
+              "连接三角山与海的贤者",
+              "Watatsuki's Spell Card ~ Lunatic Blue",
+              "五面BOSS"
+            ]
+          },
+          {
+            "id": 13,
+            "name": "金字塔的神域",
+            "jpn": "ピラミッドの神域",
+            "file": "th20/13.ogg",
+            "aliases": [
+              "金字塔的神域",
+              "ピラミッドの神域",
+              "磐永阿梨夜",
+              "恒久姬",
+              "Sacred Precincts of the Pyramid",
+              "六面道中"
+            ]
+          },
+          {
+            "id": 12,
+            "name": "早已习惯最终孑然一身　～ Stone Goddess",
+            "jpn": "最後の一人は慣れてるから　～ Stone Goddess",
+            "file": "th20/12.ogg",
+            "aliases": [
+              "早已习惯最终孑然一身　～ Stone Goddess",
+              "最後の一人は慣れてるから　～ Stone Goddess",
+              "磐永阿梨夜",
+              "恒久姬",
+              "Because I'm Used to Being the Last One Left ~ Stone Goddess",
+              "六面BOSS"
+            ]
+          },
+          {
+            "id": 17,
+            "name": "Fantastic Drift",
+            "jpn": "ファンタスティックドリフト",
+            "file": "th20/17.ogg",
+            "aliases": [
+              "最後の一人は慣れてるから　～ Stone Goddess",
+              "维缦·浅间",
+              "锦上京的命脉",
+              "Fantastic Drift",
+              "EX面道中"
+            ]
+          },
+          {
+            "id": 18,
+            "name": "双壳贝上的幻觉",
+            "jpn": "二枚貝の上のハルシネーション",
+            "file": "th20/18.ogg",
+            "aliases": [
+              "双壳贝上的幻觉",
+              "二枚貝の上のハルシネーション",
+              "渡里贝子",
+              "创造虚构都市之怪",
+              "Hallucination Atop a Bivalve",
+              "EX面BOSS"
+            ]
+          },
+          {
+            "id": 15,
+            "name": "不变的日常",
+            "jpn": "不変の日常",
+            "file": "th20/15.ogg",
+            "aliases": [
+              "不变的日常",
+              "不変の日常",
+              "Unchanging Daily Life",
+              "结局",
+              "结尾曲",
+              "ENDING"
+            ]
+          },
+          {
+            "id": 14,
+            "name": "所爱所怜的日常",
+            "jpn": "愛おしき日常",
+            "file": "th20/14.ogg",
+            "aliases": [
+              "所爱所怜的日常",
+              "愛おしき日常",
+              "Beloved Daily Life",
+              "结局",
+              "结尾曲",
+              "ENDING"
+            ]
+          },
+          {
+            "id": 16,
+            "name": "迈向生死更迭的世界",
+            "jpn": "生と死のある世界へ",
+            "file": "th20/16.ogg",
+            "aliases": [
+              "迈向生死更迭的世界",
+              "迈向存在生与死的世界",
+              "生と死のある世界へ",
+              "To a World With Life and Death",
+              "制作人员",
+              "STAFF",
+              "ED"
             ]
           }
         ]
@@ -3863,7 +4013,6 @@
               "jpn": "東方封魔録　～幽幻乱舞",
               "file": "th02/10.ogg",
               "aliases": [
-                "-",
                 "Eastern Demon-Sealing Record ~ Spectral Boisterous Dance",
                 "东方封魔录 ～幽幻乱舞",
                 "五面道中",
@@ -3888,7 +4037,6 @@
               "jpn": "エキストララブ",
               "file": "th02/12.ogg",
               "aliases": [
-                "-",
                 "EX面道中",
                 "Extra Love",
                 "额外的喜爱",
@@ -4412,7 +4560,6 @@
               "jpn": "Lotus Love",
               "file": "th04/12.ogg",
               "aliases": [
-                "-",
                 "莲之爱",
                 "雾雨魔理沙（自机为灵梦）",
                 "忘忧之爱",
@@ -4440,7 +4587,6 @@
               "jpn": "Dream Land",
               "file": "th04/14.ogg",
               "aliases": [
-                "-",
                 "梦幻之地",
                 "Dream Land",
                 "雾雨魔理沙（自机为灵梦）",
@@ -4821,7 +4967,6 @@
               "jpn": "世界の果て　～ World's End",
               "file": "th05/14.ogg",
               "aliases": [
-                "-",
                 "世界の果て　～ World's End",
                 "End of the World ~ World's End",
                 "梦子",
