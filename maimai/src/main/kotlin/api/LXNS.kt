@@ -15,7 +15,6 @@ import xyz.xszq.bot.database.QQBindTable
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.music.*
 import xyz.xszq.bot.payload.*
-import xyz.xszq.bot.retry
 import kotlin.math.min
 
 class LXNS(
@@ -106,9 +105,18 @@ class LXNS(
     private suspend fun getSingleRecord(
         player: LXNSPlayer,
         music: MusicInfo
-    ): List<Record>? = retry(3) {
+    ): List<Record>? {
+        val realId = when {
+            music.genre == MusicGenre.Utage -> music.id
+            music.type == MusicType.Deluxe -> music.resourceId
+            else -> music.id
+        }
+        val realType = when {
+            music.genre == MusicGenre.Utage -> "utage"
+            else -> music.type.full
+        }
         val response = client.get("$server/player/${player.friendCode}/bests" +
-                "?song_id=${music.resourceId}&song_type=${music.type.full}") {
+                "?song_id=$realId&song_type=$realType") {
             setDeveloper()
         }.body<LXNSResponse<List<LXNSScore>>>().data ?: return null
         return response.mapNotNull {
@@ -164,8 +172,8 @@ class LXNS(
         )
     }
     fun LXNSScore.toRecord(): Record? {
-        val realId = when (type) {
-            "dx" -> id + 10000
+        val realId = when {
+            type == "dx" && id < 10000 -> id + 10000
             else -> id
         }
         val music = musics[realId] ?: return null
@@ -174,6 +182,15 @@ class LXNS(
         else
             music.charts[levelIndex]
         val achievement = (achievements * 10000).toInt()
+        val rate = when {
+            music.genre == MusicGenre.Utage && music.charts.size > 1 -> Rate[achievement / music.charts.size]
+            else -> Rate[achievement]
+        }
+        val rating = when {
+            music.genre == MusicGenre.Utage && music.charts.size > 1 ->
+                Rating.calc(chart, achievement / music.charts.size)
+            else -> Rating.calc(chart, achievement)
+        }
         return Record(
             music = music,
             chart = chart,
@@ -181,14 +198,14 @@ class LXNS(
             comboStatus = ComboStatus.Companion.of(fc),
             syncStatus = SyncStatus.Companion.of(fs),
             deluxeScore = dxScore,
-            rate = Rate[achievement],
-            rating = Rating.calc(chart, achievement)
+            rate = rate,
+            rating = rating
         )
     }
 
     private suspend fun getRecent(
         player: LXNSPlayer
-    ): List<Record>? = retry(3) {
+    ): List<Record>? {
         val response = client.get("$server/player/${player.friendCode}/recents") {
             setDeveloper()
         }.body<LXNSResponse<List<LXNSScore>>>().data ?: return null

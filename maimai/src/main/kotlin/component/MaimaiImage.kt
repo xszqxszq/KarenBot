@@ -38,15 +38,9 @@ class MaimaiImage(
             val name = folder.relativePathTo(manager.themeBaseDir)!!
             themes[name] = manager.loadTheme(name)
         }
+        optimize()
     }
 
-    fun Text.setFont(theme: Theme, chars: CharacterSet = CharacterSet.NUMBERS) {
-        bitmapFont = theme.fontCache[font]!!.toBitmapFont(
-            size,
-            chars = chars,
-            paint = color.hexToRGBA()
-        )
-    }
     suspend fun optimize() {
         val rating = themes["rating"]!!
         rating.templates.first { it.id == "main" }.modify {
@@ -395,21 +389,6 @@ class MaimaiImage(
     }
 
     /**
-     * Get color for different difficulties.
-     * @param difficulty Chart Difficulty.
-     */
-    fun levelChartColor(
-        difficulty: MusicDifficulty
-    ) = when (difficulty) {
-        MusicDifficulty.Basic -> "#45c124"
-        MusicDifficulty.Advanced -> "#f8b709"
-        MusicDifficulty.Expert -> "#ff5a66"
-        MusicDifficulty.Master -> "#9f51dc"
-        MusicDifficulty.ReMaster -> "#dbaaff"
-        MusicDifficulty.Utage -> "#ff6ffd"
-    }
-
-    /**
      * Generate a single Chart Info for Level List.
      * @param chart The chart to render.
      * @param requiresType The icon to display.
@@ -704,10 +683,15 @@ class MaimaiImage(
                 sub("header/wrapper") header@ {
                     headerInfo(this@header, music)
                 }
-                music.charts.forEach { chart ->
-                    val record = records?.firstOrNull { it.chart.difficulty == chart.difficulty }
-                    add(theme.scoreInfo(chart, record))
-                }
+                if (music.genre == MusicGenre.Utage)
+                    music.charts.first().let { chart ->
+                        add(theme.scoreInfo(chart, records?.firstOrNull()))
+                    }
+                else
+                    music.charts.forEach { chart ->
+                        val record = records?.firstOrNull { it.chart.difficulty == chart.difficulty }
+                        add(theme.scoreInfo(chart, record))
+                    }
                 if (music.genre != MusicGenre.Utage && music.charts.none { it.difficulty == MusicDifficulty.ReMaster }) {
                     add(theme.scoreInfo(music.fakeReMaster, null))
                 }
@@ -803,33 +787,6 @@ class MaimaiImage(
                 }
             }
         }
-    }
-
-    fun calcMinDamage(
-        chart: ChartInfo,
-        achievement: Int,
-        course: LocalCourseInfo
-    ): Int {
-        val totalBase = chart.notes.tap + chart.notes.touch +
-                2 * chart.notes.hold + 3 * chart.notes.slide +
-                5 * chart.notes.`break`
-        val base = 100000.0 / totalBase
-
-        val minus = 1010000 - achievement
-        val amount = minus / base
-
-        val greats = (amount / 2).toIntFloor()
-        val goods = (amount / 5).toIntFloor()
-        val misses = (amount / 10).toIntFloor()
-
-        val damages = mutableListOf<Int>()
-        if (course.damage.great != 0)
-            damages.add(course.damage.great * greats)
-        if (course.damage.good != 0)
-            damages.add(course.damage.good * goods)
-        if (course.damage.miss != 0)
-            damages.add(course.damage.miss * misses)
-        return damages.minOrNull() ?: 0
     }
     /**
      * Template Course Score generation.
@@ -951,5 +908,55 @@ class MaimaiImage(
             }
         }
         return theme.render(main)
+    }
+    companion object {
+        fun Text.setFont(theme: Theme, chars: CharacterSet = CharacterSet.NUMBERS) {
+            bitmapFont = theme.fontCache[font]!!.toBitmapFont(
+                size,
+                chars = chars,
+                paint = color.hexToRGBA()
+            )
+        }
+        /**
+         * Get color for different difficulties.
+         * @param difficulty Chart Difficulty.
+         */
+        fun levelChartColor(
+            difficulty: MusicDifficulty
+        ) = when (difficulty) {
+            MusicDifficulty.Basic -> "#45c124"
+            MusicDifficulty.Advanced -> "#f8b709"
+            MusicDifficulty.Expert -> "#ff5a66"
+            MusicDifficulty.Master -> "#9f51dc"
+            MusicDifficulty.ReMaster -> "#dbaaff"
+            MusicDifficulty.Utage -> "#ff6ffd"
+        }
+
+        fun calcMinDamage(
+            chart: ChartInfo,
+            achievement: Int,
+            course: LocalCourseInfo
+        ): Int {
+            val totalBase = chart.notes.tap + chart.notes.touch +
+                    2 * chart.notes.hold + 3 * chart.notes.slide +
+                    5 * chart.notes.`break`
+            val base = 100000.0 / totalBase
+
+            val minus = 1010000 - achievement
+            val amount = minus / base
+
+            val greats = (amount / 2).toIntFloor()
+            val goods = (amount / 5).toIntFloor()
+            val misses = (amount / 10).toIntFloor()
+
+            val damages = mutableListOf<Int>()
+            if (course.damage.great != 0)
+                damages.add(course.damage.great * greats)
+            if (course.damage.good != 0)
+                damages.add(course.damage.good * goods)
+            if (course.damage.miss != 0)
+                damages.add(course.damage.miss * misses)
+            return damages.minOrNull() ?: 0
+        }
     }
 }
