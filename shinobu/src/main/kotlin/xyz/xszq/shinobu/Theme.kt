@@ -1,5 +1,7 @@
 package xyz.xszq.shinobu
 
+import dev.matrixlab.webp4j.WebPCodec
+import korlibs.image.awt.toAwtNativeImage
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.font.Font
 import korlibs.image.format.readNativeImage
@@ -31,11 +33,6 @@ data class Theme(
             fontCache += renderer.loadFonts(container)
         }
     }
-    enum class ImageLoadStrategy {
-        Decoded, Bytes
-    }
-    @Transient
-    val strategy = ImageLoadStrategy.Decoded
     @Transient
     private val bitmapCache = ConcurrentHashMap<String, Bitmap>()
     @Transient
@@ -44,22 +41,13 @@ data class Theme(
         bitmapCache.clear()
         bytesCache.clear()
         baseDir.list().collect { file ->
-            if (file.extensionLC == "png" || file.extensionLC == "jpg") {
-                launch(coroutineContext) {
-                    val path = file.relativePathTo(baseDir)!!
-                    when (strategy) {
-                        ImageLoadStrategy.Decoded -> bitmapCache[path] = file.readNativeImage()
-                        ImageLoadStrategy.Bytes -> bytesCache[path] = file.readBytes()
-                    }
-                }
-            }
+            val path = file.relativePathTo(baseDir)!!
+            if (file.extensionLC in listOf("png", "jpg", "webp"))
+                bitmapCache[path] = file.readAsImage()!!
         }
     }
     fun fetchCache(src: String): Bitmap? {
-        return when (strategy) {
-            ImageLoadStrategy.Decoded -> bitmapCache[src]
-            ImageLoadStrategy.Bytes -> bytesCache[src] ?.readBitmap()
-        }
+        return bitmapCache[src]
     }
     suspend fun render(main: Container): Bitmap {
         main.loadImage(this)

@@ -124,14 +124,14 @@ data class Container(
                         theme.fetchCache(src) ?.let { img ->
                             child.image = img
                         } ?: launch {
-                            child.image = runCatching { theme.baseDir[src].readNativeImage() }.getOrNull()
+                            child.image = runCatching { theme.baseDir[src].readAsImage() }.getOrNull()
                         }
                     }
                     child.mask ?.let { src ->
                         theme.fetchCache(src) ?.let { image ->
                             child.maskImage = image
                         } ?: launch {
-                            child.maskImage = runCatching { theme.baseDir[src].readNativeImage() }.getOrNull()
+                            child.maskImage = runCatching { theme.baseDir[src].readAsImage() }.getOrNull()
                         }
                     }
                 }

@@ -1,14 +1,19 @@
 package xyz.xszq.shinobu
 
+import dev.matrixlab.webp4j.WebPCodec
+import korlibs.image.awt.toAwtNativeImage
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.color.RGBA
 import korlibs.image.font.Font
 import korlibs.image.font.getTextBoundsWithGlyphs
 import korlibs.image.format.JPEG
 import korlibs.image.format.PNG
+import korlibs.image.format.readNativeImage
 import korlibs.image.text.DefaultStringTextRenderer
 import korlibs.image.text.TextAlignment
 import korlibs.image.text.TextRenderer
+import korlibs.io.file.VfsFile
+import korlibs.io.file.extensionLC
 import korlibs.memory.extract8
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
@@ -95,4 +100,10 @@ fun Bitmap.transparent(
         setRgba(x, y, RGBA(now.r, now.g, now.b, (opacity * now.a).toInt()))
     }
     return this
+}
+
+suspend fun VfsFile.readAsImage() = when (extensionLC) {
+    "png", "jpg" -> readNativeImage()
+    "webp" -> WebPCodec.decodeImage(readBytes()).toAwtNativeImage()
+    else -> null
 }

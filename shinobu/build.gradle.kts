@@ -20,6 +20,7 @@ repositories {
 
 dependencies {
     api("com.soywiz.korge:korge-core:${korlibsVersion}")
+    api("dev.matrixlab.webp4j:webp4j:1.2.0")
     api("io.github.pdvrieze.xmlutil:core-jdk:0.91.0-RC1")
     api("io.github.pdvrieze.xmlutil:serialization-jvm:0.91.0-RC1")
     testImplementation(kotlin("test"))
