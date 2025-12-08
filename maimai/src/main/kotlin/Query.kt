@@ -76,6 +76,11 @@ object Query {
     fun rate(rate: String) = Filter(chart = { chart ->
         chart.music.genre != MusicGenre.Utage
     }, record = { record ->
+        record.rate == rate
+    })
+    fun rateGreaterEqual(rate: String) = Filter(chart = { chart ->
+        chart.music.genre != MusicGenre.Utage
+    }, record = { record ->
         Rate.greaterEqual(record.achievement, rate)
     })
     fun achievement(achievement: Int) = Filter(chart = { chart ->
@@ -180,8 +185,9 @@ object Query {
         add(listOf("完整", "全"), noB15)
         add(listOf("拟合定数", "拟合", "nh"), fitLevelValues)
         add(listOf("大将", "鸟加", "sss+", "sssp"), rate("sssp"))
-        add(listOf("将", "鸟", "sss"), rate("sss"))
-        add(listOf("霸", "clear"), rate("a"))
+        add(listOf("将"), rateGreaterEqual("sss"))
+        add(listOf("鸟", "sss"), rate("sss"))
+        add(listOf("霸", "clear"), rateGreaterEqual("a"))
         add(listOf("牛逼", "nb"), achievement(1008000))
         add(listOf("丢人", "越级"), achievementLess(950000))
         (1..5).forEach { stars ->

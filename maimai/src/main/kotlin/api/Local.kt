@@ -54,9 +54,16 @@ class Local(
             it.genre == "実績" && it.requires.isNotEmpty() && it.name != "覇者"
         }.associateBy {
             it.name.replace(Item.plateTypes.first { type -> it.name.endsWith(type) }, "")
+        }.also { filtered ->
+            val early = filtered.filter { (version, _) ->
+                version in listOf("真", "超", "檄")
+            }.flatMap { (_, plate) ->
+                plate.requires.mapNotNull { musics[it] ?.version }.toSet().toList()
+            }.toSet().toList()
+            Query.conditions.add(0, Pair(listOf("真超檄"),version(early)))
         }.forEach { (version, plate) ->
             val simplified = Item.simplifyTable[version] ?: version.toSimple()
-            val gameVersions = plate.requires.mapNotNull { musics[it]?.version }.toSet().toList()
+            val gameVersions = plate.requires.mapNotNull { musics[it] ?.version }.toSet().toList()
             Query.conditions.add(Pair(listOf(version, simplified),
                 version(gameVersions)))
             Query.conditions.add(0, Pair(listOf(simplified + "代"),
@@ -96,7 +103,11 @@ class Local(
             if (designer.isNotBlank() && designer != "-")
                 Query.conditions.add(0, Pair(listOf(designer), designer(designer)))
         }
+        Query.conditions.add(listOf("ss+", "ssp"), rate("ssp"))
+        Query.conditions.add(listOf("ss", "ss"), rate("ss"))
+        Query.conditions.add(listOf("s+", "sp"), rate("sp"))
         Query.conditions.add(listOf("s"), rate("s"))
+        Query.conditions.add(listOf("aaa"), rate("aaa"))
 
         val customTags = json.decodeFromString<Map<String, Tag>>(
             File(dataDir.absolutePath + "/tag.json").readText(Charsets.UTF_8)
