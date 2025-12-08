@@ -9,6 +9,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import xyz.xszq.bot.*
 import xyz.xszq.bot.Maimai.Companion.textMode
+import xyz.xszq.bot.api.DivingFish
+import xyz.xszq.bot.api.LXNS
+import xyz.xszq.bot.api.MaimaiAPI
 import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.NotFoundException
@@ -241,7 +244,7 @@ class ImageController(
         var time = 0L
         maimai.query.rating(event, args) { response, backend ->
             if (response.ratingList.isEmpty() && response.newRatingList.isEmpty()) {
-                noData()
+                noData(backend)
                 return@rating null
             }
             countTime {
@@ -594,14 +597,18 @@ class ImageController(
         }
     }
 
-    suspend fun MessageEvent.noData() {
+    suspend fun MessageEvent.noData(
+        backend: MaimaiAPI
+    ) {
         if (textMode())
             reply(buildString {
                 appendLine("您似乎尚未导入舞萌DX分数，请查看数据导入教程：")
-                appendLine("水鱼查分器：https://otmdb.cn/jump/maimaidxprober_import")
-                appendLine("落雪查分器：https://otmdb.cn/jump/lxnsprober_import")
+                when (backend) {
+                    is DivingFish -> appendLine("水鱼查分器：https://otmdb.cn/jump/maimaidxprober_import")
+                    is LXNS -> appendLine("落雪查分器：https://otmdb.cn/jump/lxnsprober_import")
+                }
             }.trim().newLine())
-        else reply(MarkdownTemplates.Templates.IMPORT_DATA)
+        else reply(MarkdownTemplates.Templates.importData(backend))
     }
     companion object {
         val courseAliases = buildMap<Int, List<String>> {

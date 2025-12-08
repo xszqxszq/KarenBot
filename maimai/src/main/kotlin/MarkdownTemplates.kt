@@ -1,6 +1,9 @@
 package xyz.xszq.bot
 
 import korlibs.io.util.toStringDecimal
+import xyz.xszq.bot.api.DivingFish
+import xyz.xszq.bot.api.LXNS
+import xyz.xszq.bot.api.MaimaiAPI
 import xyz.xszq.bot.music.MusicDifficulty
 import xyz.xszq.bot.music.MusicInfo
 import xyz.xszq.bot.payload.markdown.*
@@ -315,6 +318,75 @@ object MarkdownTemplates {
                 }
             }
         }
+        fun importData(
+            backend: MaimaiAPI
+        ) = Keyboard.create {
+            when (backend) {
+                is DivingFish ->
+                    row {
+                        button(
+                            id = "1",
+                            action = Action(
+                                type = Action.LINK,
+                                data = "https://otmdb.cn/jump/maimaidxprober_import",
+                                permission = Permission(Permission.EVERYONE)
+                            ),
+                            renderData = RenderData(
+                                label = "\uD83D\uDC1F水鱼(电脑端)",
+                                visitedLabel = "\uD83D\uDC1F水鱼(电脑端)",
+                                style = RenderData.BLUE
+                            )
+                        )
+                    }
+                is LXNS ->
+                    row {
+                        button(
+                            id = "2",
+                            action = Action(
+                                type = Action.LINK,
+                                data = "https://otmdb.cn/jump/lxnsprober_import",
+                                permission = Permission(Permission.EVERYONE)
+                            ),
+                            renderData = RenderData(
+                                label = "❄落雪(电脑/手机)",
+                                visitedLabel = "❄落雪(电脑/手机)",
+                                style = RenderData.BLUE
+                            )
+                        )
+                    }
+            }
+            row {
+                button(
+                    id = "3",
+                    action = Action(
+                        type = Action.LINK,
+                        data = "https://otmdb.cn/jump/maimai_prober_mobile",
+                        permission = Permission(Permission.EVERYONE)
+                    ),
+                    renderData = RenderData(
+                        label = "\uD83D\uDC07UsagiPass(iOS/安卓)",
+                        visitedLabel = "\uD83D\uDC07UsagiPass(iOS/安卓)",
+                        style = RenderData.BLUE
+                    )
+                )
+            }
+            if (backend is DivingFish)
+                row {
+                    button(
+                        id = "4",
+                        action = Action(
+                            type = Action.LINK,
+                            data = "https://www.bilibili.com/video/BV1Yg41167ie",
+                            permission = Permission(Permission.EVERYONE)
+                        ),
+                        renderData = RenderData(
+                            label = "\uD83E\uDD16Bakapiano(安卓)",
+                            visitedLabel = "\uD83E\uDD16Bakapiano(安卓)",
+                            style = RenderData.BLUE
+                        )
+                    )
+                }
+        }
         fun tryIt(
             command: String
         ) = single(command.trim() + " ", "⬇试一试")
@@ -461,68 +533,6 @@ object MarkdownTemplates {
                     renderData = RenderData(
                         label = "⬇点我输入",
                         visitedLabel = "⬇点我输入",
-                        style = RenderData.BLUE
-                    )
-                )
-            }
-        }
-        val IMPORT_DATA = Keyboard.create {
-            row {
-                button(
-                    id = "1",
-                    action = Action(
-                        type = Action.LINK,
-                        data = "https://otmdb.cn/jump/maimaidxprober_import",
-                        permission = Permission(Permission.EVERYONE)
-                    ),
-                    renderData = RenderData(
-                        label = "\uD83D\uDC1F水鱼查分器(电脑端)",
-                        visitedLabel = "\uD83D\uDC1F水鱼查分器(电脑端)",
-                        style = RenderData.BLUE
-                    )
-                )
-            }
-            row {
-                button(
-                    id = "1",
-                    action = Action(
-                        type = Action.LINK,
-                        data = "https://otmdb.cn/jump/lxnsprober_import",
-                        permission = Permission(Permission.EVERYONE)
-                    ),
-                    renderData = RenderData(
-                        label = "❄落雪查分器(电脑/手机)",
-                        visitedLabel = "❄落雪查分器(电脑/手机)",
-                        style = RenderData.BLUE
-                    )
-                )
-            }
-            row {
-                button(
-                    id = "1",
-                    action = Action(
-                        type = Action.LINK,
-                        data = "https://otmdb.cn/jump/maimai_prober_mobile",
-                        permission = Permission(Permission.EVERYONE)
-                    ),
-                    renderData = RenderData(
-                        label = "\uD83D\uDC07UsagiPass(iOS/安卓)",
-                        visitedLabel = "\uD83D\uDC07UsagiPass(iOS/安卓)",
-                        style = RenderData.BLUE
-                    )
-                )
-            }
-            row {
-                button(
-                    id = "1",
-                    action = Action(
-                        type = Action.LINK,
-                        data = "https://www.bilibili.com/video/BV1Yg41167ie",
-                        permission = Permission(Permission.EVERYONE)
-                    ),
-                    renderData = RenderData(
-                        label = "\uD83E\uDD16Bakapiano(安卓)",
-                        visitedLabel = "\uD83E\uDD16Bakapiano(安卓)",
                         style = RenderData.BLUE
                     )
                 )
@@ -1097,6 +1107,10 @@ object MarkdownTemplates {
                 description.replace("\n", "\r")
             }
         }
+        fun importData(
+            backend: MaimaiAPI
+        ) = brief("舞萌DX", "您似乎尚未导入舞萌DX分数到查分器，请参考下方教程：")
+            .toMessage(Keyboards.importData(backend))
         fun guessCropped(
             url: String,
             description: String
@@ -1116,8 +1130,6 @@ object MarkdownTemplates {
                 appendLine("如您尚未设置查分器，请选择一个来绑定您的QQ号：")
             }.trim()
         ).toMessage(Keyboards.BACKENDS)
-        val IMPORT_DATA = brief("舞萌DX", "您似乎尚未导入舞萌DX分数，可以根据设备和查分器选择一种方式导入查分器：")
-            .toMessage(Keyboards.IMPORT_DATA)
         val USER_EULA = brief("舞萌DX", "请前往查分器同意用户协议再进行查询：")
             .toMessage(Keyboards.USER_EULA)
         val HELP = brief("舞萌DX", buildString {
