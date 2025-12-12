@@ -7,6 +7,7 @@ import xyz.xszq.bot.Query
 import xyz.xszq.bot.Query.designer
 import xyz.xszq.bot.Query.musicsPlate
 import xyz.xszq.bot.Query.rate
+import xyz.xszq.bot.Query.rateGreaterEqual
 import xyz.xszq.bot.Query.version
 import xyz.xszq.bot.add
 import xyz.xszq.bot.component.LocalConnector
@@ -103,11 +104,16 @@ class Local(
             if (designer.isNotBlank() && designer != "-")
                 Query.conditions.add(0, Pair(listOf(designer), designer(designer)))
         }
-        Query.conditions.add(listOf("ss+", "ssp"), rate("ssp"))
-        Query.conditions.add(listOf("ss", "ss"), rate("ss"))
-        Query.conditions.add(listOf("s+", "sp"), rate("sp"))
-        Query.conditions.add(listOf("s"), rate("s"))
-        Query.conditions.add(listOf("aaa"), rate("aaa"))
+        Query.conditions.add(listOf("纯ss+", "仅ss+"), rate("ssp"))
+        Query.conditions.add(listOf("纯ss", "仅ss"), rate("ss"))
+        Query.conditions.add(listOf("纯s+", "仅s+"), rate("sp"))
+        Query.conditions.add(listOf("纯s", "仅s"), rate("s"))
+        Query.conditions.add(listOf("纯aaa", "仅aaa"), rate("aaa"))
+        Query.conditions.add(listOf("ss+", "ssp"), rateGreaterEqual("ssp"))
+        Query.conditions.add(listOf("ss", "ss"), rateGreaterEqual("ss"))
+        Query.conditions.add(listOf("s+", "sp"), rateGreaterEqual("sp"))
+        Query.conditions.add(listOf("s"), rateGreaterEqual("s"))
+        Query.conditions.add(listOf("aaa"), rateGreaterEqual("aaa"))
 
         val customTags = json.decodeFromString<Map<String, Tag>>(
             File(dataDir.absolutePath + "/tag.json").readText(Charsets.UTF_8)
