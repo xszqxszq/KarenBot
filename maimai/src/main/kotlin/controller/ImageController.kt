@@ -97,9 +97,29 @@ class ImageController(
         commandEndsWith("完成表") { raw ->
             val args = raw.split(" ")
             val command = args.first()
+            if (command.endsWith("未"))
+                return@commandEndsWith
             val arg = args.getOrNull(1) ?: ""
             kotlin.runCatching {
-                handleLevelCompletes(this, command, arg)
+                handleLevelComplete(this, command, arg)
+            }.onFailure { e ->
+                when {
+                    e.message == "TooMany" -> {
+                        reply("您当前查询的曲目过多")
+                    }
+                    else -> {
+                        reply("生成失败")
+                        e.printStackTrace()
+                    }
+                }
+            }
+        }
+        commandEndsWith(listOf("未完成表", "未完成列表")) { raw ->
+            val args = raw.split(" ")
+            val command = args.first()
+            val arg = args.getOrNull(1) ?: ""
+            kotlin.runCatching {
+                handleLevelIncomplete(this, command, arg)
             }.onFailure { e ->
                 when {
                     e.message == "TooMany" -> {
@@ -457,7 +477,7 @@ class ImageController(
             isFitLevelValues = isFitLevelValues
         ).sendResultImage(fullCommand + "定数表", event, randomTips())
     }
-    suspend fun handleLevelCompletes(
+    suspend fun handleLevelComplete(
         event: MessageEvent,
         fullCommand: String,
         args: String
@@ -486,6 +506,43 @@ class ImageController(
                 isFitLevelValues = isFitLevelValues
             )
         }.sendResultImage(fullCommand + "完成表", event, randomTips())
+    }
+    suspend fun handleLevelIncomplete(
+        event: MessageEvent,
+        fullCommand: String,
+        args: String
+    ) = event.run {
+        val filters = Query.filters(fullCommand)
+        if (Query.noRecordFilter(filters)) {
+            reply(maimai.query.noRecords)
+            return@run
+        }
+        val (charts, detailed) = filterCharts(filters)
+        if (charts.isEmpty()) {
+            reply(maimai.query.noRecords)
+            return@run
+        }
+        val isFitLevelValues = Query.isFitLevelValues(filters)
+        val musics = charts.map { it.music }.toSet().toList()
+        maimai.query.records(event, musics, args) { response, _ ->
+            val completed = Query.filterRecords(filters, response.records, true) ?: emptyList()
+            val remains = charts.filter { chart ->
+                completed.none { it.chart == chart }
+            }
+            if (remains.isEmpty()) {
+                reply("恭喜您已完成所有谱面！")
+                return@records null
+            }
+
+            maimai.image.templateLevel(
+                remains,
+                fullCommand + "未完成表",
+                detailed,
+                Query.filterTypes(filters),
+                response.records,
+                isFitLevelValues = isFitLevelValues
+            )
+        }.sendResultImage(fullCommand + "未完成表", event, randomTips())
     }
     suspend fun handleInfoScore(
         event: MessageEvent,
