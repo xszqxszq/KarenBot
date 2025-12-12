@@ -94,7 +94,7 @@ class ImageController(
                 }
             }
         }
-        commandEndsWith("完成表") { raw ->
+        commandEndsWith(listOf("完成表", "进度表")) { raw ->
             val args = raw.split(" ")
             val command = args.first()
             if (command.endsWith("未"))
@@ -517,7 +517,7 @@ class ImageController(
             reply(maimai.query.noRecords)
             return@run
         }
-        val (charts, detailed) = filterCharts(filters)
+        val (charts, _) = filterCharts(filters)
         if (charts.isEmpty()) {
             reply(maimai.query.noRecords)
             return@run
@@ -529,13 +529,14 @@ class ImageController(
             val remains = charts.filter { chart ->
                 completed.none { it.chart == chart }
             }
-            if (remains.isEmpty()) {
+            val (filtered, detailed) = filterCharts(filters, preFiltered = remains)
+            if (filtered.isEmpty()) {
                 reply("恭喜您已完成所有谱面！")
                 return@records null
             }
 
             maimai.image.templateLevel(
-                remains,
+                filtered,
                 fullCommand + "未完成表",
                 detailed,
                 Query.filterTypes(filters),
@@ -590,10 +591,13 @@ class ImageController(
     }
 
     fun filterCharts(
-        filters: List<Filter>?
+        filters: List<Filter>? = null,
+        preFiltered: List<ChartInfo>? = null
     ): Pair<List<ChartInfo>, Boolean> {
-        val filters = filters?.toMutableList()
-        var charts = Query.filterCharts(filters, maimai.musics())
+        var charts = preFiltered ?: run {
+            Query.filterCharts(filters ?: emptyList(), maimai.musics())
+        }
+
         var detailed = Query.isDetailed(filters)
         if (Query.isPlate(filters)) {
             charts = if (charts.distinctBy { it.music.id }.size > 250) {
