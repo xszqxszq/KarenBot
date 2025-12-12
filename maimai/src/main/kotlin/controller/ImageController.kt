@@ -17,6 +17,7 @@ import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.music.ChartInfo
 import xyz.xszq.bot.music.MusicDifficulty
+import xyz.xszq.bot.music.MusicGenre
 import xyz.xszq.bot.music.MusicInfo
 import xyz.xszq.bot.music.Rating
 import xyz.xszq.bot.payload.LocalCourseInfo
@@ -595,7 +596,10 @@ class ImageController(
         preFiltered: List<ChartInfo>? = null
     ): Pair<List<ChartInfo>, Boolean> {
         var charts = preFiltered ?: run {
-            Query.filterCharts(filters ?: emptyList(), maimai.musics())
+            Query.filterCharts(
+                filters ?: emptyList(),
+                maimai.musics().filter { it.genre != MusicGenre.Utage }
+            )
         }
 
         var detailed = Query.isDetailed(filters)
@@ -616,7 +620,7 @@ class ImageController(
                         charts.addAll(levelCharts.filter { it.difficulty >= MusicDifficulty.Master })
                     }
                     else -> {
-                        charts.add(levelCharts.maxBy { it.difficulty })
+                        charts.addAll(levelCharts.filter { it.difficulty >= MusicDifficulty.Expert })
                     }
                 }
             }
