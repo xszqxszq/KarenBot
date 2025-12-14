@@ -21,6 +21,7 @@ class TTSParser(
     private val presetsDir = voiceDir["ysddTokens"]
     var tokens: Map<String, VfsFile>
     var presets: Map<String, VfsFile>
+    val originalPresets: Map<String, VfsFile>
     val pinyinPresets: Map<String, VfsFile>
     private val mary: LocalMaryInterface
     private val english: EnglishHandler
@@ -35,6 +36,14 @@ class TTSParser(
                 it.baseNameWithoutCompoundExtension
             }
         }
+        originalPresets = buildMap {
+            config.presets.forEach { (filename, aliases) ->
+                val file = presets[filename] ?: return@forEach
+                aliases.forEach { alias ->
+                    putIfAbsent(alias, file)
+                }
+            }
+        }.toList().sortedBy { -it.first.length }.toMap()
         pinyinPresets = buildMap {
             config.presets.forEach { (filename, aliases) ->
                 val file = presets[filename] ?: return@forEach
@@ -81,7 +90,7 @@ class TTSParser(
             now.clear()
             nowType = ""
         }
-        text.replace("\r", "").replace("\n", "").trim().forEach { char ->
+        text.forEach { char ->
             when {
                 char in charPresets.keys -> {
                     flush()
@@ -188,8 +197,41 @@ class TTSParser(
         }
         return result
     }
+    // TODO: Improve this temporary solution
+    fun prepare(text: String): List<Token> {
+        var texts: List<Token> = listOf(Token.Raw.Chinese(
+            text.replace("\r", "").replace("\n", "").trim()
+        ))
+        while (true) {
+            texts.filterIsInstance<Token.Raw.Chinese>()
+                .firstOrNull { t -> originalPresets.any { it.key in t.text } } ?.let { t ->
+                    val (name, file) = originalPresets.entries.first { it.key in t.text }
+
+                    val index = texts.indexOf(t)
+
+                    val before = t.text.substringBefore(name).let {
+                        if (it.isEmpty())
+                            listOf()
+                        else
+                            listOf(Token.Raw.Chinese(it))
+                    }
+                    val after = t.text.substringAfter(name).let {
+                        if (it.isEmpty())
+                            listOf()
+                        else
+                            listOf(Token.Raw.Chinese(it))
+                    }
+
+                    texts = texts.subList(0, index) + before + listOf(
+                        Token.Final.Preset(file)
+                    ) + after + texts.subList(index + 1, texts.size)
+                } ?: break
+        }
+        return texts.flatMap { if (it is Token.Raw) tokenize(it.text) else listOf(it) }
+    }
     fun parse(text: String): List<Token.Final> {
-        var result = tokenize(text)
+        var result = prepare(text)
+        println(result)
         var counter = 0
         while (result.any { it is Token.Raw } && counter < 120) {
             result = clean(result)
