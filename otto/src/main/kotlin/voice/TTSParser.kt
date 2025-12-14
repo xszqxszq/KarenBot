@@ -231,7 +231,6 @@ class TTSParser(
     }
     fun parse(text: String): List<Token.Final> {
         var result = prepare(text)
-        println(result)
         var counter = 0
         while (result.any { it is Token.Raw } && counter < 120) {
             result = clean(result)
