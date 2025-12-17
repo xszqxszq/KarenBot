@@ -118,13 +118,23 @@ class DivingFish(
         val request = buildRequest(event, args) ?: return null
         val data = ratingRequest(request) ?: return null
 
+        // TODO: Replace this temporary fix
+        val icon = if (args.isEmpty())
+            MaimaiSettingsTable[event.sender.id, "icon"] ?.toIntOrNull() ?: 101
+        else
+            101
+        val plate = if (args.isEmpty())
+            MaimaiSettingsTable[event.sender.id, "plate"] ?.toIntOrNull()
+                ?: data.plate ?.let { parsePlate(it) } ?: 11
+        else
+            11
+
         return RatingResponse(
             name = data.nickname,
             rating = data.rating,
             course = data.additionalRating + if (data.additionalRating > 10) 1 else 0,
-            icon = MaimaiSettingsTable[event.sender.id, "icon"] ?.toIntOrNull() ?: 101,
-            plate = MaimaiSettingsTable[event.sender.id, "plate"] ?.toIntOrNull() ?:
-                data.plate ?.let { parsePlate(it) } ?: 11,
+            icon = icon,
+            plate = plate,
             ratingList = data.charts.sd.mapNotNull { record ->
                 record.toRecord()
             },
@@ -207,13 +217,21 @@ class DivingFish(
     } else {
         val request = buildRequest(event, args) ?: return null
         val basicInfo = ratingRequest(request) ?: return null
+        val icon = if (args.isEmpty())
+            MaimaiSettingsTable[event.sender.id, "icon"] ?.toIntOrNull() ?: 101
+        else
+            101
+        val plate = if (args.isEmpty())
+            MaimaiSettingsTable[event.sender.id, "plate"] ?.toIntOrNull()
+                ?: basicInfo.plate ?.let { parsePlate(it) } ?: 11
+        else
+            11
         RecordsResponse(
             name = basicInfo.nickname,
             rating = basicInfo.rating,
             course = basicInfo.additionalRating + if (basicInfo.additionalRating > 10) 1 else 0,
-            icon = MaimaiSettingsTable[event.sender.id, "icon"] ?.toIntOrNull() ?: 101,
-            plate = MaimaiSettingsTable[event.sender.id, "plate"] ?.toIntOrNull() ?:
-                basicInfo.plate ?.let { parsePlate(it) } ?: 11,
+            icon = icon,
+            plate = plate,
             records = data
         )
     }
