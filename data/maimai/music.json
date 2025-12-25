@@ -10368,6 +10368,66 @@
         ]
     },
     {
+        "id": 281,
+        "name": "ダブルラリアット",
+        "type": "SD",
+        "rights": "© Crypton Future Media, INC. www.piapro.net (+piapro logo)",
+        "artist": "アゴアニキ",
+        "genre": "niconicoボーカロイド",
+        "bpm": "138",
+        "version": "ORANGE",
+        "charts": [
+            {
+                "level": "5",
+                "levelValue": 5.0,
+                "notes": {
+                    "tap": 130,
+                    "hold": 19,
+                    "slide": 2,
+                    "touch": 0,
+                    "break": 4
+                },
+                "notesDesigner": "-"
+            },
+            {
+                "level": "6+",
+                "levelValue": 6.6,
+                "notes": {
+                    "tap": 161,
+                    "hold": 20,
+                    "slide": 11,
+                    "touch": 0,
+                    "break": 5
+                },
+                "notesDesigner": "-"
+            },
+            {
+                "level": "10+",
+                "levelValue": 10.9,
+                "notes": {
+                    "tap": 175,
+                    "hold": 52,
+                    "slide": 42,
+                    "touch": 0,
+                    "break": 8
+                },
+                "notesDesigner": "某S氏"
+            },
+            {
+                "level": "13",
+                "levelValue": 13.2,
+                "notes": {
+                    "tap": 324,
+                    "hold": 17,
+                    "slide": 110,
+                    "touch": 0,
+                    "break": 16
+                },
+                "notesDesigner": "Jack"
+            }
+        ]
+    },
+    {
         "id": 282,
         "name": "からくりピエロ",
         "type": "SD",
@@ -35016,6 +35076,66 @@
         ]
     },
     {
+        "id": 10375,
+        "name": "One Step Ahead",
+        "type": "DX",
+        "rights": "",
+        "artist": "伊東歌詞太郎",
+        "genre": "niconicoボーカロイド",
+        "bpm": "186",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "4",
+                "levelValue": 4.0,
+                "notes": {
+                    "tap": 155,
+                    "hold": 17,
+                    "slide": 4,
+                    "touch": 16,
+                    "break": 4
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "7",
+                "levelValue": 7.2,
+                "notes": {
+                    "tap": 231,
+                    "hold": 21,
+                    "slide": 6,
+                    "touch": 25,
+                    "break": 2
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "10",
+                "levelValue": 10.5,
+                "notes": {
+                    "tap": 390,
+                    "hold": 25,
+                    "slide": 26,
+                    "touch": 15,
+                    "break": 29
+                },
+                "notesDesigner": "Luxizhel"
+            },
+            {
+                "level": "13",
+                "levelValue": 13.2,
+                "notes": {
+                    "tap": 415,
+                    "hold": 54,
+                    "slide": 121,
+                    "touch": 16,
+                    "break": 48
+                },
+                "notesDesigner": "Jack"
+            }
+        ]
+    },
+    {
         "id": 10404,
         "name": "響縁",
         "type": "DX",
@@ -35192,6 +35312,66 @@
                     "break": 27
                 },
                 "notesDesigner": "Jack"
+            }
+        ]
+    },
+    {
+        "id": 10422,
+        "name": "LANCE",
+        "type": "DX",
+        "rights": "",
+        "artist": "Ras",
+        "genre": "maimai",
+        "bpm": "156",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "4",
+                "levelValue": 4.0,
+                "notes": {
+                    "tap": 168,
+                    "hold": 11,
+                    "slide": 4,
+                    "touch": 6,
+                    "break": 5
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "7+",
+                "levelValue": 7.8,
+                "notes": {
+                    "tap": 290,
+                    "hold": 15,
+                    "slide": 6,
+                    "touch": 26,
+                    "break": 8
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "11",
+                "levelValue": 11.0,
+                "notes": {
+                    "tap": 373,
+                    "hold": 56,
+                    "slide": 38,
+                    "touch": 18,
+                    "break": 17
+                },
+                "notesDesigner": "Luxizhel"
+            },
+            {
+                "level": "13+",
+                "levelValue": 13.9,
+                "notes": {
+                    "tap": 644,
+                    "hold": 54,
+                    "slide": 67,
+                    "touch": 42,
+                    "break": 53
+                },
+                "notesDesigner": "サファ太"
             }
         ]
     },
@@ -70602,7 +70782,7 @@
         "rights": "",
         "artist": "Morrigan feat.Lily and 結城碧",
         "genre": "maimai",
-        "bpm": "339",
+        "bpm": "185",
         "version": "舞萌DX 2025",
         "charts": [
             {
@@ -70662,7 +70842,7 @@
         "rights": "",
         "artist": "Kai",
         "genre": "maimai",
-        "bpm": "339",
+        "bpm": "230",
         "version": "舞萌DX 2025",
         "charts": [
             {
@@ -73464,6 +73644,366 @@
         ]
     },
     {
+        "id": 11736,
+        "name": "プリズム△▽リズム",
+        "type": "DX",
+        "rights": "",
+        "artist": "Shoichiro Hirata feat.Sana",
+        "genre": "maimai",
+        "bpm": "155",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "3",
+                "levelValue": 3.0,
+                "notes": {
+                    "tap": 165,
+                    "hold": 13,
+                    "slide": 8,
+                    "touch": 8,
+                    "break": 6
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "6",
+                "levelValue": 6.5,
+                "notes": {
+                    "tap": 263,
+                    "hold": 18,
+                    "slide": 12,
+                    "touch": 18,
+                    "break": 2
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "10",
+                "levelValue": 10.0,
+                "notes": {
+                    "tap": 338,
+                    "hold": 45,
+                    "slide": 49,
+                    "touch": 6,
+                    "break": 52
+                },
+                "notesDesigner": "アマリリス"
+            },
+            {
+                "level": "13",
+                "levelValue": 13.0,
+                "notes": {
+                    "tap": 450,
+                    "hold": 47,
+                    "slide": 121,
+                    "touch": 81,
+                    "break": 74
+                },
+                "notesDesigner": "みそかつ侍"
+            }
+        ]
+    },
+    {
+        "id": 11737,
+        "name": "パラドクスイヴ",
+        "type": "DX",
+        "rights": "",
+        "artist": "Teary Planet",
+        "genre": "maimai",
+        "bpm": "180",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "3",
+                "levelValue": 3.0,
+                "notes": {
+                    "tap": 148,
+                    "hold": 20,
+                    "slide": 4,
+                    "touch": 8,
+                    "break": 3
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "7+",
+                "levelValue": 7.7,
+                "notes": {
+                    "tap": 269,
+                    "hold": 20,
+                    "slide": 9,
+                    "touch": 25,
+                    "break": 2
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "11",
+                "levelValue": 11.0,
+                "notes": {
+                    "tap": 350,
+                    "hold": 58,
+                    "slide": 48,
+                    "touch": 12,
+                    "break": 32
+                },
+                "notesDesigner": "Jack"
+            },
+            {
+                "level": "13",
+                "levelValue": 13.5,
+                "notes": {
+                    "tap": 441,
+                    "hold": 89,
+                    "slide": 83,
+                    "touch": 72,
+                    "break": 33
+                },
+                "notesDesigner": "あまくちジンジャー"
+            }
+        ]
+    },
+    {
+        "id": 11738,
+        "name": "YKWTD",
+        "type": "DX",
+        "rights": "",
+        "artist": "r-906",
+        "genre": "maimai",
+        "bpm": "174",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "4",
+                "levelValue": 4.0,
+                "notes": {
+                    "tap": 212,
+                    "hold": 15,
+                    "slide": 4,
+                    "touch": 6,
+                    "break": 6
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "8",
+                "levelValue": 8.0,
+                "notes": {
+                    "tap": 296,
+                    "hold": 4,
+                    "slide": 16,
+                    "touch": 25,
+                    "break": 4
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "11",
+                "levelValue": 11.0,
+                "notes": {
+                    "tap": 351,
+                    "hold": 50,
+                    "slide": 66,
+                    "touch": 35,
+                    "break": 19
+                },
+                "notesDesigner": "鳩ホルダー"
+            },
+            {
+                "level": "13+",
+                "levelValue": 13.8,
+                "notes": {
+                    "tap": 544,
+                    "hold": 16,
+                    "slide": 142,
+                    "touch": 124,
+                    "break": 19
+                },
+                "notesDesigner": "カマボコ君"
+            }
+        ]
+    },
+    {
+        "id": 11739,
+        "name": "184億回のマルチトニック",
+        "type": "DX",
+        "rights": "",
+        "artist": "Pizuya's Cell feat.中村さん",
+        "genre": "maimai",
+        "bpm": "184",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "5",
+                "levelValue": 5.0,
+                "notes": {
+                    "tap": 241,
+                    "hold": 14,
+                    "slide": 6,
+                    "touch": 8,
+                    "break": 8
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "8",
+                "levelValue": 8.2,
+                "notes": {
+                    "tap": 323,
+                    "hold": 24,
+                    "slide": 10,
+                    "touch": 33,
+                    "break": 1
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "11+",
+                "levelValue": 11.7,
+                "notes": {
+                    "tap": 490,
+                    "hold": 54,
+                    "slide": 62,
+                    "touch": 14,
+                    "break": 38
+                },
+                "notesDesigner": "鳩ホルダー"
+            },
+            {
+                "level": "14",
+                "levelValue": 14.1,
+                "notes": {
+                    "tap": 886,
+                    "hold": 31,
+                    "slide": 116,
+                    "touch": 73,
+                    "break": 38
+                },
+                "notesDesigner": "Jack"
+            }
+        ]
+    },
+    {
+        "id": 11740,
+        "name": "果ての空、僕らが見た光。",
+        "type": "DX",
+        "rights": "",
+        "artist": "TAKU1175 ft.駄々子",
+        "genre": "maimai",
+        "bpm": "178",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "4",
+                "levelValue": 4.0,
+                "notes": {
+                    "tap": 194,
+                    "hold": 17,
+                    "slide": 4,
+                    "touch": 8,
+                    "break": 4
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "8",
+                "levelValue": 8.0,
+                "notes": {
+                    "tap": 308,
+                    "hold": 16,
+                    "slide": 7,
+                    "touch": 26,
+                    "break": 1
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "10+",
+                "levelValue": 10.8,
+                "notes": {
+                    "tap": 335,
+                    "hold": 59,
+                    "slide": 34,
+                    "touch": 27,
+                    "break": 44
+                },
+                "notesDesigner": "サファ太"
+            },
+            {
+                "level": "13+",
+                "levelValue": 13.7,
+                "notes": {
+                    "tap": 590,
+                    "hold": 49,
+                    "slide": 103,
+                    "touch": 50,
+                    "break": 28
+                },
+                "notesDesigner": "Jack"
+            }
+        ]
+    },
+    {
+        "id": 11741,
+        "name": "Cryptarithm",
+        "type": "DX",
+        "rights": "",
+        "artist": "削除",
+        "genre": "maimai",
+        "bpm": "175",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "6",
+                "levelValue": 6.0,
+                "notes": {
+                    "tap": 241,
+                    "hold": 19,
+                    "slide": 7,
+                    "touch": 8,
+                    "break": 8
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "8",
+                "levelValue": 8.5,
+                "notes": {
+                    "tap": 326,
+                    "hold": 14,
+                    "slide": 15,
+                    "touch": 25,
+                    "break": 9
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "13",
+                "levelValue": 13.0,
+                "notes": {
+                    "tap": 553,
+                    "hold": 39,
+                    "slide": 67,
+                    "touch": 13,
+                    "break": 31
+                },
+                "notesDesigner": "みそかつ侍"
+            },
+            {
+                "level": "14+",
+                "levelValue": 14.7,
+                "notes": {
+                    "tap": 683,
+                    "hold": 114,
+                    "slide": 99,
+                    "touch": 41,
+                    "break": 58
+                },
+                "notesDesigner": "Safazhel"
+            }
+        ]
+    },
+    {
         "id": 11746,
         "name": "Divide et impera!",
         "type": "DX",
@@ -73520,6 +74060,1026 @@
                     "break": 100
                 },
                 "notesDesigner": "The Dove"
+            }
+        ]
+    },
+    {
+        "id": 11754,
+        "name": "Elemental Ethnic",
+        "type": "DX",
+        "rights": "",
+        "artist": "Yooh",
+        "genre": "オンゲキCHUNITHM",
+        "bpm": "163",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "6",
+                "levelValue": 6.0,
+                "notes": {
+                    "tap": 262,
+                    "hold": 8,
+                    "slide": 4,
+                    "touch": 20,
+                    "break": 12
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "8",
+                "levelValue": 8.2,
+                "notes": {
+                    "tap": 328,
+                    "hold": 22,
+                    "slide": 5,
+                    "touch": 30,
+                    "break": 5
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "12+",
+                "levelValue": 12.7,
+                "notes": {
+                    "tap": 557,
+                    "hold": 37,
+                    "slide": 46,
+                    "touch": 28,
+                    "break": 33
+                },
+                "notesDesigner": "Luxizhel"
+            },
+            {
+                "level": "14",
+                "levelValue": 14.0,
+                "notes": {
+                    "tap": 836,
+                    "hold": 64,
+                    "slide": 89,
+                    "touch": 23,
+                    "break": 70
+                },
+                "notesDesigner": "サファ太 & 鳩ホルダー"
+            }
+        ]
+    },
+    {
+        "id": 11755,
+        "name": "美夜月鏡",
+        "type": "DX",
+        "rights": "",
+        "artist": "かゆき",
+        "genre": "オンゲキCHUNITHM",
+        "bpm": "164",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "5",
+                "levelValue": 5.0,
+                "notes": {
+                    "tap": 207,
+                    "hold": 8,
+                    "slide": 11,
+                    "touch": 9,
+                    "break": 5
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "7+",
+                "levelValue": 7.9,
+                "notes": {
+                    "tap": 264,
+                    "hold": 31,
+                    "slide": 14,
+                    "touch": 13,
+                    "break": 9
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "12",
+                "levelValue": 12.2,
+                "notes": {
+                    "tap": 412,
+                    "hold": 92,
+                    "slide": 42,
+                    "touch": 11,
+                    "break": 8
+                },
+                "notesDesigner": "はっぴー"
+            },
+            {
+                "level": "14",
+                "levelValue": 14.2,
+                "notes": {
+                    "tap": 676,
+                    "hold": 102,
+                    "slide": 82,
+                    "touch": 116,
+                    "break": 35
+                },
+                "notesDesigner": "ロシェ@ペンギン"
+            }
+        ]
+    },
+    {
+        "id": 11760,
+        "name": "勇者",
+        "type": "DX",
+        "rights": "©山田鐘人・アベツカサ／小学館／「葬送のフリーレン」製作委員会 ©2023 by NIPPON TELEVISION MUSIC CORPORATION & Toho Music Corporation & Sony Music Publishing(Japan) Inc. ©Sony Music Entertainment (Japan) Inc.",
+        "artist": "YOASOBI",
+        "genre": "POPSアニメ",
+        "bpm": "104",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "3",
+                "levelValue": 3.0,
+                "notes": {
+                    "tap": 73,
+                    "hold": 4,
+                    "slide": 4,
+                    "touch": 8,
+                    "break": 5
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "6",
+                "levelValue": 6.5,
+                "notes": {
+                    "tap": 110,
+                    "hold": 10,
+                    "slide": 6,
+                    "touch": 14,
+                    "break": 13
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "9+",
+                "levelValue": 9.8,
+                "notes": {
+                    "tap": 217,
+                    "hold": 15,
+                    "slide": 18,
+                    "touch": 5,
+                    "break": 16
+                },
+                "notesDesigner": "まぐランド"
+            },
+            {
+                "level": "11+",
+                "levelValue": 11.7,
+                "notes": {
+                    "tap": 289,
+                    "hold": 44,
+                    "slide": 38,
+                    "touch": 8,
+                    "break": 17
+                },
+                "notesDesigner": "緑風 犬三郎"
+            },
+            {
+                "level": "13",
+                "levelValue": 13.2,
+                "notes": {
+                    "tap": 369,
+                    "hold": 17,
+                    "slide": 52,
+                    "touch": 44,
+                    "break": 35
+                },
+                "notesDesigner": "Luxizhel"
+            }
+        ]
+    },
+    {
+        "id": 11761,
+        "name": "病み垢ステロイド",
+        "type": "DX",
+        "rights": "©かいりきベア ©のう",
+        "artist": "かいりきベア",
+        "genre": "niconicoボーカロイド",
+        "bpm": "203",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "5",
+                "levelValue": 5.0,
+                "notes": {
+                    "tap": 199,
+                    "hold": 18,
+                    "slide": 6,
+                    "touch": 22,
+                    "break": 5
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "7+",
+                "levelValue": 7.8,
+                "notes": {
+                    "tap": 293,
+                    "hold": 35,
+                    "slide": 8,
+                    "touch": 26,
+                    "break": 2
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "11",
+                "levelValue": 11.0,
+                "notes": {
+                    "tap": 409,
+                    "hold": 70,
+                    "slide": 19,
+                    "touch": 23,
+                    "break": 106
+                },
+                "notesDesigner": "サファ太"
+            },
+            {
+                "level": "13+",
+                "levelValue": 13.9,
+                "notes": {
+                    "tap": 458,
+                    "hold": 79,
+                    "slide": 171,
+                    "touch": 168,
+                    "break": 35
+                },
+                "notesDesigner": "はっぴー"
+            }
+        ]
+    },
+    {
+        "id": 11763,
+        "name": "ダーリンダンス",
+        "type": "DX",
+        "rights": "©かいりきベア ©のう",
+        "artist": "かいりきベア",
+        "genre": "niconicoボーカロイド",
+        "bpm": "153",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "3",
+                "levelValue": 3.0,
+                "notes": {
+                    "tap": 162,
+                    "hold": 9,
+                    "slide": 6,
+                    "touch": 6,
+                    "break": 9
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "7",
+                "levelValue": 7.2,
+                "notes": {
+                    "tap": 262,
+                    "hold": 16,
+                    "slide": 7,
+                    "touch": 13,
+                    "break": 5
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "9+",
+                "levelValue": 9.8,
+                "notes": {
+                    "tap": 362,
+                    "hold": 81,
+                    "slide": 53,
+                    "touch": 24,
+                    "break": 31
+                },
+                "notesDesigner": "Jack"
+            },
+            {
+                "level": "11+",
+                "levelValue": 11.8,
+                "notes": {
+                    "tap": 523,
+                    "hold": 67,
+                    "slide": 71,
+                    "touch": 15,
+                    "break": 33
+                },
+                "notesDesigner": "緑風 犬三郎"
+            },
+            {
+                "level": "13",
+                "levelValue": 13.5,
+                "notes": {
+                    "tap": 670,
+                    "hold": 85,
+                    "slide": 77,
+                    "touch": 8,
+                    "break": 64
+                },
+                "notesDesigner": "サファ太"
+            }
+        ]
+    },
+    {
+        "id": 11764,
+        "name": "唱",
+        "type": "DX",
+        "rights": "Licensed by Virgin Music, A UNIVERSAL MUSIC COMPANY",
+        "artist": "Ado",
+        "genre": "POPSアニメ",
+        "bpm": "132",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "2",
+                "levelValue": 2.0,
+                "notes": {
+                    "tap": 104,
+                    "hold": 12,
+                    "slide": 6,
+                    "touch": 6,
+                    "break": 10
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "6",
+                "levelValue": 6.0,
+                "notes": {
+                    "tap": 199,
+                    "hold": 16,
+                    "slide": 6,
+                    "touch": 13,
+                    "break": 5
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "9",
+                "levelValue": 9.5,
+                "notes": {
+                    "tap": 306,
+                    "hold": 56,
+                    "slide": 16,
+                    "touch": 2,
+                    "break": 51
+                },
+                "notesDesigner": "サファ太"
+            },
+            {
+                "level": "11+",
+                "levelValue": 11.8,
+                "notes": {
+                    "tap": 335,
+                    "hold": 69,
+                    "slide": 84,
+                    "touch": 51,
+                    "break": 38
+                },
+                "notesDesigner": "緑風 犬三郎"
+            },
+            {
+                "level": "13",
+                "levelValue": 13.4,
+                "notes": {
+                    "tap": 466,
+                    "hold": 53,
+                    "slide": 91,
+                    "touch": 146,
+                    "break": 55
+                },
+                "notesDesigner": "鳩ホルダー"
+            }
+        ]
+    },
+    {
+        "id": 11765,
+        "name": "愛包ダンスホール",
+        "type": "DX",
+        "rights": "©LaRa",
+        "artist": "HIMEHINA",
+        "genre": "POPSアニメ",
+        "bpm": "141",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "3",
+                "levelValue": 3.0,
+                "notes": {
+                    "tap": 151,
+                    "hold": 13,
+                    "slide": 4,
+                    "touch": 4,
+                    "break": 10
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "6",
+                "levelValue": 6.2,
+                "notes": {
+                    "tap": 275,
+                    "hold": 16,
+                    "slide": 9,
+                    "touch": 14,
+                    "break": 1
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "9",
+                "levelValue": 9.2,
+                "notes": {
+                    "tap": 394,
+                    "hold": 45,
+                    "slide": 21,
+                    "touch": 20,
+                    "break": 34
+                },
+                "notesDesigner": "サファ太"
+            },
+            {
+                "level": "13",
+                "levelValue": 13.1,
+                "notes": {
+                    "tap": 598,
+                    "hold": 65,
+                    "slide": 75,
+                    "touch": 46,
+                    "break": 55
+                },
+                "notesDesigner": "アマリリス"
+            }
+        ]
+    },
+    {
+        "id": 11766,
+        "name": "マツケンサンバⅡ",
+        "type": "DX",
+        "rights": "",
+        "artist": "松平健 [covered by 光吉猛修]",
+        "genre": "POPSアニメ",
+        "bpm": "133",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "3",
+                "levelValue": 3.0,
+                "notes": {
+                    "tap": 140,
+                    "hold": 17,
+                    "slide": 6,
+                    "touch": 11,
+                    "break": 10
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "6",
+                "levelValue": 6.5,
+                "notes": {
+                    "tap": 201,
+                    "hold": 28,
+                    "slide": 8,
+                    "touch": 26,
+                    "break": 8
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "9+",
+                "levelValue": 9.7,
+                "notes": {
+                    "tap": 266,
+                    "hold": 38,
+                    "slide": 48,
+                    "touch": 28,
+                    "break": 50
+                },
+                "notesDesigner": "Jack"
+            },
+            {
+                "level": "12+",
+                "levelValue": 12.7,
+                "notes": {
+                    "tap": 407,
+                    "hold": 39,
+                    "slide": 98,
+                    "touch": 30,
+                    "break": 63
+                },
+                "notesDesigner": "じゃこレモン"
+            }
+        ]
+    },
+    {
+        "id": 11767,
+        "name": "デビルじゃないもん",
+        "type": "DX",
+        "rights": "© Crypton Future Media, INC. www.piapro.net (+piapro logo) © OTOIRO © mui",
+        "artist": "DECO*27, ピノキオピー",
+        "genre": "niconicoボーカロイド",
+        "bpm": "154",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "3",
+                "levelValue": 3.0,
+                "notes": {
+                    "tap": 171,
+                    "hold": 11,
+                    "slide": 2,
+                    "touch": 6,
+                    "break": 16
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "6+",
+                "levelValue": 6.8,
+                "notes": {
+                    "tap": 278,
+                    "hold": 14,
+                    "slide": 9,
+                    "touch": 13,
+                    "break": 5
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "9+",
+                "levelValue": 9.7,
+                "notes": {
+                    "tap": 376,
+                    "hold": 25,
+                    "slide": 32,
+                    "touch": 22,
+                    "break": 32
+                },
+                "notesDesigner": "アマリリス"
+            },
+            {
+                "level": "13",
+                "levelValue": 13.0,
+                "notes": {
+                    "tap": 578,
+                    "hold": 27,
+                    "slide": 97,
+                    "touch": 38,
+                    "break": 32
+                },
+                "notesDesigner": "Luxizhel"
+            }
+        ]
+    },
+    {
+        "id": 11769,
+        "name": "ずんだパーリナイ",
+        "type": "DX",
+        "rights": "©なみぐる ©nekomo ©sss VOICEVOX:ずんだもん",
+        "artist": "なみぐる feat.ずんだもん",
+        "genre": "niconicoボーカロイド",
+        "bpm": "150",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "4",
+                "levelValue": 4.0,
+                "notes": {
+                    "tap": 159,
+                    "hold": 12,
+                    "slide": 6,
+                    "touch": 10,
+                    "break": 8
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "7",
+                "levelValue": 7.5,
+                "notes": {
+                    "tap": 286,
+                    "hold": 16,
+                    "slide": 10,
+                    "touch": 14,
+                    "break": 4
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "10",
+                "levelValue": 10.5,
+                "notes": {
+                    "tap": 355,
+                    "hold": 88,
+                    "slide": 23,
+                    "touch": 20,
+                    "break": 54
+                },
+                "notesDesigner": "サファ太"
+            },
+            {
+                "level": "13+",
+                "levelValue": 13.8,
+                "notes": {
+                    "tap": 520,
+                    "hold": 114,
+                    "slide": 92,
+                    "touch": 162,
+                    "break": 110
+                },
+                "notesDesigner": "ぴちネコ"
+            }
+        ]
+    },
+    {
+        "id": 11770,
+        "name": "Ultimate taste",
+        "type": "DX",
+        "rights": "©上海アリス幻樂団",
+        "artist": "ぱらどっと",
+        "genre": "東方Project",
+        "bpm": "200",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "5",
+                "levelValue": 5.0,
+                "notes": {
+                    "tap": 192,
+                    "hold": 11,
+                    "slide": 8,
+                    "touch": 25,
+                    "break": 12
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "7+",
+                "levelValue": 7.8,
+                "notes": {
+                    "tap": 289,
+                    "hold": 19,
+                    "slide": 10,
+                    "touch": 43,
+                    "break": 3
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "11",
+                "levelValue": 11.0,
+                "notes": {
+                    "tap": 443,
+                    "hold": 51,
+                    "slide": 45,
+                    "touch": 22,
+                    "break": 34
+                },
+                "notesDesigner": "鳩ホルダー"
+            },
+            {
+                "level": "13+",
+                "levelValue": 13.7,
+                "notes": {
+                    "tap": 671,
+                    "hold": 57,
+                    "slide": 110,
+                    "touch": 22,
+                    "break": 52
+                },
+                "notesDesigner": "Luxizhel"
+            }
+        ]
+    },
+    {
+        "id": 11771,
+        "name": "Chronomia",
+        "type": "DX",
+        "rights": "",
+        "artist": "Lime",
+        "genre": "ゲームバラエティ",
+        "bpm": "227",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "6",
+                "levelValue": 6.0,
+                "notes": {
+                    "tap": 230,
+                    "hold": 14,
+                    "slide": 7,
+                    "touch": 14,
+                    "break": 5
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "8",
+                "levelValue": 8.5,
+                "notes": {
+                    "tap": 345,
+                    "hold": 18,
+                    "slide": 11,
+                    "touch": 27,
+                    "break": 5
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "12",
+                "levelValue": 12.5,
+                "notes": {
+                    "tap": 437,
+                    "hold": 49,
+                    "slide": 75,
+                    "touch": 28,
+                    "break": 53
+                },
+                "notesDesigner": "鳩ホルダー"
+            },
+            {
+                "level": "14",
+                "levelValue": 14.2,
+                "notes": {
+                    "tap": 617,
+                    "hold": 72,
+                    "slide": 128,
+                    "touch": 28,
+                    "break": 77
+                },
+                "notesDesigner": "サファ太 respects for 小鳥遊さん"
+            }
+        ]
+    },
+    {
+        "id": 11778,
+        "name": "シリウスの輝きのように",
+        "type": "DX",
+        "rights": "©Sirius/Project WDS Developed and Published by KMS, inc.",
+        "artist": "鳳 ここな(CV.石見舞菜香)、静香(CV.長谷川育美)、カトリナ・グリーベル(CV.天城サリー)、新妻八恵(CV.長縄まりあ)、柳場ぱんだ(CV.大空直美)、流石知冴(CV.佐々木李子)",
+        "genre": "POPSアニメ",
+        "bpm": "158",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "4",
+                "levelValue": 4.0,
+                "notes": {
+                    "tap": 127,
+                    "hold": 15,
+                    "slide": 2,
+                    "touch": 6,
+                    "break": 3
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "7+",
+                "levelValue": 7.7,
+                "notes": {
+                    "tap": 227,
+                    "hold": 12,
+                    "slide": 11,
+                    "touch": 35,
+                    "break": 1
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "10+",
+                "levelValue": 10.7,
+                "notes": {
+                    "tap": 331,
+                    "hold": 31,
+                    "slide": 13,
+                    "touch": 30,
+                    "break": 11
+                },
+                "notesDesigner": "まぐランド"
+            },
+            {
+                "level": "12",
+                "levelValue": 12.0,
+                "notes": {
+                    "tap": 284,
+                    "hold": 55,
+                    "slide": 78,
+                    "touch": 32,
+                    "break": 29
+                },
+                "notesDesigner": "はっぴー"
+            },
+            {
+                "level": "14",
+                "levelValue": 14.0,
+                "notes": {
+                    "tap": 656,
+                    "hold": 10,
+                    "slide": 99,
+                    "touch": 4,
+                    "break": 46
+                },
+                "notesDesigner": "Luxizhel"
+            }
+        ]
+    },
+    {
+        "id": 11779,
+        "name": "プラネタリウム・レヴュー",
+        "type": "DX",
+        "rights": "©Sirius/Project WDS Developed and Published by KMS, inc.",
+        "artist": "千寿 暦(CV.鳥部万里子)、ラモーナ・ウォルフ(CV.田中美海)、王 雪(CV.花井美春)、リリヤ・クルトベイ(CV.安齋由香里)、与那国緋花里(CV.下地紫野)",
+        "genre": "POPSアニメ",
+        "bpm": "170",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "3",
+                "levelValue": 3.0,
+                "notes": {
+                    "tap": 75,
+                    "hold": 6,
+                    "slide": 4,
+                    "touch": 14,
+                    "break": 3
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "6+",
+                "levelValue": 6.8,
+                "notes": {
+                    "tap": 196,
+                    "hold": 14,
+                    "slide": 6,
+                    "touch": 11,
+                    "break": 4
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "10",
+                "levelValue": 10.5,
+                "notes": {
+                    "tap": 267,
+                    "hold": 34,
+                    "slide": 27,
+                    "touch": 0,
+                    "break": 28
+                },
+                "notesDesigner": "Luxizhel"
+            },
+            {
+                "level": "11+",
+                "levelValue": 11.8,
+                "notes": {
+                    "tap": 255,
+                    "hold": 33,
+                    "slide": 82,
+                    "touch": 3,
+                    "break": 15
+                },
+                "notesDesigner": "はっぴー"
+            },
+            {
+                "level": "13+",
+                "levelValue": 13.7,
+                "notes": {
+                    "tap": 425,
+                    "hold": 24,
+                    "slide": 62,
+                    "touch": 15,
+                    "break": 48
+                },
+                "notesDesigner": "サファ太"
+            }
+        ]
+    },
+    {
+        "id": 11792,
+        "name": "はげしこの夜 -Psylent Crazy Night-",
+        "type": "DX",
+        "rights": "©Marvelous Inc. / Supported by HARDCORE TANO*C",
+        "artist": "aran & Kobaryo",
+        "genre": "ゲームバラエティ",
+        "bpm": "135",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "4",
+                "levelValue": 4.0,
+                "notes": {
+                    "tap": 143,
+                    "hold": 12,
+                    "slide": 6,
+                    "touch": 14,
+                    "break": 6
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "7+",
+                "levelValue": 7.7,
+                "notes": {
+                    "tap": 272,
+                    "hold": 16,
+                    "slide": 10,
+                    "touch": 26,
+                    "break": 4
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "11+",
+                "levelValue": 11.7,
+                "notes": {
+                    "tap": 424,
+                    "hold": 39,
+                    "slide": 44,
+                    "touch": 16,
+                    "break": 56
+                },
+                "notesDesigner": "サファ太"
+            },
+            {
+                "level": "13+",
+                "levelValue": 13.8,
+                "notes": {
+                    "tap": 583,
+                    "hold": 51,
+                    "slide": 75,
+                    "touch": 19,
+                    "break": 30
+                },
+                "notesDesigner": "じゃこレモン"
+            }
+        ]
+    },
+    {
+        "id": 11805,
+        "name": "リアライズ",
+        "type": "DX",
+        "rights": "© Crypton Future Media, INC. www.piapro.net (+piapro logo) ©2023 DWANGO Co.,Ltd.",
+        "artist": "柊マグネタイト",
+        "genre": "niconicoボーカロイド",
+        "bpm": "150",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "3",
+                "levelValue": 3.0,
+                "notes": {
+                    "tap": 135,
+                    "hold": 20,
+                    "slide": 4,
+                    "touch": 12,
+                    "break": 4
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "6",
+                "levelValue": 6.5,
+                "notes": {
+                    "tap": 297,
+                    "hold": 20,
+                    "slide": 9,
+                    "touch": 25,
+                    "break": 2
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "10",
+                "levelValue": 10.0,
+                "notes": {
+                    "tap": 374,
+                    "hold": 70,
+                    "slide": 44,
+                    "touch": 9,
+                    "break": 21
+                },
+                "notesDesigner": "Luxizhel"
+            },
+            {
+                "level": "13",
+                "levelValue": 13.2,
+                "notes": {
+                    "tap": 632,
+                    "hold": 53,
+                    "slide": 87,
+                    "touch": 37,
+                    "break": 27
+                },
+                "notesDesigner": "ロシェ@ペンギン"
             }
         ]
     },
@@ -73980,6 +75540,102 @@
         ]
     },
     {
+        "id": 110281,
+        "name": "[回]ダブルラリアット",
+        "type": "DX",
+        "rights": "© Crypton Future Media, INC. www.piapro.net (+piapro logo)",
+        "artist": "アゴアニキ",
+        "genre": "宴会場",
+        "bpm": "138",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "13?",
+                "levelValue": 13.0,
+                "notes": {
+                    "tap": 557,
+                    "hold": 20,
+                    "slide": 55,
+                    "touch": 0,
+                    "break": 21
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "13?",
+                "levelValue": 13.0,
+                "notes": {
+                    "tap": 557,
+                    "hold": 20,
+                    "slide": 55,
+                    "touch": 0,
+                    "break": 21
+                },
+                "notesDesigner": ""
+            }
+        ]
+    },
+    {
+        "id": 110417,
+        "name": "[習]ウミユリ海底譚",
+        "type": "DX",
+        "rights": "",
+        "artist": "n-buna",
+        "genre": "宴会場",
+        "bpm": "120",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "12+?",
+                "levelValue": 12.7,
+                "notes": {
+                    "tap": 549,
+                    "hold": 7,
+                    "slide": 109,
+                    "touch": 0,
+                    "break": 1
+                },
+                "notesDesigner": ""
+            }
+        ]
+    },
+    {
+        "id": 110532,
+        "name": "[奏]洗脳",
+        "type": "DX",
+        "rights": "",
+        "artist": "ゆりん・柿チョコ×Neru",
+        "genre": "宴会場",
+        "bpm": "125",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "12+?",
+                "levelValue": 12.7,
+                "notes": {
+                    "tap": 516,
+                    "hold": 47,
+                    "slide": 72,
+                    "touch": 0,
+                    "break": 9
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "12+?",
+                "levelValue": 12.7,
+                "notes": {
+                    "tap": 653,
+                    "hold": 63,
+                    "slide": 52,
+                    "touch": 0,
+                    "break": 9
+                },
+                "notesDesigner": ""
+            }
+        ]
+    },
+    {
         "id": 110553,
         "name": "[奏]チュルリラ・チュルリラ・ダッダッダ！",
         "type": "DX",
@@ -74148,6 +75804,30 @@
         ]
     },
     {
+        "id": 111069,
+        "name": "[協]太陽系デスコ",
+        "type": "DX",
+        "rights": "",
+        "artist": "ナユタン星人",
+        "genre": "宴会場",
+        "bpm": "150",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "11+?",
+                "levelValue": 11.7,
+                "notes": {
+                    "tap": 243,
+                    "hold": 15,
+                    "slide": 52,
+                    "touch": 20,
+                    "break": 56
+                },
+                "notesDesigner": ""
+            }
+        ]
+    },
+    {
         "id": 111222,
         "name": "[光]BREaK! BREaK! BREaK!",
         "type": "DX",
@@ -74274,6 +75954,42 @@
                     "slide": 51,
                     "touch": 70,
                     "break": 13
+                },
+                "notesDesigner": ""
+            }
+        ]
+    },
+    {
+        "id": 111365,
+        "name": "[奏]アンビバレンス",
+        "type": "DX",
+        "rights": "",
+        "artist": "すりぃ×相沢",
+        "genre": "宴会場",
+        "bpm": "187",
+        "version": "舞萌DX 2025",
+        "charts": [
+            {
+                "level": "13?",
+                "levelValue": 13.0,
+                "notes": {
+                    "tap": 558,
+                    "hold": 52,
+                    "slide": 206,
+                    "touch": 51,
+                    "break": 17
+                },
+                "notesDesigner": ""
+            },
+            {
+                "level": "13?",
+                "levelValue": 13.0,
+                "notes": {
+                    "tap": 566,
+                    "hold": 51,
+                    "slide": 198,
+                    "touch": 51,
+                    "break": 18
                 },
                 "notesDesigner": ""
             }
