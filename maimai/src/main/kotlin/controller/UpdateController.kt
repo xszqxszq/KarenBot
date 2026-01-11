@@ -5,6 +5,7 @@ import xyz.xszq.bot.database.DivingFishBindTable
 import xyz.xszq.bot.database.MaimaiBindTable
 import xyz.xszq.bot.event.GroupEvent
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.exception.NeedHelpException
 import xyz.xszq.bot.reply
 
 @Suppress("unused")
@@ -38,22 +39,7 @@ class UpdateController(
             MaimaiBindTable.update(sender.id, uid)
             reply("绑定成功。")
         }
-        startsWith("绑定") { token ->
-            if (!isAllowed())
-                return@startsWith
-            if (token.isBlank()) {
-                reply("使用方法：/绑定 水鱼查分器token")
-                return@startsWith
-            }
-            DivingFishBindTable.update(sender.id, token)
-            reply("水鱼token绑定成功。")
-        }
         startsWith("导") { _ ->
-            if (!isAllowed())
-                return@startsWith
-            update(this)
-        }
-        startsWith("更新") { _ ->
             if (!isAllowed())
                 return@startsWith
             update(this)
@@ -80,13 +66,29 @@ class UpdateController(
                 reply("查询失败，请检查uid是否正确")
             }
         }
+        // Commands without permissions
+        startsWith("绑定水鱼") { token ->
+            if (token.isBlank()) {
+                reply("使用方法：/绑定水鱼 水鱼查分器token")
+                return@startsWith
+            }
+            DivingFishBindTable.update(sender.id, token)
+            reply("水鱼token绑定成功。")
+        }
+        startsWith(listOf("upsert", "更新成绩")) { raw ->
+            val args = raw.split(" ").map { it.trim() }.filter { it.isNotBlank() }
+            runCatching {
+                if (args.size < 3)
+                    throw NeedHelpException()
+            }
+        }
     }
 
     suspend fun update(event: MessageEvent) = event.run {
         val userId = MaimaiBindTable[sender.id]
         val importToken = DivingFishBindTable[sender.id]
         if (userId == null || importToken == null) {
-            reply("请先绑定账号和水鱼导入token！\n绑定账号：@bot XXXXXXXXXX\n绑定水鱼：/绑定 水鱼查分器token")
+            reply("请先绑定账号和水鱼导入token！\n绑定账号：@bot XXXXXXXXXX\n绑定水鱼：/绑定水鱼 水鱼查分器token")
             return@run
         }
         reply("正在更新中……")
