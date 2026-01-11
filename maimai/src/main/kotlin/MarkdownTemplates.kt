@@ -949,7 +949,7 @@ object MarkdownTemplates {
                 music.id.toString()
             }
             "title" {
-                music.name
+                music.name.replace("[H.][Remix]", "［H.］［Remix］")
             }
             "artist" {
                 music.artist
