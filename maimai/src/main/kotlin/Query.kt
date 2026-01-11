@@ -176,7 +176,7 @@ object Query {
                 add(listOf(level + "级"), level(level))
         }
         add(listOf("寸"), close)
-        add(listOf("锁血", "锁", "名刀"), just)
+        add(listOf("锁血", "锁", "名刀", "血压"), just)
         add(listOf("极", "fc"), fc)
         add(listOf("理论", "ap+", "app"), app)
         add(listOf("神", "ap"), ap)
@@ -190,7 +190,7 @@ object Query {
         add(listOf("鸟", "sss"), rateGreaterEqual("sss"))
         add(listOf("霸", "clear"), rateGreaterEqual("a"))
         add(listOf("牛逼", "nb"), achievement(1008000))
-        add(listOf("丢人", "越级"), achievementLess(950000))
+        add(listOf("丢人", "越级", "越"), achievementLess(950000))
         (1..5).forEach { stars ->
             add(listOf(starsNames[stars-1], "${stars}星"), stars(stars))
         }
