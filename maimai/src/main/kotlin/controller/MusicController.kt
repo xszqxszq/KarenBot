@@ -199,7 +199,7 @@ class MusicController(
                         alias
                     }
                 val text = buildString {
-                    appendLine("${music.id}. ${music.name} 有如下别名：")
+                    appendLine("${music.id}.${music.name} 有如下别名：")
 
                     appendLine(aliases)
                     appendLine()
