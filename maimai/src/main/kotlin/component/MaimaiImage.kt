@@ -8,7 +8,9 @@ import korlibs.io.util.isDigit
 import korlibs.io.util.toStringDecimal
 import korlibs.math.toIntFloor
 import kotlinx.coroutines.flow.filter
+import xyz.xszq.bot.Filter
 import xyz.xszq.bot.Maimai
+import xyz.xszq.bot.Query
 import xyz.xszq.bot.api.MaimaiAPI
 import xyz.xszq.bot.music.*
 import xyz.xszq.bot.pagination
@@ -454,6 +456,7 @@ class MaimaiImage(
      * Template Level charts generation.
      */
     suspend fun templateLevel(
+        filters: List<Filter>?,
         charts: List<ChartInfo>,
         title: String,
         detailed: Boolean,
@@ -482,6 +485,12 @@ class MaimaiImage(
                 it.music.id == chart.music.id && it.chart.difficulty == chart.difficulty
             }
         }
+        val filtered = Query.filterRecords(filters, records ?: emptyList())
+        val completed = charts.associateWith { chart ->
+            filtered ?.firstOrNull {
+                it.music.id == chart.music.id && it.chart.difficulty == chart.difficulty
+            }
+        }
 
         val theme = themes["level"]!!
         val main = theme.main().modify {
@@ -490,11 +499,11 @@ class MaimaiImage(
                     text = title
                 }
                 image("all") {
-                    if (matched.values.any { it == null })
+                    if (completed.values.any { it == null })
                         return@image
                     src = when (requiresType) {
                         RequiresType.Achievement -> {
-                            val min = matched.values
+                            val min = completed.values
                                 .filterNotNull()
                                 .minBy { it.achievement }
                             when {
@@ -504,14 +513,14 @@ class MaimaiImage(
                             }
                         }
                         RequiresType.Combo -> {
-                            val min = matched.values
+                            val min = completed.values
                                 .filterNotNull()
                                 .filter { it.comboStatus.isFC() }
                                 .minByOrNull { it.comboStatus }
                             min?.comboStatus?.value
                         }
                         RequiresType.Sync -> {
-                            val min = matched.values
+                            val min = completed.values
                                 .filterNotNull()
                                 .filter { it.syncStatus.isFS() }
                                 .minByOrNull { it.syncStatus }

@@ -472,6 +472,7 @@ class ImageController(
         val (charts, detailed) = filterCharts(filters)
         val isFitLevelValues = Query.isFitLevelValues(filters)
         maimai.image.templateLevel(
+            filters,
             charts,
             fullCommand + "定数表",
             detailed,
@@ -499,6 +500,7 @@ class ImageController(
         val musics = charts.map { it.music }.toSet().toList()
         maimai.query.records(event, musics, args) { response, _ ->
             maimai.image.templateLevel(
+                filters,
                 charts,
                 fullCommand + "完成表",
                 detailed,
@@ -537,6 +539,7 @@ class ImageController(
             }
 
             maimai.image.templateLevel(
+                filters,
                 filtered,
                 fullCommand + "未完成表",
                 detailed,
