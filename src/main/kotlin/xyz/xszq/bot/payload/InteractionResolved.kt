@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class InteractionResolved(
     @SerialName("button_data")
-    val buttonData: String,
+    val buttonData: String ?= null,
     @SerialName("button_id")
-    val buttonId: String
+    val buttonId: String ?= null
 )

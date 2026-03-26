@@ -260,6 +260,10 @@ suspend fun Application.handleDispatch(
         /* 互动消息 */
         EventType.Interaction -> {
             val data = json.decodeFromString<InteractionCreate>(payload.d!!)
+            if (data.data.resolved.buttonData == null || data.data.resolved.buttonId == null) {
+                logger.warn { "未知的 Interaction：${data}" }
+                return
+            }
             when (data.chatType) {
                 ChatType.GROUP -> GroupInteractionEvent(
                     bot = pluginLoader.bot,
