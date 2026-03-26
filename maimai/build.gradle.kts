@@ -53,7 +53,7 @@ dependencies {
     implementation("xyz.xszq:shinobu:1.0.4")
     testImplementation(kotlin("test"))
     testImplementation("com.soywiz.korge:korge-core:$korlibsVersion")
-    testImplementation("xyz.xszq:shinobu:1.0.3")
+    testImplementation("xyz.xszq:shinobu:1.0.4")
 }
 
 tasks.test {

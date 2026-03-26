@@ -58,13 +58,6 @@ class LocalConnector {
         return url + suffix
     }
 
-    suspend fun qr(encoded: String) =
-        client.get(withSuffix("${config.server}/qr?encoded=SGWC$encoded")).body<MaimaiQRCodeResponse>()
-
-    suspend fun region(userId: Long) =
-        client.get(withSuffix("${config.server}/region?userId=$userId"))
-            .body<List<MaimaiRegionResponse>>()
-
     suspend fun info(userId: Long) =
         client.get(withSuffix("${config.server}/info?userId=$userId"))
             .body<MaimaiPlayerInfo>()
@@ -76,10 +69,6 @@ class LocalConnector {
     suspend fun musics(userId: Long) =
         client.get(withSuffix("${config.server}/musics?userId=$userId"))
             .body<List<MaimaiRecord>>()
-
-    suspend fun update(userId: Long, importToken: String) =
-        client.get(withSuffix("${config.server}/update?userId=$userId&importToken=$importToken"))
-            .body<DivingFishUpdateResponse?>()
 
     suspend fun ngMusics() =
         client.get(withSuffix("${config.server}/ng_musics"))

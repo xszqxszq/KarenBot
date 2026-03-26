@@ -147,7 +147,7 @@ class MaimaiImage(
     ): Container = this["music"].modify {
         background = "base_${record.chart.difficulty.name}.png"
         sub("cover") {
-            background = "covers/${record.music.resourceId}.png"
+            background = "covers/${record.music.resourceId}.bmp"
         }
         text("index-id") {
             text = "#${index + 1} ${record.music.id}"
@@ -404,7 +404,7 @@ class MaimaiImage(
         color = levelChartColor(chart.difficulty)
         sub("cover") {
             val id = chart.music.id.toString()
-            background = "covers/${chart.music.resourceId}.png"
+            background = "covers/${chart.music.resourceId}.bmp"
             sub("info") {
                 image("type") {
                     src = "type_${chart.music.type.value}.png"
