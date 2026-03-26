@@ -1,11 +1,7 @@
 package xyz.xszq.shinobu
 
-import dev.matrixlab.webp4j.WebPCodec
-import korlibs.image.awt.toAwtNativeImage
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.font.Font
-import korlibs.image.format.readNativeImage
-import korlibs.io.async.launch
 import korlibs.io.file.VfsFile
 import korlibs.io.file.extensionLC
 import kotlinx.coroutines.coroutineScope
@@ -40,7 +36,7 @@ data class Theme(
     suspend fun loadImages() = coroutineScope {
         bitmapCache.clear()
         bytesCache.clear()
-        baseDir.list().collect { file ->
+        baseDir.listRecursive().collect { file ->
             val path = file.relativePathTo(baseDir)!!
             if (file.extensionLC in listOf("png", "jpg", "webp"))
                 bitmapCache[path] = file.readAsImage()!!
