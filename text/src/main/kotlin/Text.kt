@@ -7,6 +7,7 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import korlibs.io.util.UUID
@@ -14,12 +15,16 @@ import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 import org.scilab.forge.jlatexmath.TeXConstants
 import org.scilab.forge.jlatexmath.TeXFormula
+import xyz.xszq.bot.config.LLMConfig
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.message.File
 import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.message.PlainText
 import xyz.xszq.bot.payload.BilibiliResponse
 import xyz.xszq.bot.payload.BilibiliVideoInfo
+import xyz.xszq.bot.payload.LLMMessage
+import xyz.xszq.bot.payload.LLMRequest
+import xyz.xszq.bot.payload.LLMResponse
 import xyz.xszq.bot.payload.RandomOtomads
 import xyz.xszq.bot.payload.markdown.*
 import java.awt.Color
@@ -38,6 +43,7 @@ class Text: Plugin() {
         put("？", "问我干嘛")
     }
     lateinit var stereotypes: StereotypesPresets
+    lateinit var llmConfig: LLMConfig
     val randomImage = RandomImage()
 
     val client = HttpClient {
@@ -55,6 +61,13 @@ class Text: Plugin() {
             .withExplicitSealedTypes()
             .build()
             .loadConfigOrThrow<StereotypesPresets>()
+
+
+        llmConfig = ConfigLoaderBuilder.default()
+            .addFileSource("./config/llm.yml")
+            .withExplicitSealedTypes()
+            .build()
+            .loadConfigOrThrow<LLMConfig>()
 
         setRoute()
         logger.info { "[文本] 插件加载完成。" }
@@ -96,7 +109,11 @@ class Text: Plugin() {
                 reply("使用方法：/发病 名字\n例：/发病 小冰")
                 return@startsWith
             }
-            reply(stereotypes.texts.random(Random(System.currentTimeMillis())).replace("{target_name}", target))
+            val result = stereotypes.texts.random(Random(System.currentTimeMillis())).replace("{target_name}", target)
+            if (audit(result))
+                reply(result)
+            else
+                reply("检测到疑似违规内容，请检查输入")
         }
         always {
             if (message.text.isBlank() && message.filter { it !is PlainText }.isEmpty()) {
@@ -236,6 +253,31 @@ class Text: Plugin() {
         return block().also {
             print("$comment: ")
             println(System.currentTimeMillis() - start)
+        }
+    }
+    suspend fun audit(text: String): Boolean {
+        val httpResponse = client.post(llmConfig.url) {
+            contentType(ContentType.Application.Json)
+            headers {
+                append(HttpHeaders.Authorization, "Bearer ${llmConfig.apikey}")
+            }
+            setBody(LLMRequest(
+                model = llmConfig.model,
+                messages = listOf(
+                    LLMMessage(role = "system", content = llmConfig.system),
+                    LLMMessage(role = "user", content = text)
+                ),
+                stream = false,
+                temperature = llmConfig.temperature
+            ))
+        }
+        return when (httpResponse.status) {
+            HttpStatusCode.OK -> {
+                val response = httpResponse.body<LLMResponse>()
+                response.choices.firstOrNull() ?.message ?.content ?.toBooleanStrictOrNull() ?: true
+            }
+            HttpStatusCode.BadRequest -> false
+            else -> true
         }
     }
 }
