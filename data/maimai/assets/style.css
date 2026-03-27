@@ -1,0 +1,33 @@
+div {
+    display: flex; 
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+}
+@font-face {
+    font-family: '阿里巴巴普惠体-B';
+    src: local('Alibaba-PuHuiTi-B'), local('阿里巴巴普惠体-B');
+}
+
+@font-face {
+    font-family: '阿里巴巴普惠体-H';
+    src: local('Alibaba-PuHuiTi-H'), local('阿里巴巴普惠体-H');
+}
+
+@font-face {
+    font-family: '阿里巴巴普惠体-M';
+    src: local('Alibaba-PuHuiTi-M'), local('阿里巴巴普惠体-M');
+}
+
+@font-face {
+    font-family: '阿里巴巴普惠体-R';
+    src: local('Alibaba-PuHuiTi-R'), local('阿里巴巴普惠体-R');
+}
+
+@font-face {
+    font-family: '方正兰亭黑_GBK';
+    src: local('FZLanTingHei-R-GBK'), local('FZLTHK--GBK1-0');
+}

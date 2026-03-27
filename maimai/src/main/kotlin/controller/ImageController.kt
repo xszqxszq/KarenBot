@@ -7,6 +7,8 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.jetbrains.skia.EncodedImageFormat
+import org.jetbrains.skia.Image
 import xyz.xszq.bot.*
 import xyz.xszq.bot.Maimai.Companion.textMode
 import xyz.xszq.bot.api.DivingFish
@@ -257,6 +259,24 @@ class ImageController(
             ))
         }
     }
+    suspend fun Image?.sendResultImage(
+        command: String,
+        event: MessageEvent,
+        text: String ?= null,
+        page: Int ?= null,
+        totalPages: Int ?= null
+    ) = event.run {
+        this@sendResultImage ?: return@run
+        if (textMode()) {
+            send(this, text)
+            return
+        }
+        upload(event) { url ->
+            reply(MarkdownTemplates.Templates.image(
+                url, Pair(width, height), command, text, page, totalPages
+            ))
+        }
+    }
 
     suspend fun handleRating50(
         event: MessageEvent,
@@ -269,7 +289,7 @@ class ImageController(
                 return@rating null
             }
             countTime {
-                maimai.image.templateRating(response, backend = backend)
+                maimai.image.templateRatingNew(response, backend = backend)
             }.let { (elapsed, result) ->
                 time = elapsed
                 result
@@ -284,7 +304,7 @@ class ImageController(
         val nowVersion = maimai.local.newestVersion
         maimai.query.recent(event, args) { response, backend ->
             countTime {
-                maimai.image.templateBest50(response, nowVersion, backend, true) { this }
+                maimai.image.templateBest50New(response, nowVersion, backend, true) { this }
             }.let { (elapsed, result) ->
                 time = elapsed
                 result
@@ -307,7 +327,7 @@ class ImageController(
                     response.newRatingList.take(15).sumOf { it.rating } +
                     Rating.courseOld(response.course)
             countTime {
-                maimai.image.templateRating(response, old = 25, new = 15, backend = backend)
+                maimai.image.templateRatingNew(response, old = 25, new = 15, backend = backend)
             }.let { (elapsed, result) ->
                 time = elapsed
                 result
@@ -331,7 +351,7 @@ class ImageController(
         var time = 0L
         maimai.query.records(event, musics, args) { response, backend ->
             countTime {
-                maimai.image.templateBest50(response, nowVersion, backend, isAllRequired, isFitLevelValues) {
+                maimai.image.templateBest50New(response, nowVersion, backend, isAllRequired, isFitLevelValues) {
                     Query.filterRecords(filters, this)
                 }
             }.let { (elapsed, result) ->
@@ -353,7 +373,7 @@ class ImageController(
         var time = 0L
         maimai.query.records(event, musics, args) { response, backend ->
             countTime {
-                maimai.image.templateBest40(response, nowVersion, backend, isAllRequired, isFitLevelValues) {
+                maimai.image.templateBest40New(response, nowVersion, backend, isAllRequired, isFitLevelValues) {
                     Query.filterRecords(filters, this)
                 }
             }.let { (elapsed, result) ->
@@ -424,7 +444,7 @@ class ImageController(
             rating.ratingList = List(old) { record }
             rating.newRatingList = List(15) { record }
             rating.rating = rating.ratingList.sumOf { it.rating } + rating.newRatingList.sumOf { it.rating }
-            maimai.image.templateRating(rating, old = old, backend = backend)
+            maimai.image.templateRatingNew(rating, old = old, backend = backend)
         }
     }.sendResultImage("歌50 ${difficulty?.brief?:""}${music.id}", event, randomTips())
     suspend fun handleScoreList(
@@ -441,13 +461,13 @@ class ImageController(
         val isFitLevelValues = Query.isFitLevelValues(filters)
         maimai.query.records(event, musics) { response, _ ->
             countTime {
-                val (image, nowPage, nowPages) = maimai.image.templateScoreList(
+                val (image, nowPage, nowPages) = maimai.image.templateScoreListNew(
                     response, fullCommand, page, all, isFitLevelValues
                 ) {
                     Query.filterRecords(filters, this) ?.also {
                         if (all && it.size > 1000) {
                             reply("您查询的记录过多，全分数列表最多支持1000条记录")
-                            return@templateScoreList null
+                            return@templateScoreListNew null
                         }
                     }
                 } ?: return@countTime null
@@ -471,7 +491,7 @@ class ImageController(
         val filters = Query.filters(fullCommand)
         val (charts, detailed) = filterCharts(filters)
         val isFitLevelValues = Query.isFitLevelValues(filters)
-        maimai.image.templateLevel(
+        maimai.image.templateLevelNew(
             filters,
             charts,
             fullCommand + "定数表",
@@ -499,7 +519,7 @@ class ImageController(
         val isFitLevelValues = Query.isFitLevelValues(filters)
         val musics = charts.map { it.music }.toSet().toList()
         maimai.query.records(event, musics, args) { response, _ ->
-            maimai.image.templateLevel(
+            maimai.image.templateLevelNew(
                 filters,
                 charts,
                 fullCommand + "完成表",
@@ -538,7 +558,7 @@ class ImageController(
                 return@records null
             }
 
-            maimai.image.templateLevel(
+            maimai.image.templateLevelNew(
                 filters,
                 filtered,
                 fullCommand + "未完成表",
@@ -554,7 +574,7 @@ class ImageController(
         music: MusicInfo
     ) = event.run {
         maimai.query.record(event, music) { response ->
-            maimai.image.templateInfoScore(
+            maimai.image.templateInfoScoreNew(
                 music,
                 response)
         }.sendResultImage("info id${music.id}", event, randomTips())
@@ -650,12 +670,38 @@ class ImageController(
             event.reply(xyz.xszq.bot.message.Image(file))
         }
     }
+    suspend fun Image.send(
+        event: MessageEvent,
+        message: String ?= null
+    ): Unit = useTempFile { file ->
+        val bytes = this.encodeToData(EncodedImageFormat.JPEG, 90)!!.bytes
+        file.writeBytes(bytes)
+        message ?.let {
+            event.reply(xyz.xszq.bot.message.Image(file) + it.toPlainText())
+        } ?: run {
+            event.reply(xyz.xszq.bot.message.Image(file))
+        }
+    }
     @OptIn(DelicateCoroutinesApi::class)
     suspend fun Bitmap.upload(
         event: MessageEvent,
         handle: suspend MessageEvent.(String) -> Unit
     ): Unit = useTempFile(suffix = ".jpg") { file ->
         val bytes = JPEG.encode(this, ImageEncodingProps(quality = 0.85))
+        file.writeBytes(bytes)
+        val uploaded = event.bot.cos.upload(file)
+        handle.invoke(event, uploaded.url)
+        GlobalScope.launch {
+            delay(10000L)
+            event.bot.cos.deleteFromCos(uploaded.filename)
+        }
+    }
+    @OptIn(DelicateCoroutinesApi::class)
+    suspend fun Image.upload(
+        event: MessageEvent,
+        handle: suspend MessageEvent.(String) -> Unit
+    ): Unit = useTempFile(suffix = ".jpg") { file ->
+        val bytes = this.encodeToData(EncodedImageFormat.JPEG, 90)!!.bytes
         file.writeBytes(bytes)
         val uploaded = event.bot.cos.upload(file)
         handle.invoke(event, uploaded.url)
