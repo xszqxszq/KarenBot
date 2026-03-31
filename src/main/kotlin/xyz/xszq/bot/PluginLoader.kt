@@ -1,14 +1,24 @@
 package xyz.xszq.bot
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.plugins.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.util.collections.*
+import korlibs.io.async.async
 import korlibs.io.file.VfsFile
-import kotlinx.coroutines.*
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import xyz.xszq.bot.message.FileManager
 import xyz.xszq.bot.subscribe.SubscribeManager
 import java.io.File
 import java.io.InputStream
-import java.net.URI
 import java.net.URL
 import java.net.URLClassLoader
 import java.util.jar.JarFile
@@ -31,12 +41,19 @@ class PluginLoader(
     private val logger = KotlinLogging.logger {}
     private val loadedPlugins = ConcurrentMap<String, Plugin>()
     private val pluginTimestamps = ConcurrentMap<String, Long>()
+    private val client = HttpClient(OkHttp) {
+        install(HttpTimeout) {
+            requestTimeoutMillis = 30000
+            connectTimeoutMillis = 30000
+            socketTimeoutMillis = 30000
+        }
+    }
 
     /**
      * Load a plugin if not exists, or reload it if changed.
      * @param pluginFile the `File` of plugin's jar.
      */
-    fun loadOrUpdatePlugin(pluginFile: File, force: Boolean = false) {
+    suspend fun loadOrUpdatePlugin(pluginFile: File, force: Boolean = false) {
         val pluginPath = pluginFile.absolutePath
         val lastModified = pluginFile.lastModified()
 
@@ -52,14 +69,14 @@ class PluginLoader(
      * Load a plugin if not exists, or reload it if changed.
      * @param pluginFile the `File` of plugin's jar.
      */
-    fun loadOrUpdatePlugin(pluginFile: VfsFile, force: Boolean = false) =
+    suspend fun loadOrUpdatePlugin(pluginFile: VfsFile, force: Boolean = false) =
         loadOrUpdatePlugin(File(pluginFile.absolutePath), force)
 
     /**
      * Unload a plugin.
      * @param pluginPath Plugin's path.
      */
-    private fun unloadPlugin(pluginPath: String) {
+    private suspend fun unloadPlugin(pluginPath: String) {
         val plugin = loadedPlugins[pluginPath]
         plugin?.unload()
         subscribes.unsubscribe(pluginPath)
@@ -73,7 +90,7 @@ class PluginLoader(
      * @param pluginPath Plugin's path.
      * @param lastModified Last modified time of the jar file.
      */
-    private fun loadPlugin(pluginPath: String, lastModified: Long) {
+    private suspend fun loadPlugin(pluginPath: String, lastModified: Long) {
         val pluginFile = File(pluginPath)
         if (!pluginFile.exists()) {
             logger.error { "[插件] 文件不存在: $pluginPath" }
@@ -92,8 +109,10 @@ class PluginLoader(
         // 加载依赖
         val dependencies = readDependencies(jarFile)
         val dependencyFiles = dependencies.map { (groupId, artifactId, version) ->
-            downloadDependency(groupId, artifactId, version)
-        }
+            async(Dispatchers.IO) {
+                downloadDependency(groupId, artifactId, version)
+            }
+        }.awaitAll()
 
         val urls = mutableListOf<URL>().apply {
             add(pluginFile.toURI().toURL())
@@ -103,7 +122,7 @@ class PluginLoader(
         }.toTypedArray()
         val classLoader = URLClassLoader(urls, this::class.java.classLoader)
 
-        try {
+        runCatching {
             val pluginClass = classLoader.loadClass(mainClassName)
             val plugin = pluginClass.getDeclaredConstructor().newInstance() as? Plugin
             if (plugin != null) {
@@ -113,7 +132,7 @@ class PluginLoader(
                 loadedPlugins[pluginPath] = plugin
                 pluginTimestamps[pluginPath] = lastModified
             }
-        } catch (e: Exception) {
+        }.onFailure { e ->
             e.printStackTrace()
         }
     }
@@ -122,16 +141,18 @@ class PluginLoader(
      * Reload All plugins.
      */
     @OptIn(DelicateCoroutinesApi::class)
-    fun reloadAllPlugins() {
+    suspend fun reloadAllPlugins() {
         val pluginDir = File(pluginDirectory)
         if (!pluginDir.exists() || !pluginDir.isDirectory) {
             logger.error { "[插件] 插件目录不存在: $pluginDirectory" }
             return
         }
 
-        runBlocking {
-            pluginDir.listFiles { file -> file.extension == "jar" }?.forEach { pluginFile ->
-                GlobalScope.launch(Dispatchers.IO) {
+        val files = pluginDir.listFiles { file -> file.extension == "jar" } ?: emptyArray()
+
+        coroutineScope {
+            files.map { pluginFile ->
+                launch {
                     loadOrUpdatePlugin(pluginFile)
                 }
             }
@@ -173,7 +194,7 @@ class PluginLoader(
     /**
      * Download dependency from maven mirror if not exists.
      */
-    private fun downloadDependency(groupId: String, artifactId: String, version: String): File {
+    private suspend fun downloadDependency(groupId: String, artifactId: String, version: String): File {
         val fileName = "$groupId-$artifactId-$version.jar".replace("/", "-")
         val libDir = File(libsDirectory).apply { mkdirs() }
         val file = File(libDir, fileName)
@@ -213,21 +234,11 @@ class PluginLoader(
         throw RuntimeException("所有仓库下载失败: $groupId:$artifactId:$version", lastException)
     }
 
-    private fun downloadFromUrl(url: String, targetFile: File) {
-        val connection = URI(url).toURL().openConnection().apply {
-            connectTimeout = 30000
-            readTimeout = 60000
-        }
-
-        try {
-            connection.getInputStream().use { input ->
-                targetFile.outputStream().use { output ->
-                    input.copyTo(output)
-                }
-            }
-        } catch (e: Exception) {
-            if (targetFile.exists()) targetFile.delete()
-            throw e
-        }
+    private suspend fun downloadFromUrl(url: String, targetFile: File) = runCatching {
+        val bytes = client.get(url).readRawBytes()
+        targetFile.writeBytes(bytes)
+    }.onFailure {
+        targetFile.delete()
+        throw Exception("Download failed")
     }
 }

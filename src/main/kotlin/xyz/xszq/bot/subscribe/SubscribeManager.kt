@@ -3,6 +3,8 @@ package xyz.xszq.bot.subscribe
 import kotlinx.coroutines.*
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -10,8 +12,8 @@ import kotlin.coroutines.CoroutineContext
  */
 class SubscribeManager: CoroutineScope {
     override val coroutineContext: CoroutineContext = Job()
-    private val plugins = mutableMapOf<String, MutableList<Subscribe<Event>>>()
-    private val temp = mutableMapOf<String, Subscribe<Event>>()
+    private val plugins = ConcurrentHashMap<String, CopyOnWriteArrayList<Subscribe<Event>>>()
+    private val temp = ConcurrentHashMap<String, Subscribe<Event>>()
 
     /**
      * Add a Subscribe from the plugin.
@@ -20,7 +22,7 @@ class SubscribeManager: CoroutineScope {
      */
     fun <E: Event> subscribe(plugin: String, subscribe: Subscribe<E>) {
         if (!plugins.containsKey(plugin)) {
-            plugins[plugin] = mutableListOf()
+            plugins[plugin] = CopyOnWriteArrayList()
         }
         @Suppress("UNCHECKED_CAST")
         plugins[plugin]?.add(subscribe as Subscribe<Event>)
@@ -54,20 +56,28 @@ class SubscribeManager: CoroutineScope {
     }
 
     /**
-     * Launch the handler of events under GlobalScope.
+     * Launch the handler of events.
      * @param event Event to handle.
      */
     @OptIn(DelicateCoroutinesApi::class)
-    suspend fun <E: Event> handle(event: E) = coroutineScope {
+    suspend fun <E: Event> handle(event: E) = supervisorScope {
         temp.values.forEach { subscribe ->
             launch(Dispatchers.IO) {
-                subscribe.handler(event)
+                runCatching {
+                    subscribe.handler(event)
+                }.onFailure { e ->
+                    e.printStackTrace()
+                }
             }
         }
         plugins.forEach { plugin, subscribes ->
             subscribes.forEach { subscribe ->
                 launch(Dispatchers.IO) {
-                    subscribe.handler(event)
+                    runCatching {
+                        subscribe.handler(event)
+                    }.onFailure { e ->
+                        e.printStackTrace()
+                    }
                 }
             }
         }

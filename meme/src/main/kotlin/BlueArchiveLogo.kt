@@ -1,6 +1,7 @@
 package xyz.xszq.bot
 
 import korlibs.image.bitmap.Bitmap
+import korlibs.image.bitmap.NativeImage
 import korlibs.image.bitmap.NativeImageOrBitmap32
 import korlibs.image.bitmap.context2d
 import korlibs.image.color.Colors
@@ -13,18 +14,16 @@ import korlibs.io.file.std.localCurrentDirVfs
 import korlibs.math.geom.Point
 import korlibs.math.geom.Size
 import korlibs.math.isAlmostEquals
-import kotlinx.coroutines.runBlocking
 
 class BlueArchiveLogo {
     val imgDir = localCurrentDirVfs[ASSETS_DIR]
-    val halo = runBlocking {
-        imgDir["halo.png"].readNativeImage()
-    }
-    val cross = runBlocking {
-        imgDir["cross.png"].readNativeImage()
-    }
-    val registry: FontRegistry = runBlocking {
-        SystemFontRegistry()
+    lateinit var halo: NativeImage
+    lateinit var cross: NativeImage
+    lateinit var registry: FontRegistry
+    suspend fun init() {
+        halo = imgDir["halo.png"].readNativeImage()
+        cross = imgDir["cross.png"].readNativeImage()
+        registry = SystemFontRegistry()
     }
     private fun getFont(text: String): String {
         val default = registry[DEFAULT_FONT]

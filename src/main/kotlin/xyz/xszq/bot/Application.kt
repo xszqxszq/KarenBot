@@ -35,7 +35,7 @@ val json = Json {
  */
 @OptIn(ExperimentalHoplite::class)
 @Suppress("OPT_IN_USAGE")
-fun main() {
+suspend fun main() {
     /* Initialize */
     val botConfig = ConfigLoaderBuilder.default()
         .addFileSource("./config/bot.yml")

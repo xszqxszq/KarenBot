@@ -55,7 +55,7 @@ class Text: Plugin() {
     }
 
     @OptIn(ExperimentalHoplite::class)
-    override fun load() {
+    override suspend fun load() {
         stereotypes = ConfigLoaderBuilder.default()
             .addFileSource("./data/random/stereotypes.yml")
             .withExplicitSealedTypes()
@@ -69,10 +69,12 @@ class Text: Plugin() {
             .build()
             .loadConfigOrThrow<LLMConfig>()
 
+        randomImage.init()
+
         setRoute()
         logger.info { "[文本] 插件加载完成。" }
     }
-    fun setRoute() = route {
+    suspend fun setRoute() = route {
         equalsTo(listOf("帮助", "help")) {
             reply(MarkdownData.create(templateBrief) {
                 "title" {

@@ -5,12 +5,14 @@ import xyz.xszq.bot.touhou.Touhou
 @Suppress("unused")
 class Guess: Plugin() {
     val touhou = Touhou(this)
-    override fun load() {
+    override suspend fun load() {
+        touhou.init()
+
         setRoute()
         logger.info { "[猜谜] 插件加载完成。" }
     }
 
-    fun setRoute() {
+    suspend fun setRoute() {
         touhou.setRoute()
     }
 }

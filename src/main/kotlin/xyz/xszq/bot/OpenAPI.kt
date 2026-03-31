@@ -9,7 +9,6 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import kotlinx.coroutines.runBlocking
 import xyz.xszq.bot.config.BotConfig
 import xyz.xszq.bot.payload.*
 import xyz.xszq.bot.payload.markdown.Keyboard
@@ -22,7 +21,7 @@ import xyz.xszq.bot.payload.markdown.MarkdownData
  */
 class OpenAPI(
     val config: BotConfig,
-    val filter: WordFilter
+    var filter: WordFilter
 ) {
     val logger = KotlinLogging.logger {}
 
@@ -53,11 +52,9 @@ class OpenAPI(
         return checkNotNull(accessToken)
     }
 
-    private fun HttpRequestBuilder.setToken() {
-        runBlocking {
-            headers["Authorization"] = "QQBot ${getToken()}"
-            headers["X-Union-Appid"] = config.appId
-        }
+    private suspend fun HttpRequestBuilder.setToken() {
+        headers["Authorization"] = "QQBot ${getToken()}"
+        headers["X-Union-Appid"] = config.appId
     }
 
     private suspend inline fun <reified T> HttpResponse.result(log: () -> Unit): T? {

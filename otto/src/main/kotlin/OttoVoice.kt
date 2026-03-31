@@ -3,10 +3,10 @@ package xyz.xszq.bot
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
+import korlibs.io.async.launch
 import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
 import xyz.xszq.bot.message.Audio
 import xyz.xszq.bot.voice.VoicePresets
 import xyz.xszq.bot.voice.TTSParser
@@ -16,7 +16,7 @@ class OttoVoice: Plugin() {
     lateinit var presets: VoicePresets
     lateinit var tts: TTSParser
     @OptIn(ExperimentalHoplite::class)
-    override fun load() {
+    override suspend fun load() {
         presets = ConfigLoaderBuilder.Companion.default()
             .addFileSource("./data/audio/otto/presets.yml")
             .withExplicitSealedTypes()
@@ -24,13 +24,14 @@ class OttoVoice: Plugin() {
             .loadConfigOrThrow<VoicePresets>()
 
         tts = TTSParser(presets, localCurrentDirVfs["data/audio/otto"])
+        tts.init()
 
         setRoute()
         logger.info { "[活字印刷] 插件加载完成。" }
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    fun setRoute() = route {
+    suspend fun setRoute() = route {
         startsWith("活字印刷") { text ->
             if (text.isBlank() || text.length >= 120) {
                 reply(buildString {
@@ -41,7 +42,7 @@ class OttoVoice: Plugin() {
                 return@startsWith
             }
 
-            GlobalScope.launch {
+            launch(Dispatchers.IO) {
                 tts.generate(text).use { pcm ->
                     reply(Audio(pcm))
                 }
@@ -49,7 +50,7 @@ class OttoVoice: Plugin() {
         }
     }
 
-    override fun unload() {
+    override suspend fun unload() {
         logger.info { "Module OttoVoice unloaded." }
     }
 }

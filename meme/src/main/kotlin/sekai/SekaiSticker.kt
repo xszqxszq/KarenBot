@@ -20,7 +20,6 @@ import korlibs.math.geom.vector.LineJoin
 import korlibs.math.squared
 import korlibs.math.toIntCeil
 import korlibs.memory.extract8
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import java.io.File
 import kotlin.math.atan
@@ -30,17 +29,18 @@ import kotlin.math.sqrt
 
 class SekaiSticker {
     val imgDir = localCurrentDirVfs[ASSETS_DIR]
-    val registry: FontRegistry = runBlocking {
-        SystemFontRegistry()
-    }
-    val fonts = runBlocking {
-        listOf("FOT-Yuruka Std UB", "SSFangTangTi", "Alibaba-PuHuiTi-H", "Alibaba-PuHuiTi-B").map {
-            registry[it]
-        }
-    }
+    lateinit var registry: FontRegistry
+    lateinit var fonts: List<Font>
     val characters = Json.decodeFromString<List<SekaiCharacter>>(
         File(imgDir["characters.json"].absolutePath).readText()
     )
+
+    suspend fun init() {
+        registry = SystemFontRegistry()
+        fonts = listOf("FOT-Yuruka Std UB", "SSFangTangTi", "Alibaba-PuHuiTi-H", "Alibaba-PuHuiTi-B").map {
+            registry[it]
+        }
+    }
 
     suspend fun draw(
         character: SekaiCharacter,

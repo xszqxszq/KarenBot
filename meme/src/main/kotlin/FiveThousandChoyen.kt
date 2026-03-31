@@ -11,12 +11,12 @@ import korlibs.math.geom.Point
 import korlibs.math.geom.vector.LineCap
 import korlibs.math.geom.vector.LineJoin
 import korlibs.math.toIntCeil
-import kotlinx.coroutines.runBlocking
 import kotlin.math.max
 
 class FiveThousandChoyen {
-    val registry: FontRegistry = runBlocking {
-        SystemFontRegistry()
+    lateinit var registry: FontRegistry
+    suspend fun init() {
+        registry = SystemFontRegistry()
     }
     fun draw(top: String, bottom: String ?= null): Bitmap {
         var rightBorder = 1500.0

@@ -14,14 +14,14 @@ abstract class Plugin {
     /**
      * This executes when Plugin is loaded.
      */
-    open fun load() {
+    open suspend fun load() {
         logger.info { "[插件] 已加载插件: $plugin" }
     }
 
     /**
      * This executes when Plugin is unloaded.
      */
-    open fun unload() {
+    open suspend fun unload() {
 
     }
 
@@ -31,7 +31,7 @@ abstract class Plugin {
      * @param force Force check prefix.
      * @param block Block of code to build Subscribes.
      */
-    fun route(prefix: String? = null, force: Boolean = false, block: SubscribeBuilder.() -> Unit) {
+    suspend fun route(prefix: String? = null, force: Boolean = false, block: suspend SubscribeBuilder.() -> Unit) {
         block(SubscribeBuilder(
             plugin = plugin, prefix = prefix, forcePrefix = force, manager = pluginLoader.subscribes))
     }

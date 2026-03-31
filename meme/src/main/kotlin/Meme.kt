@@ -7,7 +7,6 @@ import korlibs.image.format.PNG
 import korlibs.image.format.encode
 import korlibs.image.format.readNativeImage
 import korlibs.io.util.isDigit
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonPrimitive
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.ArgsNotEnoughException
@@ -31,17 +30,18 @@ class Meme: Plugin() {
     val emojiKitchen = EmojiKitchen()
 
     @OptIn(ExperimentalHoplite::class)
-    override fun load() {
+    override suspend fun load() {
+        ba.init()
+        fiveThousand.init()
+        sekai.init()
+
         config = ConfigLoaderBuilder.default()
             .addFileSource("./config/meme.yml")
             .withExplicitSealedTypes()
             .build()
             .loadConfigOrThrow<MemeConfig>()
         api = MemeAPI(config.server)
-
-        runBlocking {
-            api.init()
-        }
+        api.init()
 
         setRoute()
 
@@ -54,7 +54,7 @@ class Meme: Plugin() {
             .map { it.groupValues[1] }
             .toList()
     }
-    fun setRoute() = route {
+    suspend fun setRoute() = route {
         startsWith("生成") { raw ->
             runCatching {
                 meme(raw)

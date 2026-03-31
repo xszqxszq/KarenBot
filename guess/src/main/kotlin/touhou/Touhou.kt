@@ -5,7 +5,6 @@ import com.github.houbb.pinyin.constant.enums.PinyinStyleEnum
 import com.github.houbb.pinyin.util.PinyinHelper
 import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.xm.Similarity
 import xyz.xszq.bot.AudioHandler.crop
@@ -29,12 +28,14 @@ class Touhou(
     val templateBrief = "102112100_1761189409"
 
     val baseDir = localCurrentDirVfs["data/audio/touhou"]
-    val musics: TouhouMusics = runBlocking {
-        Json.decodeFromString(baseDir["musics.json"].readString())
-    }
+    lateinit var musics: TouhouMusics
     private val started = ConcurrentHashMap<String, Boolean>()
 
-    fun setRoute() = guess.route {
+    suspend fun init() {
+        musics = Json.decodeFromString(baseDir["musics.json"].readString())
+    }
+
+    suspend fun setRoute() = guess.route {
         startsWith("随机东方原曲") {
             val (game, target) = musics.categories.flatMap { category ->
                 category.games.flatMap { game ->

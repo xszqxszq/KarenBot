@@ -4,9 +4,6 @@ import korlibs.image.format.readNativeImage
 import korlibs.image.format.showImageAndWait
 import korlibs.io.file.extensionLC
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import xyz.xszq.bot.event.GroupReplyAbleEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.event.ReplyAble
@@ -70,11 +67,11 @@ suspend fun ReplyAble.uploadMedia(media: Media): FileResponse? {
         bot.api.logger.error { "图片上传失败" }
         null
     }
-    GlobalScope.launch(Dispatchers.IO) {
-        bot.cos.deleteFromCos(remoteFile.filename)
-        if (media.file.extensionLC == "silk")
-            media.file.delete()
-    }
+
+    if (media.file.extensionLC == "silk")
+        media.file.delete()
+
+    bot.cos.deleteFromCos(remoteFile.filename)
     return response
 }
 

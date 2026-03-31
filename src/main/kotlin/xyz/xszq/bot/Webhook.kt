@@ -11,7 +11,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import xyz.xszq.bot.config.ForwardConfig
 import xyz.xszq.bot.event.*
@@ -298,7 +297,7 @@ suspend fun Application.handleDispatch(
         /* 无法处理的事件 */
         else -> null
     } ?.let { event ->
-        GlobalScope.launch(Dispatchers.IO) {
+        launch(Dispatchers.IO) {
             pluginLoader.subscribes.handle(event)
         }
     }

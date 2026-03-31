@@ -4,7 +4,6 @@ import com.hankcs.hanlp.HanLP
 import korlibs.io.file.VfsFile
 import korlibs.io.file.baseNameWithoutCompoundExtension
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
 import marytts.LocalMaryInterface
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.LogManager
@@ -19,22 +18,21 @@ class TTSParser(
 ) {
     private val tokensDir = voiceDir["tokens"]
     private val presetsDir = voiceDir["ysddTokens"]
-    var tokens: Map<String, VfsFile>
-    var presets: Map<String, VfsFile>
-    val originalPresets: Map<String, VfsFile>
-    val pinyinPresets: Map<String, VfsFile>
-    private val mary: LocalMaryInterface
-    private val english: EnglishHandler
-    private val kana: KanaHandler
+    lateinit var tokens: Map<String, VfsFile>
+    lateinit var presets: Map<String, VfsFile>
+    lateinit var originalPresets: Map<String, VfsFile>
+    lateinit var pinyinPresets: Map<String, VfsFile>
+    private lateinit var charPresets: Map<Char, VfsFile>
+    private lateinit var mary: LocalMaryInterface
+    private lateinit var english: EnglishHandler
+    private lateinit var kana: KanaHandler
 
-    init {
-        runBlocking {
-            tokens = tokensDir.list().toList().associateBy {
-                it.baseNameWithoutCompoundExtension
-            }
-            presets = presetsDir.list().toList().associateBy {
-                it.baseNameWithoutCompoundExtension
-            }
+    suspend fun init() {
+        tokens = tokensDir.list().toList().associateBy {
+            it.baseNameWithoutCompoundExtension
+        }
+        presets = presetsDir.list().toList().associateBy {
+            it.baseNameWithoutCompoundExtension
         }
         originalPresets = buildMap {
             config.presets.forEach { (filename, aliases) ->
@@ -53,6 +51,23 @@ class TTSParser(
                 }
             }
         }.toList().sortedBy { -it.first.length }.toMap()
+        charPresets = buildMap {
+            put('.', "dian")
+            put('0', "ling")
+            put('1', "yi")
+            put('2', "er")
+            put('3', "san")
+            put('4', "si")
+            put('5', "wu")
+            put('6', "liu")
+            put('7', "qi")
+            put('8', "ba")
+            put('9', "jiu")
+        }.mapNotNull { (char, name) ->
+            tokens[name] ?.let {
+                Pair(char, it)
+            }
+        }.toMap()
 
         // MaryTTS通过插件加载器的ClassLoader会有问题
         Configurator.setAllLevels(LogManager.getRootLogger().name, Level.ERROR)
@@ -73,6 +88,7 @@ class TTSParser(
         english = EnglishHandler(mary)
         kana = KanaHandler(tokens)
     }
+
     private fun tokenize(
         text: String
     ): List<Token> {
@@ -254,23 +270,6 @@ class TTSParser(
             .split(" ").joinToString(" ") { "[$it]" }
     }
     private fun String.unescape() = substring(1, length - 1)
-    private val charPresets = buildMap {
-        put('.', "dian")
-        put('0', "ling")
-        put('1', "yi")
-        put('2', "er")
-        put('3', "san")
-        put('4', "si")
-        put('5', "wu")
-        put('6', "liu")
-        put('7', "qi")
-        put('8', "ba")
-        put('9', "jiu")
-    }.mapNotNull { (char, name) ->
-        tokens[name] ?.let {
-            Pair(char, it)
-        }
-    }.toMap()
 
 
     /**
