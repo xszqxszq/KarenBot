@@ -3,8 +3,11 @@ package xyz.xszq.bot.controller
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.format.ImageEncodingProps
 import korlibs.image.format.JPEG
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.skia.EncodedImageFormat
@@ -23,14 +26,15 @@ import xyz.xszq.bot.music.MusicGenre
 import xyz.xszq.bot.music.MusicInfo
 import xyz.xszq.bot.music.Rating
 import xyz.xszq.bot.payload.LocalCourseInfo
-import xyz.xszq.shinobu.countTime
 import kotlin.random.Random
 
 @Suppress("unused")
 class ImageController(
     override val maimai: Maimai
 ): Controller(maimai) {
-    override fun setRoute() = maimai.route("/mai") {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    override suspend fun setRoute() = maimai.route("/mai") {
         commandEndsWith("50") { raw ->
             if (raw.toIntOrNull() != null)
                 return@commandEndsWith
@@ -691,7 +695,7 @@ class ImageController(
         file.writeBytes(bytes)
         val uploaded = event.bot.cos.upload(file)
         handle.invoke(event, uploaded.url)
-        GlobalScope.launch {
+        scope.launch {
             delay(10000L)
             event.bot.cos.deleteFromCos(uploaded.filename)
         }
@@ -705,7 +709,7 @@ class ImageController(
         file.writeBytes(bytes)
         val uploaded = event.bot.cos.upload(file)
         handle.invoke(event, uploaded.url)
-        GlobalScope.launch {
+        scope.launch {
             delay(10000L)
             event.bot.cos.deleteFromCos(uploaded.filename)
         }
@@ -734,6 +738,12 @@ class ImageController(
             put(452302, listOf("随机紫中级", "随机中级", "随机master中级", "紫中级", "中级"))
             put(452303, listOf("随机紫上级", "随机上级", "随机master上级", "紫上级", "上级"))
             put(452304, listOf("随机紫超上级", "随机紫超上", "随机超上级", "随机超上", "随机master超上级", "紫超上级", "紫超上", "超上"))
+        }
+
+        suspend fun <T> countTime(block: suspend () -> T): Pair<Long, T> {
+            val start = System.currentTimeMillis()
+            val result = block()
+            return Pair(System.currentTimeMillis() - start, result)
         }
     }
 }

@@ -11,10 +11,10 @@ class TemplateManager(val basePath: String) {
     private class RawData(val elements: Map<String, Element>, val localRM: ResourceManager)
     private val loadedTemplates = mutableMapOf<String, RawData>()
 
-    val globalResourceManager: ResourceManager
-    val fontCollection: FontCollection
+    lateinit var globalResourceManager: ResourceManager
+    lateinit var fontCollection: FontCollection
 
-    init {
+    suspend fun init() {
         val fontProvider = TypefaceFontProvider()
         fontCollection = FontCollection().apply {
             setDefaultFontManager(FontMgr.default)

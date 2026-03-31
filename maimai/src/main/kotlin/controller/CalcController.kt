@@ -15,7 +15,7 @@ import xyz.xszq.bot.reply
 class CalcController(
     override val maimai: Maimai
 ): Controller(maimai) {
-    override fun setRoute() = maimai.route("/mai") {
+    override suspend fun setRoute() = maimai.route("/mai") {
         startsWith("分数线") { raw ->
             runCatching {
                 calc(raw)

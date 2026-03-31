@@ -60,7 +60,9 @@ sealed class Element(
         }
         return current
     }
-    fun findById(targetId: String): Element? {
+    fun findById(
+        targetId: String
+    ): Element? {
         if (this.id == targetId)
             return this
         for (child in children) {

@@ -1,9 +1,13 @@
 package xyz.xszq.bot.component
 
 import korlibs.io.util.UUID
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.Maimai.Companion.textMode
@@ -78,20 +82,16 @@ class MaimaiQuery(
         event: MessageEvent
     ) = event.run {
         val token = UUID.randomUUID().toString()
-        maimai.api.bindTokens[token] = this
+        maimai.api.bindTokens[token] = WaitingEventData(this)
         val authUrl = "https://bot-api.otmdb.cn/jump/lxns-oa/$token"
 
         if (textMode()) {
             reply(buildString {
-                appendLine("使用该功能需要您授权BOT访问您的全部成绩信息。请您链接授权：")
+                appendLine("使用该功能时，需要您授权BOT访问您在落雪查分器的全部成绩信息。请您点击链接授权：")
                 appendLine(authUrl)
             }.trim().newLine())
         } else {
             reply(MarkdownTemplates.Templates.oauth(authUrl))
-        }
-        GlobalScope.launch {
-            delay(5 * 60000L)
-            maimai.api.bindTokens.remove(token)
         }
     }
 

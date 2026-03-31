@@ -5,5 +5,5 @@ import xyz.xszq.bot.Maimai
 sealed class Controller(
     open val maimai: Maimai
 ) {
-    abstract fun setRoute()
+    abstract suspend fun setRoute()
 }

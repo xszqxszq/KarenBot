@@ -984,7 +984,7 @@ object MarkdownTemplates {
                 "请求授权"
             }
             "content" {
-                "使用该功能需要您授权BOT访问您的全部成绩信息："
+                "使用该功能时，需要您授权BOT访问您在落雪查分器的全部成绩信息，请点击下方登录并授权："
             }
         }.toMessage(Keyboards.oauth(authUrl))
         fun queue(

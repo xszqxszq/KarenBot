@@ -11,7 +11,7 @@ import xyz.xszq.bot.music.MusicDifficulty
 class SettingsController(
     override val maimai: Maimai
 ): Controller(maimai) {
-    override fun setRoute() = maimai.route("/mai") {
+    override suspend fun setRoute() = maimai.route("/mai") {
         startsWith("bind") { args ->
             val qq = args.toLongOrNull() ?: run {
                 reply("使用方法：/bind qq号")

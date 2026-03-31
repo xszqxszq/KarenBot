@@ -36,7 +36,7 @@ class MusicController(
 
     private val jacketUrl = maimai.tokens.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")
 
-    override fun setRoute() = maimai.route("/mai") {
+    override suspend fun setRoute() = maimai.route("/mai") {
         // 根据 ID 精准查找
         startsWith("id") { raw ->
             val id = raw.toIntOrNull() ?: return@startsWith

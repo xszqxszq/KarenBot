@@ -7,8 +7,10 @@ import korlibs.image.bitmap.sliceWithSize
 import korlibs.image.format.PNG
 import korlibs.image.format.encode
 import korlibs.image.format.readNativeImage
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import xyz.xszq.bot.*
@@ -35,7 +37,9 @@ class GuessController(
 
     private val jacketUrl = maimai.tokens.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")
 
-    override fun setRoute() = maimai.route("/mai") {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    override suspend fun setRoute() = maimai.route("/mai") {
         startsWith("猜歌") {
             classical()
         }
@@ -182,7 +186,7 @@ class GuessController(
                     reply(MarkdownTemplates.Templates.guessCropped(
                         uploaded.url, hint)
                     )
-                    GlobalScope.launch {
+                    scope.launch {
                         delay(10000L)
                         bot.cos.deleteFromCos(uploaded.filename)
                     }

@@ -24,6 +24,7 @@ import xyz.xszq.bot.database.*
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.GroupEvent
 import xyz.xszq.bot.event.MessageEvent
+import kotlin.collections.listOf
 import kotlin.reflect.full.primaryConstructor
 
 @Suppress("unused")
@@ -31,29 +32,32 @@ class Maimai: Plugin() {
     /**
      * Tokens.
      */
-    @OptIn(ExperimentalHoplite::class)
-    val tokens = ConfigLoaderBuilder.Companion.default()
-        .addFileSource("./config/maimai-tokens.yml")
-        .withExplicitSealedTypes()
-        .build()
-        .loadConfigOrThrow<TokenConfig>()
+    lateinit var tokens: TokenConfig
+    lateinit var databaseConfig: DatabaseConfig
     /**
      * Prober Backends.
      */
-    val localConnector = LocalConnector()
-    val local = Local(localConnector)
-    val backends = listOf(
-        local,
-        DivingFish(tokens.tokens["diving-fish"].toString(), local),
-        LXNS(
-            tokens.tokens["lxns"].toString(),
-            tokens.tokens["lxns-oa-id"].toString(),
-            tokens.tokens["lxns-oa-secret"].toString(),
-            tokens.tokens["lxns-oa-callback"].toString(),
-            local
-        )
-    )
+    lateinit var localConnector: LocalConnector
+    lateinit var local: Local
+    lateinit var backends: List<MaimaiAPI>
+    /**
+     * Modules.
+     */
+    lateinit var image: MaimaiImage
+    lateinit var query: MaimaiQuery
+    lateinit var aliases: AliasesSearch
+    lateinit var api: ApiController
+    /**
+     * Database.
+     */
+    lateinit var database: Database
+
+    var pluginStopped: Boolean = false
+
+    val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     fun backend(name: String) = backends.first { it.name == name }
+
     suspend fun backendsWithPriority(
         event: MessageEvent,
         args: String
@@ -73,34 +77,48 @@ class Maimai: Plugin() {
             backends.add(backend("local"))
         return backends
     }
-    /**
-     * Modules.
-     */
-    val image = MaimaiImage(this)
-    val query = MaimaiQuery(this)
-    val aliases = AliasesSearch(this)
-    val api = ApiController(this)
-    /**
-     * Database.
-     */
-    lateinit var database: Database
-    /**
-     * Config.
-     */
-    @OptIn(ExperimentalHoplite::class)
-    val databaseConfig = ConfigLoaderBuilder.Companion.default()
-        .addFileSource("./config/database.yml")
-        .withExplicitSealedTypes()
-        .build()
-        .loadConfigOrThrow<DatabaseConfig>()
 
-    var pluginStopped: Boolean = false
+    @OptIn(ExperimentalHoplite::class)
+    suspend fun init() {
+        tokens = ConfigLoaderBuilder.Companion.default()
+            .addFileSource("./config/maimai-tokens.yml")
+            .withExplicitSealedTypes()
+            .build()
+            .loadConfigOrThrow<TokenConfig>()
+
+        databaseConfig = ConfigLoaderBuilder.Companion.default()
+            .addFileSource("./config/database.yml")
+            .withExplicitSealedTypes()
+            .build()
+            .loadConfigOrThrow<DatabaseConfig>()
+
+        localConnector = LocalConnector()
+        local = Local(localConnector)
+        backends = listOf(
+            local,
+            DivingFish(tokens.tokens["diving-fish"].toString(), local),
+            LXNS(
+                tokens.tokens["lxns"].toString(),
+                tokens.tokens["lxns-oa-id"].toString(),
+                tokens.tokens["lxns-oa-secret"].toString(),
+                tokens.tokens["lxns-oa-callback"].toString(),
+                local
+            )
+        )
+
+        image = MaimaiImage(this)
+        query = MaimaiQuery(this)
+        aliases = AliasesSearch(this)
+        api = ApiController(this)
+    }
 
     /**
      * Init Maimai Plugin.
      */
     @OptIn(ExperimentalHoplite::class, DelicateCoroutinesApi::class)
-    override fun load() {
+    override suspend fun load() {
+        init()
+
         localConnector.load()
 
         // Database Init
@@ -118,40 +136,43 @@ class Maimai: Plugin() {
             }
         }
 
+        image.init()
+
         // Backends & Modules init
-        runBlocking {
-            api.listen()
-            coroutineScope {
-                launch {
-                    backends.forEach { backend ->
-                        logger.info { "[舞萌] 正在加载数据源 ${backend.name}……" }
-                        backend.load()
-                        if (backend.name == "local") {
-                            launch {
-                                logger.info { "[舞萌] 正在加载图片中……" }
-                                image.loadImage()
-                            }
-                            GlobalScope.launch {
-                                logger.info { "[舞萌] 别名初始化中……" }
-                                aliases.init()
-                                logger.info { "[舞萌] 别名初始化完毕。" }
-                            }
-                            GlobalScope.launch {
-                                logger.info { "[舞萌] 载入拟合定数中……" }
-                                loadFitLevelValues()
-                                logger.info { "[舞萌] 拟合定数载入完毕。" }
-                            }
+
+        api.listen()
+        backends.forEach { backend ->
+            scope.launch {
+                logger.info { "[舞萌] 正在加载数据源 ${backend.name}……" }
+                backend.load()
+                logger.info { "[舞萌] 数据源 ${backend.name}加载完毕。" }
+                if (backend.name == "local") {
+                    launch(Dispatchers.IO) {
+                        logger.info { "[舞萌] 正在加载图片中……" }
+                        image.loadImage()
+                        logger.info { "[舞萌] 图片载入完毕。" }
+                    }
+                    launch(Dispatchers.IO) {
+                        logger.info { "[舞萌] 别名初始化中……" }
+                        aliases.init()
+                        logger.info { "[舞萌] 别名初始化完毕。" }
+                    }
+                    launch(Dispatchers.IO) {
+                        logger.info { "[舞萌] 载入拟合定数中……" }
+                        loadFitLevelValues()
+                        logger.info { "[舞萌] 拟合定数载入完毕。" }
+                    }
+                    launch(Dispatchers.IO) {
+                        // Load Controllers
+                        Controller::class.sealedSubclasses.forEach {
+                            val controller = it.primaryConstructor!!.call(this@Maimai)
+                            controller.setRoute()
                         }
                     }
                 }
             }
         }
 
-        // Load Controllers
-        Controller::class.sealedSubclasses.forEach {
-            val controller = it.primaryConstructor!!.call(this)
-            controller.setRoute()
-        }
         // Set route
         setRoute()
 
@@ -165,10 +186,10 @@ class Maimai: Plugin() {
     /**
      * Command Routes.
      */
-    fun setRoute() = route("/mai") {
+    suspend fun setRoute() = route("/mai") {
     }
 
-    override fun unload() {
+    override suspend fun unload() {
         aliases.close()
         api.close()
         pluginStopped = true

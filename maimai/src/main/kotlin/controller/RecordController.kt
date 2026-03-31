@@ -12,7 +12,7 @@ class RecordController(
     override val maimai: Maimai
 ): Controller(maimai) {
 
-    override fun setRoute() = maimai.route("/mai") {
+    override suspend fun setRoute() = maimai.route("/mai") {
         commandEndsWith("进度") { raw ->
             val args = raw.split(" ")
             val command = args.first()

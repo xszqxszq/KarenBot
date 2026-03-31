@@ -44,7 +44,8 @@ class MusicInfo(
         appendLine("BPM：${bpm}")
         appendLine("定数：${charts.joinToString("/") { it.levelValue.toString() }}")
         appendLine("拟合定数：${charts.joinToString("/") { 
-            it.fitLevelValue.toStringDecimal(1) 
+            val value = it.fitLevelValue.toStringDecimal(1)
+            if (value == "0.0") "-" else value
         }}")
         appendLine("谱师：${charts.joinToString("/") {
             it.notesDesigner.let { d ->

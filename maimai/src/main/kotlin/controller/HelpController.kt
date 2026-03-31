@@ -9,7 +9,7 @@ import xyz.xszq.bot.reply
 class HelpController(
     override val maimai: Maimai
 ): Controller(maimai) {
-    override fun setRoute() = maimai.route {
+    override suspend fun setRoute() = maimai.route {
         equalsTo("mai") {
             if (textMode()) {
                 reply("请查看文档：https://otmdb.cn/bot/maimai")

@@ -1,6 +1,5 @@
 package xyz.xszq.bot.controller
 
-import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toJavaLocalDateTime
@@ -22,10 +21,8 @@ import java.time.Duration
 class QueueController(
     override val maimai: Maimai
 ): Controller(maimai) {
-    override fun setRoute() = maimai.route {
-        runBlocking {
-            clear()
-        }
+    override suspend fun setRoute() = maimai.route {
+        clear()
         startsWith("排卡管理") { raw ->
             if (this !is GroupMessageEvent)
                 return@startsWith
