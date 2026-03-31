@@ -6,12 +6,17 @@ import nl.adaptivity.xmlutil.serialization.XML
 
 class ThemeManager(
     val themeBaseDir: VfsFile,
-    defaultFont: String = "Simsun"
+    val defaultFont: String = "Simsun"
 ) {
-    val xml = XML(Container.module) {
-        indentString = "\t"
+    lateinit var xml: XML
+    lateinit var renderer: Renderer
+    suspend fun init() {
+        xml = XML(Container.module) {
+            indentString = "\t"
+        }
+        renderer = Renderer(defaultFont)
+        renderer.init()
     }
-    val renderer = Renderer(defaultFont)
     suspend fun loadTheme(name: String): Theme {
         val baseDir = themeBaseDir[name]
         if (!baseDir.exists()) {

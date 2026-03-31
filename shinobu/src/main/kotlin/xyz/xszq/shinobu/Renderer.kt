@@ -22,7 +22,7 @@ import kotlin.math.min
 class Renderer(
     val defaultFont: String = "Simsun"
 ) {
-    var fontRegistry: FontRegistry
+    lateinit var fontRegistry: FontRegistry
     private fun prepare() {
         NativeImage(
             width = 100,
@@ -37,11 +37,9 @@ class Renderer(
             )
         }
     }
-    init {
-        runBlocking {
-            fontRegistry = SystemFontRegistry()
-            prepare()
-        }
+    suspend fun init() {
+        fontRegistry = SystemFontRegistry()
+        prepare()
     }
     private fun renderText(element: Text, fonts: Map<String, Font>, x: Double, y: Double): Bitmap {
         val text = element.text
