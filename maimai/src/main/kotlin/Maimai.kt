@@ -3,6 +3,8 @@ package xyz.xszq.bot
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
+import korlibs.io.file.VfsFile
+import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -24,6 +26,7 @@ import xyz.xszq.bot.database.*
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.GroupEvent
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.payload.DivingFishStats
 import kotlin.collections.listOf
 import kotlin.reflect.full.primaryConstructor
 
@@ -197,14 +200,27 @@ class Maimai: Plugin() {
     }
 
     suspend fun loadFitLevelValues() {
-        val stats = (backend("diving-fish") as DivingFish).getStats()
-        stats.charts.forEach { (id, chartStats) ->
+        val local = localCurrentDirVfs["./data/maimai/diving-fish-stats.json"]
+        val stats = runCatching {
+            (backend("diving-fish") as DivingFish).getStats()
+        }.onFailure {
+            logger.warn { "[舞萌] 拟合定数拉取失败" }
+            if (local.exists())
+                runCatching {
+                    json.decodeFromString<DivingFishStats>(local.readString())
+                }.getOrNull()
+        }.getOrNull()
+
+        stats ?.charts ?.forEach { (id, chartStats) ->
             chartStats.forEachIndexed { difficulty, stat ->
                 music(id.toInt())
                     ?.charts
                     ?.getOrNull(difficulty)
                     ?.fitLevelValue = stat.fitLevelValue ?: return@forEachIndexed
             }
+        }
+        stats ?.let {
+            local.writeString(json.encodeToString(stats))
         }
     }
 

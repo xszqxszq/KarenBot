@@ -8,5 +8,5 @@ data class LLMConfig(
     val url: String,
     val model: String,
     val system: String,
-    val temperature: Double
+    val temperature: Double,
 )

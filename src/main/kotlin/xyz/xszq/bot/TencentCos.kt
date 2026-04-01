@@ -4,12 +4,14 @@ import com.qcloud.cos.COSClient
 import com.qcloud.cos.ClientConfig
 import com.qcloud.cos.auth.BasicCOSCredentials
 import com.qcloud.cos.http.HttpProtocol
+import com.qcloud.cos.model.ObjectMetadata
 import com.qcloud.cos.model.PutObjectRequest
 import com.qcloud.cos.region.Region
 import com.qcloud.cos.transfer.TransferManager
 import korlibs.io.file.VfsFile
 import xyz.xszq.bot.config.CosConfig
 import xyz.xszq.bot.payload.UploadResult
+import java.io.ByteArrayInputStream
 import java.io.File
 import java.util.*
 import java.util.concurrent.Executors
@@ -57,10 +59,35 @@ class TencentCos(
             }
         }
     }
-    suspend fun uploadBinary(binary: ByteArray, suffix: String = ""): UploadResult {
-        return useTempFile(suffix=suffix) {
-            it.writeBytes(binary)
-            upload(it)
+    fun uploadBinary(binary: ByteArray, suffix: String = ""): UploadResult {
+        val extensionStr = if (suffix.isNotBlank()) ".$suffix" else ""
+        val filename = UUID.randomUUID().toString() + extensionStr
+
+        when (config.lightMode) {
+            true -> {
+                File(config.lightDir).resolve(filename).writeBytes(binary)
+                return UploadResult("${config.lightUrl}/${filename}", filename)
+            }
+            false -> {
+                val bucketName = config.appId
+                kotlin.runCatching {
+                    val inputStream = ByteArrayInputStream(binary)
+
+                    val metadata = ObjectMetadata().apply {
+                        contentLength = binary.size.toLong()
+                    }
+
+                    val upload = transferManager.upload(
+                        PutObjectRequest(bucketName, filename, inputStream, metadata)
+                    )
+                    upload.waitForUploadResult()
+                }.onFailure {
+                    it.printStackTrace()
+                }
+
+                val expiration = Date(Date().time + 2 * 60 * 1000)
+                return UploadResult(cosClient.generatePresignedUrl(bucketName, filename, expiration).toString(), filename)
+            }
         }
     }
     fun upload(file: VfsFile) = upload(File(file.absolutePath))

@@ -1,18 +1,18 @@
 package xyz.xszq.bot.controller
 
 import io.ktor.util.collections.*
-import korlibs.image.bitmap.Bitmap
-import korlibs.image.bitmap.extract
-import korlibs.image.bitmap.sliceWithSize
-import korlibs.image.format.PNG
-import korlibs.image.format.encode
-import korlibs.image.format.readNativeImage
+import korlibs.io.file.VfsFile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.jetbrains.skia.EncodedImageFormat
+import org.jetbrains.skia.IRect
+import org.jetbrains.skia.Rect
+import org.jetbrains.skia.Surface
 import xyz.xszq.bot.*
 import xyz.xszq.bot.Maimai.Companion.textMode
 import xyz.xszq.bot.database.MaimaiSettingsTable
@@ -175,23 +175,25 @@ class GuessController(
             return
         runCatching {
             val hint = "这首歌的封面部分如图，30秒后将揭晓答案哦~"
-            useTempFile(suffix = ".png") { file ->
-                file.writeBytes(music.cover().readNativeImage().randomSlice().encode(PNG))
-                if (textMode()) {
+            val cropped = music.cover().randomSlice() ?: return@runCatching
+            if (textMode()) {
+                useTempFile(suffix = ".jpg") { file ->
+                    file.writeBytes(cropped)
                     reply(
                         hint.newLine().toPlainText() + Image(file)
                     )
-                } else {
-                    val uploaded = bot.cos.upload(file)
-                    reply(MarkdownTemplates.Templates.guessCropped(
-                        uploaded.url, hint)
-                    )
-                    scope.launch {
-                        delay(10000L)
-                        bot.cos.deleteFromCos(uploaded.filename)
-                    }
+                }
+            } else {
+                val uploaded = bot.cos.uploadBinary(cropped)
+                reply(MarkdownTemplates.Templates.guessCropped(
+                    uploaded.url, hint)
+                )
+                scope.launch {
+                    delay(10000L)
+                    bot.cos.deleteFromCos(uploaded.filename)
                 }
             }
+
         }
         delay(30000L)
 
@@ -401,10 +403,23 @@ class GuessController(
         "的紫谱谱师为 ${song.charts[3].notesDesigner}",
         "${if (song.charts.size == 4) "没有" else "有"}白谱"
     )
-    fun Bitmap.randomSlice(size: Int = 66) =
-        sliceWithSize((0..width - size).random(
-            Random(System.currentTimeMillis())
-        ), (0..height - size).random(
-            Random(System.currentTimeMillis())
-        ), size, size).extract()
+    private suspend fun VfsFile.randomSlice(size: Int = 66): ByteArray? = withContext(Dispatchers.IO) {
+        val image = org.jetbrains.skia.Image.makeFromEncoded(readBytes())
+
+        val maxX = (image.width - size).coerceAtLeast(0)
+        val maxY = (image.height - size).coerceAtLeast(0)
+
+        val x = if (maxX > 0) (0..maxX).random(Random(System.currentTimeMillis())) else 0
+        val y = if (maxY > 0) (0..maxY).random(Random(System.currentTimeMillis())) else 0
+
+        val surface = Surface.makeRasterN32Premul(size, size)
+
+        val srcRect = Rect.makeXYWH(x.toFloat(), y.toFloat(), size.toFloat(), size.toFloat())
+        val dstRect = Rect.makeXYWH(0f, 0f, size.toFloat(), size.toFloat())
+
+        surface.canvas.drawImageRect(image, srcRect, dstRect)
+
+        val croppedImage = surface.makeImageSnapshot()
+        croppedImage.encodeToData(EncodedImageFormat.JPEG, 90) ?.bytes
+    }
 }

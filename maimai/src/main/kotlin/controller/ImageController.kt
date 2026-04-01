@@ -1,12 +1,8 @@
 package xyz.xszq.bot.controller
 
-import korlibs.image.bitmap.Bitmap
-import korlibs.image.format.ImageEncodingProps
-import korlibs.image.format.JPEG
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -40,7 +36,7 @@ class ImageController(
                 return@commandEndsWith
             val args = raw.split(" ")
             val command = args.first()
-            if ("id" in command || "查歌" in command)
+            if ("id" in command || "查歌" in command || "预览" in command)
                 return@commandEndsWith
             val arg = args.getOrNull(1) ?: ""
             when (command) {
@@ -62,6 +58,8 @@ class ImageController(
         commandEndsWith("40") { raw ->
             val args = raw.split(" ")
             val command = args.first()
+            if ("id" in command || "查歌" in command || "预览" in command)
+                return@commandEndsWith
             val arg = args.getOrNull(1) ?: ""
             when (command) {
                 "b" -> handleRating40(this, arg)
@@ -244,24 +242,6 @@ class ImageController(
             }
         }
         return null
-    }
-    suspend fun Bitmap?.sendResultImage(
-        command: String,
-        event: MessageEvent,
-        text: String ?= null,
-        page: Int ?= null,
-        totalPages: Int ?= null
-    ) = event.run {
-        this@sendResultImage ?: return@run
-        if (textMode()) {
-            send(this, text)
-            return
-        }
-        upload(event) { url ->
-            reply(MarkdownTemplates.Templates.image(
-                url, Pair(width, height), command, text, page, totalPages
-            ))
-        }
     }
     suspend fun Image?.sendResultImage(
         command: String,
@@ -662,18 +642,6 @@ class ImageController(
         return Pair(charts, detailed)
     }
 
-    suspend fun Bitmap.send(
-        event: MessageEvent,
-        message: String ?= null
-    ): Unit = useTempFile { file ->
-        val bytes = JPEG.encode(this, ImageEncodingProps(quality = 0.85))
-        file.writeBytes(bytes)
-        message ?.let {
-            event.reply(xyz.xszq.bot.message.Image(file) + it.toPlainText())
-        } ?: run {
-            event.reply(xyz.xszq.bot.message.Image(file))
-        }
-    }
     suspend fun Image.send(
         event: MessageEvent,
         message: String ?= null
@@ -687,27 +655,12 @@ class ImageController(
         }
     }
     @OptIn(DelicateCoroutinesApi::class)
-    suspend fun Bitmap.upload(
-        event: MessageEvent,
-        handle: suspend MessageEvent.(String) -> Unit
-    ): Unit = useTempFile(suffix = ".jpg") { file ->
-        val bytes = JPEG.encode(this, ImageEncodingProps(quality = 0.85))
-        file.writeBytes(bytes)
-        val uploaded = event.bot.cos.upload(file)
-        handle.invoke(event, uploaded.url)
-        scope.launch {
-            delay(10000L)
-            event.bot.cos.deleteFromCos(uploaded.filename)
-        }
-    }
-    @OptIn(DelicateCoroutinesApi::class)
     suspend fun Image.upload(
         event: MessageEvent,
         handle: suspend MessageEvent.(String) -> Unit
     ): Unit = useTempFile(suffix = ".jpg") { file ->
         val bytes = this.encodeToData(EncodedImageFormat.JPEG, 90)!!.bytes
-        file.writeBytes(bytes)
-        val uploaded = event.bot.cos.upload(file)
+        val uploaded = event.bot.cos.uploadBinary(bytes, suffix = ".jpg")
         handle.invoke(event, uploaded.url)
         scope.launch {
             delay(10000L)

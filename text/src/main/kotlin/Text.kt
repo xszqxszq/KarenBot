@@ -20,12 +20,7 @@ import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.message.File
 import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.message.PlainText
-import xyz.xszq.bot.payload.BilibiliResponse
-import xyz.xszq.bot.payload.BilibiliVideoInfo
-import xyz.xszq.bot.payload.LLMMessage
-import xyz.xszq.bot.payload.LLMRequest
-import xyz.xszq.bot.payload.LLMResponse
-import xyz.xszq.bot.payload.RandomOtomads
+import xyz.xszq.bot.payload.*
 import xyz.xszq.bot.payload.markdown.*
 import java.awt.Color
 import kotlin.random.Random
@@ -258,17 +253,19 @@ class Text: Plugin() {
         }
     }
     suspend fun audit(text: String): Boolean {
-        val httpResponse = client.post(llmConfig.url) {
+        val endpoint = "${llmConfig.url}/chat/completions"
+        val messages = listOf(
+            LLMMessage(role = "system", content = llmConfig.system),
+            LLMMessage(role = "user", content = text)
+        )
+        val httpResponse = client.post(endpoint) {
             contentType(ContentType.Application.Json)
             headers {
                 append(HttpHeaders.Authorization, "Bearer ${llmConfig.apikey}")
             }
             setBody(LLMRequest(
                 model = llmConfig.model,
-                messages = listOf(
-                    LLMMessage(role = "system", content = llmConfig.system),
-                    LLMMessage(role = "user", content = text)
-                ),
+                messages = messages,
                 stream = false,
                 temperature = llmConfig.temperature
             ))

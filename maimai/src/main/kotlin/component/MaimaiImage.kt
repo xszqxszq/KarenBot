@@ -1,6 +1,5 @@
 package xyz.xszq.bot.component
 
-import korlibs.image.bitmap.Bitmap
 import korlibs.io.util.isDigit
 import korlibs.io.util.toStringDecimal
 import korlibs.math.toIntFloor
