@@ -9,12 +9,7 @@ import io.ktor.client.statement.*
 import io.ktor.util.collections.*
 import korlibs.io.async.async
 import korlibs.io.file.VfsFile
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.*
 import xyz.xszq.bot.message.FileManager
 import xyz.xszq.bot.subscribe.SubscribeManager
 import java.io.File
