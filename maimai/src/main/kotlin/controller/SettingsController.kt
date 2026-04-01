@@ -1,11 +1,15 @@
 package xyz.xszq.bot.controller
 
-import xyz.xszq.bot.*
+import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.Maimai.Companion.textMode
+import xyz.xszq.bot.MarkdownTemplates
 import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.database.QQBindTable
 import xyz.xszq.bot.music.Item
 import xyz.xszq.bot.music.MusicDifficulty
+import xyz.xszq.bot.newLine
+import xyz.xszq.bot.query.Query
+import xyz.xszq.bot.reply
 
 @Suppress("unused")
 class SettingsController(

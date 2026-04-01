@@ -3,7 +3,6 @@ package xyz.xszq.bot
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
-import korlibs.io.file.VfsFile
 import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.Database
@@ -27,37 +26,29 @@ import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.GroupEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.payload.DivingFishStats
-import kotlin.collections.listOf
+import xyz.xszq.bot.query.Query
 import kotlin.reflect.full.primaryConstructor
 
 @Suppress("unused")
 class Maimai: Plugin() {
-    /**
-     * Tokens.
-     */
+    // 配置文件
     lateinit var tokens: TokenConfig
     lateinit var databaseConfig: DatabaseConfig
-    /**
-     * Prober Backends.
-     */
-    lateinit var localConnector: LocalConnector
+    // 后端
     lateinit var local: Local
     lateinit var backends: List<MaimaiAPI>
-    /**
-     * Modules.
-     */
+    // 组件
+    lateinit var localConnector: LocalConnector
     lateinit var image: MaimaiImage
     lateinit var query: MaimaiQuery
     lateinit var aliases: AliasesSearch
     lateinit var api: ApiController
-    /**
-     * Database.
-     */
+    // 数据库
     lateinit var database: Database
 
+    // 其他
     var pluginStopped: Boolean = false
-
-    val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     fun backend(name: String) = backends.first { it.name == name }
 
@@ -81,8 +72,12 @@ class Maimai: Plugin() {
         return backends
     }
 
-    @OptIn(ExperimentalHoplite::class)
-    suspend fun init() {
+    /**
+     * 初始化插件
+     */
+    @OptIn(ExperimentalHoplite::class, DelicateCoroutinesApi::class)
+    override suspend fun load() {
+        // 载入配置
         tokens = ConfigLoaderBuilder.Companion.default()
             .addFileSource("./config/maimai-tokens.yml")
             .withExplicitSealedTypes()
@@ -109,22 +104,17 @@ class Maimai: Plugin() {
             )
         )
 
+        // 各组件初始化
         image = MaimaiImage(this)
         query = MaimaiQuery(this)
         aliases = AliasesSearch(this)
         api = ApiController(this)
-    }
-
-    /**
-     * Init Maimai Plugin.
-     */
-    @OptIn(ExperimentalHoplite::class, DelicateCoroutinesApi::class)
-    override suspend fun load() {
-        init()
 
         localConnector.load()
+        image.init()
+        Query.init()
 
-        // Database Init
+        // 数据库初始化
         database = Database.connect(
             databaseConfig.url, databaseConfig.driver,
             databaseConfig.username, databaseConfig.password
@@ -139,10 +129,7 @@ class Maimai: Plugin() {
             }
         }
 
-        image.init()
-
-        // Backends & Modules init
-
+        // 各API初始化
         api.listen()
         backends.forEach { backend ->
             scope.launch {
@@ -166,7 +153,7 @@ class Maimai: Plugin() {
                         logger.info { "[舞萌] 拟合定数载入完毕。" }
                     }
                     launch(Dispatchers.IO) {
-                        // Load Controllers
+                        // Controller初始化
                         Controller::class.sealedSubclasses.forEach {
                             val controller = it.primaryConstructor!!.call(this@Maimai)
                             controller.setRoute()
@@ -176,7 +163,7 @@ class Maimai: Plugin() {
             }
         }
 
-        // Set route
+        // 配置路由
         setRoute()
 
         logger.info { "[舞萌] 插件加载完成。" }
@@ -187,7 +174,7 @@ class Maimai: Plugin() {
     fun charts() = musics().flatMap { it.charts }
 
     /**
-     * Command Routes.
+     * 配置路由
      */
     suspend fun setRoute() = route("/mai") {
     }

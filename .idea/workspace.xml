@@ -6,7 +6,20 @@
   <component name="ChangeListManager">
     <list default="true" id="4d11881f-e4f8-46b5-bdcf-83158dd5bb86" name="更改" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/otto/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/otto/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/Filter.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/Maimai.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/Maimai.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/Query.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/api/Local.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/api/Local.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/component/LocalConnector.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/component/LocalConnector.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/component/MaimaiImage.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/component/MaimaiImage.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/ApiController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/ApiController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/GuessController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/GuessController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/ImageController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/ImageController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/MusicController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/MusicController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/RecordController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/RecordController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/SettingsController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/SettingsController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/image/dom/Div.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/image/dom/Div.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/image/style/LayoutEngine.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/image/style/LayoutEngine.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,6 +34,12 @@
   <component name="ExternalProjectsManager">
     <system id="GRADLE">
       <state>
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$/maimai">
+          <activation />
+        </task>
         <projects_view>
           <tree_state>
             <expand>
@@ -28,12 +47,30 @@
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="KarenBot" type="f1a62948:ProjectNode" />
               </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="KarenBot" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="KarenBot" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="shadow" type="c8890929:TasksNode$1" />
+              </path>
             </expand>
             <select />
           </tree_state>
         </projects_view>
       </state>
     </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Kotlin Enum" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -43,19 +80,37 @@
   &quot;associatedIndex&quot;: 0
 }</component>
   <component name="ProjectId" id="3BkXjE0dgCA2SuG8fLMnPDB7bKF" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Gradle.Build KarenBot-9.0.executor": "Run",
+    "Gradle.KarenBot [allPlugins].executor": "Run",
+    "Ktor.ApplicationKt.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "9.0",
+    "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/Users/xszq/Workspace/KarenBot"
+    "last_opened_file_path": "/Users/xszq/Workspace/KarenBot",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="K2MoveDeclarationsDialog.RECENT_PACKAGE_KEY">
+      <recent name="xyz.xszq.bot.query" />
+    </key>
+  </component>
   <component name="RunManager" selected="Ktor.ApplicationKt">
     <configuration name="KarenBot [allPlugins]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
@@ -75,11 +130,8 @@
       </ExternalSystemSettings>
       <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
       <DebugAllEnabled>false</DebugAllEnabled>
       <RunAsTest>false</RunAsTest>
-      <GradleProfilingDisabled>false</GradleProfilingDisabled>
-      <GradleCoverageDisabled>false</GradleCoverageDisabled>
       <method v="2" />
     </configuration>
     <configuration name="KarenBot [clean]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
@@ -100,11 +152,8 @@
       </ExternalSystemSettings>
       <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
       <DebugAllEnabled>false</DebugAllEnabled>
       <RunAsTest>false</RunAsTest>
-      <GradleProfilingDisabled>false</GradleProfilingDisabled>
-      <GradleCoverageDisabled>false</GradleCoverageDisabled>
       <method v="2" />
     </configuration>
     <configuration default="true" type="JetRunConfigurationType">
@@ -123,7 +172,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.30387.90" />
+        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.26927.53" />
+        <option value="bundled-js-predefined-d6986cc7102b-09060db00ec0-JavaScript-IU-251.26927.53" />
       </set>
     </attachedChunks>
   </component>
@@ -134,7 +184,11 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1775034174797</updated>
+      <workItem from="1775037629868" duration="6274000" />
     </task>
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
 </project>

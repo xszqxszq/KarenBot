@@ -1,11 +1,6 @@
 package xyz.xszq.bot.controller
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.Image
 import xyz.xszq.bot.*
@@ -16,12 +11,10 @@ import xyz.xszq.bot.api.MaimaiAPI
 import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.NotFoundException
-import xyz.xszq.bot.music.ChartInfo
-import xyz.xszq.bot.music.MusicDifficulty
-import xyz.xszq.bot.music.MusicGenre
-import xyz.xszq.bot.music.MusicInfo
-import xyz.xszq.bot.music.Rating
+import xyz.xszq.bot.music.*
 import xyz.xszq.bot.payload.LocalCourseInfo
+import xyz.xszq.bot.query.Filter
+import xyz.xszq.bot.query.Query
 import kotlin.random.Random
 
 @Suppress("unused")

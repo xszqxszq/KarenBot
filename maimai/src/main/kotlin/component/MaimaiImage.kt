@@ -4,9 +4,7 @@ import korlibs.io.util.isDigit
 import korlibs.io.util.toStringDecimal
 import korlibs.math.toIntFloor
 import org.jetbrains.skia.Image
-import xyz.xszq.bot.Filter
 import xyz.xszq.bot.Maimai
-import xyz.xszq.bot.Query
 import xyz.xszq.bot.api.MaimaiAPI
 import xyz.xszq.bot.image.dom.Div
 import xyz.xszq.bot.image.dom.Element
@@ -22,6 +20,8 @@ import xyz.xszq.bot.image.template.TemplateManager
 import xyz.xszq.bot.music.*
 import xyz.xszq.bot.pagination
 import xyz.xszq.bot.payload.LocalCourseInfo
+import xyz.xszq.bot.query.Filter
+import xyz.xszq.bot.query.Query
 import kotlin.math.min
 
 /**

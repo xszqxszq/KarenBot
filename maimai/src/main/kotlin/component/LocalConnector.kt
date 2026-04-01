@@ -12,7 +12,9 @@ import io.ktor.client.request.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 import xyz.xszq.bot.config.LocalConfig
-import xyz.xszq.bot.payload.*
+import xyz.xszq.bot.payload.MaimaiPlayerInfo
+import xyz.xszq.bot.payload.MaimaiRatingInfo
+import xyz.xszq.bot.payload.MaimaiRecord
 
 class LocalConnector {
     lateinit var config: LocalConfig

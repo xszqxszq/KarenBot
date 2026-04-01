@@ -2,15 +2,8 @@ package xyz.xszq.bot.controller
 
 import io.ktor.util.collections.*
 import korlibs.io.file.VfsFile
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.jetbrains.skia.EncodedImageFormat
-import org.jetbrains.skia.IRect
 import org.jetbrains.skia.Rect
 import org.jetbrains.skia.Surface
 import xyz.xszq.bot.*

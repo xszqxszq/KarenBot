@@ -2,9 +2,9 @@ package xyz.xszq.bot.controller
 
 import korlibs.math.toIntCeil
 import xyz.xszq.bot.Maimai
-import xyz.xszq.bot.Query
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.music.MusicDifficulty
+import xyz.xszq.bot.query.Query
 import xyz.xszq.bot.reply
 
 @Suppress("unused")

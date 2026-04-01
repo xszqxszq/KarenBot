@@ -3,11 +3,7 @@ package xyz.xszq.bot.image.style
 import org.jetbrains.skia.FontSlant
 import org.jetbrains.skia.FontStyle
 import org.jetbrains.skia.FontWidth
-import org.jetbrains.skia.paragraph.Alignment
-import org.jetbrains.skia.paragraph.Paragraph
-import org.jetbrains.skia.paragraph.ParagraphBuilder
-import org.jetbrains.skia.paragraph.ParagraphStyle
-import org.jetbrains.skia.paragraph.TextStyle
+import org.jetbrains.skia.paragraph.*
 import xyz.xszq.bot.image.dom.Div
 import xyz.xszq.bot.image.dom.Element
 import xyz.xszq.bot.image.dom.Img

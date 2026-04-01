@@ -1,11 +1,6 @@
 package xyz.xszq.bot.image.dom
 
-import org.jetbrains.skia.BlendMode
-import org.jetbrains.skia.Canvas
-import org.jetbrains.skia.Image
-import org.jetbrains.skia.Paint
-import org.jetbrains.skia.Rect
-import org.jetbrains.skia.SamplingMode
+import org.jetbrains.skia.*
 import xyz.xszq.bot.image.style.BackgroundPosition
 import xyz.xszq.bot.image.style.BackgroundSize
 

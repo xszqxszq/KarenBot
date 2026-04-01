@@ -3,12 +3,6 @@ package xyz.xszq.bot.api
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.serialization.json.Json
-import xyz.xszq.bot.Query
-import xyz.xszq.bot.Query.designer
-import xyz.xszq.bot.Query.musicsPlate
-import xyz.xszq.bot.Query.rate
-import xyz.xszq.bot.Query.rateGreaterEqual
-import xyz.xszq.bot.Query.version
 import xyz.xszq.bot.add
 import xyz.xszq.bot.component.LocalConnector
 import xyz.xszq.bot.component.Tag
@@ -17,6 +11,12 @@ import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.music.*
 import xyz.xszq.bot.payload.*
+import xyz.xszq.bot.query.Query
+import xyz.xszq.bot.query.Query.designer
+import xyz.xszq.bot.query.Query.musicsPlate
+import xyz.xszq.bot.query.Query.rate
+import xyz.xszq.bot.query.Query.rateGreaterEqual
+import xyz.xszq.bot.query.Query.version
 import xyz.xszq.bot.toSimple
 import java.io.File
 
@@ -118,9 +118,10 @@ class Local(
         val customTags = json.decodeFromString<Map<String, Tag>>(
             File(dataDir.absolutePath + "/tag.json").readText(Charsets.UTF_8)
         )
-        customTags.forEach { (id, tag) ->
+        customTags.forEach { (_, tag) ->
             Query.conditions.add(Pair(tag.aliases, Query.tag(tag.musics, tag.name)))
         }
+        Query.compile()
     }
 
     override suspend fun getMusicList(): Map<Int, MusicInfo> {

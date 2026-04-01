@@ -20,6 +20,7 @@ import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.music.ChartInfo
 import xyz.xszq.bot.music.MusicDifficulty
 import xyz.xszq.bot.music.MusicInfo
+import xyz.xszq.bot.query.Query
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
