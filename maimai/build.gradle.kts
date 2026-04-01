@@ -52,12 +52,11 @@ dependencies {
     implementation("org.jetbrains.skiko:skiko-awt:${skikoVersion}")
     implementation("org.jetbrains.skiko:skiko-awt-runtime-windows-x64:${skikoVersion}")
     implementation("org.jetbrains.skiko:skiko-awt-runtime-linux-x64:${skikoVersion}")
+    implementation("org.jetbrains.skiko:skiko-awt-runtime-macos-arm64:${skikoVersion}")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.3.1")
     implementation("software.amazon.awssdk:s3:2.26.29")
-//    implementation("xyz.xszq:shinobu:1.0.4")
     testImplementation(kotlin("test"))
     testImplementation("com.soywiz.korge:korge-core:$korlibsVersion")
-//    testImplementation("xyz.xszq:shinobu:1.0.4")
 }
 
 tasks.test {
