@@ -17,10 +17,8 @@ class ApiController(
     lateinit var server: EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration>
     val bindTokens = ConcurrentHashMap<String, WaitingEventData>()
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
     init {
-        scope.launch {
+        maimai.scope.launch {
             while (isActive) {
                 delay(60_000L)
                 val now = System.currentTimeMillis()

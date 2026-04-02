@@ -8,6 +8,7 @@ import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.exists
+import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import xyz.xszq.bot.api.DivingFish
 import xyz.xszq.bot.api.LXNS
@@ -43,12 +44,13 @@ class Maimai: Plugin() {
     lateinit var query: MaimaiQuery
     lateinit var aliases: AliasesSearch
     lateinit var api: ApiController
+    private val controllers = mutableListOf<Controller>()
     // 数据库
     lateinit var database: Database
 
     // 其他
     var pluginStopped: Boolean = false
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     fun backend(name: String) = backends.first { it.name == name }
 
@@ -122,7 +124,7 @@ class Maimai: Plugin() {
         transaction {
             listOf(
                 MaimaiBindTable, DivingFishBindTable, QQBindTable, MusicAliasesTable, MusicAliasesVoteTable,
-                MaimaiSettingsTable, ArcadeTable, ArcadeGroupTable, ArcadeGroupBindTable
+                MaimaiSettingsTable, ArcadeTable, ArcadeGroupTable, ArcadeGroupBindTable, GuessGameTable
             ).forEach { table ->
                 if (!table.exists())
                     SchemaUtils.create(table)
@@ -157,6 +159,7 @@ class Maimai: Plugin() {
                         Controller::class.sealedSubclasses.forEach {
                             val controller = it.primaryConstructor!!.call(this@Maimai)
                             controller.setRoute()
+                            controllers.add(controller)
                         }
                     }
                 }
@@ -183,6 +186,11 @@ class Maimai: Plugin() {
         aliases.close()
         api.close()
         pluginStopped = true
+        scope.cancel()
+        controllers.forEach { controller ->
+            controller.unload()
+        }
+        TransactionManager.closeAndUnregister(database)
         logger.info { "[舞萌] 插件已卸载。" }
     }
 

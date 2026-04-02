@@ -92,7 +92,9 @@ class PluginLoader(
             return
         }
 
-        val jarFile = JarFile(pluginFile)
+        val jarFile = withContext(Dispatchers.IO) {
+            JarFile(pluginFile)
+        }
         val manifest = jarFile.manifest
         val mainClassName = manifest.mainAttributes.getValue("Plugin-Class")
 
