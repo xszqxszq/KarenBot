@@ -21,8 +21,6 @@ import kotlin.random.Random
 class ImageController(
     override val maimai: Maimai
 ): Controller(maimai) {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
     override suspend fun setRoute() = maimai.route("/mai") {
         commandEndsWith("50") { raw ->
             if (raw.toIntOrNull() != null)
@@ -655,7 +653,7 @@ class ImageController(
         val bytes = this.encodeToData(EncodedImageFormat.JPEG, 90)!!.bytes
         val uploaded = event.bot.cos.uploadBinary(bytes, suffix = ".jpg")
         handle.invoke(event, uploaded.url)
-        scope.launch {
+        maimai.scope.launch {
             delay(10000L)
             event.bot.cos.deleteFromCos(uploaded.filename)
         }

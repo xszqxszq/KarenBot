@@ -1,22 +1,30 @@
 package xyz.xszq.bot.controller
 
-import io.ktor.util.collections.*
 import korlibs.io.file.VfsFile
 import kotlinx.coroutines.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.sql.upsert
 import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.Rect
 import org.jetbrains.skia.Surface
 import xyz.xszq.bot.*
 import xyz.xszq.bot.Maimai.Companion.textMode
+import xyz.xszq.bot.database.GuessGameStatus
+import xyz.xszq.bot.database.GuessGameTable
 import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.message.Image
+import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.music.MusicGenre
 import xyz.xszq.bot.music.MusicInfo
 import xyz.xszq.bot.music.MusicType
 import xyz.xszq.bot.payload.markdown.*
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 
 @Suppress("unused")
@@ -26,13 +34,14 @@ class GuessController(
     private val hints = 6
     private val maxOpening = 8
     private val cooldown = 10000L
-    private val started = ConcurrentSet<String>()
+    private val subscribeId = ConcurrentHashMap<String, String>()
+    private val eventToReply = ConcurrentHashMap<String, MessageEvent>()
 
     private val jacketUrl = maimai.tokens.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
     override suspend fun setRoute() = maimai.route("/mai") {
+        maimai.pluginLoader.bot.restoreGuessGame()
+
         startsWith("猜歌") {
             classical()
         }
@@ -41,8 +50,8 @@ class GuessController(
         }
         startsWith("不玩了") {
             val id = if (this is GroupMessageEvent) group.id else sender.id
-            if (started.contains(id))
-                started.remove(id)
+            if (subscribeId.containsKey(id))
+                subscribeId.remove(id)
         }
         startsWith(listOf("禁用猜歌", "禁止猜歌", "关闭猜歌")) {
             if (this is GroupMessageEvent)
@@ -63,36 +72,138 @@ class GuessController(
                 reply("启用猜歌成功，启用请@可怜BOT发送“禁用猜歌”。")
         }
     }
+    override suspend fun unload() {
+        subscribeId.forEach { (_, id) ->
+            maimai.pluginLoader.subscribes.stop(id)
+        }
+    }
     private suspend fun MessageEvent.playable(): Boolean {
-        val id = if (this is GroupMessageEvent) group.id else sender.id
-        MaimaiSettingsTable[id, "guess"] ?.let {
+        MaimaiSettingsTable[contextId, "guess"] ?.let {
             if (!it.toBoolean()) {
                 reply("当前群猜歌已被禁用，若要启用请管理员@可怜BOT发送“启用猜歌”。")
                 return false
             }
         }
-        if (started.contains(id)) {
+        if (subscribeId.containsKey(contextId)) {
             reply("当前还有猜歌游戏正在进行中，回复机器人“不玩了”结束游戏")
             return false
         }
-        started.add(id)
         return true
+    }
+    private suspend fun MessageEvent.save(
+        status: GuessGameStatus,
+    ): Unit = newSuspendedTransaction(Dispatchers.IO) {
+        GuessGameTable.upsert(GuessGameTable.id) {
+            it[GuessGameTable.id] = this@save.contextId
+            it[GuessGameTable.eventType] = when (this@save) {
+                is GroupMessageEvent -> "group"
+                else -> "c2c"
+            }
+            it[GuessGameTable.eventId] = this@save.eventId
+            it[GuessGameTable.messageId] = this@save.id
+            it[GuessGameTable.senderId] = this@save.sender.id
+            it[GuessGameTable.seq] = this@save.seq
+            it[GuessGameTable.type] = when(status) {
+                is GuessGameStatus.Classical -> "classical"
+                is GuessGameStatus.Opening -> "opening"
+            }
+            it[GuessGameTable.status] = status
+        }
+    }
+    private suspend fun MessageEvent.endGame(
+        subscribesAt: String
+    ) = newSuspendedTransaction(Dispatchers.IO) {
+        bot.pluginLoader.subscribes.stop(subscribesAt)
+        subscribeId.remove(contextId)
+        GuessGameTable.deleteWhere {
+            GuessGameTable.id eq contextId
+        }
+    }
+    suspend fun Bot.restoreGuessGame() = newSuspendedTransaction(Dispatchers.IO) {
+        GuessGameTable.selectAll().forEach { result ->
+            val event = when (result[GuessGameTable.eventType]) {
+                "group" -> GroupMessageEvent(
+                    bot = this@restoreGuessGame,
+                    eventId = result[GuessGameTable.eventId],
+                    id = result[GuessGameTable.messageId],
+                    message = MessageChain(),
+                    sender = User(this@restoreGuessGame, result[GuessGameTable.senderId]),
+                    group = Group(this@restoreGuessGame, result[GuessGameTable.id].value),
+                    seq = result[GuessGameTable.seq]
+                )
+                else -> MessageEvent(
+                    bot = this@restoreGuessGame,
+                    eventId = result[GuessGameTable.eventId],
+                    id = result[GuessGameTable.messageId],
+                    message = MessageChain(),
+                    sender = User(this@restoreGuessGame, result[GuessGameTable.senderId]),
+                    seq = result[GuessGameTable.seq]
+                )
+            }
+            when (result[GuessGameTable.type]) {
+                "classical" -> event.run {
+                    val status = result[GuessGameTable.status] as GuessGameStatus.Classical
+                    val music = maimai.music(status.musicId) ?: return@forEach
+                    val descriptions = status.hints
+
+                    val subscribesAt = UUID.randomUUID().toString()
+                    subscribeId[contextId] = subscribesAt
+                    eventToReply[contextId] = event
+
+                    val hintJob = maimai.scope.launch {
+                        hintClassical(contextId, subscribesAt, music, descriptions)
+                    }
+
+                    bot.pluginLoader.subscribes.always(subscribesAt) {
+                        listenClassical(contextId, subscribesAt, music, hintJob)
+                    }
+                }
+                "opening" -> event.run {
+                    val status = result[GuessGameTable.status] as GuessGameStatus.Opening
+                    val musics = status.musics.mapNotNull {
+                        maimai.music(it.first) ?.let { music ->
+                            Pair(music, it.second)
+                        }
+                    }.toMutableList()
+                    val chars = status.opened.toMutableList()
+
+                    val subscribesAt = UUID.randomUUID().toString()
+                    subscribeId[contextId] = subscribesAt
+                    eventToReply[contextId] = this
+
+                    bot.pluginLoader.subscribes.always(subscribesAt) {
+                        listenOpening(contextId, subscribesAt, musics, chars)
+                    }
+
+                }
+                else -> GuessGameTable.deleteWhere {
+                    GuessGameTable.id eq event.contextId
+                }
+            }
+        }
     }
     @OptIn(DelicateCoroutinesApi::class)
     private suspend fun MessageEvent.classical() {
         if (!playable())
             return
-        val id = if (this is GroupMessageEvent) group.id else sender.id
 
         val music = maimai.musics()
             .filter { it.genre != MusicGenre.Utage }
             .shuffled()
             .first()
-
         val options = hints + 1
         val descriptions = getDescriptions(music).shuffled().take(hints).mapIndexed { i, desc ->
             "提示${i + 1}/$options：这首歌$desc"
         }.toMutableList()
+
+        val subscribesAt = UUID.randomUUID().toString()
+        subscribeId[contextId] = subscribesAt
+        eventToReply[contextId] = this
+
+        save(GuessGameStatus.Classical(
+            music.id,
+            descriptions,
+        ))
 
         reply(buildString {
             appendLine()
@@ -103,85 +214,54 @@ class GuessController(
             appendLine()
             append( "管理员可以通过@可怜BOT发送“禁用猜歌”来关闭猜歌" )
         })
-        println(music.name)
+        maimai.logger.info { "当前正在猜测: ${music.id}. ${music.name}" }
 
-        var finished = false
-
-        val subscribeId = UUID.randomUUID().toString()
-        var eventToReply = this
-        bot.pluginLoader.subscribes.always(subscribeId) {
-            val nowId = if (this is GroupMessageEvent) group.id else sender.id
-            if (id != nowId) {
-                return@always
-            }
-            eventToReply = this
-            val input = text.trim()
-            if (input.startsWith("不玩了")) {
-                finished = true
-                bot.pluginLoader.subscribes.stop(subscribeId)
-
-                val hint = "游戏已结束。答案如下：".toPlainText() + music.infoText()
-                if (textMode()) {
-                    reply(hint)
-                } else {
-                    val url = "$jacketUrl/${music.resourceId}.jpg"
-                    reply(MarkdownTemplates.Templates.guessFinished(url, hint.text))
-                }
-                return@always
-            }
-            maimai.aliases.search(input).take(10).forEach { answer ->
-                if (answer.name == music.name) {
-                    finished = true
-                    bot.pluginLoader.subscribes.stop(subscribeId)
-                    started.remove(id)
-
-                    val hint = "恭喜你猜中了哦~".toPlainText() + music.infoText()
-                    if (textMode()) {
-                        reply(hint)
-                    } else {
-                        val url = "$jacketUrl/${music.resourceId}.jpg"
-                        reply(MarkdownTemplates.Templates.guessFinished(url, hint.text))
-                    }
-                    return@always
-                }
-            }
+        val hintJob = maimai.scope.launch {
+            hintClassical(contextId, subscribesAt, music, descriptions)
         }
 
-        delay(cooldown)
-        descriptions.forEachIndexed { index, desc ->
+        bot.pluginLoader.subscribes.always(subscribesAt) {
+            listenClassical(contextId, subscribesAt, music, hintJob)
+        }
+    }
+    private suspend fun MessageEvent.hintClassical(
+        contextId: String,
+        subscribesAt: String,
+        music: MusicInfo,
+        descriptions: List<String>?
+    ) {
+        descriptions ?.forEachIndexed { index, desc ->
             val hint = buildString {
                 appendLine()
                 appendLine(desc)
-                if (index == options - 1)
-                    appendLine("30秒后将揭晓答案哦~")
             }.trim()
-            if (finished)
-                return
             if (textMode())
-                eventToReply.reply(hint)
+                eventToReply[contextId] ?.reply(hint)
             else
-                eventToReply.reply(MarkdownTemplates.Templates.guess(hint))
+                eventToReply[contextId] ?.reply(MarkdownTemplates.Templates.guess(hint))
+            eventToReply[contextId] ?.save(GuessGameStatus.Classical(
+                music.id,
+                descriptions.subList(index + 1, descriptions.size),
+            ))
             delay(cooldown)
         }
 
-        if (finished)
-            return
-        runCatching {
+        descriptions ?.runCatching {
             val hint = "这首歌的封面部分如图，30秒后将揭晓答案哦~"
             val cropped = music.cover().randomSlice() ?: return@runCatching
             if (textMode()) {
                 useTempFile(suffix = ".jpg") { file ->
                     file.writeBytes(cropped)
-                    reply(
+                    eventToReply[contextId] ?.reply(
                         hint.newLine().toPlainText() + Image(file)
                     )
                 }
             } else {
                 val uploaded = bot.cos.uploadBinary(cropped)
-                reply(MarkdownTemplates.Templates.guessCropped(
+                eventToReply[contextId] ?.reply(MarkdownTemplates.Templates.guessCropped(
                     uploaded.url, hint)
                 )
-                scope.launch {
+                maimai.scope.launch {
                     delay(10000L)
                     bot.cos.deleteFromCos(uploaded.filename)
                 }
@@ -190,23 +270,58 @@ class GuessController(
         }
         delay(30000L)
 
-        if (finished)
-            return
-
         val hint = "很遗憾，没有人猜中哦".toPlainText() + music.infoText()
         if (textMode()) {
-            reply(hint)
+            eventToReply[contextId] ?.reply(hint)
         } else {
             val url = "$jacketUrl/${music.resourceId}.jpg"
-            reply(MarkdownTemplates.Templates.guessFinished(url, hint.text))
+            eventToReply[contextId] ?.reply(MarkdownTemplates.Templates.guessFinished(url, hint.text))
         }
-        bot.pluginLoader.subscribes.stop(subscribeId)
-        started.remove(id)
+        endGame(subscribesAt)
+    }
+    private suspend fun MessageEvent.listenClassical(
+        contextId: String,
+        subscribesAt: String,
+        music: MusicInfo,
+        hintJob: Job
+    ) {
+        if (contextId != this.contextId) {
+            return
+        }
+        eventToReply[contextId] = this
+        val input = text.trim()
+        if (input.startsWith("不玩了")) {
+            hintJob.cancel()
+            endGame(subscribesAt)
+
+            val hint = "游戏已结束。答案如下：".toPlainText() + music.infoText()
+            if (textMode()) {
+                reply(hint)
+            } else {
+                val url = "$jacketUrl/${music.resourceId}.jpg"
+                reply(MarkdownTemplates.Templates.guessFinished(url, hint.text))
+            }
+            return
+        }
+        maimai.aliases.search(input).take(10).forEach { answer ->
+            if (answer.name == music.name) {
+                hintJob.cancel()
+                endGame(subscribesAt)
+
+                val hint = "恭喜你猜中了哦~".toPlainText() + music.infoText()
+                if (textMode()) {
+                    reply(hint)
+                } else {
+                    val url = "$jacketUrl/${music.resourceId}.jpg"
+                    reply(MarkdownTemplates.Templates.guessFinished(url, hint.text))
+                }
+                return
+            }
+        }
     }
     private suspend fun MessageEvent.opening() {
         if (!playable())
             return
-        val id = if (this is GroupMessageEvent) group.id else sender.id
 
         val musics = maimai.musics()
             .filter { music -> music.genre != MusicGenre.Utage && (music.name.hasAlpha() || music.name.any { it.isDigit() }) }
@@ -214,8 +329,16 @@ class GuessController(
             .take(maxOpening)
             .map { Pair(it, false) }
             .toMutableList()
-
         val chars = mutableListOf<Char>()
+
+        val subscribesAt = UUID.randomUUID().toString()
+        subscribeId[contextId] = subscribesAt
+        eventToReply[contextId] = this
+
+        save(GuessGameStatus.Opening(
+            musics = musics.map { Pair(it.first.id, it.second) },
+            opened = chars
+        ))
 
         reply(buildString {
             appendLine()
@@ -229,58 +352,66 @@ class GuessController(
 
         reply(showOpening(musics, chars))
 
-        val subscribeId = UUID.randomUUID().toString()
-        bot.pluginLoader.subscribes.always(subscribeId) {
-            val nowId = if (this is GroupMessageEvent) group.id else sender.id
-            if (id != nowId) {
-                return@always
-            }
-            if (maimai.pluginStopped || text.trim().startsWith("不玩了")) {
-                reply(showOpening(musics, chars, true))
-                bot.pluginLoader.subscribes.stop(subscribeId)
-                return@always
-            }
-
-            if (text.trim().startsWith("开字母")) {
-                val char = text.trim().substringAfter("开字母").trim().firstOrNull()
-                    ?: return@always
-                if (char in chars) {
-                    reply("字母“${char}”已经开过了！")
-                    return@always
-                }
-                chars.add(char.lowercase().toDBC().first())
-                musics.forEachIndexed { index, (music, opened) ->
-                    if (!opened && music.name.all {
-                            val ch = it.lowercase().toDBC().first()
-                            ch in chars || ch.toString().isBlank()
-                        })
-                        musics[index] = Pair(music, true)
-                }
-            } else if (text.trim().startsWith("开歌")) {
-                val name = text.trim().substringAfter("开歌").trim().lowercase().toDBC()
-                val found = maimai.aliases.search(name).take(10)
-                if (found.isEmpty()) {
-                    reply("歌曲不存在！")
-                    return@always
-                }
-                musics.firstOrNull { (music, _) -> found.any { it.name == music.name } } ?.let { item ->
-                    musics[musics.indexOf(item)] = Pair(item.first, true)
-                } ?: run {
-                    reply("歌曲不在题目列表中！")
-                    return@always
-                }
-            } else {
-                return@always
-            }
-            if (musics.all { (_, opened) -> opened }) {
-                reply("恭喜您猜出了全部歌曲！")
-                reply(showOpening(musics, chars, true))
-                bot.pluginLoader.subscribes.stop(subscribeId)
-                started.remove(id)
-                return@always
-            }
-            reply(showOpening(musics, chars))
+        bot.pluginLoader.subscribes.always(subscribesAt) {
+            listenOpening(contextId, subscribesAt, musics, chars)
         }
+    }
+    private suspend fun MessageEvent.listenOpening(
+        contextId: String,
+        subscribesAt: String,
+        musics: MutableList<Pair<MusicInfo, Boolean>>,
+        chars: MutableList<Char>
+    ) {
+        if (contextId != this.contextId) {
+            return
+        }
+        if (text.trim().startsWith("不玩了")) {
+            reply(showOpening(musics, chars, true))
+            endGame(subscribesAt)
+            return
+        }
+
+        if (text.trim().startsWith("开字母")) {
+            val char = text.trim().substringAfter("开字母").trim().firstOrNull() ?: return
+            if (char in chars) {
+                reply("字母“${char}”已经开过了！")
+                return
+            }
+            chars.add(char.lowercase().toDBC().first())
+            musics.forEachIndexed { index, (music, opened) ->
+                if (!opened && music.name.all {
+                        val ch = it.lowercase().toDBC().first()
+                        ch in chars || ch.toString().isBlank()
+                    })
+                    musics[index] = Pair(music, true)
+            }
+        } else if (text.trim().startsWith("开歌")) {
+            val name = text.trim().substringAfter("开歌").trim().lowercase().toDBC()
+            val found = maimai.aliases.search(name).take(10)
+            if (found.isEmpty()) {
+                reply("歌曲不存在！")
+                return
+            }
+            musics.firstOrNull { (music, _) -> found.any { it.name == music.name } } ?.let { item ->
+                musics[musics.indexOf(item)] = Pair(item.first, true)
+            } ?: run {
+                reply("歌曲不在题目列表中！")
+                return
+            }
+        } else {
+            return
+        }
+        if (musics.all { (_, opened) -> opened }) {
+            reply("恭喜您猜出了全部歌曲！")
+            reply(showOpening(musics, chars, true))
+            endGame(subscribesAt)
+            return
+        }
+        save(GuessGameStatus.Opening(
+            musics = musics.map { Pair(it.first.id, it.second) },
+            opened = chars
+        ))
+        reply(showOpening(musics, chars))
     }
     private fun showOpening(
         musics: List<Pair<MusicInfo, Boolean>>,
@@ -288,8 +419,7 @@ class GuessController(
         all: Boolean = false
     ) = MarkdownData.create(MarkdownTemplates.GUESS) {
         "status" {
-            "\uD83D\uDCA1已开出字母：${chars.joinToString(", ")}" +
-                    if (maimai.pluginStopped) "\r机器人重启中，该局游戏已结束" else ""
+            "\uD83D\uDCA1已开出字母：${chars.joinToString(", ")}"
         }
         musics.forEachIndexed { index, (music, status) ->
             if (status) {
@@ -311,6 +441,7 @@ class GuessController(
             }
         }
     }.toMessage(if (!all) getOpeningButtons() else MarkdownTemplates.Keyboards.GUESS_OPEN_AGAIN)
+
     private fun GroupMessageEvent.showAdminPanel(
         disable: Boolean
     ) = MarkdownData.create(MarkdownTemplates.BRIEF) {
@@ -415,4 +546,9 @@ class GuessController(
         val croppedImage = surface.makeImageSnapshot()
         croppedImage.encodeToData(EncodedImageFormat.JPEG, 90) ?.bytes
     }
+    private val MessageEvent.contextId
+        get() = when(this) {
+            is GroupMessageEvent -> group.id
+            else -> sender.id
+        }
 }

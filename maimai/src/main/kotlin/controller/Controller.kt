@@ -6,4 +6,5 @@ sealed class Controller(
     open val maimai: Maimai
 ) {
     abstract suspend fun setRoute()
+    open suspend fun unload() {}
 }
