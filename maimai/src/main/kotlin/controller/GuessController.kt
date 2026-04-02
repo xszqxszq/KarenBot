@@ -2,11 +2,13 @@ package xyz.xszq.bot.controller
 
 import korlibs.io.file.VfsFile
 import kotlinx.coroutines.*
+import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.upsert
+import org.jetbrains.exposed.sql.vendors.currentDialect
 import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.Rect
 import org.jetbrains.skia.Surface
@@ -93,7 +95,16 @@ class GuessController(
     private suspend fun MessageEvent.save(
         status: GuessGameStatus,
     ): Unit = newSuspendedTransaction(Dispatchers.IO) {
-        GuessGameTable.upsert(GuessGameTable.id) {
+        val needConflictKeys = currentDialect.name.lowercase().let {
+            !it.contains("mysql") && !it.contains("mariadb")
+        }
+
+        val conflictKeys: Array<out Column<*>> = if (needConflictKeys) {
+            arrayOf(GuessGameTable.id)
+        } else {
+            emptyArray()
+        }
+        GuessGameTable.upsert(*conflictKeys) {
             it[GuessGameTable.id] = this@save.contextId
             it[GuessGameTable.eventType] = when (this@save) {
                 is GroupMessageEvent -> "group"
