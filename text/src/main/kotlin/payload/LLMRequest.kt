@@ -7,5 +7,6 @@ data class LLMRequest(
     val model: String,
     val messages: List<LLMMessage>,
     val stream: Boolean,
-    val temperature: Double
+    val temperature: Double,
+    val thinking: LLMThinking ?= null
 )

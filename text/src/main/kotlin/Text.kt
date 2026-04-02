@@ -267,7 +267,8 @@ class Text: Plugin() {
                 model = llmConfig.model,
                 messages = messages,
                 stream = false,
-                temperature = llmConfig.temperature
+                temperature = llmConfig.temperature,
+                thinking = LLMThinking("disabled")
             ))
         }
         return when (httpResponse.status) {
