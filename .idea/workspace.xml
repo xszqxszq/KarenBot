@@ -6,20 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="4d11881f-e4f8-46b5-bdcf-83158dd5bb86" name="更改" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/Filter.kt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/Maimai.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/Maimai.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/Query.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/api/Local.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/api/Local.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/component/LocalConnector.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/component/LocalConnector.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/component/MaimaiImage.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/component/MaimaiImage.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/ApiController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/ApiController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/Controller.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/Controller.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/GuessController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/GuessController.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/ImageController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/ImageController.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/MusicController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/MusicController.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/RecordController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/RecordController.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/SettingsController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/controller/SettingsController.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/image/dom/Div.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/image/dom/Div.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/maimai/src/main/kotlin/image/style/LayoutEngine.kt" beforeDir="false" afterPath="$PROJECT_DIR$/maimai/src/main/kotlin/image/style/LayoutEngine.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/xyz/xszq/bot/PluginLoader.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/xyz/xszq/bot/PluginLoader.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,6 +61,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Kotlin Enum" />
+        <option value="Kotlin Object" />
+        <option value="Kotlin Data Class" />
       </list>
     </option>
   </component>
@@ -90,7 +84,9 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Gradle.Build KarenBot-9.0.executor": "Run",
+    "Gradle.Build KarenBot.executor": "Run",
     "Gradle.KarenBot [allPlugins].executor": "Run",
+    "Gradle.KarenBot [clean].executor": "Run",
     "Ktor.ApplicationKt.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
@@ -130,8 +126,11 @@
       </ExternalSystemSettings>
       <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
       <DebugAllEnabled>false</DebugAllEnabled>
       <RunAsTest>false</RunAsTest>
+      <GradleProfilingDisabled>false</GradleProfilingDisabled>
+      <GradleCoverageDisabled>false</GradleCoverageDisabled>
       <method v="2" />
     </configuration>
     <configuration name="KarenBot [clean]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
@@ -152,15 +151,12 @@
       </ExternalSystemSettings>
       <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
       <DebugAllEnabled>false</DebugAllEnabled>
       <RunAsTest>false</RunAsTest>
+      <GradleProfilingDisabled>false</GradleProfilingDisabled>
+      <GradleCoverageDisabled>false</GradleCoverageDisabled>
       <method v="2" />
-    </configuration>
-    <configuration default="true" type="JetRunConfigurationType">
-      <module name="KarenBot" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
     </configuration>
     <recent_temporary>
       <list>
@@ -179,7 +175,7 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="默认任务">
-      <changelist id="4d11881f-e4f8-46b5-bdcf-83158dd5bb86" name="更改" comment="" />
+      <changelist id="27592cce-a1db-49e7-82a6-78676efa57d5" name="Changes" comment="" />
       <created>1775034174797</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
