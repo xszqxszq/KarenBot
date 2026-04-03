@@ -13,5 +13,5 @@ object GuessGameTable: IdTable<String>() {
     val seq = integer("seq")
     val type = varchar("type", 32)
     val status = jsonb<GuessGameStatus>("status", Json, GuessGameStatus.serializer())
-    override val primaryKey = PrimaryKey(MaimaiBindTable.id)
+    override val primaryKey = PrimaryKey(id)
 }
