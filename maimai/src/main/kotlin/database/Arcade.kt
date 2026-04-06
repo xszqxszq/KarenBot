@@ -7,7 +7,7 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
 class Arcade(id: EntityID<Int>): IntEntity(id) {
     var group       by ArcadeTable.group
@@ -16,10 +16,10 @@ class Arcade(id: EntityID<Int>): IntEntity(id) {
     var value       by ArcadeTable.value
     var modified    by ArcadeTable.modified
 
-    suspend fun clear() = suspendedTransactionAsync {
+    suspend fun clear() = newSuspendedTransaction {
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         if (modified == initTime || now.isSameDay(modified))
-            return@suspendedTransactionAsync
+            return@newSuspendedTransaction
         value = 0
         modified = initTime
     }
@@ -27,14 +27,14 @@ class Arcade(id: EntityID<Int>): IntEntity(id) {
 
     companion object : IntEntityClass<Arcade>(ArcadeTable) {
         private val initTime = LocalDateTime(2000, 1, 1, 0, 0)
-        suspend fun new(group: ArcadeGroup, name: String) = suspendedTransactionAsync {
+        suspend fun new(group: ArcadeGroup, name: String) = newSuspendedTransaction {
             new {
                 this.group = group.id
                 this.name = name
                 this.aliases = name
                 this.value = 0
             }
-        }.await()
+        }
         fun LocalDateTime.isSameDay(b: LocalDateTime): Boolean =
             year == b.year && month == b.month && dayOfMonth == b.dayOfMonth
     }

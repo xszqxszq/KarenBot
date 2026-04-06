@@ -52,9 +52,7 @@ object MusicAliasesTable: Table() {
                 (MusicAliasesTable.id eq music.id) and (name eq alias)
             }.count() != 0L) {
             update({ (MusicAliasesTable.id eq music.id) and (name eq alias) }) {
-                with(SqlExpressionBuilder) {
-                    it[votes] = 0
-                }
+                it[votes] = 0
             }
         } else {
             insert {

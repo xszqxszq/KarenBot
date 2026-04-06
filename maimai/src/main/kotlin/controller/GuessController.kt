@@ -39,7 +39,7 @@ class GuessController(
     private val subscribeId = ConcurrentHashMap<String, String>()
     private val eventToReply = ConcurrentHashMap<String, MessageEvent>()
 
-    private val jacketUrl = maimai.tokens.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")
+    private val jacketUrl = maimai.config.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")
 
     override suspend fun setRoute() = maimai.route("/mai") {
         maimai.pluginLoader.bot.restoreGuessGame()

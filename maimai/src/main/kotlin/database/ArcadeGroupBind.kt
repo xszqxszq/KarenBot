@@ -3,6 +3,7 @@ package xyz.xszq.bot.database
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 
 class ArcadeGroupBind(id: EntityID<String>): Entity<String>(id) {
@@ -26,12 +27,12 @@ class ArcadeGroupBind(id: EntityID<String>): Entity<String>(id) {
                 ArcadeGroup.findById(it.group)
             }
         }.await()
-        suspend fun bind(openId: String, group: ArcadeGroup) = suspendedTransactionAsync {
+        suspend fun bind(openId: String, group: ArcadeGroup) = newSuspendedTransaction {
             findById(openId) ?.let {
                 it.group = group.id
             } ?: new(openId) {
                 this.group = group.id
             }
-        }.await()
+        }
     }
 }

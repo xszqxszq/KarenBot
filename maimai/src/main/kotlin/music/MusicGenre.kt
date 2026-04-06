@@ -29,10 +29,5 @@ enum class MusicGenre(val id: Int, val genreName: String, val value: String, val
 
     companion object {
         fun of(value: String): MusicGenre = MusicGenre.entries.first { it.value == value }
-        fun fromChnName(name: String): MusicGenre? = MusicGenre.entries.firstOrNull { it.genreName == name }
-        fun fromDivingFish(name: String) = when (name) {
-            "niconico & VOCALOID" -> Niconico
-            else -> fromChnName(name) ?: of(name)
-        }
     }
 }

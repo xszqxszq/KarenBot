@@ -8,7 +8,10 @@ import xyz.xszq.bot.database.QQBindTable
 import xyz.xszq.bot.music.Item
 import xyz.xszq.bot.music.MusicDifficulty
 import xyz.xszq.bot.newLine
-import xyz.xszq.bot.query.Query
+import xyz.xszq.bot.query.ComboQuery
+import xyz.xszq.bot.query.ComboQuery.filterCharts
+import xyz.xszq.bot.query.ComboQuery.filterMusics
+import xyz.xszq.bot.query.ComboQuery.filterRecords
 import xyz.xszq.bot.reply
 
 @Suppress("unused")
@@ -81,7 +84,7 @@ class SettingsController(
             reply("兼容模式启用成功，如需关闭请@机器人并发送“兼容模式 关闭”。")
         }
         startsWith("设置头像") { icon ->
-            val iconFile = maimai.local.icons.values.firstOrNull {
+            val iconFile = maimai.maimaiData.icons.values.firstOrNull {
                 it.id == icon.trim().toIntOrNull() ||
                         it.name == icon.trim() ||
                         it.filename == icon.trim() ||
@@ -106,7 +109,7 @@ class SettingsController(
                 reply(MarkdownTemplates.Templates.SELECT_ICON_SUCCESS)
         }
         startsWith(listOf("设置牌子", "设置姓名框")) { plate ->
-            val plateFile = maimai.local.plates.values.firstOrNull {
+            val plateFile = maimai.maimaiData.plates.values.firstOrNull {
                 it.id == plate.trim().toIntOrNull() ||
                         it.name == plate.trim() ||
                         Item.toSimplified(it.name) == plate.trim() ||
@@ -127,16 +130,14 @@ class SettingsController(
                 return@startsWith
             }
             if (plateFile.genre == "実績" && plateFile.requires.isNotEmpty()) {
-                val filters = Query.filters(Item.toSimplified(plateFile.name))
-                val musics = Query.filterMusics(filters, maimai.musics())
-                val charts = Query.filterCharts(filters, maimai.musics()).filter {
+                val user = maimai.query.getQueryParams(this)
+                val filters = ComboQuery.filters(Item.toSimplified(plateFile.name))
+                val musics = filters.filterMusics(maimai.musics())
+                val charts = filters.filterCharts(maimai.musics()).filter {
                    it.difficulty.value >= MusicDifficulty.Master.value
                 }
-                val response = maimai.query.records(this, musics) ?: run {
-                    return@startsWith
-                }
-                val records = Query.filterRecords(
-                    filters,
+                val (response, _) = maimai.query.records(user, musics)
+                val records = filters.filterRecords(
                     response.records.filter { it.chart.difficulty.value >= MusicDifficulty.Master.value },
                     true
                 ) ?: return@startsWith

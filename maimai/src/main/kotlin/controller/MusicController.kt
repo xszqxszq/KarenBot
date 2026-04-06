@@ -20,7 +20,8 @@ import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.music.ChartInfo
 import xyz.xszq.bot.music.MusicDifficulty
 import xyz.xszq.bot.music.MusicInfo
-import xyz.xszq.bot.query.Query
+import xyz.xszq.bot.query.ComboQuery
+import xyz.xszq.bot.query.ComboQuery.filterMusics
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
@@ -35,7 +36,7 @@ class MusicController(
     private val maxResults = 8
     private val maxResultsLong = 40
 
-    private val jacketUrl = maimai.tokens.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")
+    private val jacketUrl = maimai.config.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")
 
     override suspend fun setRoute() = maimai.route("/mai") {
         // 根据 ID 精准查找
@@ -67,8 +68,8 @@ class MusicController(
 
         // 随机歌曲
         startsWith("随个") { query ->
-            val filters = Query.filters(query)
-            val musics = Query.filterMusics(filters, maimai.musics())
+            val filters = ComboQuery.filters(query)
+            val musics = filters.filterMusics(maimai.musics())
             if (musics.isEmpty()) {
                 reply(notFound)
                 return@startsWith
@@ -340,7 +341,7 @@ class MusicController(
         designer: String,
         page: Int
     ) {
-        val targets = Query.designerConfig.aliases
+        val targets = ComboQuery.designerConfig.aliases
             .filter { (_, value) -> value.any { alias -> alias == designer || designer in alias } }
             .map { it.key }
         val (result, nowPage, totalPages) = maimai.charts()

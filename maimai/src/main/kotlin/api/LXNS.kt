@@ -8,9 +8,12 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
-import xyz.xszq.bot.api.exception.*
+import xyz.xszq.bot.exception.AuthorizationException
+import xyz.xszq.bot.exception.UnknownException
+import xyz.xszq.bot.exception.UserNotFoundException
+import xyz.xszq.bot.exception.UserOARequiredException
+import xyz.xszq.bot.component.MaimaiData
 import xyz.xszq.bot.database.MaimaiSettingsTable
-import xyz.xszq.bot.database.QQBindTable
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.music.*
 import xyz.xszq.bot.payload.*
@@ -21,14 +24,14 @@ class LXNS(
     val oauthId: String,
     val oauthSecret: String,
     val oauthCallback: String,
-    val local: Local
+    val maimaiData: MaimaiData
 ): MaimaiAPI {
-    override val name: String = "lxns"
+    override val id: String = "lxns"
+    override val name: String = "落雪"
     val server = "https://maimai.lxns.net/api/v0/maimai"
     val oauth = "https://maimai.lxns.net/api/v0/oauth"
-    val user = "https://maimai.lxns.net/api/v0/user"
     val musics
-        get() = local.musics
+        get() = maimaiData.musics
 
     val json = Json {
         ignoreUnknownKeys = true
@@ -45,19 +48,14 @@ class LXNS(
         headers["Authorization"] = "Bearer $accessToken"
     }
     suspend fun getPlayerInfo(
-        event: MessageEvent,
-        args: String
+        user: UserQueryParams
     ): LXNSPlayer? {
-        val response = if (args.isEmpty()) {
-            val qq = QQBindTable[event.sender.id] ?: throw UserBindRequiredException()
-            client.get("$server/player/qq/$qq") {
-                setDeveloper()
-            }.body<LXNSResponse<LXNSPlayer>>()
-        } else {
-            client.get("$server/player/$args") {
-                setDeveloper()
-            }.body<LXNSResponse<LXNSPlayer>>()
-        }
+        val response = client.get(when (user) {
+            is UserQueryParams.QQ -> "$server/player/qq/${user.qq}"
+            is UserQueryParams.Username -> "$server/player/${user.username}"
+        }) {
+            setDeveloper()
+        }.body<LXNSResponse<LXNSPlayer>>()
         when (response.code) {
             401 -> throw AuthorizationException(response.message)
             404 -> throw UserNotFoundException(response.message)
@@ -69,30 +67,25 @@ class LXNS(
     override suspend fun load() {
     }
 
-    override suspend fun getMusicList(): Map<Int, MusicInfo> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getGameVersions(): Map<String, GameVersion> {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun getPlayerRating(
-        event: MessageEvent,
-        args: String
+        user: UserQueryParams
     ): RatingResponse? {
-        val player = getPlayerInfo(event, args) ?: return null
+        val player = getPlayerInfo(user) ?: return null
 
         val response = client.get("$server/player/${player.friendCode}/bests") {
             setDeveloper()
         }.body<LXNSResponse<LXNSRatingResponse>>().data ?: return null
         return RatingResponse(
-            name = player.name,
-            rating = player.rating,
-            course = player.courseRank,
-            icon = MaimaiSettingsTable[event.sender.id, "icon"] ?.toIntOrNull() ?: player.icon?.id ?: 101,
-            plate = MaimaiSettingsTable[event.sender.id, "plate"] ?.toIntOrNull() ?: player.namePlate?.id ?: 11,
-            ratingList = response.standard.mapNotNull { record ->
+            player = PlayerInfo(
+                nickname = player.name,
+                rating = player.rating,
+                course = player.courseRank
+            ),
+            settings = PlayerSettings(
+                avatar = player.icon ?.id,
+                plate = player.namePlate ?.id
+            ),
+            oldRatingList = response.standard.mapNotNull { record ->
                 record.toRecord()
             },
             newRatingList = response.dx.mapNotNull { record ->
@@ -124,11 +117,10 @@ class LXNS(
     }
 
     override suspend fun getPlayerRecord(
-        event: MessageEvent,
-        args: String,
+        user: UserQueryParams,
         music: MusicInfo
     ): List<Record>? {
-        val player = getPlayerInfo(event, args) ?: return null
+        val player = getPlayerInfo(user) ?: return null
 
         return getSingleRecord(player, music)
     }
@@ -148,23 +140,26 @@ class LXNS(
     }
 
     override suspend fun getPlayerRecords(
-        event: MessageEvent,
-        args: String,
+        user: UserQueryParams,
         musics: List<MusicInfo>
     ): RecordsResponse? {
         // 玩家信息获取一定要在token获取前
-        val player = getPlayerInfo(event, args) ?: return null
-        val accessToken = refreshToken(event) ?: throw UserOARequiredException()
+        val player = getPlayerInfo(user) ?: return null
+        val accessToken = refreshToken(user.event) ?: throw UserOARequiredException()
 
         val response = client.get("$user/maimai/player/scores") {
             setOAuth(accessToken)
         }.body<LXNSResponse<List<LXNSScore>>>().data ?: return null
         return RecordsResponse(
-            name = player.name,
-            rating = player.rating,
-            course = player.courseRank,
-            icon = MaimaiSettingsTable[event.sender.id, "icon"] ?.toIntOrNull() ?: player.icon?.id ?: 101,
-            plate = MaimaiSettingsTable[event.sender.id, "plate"] ?.toIntOrNull() ?: player.namePlate?.id ?: 11,
+            player = PlayerInfo(
+                nickname = player.name,
+                rating = player.rating,
+                course = player.courseRank
+            ),
+            settings = PlayerSettings(
+                avatar = player.icon ?.id,
+                plate = player.namePlate ?.id
+            ),
             records = response.mapNotNull { record ->
                 record.toRecord()
             }
@@ -194,8 +189,8 @@ class LXNS(
             music = music,
             chart = chart,
             achievement = achievement,
-            comboStatus = ComboStatus.Companion.of(fc),
-            syncStatus = SyncStatus.Companion.of(fs),
+            comboStatus = ComboStatus.of(fc),
+            syncStatus = SyncStatus.of(fs),
             deluxeScore = dxScore,
             rate = rate,
             rating = rating
@@ -213,17 +208,20 @@ class LXNS(
         }
     }
     suspend fun getPlayerRecent(
-        event: MessageEvent,
-        args: String
+        user: UserQueryParams
     ): RecordsResponse? {
-        val player = getPlayerInfo(event, args) ?: return null
+        val player = getPlayerInfo(user) ?: return null
         val response = getRecent(player) ?: return null
         return RecordsResponse(
-            name = player.name,
-            rating = player.rating,
-            course = player.courseRank,
-            icon = MaimaiSettingsTable[event.sender.id, "icon"] ?.toIntOrNull() ?: player.icon?.id ?: 101,
-            plate = MaimaiSettingsTable[event.sender.id, "plate"] ?.toIntOrNull() ?: player.namePlate?.id ?: 11,
+            player = PlayerInfo(
+                nickname = player.name,
+                rating = player.rating,
+                course = player.courseRank
+            ),
+            settings = PlayerSettings(
+                avatar = player.icon ?.id,
+                plate = player.namePlate ?.id
+            ),
             records = response
         )
     }
@@ -249,6 +247,7 @@ class LXNS(
     suspend fun refreshToken(
         event: MessageEvent
     ): String? {
+        // TODO: 不要在查分器端引入任何直接查表
         val refresh = MaimaiSettingsTable[event.sender.id, "lxns-oa-refresh"] ?: return null
         val response = client.post("$oauth/token") {
             contentType(ContentType.Application.Json)

@@ -12,34 +12,28 @@ import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import xyz.xszq.bot.api.DivingFish
 import xyz.xszq.bot.api.LXNS
-import xyz.xszq.bot.api.Local
 import xyz.xszq.bot.api.MaimaiAPI
 import xyz.xszq.bot.component.AliasesSearch
-import xyz.xszq.bot.component.LocalConnector
-import xyz.xszq.bot.component.MaimaiImage
+import xyz.xszq.bot.component.MaimaiData
 import xyz.xszq.bot.component.MaimaiQuery
-import xyz.xszq.bot.config.DatabaseConfig
-import xyz.xszq.bot.config.TokenConfig
+import xyz.xszq.bot.component.image.MaimaiImage
+import xyz.xszq.bot.config.MaimaiConfig
 import xyz.xszq.bot.controller.ApiController
 import xyz.xszq.bot.controller.Controller
 import xyz.xszq.bot.database.*
 import xyz.xszq.bot.event.Event
-import xyz.xszq.bot.event.GroupEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.payload.DivingFishStats
-import xyz.xszq.bot.query.Query
+import xyz.xszq.bot.query.ComboQuery
 import kotlin.reflect.full.primaryConstructor
 
-@Suppress("unused")
 class Maimai: Plugin() {
     // 配置文件
-    lateinit var tokens: TokenConfig
-    lateinit var databaseConfig: DatabaseConfig
+    lateinit var config: MaimaiConfig
     // 后端
-    lateinit var local: Local
     lateinit var backends: List<MaimaiAPI>
     // 组件
-    lateinit var localConnector: LocalConnector
+    lateinit var maimaiData: MaimaiData
     lateinit var image: MaimaiImage
     lateinit var query: MaimaiQuery
     lateinit var aliases: AliasesSearch
@@ -52,27 +46,7 @@ class Maimai: Plugin() {
     var pluginStopped: Boolean = false
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    fun backend(name: String) = backends.first { it.name == name }
-
-    suspend fun backendsWithPriority(
-        event: MessageEvent,
-        args: String
-    ): List<MaimaiAPI> {
-        var backends = listOf(
-            backend("diving-fish"),
-            backend("lxns"),
-        ).toMutableList()
-        MaimaiSettingsTable[event.sender.id, "prober"] ?.let { prefer ->
-            if (prefer.isBlank())
-                return@let
-            backends = (backends.filter { it.name == prefer })
-                .toMutableList()
-        }
-        if (event.sender.id in localConnector.config.allowed ||
-            (event is GroupEvent && event.group.id in localConnector.config.allowed))
-            backends.add(backend("local"))
-        return backends
-    }
+    fun backend(name: String) = backends.first { it.id == name }
 
     /**
      * 初始化插件
@@ -80,54 +54,70 @@ class Maimai: Plugin() {
     @OptIn(ExperimentalHoplite::class, DelicateCoroutinesApi::class)
     override suspend fun load() {
         // 载入配置
-        tokens = ConfigLoaderBuilder.Companion.default()
-            .addFileSource("./config/maimai-tokens.yml")
+        config = ConfigLoaderBuilder.default()
+            .addFileSource("./config/maimai.yml")
             .withExplicitSealedTypes()
             .build()
-            .loadConfigOrThrow<TokenConfig>()
+            .loadConfigOrThrow<MaimaiConfig>()
 
-        databaseConfig = ConfigLoaderBuilder.Companion.default()
-            .addFileSource("./config/database.yml")
-            .withExplicitSealedTypes()
-            .build()
-            .loadConfigOrThrow<DatabaseConfig>()
+        maimaiData = MaimaiData()
+        maimaiData.load()
 
-        localConnector = LocalConnector()
-        local = Local(localConnector)
         backends = listOf(
-            local,
-            DivingFish(tokens.tokens["diving-fish"].toString(), local),
+            DivingFish(config.tokens["diving-fish"].toString(), maimaiData),
             LXNS(
-                tokens.tokens["lxns"].toString(),
-                tokens.tokens["lxns-oa-id"].toString(),
-                tokens.tokens["lxns-oa-secret"].toString(),
-                tokens.tokens["lxns-oa-callback"].toString(),
-                local
+                config.tokens["lxns"].toString(),
+                config.tokens["lxns-oa-id"].toString(),
+                config.tokens["lxns-oa-secret"].toString(),
+                config.tokens["lxns-oa-callback"].toString(),
+                maimaiData
             )
         )
 
         // 各组件初始化
-        image = MaimaiImage(this)
+        image = MaimaiImage(maimaiData)
         query = MaimaiQuery(this)
         aliases = AliasesSearch(this)
         api = ApiController(this)
 
-        localConnector.load()
         image.init()
-        Query.init()
+        ComboQuery.init(maimaiData)
 
         // 数据库初始化
         database = Database.connect(
-            databaseConfig.url, databaseConfig.driver,
-            databaseConfig.username, databaseConfig.password
+            config.database.url, config.database.driver,
+            config.database.username, config.database.password
         )
         transaction {
             listOf(
-                MaimaiBindTable, DivingFishBindTable, QQBindTable, MusicAliasesTable, MusicAliasesVoteTable,
+                QQBindTable, MusicAliasesTable, MusicAliasesVoteTable,
                 MaimaiSettingsTable, ArcadeTable, ArcadeGroupTable, ArcadeGroupBindTable, GuessGameTable
             ).forEach { table ->
                 if (!table.exists())
                     SchemaUtils.create(table)
+            }
+        }
+        scope.launch(Dispatchers.IO) {
+            logger.info { "[舞萌] 正在加载图片中……" }
+            image.load()
+            logger.info { "[舞萌] 图片载入完毕。" }
+        }
+        scope.launch(Dispatchers.IO) {
+            logger.info { "[舞萌] 别名初始化中……" }
+            aliases.init()
+            logger.info { "[舞萌] 别名初始化完毕。" }
+        }
+        scope.launch(Dispatchers.IO) {
+            logger.info { "[舞萌] 载入拟合定数中……" }
+            loadFitLevelValues()
+            logger.info { "[舞萌] 拟合定数载入完毕。" }
+        }
+        scope.launch(Dispatchers.IO) {
+            // Controller初始化
+            Controller::class.sealedSubclasses.forEach {
+                val controller = it.primaryConstructor!!.call(this@Maimai)
+                controller.setRoute()
+                controllers.add(controller)
             }
         }
 
@@ -135,34 +125,9 @@ class Maimai: Plugin() {
         api.listen()
         backends.forEach { backend ->
             scope.launch {
-                logger.info { "[舞萌] 正在加载数据源 ${backend.name}……" }
+                logger.info { "[舞萌] 正在加载数据源 ${backend.id}……" }
                 backend.load()
-                logger.info { "[舞萌] 数据源 ${backend.name}加载完毕。" }
-                if (backend.name == "local") {
-                    launch(Dispatchers.IO) {
-                        logger.info { "[舞萌] 正在加载图片中……" }
-                        image.loadImage()
-                        logger.info { "[舞萌] 图片载入完毕。" }
-                    }
-                    launch(Dispatchers.IO) {
-                        logger.info { "[舞萌] 别名初始化中……" }
-                        aliases.init()
-                        logger.info { "[舞萌] 别名初始化完毕。" }
-                    }
-                    launch(Dispatchers.IO) {
-                        logger.info { "[舞萌] 载入拟合定数中……" }
-                        loadFitLevelValues()
-                        logger.info { "[舞萌] 拟合定数载入完毕。" }
-                    }
-                    launch(Dispatchers.IO) {
-                        // Controller初始化
-                        Controller::class.sealedSubclasses.forEach {
-                            val controller = it.primaryConstructor!!.call(this@Maimai)
-                            controller.setRoute()
-                            controllers.add(controller)
-                        }
-                    }
-                }
+                logger.info { "[舞萌] 数据源 ${backend.id}加载完毕。" }
             }
         }
 
@@ -172,8 +137,8 @@ class Maimai: Plugin() {
         logger.info { "[舞萌] 插件加载完成。" }
     }
 
-    fun musics() = local.musics.values
-    fun music(id: Int) = local.musics[id]
+    fun musics() = maimaiData.musics.values
+    fun music(id: Int) = maimaiData.musics[id]
     fun charts() = musics().flatMap { it.charts }
 
     /**

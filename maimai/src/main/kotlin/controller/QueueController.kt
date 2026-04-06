@@ -4,7 +4,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import xyz.xszq.bot.*
 import xyz.xszq.bot.Maimai.Companion.textMode
 import xyz.xszq.bot.database.Arcade
@@ -77,7 +77,7 @@ class QueueController(
     }
     suspend fun GroupMessageEvent.delete(name: String) {
         val arcade = get(name)
-        suspendedTransactionAsync {
+        newSuspendedTransaction {
             arcade.delete()
         }
         if (textMode())
@@ -96,7 +96,7 @@ class QueueController(
             throw IllegalArgsException("别名已存在！")
 
         aliases.add(alias)
-        suspendedTransactionAsync {
+        newSuspendedTransaction {
             arcade.aliases = aliases.joinToString(",")
         }
 
@@ -114,7 +114,7 @@ class QueueController(
         val alias = validateAlias(raw)
 
         aliases.remove(alias)
-        suspendedTransactionAsync {
+        newSuspendedTransaction {
             arcade.aliases = aliases.joinToString(",")
         }
 
@@ -159,7 +159,7 @@ class QueueController(
         val group = ArcadeGroupBind.group(group.id)
         return group.find(name) != null
     }
-    private suspend fun clear() = suspendedTransactionAsync {
+    private suspend fun clear() {
         Arcade.all().forEach {
             it.clear()
         }
@@ -201,7 +201,7 @@ class QueueController(
         })
         append(")")
     }
-    suspend fun GroupMessageEvent.handle() = suspendedTransactionAsync {
+    suspend fun GroupMessageEvent.handle() {
         val group = ArcadeGroupBind.find(group.id)
         val raw = text.trim()
             .substringAfter("/mai")
@@ -220,24 +220,24 @@ class QueueController(
                             "排卡管理",
                             "当前群未设置机厅，请点击下方按钮添加机厅。"
                         ))
-                    return@suspendedTransactionAsync
+                    return
                 }
-                group.arcades.forEach { it ->
-                    it.clear()
+                group.arcades.forEach { arcade ->
+                    arcade.clear()
                 }
                 reply(list(group.arcades.toList()))
-                return@suspendedTransactionAsync
+                return
             }
             if (group == null)
-                return@suspendedTransactionAsync
+                return
             group.arcades.firstOrNull { name == it.name || name in it.aliases } ?.let { arcade ->
                 arcade.clear()
                 reply(list(listOf(arcade)))
             }
-            return@suspendedTransactionAsync
+            return
         }
         if (group == null)
-            return@suspendedTransactionAsync
+            return
         group.arcades.forEach { arcade ->
             arcade.aliases.split(",").forEach { alias ->
                 if (!raw.startsWith(alias))
@@ -253,12 +253,12 @@ class QueueController(
                     else -> {
                         raw.substringAfter(alias)
                             .replace("=", "")
-                            .toIntOrNull() ?: return@suspendedTransactionAsync
+                            .toIntOrNull() ?: return
                     }
                 }
                 if (newValue > 50) {
                     reply("机厅很小，请你忍一忍")
-                    return@suspendedTransactionAsync
+                    return
                 }
                 if (newValue < 0)
                     newValue = 0

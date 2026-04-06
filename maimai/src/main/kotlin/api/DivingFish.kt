@@ -8,26 +8,23 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.*
-import xyz.xszq.bot.api.exception.UnknownException
-import xyz.xszq.bot.api.exception.UserBindRequiredException
-import xyz.xszq.bot.api.exception.UserDeniedException
-import xyz.xszq.bot.api.exception.UserNotFoundException
-import xyz.xszq.bot.database.MaimaiSettingsTable
-import xyz.xszq.bot.database.QQBindTable
-import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.exception.UnknownException
+import xyz.xszq.bot.exception.UserDeniedException
+import xyz.xszq.bot.exception.UserNotFoundException
+import xyz.xszq.bot.component.MaimaiData
 import xyz.xszq.bot.music.*
 import xyz.xszq.bot.payload.*
 
 class DivingFish(
     val token: String,
-    val local: Local
+    val maimaiData: MaimaiData
 ) : MaimaiAPI {
-    override val name: String = "diving-fish"
+    override val id: String = "diving-fish"
+    override val name: String = "水鱼"
 
     val server = "https://www.diving-fish.com/api/maimaidxprober"
     val musics
-        get() = local.musics
-    val divingFishVersions = mutableMapOf<String, GameVersion>()
+        get() = maimaiData.musics
 
     val json = Json {
         ignoreUnknownKeys = true
@@ -39,103 +36,21 @@ class DivingFish(
     }
 
     override suspend fun load() {
-//        musics.clear()
-//        musics.putAll(getMusicList())
     }
-
-    val jpn2chn = buildMap {
-        put("maimai でらっくす", "舞萌DX")
-        put("maimai でらっくす Splash", "舞萌DX 2021")
-        put("maimai でらっくす UNiVERSE", "舞萌DX 2022")
-        put("maimai でらっくす FESTiVAL", "舞萌DX 2023")
-        put("maimai でらっくす BUDDiES", "舞萌DX 2024")
-    }
-
-    fun toNotes(list: List<Int>): Notes = when (list.size) {
-        4 -> Notes(list[0], list[1], list[2], 0, list[3])
-        5 -> Notes(list[0], list[1], list[2], list[3], list[4])
-        else -> throw IllegalStateException()
-    }
-
-    fun toGameVersion(name: String): GameVersion {
-        if (name.startsWith("maimai でらっくす"))
-            return local.versions[jpn2chn[name]!!]!!
-        return local.versions[name] ?: local.versions[name.replace("maimai", "").trim()]!!
-    }
-
-    fun parsePlate(name: String): Int = local.plates.values.firstOrNull {
-        it.name == name
-    } ?.id ?: 11
-
-    override suspend fun getMusicList(): Map<Int, MusicInfo> {
-        val data = client.get("$server/music_data").body<List<DivingFishMusicInfo>>()
-
-        divingFishVersions.clear()
-        divingFishVersions.putAll(data.map {
-            it.basicInfo.from
-        }.toSet().toList().associateWith {
-            toGameVersion(it)
-        })
-
-        return data.map { musicInfo ->
-            MusicInfo(
-                id = musicInfo.id.toInt(),
-                name = musicInfo.title,
-                type = MusicType.Companion.of(musicInfo.type),
-                rights = "",
-                artist = musicInfo.basicInfo.artist,
-                genre = MusicGenre.Companion.fromDivingFish(musicInfo.basicInfo.genre),
-                bpm = musicInfo.basicInfo.bpm,
-                version = divingFishVersions[musicInfo.basicInfo.from]!!,
-                isNew = musicInfo.basicInfo.isNew
-            ).also { info ->
-                info.charts = musicInfo.charts.mapIndexed { index, chart ->
-                    val difficulty =
-                        if (info.genre == MusicGenre.Utage)
-                            MusicDifficulty.Utage
-                        else
-                            MusicDifficulty.Companion.of(index)
-                    ChartInfo(
-                        music = info,
-                        difficulty = difficulty,
-                        level = musicInfo.level[index],
-                        levelValue = musicInfo.ds[index],
-                        notes = toNotes(chart.notes),
-                        notesDesigner = chart.charter
-                    )
-                }
-            }
-        }.associateBy { it.id }
-    }
-    suspend fun getStats(): DivingFishStats = client.get("$server/chart_stats").body<DivingFishStats>()
-
-    override suspend fun getGameVersions(): Map<String, GameVersion> = divingFishVersions
 
     override suspend fun getPlayerRating(
-        event: MessageEvent,
-        args: String
+        user: UserQueryParams
     ): RatingResponse? {
-        val request = buildRequest(event, args) ?: return null
+        val request = buildRequest(user)
         val data = ratingRequest(request) ?: return null
 
-        // TODO: Replace this temporary fix
-        val icon = if (args.isEmpty())
-            MaimaiSettingsTable[event.sender.id, "icon"] ?.toIntOrNull() ?: 101
-        else
-            101
-        val plate = if (args.isEmpty())
-            MaimaiSettingsTable[event.sender.id, "plate"] ?.toIntOrNull()
-                ?: data.plate ?.let { parsePlate(it) } ?: 11
-        else
-            11
-
         return RatingResponse(
-            name = data.nickname,
-            rating = data.rating,
-            course = data.additionalRating + if (data.additionalRating > 10) 1 else 0,
-            icon = icon,
-            plate = plate,
-            ratingList = data.charts.sd.mapNotNull { record ->
+            player = PlayerInfo(
+                nickname = data.nickname,
+                rating = data.rating,
+                course = data.additionalRating + if (data.additionalRating > 10) 1 else 0
+            ),
+            oldRatingList = data.charts.sd.mapNotNull { record ->
                 record.toRecord()
             },
             newRatingList = data.charts.dx.mapNotNull { record ->
@@ -145,93 +60,56 @@ class DivingFish(
     }
 
     override suspend fun getPlayerRecord(
-        event: MessageEvent,
-        args: String,
+        user: UserQueryParams,
         music: MusicInfo
     ): List<Record>? {
         val ids = listOf(music.id)
-        return getRecordsDeveloper(ids, event, args, true) ?.records
+        return getRecordsDeveloper(user, ids, true) ?.records
     }
 
     override suspend fun getPlayerRecords(
-        event: MessageEvent,
-        args: String,
+        user: UserQueryParams,
         musics: List<MusicInfo>
     ): RecordsResponse? {
         val ids = musics.map { it.id }
-        return getRecordsDeveloper(ids, event, args)
+        return getRecordsDeveloper(user, ids)
     }
 
     suspend fun getRecordsDeveloper(
+        user: UserQueryParams,
         ids: List<Int>,
-        event: MessageEvent,
-        args: String,
         simple: Boolean = false
     ): RecordsResponse? {
-        val request = buildRequest(event, args) {
+        val request = buildRequest(user) {
             putJsonArray("music_id") {
                 ids.forEach { id ->
                     add(JsonPrimitive(id.toString()))
                 }
             }
-        } ?: return null
+        }
         val data = recordRequestDeveloper(request).mapNotNull { it.toRecord() }
 
-        return getRecordsResponse(event, args, simple, data)
-    }
-
-    suspend fun getRecordsByPlate(
-        ids: List<Int>,
-        event: MessageEvent,
-        args: String,
-        simple: Boolean = false
-    ): RecordsResponse? {
-        val request = buildRequest(event, args) {
-            putJsonArray("version") {
-                divingFishVersions.keys.forEach { version ->
-                    add(JsonPrimitive(version))
-                }
-            }
-        } ?: return null
-        val data = recordsRequest(request)
-            ?.verList?.filter { it.id in ids }?.mapNotNull { it.toRecord() }
-            ?: return null
-
-        return getRecordsResponse(event, args, simple, data)
+        return getRecordsResponse(user, simple, data)
     }
 
     suspend fun getRecordsResponse(
-        event: MessageEvent,
-        args: String,
+        user: UserQueryParams,
         simple: Boolean = false,
         data: List<Record>
     ): RecordsResponse? = if (simple) {
         RecordsResponse(
-            name = "",
-            rating = 0,
-            course = 0,
-            icon = 0,
-            plate = 0,
+            player = PlayerInfo(),
             records = data
         )
     } else {
-        val request = buildRequest(event, args) ?: return null
+        val request = buildRequest(user)
         val basicInfo = ratingRequest(request) ?: return null
-        val icon = if (args.isEmpty())
-            MaimaiSettingsTable[event.sender.id, "icon"] ?.toIntOrNull() ?: 101
-        else
-            101
-        val plate = if (args.isEmpty())
-            MaimaiSettingsTable[event.sender.id, "plate"] ?.toIntOrNull()
-                ?: basicInfo.plate ?.let { parsePlate(it) } ?: 11
-        else
-            11
         RecordsResponse(
-            name = basicInfo.nickname,
-            rating = basicInfo.rating,
-            course = basicInfo.additionalRating + if (basicInfo.additionalRating > 10) 1 else 0,
-            icon = icon,
-            plate = plate,
+            player = PlayerInfo(
+                nickname = basicInfo.nickname,
+                rating = basicInfo.rating,
+                course = basicInfo.additionalRating + if (basicInfo.additionalRating > 10) 1 else 0
+            ),
             records = data
         )
     }
@@ -245,20 +123,6 @@ class DivingFish(
             HttpStatusCode.BadRequest -> throw UserNotFoundException()
             HttpStatusCode.Forbidden -> throw UserDeniedException()
             HttpStatusCode.OK -> response.body<DivingFishRatingResponse>()
-            else -> throw UnknownException()
-        }
-    }
-
-    suspend fun recordsRequest(request: JsonObject): DivingFishPlateResponse? {
-        val response = client.post("$server/query/plate") {
-            contentType(ContentType.Application.Json)
-            setBody(request)
-        }
-
-        return when (response.status) {
-            HttpStatusCode.BadRequest -> throw UserNotFoundException()
-            HttpStatusCode.Forbidden -> throw UserDeniedException()
-            HttpStatusCode.OK -> response.body<DivingFishPlateResponse>()
             else -> throw UnknownException()
         }
     }
@@ -282,22 +146,15 @@ class DivingFish(
         headers["developer-token"] = token
     }
 
-    suspend fun buildRequest(
-        event: MessageEvent,
-        args: String,
+    fun buildRequest(
+        user: UserQueryParams,
         additional: JsonObjectBuilder.() -> Unit = {}
-    ): JsonObject? {
-        val target = if (args.lowercase().startsWith("qq"))
-            args.lowercase().substringAfter("qq").trim().toLongOrNull()
-        else
-            null
+    ): JsonObject {
         val request = buildJsonObject {
             put("b50", JsonPrimitive(true))
-            if (args.isEmpty() || target != null) {
-                val qq = target ?: QQBindTable[event.sender.id] ?: throw UserBindRequiredException()
-                put("qq", JsonPrimitive(qq))
-            } else {
-                put("username", JsonPrimitive(args))
+            when (user) {
+                is UserQueryParams.QQ -> put("qq", JsonPrimitive(user.qq))
+                is UserQueryParams.Username -> put("username", JsonPrimitive(user.username))
             }
             additional()
         }
@@ -315,30 +172,13 @@ class DivingFish(
             music = music,
             chart = chart,
             achievement = achievement,
-            comboStatus = ComboStatus.Companion.of(fc),
-            syncStatus = SyncStatus.Companion.of(fs),
+            comboStatus = ComboStatus.of(fc),
+            syncStatus = SyncStatus.of(fs),
             deluxeScore = dxScore,
             rate = rate,
             rating = Rating.calc(chart, achievement)
         )
     }
 
-    fun DivingFishPlateRecord.toRecord(): Record? {
-        val music = musics[id] ?: return null
-        val chart = if (music.genre == MusicGenre.Utage)
-            music.charts[0]
-        else
-            music.charts[levelIndex]
-        val achievement = (achievements * 10000).toInt()
-        return Record(
-            music = music,
-            chart = chart,
-            achievement = achievement,
-            comboStatus = ComboStatus.Companion.of(fc),
-            syncStatus = SyncStatus.Companion.of(fs),
-            deluxeScore = 0,
-            rate = Rate[achievement],
-            rating = Rating.calc(chart, achievement)
-        )
-    }
+    suspend fun getStats(): DivingFishStats = client.get("$server/chart_stats").body<DivingFishStats>()
 }

@@ -1,225 +1,149 @@
 package xyz.xszq.bot.component
 
-import korlibs.io.util.UUID
-import kotlinx.coroutines.DelicateCoroutinesApi
+import okio.IOException
 import xyz.xszq.bot.Maimai
-import xyz.xszq.bot.Maimai.Companion.textMode
-import xyz.xszq.bot.MarkdownTemplates
 import xyz.xszq.bot.api.LXNS
 import xyz.xszq.bot.api.MaimaiAPI
-import xyz.xszq.bot.api.exception.UserBindRequiredException
-import xyz.xszq.bot.api.exception.UserDeniedException
-import xyz.xszq.bot.api.exception.UserNotFoundException
-import xyz.xszq.bot.api.exception.UserOARequiredException
+import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.database.QQBindTable
 import xyz.xszq.bot.event.MessageEvent
-import xyz.xszq.bot.music.MusicInfo
-import xyz.xszq.bot.music.RatingResponse
-import xyz.xszq.bot.music.Record
-import xyz.xszq.bot.music.RecordsResponse
-import xyz.xszq.bot.newLine
-import xyz.xszq.bot.reply
-
-typealias MaimaiErrorHandler = suspend MessageEvent.(Throwable, String) -> Boolean
+import xyz.xszq.bot.exception.NotSupportedException
+import xyz.xszq.bot.exception.QQBindRequiredException
+import xyz.xszq.bot.exception.UserNotFoundException
+import xyz.xszq.bot.music.*
 
 class MaimaiQuery(
     val maimai: Maimai
 ) {
-    /**
-     * Messages.
-     */
-    val noBackendBindings = "您还未在查分器上绑定QQ号，请前往水鱼/落雪查分器设置您的QQ号。"
-    val noQQBindings = "为了继续后续查询，请输入“/bind qq号”绑定您的QQ号："
-    val noRecords = "在当前筛选条件下未查询到歌曲记录。"
-    val userNotFound = "您查询的用户不存在。"
-    val userDenied = "您查询的用户设置了查分器隐私或未同意查分器协议，请检查设置。"
-    val userEULA = "请先前往查分器同意用户协议再进行查询。"
+    companion object {
+        const val NO_BACKEND_BINDINGS = "您还未在查分器上绑定QQ号，请前往水鱼/落雪查分器设置您的QQ号。"
+        const val NO_QQ_BINDINGS = "为了继续后续查询，请输入\"/bind qq号\"绑定您的QQ号："
+        const val NO_RECORDS = "在当前筛选条件下未查询到歌曲记录。"
+        const val USER_NOT_FOUND = "您查询的用户不存在。"
+        const val USER_DENIED = "您查询的用户设置了查分器隐私或未同意查分器协议，请检查设置。"
+        const val USER_EULA = "请先前往查分器同意用户协议再进行查询。"
+        const val NEED_AUTHORIZATION = "该功能需要您授权BOT访问您的成绩信息"
+        const val QUERY_FAILED = "查询失败，请重试"
+    }
 
-    suspend fun messageUserNeedBind(
+    private fun isRetryableError(e: Throwable) = when (e) {
+        is UserNotFoundException -> true
+        is IOException -> true
+        else -> false
+    }
+
+    // 获取要查询的目标用户的参数
+    suspend fun getQueryParams(
         event: MessageEvent,
-        args: String
-    ) = event.run {
-        if (args.isBlank()) { // 查询绑定的用户
-            if (QQBindTable.hasBinding(sender.id)) {
-                if (event.textMode())
-                    reply(noBackendBindings)
-                else
-                    reply(MarkdownTemplates.Templates.SELECT_BACKENDS)
-            } else {
-                if (event.textMode())
-                    reply(noQQBindings)
-                else
-                    reply(MarkdownTemplates.Templates.BIND_QQ)
+        queryArgs: String ?= null
+    ): UserQueryParams = when {
+        queryArgs.isNullOrBlank() -> {
+            val qq = QQBindTable[event.sender.id] ?: throw QQBindRequiredException()
+            val settings = MaimaiSettingsTable.settings(event.sender.id)
+            UserQueryParams.QQ(qq, event, true, settings)
+        }
+        queryArgs.startsWith("qq") -> {
+            val qq = queryArgs.substringAfter("qq").toLongOrNull()
+            qq ?.let {
+                UserQueryParams.QQ(qq, event, false)
+            } ?: run {
+                UserQueryParams.Username(queryArgs, event, false)
             }
-        } else { // 指定的用户不存在
-            reply(userNotFound)
+        }
+        else -> {
+            UserQueryParams.Username(queryArgs, event, false)
         }
     }
 
-    suspend fun messageUserDenied(
-        event: MessageEvent,
-        args: String
-    ) = event.run {
-        if (args.isBlank()) { // 查询绑定的用户
-            if (event.textMode())
-                reply(userEULA)
-            else
-                reply(MarkdownTemplates.Templates.USER_EULA)
-        } else { // 指定的用户不存在
-            reply(userDenied)
-        }
+    // 根据用户设置列出后端
+    suspend fun listBackends(
+        user: UserQueryParams
+    ): List<MaimaiAPI> {
+        var backends = listOf(
+            maimai.backend("diving-fish"),
+            maimai.backend("lxns"),
+        ).toMutableList()
+        if (user.isSelf)
+            MaimaiSettingsTable[user.event.sender.id, "prober"] ?.let { prefer ->
+                if (prefer.isBlank())
+                    return@let
+                backends = (backends.filter { it.id == prefer })
+                    .toMutableList()
+            }
+        return backends
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
-    suspend fun requestOA(
-        event: MessageEvent
-    ) = event.run {
-        val token = UUID.randomUUID().toString()
-        maimai.api.bindTokens[token] = WaitingEventData(this)
-        val authUrl = "https://bot-api.otmdb.cn/jump/lxns-oa/$token"
-
-        if (textMode()) {
-            reply(buildString {
-                appendLine("使用该功能时，需要您授权BOT访问您在落雪查分器的全部成绩信息。请您点击链接授权：")
-                appendLine(authUrl)
-            }.trim().newLine())
-        } else {
-            reply(MarkdownTemplates.Templates.oauth(authUrl))
-        }
+    private fun mergeSettings(
+        existing: PlayerSettings?,
+        userSettings: PlayerSettings?
+    ): PlayerSettings? = when {
+        userSettings == null -> existing
+        existing == null ->
+            if (userSettings.avatar == null && userSettings.plate == null) null
+            else userSettings
+        else -> PlayerSettings(
+            avatar = userSettings.avatar ?: existing.avatar,
+            plate = userSettings.plate ?: existing.plate
+        )
     }
 
-    suspend fun <R> rating(
-        event: MessageEvent,
-        args: String,
-        handler: suspend MessageEvent.(RatingResponse, MaimaiAPI) -> R?
-    ): R? = event.run query@ {
-        // Temporary fix
-        // TODO: Process exception in a more elegant way
-        var lastException: Throwable? = null
-        val (response, backend) = maimai.backendsWithPriority(event, args).firstNotNullOfOrNull { backend ->
+    suspend fun rating(
+        user: UserQueryParams
+    ): Pair<RatingResponse, MaimaiAPI> {
+        val result = listBackends(user).firstNotNullOfOrNull { backend ->
             runCatching {
-                backend.getPlayerRating(this, args)
+                backend.getPlayerRating(user)
             }.onFailure { e ->
-                if (errorHandler(e, args))
-                    return@query null
-                lastException = e
+                if (!isRetryableError(e))
+                    throw e
             }.getOrNull() ?.let { Pair(it, backend) }
-        } ?: run {
-            if (lastException is UserNotFoundException)
-                messageUserNeedBind(this, args)
-            else
-                reply("查询失败")
-            return@query null
-        }
-        return handler(response, backend)
-    }
-
-    suspend fun <R> records(
-        event: MessageEvent,
-        musics: List<MusicInfo>,
-        args: String = "",
-        handler: suspend MessageEvent.(RecordsResponse, MaimaiAPI) -> R?
-    ): R? = event.run query@ {
-        var lastException: Throwable? = null
-        val (response, backend) = maimai.backendsWithPriority(event, args).firstNotNullOfOrNull { backend ->
-            runCatching {
-                backend.getPlayerRecords(this, args, musics)
-            }.onFailure { e ->
-                if (errorHandler(e, args))
-                    return@query null
-                lastException = e
-            }.getOrNull() ?.let { Pair(it, backend) }
-        } ?: run {
-            if (lastException is UserNotFoundException)
-                messageUserNeedBind(this, args)
-            else
-                reply("查询失败")
-            return@query null
-        }
-        return handler(response, backend)
+        } ?: throw UserNotFoundException()
+        result.first.settings = mergeSettings(result.first.settings, user.settings)
+        return result
     }
 
     suspend fun records(
-        event: MessageEvent,
+        user: UserQueryParams,
         musics: List<MusicInfo>
-    ) = runCatching {
-        records(event, musics) { result, _ -> result }
-    }.getOrNull()
-
-    suspend fun <R> record(
-        event: MessageEvent,
-        music: MusicInfo,
-        handler: suspend MessageEvent.(List<Record>) -> R?
-    ): R? = event.run query@ {
-        var lastException: Throwable? = null
-        val response = maimai.backendsWithPriority(event, "").firstNotNullOfOrNull { backend ->
+    ): Pair<RecordsResponse, MaimaiAPI> {
+        val result = listBackends(user).firstNotNullOfOrNull { backend ->
             runCatching {
-                backend.getPlayerRecord(this, "", music)
+                backend.getPlayerRecords(user, musics)
             }.onFailure { e ->
-                if (errorHandler(e, ""))
-                    return@query null
-                lastException = e
-            }.getOrNull()
-        } ?: run {
-            if (lastException is UserNotFoundException)
-                messageUserNeedBind(this, "")
-            else
-                reply("查询失败")
-            return@query null
-        }
-        return handler(response)
-    }
-    suspend fun <R> recent(
-        event: MessageEvent,
-        args: String,
-        handler: suspend MessageEvent.(RecordsResponse, MaimaiAPI) -> R?
-    ): R? = event.run query@ {
-        // Temporary fix
-        // TODO: Process exception in a more elegant way
-        var lastException: Throwable? = null
-        val (response, backend) = maimai.backendsWithPriority(event, args).also {
-            if (it.none { it is LXNS }) {
-                reply("该功能仅支持落雪查分器。")
-                return@query null
-            }
-        }.filter { it is LXNS }.firstNotNullOfOrNull { backend ->
-            if (backend !is LXNS)
-                return@query null
-            runCatching {
-                backend.getPlayerRecent(this, args)
-            }.onFailure { e ->
-                if (errorHandler(e, args))
-                    return@query null
-                lastException = e
+                if (!isRetryableError(e))
+                    throw e
             }.getOrNull() ?.let { Pair(it, backend) }
-        } ?: run {
-            if (lastException is UserNotFoundException)
-                messageUserNeedBind(this, args)
-            else
-                reply("请修改落雪查分器的爬取模式为增量爬取。并重新导入一次后再进行查询。")
-            return@query null
-        }
-        return handler(response, backend)
+        } ?: throw UserNotFoundException()
+        result.first.settings = mergeSettings(result.first.settings, user.settings)
+        return result
     }
 
-    val errorHandler: MaimaiErrorHandler = handler@ { e, args ->
-        when (e) {
-            is UserNotFoundException -> {
-                return@handler false
-            }
-            is UserBindRequiredException -> {
-                messageUserNeedBind(this, args)
-            }
-            is UserDeniedException -> {
-                messageUserDenied(this, args)
-            }
-            is UserOARequiredException -> {
-                requestOA(this)
-            }
-            else -> {
-                e.printStackTrace()
-            }
-        }
-        return@handler true
+    suspend fun record(
+        user: UserQueryParams,
+        music: MusicInfo
+    ): List<Record> {
+        val result = listBackends(user).firstNotNullOfOrNull { backend ->
+            runCatching {
+                backend.getPlayerRecord(user, music)
+            }.onFailure { e ->
+                if (!isRetryableError(e))
+                    throw e
+            }.getOrNull()
+        } ?: throw UserNotFoundException()
+        return result
+    }
+    suspend fun recent(
+        user: UserQueryParams,
+    ): Pair<RecordsResponse, MaimaiAPI> {
+        val backend = listBackends(user).filterIsInstance<LXNS>().firstOrNull()
+            ?: throw NotSupportedException("该功能仅支持落雪查分器")
+        val response = runCatching {
+            backend.getPlayerRecent(user)
+        }.onFailure { e ->
+            if (!isRetryableError(e))
+                throw e
+        }.getOrNull() ?: throw UserNotFoundException()
+        response.settings = mergeSettings(response.settings, user.settings)
+        return Pair(response, backend)
     }
 }

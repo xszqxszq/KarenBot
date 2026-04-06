@@ -2,9 +2,14 @@ package xyz.xszq.bot.controller
 
 import korlibs.math.toIntCeil
 import xyz.xszq.bot.Maimai
+import xyz.xszq.bot.component.MaimaiQuery
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.music.MusicDifficulty
-import xyz.xszq.bot.query.Query
+import xyz.xszq.bot.music.UserQueryParams
+import xyz.xszq.bot.query.ComboQuery
+import xyz.xszq.bot.query.ComboQuery.filterCharts
+import xyz.xszq.bot.query.ComboQuery.filterMusics
+import xyz.xszq.bot.query.ComboQuery.filterRecords
 import xyz.xszq.bot.reply
 
 @Suppress("unused")
@@ -16,23 +21,28 @@ class RecordController(
         commandEndsWith("进度") { raw ->
             val args = raw.split(" ")
             val command = args.first()
-            val arg = args.getOrNull(1) ?: ""
-            handleProgress(this, command, arg) ?.let { result ->
-                reply(result)
-            } ?: reply(maimai.query.noRecords)
+            val queryArgs = args.getOrNull(1) ?: ""
+            val user = maimai.query.getQueryParams(this, queryArgs)
+            runCatching {
+                handleProgress(this, command, user) ?.let { result ->
+                    reply(result)
+                } ?: reply(MaimaiQuery.NO_RECORDS)
+            }.onFailure { e ->
+                handleError(this, e, user)
+            }
         }
     }
 
     suspend fun handleProgress(
         event: MessageEvent,
         fullCommand: String,
-        args: String
+        user: UserQueryParams
     ): String? {
-        val filters = Query.filters(fullCommand)
-        val musics = Query.filterMusics(filters, maimai.musics())
-        val charts = Query.filterCharts(filters, maimai.musics())
-        val response = maimai.query.records(event, musics) ?: return null
-        val records = Query.filterRecords(filters, response.records, true) ?: return null
+        val filters = ComboQuery.filters(fullCommand)
+        val musics = filters.filterMusics(maimai.musics())
+        val charts = filters.filterCharts(maimai.musics())
+        val (response, _) = maimai.query.records(user, musics)
+        val records = filters.filterRecords(response.records, true) ?: return null
         if (records.size == charts.size)
             return "您已经达成了${fullCommand}的条件。"
         return buildString {

@@ -42,15 +42,6 @@ sealed class Element(
         child.parent = this
         children.add(child)
     }
-    fun remove(child: Element) {
-        children.remove(child)
-        child.parent = null
-    }
-    fun collectElementsWithId(map: MutableMap<String, Element>) {
-        if (id != null)
-            map[id] = this
-        children.forEach { it.collectElementsWithId(map) }
-    }
 
     operator fun get(path: String): Element? {
         val parts = path.split("/")

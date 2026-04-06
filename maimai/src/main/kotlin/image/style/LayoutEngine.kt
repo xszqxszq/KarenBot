@@ -80,7 +80,7 @@ object LayoutEngine {
 
                             fontStyle = FontStyle(
                                 element.style.fontWeight,
-                                FontWidth.Companion.NORMAL,
+                                FontWidth.NORMAL,
                                 FontSlant.UPRIGHT
                             )
                         }
@@ -202,6 +202,18 @@ object LayoutEngine {
         element.measuredHeight = finalH
     }
 
+    private fun measureChildSize(
+        isRow: Boolean,
+        child: Element,
+        line: FlexLine
+    ) {
+        if (isRow && child.style.height == null) {
+            child.measuredHeight = maxOf(0f, line.crossSize - child.style.margin.top - child.style.margin.bottom)
+        } else if (!isRow && child.style.width == null) {
+            child.measuredWidth = maxOf(0f, line.crossSize - child.style.margin.left - child.style.margin.right)
+        }
+    }
+
     private fun layout(element: Element, startX: Float, startY: Float) {
         element.layoutX = startX
         element.layoutY = startY
@@ -258,11 +270,7 @@ object LayoutEngine {
                             child.measuredHeight = newCross / ratio
                         }
                     } else if (child is Div) {
-                        if (isRow && child.style.height == null) {
-                            child.measuredHeight = maxOf(0f, line.crossSize - child.style.margin.top - child.style.margin.bottom)
-                        } else if (!isRow && child.style.width == null) {
-                            child.measuredWidth = maxOf(0f, line.crossSize - child.style.margin.left - child.style.margin.right)
-                        }
+                        measureChildSize(isRow, child, line)
                     }
                 }
                 line.mainSize = line.items.sumOf { it.mainSize(isRow).toDouble() }.toFloat()
@@ -305,11 +313,7 @@ object LayoutEngine {
                     AlignItems.STRETCH -> {
                         crossOffset = 0f
                         if (child !is Span) {
-                            if (isRow && child.style.height == null) {
-                                child.measuredHeight = maxOf(0f, line.crossSize - child.style.margin.top - child.style.margin.bottom)
-                            } else if (!isRow && child.style.width == null) {
-                                child.measuredWidth = maxOf(0f, line.crossSize - child.style.margin.left - child.style.margin.right)
-                            }
+                            measureChildSize(isRow, child, line)
                         }
                     }
                 }

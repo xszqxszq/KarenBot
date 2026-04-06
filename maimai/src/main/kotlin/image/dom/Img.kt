@@ -93,4 +93,8 @@ class Img(
     override fun clone(): Element {
         return Img(this.id, this.src).also { copyBasePropertiesTo(it) }
     }
+
+    companion object {
+        fun Img.noScale() = apply { style.objectFit = ObjectFit.NONE }
+    }
 }

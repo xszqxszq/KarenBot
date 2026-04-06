@@ -12,12 +12,12 @@ class Filter(
     val nowVersion: () -> GameVersion? = defaultVersion,
     val disable15: Boolean = false,
     val name: String? = null,
-    val fitLevelValues: Boolean = false
+    val fitLevelValue: Boolean = false
 ) {
     companion object {
-        val defaultChartFilter: (ChartInfo) -> Boolean = { it -> true }
-        val defaultRecordFilter: (Record) -> Boolean = { it -> true }
-        val defaultSort: (Record) -> Int = { it -> -it.rating }
+        val defaultChartFilter: (ChartInfo) -> Boolean = { true }
+        val defaultRecordFilter: (Record) -> Boolean = { true }
+        val defaultSort: (Record) -> Int = { -it.rating }
         val defaultVersion: () -> GameVersion? = { null }
     }
 }

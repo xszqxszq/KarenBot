@@ -15,7 +15,7 @@ class ArcadeGroup(id: EntityID<Int>) : IntEntity(id) {
     }
     suspend fun find(name: String) = suspendedTransactionAsync {
         arcades.firstOrNull { arcade ->
-            arcade.name.lowercase() == name.lowercase() ||
+            arcade.name.equals(name, ignoreCase = true) ||
                 name.lowercase() in arcade.aliases.split(",").map { it.lowercase() } }
     }.await()
 }

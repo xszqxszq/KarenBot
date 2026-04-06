@@ -234,7 +234,7 @@ object StyleParser {
     }
 
     private fun parseShadow(value: String): TextShadow? {
-        var colorStr: String? = null
+        var colorStr: String?
         var remainingStr = value
 
         val rgbRegex = Regex("""rgba?\s*\([^)]+\)""")

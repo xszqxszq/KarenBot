@@ -1,161 +1,148 @@
 package xyz.xszq.bot.controller
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.Image
 import xyz.xszq.bot.*
 import xyz.xszq.bot.Maimai.Companion.textMode
-import xyz.xszq.bot.api.DivingFish
-import xyz.xszq.bot.api.LXNS
-import xyz.xszq.bot.api.MaimaiAPI
 import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.exception.FilterNoResultException
+import xyz.xszq.bot.exception.NoDataException
 import xyz.xszq.bot.exception.NotFoundException
+import xyz.xszq.bot.exception.NotSupportedException
 import xyz.xszq.bot.music.*
 import xyz.xszq.bot.payload.LocalCourseInfo
+import xyz.xszq.bot.query.ComboQuery
+import xyz.xszq.bot.query.ComboQuery.filterCharts
+import xyz.xszq.bot.query.ComboQuery.filterMusics
+import xyz.xszq.bot.query.ComboQuery.filterRecords
+import xyz.xszq.bot.query.ComboQuery.isDetailed
+import xyz.xszq.bot.query.ComboQuery.isPlate
+import xyz.xszq.bot.query.ComboQuery.noRecordFilter
+import xyz.xszq.bot.query.ComboQuery.params
 import xyz.xszq.bot.query.Filter
-import xyz.xszq.bot.query.Query
 import kotlin.random.Random
 
 @Suppress("unused")
 class ImageController(
     override val maimai: Maimai
 ): Controller(maimai) {
+    var tips = mutableListOf<String>()
     override suspend fun setRoute() = maimai.route("/mai") {
-        commandEndsWith("50") { raw ->
-            if (raw.toIntOrNull() != null)
-                return@commandEndsWith
-            val args = raw.split(" ")
-            val command = args.first()
-            if ("id" in command || "查歌" in command || "预览" in command)
-                return@commandEndsWith
-            val arg = args.getOrNull(1) ?: ""
-            when (command) {
-                "设置b" -> return@commandEndsWith
-                "b" -> handleRating50(this, arg)
-                "r" -> handleRecent50(this, arg)
-                "歌" -> handleMusicRating(this, args.subList(1, args.size).joinToString(" "), 35)
-                "随心配" -> reply("https://otmdb.cn/bot/maimai/combo")
-                else -> runCatching {
-                    handle50(this, command, arg)
+        tips = maimai.config.tips.toMutableList()
+        // b50 / b40 及扩展功能
+        listOf(50, 40).forEach { total ->
+            commandEndsWith(total.toString()) { raw ->
+                val args = raw.split(" ")
+                val command = args.first()
+
+                when {
+                    "id" in command || "查歌" in command || "预览" in command -> return@commandEndsWith
+                    command == "设置b" -> return@commandEndsWith
+                    command == "随心配" -> {
+                        reply("https://otmdb.cn/bot/maimai/combo")
+                        return@commandEndsWith
+                    }
+                }
+
+                val queryArgs = args.getOrNull(1) ?: ""
+                val user = maimai.query.getQueryParams(this, queryArgs)
+                runCatching {
+                    when (command) {
+                        "b" -> handleRating(total, user)
+                        "r" -> handleRecent(total, user)
+                        "歌" -> {
+                            val musicQuery = args.subList(1, args.size).joinToString(" ")
+                            handleMusicRating(total, user, musicQuery)
+                        }
+                        else -> handleCombo(total, user, command)
+                    }
                 }.onFailure { e ->
-                    e.printStackTrace()
+                    handleError(this, e, user)
                 }
             }
-            if (command == "b") {
-                return@commandEndsWith
-            }
         }
-        commandEndsWith("40") { raw ->
-            val args = raw.split(" ")
-            val command = args.first()
-            if ("id" in command || "查歌" in command || "预览" in command)
-                return@commandEndsWith
-            val arg = args.getOrNull(1) ?: ""
-            when (command) {
-                "b" -> handleRating40(this, arg)
-                "歌" -> handleMusicRating(this, args.subList(1, args.size).joinToString(" "), 25)
-                else -> runCatching {
-                    handle40(this, command, arg)
-                }.onFailure { e ->
-                    e.printStackTrace()
-                }
-            }
-            if (command == "b") {
-                return@commandEndsWith
-            }
-        }
+        // 成绩列表
         commandEndsWith(listOf("分数列表", "分数表", "成绩列表", "成绩表")) { raw ->
             val args = raw.split(" ")
             val command = args.first()
             val page = args.getOrNull(1) ?.toIntOrNull() ?: 1
-            kotlin.runCatching {
-                handleScoreList(this, command, page)
+            val user = maimai.query.getQueryParams(this)
+            runCatching {
+                handleScoreList(command, user, page)
             }.onFailure { e ->
-                reply("生成失败")
-                e.printStackTrace()
+                handleError(this, e, user)
             }
         }
+        // 定数表
         commandEndsWith("定数表") { raw ->
             val args = raw.split(" ")
             val command = args.first()
-            kotlin.runCatching {
-                handleLevelList(this, command)
-            }.onFailure {
-                if (it.message == "TooMany") {
-                    reply("您当前查询的曲目过多")
-                } else {
-                    reply("生成失败")
-                    it.printStackTrace()
-                }
+            runCatching {
+                handleLevelList(command)
+            }.onFailure { e->
+                handleError(this, e, null)
             }
         }
+        // 完成表
         commandEndsWith(listOf("完成表", "进度表")) { raw ->
             val args = raw.split(" ")
             val command = args.first()
             if (command.endsWith("未"))
                 return@commandEndsWith
-            val arg = args.getOrNull(1) ?: ""
-            kotlin.runCatching {
-                handleLevelComplete(this, command, arg)
+
+            val queryArgs = args.getOrNull(1) ?: ""
+            val user = maimai.query.getQueryParams(this, queryArgs)
+            runCatching {
+                handleLevelComplete(command, user)
             }.onFailure { e ->
-                when {
-                    e.message == "TooMany" -> {
-                        reply("您当前查询的曲目过多")
-                    }
-                    else -> {
-                        reply("生成失败")
-                        e.printStackTrace()
-                    }
-                }
+                handleError(this, e, user)
             }
         }
+        // 未完成表
         commandEndsWith(listOf("未完成表", "未完成列表")) { raw ->
             val args = raw.split(" ")
             val command = args.first()
-            val arg = args.getOrNull(1) ?: ""
-            kotlin.runCatching {
-                handleLevelIncomplete(this, command, arg)
+            val queryArgs = args.getOrNull(1) ?: ""
+            val user = maimai.query.getQueryParams(this, queryArgs)
+            runCatching {
+                handleLevelIncomplete(command, user)
             }.onFailure { e ->
-                when {
-                    e.message == "TooMany" -> {
-                        reply("您当前查询的曲目过多")
-                    }
-                    else -> {
-                        reply("生成失败")
-                        e.printStackTrace()
+                handleError(this, e, user)
+            }
+        }
+        // 歌曲信息+成绩
+        startsWith(listOf("info", "minfo")) { musicQuery ->
+            val user = maimai.query.getQueryParams(this)
+            runCatching {
+                handleInfoScore(user, musicQuery)
+            }.onFailure { e ->
+                handleError(this, e, user)
+            }
+        }
+        // 段位表
+        val courseSubscribes = buildMap {
+            maimai.maimaiData.courses.values.forEach { course ->
+                put(course.name.toSimple().lowercase(), course)
+            }
+            courseAliases.forEach { (id, aliases) ->
+                maimai.maimaiData.courses[id]?.let { course ->
+                    aliases.forEach { alias ->
+                        put(alias.toSimple().lowercase(), course)
                     }
                 }
             }
         }
-        startsWith(listOf("info", "minfo")) { args ->
-            val found = runCatching {
-                selectMusic("info", args, false)
-            }.onFailure { e ->
-                when (e) {
-                    is NotFoundException -> reply(buildString {
-                        appendLine("未找到相关歌曲，请检查拼写。")
-                        appendLine("使用方法：info id/歌名/别名")
-                    })
-                    else -> e.printStackTrace()
-                }
-                return@startsWith
-            }.getOrNull() ?: return@startsWith
-            val (music, _) = found
-            handleInfoScore(this, music)
-        }
-
-        maimai.local.courses.values.forEach { course ->
-            startsWith(course.name.toSimple().lowercase()) { args ->
-                handleCourse(this, course, args)
-            }
-        }
-        courseAliases.forEach { (id, aliases) ->
-            aliases.forEach { alias ->
-                startsWith(alias.toSimple().lowercase()) { args ->
-                    maimai.local.courses[id] ?.let { course ->
-                        handleCourse(this, course, args)
-                    }
+        courseSubscribes.forEach { (name, course) ->
+            startsWith(name) { args ->
+                val user = maimai.query.getQueryParams(this)
+                runCatching {
+                    handleCourse(course, user)
+                }.onFailure { e ->
+                    handleError(this, e, user)
                 }
             }
         }
@@ -165,7 +152,7 @@ class ImageController(
                 reply("使用方法：段位表 段位名称\n\t例：段位表 十段\n\t例：段位表 随机紫超上")
                 return@startsWith
             }
-            val course = maimai.local.courses.values.firstOrNull {
+            val course = maimai.maimaiData.courses.values.firstOrNull {
                 it.name.toSimple().lowercase() == name
             } ?: run {
                 courseAliases.firstNotNullOfOrNull { (id, aliases) ->
@@ -174,26 +161,17 @@ class ImageController(
                     else
                         null
                 } ?.let { id ->
-                    maimai.local.courses[id]
+                    maimai.maimaiData.courses[id]
                 }
             }
             course ?.let {
-                handleCourse(this, course, args.getOrElse(1) { "" })
+                val user = maimai.query.getQueryParams(this, args.getOrNull(1))
+                handleCourse(course, user)
             } ?: run {
                 reply("未找到该段位。\n使用方法：段位表 段位名称\n\t例：段位表 十段\n\t例：段位表 随机紫超上")
             }
         }
     }
-
-    val tips = listOf(
-        "b50查询支持叠加多种条件查询啦，如「东方寸50」「术力口13ap50」「maistar50」",
-        "分数列表也支持多种条件叠加，如「东方锁血分数列表」「jack13+大将分数列表」",
-        "查询完成表/进度支持自由组合条件啦，如「v家将完成表」「东方13将完成表」「翠楼屋极进度」",
-        "如果您使用旧版QQ无法查看新版UI，可以发送「兼容模式」",
-        "b50的头像和姓名框样式支持更换，点击「修改设置」来试试吧",
-        "新版查歌搜索结果可以点击哦",
-        "可以试一试「舞萌开字母」猜歌游戏"
-    )
     fun randomTips(): String? {
         if (Random(System.currentTimeMillis() * 2).nextDouble() < 0.5)
             return "TIPS: " + tips.random(Random(System.currentTimeMillis() * 5))
@@ -217,7 +195,7 @@ class ImageController(
             result = maimai.aliases.search(args)
         }
         when (result.size) {
-            0 -> throw NotFoundException()
+            0 -> throw NotFoundException("未找到该歌曲")
             1 -> return Pair(result.first(), difficulty)
             else -> {
                 if (textMode)
@@ -253,123 +231,73 @@ class ImageController(
         }
     }
 
-    suspend fun handleRating50(
-        event: MessageEvent,
-        args: String
+    suspend fun MessageEvent.handleRating(
+        total: Int,
+        user: UserQueryParams
     ) {
-        var time = 0L
-        maimai.query.rating(event, args) { response, backend ->
-            if (response.ratingList.isEmpty() && response.newRatingList.isEmpty()) {
-                noData(backend)
-                return@rating null
-            }
-            countTime {
-                maimai.image.templateRatingNew(response, backend = backend)
-            }.let { (elapsed, result) ->
-                time = elapsed
-                result
-            }
-        }.sendResultImage("b50", event, "生成时间：${time}ms\r${randomTips()?:""}")
-    }
-    suspend fun handleRecent50(
-        event: MessageEvent,
-        args: String
-    ) {
-        var time = 0L
-        val nowVersion = maimai.local.newestVersion
-        maimai.query.recent(event, args) { response, backend ->
-            countTime {
-                maimai.image.templateBest50New(response, nowVersion, backend, true) { this }
-            }.let { (elapsed, result) ->
-                time = elapsed
-                result
-            }
-        }.sendResultImage("r50", event, "生成时间：${time}ms\r${randomTips()?:""}")
-    }
-    suspend fun handleRating40(
-        event: MessageEvent,
-        args: String
-    ) {
-        var time = 0L
-        maimai.query.rating(event, args) { response, backend ->
-            response.ratingList.forEach {
-                it.rating = Rating.calcOld(it.chart, it.achievement)
-            }
-            response.newRatingList.forEach {
-                it.rating = Rating.calcOld(it.chart, it.achievement)
-            }
-            response.rating = response.ratingList.take(25).sumOf { it.rating } +
-                    response.newRatingList.take(15).sumOf { it.rating } +
-                    Rating.courseOld(response.course)
-            countTime {
-                maimai.image.templateRatingNew(response, old = 25, new = 15, backend = backend)
-            }.let { (elapsed, result) ->
-                time = elapsed
-                result
-            }
-        }.sendResultImage("b40", event, "生成时间：${time}ms\r${randomTips()?:""}")
-    }
-    suspend fun handle50(
-        event: MessageEvent,
-        fullCommand: String,
-        args: String
-    ) {
-        val filters = Query.filters(fullCommand) ?: return
-        val musics = Query.filterMusics(filters, maimai.musics())
-        val nowVersion = Query.filterNowVersion(filters) ?: maimai.local.newestVersion
-        if (musics.isEmpty()) {
-            event.reply(maimai.query.noRecords)
-            return
+        val (response, api) = maimai.query.rating(user)
+        if (response.oldRatingList.isEmpty() && response.newRatingList.isEmpty()) {
+            throw NoDataException(api = api)
         }
-        val isAllRequired = Query.isAllRequired(filters)
-        val isFitLevelValues = Query.isFitLevelValues(filters)
-        var time = 0L
-        maimai.query.records(event, musics, args) { response, backend ->
-            countTime {
-                maimai.image.templateBest50New(response, nowVersion, backend, isAllRequired, isFitLevelValues) {
-                    Query.filterRecords(filters, this)
-                }
-            }.let { (elapsed, result) ->
-                time = elapsed
-                result
-            }
-        }.sendResultImage(fullCommand+"50", event, "生成时间：${time}ms\r${randomTips()?:""}")
+        val (elapsed, result) = countTime {
+            maimai.image.rating.bests(total, response, api.name)
+        }
+        result.sendResultImage("b50", this, "生成时间：${elapsed}ms\r${randomTips()?:""}")
     }
-    suspend fun handle40(
-        event: MessageEvent,
-        fullCommand: String,
-        args: String
+    suspend fun MessageEvent.handleRecent(
+        total: Int,
+        user: UserQueryParams
     ) {
-        val filters = Query.filters(fullCommand)
-        val musics = Query.filterMusics(filters, maimai.musics())
-        val nowVersion = Query.filterNowVersion(filters) ?: maimai.local.newestVersion
-        val isAllRequired = Query.isAllRequired(filters)
-        val isFitLevelValues = Query.isFitLevelValues(filters)
-        var time = 0L
-        maimai.query.records(event, musics, args) { response, backend ->
-            countTime {
-                maimai.image.templateBest40New(response, nowVersion, backend, isAllRequired, isFitLevelValues) {
-                    Query.filterRecords(filters, this)
-                }
-            }.let { (elapsed, result) ->
-                time = elapsed
-                result
-            }
-        }.sendResultImage(fullCommand+"40", event, "生成时间：${time}ms\r${randomTips()?:""}")
+        val (response, api) = maimai.query.recent(user)
+        val (elapsed, result) = countTime {
+            maimai.image.rating.comboBests(
+                total = total,
+                player = response.player,
+                settings = response.settings,
+                allRecords = response.records,
+                api = api.name
+            )
+        }
+        result.sendResultImage("r50", this, "生成时间：${elapsed}ms\r${randomTips()?:""}")
+    }
+    suspend fun MessageEvent.handleCombo(
+        total: Int,
+        user: UserQueryParams,
+        combo: String,
+    ) {
+        val filters = ComboQuery.filters(combo) ?: return
+        val musics = filters.filterMusics(maimai.musics())
+        if (musics.isEmpty()) {
+            throw FilterNoResultException()
+        }
+        val filterParams = filters.params(combo)
+
+        val (response, api) = maimai.query.records(user, musics)
+        val filtered = filters.filterRecords(response.records) ?: emptyList()
+        val (elapsed, result) = countTime {
+            maimai.image.rating.comboBests(
+                total = total,
+                player = response.player,
+                settings = response.settings,
+                allRecords = filtered,
+                filterParams = filterParams,
+                api = api.name
+            )
+        }
+        result.sendResultImage("${combo}50", this, "生成时间：${elapsed}ms\r${randomTips()?:""}")
     }
 
-    suspend fun handleMusicRating(
-        event: MessageEvent,
-        args: String,
-        old: Int = 35
-    ) = event.run {
-        val bests = old + 15
-        if (args.isBlank()) {
+    suspend fun MessageEvent.handleMusicRating(
+        total: Int,
+        user: UserQueryParams,
+        musicQuery: String
+    ) {
+        if (musicQuery.isBlank()) {
             val help = buildString {
-                appendLine("该功能可查看填充${bests}遍同一首歌的b${bests}。")
-                appendLine("使用方法：歌${bests} (难度)id/名称/别称")
-                appendLine("\t例：歌${bests} 紫茄子")
-                appendLine("\t例：歌${bests} kib")
+                appendLine("该功能可查看填充${total}遍同一首歌的b${total}。")
+                appendLine("使用方法：歌${total} (难度)id/名称/别称")
+                appendLine("\t例：歌${total} 紫茄子")
+                appendLine("\t例：歌${total} kib")
             }.trim()
             if (textMode())
                 reply(help.newLine())
@@ -380,186 +308,166 @@ class ImageController(
                 ).toMessage(
                     MarkdownTemplates.Keyboards.tryIt("歌50")
                 ))
-            return@run
+            return
         }
-        val found = runCatching {
-            selectMusic("歌$bests", args, true)
-        }.onFailure { e ->
-            when (e) {
-                is NotFoundException -> reply("未找到该歌曲！")
-                else -> e.printStackTrace()
+        val (music, difficulty) = selectMusic(
+            "歌$total",
+            musicQuery,
+            true
+        ) ?: return
+
+        val (info, api) = maimai.query.rating(user)
+        val recordResponse = maimai.query.record(user, music)
+
+        val record = difficulty ?.let {
+            recordResponse.firstOrNull {
+                it.chart.difficulty == difficulty
+            } ?: throw NotFoundException("未查询到该歌曲该难度的游玩记录")
+        } ?: run {
+            recordResponse.sortedBy {
+                -it.chart.difficulty.value
+            }.firstOrNull {
+                it.achievement != 0
             }
-            return@run
-        }.getOrNull() ?: return@run
-        val (music, difficulty) = found
-        runCatching {
-            handleMusicRating(event, args, old, music, difficulty)
-        }.onFailure { e ->
-            when (e) {
-                is NotFoundException -> reply("未查询到该歌曲${if (difficulty != null) "该难度" else ""}的游玩记录。")
-                else -> e.printStackTrace()
-            }
-        }
+        } ?: throw NotFoundException("未查询到该歌曲的游玩记录")
+
+        maimai.image.rating.comboBests(
+            total = total,
+            player = info.player,
+            settings = info.settings,
+            allRecords = List(total) { record },
+            filterParams = null,
+            api = api.name
+        )
+
     }
-    suspend fun handleMusicRating(
-        event: MessageEvent,
-        args: String,
-        old: Int = 35,
-        music: MusicInfo,
-        difficulty: MusicDifficulty ?= null
-    ) = maimai.query.rating(event, "") { rating, backend ->
-        maimai.query.record(event, music) { response ->
-            val record = difficulty ?.let {
-                response.firstOrNull { it.chart.difficulty == difficulty } ?: throw NotFoundException()
-            } ?: run {
-                response.sortedBy { -it.chart.difficulty.value }.firstOrNull { it.achievement != 0 }
-            } ?: throw NotFoundException()
-            if (old == 25)
-                record.rating = Rating.calcOld(record.chart, record.achievement)
-            rating.ratingList = List(old) { record }
-            rating.newRatingList = List(15) { record }
-            rating.rating = rating.ratingList.sumOf { it.rating } + rating.newRatingList.sumOf { it.rating }
-            maimai.image.templateRatingNew(rating, old = old, backend = backend)
-        }
-    }.sendResultImage("歌50 ${difficulty?.brief?:""}${music.id}", event, randomTips())
-    suspend fun handleScoreList(
-        event: MessageEvent,
-        fullCommand: String,
+    suspend fun MessageEvent.handleScoreList(
+        combo: String,
+        user: UserQueryParams,
         page: Int
     ) {
-        val filters = Query.filters(fullCommand)
-        val musics = Query.filterMusics(filters, maimai.musics())
-        val all = Query.isAllRequired(filters)
-        var time = 0L
-        var numPage = 1
-        var totalPages = 1
-        val isFitLevelValues = Query.isFitLevelValues(filters)
-        maimai.query.records(event, musics) { response, _ ->
-            countTime {
-                val (image, nowPage, nowPages) = maimai.image.templateScoreListNew(
-                    response, fullCommand, page, all, isFitLevelValues
-                ) {
-                    Query.filterRecords(filters, this) ?.also {
-                        if (all && it.size > 1000) {
-                            reply("您查询的记录过多，全分数列表最多支持1000条记录")
-                            return@templateScoreListNew null
-                        }
-                    }
-                } ?: return@countTime null
-                numPage = nowPage
-                totalPages = nowPages
-                image
-            }.let { (elapsed, result) ->
-                time = elapsed
-                result
-            }
-        }.sendResultImage(
-            "${fullCommand}分数列表", event, "生成时间：${time}ms\r${randomTips()?:""}",
-            page = numPage,
+        val filters = ComboQuery.filters(combo) ?: throw FilterNoResultException()
+        val musics = filters.filterMusics(maimai.musics())
+        val filterParams = filters.params(combo)
+
+        val (response, _) = maimai.query.records(user, musics)
+        val filtered = filters.filterRecords(response.records) ?: emptyList()
+        if (filterParams.isAllRequired && filtered.size > 1500) {
+            throw NotSupportedException("您查询的记录过多，全分数列表最多支持1500条记录")
+        }
+        val (elapsed, result) = countTime {
+            maimai.image.rating.scoreList(
+                player = response.player,
+                settings = response.settings,
+                allRecords = filtered,
+                filterParams = filterParams,
+                page = page
+            )
+        }
+        val (image, nowPage, totalPages) = result
+
+        image.sendResultImage(
+            "${combo}分数列表",
+            this,
+            "生成时间：${elapsed}ms\r${randomTips()?:""}",
+            page = nowPage,
             totalPages = totalPages
         )
     }
-    suspend fun handleLevelList(
-        event: MessageEvent,
-        fullCommand: String
-    ) = event.run {
-        val filters = Query.filters(fullCommand)
-        val (charts, detailed) = filterCharts(filters)
-        val isFitLevelValues = Query.isFitLevelValues(filters)
-        maimai.image.templateLevelNew(
-            filters,
-            charts,
-            fullCommand + "定数表",
-            detailed,
-            isFitLevelValues = isFitLevelValues
-        ).sendResultImage(fullCommand + "定数表", event, randomTips())
+    suspend fun MessageEvent.handleLevelList(
+        combo: String
+    ) {
+        val filters = ComboQuery.filters(combo) ?: throw FilterNoResultException()
+        val (charts, isDetailed) = filterCharts(filters)
+
+        val filterParams = filters.params(combo)
+        filterParams.isDetailed = isDetailed
+
+        maimai.image.level.level(
+            charts = charts,
+            records = null,
+            title = "${combo}定数表",
+            filterParams = filterParams
+        ).sendResultImage("${combo}定数表", this, randomTips())
     }
-    suspend fun handleLevelComplete(
-        event: MessageEvent,
-        fullCommand: String,
-        args: String
-    ) = event.run {
-        val filters = Query.filters(fullCommand)
-        if (Query.noRecordFilter(filters)) {
-            if (filters == null || filters.isEmpty()) {
-                reply(maimai.query.noRecords)
-                return@run
-            }
-        }
-        val (charts, detailed) = filterCharts(filters)
-        if (charts.isEmpty()) {
-            reply(maimai.query.noRecords)
-            return@run
-        }
-        val isFitLevelValues = Query.isFitLevelValues(filters)
+    suspend fun MessageEvent.handleLevelComplete(
+        combo: String,
+        user: UserQueryParams
+    ) {
+        val filters = ComboQuery.filters(combo) ?: throw FilterNoResultException()
+        if (filters.noRecordFilter())
+            throw FilterNoResultException()
+
+        val (charts, isDetailed) = filterCharts(filters)
+        if (charts.isEmpty())
+            throw FilterNoResultException()
+
+        val filterParams = filters.params(combo)
+        filterParams.isDetailed = isDetailed
+
         val musics = charts.map { it.music }.toSet().toList()
-        maimai.query.records(event, musics, args) { response, _ ->
-            maimai.image.templateLevelNew(
-                filters,
-                charts,
-                fullCommand + "完成表",
-                detailed,
-                Query.filterTypes(filters),
-                response.records,
-                isFitLevelValues = isFitLevelValues
-            )
-        }.sendResultImage(fullCommand + "完成表", event, randomTips())
+        val (response, _) = maimai.query.records(user, musics)
+
+        maimai.image.level.level(
+            charts = charts,
+            records = response.records,
+            title = "${combo}定数表",
+            filterParams = filterParams
+        ).sendResultImage("${combo}完成表", this, randomTips())
     }
-    suspend fun handleLevelIncomplete(
-        event: MessageEvent,
-        fullCommand: String,
-        args: String
-    ) = event.run {
-        val filters = Query.filters(fullCommand)
-        if (Query.noRecordFilter(filters)) {
-            reply(maimai.query.noRecords)
-            return@run
-        }
+    suspend fun MessageEvent.handleLevelIncomplete(
+        combo: String,
+        user: UserQueryParams
+    ) {
+        val filters = ComboQuery.filters(combo) ?: throw FilterNoResultException()
+        if (filters.noRecordFilter())
+            throw FilterNoResultException()
+
         val (charts, _) = filterCharts(filters)
-        if (charts.isEmpty()) {
-            reply(maimai.query.noRecords)
-            return@run
-        }
-        val isFitLevelValues = Query.isFitLevelValues(filters)
+        if (charts.isEmpty())
+            throw FilterNoResultException()
+
         val musics = charts.map { it.music }.toSet().toList()
-        maimai.query.records(event, musics, args) { response, _ ->
-            val completed = Query.filterRecords(filters, response.records, true) ?: emptyList()
-            val remains = charts.filter { chart ->
-                completed.none { it.chart == chart }
-            }
-            val (filtered, detailed) = filterCharts(filters, preFiltered = remains)
-            if (filtered.isEmpty()) {
-                reply("恭喜您已完成所有谱面！")
-                return@records null
-            }
+        val (response, _) = maimai.query.records(user, musics)
 
-            maimai.image.templateLevelNew(
-                filters,
-                filtered,
-                fullCommand + "未完成表",
-                detailed,
-                Query.filterTypes(filters),
-                response.records,
-                isFitLevelValues = isFitLevelValues
-            )
-        }.sendResultImage(fullCommand + "未完成表", event, randomTips())
+        val completed = filters.filterRecords(response.records, true) ?: emptyList()
+        val remains = charts.filter { chart ->
+            completed.none { it.chart == chart }
+        }
+        val (filtered, isDetailed) = filterCharts(filters, preFiltered = remains)
+
+        val filterParams = filters.params(combo)
+        filterParams.isDetailed = isDetailed
+
+        if (filtered.isEmpty()) {
+            reply("恭喜您已完成所有谱面！")
+            return
+        }
+
+        maimai.image.level.level(
+            charts = filtered,
+            records = response.records,
+            title = "${combo}未完成表",
+            filterParams = filterParams
+        ).sendResultImage("${combo}未完成表", this, randomTips())
     }
-    suspend fun handleInfoScore(
-        event: MessageEvent,
-        music: MusicInfo
-    ) = event.run {
-        maimai.query.record(event, music) { response ->
-            maimai.image.templateInfoScoreNew(
-                music,
-                response)
-        }.sendResultImage("info id${music.id}", event, randomTips())
+    suspend fun MessageEvent.handleInfoScore(
+        user: UserQueryParams,
+        musicQuery: String
+    ) {
+        val (music, _) = selectMusic("info", musicQuery, false)
+            ?: return
+        val records = maimai.query.record(user, music)
+        maimai.image.score.template(
+            music,
+            records
+        ).sendResultImage("info id${music.id}", this, randomTips())
     }
 
-    suspend fun handleCourse(
-        event: MessageEvent,
+    suspend fun MessageEvent.handleCourse(
         course: LocalCourseInfo,
-        args: String
-    ) = event.run {
+        user: UserQueryParams
+    ) {
         val charts = if (course.random) {
             val difficulties =
                 if (course.name.startsWith("MASTER"))
@@ -578,30 +486,32 @@ class ImageController(
             }
         }
         val musics = charts.map { it.music }.toSet().toList()
-        maimai.query.records(event, musics, args) { response, _ ->
-            val scores = charts.map { chart ->
-                Pair(chart, response.records.firstOrNull { record ->
-                    chart == record.chart
-                })
-            }
-            maimai.image.templateCourse(course, scores)
-                .sendResultImage(course.name.toSimple().lowercase(), event, randomTips())
+        val (response, _) = maimai.query.records(user, musics)
+
+        val scores = charts.map { chart ->
+            Pair(chart, response.records.firstOrNull { record ->
+                chart == record.chart
+            })
         }
+        maimai.image.course.template(course, scores).sendResultImage(
+            course.name.toSimple().lowercase(),
+            this,
+            randomTips()
+        )
     }
 
     fun filterCharts(
-        filters: List<Filter>? = null,
+        filters: List<Filter>,
         preFiltered: List<ChartInfo>? = null
     ): Pair<List<ChartInfo>, Boolean> {
         var charts = preFiltered ?: run {
-            Query.filterCharts(
-                filters ?: emptyList(),
+            filters.filterCharts(
                 maimai.musics().filter { it.genre != MusicGenre.Utage }
             )
         }
 
-        var detailed = Query.isDetailed(filters)
-        if (Query.isPlate(filters)) {
+        var detailed = filters.isDetailed()
+        if (filters.isPlate()) {
             charts = if (charts.distinctBy { it.music.id }.size > 250) {
                 detailed = true
                 charts.filter { it.difficulty >= MusicDifficulty.Master && it.levelValue >= 14 }
@@ -659,21 +569,8 @@ class ImageController(
         }
     }
 
-    suspend fun MessageEvent.noData(
-        backend: MaimaiAPI
-    ) {
-        if (textMode())
-            reply(buildString {
-                appendLine("您似乎尚未导入舞萌DX分数，请查看数据导入教程：")
-                when (backend) {
-                    is DivingFish -> appendLine("水鱼查分器：https://otmdb.cn/jump/maimaidxprober_import")
-                    is LXNS -> appendLine("落雪查分器：https://otmdb.cn/jump/lxnsprober_import")
-                }
-            }.trim().newLine())
-        else reply(MarkdownTemplates.Templates.importData(backend))
-    }
     companion object {
-        val courseAliases = buildMap<Int, List<String>> {
+        val courseAliases = buildMap {
             put(452201, listOf("随机红初级", "随机expert初级", "红初级"))
             put(452202, listOf("随机红中级", "随机expert中级", "红中级"))
             put(452203, listOf("随机红上级", "随机expert上级", "红上级"))

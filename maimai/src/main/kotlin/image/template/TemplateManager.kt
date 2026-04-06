@@ -14,7 +14,7 @@ class TemplateManager(val basePath: String) {
     lateinit var globalResourceManager: ResourceManager
     lateinit var fontCollection: FontCollection
 
-    suspend fun init() {
+    fun init() {
         val fontProvider = TypefaceFontProvider()
         fontCollection = FontCollection().apply {
             setDefaultFontManager(FontMgr.default)

@@ -135,7 +135,9 @@ class AliasesSearch(
         if (result.isNotEmpty())
             return result
 
-        val nameMatch = maimai.musics().filter { it.name.lowercase() == name.lowercase() }
+        val nameMatch = maimai.musics().filter {
+            it.name.equals(name, ignoreCase = true)
+        }
         if (nameMatch.isNotEmpty()) {
             return nameMatch
         }

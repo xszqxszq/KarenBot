@@ -1,4 +1,4 @@
-package xyz.xszq.bot.api.exception
+package xyz.xszq.bot.exception
 
 class AuthorizationException(
     message: String ?= null

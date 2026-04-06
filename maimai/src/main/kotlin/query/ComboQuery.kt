@@ -6,12 +6,15 @@ import com.sksamuel.hoplite.addFileSource
 import korlibs.io.util.toStringDecimal
 import korlibs.math.toIntRound
 import xyz.xszq.bot.add
+import xyz.xszq.bot.component.MaimaiData
+import xyz.xszq.bot.component.image.FilterParams
 import xyz.xszq.bot.config.DesignerConfig
 import xyz.xszq.bot.music.*
 import kotlin.random.Random
 
-object Query {
+object ComboQuery {
     lateinit var designerConfig: DesignerConfig
+    lateinit var maimaiData: MaimaiData
 
     var conditions: MutableList<Pair<List<String>, Filter>> = mutableListOf()
     var sortedConditions: List<Pair<String, Filter>> = emptyList()
@@ -172,12 +175,12 @@ object Query {
     fun designer(designer: String) = Filter(
         type = FilterType.Designer,
         chart = { chart ->
-            (chart.notesDesigner.lowercase() == designer.lowercase() ||
+            (chart.notesDesigner.equals(designer, ignoreCase = true) ||
                     designerConfig.includes[designer]?.let { chart.notesDesigner in it } == true ||
                     designerConfig.collabs[designer]?.let { c ->
                         c.any { raw ->
                             val nowId = raw.substringBefore("#").toInt()
-                            val nowDiff = MusicDifficulty.Companion.of(raw.substringAfter("#").toInt())
+                            val nowDiff = MusicDifficulty.of(raw.substringAfter("#").toInt())
                             chart.music.id == nowId && chart.difficulty == nowDiff
                         }
                     } == true ||
@@ -230,7 +233,7 @@ object Query {
     )
     val fitLevelValues = Filter(
         type = FilterType.Modification,
-        fitLevelValues = true,
+        fitLevelValue = true,
         sortBy = { record ->
             -Rating.calc(record.chart.fitLevelValue, record.achievement)
         }
@@ -244,12 +247,13 @@ object Query {
     )
 
     @OptIn(ExperimentalHoplite::class)
-    fun init() {
-        designerConfig = ConfigLoaderBuilder.Companion.default()
+    fun init(data: MaimaiData) {
+        designerConfig = ConfigLoaderBuilder.default()
             .addFileSource("./data/maimai/designer.yml")
             .withExplicitSealedTypes()
             .build()
             .loadConfigOrThrow<DesignerConfig>()
+        maimaiData = data
 
         conditions.apply {
             designerConfig.aliases.forEach { (designer, aliases) ->
@@ -326,32 +330,13 @@ object Query {
         return filters
     }
 
-    fun noRecordFilter(
-        filters: List<Filter>?
-    ) = filters == null || filters.all { it.record == Filter.Companion.defaultRecordFilter }
-
-    fun isDetailed(
-        filters: List<Filter>?,
-    ): Boolean {
-        filters ?: return false
-        return filters.any { it.name == "level" }
-    }
-
-    fun isPlate(
-        filters: List<Filter>?,
-    ): Boolean {
-        filters ?: return false
-        return filters.size == 1 && filters.first().name?.startsWith("plate") == true
-    }
-
-    fun filterCharts(
-        filters: List<Filter>?,
+    fun List<Filter>?.filterCharts(
         musics: Collection<MusicInfo>
     ): List<ChartInfo> {
-        if (filters.isNullOrEmpty())
+        if (isNullOrEmpty())
             return musics.flatMap { it.charts }
 
-        val groupedFilters = filters.groupBy { it.type }
+        val groupedFilters = groupBy { it.type }
         return musics.flatMap {
             it.charts
         }.filter { chart ->
@@ -363,22 +348,20 @@ object Query {
         }
     }
 
-    fun filterMusics(
-        filters: List<Filter>?,
+    fun List<Filter>?.filterMusics(
         musics: Collection<MusicInfo>
     ): List<MusicInfo> {
-        return filterCharts(filters, musics).map { it.music }.toSet().toList()
+        return filterCharts(musics).map { it.music }.toSet().toList()
     }
 
-    fun filterRecords(
-        filters: List<Filter>?,
+    fun List<Filter>?.filterRecords(
         records: List<Record>,
         required: Boolean = false
     ): List<Record>? {
-        if (filters == null || required && noRecordFilter(filters))
+        if (this == null || required && noRecordFilter())
             return null
 
-        val groupedFilters = filters.groupBy { it.type }
+        val groupedFilters = groupBy { it.type }
         var filtered = records.filter { record ->
             groupedFilters.all { (_, group) ->
                 group.any { filter ->
@@ -386,23 +369,21 @@ object Query {
                 }
             }
         }
-        filtered = filtered.sortedBy(Filter.Companion.defaultSort)
-        filters.filter { it.sortBy != Filter.Companion.defaultSort }.forEach { filter ->
+        filtered = filtered.sortedBy(Filter.defaultSort)
+        filter { it.sortBy != Filter.defaultSort }.forEach { filter ->
             @Suppress("UNCHECKED_CAST")
             filtered = records.sortedBy<Record, Comparable<Any>>(filter.sortBy as (Record) -> Comparable<Any>?)
         }
         return filtered
     }
 
-    fun filterTypes(
-        filters: List<Filter>?,
-    ): RequiresType {
-        filters ?: return RequiresType.Achievement
-        if (fc in filters || ap in filters)
+    fun List<Filter>?.requiresType(): RequiresType {
+        this ?: return RequiresType.Achievement
+        if (fc in this || ap in this)
             return RequiresType.Combo
-        if (fsd in filters)
+        if (fsd in this)
             return RequiresType.Sync
-        return filters.mapNotNull { it.name }.firstOrNull { it.startsWith("plate") } ?.let { plateName ->
+        return mapNotNull { it.name }.firstOrNull { it.startsWith("plate") } ?.let { plateName ->
             when {
                 plateName.endsWith("極") -> RequiresType.Combo
                 plateName.endsWith("神") -> RequiresType.Combo
@@ -412,15 +393,36 @@ object Query {
         } ?: RequiresType.Achievement
     }
 
-    fun filterNowVersion(
-        filters: List<Filter>?,
-    ): GameVersion? = filters?.lastOrNull { it.nowVersion != Filter.Companion.defaultVersion }?.nowVersion()
+    fun List<Filter>.filterNowVersion(): GameVersion? =
+        lastOrNull { it.nowVersion != Filter.defaultVersion } ?.nowVersion()
 
-    fun isAllRequired(
-        filters: List<Filter>?,
-    ) = filters ?.any { it.disable15 } ?: false
+    fun List<Filter>?.noRecordFilter() =
+        this == null || all { it.record == Filter.defaultRecordFilter }
 
-    fun isFitLevelValues(
-        filters: List<Filter>?,
-    ) = filters ?.any { it.fitLevelValues } ?: false
+    fun List<Filter>?.isDetailed() = when {
+        this == null -> false
+        else -> any { it.name == "level" }
+    }
+
+    fun List<Filter>?.isPlate() = when {
+        this == null -> false
+        else -> size == 1 && first().name?.startsWith("plate") == true
+    }
+
+    fun List<Filter>?.isAllRequired() =
+        this ?.any { it.disable15 } ?: false
+
+    fun List<Filter>?.isFitLevelValue() =
+        this ?.any { it.fitLevelValue } ?: false
+
+    fun List<Filter>.params(
+        name: String
+    ): FilterParams = FilterParams(
+        name = name,
+        newestVersion = filterNowVersion() ?: maimaiData.newestVersion,
+        isAllRequired = isAllRequired(),
+        isFitLevelValue = isFitLevelValue(),
+        isDetailed = isDetailed(),
+        requiresType = requiresType()
+    )
 }
