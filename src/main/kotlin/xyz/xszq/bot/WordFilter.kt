@@ -6,7 +6,7 @@ class WordFilter(
     fun filter(text: String): String {
         var result = text
         words.forEach { word ->
-            result = result.replace(word, '*' * word.length)
+            result = result.replace(word, '*' * word.length, true)
         }
         return result
     }

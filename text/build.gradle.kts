@@ -25,6 +25,9 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json:${ktorVersion}")
     implementation("org.scilab.forge:jlatexmath:1.0.7")
     testImplementation(kotlin("test"))
+    testImplementation(project(":"))
+    testImplementation("io.ktor:ktor-client-mock:${ktorVersion}")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 }
 
 tasks.test {

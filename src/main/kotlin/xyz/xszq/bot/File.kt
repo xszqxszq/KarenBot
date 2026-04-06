@@ -39,6 +39,8 @@ suspend fun <R> useTempFile(
     block: suspend (VfsFile) -> R
 ): R = newTempFile(prefix, suffix).use(block)
 
+fun createDownloadClient() = HttpClient(OkHttp)
+
 
 
 /**
@@ -48,7 +50,15 @@ suspend fun <R> useTempFile(
  * @param logger Logger to log error.
  */
 suspend fun downloadFile(url: String, filename: String, logger: KLogger): VfsFile? {
-    val client = HttpClient(OkHttp)
+    val client = createDownloadClient()
+    return try {
+        downloadFile(url, filename, logger, client)
+    } finally {
+        client.close()
+    }
+}
+
+suspend fun downloadFile(url: String, filename: String, logger: KLogger, client: HttpClient): VfsFile? {
     val file = tempVfs[filename]
     try {
         val response = client.get(url)
@@ -56,8 +66,6 @@ suspend fun downloadFile(url: String, filename: String, logger: KLogger): VfsFil
         return file
     } catch (e: Exception) {
         logger.error { "Error downloading file: ${e.message}" }
-    } finally {
-        client.close()
     }
     return null
 }

@@ -1,54 +1,40 @@
 package xyz.xszq.bot.message
 
 import korlibs.io.file.VfsFile
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.channels.actor
-import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * Manages all image files downloaded.
  * The image files will be lazy deleted after `expiresAfter`.
  */
-class FileManager: CoroutineScope {
-    override val coroutineContext: CoroutineContext = Job()
+class FileManager(
+    private val expiresAfter: Long = 5 * 60 * 1000L,
+    private val now: () -> Long = System::currentTimeMillis,
+){
+    private val mutex = Mutex()
+    private val files = mutableListOf<Pair<VfsFile, Long>>()
 
-    private val expiresAfter = 5 * 60 * 1000L // 5 min
-    private val channel: SendChannel<Any> = fileActor()
-
-    @OptIn(ObsoleteCoroutinesApi::class)
-    fun CoroutineScope.fileActor(): SendChannel<Any> = actor {
-        val files = mutableListOf<Pair<VfsFile, Long>>()
-
-        suspend fun clean() {
-            val currentTime = System.currentTimeMillis()
-            files.filter { it.second <= currentTime }.forEach {
-                it.first.delete()
-            }
-            files.removeAll { it.second <= currentTime }
+    private suspend fun cleanExpired(currentTime: Long) {
+        files.filter { it.second <= currentTime }.forEach {
+            it.first.delete()
         }
+        files.removeAll { it.second <= currentTime }
+    }
 
-        for (msg in channel) {
-            clean()
-            val now = System.currentTimeMillis()
-            when (msg) {
-                is VfsFile -> {
-                    files.add(Pair(msg, now + expiresAfter))
-                }
-
-                is List<*> -> {
-                    files.addAll(msg.filterIsInstance<VfsFile>().map { Pair(it, now + expiresAfter) })
-                }
-            }
+    private suspend fun register(filesToAdd: List<VfsFile>) {
+        mutex.withLock {
+            val currentTime = now()
+            cleanExpired(currentTime)
+            files.addAll(filesToAdd.map { Pair(it, currentTime + expiresAfter) })
         }
     }
 
     suspend fun addFile(file: VfsFile) {
-        channel.send(file)
+        register(listOf(file))
     }
+
     suspend fun addFiles(files: List<VfsFile>) {
-        channel.send(files)
+        register(files)
     }
 }

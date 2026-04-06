@@ -21,32 +21,40 @@ import xyz.xszq.bot.payload.markdown.MarkdownData
  */
 class OpenAPI(
     val config: BotConfig,
-    var filter: WordFilter
+    var filter: WordFilter,
+    private val client: HttpClient = defaultHttpClient(),
+    private val server: String = DEFAULT_SERVER,
+    private val accessTokenUrl: String = DEFAULT_ACCESS_TOKEN_URL,
+    private val now: () -> Long = System::currentTimeMillis,
 ) {
     val logger = KotlinLogging.logger {}
 
-    private val server = "https://api.sgroup.qq.com"
-
-    private val client = HttpClient(OkHttp) {
-        install(ContentNegotiation) {
-            json(json)
-        }
-    }
     private var accessToken: String? = null
     private var accessTokenExpiresAt: Long? = null
 
+    companion object {
+        const val DEFAULT_SERVER = "https://api.sgroup.qq.com"
+        const val DEFAULT_ACCESS_TOKEN_URL = "https://bots.qq.com/app/getAppAccessToken"
+
+        fun defaultHttpClient() = HttpClient(OkHttp) {
+            install(ContentNegotiation) {
+                json(json)
+            }
+        }
+    }
+
     private suspend fun getRawAccessToken() =
-        client.post("https://bots.qq.com/app/getAppAccessToken") {
+        client.post(accessTokenUrl) {
             contentType(ContentType.Application.Json)
             setBody(AccessTokenRequest(config.appId, config.clientSecret))
         }.body<AccessTokenResponse>()
 
     private suspend fun getToken(): String {
-        val now = System.currentTimeMillis()
-        if (accessToken.isNullOrEmpty() || accessTokenExpiresAt?.let { now > it } == true) {
+        val currentTime = now()
+        if (accessToken.isNullOrEmpty() || accessTokenExpiresAt?.let { currentTime > it } == true) {
             getRawAccessToken().let { response ->
                 accessToken = response.accessToken
-                accessTokenExpiresAt = now + response.expiresIn * 1000L
+                accessTokenExpiresAt = currentTime + response.expiresIn * 1000L
             }
         }
         return checkNotNull(accessToken)

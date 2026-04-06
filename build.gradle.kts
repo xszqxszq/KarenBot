@@ -24,7 +24,6 @@ repositories {
 }
 
 dependencies {
-    testImplementation(kotlin("test"))
     implementation("ch.qos.logback:logback-classic:1.5.15")
     implementation("com.qcloud:cos_api:5.6.240")
     implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
@@ -43,6 +42,10 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation("io.ktor:ktor-network-tls-certificates:$ktorVersion")
     implementation("org.bouncycastle:bcprov-jdk15on:1.70")
+    testImplementation(kotlin("test"))
+    testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
+    testImplementation("io.mockk:mockk:1.13.13")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 }
 
 tasks.test {

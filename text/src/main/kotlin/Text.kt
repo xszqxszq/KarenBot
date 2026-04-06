@@ -41,11 +41,15 @@ class Text: Plugin() {
     lateinit var llmConfig: LLMConfig
     val randomImage = RandomImage()
 
-    val client = HttpClient {
-        install(ContentNegotiation) {
-            json(Json {
-                ignoreUnknownKeys = true
-            })
+    internal var client = createHttpClient()
+
+    companion object {
+        fun createHttpClient() = HttpClient {
+            install(ContentNegotiation) {
+                json(Json {
+                    ignoreUnknownKeys = true
+                })
+            }
         }
     }
 

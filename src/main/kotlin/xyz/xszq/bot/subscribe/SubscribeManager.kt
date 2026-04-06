@@ -1,6 +1,12 @@
 package xyz.xszq.bot.subscribe
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
 import java.util.concurrent.ConcurrentHashMap
@@ -10,7 +16,9 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Manage subscribe of plugins.
  */
-class SubscribeManager: CoroutineScope {
+class SubscribeManager(
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+): CoroutineScope {
     override val coroutineContext: CoroutineContext = Job()
     private val plugins = ConcurrentHashMap<String, CopyOnWriteArrayList<Subscribe<Event>>>()
     private val temp = ConcurrentHashMap<String, Subscribe<Event>>()
@@ -62,7 +70,7 @@ class SubscribeManager: CoroutineScope {
     @OptIn(DelicateCoroutinesApi::class)
     suspend fun <E: Event> handle(event: E) = supervisorScope {
         temp.values.forEach { subscribe ->
-            launch(Dispatchers.IO) {
+            launch(dispatcher) {
                 runCatching {
                     subscribe.handler(event)
                 }.onFailure { e ->
@@ -72,7 +80,7 @@ class SubscribeManager: CoroutineScope {
         }
         plugins.forEach { plugin, subscribes ->
             subscribes.forEach { subscribe ->
-                launch(Dispatchers.IO) {
+                launch(dispatcher) {
                     runCatching {
                         subscribe.handler(event)
                     }.onFailure { e ->
