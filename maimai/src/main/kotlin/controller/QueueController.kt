@@ -159,7 +159,7 @@ class QueueController(
         val group = ArcadeGroupBind.group(group.id)
         return group.find(name) != null
     }
-    private suspend fun clear() {
+    private suspend fun clear() = newSuspendedTransaction {
         Arcade.all().forEach {
             it.clear()
         }
@@ -222,8 +222,10 @@ class QueueController(
                         ))
                     return
                 }
-                group.arcades.forEach { arcade ->
-                    arcade.clear()
+                newSuspendedTransaction {
+                    group.arcades.forEach { arcade ->
+                        arcade.clear()
+                    }
                 }
                 reply(list(group.arcades.toList()))
                 return

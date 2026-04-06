@@ -6,7 +6,11 @@ import kotlinx.serialization.Serializable
 data class Keyboard(
     val content: InlineKeyboard
 ) {
-    fun text() = content.rows.joinToString(", ") { "[" + it.buttons.joinToString(", ") { it.renderData.label } + "]" }
+    fun text() = content.rows.joinToString(", ") {
+        "[" + it.buttons.joinToString(", ") { button ->
+            button.renderData.label
+        } + "]"
+    }
     class KeyboardRowBuilder {
         val data = mutableListOf<Button>()
         fun button(id: String, renderData: RenderData, action: Action) =
