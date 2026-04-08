@@ -10,6 +10,7 @@ import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.NotSupportedException
 import xyz.xszq.bot.exception.QQBindRequiredException
 import xyz.xszq.bot.exception.UnknownException
+import xyz.xszq.bot.exception.UserBindRequiredException
 import xyz.xszq.bot.exception.UserNotFoundException
 import xyz.xszq.bot.music.*
 
@@ -102,7 +103,7 @@ class MaimaiQuery(
             }.getOrNull() ?.let { Pair(it, backend) }
         } ?: when {
             user is UserQueryParams.Username -> throw UserNotFoundException()
-            else -> throw UnknownException("查询失败，请稍后重试")
+            else -> throw UserBindRequiredException()
         }
         result.first.settings = mergeSettings(result.first.settings, user.settings)
         return result
@@ -121,7 +122,7 @@ class MaimaiQuery(
             }.getOrNull() ?.let { Pair(it, backend) }
         } ?: when {
             user is UserQueryParams.Username -> throw UserNotFoundException()
-            else -> throw UnknownException("查询失败，请稍后重试")
+            else -> throw UserBindRequiredException()
         }
         result.first.settings = mergeSettings(result.first.settings, user.settings)
         return result
@@ -140,7 +141,7 @@ class MaimaiQuery(
             }.getOrNull()
         } ?: when {
             user is UserQueryParams.Username -> throw UserNotFoundException()
-            else -> throw UnknownException("查询失败，请稍后重试")
+            else -> throw UserBindRequiredException()
         }
         return result
     }
@@ -156,7 +157,7 @@ class MaimaiQuery(
                 throw e
         }.getOrNull() ?: when {
             user is UserQueryParams.Username -> throw UserNotFoundException()
-            else -> throw UnknownException("查询失败，请稍后重试")
+            else -> throw UserBindRequiredException()
         }
         response.settings = mergeSettings(response.settings, user.settings)
         return Pair(response, backend)

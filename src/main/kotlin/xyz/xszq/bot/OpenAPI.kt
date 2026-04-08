@@ -9,10 +9,12 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import okhttp3.ConnectionPool
 import xyz.xszq.bot.config.BotConfig
 import xyz.xszq.bot.payload.*
 import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.payload.markdown.MarkdownData
+import java.util.concurrent.TimeUnit
 
 
 /**
@@ -39,6 +41,11 @@ class OpenAPI(
         fun defaultHttpClient() = HttpClient(OkHttp) {
             install(ContentNegotiation) {
                 json(json)
+            }
+            engine {
+                config {
+                    connectionPool(ConnectionPool(50, 30, TimeUnit.SECONDS))
+                }
             }
         }
     }

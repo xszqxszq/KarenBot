@@ -407,8 +407,6 @@ class ImageController(
         user: UserQueryParams
     ) {
         val filters = ComboQuery.filters(combo) ?: throw FilterNoResultException()
-        if (filters.noRecordFilter())
-            throw FilterNoResultException()
 
         val (charts, isDetailed) = filterCharts(filters)
         if (charts.isEmpty())
@@ -423,7 +421,7 @@ class ImageController(
         maimai.image.level.level(
             charts = charts,
             records = response.records,
-            title = "${combo}定数表",
+            title = "${combo}完成表",
             filterParams = filterParams
         ).sendResultImage("${combo}完成表", this, randomTips())
     }
@@ -432,8 +430,6 @@ class ImageController(
         user: UserQueryParams
     ) {
         val filters = ComboQuery.filters(combo) ?: throw FilterNoResultException()
-        if (filters.noRecordFilter())
-            throw FilterNoResultException()
 
         val (charts, _) = filterCharts(filters)
         if (charts.isEmpty())
