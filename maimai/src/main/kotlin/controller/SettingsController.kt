@@ -19,7 +19,7 @@ class SettingsController(
     override val maimai: Maimai
 ): Controller(maimai) {
     override suspend fun setRoute() = maimai.route("/mai") {
-        startsWith("bind") { args ->
+        startsWith(listOf("bind", "绑定")) { args ->
             val qq = args.toLongOrNull() ?: run {
                 reply("使用方法：/bind qq号")
                 return@startsWith

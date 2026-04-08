@@ -5,6 +5,7 @@ import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.upsert
@@ -51,10 +52,7 @@ class GuessController(
             opening()
         }
         startsWith("不玩了") {
-            if (subscribeId.containsKey(contextId)) {
-                subscribeId.remove(contextId)
-                eventToReply.remove(contextId)
-            }
+            endGame(subscribeId[contextId])
         }
         startsWith(listOf("禁用猜歌", "禁止猜歌", "关闭猜歌")) {
             if (this is GroupMessageEvent)
@@ -96,16 +94,10 @@ class GuessController(
     private suspend fun MessageEvent.save(
         status: GuessGameStatus,
     ): Unit = newSuspendedTransaction(Dispatchers.IO) {
-        val needConflictKeys = currentDialect.name.lowercase().let {
-            !it.contains("mysql") && !it.contains("mariadb")
+        GuessGameTable.deleteWhere {
+            GuessGameTable.id eq this@save.contextId
         }
-
-        val conflictKeys: Array<out Column<*>> = if (needConflictKeys) {
-            arrayOf(GuessGameTable.id)
-        } else {
-            emptyArray()
-        }
-        GuessGameTable.upsert(*conflictKeys) {
+        GuessGameTable.insert {
             it[GuessGameTable.id] = this@save.contextId
             it[GuessGameTable.eventType] = when (this@save) {
                 is GroupMessageEvent -> "group"
@@ -123,10 +115,13 @@ class GuessController(
         }
     }
     private suspend fun MessageEvent.endGame(
-        subscribesAt: String
+        subscribesAt: String? = null
     ) = newSuspendedTransaction(Dispatchers.IO) {
-        bot.pluginLoader.subscribes.stop(subscribesAt)
+        subscribesAt ?.let {
+            bot.pluginLoader.subscribes.stop(subscribesAt)
+        }
         subscribeId.remove(contextId)
+        eventToReply.remove(contextId)
         GuessGameTable.deleteWhere {
             GuessGameTable.id eq contextId
         }

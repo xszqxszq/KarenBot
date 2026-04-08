@@ -49,12 +49,14 @@ class ImageController(
                 }
 
                 val queryArgs = args.getOrNull(1) ?: ""
-                val user = maimai.query.getQueryParams(this, queryArgs)
+                var user: UserQueryParams? = null
                 runCatching {
+                    user = maimai.query.getQueryParams(this, queryArgs)
                     when (command) {
                         "b" -> handleRating(total, user)
                         "r" -> handleRecent(total, user)
                         "歌" -> {
+                            user = maimai.query.getQueryParams(this)
                             val musicQuery = args.subList(1, args.size).joinToString(" ")
                             handleMusicRating(total, user, musicQuery)
                         }
@@ -70,8 +72,9 @@ class ImageController(
             val args = raw.split(" ")
             val command = args.first()
             val page = args.getOrNull(1) ?.toIntOrNull() ?: 1
-            val user = maimai.query.getQueryParams(this)
+            var user: UserQueryParams? = null
             runCatching {
+                user = maimai.query.getQueryParams(this)
                 handleScoreList(command, user, page)
             }.onFailure { e ->
                 handleError(this, e, user)
@@ -95,8 +98,9 @@ class ImageController(
                 return@commandEndsWith
 
             val queryArgs = args.getOrNull(1) ?: ""
-            val user = maimai.query.getQueryParams(this, queryArgs)
+            var user: UserQueryParams? = null
             runCatching {
+                user = maimai.query.getQueryParams(this, queryArgs)
                 handleLevelComplete(command, user)
             }.onFailure { e ->
                 handleError(this, e, user)
@@ -107,8 +111,9 @@ class ImageController(
             val args = raw.split(" ")
             val command = args.first()
             val queryArgs = args.getOrNull(1) ?: ""
-            val user = maimai.query.getQueryParams(this, queryArgs)
+            var user: UserQueryParams? = null
             runCatching {
+                user = maimai.query.getQueryParams(this, queryArgs)
                 handleLevelIncomplete(command, user)
             }.onFailure { e ->
                 handleError(this, e, user)
@@ -116,8 +121,9 @@ class ImageController(
         }
         // 歌曲信息+成绩
         startsWith(listOf("info", "minfo")) { musicQuery ->
-            val user = maimai.query.getQueryParams(this)
+            var user: UserQueryParams? = null
             runCatching {
+                user = maimai.query.getQueryParams(this)
                 handleInfoScore(user, musicQuery)
             }.onFailure { e ->
                 handleError(this, e, user)
@@ -138,8 +144,9 @@ class ImageController(
         }
         courseSubscribes.forEach { (name, course) ->
             startsWith(name) { args ->
-                val user = maimai.query.getQueryParams(this)
+                var user: UserQueryParams? = null
                 runCatching {
+                    user = maimai.query.getQueryParams(this)
                     handleCourse(course, user)
                 }.onFailure { e ->
                     handleError(this, e, user)
@@ -165,8 +172,13 @@ class ImageController(
                 }
             }
             course ?.let {
-                val user = maimai.query.getQueryParams(this, args.getOrNull(1))
-                handleCourse(course, user)
+                var user: UserQueryParams? = null
+                runCatching {
+                    user = maimai.query.getQueryParams(this, args.getOrNull(1))
+                    handleCourse(course, user)
+                }.onFailure { e ->
+                    handleError(this, e, user)
+                }
             } ?: run {
                 reply("未找到该段位。\n使用方法：段位表 段位名称\n\t例：段位表 十段\n\t例：段位表 随机紫超上")
             }

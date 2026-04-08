@@ -9,6 +9,7 @@ import xyz.xszq.bot.database.QQBindTable
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.NotSupportedException
 import xyz.xszq.bot.exception.QQBindRequiredException
+import xyz.xszq.bot.exception.UnknownException
 import xyz.xszq.bot.exception.UserNotFoundException
 import xyz.xszq.bot.music.*
 
@@ -99,7 +100,10 @@ class MaimaiQuery(
                 if (!isRetryableError(e))
                     throw e
             }.getOrNull() ?.let { Pair(it, backend) }
-        } ?: throw UserNotFoundException()
+        } ?: when {
+            user is UserQueryParams.Username -> throw UserNotFoundException()
+            else -> throw UnknownException("查询失败，请稍后重试")
+        }
         result.first.settings = mergeSettings(result.first.settings, user.settings)
         return result
     }
@@ -115,7 +119,10 @@ class MaimaiQuery(
                 if (!isRetryableError(e))
                     throw e
             }.getOrNull() ?.let { Pair(it, backend) }
-        } ?: throw UserNotFoundException()
+        } ?: when {
+            user is UserQueryParams.Username -> throw UserNotFoundException()
+            else -> throw UnknownException("查询失败，请稍后重试")
+        }
         result.first.settings = mergeSettings(result.first.settings, user.settings)
         return result
     }
@@ -131,7 +138,10 @@ class MaimaiQuery(
                 if (!isRetryableError(e))
                     throw e
             }.getOrNull()
-        } ?: throw UserNotFoundException()
+        } ?: when {
+            user is UserQueryParams.Username -> throw UserNotFoundException()
+            else -> throw UnknownException("查询失败，请稍后重试")
+        }
         return result
     }
     suspend fun recent(
@@ -144,7 +154,10 @@ class MaimaiQuery(
         }.onFailure { e ->
             if (!isRetryableError(e))
                 throw e
-        }.getOrNull() ?: throw UserNotFoundException()
+        }.getOrNull() ?: when {
+            user is UserQueryParams.Username -> throw UserNotFoundException()
+            else -> throw UnknownException("查询失败，请稍后重试")
+        }
         response.settings = mergeSettings(response.settings, user.settings)
         return Pair(response, backend)
     }

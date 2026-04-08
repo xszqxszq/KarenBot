@@ -22,8 +22,9 @@ class RecordController(
             val args = raw.split(" ")
             val command = args.first()
             val queryArgs = args.getOrNull(1) ?: ""
-            val user = maimai.query.getQueryParams(this, queryArgs)
+            var user: UserQueryParams? = null
             runCatching {
+                user = maimai.query.getQueryParams(this, queryArgs)
                 handleProgress(this, command, user) ?.let { result ->
                     reply(result)
                 } ?: reply(MaimaiQuery.NO_RECORDS)

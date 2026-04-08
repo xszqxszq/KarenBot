@@ -31,8 +31,9 @@ class LXNS(
 ): MaimaiAPI {
     override val id: String = "lxns"
     override val name: String = "落雪"
-    val server = "https://maimai.lxns.net/api/v0/maimai"
-    val oauth = "https://maimai.lxns.net/api/v0/oauth"
+    val apiServer = "https://maimai.lxns.net/api/v0/maimai"
+    val apiOauth = "https://maimai.lxns.net/api/v0/oauth"
+    val apiUser = "https://maimai.lxns.net/api/v0/user"
     val musics
         get() = maimaiData.musics
 
@@ -63,8 +64,8 @@ class LXNS(
         user: UserQueryParams
     ): LXNSPlayer? {
         val response = client.get(when (user) {
-            is UserQueryParams.QQ -> "$server/player/qq/${user.qq}"
-            is UserQueryParams.Username -> "$server/player/${user.username}"
+            is UserQueryParams.QQ -> "$apiServer/player/qq/${user.qq}"
+            is UserQueryParams.Username -> "$apiServer/player/${user.username}"
         }) {
             setDeveloper()
         }.body<LXNSResponse<LXNSPlayer>>()
@@ -84,7 +85,7 @@ class LXNS(
     ): RatingResponse? {
         val player = getPlayerInfo(user) ?: return null
 
-        val response = client.get("$server/player/${player.friendCode}/bests") {
+        val response = client.get("$apiServer/player/${player.friendCode}/bests") {
             setDeveloper()
         }.body<LXNSResponse<LXNSRatingResponse>>().data ?: return null
         return RatingResponse(
@@ -119,7 +120,7 @@ class LXNS(
             music.genre == MusicGenre.Utage -> "utage"
             else -> music.type.full
         }
-        val response = client.get("$server/player/${player.friendCode}/bests" +
+        val response = client.get("$apiServer/player/${player.friendCode}/bests" +
                 "?song_id=$realId&song_type=$realType") {
             setDeveloper()
         }.body<LXNSResponse<List<LXNSScore>>>().data ?: return null
@@ -159,7 +160,7 @@ class LXNS(
         val player = getPlayerInfo(user) ?: return null
         val accessToken = refreshToken(user.event) ?: throw UserOARequiredException()
 
-        val response = client.get("$user/maimai/player/scores") {
+        val response = client.get("$apiUser/maimai/player/scores") {
             setOAuth(accessToken)
         }.body<LXNSResponse<List<LXNSScore>>>().data ?: return null
         return RecordsResponse(
@@ -212,7 +213,7 @@ class LXNS(
     private suspend fun getRecent(
         player: LXNSPlayer
     ): List<Record>? {
-        val response = client.get("$server/player/${player.friendCode}/recents") {
+        val response = client.get("$apiServer/player/${player.friendCode}/recents") {
             setDeveloper()
         }.body<LXNSResponse<List<LXNSScore>>>().data ?: return null
         return response.mapNotNull {
@@ -242,7 +243,7 @@ class LXNS(
         code: String,
         event: MessageEvent
     ): Boolean {
-        val response = client.post("$oauth/token") {
+        val response = client.post("$apiOauth/token") {
             contentType(ContentType.Application.Json)
             setBody(LXNSOAToken(
                 clientId = oauthId,
@@ -261,7 +262,7 @@ class LXNS(
     ): String? {
         // TODO: 不要在查分器端引入任何直接查表
         val refresh = MaimaiSettingsTable[event.sender.id, "lxns-oa-refresh"] ?: return null
-        val response = client.post("$oauth/token") {
+        val response = client.post("$apiOauth/token") {
             contentType(ContentType.Application.Json)
             setBody(LXNSOAToken(
                 clientId = oauthId,
