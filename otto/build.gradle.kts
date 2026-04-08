@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "xyz.xszq.bot"
-version = "1.0"
+version = "9.0"
 
 repositories {
     mavenCentral()

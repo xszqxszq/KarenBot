@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "xyz.xszq.bot"
-version = "1.0"
+version = "9.1"
 
 repositories {
     mavenLocal()

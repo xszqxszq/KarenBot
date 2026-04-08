@@ -11,14 +11,13 @@ import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import xyz.xszq.bot.config.LLMConfig
 
 class TextTest {
     @Test
-    fun shouldReturnResultAfterAudit() = runTest {
+    fun testAudit() = runTest {
         val text = textWithClient(
             MockEngine { request ->
                 respond(
@@ -34,7 +33,7 @@ class TextTest {
     }
 
     @Test
-    fun shouldReturnFalseWhenBadRequestOccurred() = runTest {
+    fun testHardReject() = runTest {
         val text = textWithClient(
             MockEngine {
                 respond(
@@ -49,7 +48,7 @@ class TextTest {
     }
 
     @Test
-    fun shouldReturnTrueWhenServerGlitches() = runTest {
+    fun testAuditServerGlitches() = runTest {
         val text = textWithClient(
             MockEngine {
                 respond(
