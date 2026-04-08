@@ -3,10 +3,8 @@ package xyz.xszq.bot
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
-import korlibs.io.file.baseName
-import korlibs.io.file.std.localCurrentDirVfs
-import kotlinx.coroutines.flow.firstOrNull
 import xyz.xszq.bot.event.MessageEvent
+import java.io.File
 
 @Suppress("unused")
 class Admin: Plugin() {
@@ -39,9 +37,9 @@ class Admin: Plugin() {
             reply("重载所有插件完成。")
         }
         else -> {
-            localCurrentDirVfs[pluginLoader.pluginDirectory].list().firstOrNull {
-                name in it.baseName
-            } ?.let {
+            File(pluginLoader.pluginDirectory).listFiles()?.firstOrNull {
+                it.extension == "jar" && name in it.nameWithoutExtension
+            }?.let {
                 pluginLoader.loadOrUpdatePlugin(it, true)
                 reply("重载插件完成。")
             } ?: run {

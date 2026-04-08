@@ -1,19 +1,11 @@
 package xyz.xszq.bot
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.ktor.client.*
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.plugins.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.util.collections.*
-import korlibs.io.async.async
-import korlibs.io.file.VfsFile
 import kotlinx.coroutines.*
 import xyz.xszq.bot.message.FileManager
 import xyz.xszq.bot.subscribe.SubscribeManager
 import java.io.File
-import java.io.InputStream
 import java.net.URL
 import java.net.URLClassLoader
 import java.util.jar.JarFile
@@ -36,13 +28,6 @@ class PluginLoader(
     private val logger = KotlinLogging.logger {}
     private val loadedPlugins = ConcurrentMap<String, Plugin>()
     private val pluginTimestamps = ConcurrentMap<String, Long>()
-    private val client = HttpClient(OkHttp) {
-        install(HttpTimeout) {
-            requestTimeoutMillis = 30000
-            connectTimeoutMillis = 30000
-            socketTimeoutMillis = 30000
-        }
-    }
 
     /**
      * Load a plugin if not exists, or reload it if changed.
@@ -60,12 +45,6 @@ class PluginLoader(
         }
         loadPlugin(pluginPath, lastModified)
     }
-    /**
-     * Load a plugin if not exists, or reload it if changed.
-     * @param pluginFile the `File` of plugin's jar.
-     */
-    suspend fun loadOrUpdatePlugin(pluginFile: VfsFile, force: Boolean = false) =
-        loadOrUpdatePlugin(File(pluginFile.absolutePath), force)
 
     /**
      * Unload a plugin.
@@ -92,45 +71,42 @@ class PluginLoader(
             return
         }
 
-        val jarFile = withContext(Dispatchers.IO) {
+        withContext(Dispatchers.IO) {
             JarFile(pluginFile)
-        }
-        val manifest = jarFile.manifest
-        val mainClassName = manifest.mainAttributes.getValue("Plugin-Class")
+        }.use { jarFile ->
+            val manifest = jarFile.manifest
+            val mainClassName = manifest.mainAttributes.getValue("Plugin-Class")
 
-        if (mainClassName.isNullOrEmpty()) {
-            logger.error { "[插件] 未在 Manifest 中指定主类: $pluginPath" }
-            return
-        }
-
-        // 加载依赖
-        val dependencies = readDependencies(jarFile)
-        val dependencyFiles = dependencies.map { (groupId, artifactId, version) ->
-            async(Dispatchers.IO) {
-                downloadDependency(groupId, artifactId, version)
+            if (mainClassName.isNullOrEmpty()) {
+                logger.error { "[插件] 未在 Manifest 中指定主类: $pluginPath" }
+                return
             }
-        }.awaitAll()
 
-        val urls = mutableListOf<URL>().apply {
-            add(pluginFile.toURI().toURL())
-            dependencyFiles.forEach { file ->
-                add(file.toURI().toURL())
+            val dependencyFiles = withContext(Dispatchers.IO) {
+                RuntimeDependencyResolver.resolveDependencies(jarFile, File(libsDirectory))
             }
-        }.toTypedArray()
-        val classLoader = URLClassLoader(urls, this::class.java.classLoader)
 
-        runCatching {
-            val pluginClass = classLoader.loadClass(mainClassName)
-            val plugin = pluginClass.getDeclaredConstructor().newInstance() as? Plugin
-            if (plugin != null) {
-                plugin.pluginLoader = this
-                plugin.plugin = pluginPath
-                plugin.load()
-                loadedPlugins[pluginPath] = plugin
-                pluginTimestamps[pluginPath] = lastModified
+            val urls = mutableListOf<URL>().apply {
+                add(pluginFile.toURI().toURL())
+                dependencyFiles.forEach { file ->
+                    add(file.toURI().toURL())
+                }
+            }.toTypedArray()
+            val classLoader = URLClassLoader(urls, this::class.java.classLoader)
+
+            runCatching {
+                val pluginClass = classLoader.loadClass(mainClassName)
+                val plugin = pluginClass.getDeclaredConstructor().newInstance() as? Plugin
+                if (plugin != null) {
+                    plugin.pluginLoader = this
+                    plugin.plugin = pluginPath
+                    plugin.load()
+                    loadedPlugins[pluginPath] = plugin
+                    pluginTimestamps[pluginPath] = lastModified
+                }
+            }.onFailure { e ->
+                e.printStackTrace()
             }
-        }.onFailure { e ->
-            e.printStackTrace()
         }
     }
 
@@ -154,88 +130,5 @@ class PluginLoader(
                 }
             }
         }
-    }
-
-
-    /**
-     * Read dependencies from plugin's META-INF/plugin-dependencies.txt
-     */
-    private fun readDependencies(jarFile: JarFile): List<Triple<String, String, String>> {
-        val entry = jarFile.getJarEntry("META-INF/plugin-dependencies.txt") ?: return emptyList()
-        return jarFile.getInputStream(entry).use { input ->
-            parseDependencies(input)
-        }
-    }
-
-    /**
-     * Parse dependencies from input stream.
-     */
-    private fun parseDependencies(input: InputStream): List<Triple<String, String, String>> {
-        val dependencies = mutableListOf<Triple<String, String, String>>()
-        input.bufferedReader().useLines { lines ->
-            lines.forEach { line ->
-                val trimmed = line.trim()
-                if (trimmed.isNotEmpty() && !trimmed.startsWith("#")) {
-                    val parts = trimmed.split(':')
-                    if (parts.size == 3) {
-                        dependencies.add(Triple(parts[0], parts[1], parts[2]))
-                    } else {
-                        logger.warn { "[依赖] 忽略无效依赖行: $trimmed" }
-                    }
-                }
-            }
-        }
-        return dependencies
-    }
-
-    /**
-     * Download dependency from maven mirror if not exists.
-     */
-    private suspend fun downloadDependency(groupId: String, artifactId: String, version: String): File {
-        val fileName = "$groupId-$artifactId-$version.jar".replace("/", "-")
-        val libDir = File(libsDirectory).apply { mkdirs() }
-        val file = File(libDir, fileName)
-
-        if (file.exists()) {
-            logger.debug { "[依赖] 使用本地依赖: ${file.name}" }
-            return file
-        }
-
-        val repositories = listOf(
-            { g: String, a: String, v: String ->
-                "阿里云镜像" to "https://maven.aliyun.com/repository/public/${g.replace('.', '/')}/$a/$v/$a-$v.jar"
-            },
-            { g: String, a: String, v: String ->
-                "Maven中央仓库" to "https://repo1.maven.org/maven2/${g.replace('.', '/')}/$a/$v/$a-$v.jar"
-            },
-            { g: String, a: String, v: String ->
-                "Jitpack" to "https://jitpack.io/${g.replace('.', '/')}/$a/$v/$a-$v.jar"
-            }
-        )
-
-        var lastException: Exception? = null
-        for (repoBuilder in repositories) {
-            try {
-                val (repoName, url) = repoBuilder(groupId, artifactId, version)
-                logger.info { "[依赖] 尝试从 $repoName 下载: $groupId:$artifactId:$version" }
-                downloadFromUrl(url, file)
-                logger.info { "[依赖] $repoName 下载成功: ${file.name}" }
-                return file
-            } catch (e: Exception) {
-                logger.warn { "[依赖] 下载失败: ${e.message}" }
-                lastException = e
-            }
-        }
-
-        logger.error { "[依赖] 所有仓库下载失败: $groupId:$artifactId:$version" }
-        throw RuntimeException("所有仓库下载失败: $groupId:$artifactId:$version", lastException)
-    }
-
-    private suspend fun downloadFromUrl(url: String, targetFile: File) = runCatching {
-        val bytes = client.get(url).readRawBytes()
-        targetFile.writeBytes(bytes)
-    }.onFailure {
-        targetFile.delete()
-        throw Exception("Download failed")
     }
 }

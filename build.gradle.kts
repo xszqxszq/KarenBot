@@ -11,7 +11,7 @@ plugins {
 }
 
 application {
-    mainClass.set("xyz.xszq.bot.ApplicationKt")
+    mainClass.set("xyz.xszq.bot.Bootstrap")
 }
 
 
@@ -50,6 +50,21 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+tasks.jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes(
+            "Main-Class" to "xyz.xszq.bot.Bootstrap"
+        )
+    }
+    from({
+        configurations.runtimeClasspath.get()
+            .filter { file ->
+                file.name.startsWith("kotlin-stdlib") || file.name.startsWith("annotations-")
+            }
+            .map(::zipTree)
+    })
 }
 tasks.register("allPlugins") {
     group = "shadow"

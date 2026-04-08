@@ -35,6 +35,7 @@ val json = Json {
  * Entry point.
  */
 object KarenBotApplication {
+
     @JvmStatic
     fun main(args: Array<String>) = runBlocking {
         start()
@@ -93,16 +94,16 @@ object KarenBotApplication {
             configureRouting(logger, pluginLoader, filter, forwardConfig)
         }.start(wait = true)
     }
-}
-@OptIn(DelicateCoroutinesApi::class)
-fun readInput(pluginLoader: PluginLoader) {
-    while (true) {
-        val input = readln()
-        GlobalScope.launch(Dispatchers.IO) {
-            pluginLoader.manualTrigger(
-                MessageEvent(pluginLoader.bot, "", "",
-                    MessageChain(PlainText(input)), User(pluginLoader.bot, "BD11EC5ADAE7A0CA792984F3EC63A165")
-                ))
+    @OptIn(DelicateCoroutinesApi::class)
+    fun readInput(pluginLoader: PluginLoader) {
+        while (true) {
+            val input = readln()
+            GlobalScope.launch(Dispatchers.IO) {
+                pluginLoader.manualTrigger(
+                    MessageEvent(pluginLoader.bot, "", "",
+                        MessageChain(PlainText(input)), User(pluginLoader.bot, "BD11EC5ADAE7A0CA792984F3EC63A165")
+                    ))
+            }
         }
     }
 }
