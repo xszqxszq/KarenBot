@@ -143,7 +143,7 @@ class RatingTemplate(
             if (isNewDisabled) bests.take(oldCount)
             else sorted.filter { it.music.version != filterParams ?.newestVersion }.take(oldCount)
         val newRecords =
-            if (!isNewDisabled) bests.subList(min(oldCount,oldRecords.size), bests.size)
+            if (isNewDisabled) bests.subList(min(oldCount,oldRecords.size), bests.size)
             else sorted.filter { it.music.version == filterParams ?.newestVersion }.take(newCount)
 
         val oldRating = oldRecords.sumOf { it.rating }
