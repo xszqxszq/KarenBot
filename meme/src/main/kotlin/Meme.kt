@@ -3,19 +3,26 @@ package xyz.xszq.bot
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
+import io.ktor.http.encodeURLParameter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import korlibs.image.format.PNG
 import korlibs.image.format.encode
 import korlibs.image.format.readNativeImage
 import korlibs.io.util.isDigit
+import org.jetbrains.skia.Image as SkiaImage
 import kotlinx.serialization.json.JsonPrimitive
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.ArgsNotEnoughException
 import xyz.xszq.bot.exception.NeedHelpException
 import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.message.Image
+import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.payload.MemeOption
 import xyz.xszq.bot.payload.markdown.*
+import xyz.xszq.bot.sekai.SekaiCharacter
 import xyz.xszq.bot.sekai.SekaiSticker
+import java.io.File
 
 @Suppress("unused")
 class Meme: Plugin() {
@@ -41,7 +48,11 @@ class Meme: Plugin() {
             .build()
             .loadConfigOrThrow<MemeConfig>()
         api = MemeAPI(config.server)
-        api.init()
+        runCatching {
+            api.init()
+        }.onFailure { e ->
+            e.printStackTrace()
+        }
 
         setRoute()
 
@@ -354,9 +365,10 @@ class Meme: Plugin() {
         raw: String
     ) {
         val args = raw.split(" ", limit = 2)
-        if (args.size != 2)
+        if (args.isEmpty())
             throw ArgsNotEnoughException()
-        val (name, text) = args
+        val name = args.first()
+        val text = args.getOrNull(1)
         val (character, alias) = SekaiSticker.aliases.entries.firstNotNullOfOrNull { (character, aliases) ->
             aliases.firstOrNull { alias ->
                 name.lowercase().startsWith(alias)
@@ -368,10 +380,13 @@ class Meme: Plugin() {
                 character == it.character && id == it.name.split(" ").last().toInt()
             }
         } ?: run {
-            sekai.characters.filter {
+            val options = sekai.characters.filter {
                 character == it.character
-            }.randomOrNull()
-        } ?: throw NotFoundException()
+            }
+            selectSekaiImageId(character, options)
+            return
+        }
+        text ?: throw ArgsNotEnoughException()
         sekai.draw(config, text).encode(PNG).send(this)
     }
     private suspend fun MessageEvent.ba(
@@ -502,6 +517,55 @@ class Meme: Plugin() {
     ): Unit = useTempFile { file ->
         file.writeBytes(this)
         event.reply(Image(file))
+    }
+
+    private suspend fun MessageEvent.selectSekaiImageId(
+        character: String,
+        options: List<SekaiCharacter>
+    ) {
+        val rows = options.map { option ->
+            val id = option.name.split(" ").last().toInt()
+            val url = "https://static-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/${option.img.replace("png", "webp")}"
+            val width = getImageWidth(option.img)
+            buildString {
+                append("![preview #${width}px #50px]($url)")
+                append(' ')
+                append("<qqbot-cmd-input text=\"")
+                append("/pjsk ${character}${id} ".encodeURLParameter())
+                append("\" show=\"")
+                append("#${id}".encodeURLParameter())
+                append("\" reference=\"true\"/>")
+            }
+        }.chunked(2)
+        
+        reply(Markdown(MarkdownData(buildString {
+            appendLine("请点击要制作的图片编号并输入文本：")
+            appendLine("| | |")
+            appendLine("| :---: | :---: |")
+            rows.forEach { row ->
+                append("|")
+                row.forEach { cell ->
+                    append(cell)
+                    append("|")
+                }
+                repeat(2 - row.size) {
+                    append(" |")
+                }
+                appendLine()
+            }
+        })))
+    }
+
+    private suspend fun getImageWidth(
+        path: String,
+        height: Double = 50.0
+    ): Int = withContext(Dispatchers.IO) {
+        runCatching {
+            val image = SkiaImage.makeFromEncoded(File(sekai.imgDir[path].absolutePath).readBytes())
+            (image.width * height / image.height)
+                .toInt()
+                .coerceAtLeast(1)
+        }.getOrDefault(height.toInt())
     }
 
     companion object {
