@@ -55,7 +55,10 @@ dependencies {
     implementation("org.mariadb.jdbc:mariadb-java-client:3.3.1")
     implementation("software.amazon.awssdk:s3:2.26.29")
     testImplementation(kotlin("test"))
+    testImplementation(project(":"))
+    testImplementation("io.mockk:mockk:1.13.13")
     testImplementation("com.soywiz.korge:korge-core:$korlibsVersion")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 }
 
 tasks.test {

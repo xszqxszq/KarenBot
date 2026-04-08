@@ -1,14 +1,9 @@
 package xyz.xszq.bot.controller
 
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toJavaLocalDateTime
-import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import xyz.xszq.bot.*
 import xyz.xszq.bot.Maimai.Companion.textMode
 import xyz.xszq.bot.database.Arcade
-import xyz.xszq.bot.database.ArcadeGroup
 import xyz.xszq.bot.database.ArcadeGroupBind
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.exception.IllegalArgsException
@@ -63,86 +58,71 @@ class QueueController(
             handle()
         }
     }
+
     suspend fun GroupMessageEvent.add(name: String) {
-        val group = ArcadeGroupBind.group(group.id)
-        if (group.find(name) != null)
-            throw IllegalArgsException("机厅已存在！")
         if (name.length > 32)
             throw IllegalArgsException("机厅名称过长！")
-        Arcade.new(group, name)
+        ArcadeGroupBind.addArcade(group.id, name)
         if (textMode())
             reply("添加机厅成功。")
         else
             reply(MarkdownTemplates.Templates.queue("排卡管理", "添加机厅成功。", name))
     }
+
     suspend fun GroupMessageEvent.delete(name: String) {
-        val arcade = get(name)
-        newSuspendedTransaction {
-            arcade.delete()
-        }
+        ArcadeGroupBind.deleteArcade(group.id, name)
         if (textMode())
             reply("删除机厅成功。")
         else
             reply(MarkdownTemplates.Templates.queue("排卡管理", "删除机厅成功。", name))
     }
+
     suspend fun GroupMessageEvent.addAlias(
         name: String,
         raw: String ?= null
     ) {
-        val arcade = get(name)
-        val aliases = arcade.aliases.split(",").toMutableList()
         val alias = validateAlias(raw)
-        if (exists(alias) || alias in aliases)
-            throw IllegalArgsException("别名已存在！")
-
-        aliases.add(alias)
-        newSuspendedTransaction {
-            arcade.aliases = aliases.joinToString(",")
-        }
+        ArcadeGroupBind.addAlias(group.id, name, alias)
 
         if (textMode())
             reply("添加机厅别名成功。")
         else
             reply(MarkdownTemplates.Templates.queue("排卡管理", "添加机厅别名成功。", name))
     }
+
     suspend fun GroupMessageEvent.deleteAlias(
         name: String,
         raw: String ?= null
     ) {
-        val arcade = get(name)
-        val aliases = arcade.aliases.split(",").toMutableList()
         val alias = validateAlias(raw)
-
-        aliases.remove(alias)
-        newSuspendedTransaction {
-            arcade.aliases = aliases.joinToString(",")
-        }
+        ArcadeGroupBind.deleteAlias(group.id, name, alias)
 
         if (textMode())
             reply("删除机厅别名成功。")
         else
             reply(MarkdownTemplates.Templates.queue("排卡管理", "删除机厅别名成功。", name))
     }
+
     suspend fun GroupMessageEvent.aliases(
         name: String
     ) {
-        val arcade = get(name)
-        val aliases = arcade.aliases.split(",").joinToString("，")
+        val aliases = ArcadeGroupBind.aliases(group.id, name).joinToString("，")
 
         if (textMode())
             reply("机厅别名如下：$aliases")
         else
             reply(MarkdownTemplates.Templates.queue("排卡管理", "机厅别名如下：$aliases", name))
     }
+
     suspend fun GroupMessageEvent.setGroup(targetName: String) {
-        val target = ArcadeGroup[targetName] ?: throw IllegalArgsException("该分组不存在。")
-        ArcadeGroupBind.bind(group.id, target)
+        ArcadeGroupBind.bind(group.id, targetName)
 
         if (textMode())
             reply("设置分组成功。")
         else
             reply(MarkdownTemplates.Templates.queue("排卡管理", "设置分组成功。"))
     }
+
     fun validateAlias(raw: String ?= null): String {
         val alias = raw ?.replace(",", "") ?: throw IllegalArgsException("请输入别名！")
         if (alias.isBlank())
@@ -151,21 +131,11 @@ class QueueController(
             throw IllegalArgsException("别名长度过长！")
         return alias
     }
-    suspend fun GroupMessageEvent.get(name: String): Arcade {
-        val group = ArcadeGroupBind.group(group.id)
-        return group.find(name) ?: throw NotFoundException("机厅不存在！")
-    }
-    suspend fun GroupMessageEvent.exists(name: String): Boolean {
-        val group = ArcadeGroupBind.group(group.id)
-        return group.find(name) != null
-    }
-    private suspend fun clear() = newSuspendedTransaction {
-        Arcade.all().forEach {
-            it.clear()
-        }
-    }
-    suspend fun GroupMessageEvent.list(
-        arcades: List<Arcade>
+
+    private suspend fun clear() = Arcade.clearAll()
+
+    private suspend fun GroupMessageEvent.list(
+        arcades: List<Arcade.Snapshot>
     ): MessageElement {
         val nowTime = java.time.LocalDateTime.now()
         if (arcades.size == 1) {
@@ -187,22 +157,23 @@ class QueueController(
         else
             MarkdownTemplates.Templates.queueUpdate(countInfo)
     }
-    fun status(
-        arcade: Arcade,
+
+    private fun status(
+        arcade: Arcade.Snapshot,
         nowTime: java.time.LocalDateTime,
     ) = buildString {
         append("${arcade.name}: ${arcade.value}人 (")
         append(if (arcade.noUpdates()) {
             "今日未更新数据"
-        } else if (Duration.between(arcade.modified.toJavaLocalDateTime(), nowTime).toHours() < 1L){
+        } else if (Duration.between(arcade.modified.toJavaLocalDateTime(), nowTime).toHours() < 1L) {
             "更新于 1 小时内"
         } else {
             "更新于 ${Duration.between(arcade.modified.toJavaLocalDateTime(), nowTime).toHours()} 小时前"
         })
         append(")")
     }
+
     suspend fun GroupMessageEvent.handle() {
-        val group = ArcadeGroupBind.find(group.id)
         val raw = text.trim()
             .substringAfter("/mai")
             .substringAfter("/")
@@ -210,9 +181,9 @@ class QueueController(
             .trim()
         if (raw.endsWith(listOf("j", "几", "几个"))) {
             val name = raw.substringBefore(listOf("j", "几", "几个"))
-            // List All
             if (name.isBlank()) {
-                if (group == null || group.arcades.count() == 0L) {
+                val arcades = ArcadeGroupBind.listArcades(group.id)
+                if (arcades.isNullOrEmpty()) {
                     if (textMode())
                         reply("当前群未设置机厅，请使用“@可怜BOT /排卡管理 添加机厅”来添加机厅。")
                     else
@@ -222,61 +193,29 @@ class QueueController(
                         ))
                     return
                 }
-                newSuspendedTransaction {
-                    group.arcades.forEach { arcade ->
-                        arcade.clear()
-                    }
-                }
-                reply(list(group.arcades.toList()))
+                reply(list(arcades))
                 return
             }
-            if (group == null)
-                return
-            group.arcades.firstOrNull { name == it.name || name in it.aliases } ?.let { arcade ->
-                arcade.clear()
+            ArcadeGroupBind.findArcade(group.id, name) ?.let { arcade ->
                 reply(list(listOf(arcade)))
             }
             return
         }
-        if (group == null)
-            return
-        group.arcades.forEach { arcade ->
-            arcade.aliases.split(",").forEach { alias ->
-                if (!raw.startsWith(alias))
-                    return@forEach
-
-                var newValue = when {
-                    raw.startsWith("$alias+") -> {
-                        arcade.value + raw.substringAfter("${alias}+").filter { it.isDigit() }.toInt()
-                    }
-                    raw.startsWith("$alias-") -> {
-                        arcade.value - raw.substringAfter("${alias}-").filter { it.isDigit() }.toInt()
-                    }
-                    else -> {
-                        raw.substringAfter(alias)
-                            .replace("=", "")
-                            .toIntOrNull() ?: return
-                    }
-                }
-                if (newValue > 50) {
-                    reply("机厅很小，请你忍一忍")
-                    return
-                }
-                if (newValue < 0)
-                    newValue = 0
-                arcade.value = newValue
-                arcade.modified = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-
+        when (val result = ArcadeGroupBind.updateArcade(group.id, raw)) {
+            null -> return
+            Arcade.UpdateResult.TooLarge -> reply("机厅很小，请你忍一忍")
+            is Arcade.UpdateResult.Updated -> {
                 if (textMode())
-                    reply("更新成功，现在${arcade.name}人数为${newValue}人。")
+                    reply("更新成功，现在${result.arcade.name}人数为${result.arcade.value}人。")
                 else
                     reply(MarkdownTemplates.Templates.queue(
-                        "排卡管理", "更新成功，现在${arcade.name}人数为${newValue}人。",
-                        arcade.name
+                        "排卡管理", "更新成功，现在${result.arcade.name}人数为${result.arcade.value}人。",
+                        result.arcade.name
                     ))
             }
         }
     }
+
     val helpText = buildString {
         appendLine("本功能可以提供机厅人数查询及更新功能，支持的功能命令如下：")
         appendLine("查询人数：@可怜BOT 几 (或者 j)")

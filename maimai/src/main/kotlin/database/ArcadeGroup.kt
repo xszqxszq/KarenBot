@@ -8,14 +8,18 @@ import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionA
 class ArcadeGroup(id: EntityID<Int>) : IntEntity(id) {
     var name    by ArcadeGroupTable.name
     val arcades by Arcade referrersOn ArcadeTable.group
+
+    fun findInTransaction(name: String) = arcades.firstOrNull { arcade ->
+        arcade.matches(name)
+    }
+
     companion object : IntEntityClass<ArcadeGroup>(ArcadeGroupTable) {
         suspend operator fun get(name: String): ArcadeGroup? = suspendedTransactionAsync {
             find { ArcadeGroupTable.name eq name }
         }.await().firstOrNull()
     }
+
     suspend fun find(name: String) = suspendedTransactionAsync {
-        arcades.firstOrNull { arcade ->
-            arcade.name.equals(name, ignoreCase = true) ||
-                name.lowercase() in arcade.aliases.split(",").map { it.lowercase() } }
+        findInTransaction(name)
     }.await()
 }

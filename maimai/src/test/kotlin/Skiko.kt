@@ -1,3 +1,5 @@
+package xyz.xszq.bot
+
 import org.jetbrains.skia.EncodedImageFormat
 import xyz.xszq.bot.image.dom.Element
 import xyz.xszq.bot.image.template.Template

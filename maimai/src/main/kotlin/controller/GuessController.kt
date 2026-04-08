@@ -51,9 +51,10 @@ class GuessController(
             opening()
         }
         startsWith("不玩了") {
-            val id = if (this is GroupMessageEvent) group.id else sender.id
-            if (subscribeId.containsKey(id))
-                subscribeId.remove(id)
+            if (subscribeId.containsKey(contextId)) {
+                subscribeId.remove(contextId)
+                eventToReply.remove(contextId)
+            }
         }
         startsWith(listOf("禁用猜歌", "禁止猜歌", "关闭猜歌")) {
             if (this is GroupMessageEvent)
@@ -216,18 +217,18 @@ class GuessController(
             descriptions,
         ))
 
-        reply(buildString {
-            appendLine()
-            append( "这是一个 maimai 猜歌小游戏~" )
-            appendLine()
-            append( "你需要根据以下信息猜出以下是 maimai 中收录的哪一首歌。" )
-            append( "可以@可怜BOT发送歌曲名称，说“不玩了”可以结束游戏哦~" )
-            appendLine()
-            append( "管理员可以通过@可怜BOT发送“禁用猜歌”来关闭猜歌" )
-        })
         maimai.logger.info { "当前正在猜测: ${music.id}. ${music.name}" }
 
         val hintJob = maimai.scope.launch {
+            reply(buildString {
+                appendLine()
+                append( "这是一个 maimai 猜歌小游戏~" )
+                appendLine()
+                append( "你需要根据以下信息猜出以下是 maimai 中收录的哪一首歌。" )
+                append( "可以@可怜BOT发送歌曲名称，说“不玩了”可以结束游戏哦~" )
+                appendLine()
+                append( "管理员可以通过@可怜BOT发送“禁用猜歌”来关闭猜歌" )
+            })
             hintClassical(contextId, subscribesAt, music, descriptions)
         }
 
