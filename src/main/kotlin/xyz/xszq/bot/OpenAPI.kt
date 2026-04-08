@@ -95,7 +95,7 @@ class OpenAPI(
     ): Boolean {
         payload.content = filter.filter(payload.content)
         payload.markdown ?.let { markdown ->
-            markdown.params.forEach { param ->
+            markdown.params ?.forEach { param ->
                 param.values = param.values.map { filter.filter(it) }
             }
         }
