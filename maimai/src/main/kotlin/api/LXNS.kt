@@ -44,7 +44,7 @@ class LXNS(
             json(json)
         }
         install(HttpRequestRetry) {
-            retryOnExceptionOrServerErrors(maxRetries = 3)
+            retryOnExceptionOrServerErrors(maxRetries = 2)
             exponentialDelay()
         }
         engine {
