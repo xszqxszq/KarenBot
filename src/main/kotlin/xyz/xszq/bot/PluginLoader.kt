@@ -23,7 +23,7 @@ class PluginLoader(
     val files = FileManager()
 
     val pluginDirectory = "plugins/"
-    val libsDirectory = "libs/"
+    val libsDirectory = File("libs")
 
     private val logger = KotlinLogging.logger {}
     private val loadedPlugins = ConcurrentMap<String, Plugin>()
@@ -83,7 +83,7 @@ class PluginLoader(
             }
 
             val dependencyFiles = withContext(Dispatchers.IO) {
-                RuntimeDependencyResolver.resolveDependencies(jarFile, File(libsDirectory))
+                RuntimeDependencyResolver.resolveDependencies(jarFile, libsDirectory)
             }
 
             val urls = mutableListOf<URL>().apply {

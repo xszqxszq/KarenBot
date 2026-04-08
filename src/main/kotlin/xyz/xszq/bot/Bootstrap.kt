@@ -9,6 +9,7 @@ object Bootstrap {
 
     @JvmStatic
     fun main(args: Array<String>) {
+        RuntimePaths.relaunchIfNeeded(Bootstrap::class.java.name, args)
         val currentJar = File(Bootstrap::class.java.protectionDomain.codeSource.location.toURI())
         val libsDirectory = File("libs")
 

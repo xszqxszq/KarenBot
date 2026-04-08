@@ -38,6 +38,7 @@ object KarenBotApplication {
 
     @JvmStatic
     fun main(args: Array<String>) = runBlocking {
+        RuntimePaths.relaunchIfNeeded(KarenBotApplication::class.java.name, args)
         start()
     }
 

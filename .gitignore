@@ -1,0 +1,48 @@
+.gradle/
+build/
+out/
+bin/
+dist/
+.kotlin/
+
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+!**/src/main/**/out/
+!**/src/test/**/out/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+# IntelliJ IDEA
+.idea/modules.xml
+.idea/jarRepositories.xml
+.idea/compiler.xml
+.idea/workspace.xml
+.idea/dictionaries/
+.idea/libraries/
+*.iws
+*.iml
+*.ipr
+
+# Editors and OS
+.vscode/
+.DS_Store
+
+# Eclipse / NetBeans
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+nbproject/private/
+nbbuild/
+nbdist/
+.nb-gradle/
+
+# Local secrets and runtime leftovers inside the code repo
+keystore.jks
+todo.txt
+plugins/
+chunithm/
