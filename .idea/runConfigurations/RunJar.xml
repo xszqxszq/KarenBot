@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="RunJar" type="JarApplication">
     <option name="JAR_PATH" value="$PROJECT_DIR$/build/libs/KarenBot-9.0.jar" />
-    <option name="VM_PARAMETERS" value="-Dcli --enable-native-access=ALL-UNNAMED" />
+    <option name="VM_PARAMETERS" value="-Dcli --enable-native-access=ALL-UNNAMED -Dkarenbot.path=../KarenBot-runtime" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     <option name="ALTERNATIVE_JRE_PATH" />
     <method v="2">
