@@ -8,6 +8,7 @@ import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.Image
 import xyz.xszq.bot.*
 import xyz.xszq.bot.Maimai.Companion.textMode
+import xyz.xszq.bot.component.image.FilterParams
 import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.FilterNoResultException
@@ -34,7 +35,6 @@ class ImageController(
     override val maimai: Maimai
 ): Controller(maimai) {
     private var tips = mutableListOf<String>()
-    private val jacketUrl = maimai.config.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")
 
     override suspend fun setRoute() = maimai.route("/mai") {
         tips = maimai.config.tips.toMutableList()
@@ -56,16 +56,24 @@ class ImageController(
                 val queryArgs = args.getOrNull(1) ?: ""
                 var user: UserQueryParams? = null
                 runCatching {
-                    user = maimai.query.getQueryParams(this, queryArgs)
                     when (command) {
-                        "b" -> handleRating(total, user)
-                        "r" -> handleRecent(total, user)
+                        "b" -> {
+                            user = maimai.query.getQueryParams(this, queryArgs)
+                            handleRating(total, user)
+                        }
+                        "r" -> {
+                            user = maimai.query.getQueryParams(this, queryArgs)
+                            handleRecent(total, user)
+                        }
                         "歌" -> {
                             user = maimai.query.getQueryParams(this)
                             val musicQuery = args.subList(1, args.size).joinToString(" ")
                             handleMusicRating(total, user, musicQuery)
                         }
-                        else -> handleCombo(total, user, command)
+                        else -> {
+                            user = maimai.query.getQueryParams(this, queryArgs)
+                            handleCombo(total, user, command)
+                        }
                     }
                 }.onFailure { e ->
                     handleError(this, e, user)
@@ -218,56 +226,18 @@ class ImageController(
                 if (textMode)
                     return Pair(result.first(), difficulty)
                 else
-//                    reply(MarkdownTemplates.Templates.resultSimple(
-//                        title = "您要查找的歌曲可能是：",
-//                        type = type,
-//                        keyword = args,
-//                        difficulty = difficulty,
-//                        result = result
-//                    ))
-                    selectMusic(
+                    reply(MarkdownTemplates.Templates.selectMusic(
                         title = "您要查找的歌曲可能是：",
                         type = type,
                         keyword = args,
                         difficulty = difficulty,
                         result = result
-                    )
+                    ))
             }
         }
         return null
     }
 
-    private suspend fun MessageEvent.selectMusic(
-        title: String,
-        type: String,
-        keyword: String,
-        difficulty: MusicDifficulty?,
-        result: List<MusicInfo>
-    ) {
-        val rows = result.map { music ->
-            val url = "$jacketUrl/${music.resourceId}.jpg"
-            buildString {
-                append("![preview #25px #25px]($url)")
-                append(' ')
-                append("<qqbot-cmd-input text=\"")
-                append("$type ${difficulty?.brief ?: ""}id${music.id}".encodeURLParameter())
-                append("\" show=\"")
-                append("${music.id}. ${music.name}".encodeURLParameter())
-                append("\" reference=\"false\"/>")
-            }
-        }
-
-        reply(Markdown(MarkdownData(buildString {
-            appendLine("| 您要查找的歌曲可能是： |")
-            appendLine("| --- |")
-            rows.forEach { row ->
-                append("|")
-                append(row)
-                append("|")
-                appendLine()
-            }
-        })))
-    }
     suspend fun Image?.sendResultImage(
         command: String,
         event: MessageEvent,
@@ -387,15 +357,22 @@ class ImageController(
             }
         } ?: throw NotFoundException("未查询到该歌曲的游玩记录")
 
-        maimai.image.rating.comboBests(
-            total = total,
-            player = info.player,
-            settings = info.settings,
-            allRecords = List(total) { record },
-            filterParams = null,
-            api = api.name
-        )
-
+        val (elapsed, result) = countTime {
+            maimai.image.rating.comboBests(
+                total = total,
+                player = info.player,
+                settings = info.settings,
+                allRecords = List(total) { record },
+                filterParams = FilterParams(
+                    newestVersion = maimai.maimaiData.newestVersion,
+                    isAllRequired = true,
+                    isFitLevelValue = false,
+                    isDetailed = true
+                ),
+                api = api.name
+            )
+        }
+        result.sendResultImage("歌50", this, "生成时间：${elapsed}ms\r${randomTips()?:""}")
     }
     suspend fun MessageEvent.handleScoreList(
         combo: String,

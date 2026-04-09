@@ -4,7 +4,7 @@ import xyz.xszq.bot.music.GameVersion
 import xyz.xszq.bot.music.RequiresType
 
 data class FilterParams(
-    var name: String,
+    var name: String = "",
     var newestVersion: GameVersion,
     var isAllRequired: Boolean,
     var isFitLevelValue: Boolean,

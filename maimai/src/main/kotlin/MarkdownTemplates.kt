@@ -1,16 +1,18 @@
 package xyz.xszq.bot
 
+import io.ktor.http.encodeURLParameter
 import korlibs.io.util.toStringDecimal
 import xyz.xszq.bot.api.DivingFish
 import xyz.xszq.bot.api.LXNS
 import xyz.xszq.bot.api.MaimaiAPI
+import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.music.MusicDifficulty
 import xyz.xszq.bot.music.MusicInfo
 import xyz.xszq.bot.payload.markdown.*
 import xyz.xszq.bot.payload.markdown.Keyboard.KeyboardRowBuilder
 
 object MarkdownTemplates {
-    private const val MAX_RESULTS = 8
+    lateinit var jacketUrl: String
 
     const val MUSIC_INFO = "102112100_1761189244"
     const val GUESS = "102112100_1748875837"
@@ -18,6 +20,11 @@ object MarkdownTemplates {
     const val CODE_BLOCK = "102112100_1751984435"
     const val IMAGE = "102112100_1761189134"
 
+    fun init(
+        maimai: Maimai
+    ) {
+        jacketUrl = maimai.config.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")
+    }
     object Keyboards {
         fun single(
             data: String,
@@ -442,53 +449,41 @@ object MarkdownTemplates {
         fun selectPaged(
             button: String,
             keyword: String,
-            result: List<MusicInfo>,
             nowPage: Int = 1,
             totalPages: Int = 1,
-            command: String = "id"
         ) = Keyboard.create {
-            listButtons(result).forEach { musics ->
-                row {
-                    musics.forEach { music ->
-                        placeButton(music, command)
-                    }
-                    if (musics.size == 1 && result.size > 4)
-                        emptyButton()
-                }
+            row {
+                if (nowPage > 1)
+                    button(
+                        id = button,
+                        action = Action(
+                            type = Action.CALLBACK,
+                            data = "$keyword\n${nowPage-1}",
+                            permission = Permission(Permission.EVERYONE),
+                            enter = true
+                        ),
+                        renderData = RenderData(
+                            label = "⬅\uFE0F上一页",
+                            visitedLabel = "⬅\uFE0F上一页",
+                            style = RenderData.BLUE
+                        )
+                    )
+                if (nowPage < totalPages)
+                    button(
+                        id = button,
+                        action = Action(
+                            type = Action.CALLBACK,
+                            data = "$keyword\n${nowPage+1}",
+                            permission = Permission(Permission.EVERYONE),
+                            enter = true
+                        ),
+                        renderData = RenderData(
+                            label = "➡\uFE0F下一页",
+                            visitedLabel = "➡\uFE0F下一页",
+                            style = RenderData.BLUE
+                        )
+                    )
             }
-            if (totalPages > 1)
-                row {
-                    if (nowPage > 1)
-                        button(
-                            id = button,
-                            action = Action(
-                                type = Action.CALLBACK,
-                                data = "$keyword\n${nowPage-1}",
-                                permission = Permission(Permission.EVERYONE),
-                                enter = true
-                            ),
-                            renderData = RenderData(
-                                label = "⬅\uFE0F上一页",
-                                visitedLabel = "⬅\uFE0F上一页",
-                                style = RenderData.BLUE
-                            )
-                        )
-                    if (nowPage < totalPages)
-                        button(
-                            id = button,
-                            action = Action(
-                                type = Action.CALLBACK,
-                                data = "$keyword\n${nowPage+1}",
-                                permission = Permission(Permission.EVERYONE),
-                                enter = true
-                            ),
-                            renderData = RenderData(
-                                label = "➡\uFE0F下一页",
-                                visitedLabel = "➡\uFE0F下一页",
-                                style = RenderData.BLUE
-                            )
-                        )
-                }
         }
 
         val BACKENDS = Keyboard.create {
@@ -1023,38 +1018,6 @@ object MarkdownTemplates {
                 "更新数据请使用“机厅名+数量”。\r\t例：某某机厅3\r\t例：机厅+1\r\t例：jt-2"
             }
         }.toMessage(Keyboards.QUEUE_UPDATE)
-        fun result(
-            title: String,
-            type: String,
-            keyword: String,
-            result: List<MusicInfo>,
-            nowPage: Int = 1,
-            totalPages: Int = 1,
-        ) = MarkdownData.create(BRIEF) {
-            "title" {
-                title
-            }
-        }.toMessage(Keyboards.selectPaged(
-            type, keyword, result, nowPage, totalPages
-        ))
-        fun resultSimple(
-            title: String,
-            type: String,
-            keyword: String,
-            difficulty: MusicDifficulty?,
-            result: List<MusicInfo>
-        ) = MarkdownData.create(BRIEF) {
-            "title" {
-                title
-            }
-        }.toMessage(Keyboards.selectPaged(
-            button = "",
-            keyword = keyword,
-            result = result.take(MAX_RESULTS),
-            nowPage = 1,
-            totalPages = 1,
-            command = "$type ${difficulty?.brief?:""}id"
-        ))
         fun image(
             url: String,
             size: Pair<Int, Int>,
@@ -1119,6 +1082,46 @@ object MarkdownTemplates {
             url: String,
             hint: String
         ) = guessImage(url, hint).toMessage(Keyboards.GUESS_AGAIN)
+
+        fun selectMusic(
+            title: String,
+            type: String,
+            keyword: String,
+            difficulty: MusicDifficulty?,
+            result: List<MusicInfo>,
+            displayName: String ?= null,
+            nowPage: Int = 1,
+            totalPages: Int = 1,
+        ): Markdown {
+            val rows = result.map { music ->
+                val url = "$jacketUrl/${music.resourceId}.jpg"
+                buildString {
+                    append("![preview #25px #25px]($url)")
+                    append(' ')
+                    append("<qqbot-cmd-input text=\"")
+                    append("${displayName ?: type} ${difficulty?.brief ?: ""}id${music.id}".trim().encodeURLParameter())
+                    append("\" show=\"")
+                    append("${music.id}. ${music.name}".encodeURLParameter())
+                    append("\" reference=\"false\"/>")
+                }
+            }.take(20)
+
+            val data = MarkdownData(buildString {
+                appendLine("| $title |")
+                appendLine("| --- |")
+                rows.forEach { row ->
+                    append("|")
+                    append(row)
+                    append("|")
+                    appendLine()
+                }
+            })
+            val keyboard = when {
+                totalPages == 1 -> null
+                else -> Keyboards.selectPaged(type, keyword, nowPage, totalPages)
+            }
+            return Markdown(data, keyboard)
+        }
 
         val SELECT_BACKENDS = brief("舞萌DX", "您还未在查分器上绑定QQ号。请选择一个查分器来绑定您的QQ号：")
             .toMessage(Keyboards.BACKENDS)

@@ -82,6 +82,7 @@ class Maimai: Plugin() {
 
         image.init()
         ComboQuery.init(maimaiData)
+        MarkdownTemplates.init(this)
 
         // 数据库初始化
         database = Database.connect(

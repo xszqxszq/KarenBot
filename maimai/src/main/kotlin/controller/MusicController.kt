@@ -33,7 +33,7 @@ class MusicController(
     private val previewDir = "./data/maimai/preview/"
     private val notFound = "未查找到相关的歌曲，请检查拼写是否有误。"
 
-    private val maxResults = 8
+    private val maxResults = 20
     private val maxResultsLong = 40
 
     private val jacketUrl = maimai.config.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")
@@ -276,6 +276,7 @@ class MusicController(
         type: String,
         keyword: String,
         result: List<MusicInfo>,
+        displayName: String ?= null,
         nowPage: Int = 1,
         totalPages: Int = 1,
     ) {
@@ -283,9 +284,11 @@ class MusicController(
             MaimaiSettingsTable[sender.id, "text-mode"] == "1"
         else
             false
-        when (result.size) {
-            0 -> reply(notFound)
-            1 -> {
+        when {
+            result.isEmpty() -> {
+                reply(notFound)
+            }
+            result.size == 1 && totalPages == 1 -> {
                 if (textMode)
                     reply(result.first().infoText())
                 else
@@ -305,11 +308,13 @@ class MusicController(
                         }
                     }.trim())
                 else
-                    reply(MarkdownTemplates.Templates.result(
+                    reply(MarkdownTemplates.Templates.selectMusic(
                         title = hint,
                         type = type,
                         keyword = keyword,
+                        difficulty = null,
                         result = result,
+                        displayName = displayName,
                         nowPage = nowPage,
                         totalPages = totalPages,
                     ))
@@ -322,7 +327,14 @@ class MusicController(
     ) {
         val (result, nowPage, totalPages) = maimai.aliases.search(name)
             .pagination(page, maxResults)
-        showResult("search-word", name, result, nowPage, totalPages)
+        showResult(
+            "search-word",
+            name,
+            result,
+            "",
+            nowPage,
+            totalPages
+        )
     }
 
     suspend fun ReplyAble.searchLevel(
@@ -335,7 +347,14 @@ class MusicController(
             .filter { it.levelValue in begin..end }
             .distinctBy { it.music.id }
             .pagination(page, maxResults)
-        showResult("search-level", "$begin:$end", result.map { it.music }, nowPage, totalPages)
+        showResult(
+            "search-level",
+            "$begin:$end",
+            result.map { it.music },
+            "",
+            nowPage,
+            totalPages
+        )
     }
     suspend fun ReplyAble.searchDesigner(
         designer: String,
@@ -348,7 +367,14 @@ class MusicController(
             .filter { it.notesDesigner in targets || designer == it.notesDesigner || designer in it.notesDesigner }
             .distinctBy { it.music.id }
             .pagination(page, maxResults)
-        showResult("search-designer", designer, result.map { it.music }, nowPage, totalPages)
+        showResult(
+            "search-designer",
+            designer,
+            result.map { it.music },
+            "",
+            nowPage,
+            totalPages
+        )
     }
     suspend fun MessageEvent.searchRegex(
         raw: String,
@@ -357,7 +383,12 @@ class MusicController(
         val result = maimai.musics()
             .filter { regex.matches(it.name) }
             .take(maxResults)
-        showResult("search-regex", raw, result)
+        showResult(
+            "search-regex",
+            raw,
+            result,
+            ""
+        )
     }
     suspend fun ReplyAble.searchBPM(
         bpm: Int,
@@ -366,7 +397,14 @@ class MusicController(
         val (result, nowPage, totalPages) = maimai.musics()
             .filter { it.bpm == bpm }
             .pagination(page, maxResults)
-        showResult("search-bpm", "$bpm", result, nowPage, totalPages)
+        showResult(
+            "search-bpm",
+            "$bpm",
+            result,
+            "",
+            nowPage,
+            totalPages
+        )
     }
     suspend fun chartText(
         chart: ChartInfo
