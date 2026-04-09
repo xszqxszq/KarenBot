@@ -1,5 +1,6 @@
 package xyz.xszq.bot.controller
 
+import io.ktor.http.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -13,24 +14,28 @@ import xyz.xszq.bot.exception.FilterNoResultException
 import xyz.xszq.bot.exception.NoDataException
 import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.exception.NotSupportedException
+import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.music.*
 import xyz.xszq.bot.payload.LocalCourseInfo
+import xyz.xszq.bot.payload.markdown.MarkdownData
 import xyz.xszq.bot.query.ComboQuery
 import xyz.xszq.bot.query.ComboQuery.filterCharts
 import xyz.xszq.bot.query.ComboQuery.filterMusics
 import xyz.xszq.bot.query.ComboQuery.filterRecords
 import xyz.xszq.bot.query.ComboQuery.isDetailed
 import xyz.xszq.bot.query.ComboQuery.isPlate
-import xyz.xszq.bot.query.ComboQuery.noRecordFilter
 import xyz.xszq.bot.query.ComboQuery.params
 import xyz.xszq.bot.query.Filter
+import kotlin.collections.forEach
 import kotlin.random.Random
 
 @Suppress("unused")
 class ImageController(
     override val maimai: Maimai
 ): Controller(maimai) {
-    var tips = mutableListOf<String>()
+    private var tips = mutableListOf<String>()
+    private val jacketUrl = maimai.config.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")
+
     override suspend fun setRoute() = maimai.route("/mai") {
         tips = maimai.config.tips.toMutableList()
         // b50 / b40 及扩展功能
@@ -213,16 +218,55 @@ class ImageController(
                 if (textMode)
                     return Pair(result.first(), difficulty)
                 else
-                    reply(MarkdownTemplates.Templates.resultSimple(
+//                    reply(MarkdownTemplates.Templates.resultSimple(
+//                        title = "您要查找的歌曲可能是：",
+//                        type = type,
+//                        keyword = args,
+//                        difficulty = difficulty,
+//                        result = result
+//                    ))
+                    selectMusic(
                         title = "您要查找的歌曲可能是：",
                         type = type,
                         keyword = args,
                         difficulty = difficulty,
                         result = result
-                    ))
+                    )
             }
         }
         return null
+    }
+
+    private suspend fun MessageEvent.selectMusic(
+        title: String,
+        type: String,
+        keyword: String,
+        difficulty: MusicDifficulty?,
+        result: List<MusicInfo>
+    ) {
+        val rows = result.map { music ->
+            val url = "$jacketUrl/${music.resourceId}.jpg"
+            buildString {
+                append("![preview #25px #25px]($url)")
+                append(' ')
+                append("<qqbot-cmd-input text=\"")
+                append("$type ${difficulty?.brief ?: ""}id${music.id}".encodeURLParameter())
+                append("\" show=\"")
+                append("${music.id}. ${music.name}".encodeURLParameter())
+                append("\" reference=\"false\"/>")
+            }
+        }
+
+        reply(Markdown(MarkdownData(buildString {
+            appendLine("| 您要查找的歌曲可能是： |")
+            appendLine("| --- |")
+            rows.forEach { row ->
+                append("|")
+                append(row)
+                append("|")
+                appendLine()
+            }
+        })))
     }
     suspend fun Image?.sendResultImage(
         command: String,
