@@ -505,17 +505,18 @@ class Meme: Plugin() {
     }
 
     private fun StringBuilder.buildTable(
-        rows: List<List<String>>
+        rows: List<List<String>>,
+        cols: Int = 2
     ) {
-        appendLine("| | |")
-        appendLine("| :---: | :---: |")
+        appendLine("|" + " |".repeat(cols))
+        appendLine("|" + " :---: |".repeat(cols))
         rows.forEach { row ->
             append("|")
             row.forEach { cell ->
                 append(cell)
                 append("|")
             }
-            repeat(2 - row.size) {
+            repeat(cols - row.size) {
                 append(" |")
             }
             appendLine()
@@ -555,9 +556,9 @@ class Meme: Plugin() {
         val rows = options.map { option ->
             val id = option.name.split(" ").last().toInt()
             val url = "https://static-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/${option.img.replace("png", "webp")}"
-            val width = getImageWidth(option.img)
+            val width = getImageWidth(option.img, 26.0)
             buildString {
-                append("![preview #${width}px #50px]($url)")
+                append("![preview #${width}px #26px]($url)")
                 append(' ')
                 append("<qqbot-cmd-input text=\"")
                 append("/pjsk ${character}${id} ".encodeURLParameter())
@@ -565,11 +566,11 @@ class Meme: Plugin() {
                 append("#${id}".encodeURLParameter())
                 append("\" reference=\"true\"/>")
             }
-        }.chunked(2)
+        }.chunked(4)
         
         reply(Markdown(MarkdownData(buildString {
             appendLine("请点击要选择的图片编号并输入文本：")
-            buildTable(rows)
+            buildTable(rows, 4)
         })))
     }
 
