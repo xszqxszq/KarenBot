@@ -542,6 +542,7 @@ class Meme: Plugin() {
         reply(Markdown(MarkdownData(buildString {
             appendLine("## 表情生成")
             appendLine( "> 这是一个生成初音未来：世界计划（プロセカ/pjsk）表情的功能。" )
+            appendLine()
             appendLine( "⬇请点击角色名来选择想生成的角色：" )
             buildTable(rows)
         })))
