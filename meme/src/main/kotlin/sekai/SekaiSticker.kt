@@ -1,165 +1,281 @@
 package xyz.xszq.bot.sekai
 
-import korlibs.image.bitmap.Bitmap
-import korlibs.image.bitmap.NativeImage
-import korlibs.image.bitmap.context2d
-import korlibs.image.color.Colors
-import korlibs.image.color.RGBA
-import korlibs.image.font.Font
-import korlibs.image.font.FontRegistry
-import korlibs.image.font.SystemFontRegistry
-import korlibs.image.font.getTextBoundsWithGlyphs
-import korlibs.image.format.readNativeImage
-import korlibs.io.file.std.localCurrentDirVfs
-import korlibs.math.geom.Angle
-import korlibs.math.geom.Point
-import korlibs.math.geom.Size
-import korlibs.math.geom.radians
-import korlibs.math.geom.vector.LineCap
-import korlibs.math.geom.vector.LineJoin
-import korlibs.math.squared
-import korlibs.math.toIntCeil
-import korlibs.memory.extract8
 import kotlinx.serialization.json.Json
+import org.jetbrains.skia.Color
+import org.jetbrains.skia.FontMgr
+import org.jetbrains.skia.Paint
+import org.jetbrains.skia.PaintMode
+import org.jetbrains.skia.PaintStrokeCap
+import org.jetbrains.skia.PaintStrokeJoin
+import org.jetbrains.skia.Rect
+import org.jetbrains.skia.Surface
+import org.jetbrains.skia.paragraph.Alignment
+import org.jetbrains.skia.paragraph.FontCollection
+import org.jetbrains.skia.paragraph.Paragraph
+import org.jetbrains.skia.paragraph.ParagraphBuilder
+import org.jetbrains.skia.paragraph.ParagraphStyle
+import org.jetbrains.skia.paragraph.TextStyle
+import org.jetbrains.skia.paragraph.TypefaceFontProvider
 import java.io.File
-import kotlin.math.atan
+import kotlin.math.abs
+import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.sqrt
+import kotlin.math.sin
 
 class SekaiSticker {
-    val imgDir = localCurrentDirVfs[ASSETS_DIR]
-    lateinit var registry: FontRegistry
-    lateinit var fonts: List<Font>
+    val imgDir = File(ASSETS_DIR)
+    lateinit var fontCollection: FontCollection
+
     val characters = Json.decodeFromString<List<SekaiCharacter>>(
-        File(imgDir["characters.json"].absolutePath).readText()
+        File(imgDir, "characters.json").readText()
     )
 
-    suspend fun init() {
-        registry = SystemFontRegistry()
-        fonts = listOf("FOT-Yuruka Std UB", "SSFangTangTi", "Alibaba-PuHuiTi-H", "Alibaba-PuHuiTi-B").map {
-            registry[it]
+    fun init() {
+        val provider = TypefaceFontProvider()
+        fontCollection = FontCollection().apply {
+            setDefaultFontManager(FontMgr.default)
+            setAssetFontManager(provider)
         }
+        registerSystemFonts(provider)
     }
 
-    suspend fun draw(
+    fun draw(
         character: SekaiCharacter,
         text: String,
-    ): Bitmap {
-        val sticker = NativeImage(296, 256)
-        val template = imgDir[character.img].readNativeImage()
+    ): org.jetbrains.skia.Image {
+        val sticker = Surface.makeRasterN32Premul(296, 256)
+        val template = org.jetbrains.skia.Image.makeFromEncoded(File(imgDir, character.img).readBytes())
+        val ratio = min(296f / template.width, 256f / template.height)
+        val width = template.width * ratio
+        val height = template.height * ratio
+        val x = (296f - width) / 2f
+        val y = (256f - height) / 2f
 
-        var ratio = min(sticker.width.toDouble() / template.width, sticker.height.toDouble() / template.height)
-        var templatePos = Point(
-            (sticker.width - template.width * ratio) / 2,
-            (sticker.height - template.height * ratio) / 2
+        sticker.canvas.drawImageRect(
+            template,
+            Rect.makeWH(template.width.toFloat(), template.height.toFloat()),
+            Rect.makeXYWH(x, y, width, height)
         )
-        val angle = (character.defaultText.r / 10.0).radians
 
-        // 先渲染文本，否则 Stroke 会很丑
-        val renderedTexts = text.split("\n").map { line ->
-            drawLine(character, line)
-        }
+        val rendered = drawText(character, text)
+        val angle = character.defaultText.r / 10f * 57.29578f
 
-        return sticker.context2d {
-            drawImage(
-                template,
-                templatePos,
-                Size(template.width * ratio, template.height * ratio)
-            )
-            save()
+        sticker.canvas.save()
+        sticker.canvas.translate(character.defaultText.x.toFloat(), character.defaultText.y.toFloat())
+        sticker.canvas.rotate(angle)
+        val (textX, textY) = calcTextPosition(
+            rendered = rendered,
+            anchorX = character.defaultText.x.toFloat(),
+            anchorY = character.defaultText.y.toFloat(),
+            angle = angle
+        )
+        rendered.stroke.paint(sticker.canvas, textX, textY)
+        rendered.fill.paint(sticker.canvas, textX, textY)
+        sticker.canvas.restore()
 
-            // 计算旋转后的中心偏移
-            val reference = renderedTexts.first()
-            val (_, offsetY) = calcOffset(reference, angle)
-
-            translate(
-                character.defaultText.x,
-                character.defaultText.y - offsetY
-            )
-            rotate(angle)
-            var nowY = 0
-            renderedTexts.forEach { rendered ->
-                val (offsetX, _) = calcOffset(rendered, angle)
-                drawImage(
-                    rendered,
-                    Point(-offsetX, nowY)
-                )
-                nowY += rendered.height
-            }
-        }
+        return sticker.makeImageSnapshot()
     }
-    fun calcOffset(
-        rendered: NativeImage,
-        angle: Angle
-    ): Pair<Double, Double> {
-        val diagonal = sqrt(rendered.width.squared().toDouble() + rendered.height.squared())
-        val centerAngle = angle + atan(rendered.height.toDouble() / rendered.width).radians
-        val offsetX = diagonal / 2 * centerAngle.cosine()
-        val offsetY = diagonal / 2 * centerAngle.sine() + STROKE * 2
-        return Pair(offsetX, offsetY)
-    }
-    private fun drawLine(
+
+    private fun drawText(
         character: SekaiCharacter,
         text: String
-    ): NativeImage {
-        var textHeight = 0.0
-        var ascent = 0.0
-        val chars = mutableListOf<Triple<Char, Font, Double>>()
-        text.forEach { char ->
-            val (font, metrics) = fonts.firstNotNullOfOrNull { font ->
-                val metrics = font.getTextBoundsWithGlyphs(character.defaultText.s.toDouble(), char.toString())
-                if (char.toString().isBlank() || metrics.glyphs.firstOrNull()?.metrics?.existing == true)
-                    Pair(font, metrics)
-                else
-                    null
-            } ?: return@forEach
-            val width =
-                if (metrics.metrics.width == 0.0) metrics.glyphs.first().metrics.xadvance
-                else metrics.metrics.width
-            chars.add(Triple(char, font, width))
-            textHeight = max(textHeight, metrics.metrics.ascent - metrics.metrics.descent)
-            ascent = max(ascent, metrics.metrics.ascent)
-        }
-        ascent += STROKE
-        val textWidth = chars.sumOf { it.third }
-        return NativeImage(
-            (textWidth + STROKE * 2).toIntCeil(),
-            (textHeight + STROKE * 2).toIntCeil()
-        ).context2d {
-            fontSize = character.defaultText.s.toDouble()
-            lineWidth = STROKE
-            lineCap = LineCap.ROUND
-            lineJoin = LineJoin.ROUND
+    ): RenderedText {
+        var size = character.defaultText.s.toFloat()
+        val content = text.trim().ifBlank { " " }
 
-            var x = STROKE
-            chars.forEach { (char, selected, width) ->
-                font = selected
-                strokeStyle = Colors.WHITE
-                strokeText(char.toString(), Point(x, ascent))
-                x += width
+        repeat(12) {
+            val stroke = drawLine(content, size, true, parseColor(character.color))
+            val fill = drawLine(content, size, false, parseColor(character.color))
+            if (fill.lineMetrics.size <= 4 && fill.height <= 140f) {
+                val firstLineHeight = fill.lineMetrics.firstOrNull()?.height?.toFloat() ?: fill.height
+                val totalHeight = fill.lineMetrics.sumOf { it.height }.toFloat().takeIf { it > 0f } ?: fill.height
+                return RenderedText(stroke, fill, firstLineHeight, totalHeight)
             }
-            x = STROKE
-            chars.forEach { (char, selected, width) ->
-                font = selected
-                fillStyle = character.color.hexToRGBA()
-                fillText(char.toString(), Point(x, ascent))
-                x += width
-            }
+            size = (size * 0.92f).coerceAtLeast(16f)
         }
+
+        val stroke = drawLine(content, size, true, parseColor(character.color))
+        val fill = drawLine(content, size, false, parseColor(character.color))
+        val firstLineHeight = fill.lineMetrics.firstOrNull()?.height?.toFloat() ?: fill.height
+        val totalHeight = fill.lineMetrics.sumOf { it.height }.toFloat().takeIf { it > 0f } ?: fill.height
+        return RenderedText(stroke, fill, firstLineHeight, totalHeight)
     }
 
-    private fun String.hexToRGBA(): RGBA {
-        val int = substring(1).toInt(16)
-        return RGBA.Companion.invoke(
-            int.extract8(16),
-            int.extract8(8),
-            int.extract8(0)
+    private fun drawLine(
+        text: String,
+        size: Float,
+        stroke: Boolean,
+        color: Int
+    ): Paragraph {
+        val style = ParagraphStyle().apply {
+            alignment = Alignment.CENTER
+        }
+        val textStyle = TextStyle().apply {
+            fontSize = size
+            fontFamilies = fonts
+            height = 0.94f
+            this.color = color
+            foreground = Paint().apply {
+                mode = if (stroke) PaintMode.STROKE else PaintMode.FILL
+                this.color = if (stroke) Color.WHITE else color
+                strokeWidth = if (stroke) 9f else 0f
+                strokeJoin = PaintStrokeJoin.ROUND
+                strokeCap = PaintStrokeCap.ROUND
+                isAntiAlias = true
+            }
+        }
+
+        val builder = ParagraphBuilder(style, fontCollection)
+        builder.pushStyle(textStyle)
+        builder.addText(text)
+        return builder.build().also { it.layout(220f) }
+    }
+
+    private fun calcTextPosition(
+        rendered: RenderedText,
+        anchorX: Float,
+        anchorY: Float,
+        angle: Float
+    ): Pair<Float, Float> {
+        val width = 220f
+        val firstLineHeight = rendered.firstLineHeight + 9f
+        val totalHeight = rendered.totalHeight + 9f
+        val expandUp = (totalHeight - firstLineHeight).coerceAtLeast(0f)
+        val x = -width / 2f
+        var y = -firstLineHeight / 2f - expandUp
+
+        val rad = angle / 57.29578f
+        val c = cos(rad)
+        val s = sin(rad)
+        val corners = listOf(
+            rotatePoint(x, y, c, s),
+            rotatePoint(x + width, y, c, s),
+            rotatePoint(x, y + totalHeight, c, s),
+            rotatePoint(x + width, y + totalHeight, c, s)
         )
+        y += solveYOffset(corners, anchorX, anchorY, c, s)
+        return x to y
     }
+
+    private fun solveYOffset(
+        corners: List<Pair<Float, Float>>,
+        anchorX: Float,
+        anchorY: Float,
+        cos: Float,
+        sin: Float
+    ): Float {
+        var lower = Float.NEGATIVE_INFINITY
+        var upper = Float.POSITIVE_INFINITY
+
+        corners.forEach { (x, y) ->
+            updateBounds(anchorX + x, -sin, 8f, 288f) { lo, hi ->
+                lower = max(lower, lo)
+                upper = min(upper, hi)
+            }
+            updateBounds(anchorY + y, cos, 8f, 248f) { lo, hi ->
+                lower = max(lower, lo)
+                upper = min(upper, hi)
+            }
+        }
+
+        if (lower <= 0f && 0f <= upper)
+            return 0f
+        if (lower.isFinite() && upper.isFinite() && lower > upper)
+            return lower
+        return when {
+            lower.isFinite() && lower > 0f -> lower
+            upper.isFinite() && upper < 0f -> upper
+            lower.isFinite() -> lower
+            upper.isFinite() -> upper
+            else -> 0f
+        }
+    }
+
+    private fun updateBounds(
+        base: Float,
+        coeff: Float,
+        min: Float,
+        max: Float,
+        onBounds: (Float, Float) -> Unit
+    ) {
+        if (abs(coeff) < 0.0001f) {
+            if (base < min || base > max)
+                onBounds(Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY)
+            return
+        }
+
+        val a = (min - base) / coeff
+        val b = (max - base) / coeff
+        onBounds(min(a, b), max(a, b))
+    }
+
+    private fun rotatePoint(
+        x: Float,
+        y: Float,
+        cos: Float,
+        sin: Float
+    ): Pair<Float, Float> = x * cos - y * sin to x * sin + y * cos
+
+    private fun registerSystemFonts(
+        provider: TypefaceFontProvider
+    ) {
+        val mgr = FontMgr.default
+        fontAliases.forEach { (target, names) ->
+            for (i in 0 until mgr.familiesCount) {
+                val family = mgr.getFamilyName(i)
+                if (names.none { normalize(it) == normalize(family) })
+                    continue
+                val styleSet = mgr.makeStyleSet(i) ?: continue
+                val hints = fontStyles[target].orEmpty()
+                val index = (0 until styleSet.count()).firstOrNull { index ->
+                    val styleName = styleSet.getStyleName(index)
+                    hints.any { styleName.contains(it, true) }
+                } ?: 0
+                styleSet.getTypeface(index)?.let {
+                    provider.registerTypeface(it, target)
+                    break
+                }
+            }
+        }
+    }
+
+    private fun parseColor(hex: String): Int {
+        val color = hex.removePrefix("#").toInt(16)
+        return Color.makeARGB(255, color shr 16 and 0xFF, color shr 8 and 0xFF, color and 0xFF)
+    }
+
+    private fun normalize(name: String): String =
+        name.lowercase().replace(" ", "").replace("-", "").replace("_", "")
+
+    private data class RenderedText(
+        val stroke: Paragraph,
+        val fill: Paragraph,
+        val firstLineHeight: Float,
+        val totalHeight: Float
+    )
+
     companion object {
         private const val ASSETS_DIR = "./data/meme/pjsk/"
-        private const val STROKE = 9.0
+        private val fonts = arrayOf(
+            "FOT-Yuruka Std UB",
+            "SSFangTangTi",
+            "Alibaba-PuHuiTi-H",
+            "Alibaba-PuHuiTi-B"
+        )
+        private val fontAliases = mapOf(
+            "FOT-Yuruka Std UB" to listOf("FOT-Yuruka Std UB", "FOT-Yuruka Std", "YurukaStd", "Yuruka Std"),
+            "SSFangTangTi" to listOf("SSFangTangTi", "ShangShouFangTangTi", "Shang Shou Fang Tang Ti"),
+            "Alibaba-PuHuiTi-H" to listOf("Alibaba-PuHuiTi-H", "Alibaba PuHuiTi", "Alibaba PuHuiTi Heavy"),
+            "Alibaba-PuHuiTi-B" to listOf("Alibaba-PuHuiTi-B", "Alibaba PuHuiTi", "Alibaba PuHuiTi Bold")
+        )
+        private val fontStyles = mapOf(
+            "FOT-Yuruka Std UB" to listOf("UB", "Ultra", "Heavy", "Bold", "Black"),
+            "SSFangTangTi" to listOf("Regular", "Normal"),
+            "Alibaba-PuHuiTi-H" to listOf("H", "Heavy", "Bold"),
+            "Alibaba-PuHuiTi-B" to listOf("B", "Bold", "Medium")
+        )
+
         val aliases = buildMap {
             put("airi", listOf("airi", "桃井爱莉", "桃井", "爱莉", "桃井愛莉", "愛莉", "momoi"))
             put("akito", listOf("akito", "东云彰人", "東雲彰人", "彰人", "彰人", "akt"))

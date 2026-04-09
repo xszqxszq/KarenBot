@@ -8,7 +8,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import korlibs.image.format.PNG
 import korlibs.image.format.encode
-import korlibs.image.format.readNativeImage
 import korlibs.io.util.isDigit
 import org.jetbrains.skia.Image as SkiaImage
 import kotlinx.serialization.json.JsonPrimitive
@@ -372,7 +371,7 @@ class Meme: Plugin() {
             return
         }
         text ?: throw ArgsNotEnoughException()
-        sekai.draw(config, text).encode(PNG).send(this)
+        sekai.draw(config, text).encodePng().send(this)
     }
     private suspend fun MessageEvent.ba(
         raw: String
@@ -423,11 +422,11 @@ class Meme: Plugin() {
     }
     private suspend fun MessageEvent.spherize() {
         val image = message.filterIsInstance<Image>().firstOrNull() ?: throw ArgsNotEnoughException()
-        spherize.handle(this, image.file.readNativeImage())
+        spherize.handle(this, image.file)
     }
     private suspend fun MessageEvent.imSoHappy() {
         val image = message.filterIsInstance<Image>().firstOrNull() ?: throw ArgsNotEnoughException()
-        imSoHappy.handle(this, image.file.readNativeImage())
+        imSoHappy.handle(this, image.file)
     }
     private suspend fun MessageEvent.emojiKitchen(
         raw: String
@@ -579,7 +578,7 @@ class Meme: Plugin() {
         height: Double = 50.0
     ): Int = withContext(Dispatchers.IO) {
         runCatching {
-            val image = SkiaImage.makeFromEncoded(File(sekai.imgDir[path].absolutePath).readBytes())
+            val image = SkiaImage.makeFromEncoded(File(sekai.imgDir, path).readBytes())
             (image.width * height / image.height)
                 .toInt()
                 .coerceAtLeast(1)

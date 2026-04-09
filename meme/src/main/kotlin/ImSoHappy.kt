@@ -1,55 +1,53 @@
 package xyz.xszq.bot
 
-import korlibs.image.bitmap.Bitmap
-import korlibs.image.bitmap.Bitmap32
-import korlibs.image.format.PNG
-import korlibs.image.format.encode
+import korlibs.io.file.VfsFile
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.message.Image
 
 class ImSoHappy {
     fun flip(
-        input: Bitmap32,
-    ): Pair<Bitmap32, Bitmap32> {
+        input: SkikoImageData,
+    ): Pair<SkikoImageData, SkikoImageData> {
         val width = input.width
         val height = input.height
         val halfWidth = width / 2
-        val srcData = input.ints
+        val srcData = input.pixels
 
-        val outL2R = Bitmap32(width, height)
-        val outR2L = Bitmap32(width, height)
-        val dstL2R = outL2R.ints
-        val dstR2L = outR2L.ints
+        val dstL2R = ByteArray(srcData.size)
+        val dstR2L = ByteArray(srcData.size)
 
         for (y in 0 until height) {
-            val rowStart = y * width
-            for (x in 0 until width) {
-                val srcIndex: Int
-                when {
-                    x < halfWidth -> {
-                        dstL2R[rowStart + x] = srcData[rowStart + x]
-                        srcIndex = rowStart + (width - 1 - x)
-                        dstR2L[rowStart + x] = srcData[srcIndex]
-                    }
-                    else -> {
-                        srcIndex = rowStart + (width - 1 - x)
-                        dstL2R[rowStart + x] = srcData[srcIndex]
-                        dstR2L[rowStart + x] = srcData[rowStart + x]
-                    }
-                }
+            val rowStart = y * width * 4
+            for (x in 0 until halfWidth) {
+                val left = rowStart + x * 4
+                val right = rowStart + (width - 1 - x) * 4
+
+                copyPixel(srcData, left, dstL2R, left)
+                copyPixel(srcData, left, dstL2R, right)
+                copyPixel(srcData, right, dstR2L, left)
+                copyPixel(srcData, right, dstR2L, right)
+            }
+            if (width % 2 == 1) {
+                val center = rowStart + halfWidth * 4
+                copyPixel(srcData, center, dstL2R, center)
+                copyPixel(srcData, center, dstR2L, center)
             }
         }
-        return Pair(outL2R, outR2L)
+        return Pair(
+            SkikoImageData(width, height, dstL2R),
+            SkikoImageData(width, height, dstR2L)
+        )
     }
+
     suspend fun handle(
         event: MessageEvent,
-        input: Bitmap
+        input: VfsFile
     ) {
-        val (a, b) = flip(input.toBMP32())
+        val (a, b) = flip(input.readSkikoImage())
         useTempFile { first ->
-            first.writeBytes(a.encode(PNG))
+            first.writeBytes(a.toSkiaImage().encodePng())
             useTempFile { second ->
-                second.writeBytes(b.encode(PNG))
+                second.writeBytes(b.toSkiaImage().encodePng())
                 event.reply(Image(first))
                 event.reply(Image(second))
             }

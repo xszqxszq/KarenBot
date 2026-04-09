@@ -8,6 +8,7 @@ import korlibs.io.file.std.localVfs
 import kotlinx.coroutines.runBlocking
 import xyz.xszq.bot.BlueArchiveLogo
 import xyz.xszq.bot.FiveThousandChoyen
+import xyz.xszq.bot.encodePng
 import xyz.xszq.bot.sekai.SekaiCharacter
 import xyz.xszq.bot.sekai.SekaiSticker
 import xyz.xszq.bot.sekai.SekaiText
@@ -19,7 +20,9 @@ suspend fun listFonts() {
     }
 }
 suspend fun testSekai() {
-    SekaiSticker().draw(SekaiCharacter(
+    val sekai = SekaiSticker()
+    sekai.init()
+    sekai.draw(SekaiCharacter(
         "62",
         "Emu 13",
         "emu",
@@ -32,7 +35,7 @@ suspend fun testSekai() {
             -2,
             38
         )
-    ), "Wonderhoy!\nWonderhoy2!").showImageAndWait()
+    ), "Wonderhoy!\nWonderhoy2!").encodePng()
 }
 suspend fun testBA() {
     BlueArchiveLogo().draw("a", "b").showImageAndWait()
