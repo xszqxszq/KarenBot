@@ -1,7 +1,9 @@
 package xyz.xszq.bot.component.image
 
 import xyz.xszq.bot.music.GameVersion
+import xyz.xszq.bot.music.Record
 import xyz.xszq.bot.music.RequiresType
+import xyz.xszq.bot.query.Filter.Companion.defaultSort
 
 data class FilterParams(
     var name: String = "",
@@ -10,4 +12,5 @@ data class FilterParams(
     var isFitLevelValue: Boolean,
     var isDetailed: Boolean,
     var requiresType: RequiresType = RequiresType.Achievement,
+    var sortBy: List<(Record) -> Comparable<*>> = emptyList()
 )

@@ -21,6 +21,9 @@ import xyz.xszq.bot.component.image.FilterParams
 import xyz.xszq.bot.music.PlayerInfo
 import xyz.xszq.bot.music.PlayerSettings
 import xyz.xszq.bot.music.RatingResponse
+import xyz.xszq.bot.query.Filter.Companion.defaultSort
+import kotlin.collections.filter
+import kotlin.collections.sortedBy
 import kotlin.math.min
 
 class RatingTemplate(
@@ -90,8 +93,8 @@ class RatingTemplate(
                 oldCount = oldCount,
                 newCount = newCount,
                 isNewDisabled = false,
-                oldRecords = info.oldRatingList,
-                newRecords = info.newRatingList,
+                oldRecords = info.oldRatingList.take(oldCount),
+                newRecords = info.newRatingList.take(newCount),
             )
         )
     }
@@ -128,23 +131,22 @@ class RatingTemplate(
             }
         }
 
-        val sorted = allRecords.sortedByDescending { record -> record.rating }
-        val bests = sorted.take(total)
+        val bests = allRecords.take(total)
         val isNewDisabled = when {
             filterParams == null -> false
             filterParams.isAllRequired -> true
             filterParams.newestVersion == newestVersion ->
-                sorted.filter { it.music.version == filterParams.newestVersion }.size < newCount
-            sorted.none { it.music.version != filterParams.newestVersion } -> true
+                allRecords.filter { it.music.version == filterParams.newestVersion }.size < newCount
+            allRecords.none { it.music.version != filterParams.newestVersion } -> true
             else -> false
         }
 
         val oldRecords =
             if (isNewDisabled) bests.take(oldCount)
-            else sorted.filter { it.music.version != filterParams ?.newestVersion }.take(oldCount)
+            else allRecords.filter { it.music.version != filterParams ?.newestVersion }.take(oldCount)
         val newRecords =
             if (isNewDisabled) bests.subList(min(oldCount,oldRecords.size), bests.size)
-            else sorted.filter { it.music.version == filterParams ?.newestVersion }.take(newCount)
+            else allRecords.filter { it.music.version == filterParams ?.newestVersion }.take(newCount)
 
         val oldRating = oldRecords.sumOf { it.rating }
         val newRating = newRecords.sumOf { it.rating }

@@ -71,7 +71,7 @@ object ComboQuery {
         },
         record = { record ->
             val decimal = record.achievement % 10000
-            record.achievement in 995000..1005000
+            record.achievement in 994250..1004999
                     && (decimal in 4250..4999 || decimal in 9250..9999)
         },
         sortBy = { record ->
@@ -372,7 +372,7 @@ object ComboQuery {
         filtered = filtered.sortedBy(Filter.defaultSort)
         filter { it.sortBy != Filter.defaultSort }.forEach { filter ->
             @Suppress("UNCHECKED_CAST")
-            filtered = records.sortedBy<Record, Comparable<Any>>(filter.sortBy as (Record) -> Comparable<Any>?)
+            filtered = filtered.sortedBy<Record, Comparable<Any>>(filter.sortBy as (Record) -> Comparable<Any>?)
         }
         return filtered
     }
@@ -423,6 +423,7 @@ object ComboQuery {
         isAllRequired = isAllRequired(),
         isFitLevelValue = isFitLevelValue(),
         isDetailed = isDetailed(),
-        requiresType = requiresType()
+        requiresType = requiresType(),
+        sortBy = filter { it.sortBy != Filter.defaultSort }.map { it.sortBy }
     )
 }
