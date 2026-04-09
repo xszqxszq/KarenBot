@@ -23,6 +23,7 @@ import xyz.xszq.bot.payload.markdown.*
 import xyz.xszq.bot.sekai.SekaiCharacter
 import xyz.xszq.bot.sekai.SekaiSticker
 import java.io.File
+import kotlin.collections.chunked
 
 @Suppress("unused")
 class Meme: Plugin() {
@@ -124,7 +125,7 @@ class Meme: Plugin() {
     }
     val sekaiErrorHandler: ErrorHandler = { e ->
         when (e) {
-            is ArgsNotEnoughException -> reply(sekaiHelp)
+            is ArgsNotEnoughException -> selectSekaiCharacter()
             is NotFoundException -> reply(sekaiNotFound)
             else -> e.printStackTrace()
         }
@@ -266,22 +267,6 @@ class Meme: Plugin() {
             )
         }
     }
-    val sekaiHelp = MarkdownData.create(BRIEF) {
-        "title" {
-            "PJSK表情"
-        }
-        "content" {
-            buildString {
-                appendLine( "这是一个生成PJSK（プロセカ）表情包的功能。" )
-                appendLine( "使用方法：/pjsk 角色名+图片编号 文本" )
-                appendLine( "\uD83D\uDC49\uFE0F/pjsk 初音6 已举办" )
-                appendLine( "\uD83D\uDC49\uFE0F/pjsk ena9 喜欢你" )
-                appendLine( "\uD83D\uDC49\uFE0F/pjsk mzk 这是随机" )
-                appendLine( " " )
-                appendLine( "⬇请点击下方按钮选择表情：" )
-            }.trim().replace("\n", "\r")
-        }
-    }.toMessage(sekaiKeyboard)
     val sekaiNotFound = MarkdownData.create(BRIEF) {
         "title" {
             "PJSK表情"
@@ -364,7 +349,7 @@ class Meme: Plugin() {
     private suspend fun MessageEvent.sekai(
         raw: String
     ) {
-        val args = raw.split(" ", limit = 2)
+        val args = raw.split(" ", limit = 2).filter { it.isNotBlank() }
         if (args.isEmpty())
             throw ArgsNotEnoughException()
         val name = args.first()
@@ -519,6 +504,49 @@ class Meme: Plugin() {
         event.reply(Image(file))
     }
 
+    private fun StringBuilder.buildTable(
+        rows: List<List<String>>
+    ) {
+        appendLine("| | |")
+        appendLine("| :---: | :---: |")
+        rows.forEach { row ->
+            append("|")
+            row.forEach { cell ->
+                append(cell)
+                append("|")
+            }
+            repeat(2 - row.size) {
+                append(" |")
+            }
+            appendLine()
+        }
+    }
+
+    private suspend fun MessageEvent.selectSekaiCharacter() {
+        val rows = SekaiSticker.aliases.map { (characterId, aliases) ->
+            val displayName = aliases[1]
+            val example = sekai.characters.first { it.character == characterId }
+            val url = "https://static-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/${example.img.replace("png", "webp")}"
+            val width = getImageWidth(example.img, 16.0)
+            buildString {
+                append("![preview #${width}px #16px]($url)")
+                append(' ')
+                append("<qqbot-cmd-input text=\"")
+                append("/pjsk $characterId".encodeURLParameter())
+                append("\" show=\"")
+                append(displayName.encodeURLParameter())
+                append("\" reference=\"true\"/>")
+            }
+        }.chunked(2)
+
+        reply(Markdown(MarkdownData(buildString {
+            appendLine("## 表情生成")
+            appendLine( "> 这是一个生成初音未来：世界计划（プロセカ/pjsk）表情的功能。" )
+            appendLine( "⬇请点击角色名来选择想生成的角色：" )
+            buildTable(rows)
+        })))
+    }
+
     private suspend fun MessageEvent.selectSekaiImageId(
         character: String,
         options: List<SekaiCharacter>
@@ -539,20 +567,8 @@ class Meme: Plugin() {
         }.chunked(2)
         
         reply(Markdown(MarkdownData(buildString {
-            appendLine("请点击要制作的图片编号并输入文本：")
-            appendLine("| | |")
-            appendLine("| :---: | :---: |")
-            rows.forEach { row ->
-                append("|")
-                row.forEach { cell ->
-                    append(cell)
-                    append("|")
-                }
-                repeat(2 - row.size) {
-                    append(" |")
-                }
-                appendLine()
-            }
+            appendLine("请点击要选择的图片编号并输入文本：")
+            buildTable(rows)
         })))
     }
 
