@@ -147,6 +147,8 @@ class GuessController(
                     seq = result[GuessGameTable.seq]
                 )
             }
+            if (!event.playable())
+                return@forEach
             when (result[GuessGameTable.type]) {
                 "classical" -> event.run {
                     val status = result[GuessGameTable.status] as GuessGameStatus.Classical
@@ -154,15 +156,15 @@ class GuessController(
                     val descriptions = status.hints
 
                     val subscribesAt = UUID.randomUUID().toString()
-                    subscribeId[contextId] = subscribesAt
-                    eventToReply[contextId] = event
+                    subscribeId[event.contextId] = subscribesAt
+                    eventToReply[event.contextId] = event
 
                     val hintJob = maimai.scope.launch {
-                        hintClassical(contextId, subscribesAt, music, descriptions)
+                        hintClassical(event.contextId, subscribesAt, music, descriptions)
                     }
 
                     bot.pluginLoader.subscribes.always(subscribesAt) {
-                        listenClassical(contextId, subscribesAt, music, hintJob)
+                        listenClassical(event.contextId, subscribesAt, music, hintJob)
                     }
                 }
                 "opening" -> event.run {
@@ -175,11 +177,11 @@ class GuessController(
                     val chars = status.opened.toMutableList()
 
                     val subscribesAt = UUID.randomUUID().toString()
-                    subscribeId[contextId] = subscribesAt
-                    eventToReply[contextId] = this
+                    subscribeId[event.contextId] = subscribesAt
+                    eventToReply[event.contextId] = event
 
                     bot.pluginLoader.subscribes.always(subscribesAt) {
-                        listenOpening(contextId, subscribesAt, musics, chars)
+                        listenOpening(event.contextId, subscribesAt, musics, chars)
                     }
 
                 }
@@ -228,7 +230,7 @@ class GuessController(
         }
 
         bot.pluginLoader.subscribes.always(subscribesAt) {
-            listenClassical(contextId, subscribesAt, music, hintJob)
+            listenClassical(this@classical.contextId, subscribesAt, music, hintJob)
         }
     }
     private suspend fun MessageEvent.hintClassical(
@@ -360,7 +362,7 @@ class GuessController(
         reply(showOpening(musics, chars))
 
         bot.pluginLoader.subscribes.always(subscribesAt) {
-            listenOpening(contextId, subscribesAt, musics, chars)
+            listenOpening(this@opening.contextId, subscribesAt, musics, chars)
         }
     }
     private suspend fun MessageEvent.listenOpening(
