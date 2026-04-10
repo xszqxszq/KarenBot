@@ -280,6 +280,12 @@ class ImageController(
                 player = response.player,
                 settings = response.settings,
                 allRecords = response.records,
+                filterParams = FilterParams(
+                    newestVersion = maimai.maimaiData.newestVersion,
+                    isFitLevelValue = false,
+                    isAllRequired = true,
+                    isDetailed = true
+                ),
                 api = api.name
             )
         }
@@ -365,8 +371,8 @@ class ImageController(
                 allRecords = List(total) { record },
                 filterParams = FilterParams(
                     newestVersion = maimai.maimaiData.newestVersion,
-                    isAllRequired = true,
                     isFitLevelValue = false,
+                    isAllRequired = true,
                     isDetailed = true
                 ),
                 api = api.name
