@@ -21,6 +21,7 @@ import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.message.Image
+import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.music.MusicGenre
 import xyz.xszq.bot.music.MusicInfo
@@ -266,7 +267,7 @@ class GuessController(
                     )
                 }
             } else {
-                val uploaded = bot.cos.uploadBinary(cropped)
+                val uploaded = bot.cos.uploadBinary(cropped, "jpg")
                 eventToReply[contextId] ?.reply(MarkdownTemplates.Templates.guessCropped(
                     uploaded.url, hint)
                 )
@@ -426,41 +427,35 @@ class GuessController(
         musics: List<Pair<MusicInfo, Boolean>>,
         chars: List<Char>,
         all: Boolean = false
-    ) = MarkdownData.create(MarkdownTemplates.GUESS) {
-        "status" {
-            "\uD83D\uDCA1已开出字母：${chars.joinToString(", ")}"
-        }
+    ) = Markdown(MarkdownData(buildString {
+        appendLine("## 舞萌开字母")
+        appendLine()
         musics.forEachIndexed { index, (music, status) ->
             if (status) {
-                "word${index+1}" {
-                    "✅${music.name}"
-                }
+                appendLine("> ✅${music.name}")
             } else {
-                "word${index+1}" {
-                    buildString {
-                        if (all)
-                            append("❌")
-                        else
-                            append("\uD83E\uDD14")
-                        append(music.name.map { c ->
-                            if (c.lowercase().toDBC().first() !in chars && c.toString().isNotBlank() && !all) '?' else c
-                        }.joinToString(""))
-                    }
-                }
+                appendLine(buildString {
+                    append("> ")
+                    if (all)
+                        append("❌")
+                    else
+                        append("\uD83E\uDD14")
+                    appendLine(music.name.map { c ->
+                        if (c.lowercase().toDBC().first() !in chars && c.toString().isNotBlank() && !all) '?' else c
+                    }.joinToString(""))
+                })
             }
         }
-    }.toMessage(if (!all) getOpeningButtons() else MarkdownTemplates.Keyboards.GUESS_OPEN_AGAIN)
+        appendLine("> \uD83D\uDCA1已开出字母：${chars.joinToString(", ")}")
+    }), if (!all) getOpeningButtons() else MarkdownTemplates.Keyboards.GUESS_OPEN_AGAIN)
 
     private fun GroupMessageEvent.showAdminPanel(
         disable: Boolean
-    ) = MarkdownData.create(MarkdownTemplates.BRIEF) {
-        "title" {
-            "猜歌设置"
-        }
-        "content" {
-            "请管理员点击下方按钮确认" + (if (disable) "禁用" else "启用") + "猜歌："
-        }
-    }.toMessage(Keyboard.create {
+    ) = Markdown(MarkdownData(buildString {
+        appendLine("**猜歌设置**")
+        appendLine()
+        appendLine("请管理员点击下方按钮确认" + (if (disable) "禁用" else "启用") + "猜歌：")
+    }), Keyboard.create {
         row {
             val display = if (disable) "⚠禁用猜歌" else "✅启用猜歌"
             button(

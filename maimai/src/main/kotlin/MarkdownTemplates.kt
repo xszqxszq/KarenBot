@@ -14,12 +14,6 @@ import xyz.xszq.bot.payload.markdown.Keyboard.KeyboardRowBuilder
 object MarkdownTemplates {
     lateinit var jacketUrl: String
 
-    const val MUSIC_INFO = "102112100_1761189244"
-    const val GUESS = "102112100_1748875837"
-    const val BRIEF = "102112100_1761189409"
-    const val CODE_BLOCK = "102112100_1751984435"
-    const val IMAGE = "102112100_1761189134"
-
     fun init(
         maimai: Maimai
     ) {
@@ -404,48 +398,6 @@ object MarkdownTemplates {
             command: String
         ) = single(command.trim(), "点我投票", enter = true)
 
-        private fun listButtons(
-            result: List<MusicInfo>
-        ): List<MutableList<MusicInfo>> {
-            return List(4) { mutableListOf<MusicInfo>() }.apply {
-                result.forEachIndexed { index, music ->
-                    this[index % 4].add(music)
-                }
-            }.filter { it.isNotEmpty() }
-        }
-        private fun KeyboardRowBuilder.placeButton(
-            music: MusicInfo,
-            command: String = "id"
-        ) {
-            button(
-                id = "maimai-id",
-                action = Action(
-                    type = Action.AT,
-                    data = "$command${music.id}",
-                    permission = Permission(Permission.EVERYONE),
-                    enter = true
-                ),
-                renderData = RenderData(
-                    label = "${music.id}. ${music.name}",
-                    visitedLabel = "${music.id}. ${music.name}",
-                    style = RenderData.GRAY
-                )
-            )
-        }
-        private fun KeyboardRowBuilder.emptyButton() = button(
-            id = "placeholder",
-            action = Action(
-                type = Action.CALLBACK,
-                data = "",
-                permission = Permission(Permission.EVERYONE),
-                enter = true
-            ),
-            renderData = RenderData(
-                label = " ",
-                visitedLabel = " ",
-                style = RenderData.GRAY
-            )
-        )
         fun selectPaged(
             button: String,
             keyword: String,
@@ -936,88 +888,58 @@ object MarkdownTemplates {
         fun music(
             music: MusicInfo,
             cover: String
-        ) = MarkdownData.create(MUSIC_INFO) {
-            "cover" {
-                cover
-            }
-            "id" {
-                music.id.toString()
-            }
-            "title" {
-                music.name.replace("[H.][Remix]", "［H.］［Remix］")
-            }
-            "artist" {
-                music.artist
-            }
-            "genre" {
-                music.genre.genreName
-            }
-            "version" {
-                music.version.name
-            }
-            "bpm" {
-                music.bpm.toString()
-            }
-            "level" {
-                music.charts.joinToString("/") {
-                    it.levelValue.toString()
-                }
-            }
-            "level_fit" {
-                music.charts.joinToString("/") {
+        ) = Markdown(MarkdownData(buildString {
+            appendLine("![img#190px #190px]($cover)")
+            appendLine("**${music.id}. ${music.name}**")
+
+            appendLine("**曲师:** ${music.artist}")
+            appendLine("**分类:** ${music.genre.genreName}")
+            appendLine("**版本:** ${music.version.name}")
+            appendLine("**BPM:** ${music.bpm}")
+            appendLine("**定数:** ${music.charts.joinToString("/") {
+                it.levelValue.toString()
+            }}")
+            appendLine("**拟合定数:** ${music.charts.joinToString("/") {
+                if (it.fitLevelValue == 0.0)
+                    "-"
+                else
                     it.fitLevelValue.toStringDecimal(1)
-                }
-            }
-            "charter" {
-                music.charts.joinToString("/") { it.notesDesigner }.ifBlank { "-" }
-            }
-        }.toMessage(Keyboards.music(music))
+            }}")
+            appendLine("**谱师:** ${music.charts.joinToString("/") { it.notesDesigner }.ifBlank { "-" }}")
+        }), Keyboards.music(music))
         fun oauth(
             authUrl: String
-        ) = MarkdownData.create(BRIEF) {
-            "title" {
-                "请求授权"
-            }
-            "content" {
-                "使用该功能时，需要您授权BOT访问您在落雪查分器的全部成绩信息，请点击下方登录并授权："
-            }
-        }.toMessage(Keyboards.oauth(authUrl))
+        ) = Markdown(MarkdownData(buildString {
+            appendLine("**请求授权**")
+            appendLine()
+            appendLine("使用该功能时，需要您授权BOT访问您在落雪查分器的全部成绩信息，请点击下方登录并授权：")
+        }), Keyboards.oauth(authUrl))
         fun queue(
             title: String,
             content: String,
             now: String ?= null,
-        ) = MarkdownData.create(BRIEF) {
-            "title" {
-                title
-            }
-            "content" {
-                content
-            }
-        }.toMessage(Keyboards.queue(now))
+        ) = Markdown(MarkdownData(buildString {
+            appendLine("**$title**")
+            appendLine()
+            appendLine(content)
+        }), Keyboards.queue(now))
         fun queueInit(
             title: String,
             content: String
-        ) = MarkdownData.create(BRIEF) {
-            "title" {
-                title
-            }
-            "content" {
-                content
-            }
-        }.toMessage(Keyboards.QUEUE_INIT)
+        ) = Markdown(MarkdownData(buildString {
+            appendLine("**$title**")
+            appendLine()
+            appendLine(content)
+        }), Keyboards.QUEUE_INIT)
         fun queueUpdate(
             info: String
-        ) = MarkdownData.create(CODE_BLOCK) {
-            "title" {
-                "机厅排卡人数："
-            }
-            "content" {
-                info.replace("\n", "\r")
-            }
-            "description" {
-                "更新数据请使用“机厅名+数量”。\r\t例：某某机厅3\r\t例：机厅+1\r\t例：jt-2"
-            }
-        }.toMessage(Keyboards.QUEUE_UPDATE)
+        ) = Markdown(MarkdownData(buildString {
+            appendLine("**机厅排卡人数：**")
+            appendLine()
+            appendLine(info.split("\n").joinToString("\n") { "> $it" })
+            appendLine("> ")
+            appendLine("> 更新数据请使用“机厅名+数量”。\n\t例：某某机厅3\n\t例：机厅+1\n\t例：jt-2")
+        }), Keyboards.QUEUE_UPDATE)
         fun image(
             url: String,
             size: Pair<Int, Int>,
@@ -1025,51 +947,34 @@ object MarkdownTemplates {
             description: String?,
             nowPage: Int ?= null,
             totalPages: Int ?= null
-        ) = MarkdownData.create(IMAGE) {
-            "title" {
-                "查询结果"
-            }
-            "img" {
-                url
-            }
-            "img_size" {
-                "img #${size.first}px #${size.second}px"
-            }
-            "description" {
-                description ?.replace("\n", "\r") ?: " "
-            }
-        }.toMessage(Keyboards.image(command, nowPage, totalPages))
+        ) = Markdown(MarkdownData(buildString {
+            appendLine("**查询结果**")
+            appendLine()
+            appendLine("![img #${size.first}px #${size.second}px]($url)")
+            appendLine()
+            appendLine(description ?: "")
+        }), Keyboards.image(command, nowPage, totalPages))
         fun brief(
             title: String,
             content: String,
-        ) = MarkdownData.create(BRIEF) {
-            "title" {
-                title
-            }
-            "content" {
-                content.replace("\n", "\r")
-            }
-        }
+        ) = MarkdownData(buildString {
+            appendLine("**$title**")
+            appendLine()
+            appendLine(content)
+        })
         fun guess(
             hint: String
         ) = brief("maimai 猜歌", hint).toMessage(Keyboards.GUESS)
         fun guessImage(
             url: String,
             description: String
-        ) = MarkdownData.create(IMAGE) {
-            "title" {
-                "maimai 猜歌"
-            }
-            "img" {
-                url
-            }
-            "img_size" {
-                "img #300px #300px"
-            }
-            "description" {
-                description.replace("\n", "\r")
-            }
-        }
+        ) = MarkdownData(buildString {
+            appendLine("**maimai 猜歌**")
+            appendLine()
+            appendLine("![img #300px #300px]($url)")
+            appendLine()
+            appendLine(description)
+        })
         fun importData(
             backend: MaimaiAPI
         ) = brief("舞萌DX", "您似乎尚未导入舞萌DX分数到查分器，请参考下方教程：")
