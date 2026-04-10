@@ -87,7 +87,7 @@ object ComboQuery {
         },
         record = { record ->
             val decimal = record.achievement % 10000
-            record.achievement in 1000000..1005000
+            record.achievement in 1000000..1005250
                     && (decimal in 5000..5250 || decimal in 0..1250)
         },
         sortBy = { record ->
