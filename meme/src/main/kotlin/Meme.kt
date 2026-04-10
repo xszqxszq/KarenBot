@@ -124,7 +124,12 @@ class Meme: Plugin() {
     }
     val sekaiErrorHandler: ErrorHandler = { e ->
         when (e) {
-            is ArgsNotEnoughException -> selectSekaiCharacter()
+            is ArgsNotEnoughException -> {
+                if (e.message == null || e.message ?.isBlank() == true)
+                    selectSekaiCharacter()
+                else
+                    reply(e.message!!)
+            }
             is NotFoundException -> reply(sekaiNotFound)
             else -> e.printStackTrace()
         }
@@ -370,7 +375,7 @@ class Meme: Plugin() {
             selectSekaiImageId(character, options)
             return
         }
-        text ?: throw ArgsNotEnoughException()
+        text ?: throw ArgsNotEnoughException("请在点击图片编号后输入文本！\n使用方法：/pjsk 角色名+编号 要生成的文本")
         sekai.draw(config, text).encodePng().send(this)
     }
     private suspend fun MessageEvent.ba(
