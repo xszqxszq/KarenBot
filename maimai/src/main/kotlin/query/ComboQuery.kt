@@ -7,9 +7,15 @@ import korlibs.io.util.toStringDecimal
 import korlibs.math.toIntRound
 import xyz.xszq.bot.add
 import xyz.xszq.bot.component.MaimaiData
+import xyz.xszq.bot.component.Tag
 import xyz.xszq.bot.component.image.FilterParams
 import xyz.xszq.bot.config.DesignerConfig
+import xyz.xszq.bot.json
 import xyz.xszq.bot.music.*
+import xyz.xszq.bot.toSimple
+import java.io.File
+import kotlin.collections.component1
+import kotlin.collections.component2
 import kotlin.random.Random
 
 object ComboQuery {
@@ -255,50 +261,135 @@ object ComboQuery {
             .loadConfigOrThrow<DesignerConfig>()
         maimaiData = data
 
-        conditions.apply {
-            designerConfig.aliases.forEach { (designer, aliases) ->
-                add(aliases, designer(designer))
-            }
-            MusicGenre.entries.forEach { genre ->
-                add(buildList {
-                    add(genre.genreName)
-                    add(genre.value)
-                    addAll(genre.names)
-                }, genre(genre))
-            }
-            MusicDifficulty.entries.filter { it != MusicDifficulty.Utage }.forEach { difficulty ->
-                add(difficulty.names, difficulty(difficulty))
-            }
-            Level.levelValues.reversed().forEach { levelValue ->
-                add(listOf(levelValue.toStringDecimal(1)), levelValue(levelValue))
-            }
-            Level.levels.reversed().forEach { level ->
-                if (Level.numberPart(level) >= 10)
-                    add(listOf(level + "级", level), level(level))
-                else
-                    add(listOf(level + "级"), level(level))
-            }
-            add(listOf("寸"), close)
-            add(listOf("锁血", "锁", "名刀", "血压"), just)
-            add(listOf("极", "fc"), fc)
-            add(listOf("理论", "ap+", "app"), app)
-            add(listOf("神", "ap"), ap)
-            add(listOf("fdx+", "fsd+", "fdxp", "fsdp"), fsdp)
-            add(listOf("舞舞", "fdx", "fsd"), fsd)
-            add(listOf("完整", "全"), noB15)
-            add(listOf("拟合定数", "拟合", "nh"), fitLevelValues)
-            add(listOf("大将", "鸟加", "sss+", "sssp"), rateGreaterEqual("sssp"))
-            add(listOf("将"), rateGreaterEqual("sss"))
-            add(listOf("纯鸟", "纯sss", "仅鸟", "仅sss"), rate("sss"))
-            add(listOf("鸟", "sss"), rateGreaterEqual("sss"))
-            add(listOf("霸", "clear"), rateGreaterEqual("a"))
-            add(listOf("牛逼", "nb"), achievement(1008000))
-            add(listOf("丢人", "越级", "越"), achievementLess(950000))
-            (1..5).forEach { stars ->
-                add(listOf(starsNames[stars-1], "${stars}星"), stars(stars))
-            }
-        }
+        conditions.addConditions()
         compile()
+    }
+    fun MutableList<Pair<List<String>, Filter>>.addConditions() {
+        // 谱师别称
+        designerConfig.aliases.forEach { (designer, aliases) ->
+            add(aliases, designer(designer))
+        }
+        // 曲目分类
+        MusicGenre.entries.forEach { genre ->
+            add(buildList {
+                add(genre.genreName)
+                add(genre.value)
+                addAll(genre.names)
+            }, genre(genre))
+        }
+        // 谱面难度
+        MusicDifficulty.entries.filter { it != MusicDifficulty.Utage }.forEach { difficulty ->
+            add(difficulty.names, difficulty(difficulty))
+        }
+        // 谱面定数
+        Level.levelValues.reversed().forEach { levelValue ->
+            add(listOf(levelValue.toStringDecimal(1)), levelValue(levelValue))
+        }
+        // 谱面等级
+        Level.levels.reversed().forEach { level ->
+            if (Level.numberPart(level) >= 10)
+                add(listOf(level + "级", level), level(level))
+            else
+                add(listOf(level + "级"), level(level))
+        }
+        // 特殊条件
+        add(listOf("完整", "全"), noB15)
+        add(listOf("拟合定数", "拟合", "nh"), fitLevelValues)
+        // FC/FS
+        add(listOf("极", "fc"), fc)
+        add(listOf("理论", "ap+", "app"), app)
+        add(listOf("神", "ap"), ap)
+        add(listOf("fdx+", "fsd+", "fdxp", "fsdp"), fsdp)
+        add(listOf("舞舞", "fdx", "fsd"), fsd)
+        // 成绩分数
+        add(listOf("寸"), close)
+        add(listOf("锁血", "锁", "名刀", "血压"), just)
+        add(listOf("大将", "鸟加", "sss+", "sssp"), rateGreaterEqual("sssp"))
+        add(listOf("将"), rateGreaterEqual("sss"))
+        add(listOf("纯鸟", "纯sss", "仅鸟", "仅sss"), rate("sss"))
+        add(listOf("鸟", "sss"), rateGreaterEqual("sss"))
+        add(listOf("霸", "clear"), rateGreaterEqual("a"))
+        add(listOf("牛逼", "nb"), achievement(1008000))
+        add(listOf("丢人", "越级", "越"), achievementLess(950000))
+        (1..5).forEach { stars ->
+            add(listOf(starsNames[stars-1], "${stars}星"), stars(stars))
+        }
+        // 标准版本
+        maimaiData.plates.values.filter {
+            it.genre == "実績" && it.requires.isNotEmpty() && it.name != "覇者"
+        }.associateBy {
+            it.name.replace(Item.plateTypes.first { type -> it.name.endsWith(type) }, "")
+        }.also { filtered ->
+            val early = filtered.filter { (version, _) ->
+                version in listOf("真", "超", "檄")
+            }.flatMap { (_, plate) ->
+                plate.requires.mapNotNull { maimaiData.musics[it] ?.version }.toSet().toList()
+            }.toSet().toList()
+            add(0, Pair(listOf("真超檄"),version(early)))
+        }.forEach { (version, plate) ->
+            val simplified = Item.simplifyTable[version] ?: version.toSimple()
+            val gameVersions = plate.requires.mapNotNull { maimaiData.musics[it] ?.version }.toSet().toList()
+            add(Pair(listOf(version, simplified),
+                version(gameVersions)))
+            add(0, Pair(listOf(simplified + "代"),
+                version(gameVersions)))
+        }
+        // DX版本
+        maimaiData.versions.values.filter { it.version > 20000 }.forEach { version ->
+            val year = version.name.substringAfter("舞萌DX ")
+            add(0, Pair(listOf("dx$year", year), nowVersion(version)))
+        }
+        maimaiData.versions.values.firstOrNull { it.version == 20000 } ?.let { version ->
+            add(0, Pair(listOf("dx无印"), nowVersion(version)))
+        }
+        // 谱面类型
+        add(Pair(listOf("标准", "标"), type(MusicType.Standard)))
+        add(Pair(listOf("dx谱"), type(MusicType.Deluxe)))
+        add(Pair(listOf("旧框"),
+            version(maimaiData.versions.values.filter { it.version <= 19900 })
+        ))
+        add(Pair(listOf("dx"),
+            version(maimaiData.versions.values.filter { it.version > 19900 })
+        ))
+        add(Pair(listOf("旧版本", "旧"),
+            version(maimaiData.versions.values.filter { it != maimaiData.newestVersion })
+        ))
+        add(Pair(listOf("新版本", "新歌", "新"),
+            version(listOf(maimaiData.newestVersion))
+        ))
+        // 牌子谱面
+        maimaiData.plates.values.filter {
+            it.genre == "実績" && it.requires.isNotEmpty()
+        }.forEach { plate ->
+            val name = Item.toSimplified(plate.name)
+            add(0, Pair(listOf(plate.name, name),
+                musicsPlate(plate.requires, plate.remasters, plate.name)))
+        }
+        // 谱师名称
+        maimaiData.musics.values.flatMap { music ->
+            music.charts.map { chart -> chart.notesDesigner }
+        }.toSet().toList().forEach { designer ->
+            if (designer.isNotBlank() && designer != "-")
+                add(0, Pair(listOf(designer), designer(designer)))
+        }
+        // 谱面分数
+        add(listOf("纯ss+", "仅ss+"), rate("ssp"))
+        add(listOf("纯ss", "仅ss"), rate("ss"))
+        add(listOf("纯s+", "仅s+"), rate("sp"))
+        add(listOf("纯s", "仅s"), rate("s"))
+        add(listOf("纯aaa", "仅aaa"), rate("aaa"))
+        add(listOf("ss+", "ssp"), rateGreaterEqual("ssp"))
+        add(listOf("ss", "ss"), rateGreaterEqual("ss"))
+        add(listOf("s+", "sp"), rateGreaterEqual("sp"))
+        add(listOf("s"), rateGreaterEqual("s"))
+        add(listOf("aaa"), rateGreaterEqual("aaa"))
+        // 谱面标签
+        val customTags = json.decodeFromString<Map<String, Tag>>(
+            File(maimaiData.dataDir.absolutePath + "/tag.json").readText(Charsets.UTF_8)
+        )
+        customTags.forEach { (_, tag) ->
+            add(Pair(tag.aliases, tag(tag.musics, tag.name)))
+        }
     }
 
     fun compile() {

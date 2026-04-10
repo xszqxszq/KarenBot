@@ -87,7 +87,7 @@ class MusicController(
             val name = args[0]
             search(name)
         }
-        endsWith("是什么歌") { raw ->
+        endsWith(listOf("是什么歌", "是什么歌？")) { raw ->
             val args = raw.split("\n", limit = 2)
             val name = args[0]
             search(name)
@@ -192,7 +192,7 @@ class MusicController(
             searchBPM(bpm, page)
         }
         // 别名查询/设置
-        endsWith("有什么别名") { name ->
+        endsWith(listOf("有什么别名", "有什么别名？")) { name ->
             maimai.aliases.search(name).firstOrNull() ?.let { music ->
                 val aliases = MusicAliasesTable[music]
                     .filter { it.first != music.name }
