@@ -1,27 +1,10 @@
 package xyz.xszq.bot.sekai
 
 import kotlinx.serialization.json.Json
-import org.jetbrains.skia.Color
-import org.jetbrains.skia.FontMgr
-import org.jetbrains.skia.Paint
-import org.jetbrains.skia.PaintMode
-import org.jetbrains.skia.PaintStrokeCap
-import org.jetbrains.skia.PaintStrokeJoin
-import org.jetbrains.skia.Rect
-import org.jetbrains.skia.Surface
-import org.jetbrains.skia.paragraph.Alignment
-import org.jetbrains.skia.paragraph.FontCollection
-import org.jetbrains.skia.paragraph.Paragraph
-import org.jetbrains.skia.paragraph.ParagraphBuilder
-import org.jetbrains.skia.paragraph.ParagraphStyle
-import org.jetbrains.skia.paragraph.TextStyle
-import org.jetbrains.skia.paragraph.TypefaceFontProvider
+import org.jetbrains.skia.*
+import org.jetbrains.skia.paragraph.*
 import java.io.File
-import kotlin.math.abs
-import kotlin.math.cos
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.sin
+import kotlin.math.*
 
 class SekaiSticker {
     val imgDir = File(ASSETS_DIR)

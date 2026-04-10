@@ -1,12 +1,7 @@
 package xyz.xszq.bot
 
 import korlibs.io.file.VfsFile
-import org.jetbrains.skia.Bitmap
-import org.jetbrains.skia.ColorAlphaType
-import org.jetbrains.skia.ColorType
-import org.jetbrains.skia.EncodedImageFormat
-import org.jetbrains.skia.Image
-import org.jetbrains.skia.ImageInfo
+import org.jetbrains.skia.*
 
 data class SkikoImageData(
     val width: Int,

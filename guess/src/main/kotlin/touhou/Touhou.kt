@@ -16,6 +16,7 @@ import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.IllegalArgsException
 import xyz.xszq.bot.exception.NeedHelpException
 import xyz.xszq.bot.message.Audio
+import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.payload.markdown.*
 import xyz.xszq.bot.reply
 import java.util.*
@@ -25,8 +26,6 @@ import kotlin.random.Random
 class Touhou(
     val guess: Guess
 ) {
-    val templateBrief = "102112100_1761189409"
-
     val baseDir = localCurrentDirVfs["data/audio/touhou"]
     lateinit var musics: TouhouMusics
     private val started = ConcurrentHashMap<String, Boolean>()
@@ -57,14 +56,11 @@ class Touhou(
             )
             reply(Audio(cropped))
             cropped.delete()
-            reply(MarkdownData.create(templateBrief) {
-                "title" {
-                    "随机东方原曲"
-                }
-                "content" {
-                    "${target.name}\r来自${game.id}. ${game.name}"
-                }
-            }.toMessage(Keyboard.create {
+            reply(Markdown(MarkdownData(buildString {
+                appendLine("**随机东方原曲**")
+                appendLine()
+                appendLine("${target.name}\r来自${game.id}. ${game.name}")
+            }), Keyboard.create {
                 row {
                     button(
                         id = "1",
@@ -175,14 +171,11 @@ class Touhou(
 
         reply(Audio(cropped))
         cropped.delete()
-        reply(MarkdownData.create("102112100_1761189409") {
-            "title" {
-                "原曲认知测验"
-            }
-            "content" {
-                "请回答该原曲的名称，一分钟后揭晓答案~"
-            }
-        }.toMessage(Keyboard.create {
+        reply(Markdown(MarkdownData(buildString {
+            appendLine("**原曲认知测验**")
+            appendLine()
+            appendLine("请回答该原曲的名称，一分钟后揭晓答案~")
+        }), Keyboard.create {
             row {
                 button(
                     id = "",
@@ -223,28 +216,22 @@ class Touhou(
             }
             if (text.trim().startsWith("不玩了")) {
                 finished = true
-                reply(MarkdownData.create("102112100_1761189409") {
-                    "title" {
-                        "原曲认知测验"
-                    }
-                    "content" {
-                        "游戏已结束。答案是${music.answer()}"
-                    }
-                }.toMessage(againKeyboard(difficulty, range)))
+                reply(Markdown(MarkdownData(buildString {
+                    appendLine("**原曲认知测验**")
+                    appendLine()
+                    appendLine("游戏已结束。答案是${music.answer()}")
+                }), againKeyboard(difficulty, range)))
                 bot.pluginLoader.subscribes.stop(subscribeId)
                 return@always
             }
 
             if (answers.isAnswer(text.trim())) {
                 finished = true
-                reply(MarkdownData.create("102112100_1761189409") {
-                    "title" {
-                        "原曲认知测验"
-                    }
-                    "content" {
-                        "恭喜你猜中了哦~答案是${music.answer()}"
-                    }
-                }.toMessage(againKeyboard(difficulty, range)))
+                reply(Markdown(MarkdownData(buildString {
+                    appendLine("**原曲认知测验**")
+                    appendLine()
+                    appendLine("恭喜你猜中了哦~答案是${music.answer()}")
+                }), againKeyboard(difficulty, range)))
                 bot.pluginLoader.subscribes.stop(subscribeId)
                 started.remove(id)
                 return@always
@@ -254,14 +241,11 @@ class Touhou(
         delay(TIMESUP)
         if (finished)
             return
-        reply(MarkdownData.create("102112100_1761189409") {
-            "title" {
-                "原曲认知测验"
-            }
-            "content" {
-                "很遗憾，没有人猜中哦，答案是${music.answer()}"
-            }
-        }.toMessage(againKeyboard(difficulty, range)))
+        reply(Markdown(MarkdownData(buildString {
+            appendLine("**原曲认知测验**")
+            appendLine()
+            appendLine("很遗憾，没有人猜中哦，答案是${music.answer()}")
+        }), againKeyboard(difficulty, range)))
         bot.pluginLoader.subscribes.stop(subscribeId)
         started.remove(id)
     }
@@ -320,14 +304,12 @@ class Touhou(
     }
     val guessErrorHandler: ErrorHandler = { e ->
         when (e) {
-            is NeedHelpException -> reply(MarkdownData.create("102112100_1761189409") {
-                "title" {
-                    "原曲认知测验"
-                }
-                "content" {
-                    "请选择要进行的难度和模式："
-                }
-            }.toMessage(Keyboard.create {
+            is NeedHelpException ->
+                reply(Markdown(MarkdownData(buildString {
+                    appendLine("**原曲认知测验**")
+                    appendLine()
+                    appendLine("请选择要进行的难度和模式：")
+                }), Keyboard.create {
                 row {
                     Difficulty.entries.forEach { difficulty ->
                         button(

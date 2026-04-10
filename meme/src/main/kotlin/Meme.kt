@@ -3,13 +3,12 @@ package xyz.xszq.bot
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
-import io.ktor.http.encodeURLParameter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import io.ktor.http.*
 import korlibs.image.format.PNG
 import korlibs.image.format.encode
 import korlibs.io.util.isDigit
-import org.jetbrains.skia.Image as SkiaImage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonPrimitive
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.ArgsNotEnoughException
@@ -22,7 +21,7 @@ import xyz.xszq.bot.payload.markdown.*
 import xyz.xszq.bot.sekai.SekaiCharacter
 import xyz.xszq.bot.sekai.SekaiSticker
 import java.io.File
-import kotlin.collections.chunked
+import org.jetbrains.skia.Image as SkiaImage
 
 @Suppress("unused")
 class Meme: Plugin() {
@@ -168,14 +167,11 @@ class Meme: Plugin() {
             appendLine( "请发送想要球面化的图片" )
         }.trim()
         when {
-            e is ArgsNotEnoughException || e is NeedHelpException -> reply(MarkdownData.create(BRIEF) {
-                "title" {
-                    "球面化"
-                }
-                "content" {
-                    help.replace("\n", "\r")
-                }
-            }.toMessage(callKeyboard("球面化")))
+            e is ArgsNotEnoughException || e is NeedHelpException -> reply(
+                Markdown(
+                    brief("球面化", help),
+                    callKeyboard("球面化")
+                ))
             else -> e.printStackTrace()
         }
     }
@@ -187,14 +183,11 @@ class Meme: Plugin() {
             appendLine( "请发送想要我巨爽的图片" )
         }.trim()
         when {
-            e is ArgsNotEnoughException || e is NeedHelpException -> reply(MarkdownData.create(BRIEF) {
-                "title" {
-                    "我巨爽"
-                }
-                "content" {
-                    help.replace("\n", "\r")
-                }
-            }.toMessage(callKeyboard("我巨爽")))
+            e is ArgsNotEnoughException || e is NeedHelpException -> reply(
+                Markdown(
+                    brief("我巨爽", help),
+                    callKeyboard("我巨爽")
+                ))
             else -> e.printStackTrace()
         }
     }
@@ -228,19 +221,15 @@ class Meme: Plugin() {
             )
         }
     }
-    val memeHelp = MarkdownData.create(BRIEF) {
-        "title" {
-            "生成功能"
-        }
-        "content" {
-            buildString {
-                appendLine( "这是一个生成表情包的功能。" )
-                appendLine( "使用方法：@可怜BOT /生成 表情名称 参数" )
-                appendLine( "手机端发送图片需长按输入框，点击“全屏输入”，再去相册勾选即可" )
-                appendLine( "⬇请点击下方按钮选择表情：" )
-            }.trim().replace("\n", "\r")
-        }
-    }.toMessage(memeKeyboard)
+    val memeHelp = Markdown(
+        brief("生成功能", buildString {
+            appendLine( "这是一个生成表情包的功能。" )
+            appendLine( "使用方法：@可怜BOT /生成 表情名称 参数" )
+            appendLine( "手机端发送图片需长按输入框，点击“全屏输入”，再去相册勾选即可" )
+            appendLine( "⬇请点击下方按钮选择表情：" )
+        }),
+        memeKeyboard
+    )
     val sekaiKeyboard = Keyboard.create {
         row {
             button(
@@ -271,14 +260,10 @@ class Meme: Plugin() {
             )
         }
     }
-    val sekaiNotFound = MarkdownData.create(BRIEF) {
-        "title" {
-            "PJSK表情"
-        }
-        "content" {
-            "该角色或图片不存在，请重新选择："
-        }
-    }.toMessage(sekaiKeyboard)
+    val sekaiNotFound = Markdown(
+        brief("PJSK表情","该角色或图片不存在，请重新选择："),
+        sekaiKeyboard
+    )
     fun callKeyboard(
         name: String
     ) = Keyboard.create {
@@ -591,7 +576,10 @@ class Meme: Plugin() {
     }
 
     companion object {
-        const val BRIEF = "102112100_1761189409"
         fun String.splitEmojis() = Regex("\\X").findAll(this).map { it.value }.toList()
+        fun brief(
+            title: String,
+            content: String
+        ) = MarkdownData("**$title**\n\n$content")
     }
 }

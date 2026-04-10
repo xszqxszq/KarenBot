@@ -7,7 +7,6 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import korlibs.io.util.UUID
@@ -19,6 +18,7 @@ import xyz.xszq.bot.config.LLMConfig
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.message.File
 import xyz.xszq.bot.message.Image
+import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.message.PlainText
 import xyz.xszq.bot.payload.*
 import xyz.xszq.bot.payload.markdown.*
@@ -75,14 +75,11 @@ class Text: Plugin() {
     }
     suspend fun setRoute() = route {
         equalsTo(listOf("帮助", "help")) {
-            reply(MarkdownData.create(templateBrief) {
-                "title" {
-                    "可怜BOT"
-                }
-                "content" {
-                    "请点击下方查看帮助："
-                }
-            }.toMessage(Keyboard.create {
+            reply(Markdown(MarkdownData(buildString {
+                appendLine("**可怜BOT**")
+                appendLine()
+                appendLine("请点击下方查看帮助：")
+            }), Keyboard.create {
                 row {
                     button(
                         id = "1",
@@ -167,23 +164,16 @@ class Text: Plugin() {
                 reply("咦，获取失败了(ó﹏ò｡)")
                 return@startsWith
             }
-            reply(MarkdownData.create(templateImage) {
-                "title" {
-                    video.title
-                }
-                "img" {
-                    video.pic + "@672w_378h_1c.webp"
-                }
-                "img_size" {
-                    "img #672px #378px"
-                }
-                "description" {
-                    buildString {
-                        appendLine("UP主：${video.owner.name}")
-                        appendLine("数据来自otaMAD⋅top")
-                    }.trim().replace("\n", "\r")
-                }
-            }.toMessage(Keyboard.create {
+            reply(Markdown(MarkdownData(buildString {
+                appendLine("**${video.title}**")
+                appendLine()
+                appendLine("![img #672px #378px](${video.pic + "@672w_378h_1c.webp"})")
+                appendLine()
+                appendLine(buildString {
+                    appendLine("UP主：${video.owner.name}")
+                    appendLine("数据来自otaMAD⋅top")
+                }.trim().replace("\n", "\r"))
+            }), Keyboard.create {
                 row {
                     button(
                         id = "1",
@@ -200,7 +190,6 @@ class Text: Plugin() {
                     )
                 }
                 row {
-
                     button(
                         id = "2",
                         action = Action(
