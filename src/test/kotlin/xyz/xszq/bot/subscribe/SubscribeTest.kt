@@ -1,12 +1,12 @@
 package xyz.xszq.bot.subscribe
 
 import kotlinx.coroutines.test.runTest
+import xyz.xszq.bot.interactionEvent
+import xyz.xszq.bot.messageEvent
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import xyz.xszq.bot.interactionEvent
-import xyz.xszq.bot.messageEvent
 
 class SubscribeTest {
     @Test

@@ -1,24 +1,20 @@
 package xyz.xszq.bot
 
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.mock.MockEngine
-import io.ktor.client.engine.mock.respond
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.HttpRequestData
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.content.OutgoingContent
-import io.ktor.http.headersOf
-import io.ktor.serialization.kotlinx.json.json
+import io.ktor.client.*
+import io.ktor.client.engine.mock.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.http.content.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.core.readText
 import io.ktor.utils.io.readRemaining
+import xyz.xszq.bot.config.BotConfig
+import xyz.xszq.bot.payload.MsgType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import xyz.xszq.bot.config.BotConfig
-import xyz.xszq.bot.payload.MsgType
 
 class OpenAPITest {
     @Test

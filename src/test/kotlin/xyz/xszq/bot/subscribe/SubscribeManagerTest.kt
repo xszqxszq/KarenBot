@@ -2,9 +2,9 @@ package xyz.xszq.bot.subscribe
 
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
+import xyz.xszq.bot.messageEvent
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import xyz.xszq.bot.messageEvent
 
 class SubscribeManagerTest {
     @Test
