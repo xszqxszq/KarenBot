@@ -26,6 +26,7 @@ import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.payload.DivingFishStats
 import xyz.xszq.bot.query.ComboQuery
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.full.primaryConstructor
 
 class Maimai: Plugin() {
@@ -46,6 +47,7 @@ class Maimai: Plugin() {
     // 其他
     var pluginStopped: Boolean = false
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    val messageToReplay = ConcurrentHashMap<String, String>()
 
     fun backend(name: String) = backends.first { it.id == name }
 

@@ -2,9 +2,14 @@ package xyz.xszq.bot.controller
 
 import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.Maimai.Companion.textMode
+import xyz.xszq.bot.chain
 import xyz.xszq.bot.component.MarkdownTemplates
 import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.database.QQBindTable
+import xyz.xszq.bot.event.GroupMessageEvent
+import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.message.MessageChain
+import xyz.xszq.bot.message.PlainText
 import xyz.xszq.bot.music.Item
 import xyz.xszq.bot.music.MusicDifficulty
 import xyz.xszq.bot.newLine
@@ -31,6 +36,10 @@ class SettingsController(
                 })
             else
                 reply(MarkdownTemplates.Templates.BIND_SUCCESS)
+            maimai.messageToReplay[sender.id] ?.let { text ->
+                replayMessage(text.chain())
+                maimai.messageToReplay.remove(sender.id)
+            }
         }
         startsWith("设置查分器") { name ->
             when {
@@ -169,5 +178,29 @@ class SettingsController(
             else
                 reply(MarkdownTemplates.Templates.SETTINGS)
         }
+    }
+    private suspend fun MessageEvent.replayMessage(
+        message: MessageChain,
+    ) {
+        bot.pluginLoader.subscribes.handle(when (this) {
+            is GroupMessageEvent -> GroupMessageEvent(
+                bot = bot,
+                eventId = eventId,
+                id = id,
+                message = message,
+                sender = sender,
+                group = group,
+                seq = seq + 1
+            )
+            else -> MessageEvent(
+                bot = bot,
+                eventId = eventId,
+                id = id,
+                message = message,
+                sender = sender,
+                seq = seq + 1
+            )
+        })
+
     }
 }

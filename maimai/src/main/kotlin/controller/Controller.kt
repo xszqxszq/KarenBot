@@ -41,6 +41,7 @@ sealed class Controller(
     }
 
     suspend fun MessageEvent.messageUserNeedQQBind() {
+        maimai.messageToReplay[sender.id] = message.text.trim()
         if (textMode())
             reply(MaimaiQuery.NO_QQ_BINDINGS)
         else
