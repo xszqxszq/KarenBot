@@ -4,25 +4,11 @@ import com.sksamuel.hoplite.ExperimentalHoplite
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.serialization.json.Json
-import xyz.xszq.bot.add
-import xyz.xszq.bot.music.ChartInfo
-import xyz.xszq.bot.music.GameVersion
-import xyz.xszq.bot.music.Item
-import xyz.xszq.bot.music.MusicDifficulty
-import xyz.xszq.bot.music.MusicGenre
-import xyz.xszq.bot.music.MusicInfo
-import xyz.xszq.bot.music.MusicType
+import xyz.xszq.bot.music.*
 import xyz.xszq.bot.payload.LocalCourseInfo
 import xyz.xszq.bot.payload.LocalIconInfo
 import xyz.xszq.bot.payload.LocalMusicInfo
 import xyz.xszq.bot.payload.LocalPlateInfo
-import xyz.xszq.bot.query.ComboQuery
-import xyz.xszq.bot.query.ComboQuery.designer
-import xyz.xszq.bot.query.ComboQuery.musicsPlate
-import xyz.xszq.bot.query.ComboQuery.rate
-import xyz.xszq.bot.query.ComboQuery.rateGreaterEqual
-import xyz.xszq.bot.query.ComboQuery.version
-import xyz.xszq.bot.toSimple
 import java.io.File
 
 class MaimaiData {

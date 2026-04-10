@@ -1,6 +1,5 @@
 package xyz.xszq.bot.controller
 
-import io.ktor.http.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -8,6 +7,7 @@ import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.Image
 import xyz.xszq.bot.*
 import xyz.xszq.bot.Maimai.Companion.textMode
+import xyz.xszq.bot.component.MarkdownTemplates
 import xyz.xszq.bot.component.image.FilterParams
 import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.event.MessageEvent
@@ -15,10 +15,8 @@ import xyz.xszq.bot.exception.FilterNoResultException
 import xyz.xszq.bot.exception.NoDataException
 import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.exception.NotSupportedException
-import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.music.*
 import xyz.xszq.bot.payload.LocalCourseInfo
-import xyz.xszq.bot.payload.markdown.MarkdownData
 import xyz.xszq.bot.query.ComboQuery
 import xyz.xszq.bot.query.ComboQuery.filterCharts
 import xyz.xszq.bot.query.ComboQuery.filterMusics
@@ -27,7 +25,6 @@ import xyz.xszq.bot.query.ComboQuery.isDetailed
 import xyz.xszq.bot.query.ComboQuery.isPlate
 import xyz.xszq.bot.query.ComboQuery.params
 import xyz.xszq.bot.query.Filter
-import kotlin.collections.forEach
 import kotlin.random.Random
 
 @Suppress("unused")
@@ -226,7 +223,8 @@ class ImageController(
                 if (textMode)
                     return Pair(result.first(), difficulty)
                 else
-                    reply(MarkdownTemplates.Templates.selectMusic(
+                    reply(
+                        MarkdownTemplates.Templates.selectMusic(
                         title = "您要查找的歌曲可能是：",
                         type = type,
                         keyword = args,
@@ -251,7 +249,8 @@ class ImageController(
             return
         }
         upload(event) { url ->
-            reply(MarkdownTemplates.Templates.image(
+            reply(
+                MarkdownTemplates.Templates.image(
                 url, Pair(width, height), command, text, page, totalPages
             ))
         }
@@ -328,7 +327,8 @@ class ImageController(
             if (textMode())
                 reply(help.newLine())
             else
-                reply(MarkdownTemplates.Templates.brief(
+                reply(
+                    MarkdownTemplates.Templates.brief(
                     "舞萌DX",
                     help
                 ).toMessage(

@@ -2,6 +2,7 @@ package xyz.xszq.bot.component.image.templates
 
 import korlibs.io.util.toStringDecimal
 import org.jetbrains.skia.Image
+import xyz.xszq.bot.component.image.FilterParams
 import xyz.xszq.bot.component.image.RatingRenderParams
 import xyz.xszq.bot.image.dom.Div
 import xyz.xszq.bot.image.dom.Img
@@ -11,19 +12,8 @@ import xyz.xszq.bot.image.style.BackgroundPosition
 import xyz.xszq.bot.image.style.BackgroundSize
 import xyz.xszq.bot.image.template.Template
 import xyz.xszq.bot.image.template.TemplateManager
-import xyz.xszq.bot.music.DeluxeScore
-import xyz.xszq.bot.music.GameVersion
-import xyz.xszq.bot.music.MusicDifficulty
-import xyz.xszq.bot.music.Rating
-import xyz.xszq.bot.music.Record
+import xyz.xszq.bot.music.*
 import xyz.xszq.bot.pagination
-import xyz.xszq.bot.component.image.FilterParams
-import xyz.xszq.bot.music.PlayerInfo
-import xyz.xszq.bot.music.PlayerSettings
-import xyz.xszq.bot.music.RatingResponse
-import xyz.xszq.bot.query.Filter.Companion.defaultSort
-import kotlin.collections.filter
-import kotlin.collections.sortedBy
 import kotlin.math.min
 
 class RatingTemplate(

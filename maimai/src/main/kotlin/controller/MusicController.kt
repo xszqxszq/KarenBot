@@ -4,6 +4,7 @@ import korlibs.io.file.VfsFile
 import korlibs.io.file.std.localCurrentDirVfs
 import xyz.xszq.bot.*
 import xyz.xszq.bot.Maimai.Companion.textMode
+import xyz.xszq.bot.component.MarkdownTemplates
 import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.database.MusicAliasesTable
 import xyz.xszq.bot.database.MusicAliasesVoteTable
@@ -62,7 +63,10 @@ class MusicController(
                 val id = raw.toIntOrNull() ?: return@startsWith
                 val music = maimai.music(id) ?: return@startsWith
                 val chart = music.charts.firstOrNull { it.difficulty == difficulty } ?: return@startsWith
-                reply(chartText(chart))
+                if (textMode())
+                    reply(chart.infoText())
+                else
+                    reply(chart.infoMD(jacketUrl))
             }
         }
 
@@ -210,7 +214,8 @@ class MusicController(
                 if (textMode())
                     reply(text.newLine())
                 else
-                    reply(MarkdownTemplates.Templates.brief("别名列表", text)
+                    reply(
+                        MarkdownTemplates.Templates.brief("别名列表", text)
                         .toMessage(MarkdownTemplates.Keyboards.aliases("添加别名 id${music.id}")))
             }
         }
@@ -308,7 +313,8 @@ class MusicController(
                         }
                     }.trim())
                 else
-                    reply(MarkdownTemplates.Templates.selectMusic(
+                    reply(
+                        MarkdownTemplates.Templates.selectMusic(
                         title = hint,
                         type = type,
                         keyword = keyword,
@@ -406,21 +412,6 @@ class MusicController(
             totalPages
         )
     }
-    suspend fun chartText(
-        chart: ChartInfo
-    ) = Image(chart.music.cover()) + buildString {
-        appendLine("${chart.difficulty.names.last()}${chart.music.id}. ${chart.music.name}")
-        appendLine("等级: ${chart.level} (${chart.levelValue})")
-        appendLine("TAP: ${chart.notes.tap}")
-        appendLine("HOLD: ${chart.notes.hold}")
-        appendLine("SLIDE: ${chart.notes.slide}")
-        appendLine("BREAK: ${chart.notes.`break`}")
-        if (chart.notes.touch != 0)
-            appendLine("TOUCH: ${chart.notes.touch}")
-        appendLine("总物量: ${chart.notes.total}")
-        appendLine("总DX分: ${chart.maxDeluxeScore}")
-        appendLine("谱师: ${chart.notesDesigner}")
-    }.trim().newLine()
 
     suspend fun MessageEvent.addAlias(
         raw: String

@@ -1,5 +1,7 @@
 package xyz.xszq.bot.component
 
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.apache.lucene.analysis.Analyzer
 import org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
@@ -11,14 +13,8 @@ import org.apache.lucene.index.DirectoryReader
 import org.apache.lucene.index.IndexWriter
 import org.apache.lucene.index.IndexWriterConfig
 import org.apache.lucene.index.Term
-import org.apache.lucene.search.BooleanClause
-import org.apache.lucene.search.BooleanQuery
-import org.apache.lucene.search.FuzzyQuery
-import org.apache.lucene.search.IndexSearcher
-import org.apache.lucene.search.TermQuery
+import org.apache.lucene.search.*
 import org.apache.lucene.store.FSDirectory
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.database.MusicAliasesTable
 import xyz.xszq.bot.music.MusicInfo

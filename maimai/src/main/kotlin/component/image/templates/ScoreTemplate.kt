@@ -6,13 +6,7 @@ import xyz.xszq.bot.image.dom.Div
 import xyz.xszq.bot.image.dom.Element
 import xyz.xszq.bot.image.template.Template
 import xyz.xszq.bot.image.template.TemplateManager
-import xyz.xszq.bot.music.ChartInfo
-import xyz.xszq.bot.music.DeluxeScore
-import xyz.xszq.bot.music.MusicDifficulty
-import xyz.xszq.bot.music.MusicGenre
-import xyz.xszq.bot.music.MusicInfo
-import xyz.xszq.bot.music.Rate
-import xyz.xszq.bot.music.Record
+import xyz.xszq.bot.music.*
 
 class ScoreTemplate(
     private val manager: TemplateManager,

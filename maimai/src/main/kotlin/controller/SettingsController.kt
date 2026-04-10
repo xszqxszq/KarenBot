@@ -2,7 +2,7 @@ package xyz.xszq.bot.controller
 
 import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.Maimai.Companion.textMode
-import xyz.xszq.bot.MarkdownTemplates
+import xyz.xszq.bot.component.MarkdownTemplates
 import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.database.QQBindTable
 import xyz.xszq.bot.music.Item

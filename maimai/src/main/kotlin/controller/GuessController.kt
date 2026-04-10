@@ -2,19 +2,17 @@ package xyz.xszq.bot.controller
 
 import korlibs.io.file.VfsFile
 import kotlinx.coroutines.*
-import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.upsert
-import org.jetbrains.exposed.sql.vendors.currentDialect
 import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.Rect
 import org.jetbrains.skia.Surface
 import xyz.xszq.bot.*
 import xyz.xszq.bot.Maimai.Companion.textMode
+import xyz.xszq.bot.component.MarkdownTemplates
 import xyz.xszq.bot.database.GuessGameStatus
 import xyz.xszq.bot.database.GuessGameTable
 import xyz.xszq.bot.database.MaimaiSettingsTable
@@ -268,7 +266,8 @@ class GuessController(
                 }
             } else {
                 val uploaded = bot.cos.uploadBinary(cropped, "jpg")
-                eventToReply[contextId] ?.reply(MarkdownTemplates.Templates.guessCropped(
+                eventToReply[contextId] ?.reply(
+                    MarkdownTemplates.Templates.guessCropped(
                     uploaded.url, hint)
                 )
                 maimai.scope.launch {

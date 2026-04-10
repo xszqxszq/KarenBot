@@ -16,6 +16,7 @@ import xyz.xszq.bot.api.MaimaiAPI
 import xyz.xszq.bot.component.AliasesSearch
 import xyz.xszq.bot.component.MaimaiData
 import xyz.xszq.bot.component.MaimaiQuery
+import xyz.xszq.bot.component.MarkdownTemplates
 import xyz.xszq.bot.component.image.MaimaiImage
 import xyz.xszq.bot.config.MaimaiConfig
 import xyz.xszq.bot.controller.ApiController

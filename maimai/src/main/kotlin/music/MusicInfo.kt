@@ -3,7 +3,7 @@ package xyz.xszq.bot.music
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.localCurrentDirVfs
 import korlibs.io.util.toStringDecimal
-import xyz.xszq.bot.MarkdownTemplates
+import xyz.xszq.bot.component.MarkdownTemplates
 import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.newLine
 import xyz.xszq.bot.plus

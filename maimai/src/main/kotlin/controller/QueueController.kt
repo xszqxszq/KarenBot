@@ -3,6 +3,7 @@ package xyz.xszq.bot.controller
 import kotlinx.datetime.toJavaLocalDateTime
 import xyz.xszq.bot.*
 import xyz.xszq.bot.Maimai.Companion.textMode
+import xyz.xszq.bot.component.MarkdownTemplates
 import xyz.xszq.bot.database.Arcade
 import xyz.xszq.bot.database.ArcadeGroupBind
 import xyz.xszq.bot.event.GroupMessageEvent
@@ -187,7 +188,8 @@ class QueueController(
                     if (textMode())
                         reply("当前群未设置机厅，请使用“@可怜BOT /排卡管理 添加机厅”来添加机厅。")
                     else
-                        reply(MarkdownTemplates.Templates.queueInit(
+                        reply(
+                            MarkdownTemplates.Templates.queueInit(
                             "排卡管理",
                             "当前群未设置机厅，请点击下方按钮添加机厅。"
                         ))
@@ -208,7 +210,8 @@ class QueueController(
                 if (textMode())
                     reply("更新成功，现在${result.arcade.name}人数为${result.arcade.value}人。")
                 else
-                    reply(MarkdownTemplates.Templates.queue(
+                    reply(
+                        MarkdownTemplates.Templates.queue(
                         "排卡管理", "更新成功，现在${result.arcade.name}人数为${result.arcade.value}人。",
                         result.arcade.name
                     ))

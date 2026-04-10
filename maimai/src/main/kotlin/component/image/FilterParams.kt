@@ -3,7 +3,6 @@ package xyz.xszq.bot.component.image
 import xyz.xszq.bot.music.GameVersion
 import xyz.xszq.bot.music.Record
 import xyz.xszq.bot.music.RequiresType
-import xyz.xszq.bot.query.Filter.Companion.defaultSort
 
 data class FilterParams(
     var name: String = "",

@@ -9,7 +9,6 @@ import xyz.xszq.bot.database.QQBindTable
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.NotSupportedException
 import xyz.xszq.bot.exception.QQBindRequiredException
-import xyz.xszq.bot.exception.UnknownException
 import xyz.xszq.bot.exception.UserBindRequiredException
 import xyz.xszq.bot.exception.UserNotFoundException
 import xyz.xszq.bot.music.*

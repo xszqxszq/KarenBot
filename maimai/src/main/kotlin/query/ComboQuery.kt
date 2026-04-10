@@ -14,8 +14,6 @@ import xyz.xszq.bot.json
 import xyz.xszq.bot.music.*
 import xyz.xszq.bot.toSimple
 import java.io.File
-import kotlin.collections.component1
-import kotlin.collections.component2
 import kotlin.random.Random
 
 object ComboQuery {

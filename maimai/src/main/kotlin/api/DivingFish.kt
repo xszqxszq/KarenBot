@@ -3,19 +3,21 @@ package xyz.xszq.bot.api
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.plugins.HttpRequestRetry
+import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.*
 import okhttp3.ConnectionPool
+import xyz.xszq.bot.component.MaimaiData
 import xyz.xszq.bot.exception.UnknownException
 import xyz.xszq.bot.exception.UserDeniedException
 import xyz.xszq.bot.exception.UserNotFoundException
-import xyz.xszq.bot.component.MaimaiData
 import xyz.xszq.bot.music.*
-import xyz.xszq.bot.payload.*
+import xyz.xszq.bot.payload.DivingFishRatingResponse
+import xyz.xszq.bot.payload.DivingFishRecord
+import xyz.xszq.bot.payload.DivingFishStats
 import java.util.concurrent.TimeUnit
 
 class DivingFish(

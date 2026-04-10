@@ -4,7 +4,9 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.api.LXNS
 import xyz.xszq.bot.component.WaitingEventData
