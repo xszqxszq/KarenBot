@@ -51,7 +51,7 @@ sealed class Controller(
         if (textMode())
             reply(MaimaiQuery.NO_BACKEND_BINDINGS)
         else
-            reply(MarkdownTemplates.Templates.SELECT_BACKENDS)
+            reply(MarkdownTemplates.Templates.selectBackends(this.text))
     }
     suspend fun MessageEvent.messageUserNotFound() {
         reply(MaimaiQuery.USER_NOT_FOUND)

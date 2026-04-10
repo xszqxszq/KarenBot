@@ -25,27 +25,27 @@ object MarkdownTemplates {
             data: String,
             label: String,
             enter: Boolean = false
-        ) = Keyboard.Companion.create {
+        ) = Keyboard.create {
             row {
                 button(
                     id = "1",
                     action = Action(
-                        type = Action.Companion.AT,
+                        type = Action.AT,
                         data = data,
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        permission = Permission(Permission.EVERYONE),
                         enter = enter
                     ),
                     renderData = RenderData(
                         label = label,
                         visitedLabel = label,
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     )
                 )
             }
         }
         fun music(
             music: MusicInfo
-        ) = Keyboard.Companion.create {
+        ) = Keyboard.create {
             row {
                 music.charts.forEach { chart ->
                     val emoji = when(chart.difficulty) {
@@ -60,15 +60,15 @@ object MarkdownTemplates {
                     button(
                         id = "level",
                         action = Action(
-                            type = Action.Companion.AT,
+                            type = Action.AT,
                             data = "${chart.difficulty.brief}${music.id}",
-                            permission = Permission(Permission.Companion.EVERYONE),
+                            permission = Permission(Permission.EVERYONE),
                             enter = true
                         ),
                         renderData = RenderData(
                             label = display,
                             visitedLabel = display,
-                            style = RenderData.Companion.BLUE
+                            style = RenderData.BLUE
                         )
                     )
                 }
@@ -77,29 +77,29 @@ object MarkdownTemplates {
                 button(
                     id = "1",
                     action = Action(
-                        type = Action.Companion.AT,
+                        type = Action.AT,
                         data = "info ${music.id}",
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        permission = Permission(Permission.EVERYONE),
                         enter = true
                     ),
                     renderData = RenderData(
                         label = "\uD83D\uDCAF查成绩",
                         visitedLabel = "\uD83D\uDCAF查成绩",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     )
                 )
                 button(
                     id = "2",
                     action = Action(
-                        type = Action.Companion.AT,
+                        type = Action.AT,
                         data = "歌50 ${music.id}",
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        permission = Permission(Permission.EVERYONE),
                         enter = true
                     ),
                     renderData = RenderData(
                         label = "\uD83D\uDCDC歌50",
                         visitedLabel = "\uD83D\uDCDC歌50",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     )
                 )
             }
@@ -107,47 +107,47 @@ object MarkdownTemplates {
                 button(
                     id = "3",
                     action = Action(
-                        type = Action.Companion.AT,
+                        type = Action.AT,
                         data = "预览id${music.id}",
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        permission = Permission(Permission.EVERYONE),
                         enter = true
                     ),
                     renderData = RenderData(
                         label = "\uD83D\uDD0A试听一下",
                         visitedLabel = "\uD83D\uDD0A试听一下",
-                        style = RenderData.Companion.GRAY
+                        style = RenderData.GRAY
                     )
                 )
                 button(
                     id = "4",
                     action = Action(
-                        type = Action.Companion.AT,
+                        type = Action.AT,
                         data = "添加别名 ${music.id}",
-                        permission = Permission(Permission.Companion.EVERYONE)
+                        permission = Permission(Permission.EVERYONE)
                     ),
                     renderData = RenderData(
                         label = "➕添加别名",
                         visitedLabel = "➕添加别名",
-                        style = RenderData.Companion.GRAY
+                        style = RenderData.GRAY
                     )
                 )
             }
         }
         fun oauth(
             authUrl: String
-        ) = Keyboard.Companion.create {
+        ) = Keyboard.create {
             row {
                 button(
                     id = "1",
                     action = Action(
-                        type = Action.Companion.LINK,
+                        type = Action.LINK,
                         data = authUrl,
-                        permission = Permission(Permission.Companion.EVERYONE)
+                        permission = Permission(Permission.EVERYONE)
                     ),
                     renderData = RenderData(
                         label = "点我授权",
                         visitedLabel = "已授权",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     )
                 )
             }
@@ -155,18 +155,18 @@ object MarkdownTemplates {
         fun collection(
             type: String,
             engType: String
-        ) = Keyboard.Companion.create {
+        ) = Keyboard.create {
             row {
                 button(
                     id = "1",
                     renderData = RenderData(
                         label = "选择$type",
                         visitedLabel = "选择$type",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     ),
                     action = Action(
-                        type = Action.Companion.LINK,
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        type = Action.LINK,
+                        permission = Permission(Permission.EVERYONE),
                         data = "https://otmdb.cn/bot/maimai/$engType"
                     )
                 )
@@ -175,11 +175,11 @@ object MarkdownTemplates {
                     renderData = RenderData(
                         label = "⚙ 设置$type",
                         visitedLabel = "⚙ 设置$type",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     ),
                     action = Action(
-                        type = Action.Companion.AT,
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        type = Action.AT,
+                        permission = Permission(Permission.EVERYONE),
                         data = "设置$type "
                     )
                 )
@@ -187,18 +187,18 @@ object MarkdownTemplates {
         }
         fun queue(
             now: String ?= null,
-        ) = Keyboard.Companion.create {
+        ) = Keyboard.create {
             row {
                 button(
                     id = "",
                     renderData = RenderData(
                         label = "查询人数",
                         visitedLabel = "查询人数",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     ),
                     action = Action(
-                        type = Action.Companion.AT,
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        type = Action.AT,
+                        permission = Permission(Permission.EVERYONE),
                         data = "/j",
                         enter = true
                     )
@@ -209,11 +209,11 @@ object MarkdownTemplates {
                         renderData = RenderData(
                             label = "添加别名",
                             visitedLabel = "添加别名",
-                            style = RenderData.Companion.BLUE
+                            style = RenderData.BLUE
                         ),
                         action = Action(
-                            type = Action.Companion.AT,
-                            permission = Permission(Permission.Companion.EVERYONE),
+                            type = Action.AT,
+                            permission = Permission(Permission.EVERYONE),
                             data = "/排卡管理 添加别名 $now 这里填别名"
                         )
                     )
@@ -223,11 +223,11 @@ object MarkdownTemplates {
                     renderData = RenderData(
                         label = "更新人数",
                         visitedLabel = "更新人数",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     ),
                     action = Action(
-                        type = Action.Companion.AT,
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        type = Action.AT,
+                        permission = Permission(Permission.EVERYONE),
                         data = now ?: "\n"
                     )
                 )
@@ -237,47 +237,47 @@ object MarkdownTemplates {
             command: String,
             nowPage: Int ?= null,
             totalPages: Int ?= null
-        ) = Keyboard.Companion.create {
+        ) = Keyboard.create {
             row {
                 button(
                     id = "1",
                     action = Action(
-                        type = Action.Companion.AT,
+                        type = Action.AT,
                         data = command,
-                        permission = Permission(Permission.Companion.EVERYONE)
+                        permission = Permission(Permission.EVERYONE)
                     ),
                     renderData = RenderData(
                         label = "\uD83D\uDCAF我也要查",
                         visitedLabel = "\uD83D\uDCAF我也要查",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     )
                 )
                 button(
                     id = "2",
                     action = Action(
-                        type = Action.Companion.LINK,
+                        type = Action.LINK,
                         data = "https://otmdb.cn/bot/maimai/combo",
                         enter = true,
-                        permission = Permission(Permission.Companion.EVERYONE)
+                        permission = Permission(Permission.EVERYONE)
                     ),
                     renderData = RenderData(
                         label = "随心配",
                         visitedLabel = "随心配",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     )
                 )
                 button(
                     id = "3",
                     action = Action(
-                        type = Action.Companion.AT,
+                        type = Action.AT,
                         data = "设置mai",
                         enter = true,
-                        permission = Permission(Permission.Companion.EVERYONE)
+                        permission = Permission(Permission.EVERYONE)
                     ),
                     renderData = RenderData(
                         label = "\uD83C\uDFA8修改设置",
                         visitedLabel = "\uD83C\uDFA8修改设置",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     )
                 )
             }
@@ -291,30 +291,30 @@ object MarkdownTemplates {
                         button(
                             id = "4",
                             action = Action(
-                                type = Action.Companion.AT,
+                                type = Action.AT,
                                 data = "$command ${nowPage - 1}",
-                                permission = Permission(Permission.Companion.EVERYONE),
+                                permission = Permission(Permission.EVERYONE),
                                 enter = true
                             ),
                             renderData = RenderData(
                                 label = "⬅\uFE0F上一页",
                                 visitedLabel = "⬅\uFE0F上一页",
-                                style = RenderData.Companion.BLUE
+                                style = RenderData.BLUE
                             )
                         )
                     if (nowPage < totalPages)
                         button(
                             id = "5",
                             action = Action(
-                                type = Action.Companion.AT,
+                                type = Action.AT,
                                 data = "$command ${nowPage + 1}",
-                                permission = Permission(Permission.Companion.EVERYONE),
+                                permission = Permission(Permission.EVERYONE),
                                 enter = true
                             ),
                             renderData = RenderData(
                                 label = "➡\uFE0F下一页",
                                 visitedLabel = "➡\uFE0F下一页",
-                                style = RenderData.Companion.BLUE
+                                style = RenderData.BLUE
                             )
                         )
                 }
@@ -322,21 +322,21 @@ object MarkdownTemplates {
         }
         fun importData(
             backend: MaimaiAPI
-        ) = Keyboard.Companion.create {
+        ) = Keyboard.create {
             when (backend) {
                 is DivingFish ->
                     row {
                         button(
                             id = "1",
                             action = Action(
-                                type = Action.Companion.LINK,
+                                type = Action.LINK,
                                 data = "https://otmdb.cn/jump/maimaidxprober_import",
-                                permission = Permission(Permission.Companion.EVERYONE)
+                                permission = Permission(Permission.EVERYONE)
                             ),
                             renderData = RenderData(
                                 label = "\uD83D\uDC1F水鱼(电脑端)",
                                 visitedLabel = "\uD83D\uDC1F水鱼(电脑端)",
-                                style = RenderData.Companion.BLUE
+                                style = RenderData.BLUE
                             )
                         )
                     }
@@ -345,14 +345,14 @@ object MarkdownTemplates {
                         button(
                             id = "2",
                             action = Action(
-                                type = Action.Companion.LINK,
+                                type = Action.LINK,
                                 data = "https://otmdb.cn/jump/lxnsprober_import",
-                                permission = Permission(Permission.Companion.EVERYONE)
+                                permission = Permission(Permission.EVERYONE)
                             ),
                             renderData = RenderData(
                                 label = "❄落雪(电脑/手机)",
                                 visitedLabel = "❄落雪(电脑/手机)",
-                                style = RenderData.Companion.BLUE
+                                style = RenderData.BLUE
                             )
                         )
                     }
@@ -361,14 +361,14 @@ object MarkdownTemplates {
                 button(
                     id = "3",
                     action = Action(
-                        type = Action.Companion.LINK,
+                        type = Action.LINK,
                         data = "https://otmdb.cn/jump/maimai_prober_mobile",
-                        permission = Permission(Permission.Companion.EVERYONE)
+                        permission = Permission(Permission.EVERYONE)
                     ),
                     renderData = RenderData(
                         label = "\uD83D\uDC07UsagiPass(iOS/安卓)",
                         visitedLabel = "\uD83D\uDC07UsagiPass(iOS/安卓)",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     )
                 )
             }
@@ -377,14 +377,14 @@ object MarkdownTemplates {
                     button(
                         id = "4",
                         action = Action(
-                            type = Action.Companion.LINK,
+                            type = Action.LINK,
                             data = "https://www.bilibili.com/video/BV1Yg41167ie",
-                            permission = Permission(Permission.Companion.EVERYONE)
+                            permission = Permission(Permission.EVERYONE)
                         ),
                         renderData = RenderData(
                             label = "\uD83E\uDD16Bakapiano(安卓)",
                             visitedLabel = "\uD83E\uDD16Bakapiano(安卓)",
-                            style = RenderData.Companion.BLUE
+                            style = RenderData.BLUE
                         )
                     )
                 }
@@ -404,131 +404,149 @@ object MarkdownTemplates {
             keyword: String,
             nowPage: Int = 1,
             totalPages: Int = 1,
-        ) = Keyboard.Companion.create {
+        ) = Keyboard.create {
             row {
                 if (nowPage > 1)
                     button(
                         id = button,
                         action = Action(
-                            type = Action.Companion.CALLBACK,
+                            type = Action.CALLBACK,
                             data = "$keyword\n${nowPage - 1}",
-                            permission = Permission(Permission.Companion.EVERYONE),
+                            permission = Permission(Permission.EVERYONE),
                             enter = true
                         ),
                         renderData = RenderData(
                             label = "⬅\uFE0F上一页",
                             visitedLabel = "⬅\uFE0F上一页",
-                            style = RenderData.Companion.BLUE
+                            style = RenderData.BLUE
                         )
                     )
                 if (nowPage < totalPages)
                     button(
                         id = button,
                         action = Action(
-                            type = Action.Companion.CALLBACK,
+                            type = Action.CALLBACK,
                             data = "$keyword\n${nowPage + 1}",
-                            permission = Permission(Permission.Companion.EVERYONE),
+                            permission = Permission(Permission.EVERYONE),
                             enter = true
                         ),
                         renderData = RenderData(
                             label = "➡\uFE0F下一页",
                             visitedLabel = "➡\uFE0F下一页",
-                            style = RenderData.Companion.BLUE
+                            style = RenderData.BLUE
                         )
                     )
             }
         }
-
-        val BACKENDS = Keyboard.Companion.create {
+        fun backends(
+            message: String
+        ) = Keyboard.create {
             row {
                 button(
                     id = "1",
                     action = Action(
-                        type = Action.Companion.LINK,
+                        type = Action.LINK,
                         data = "https://otmdb.cn/jump/maimaidxprober",
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        permission = Permission(Permission.EVERYONE),
                     ),
                     renderData = RenderData(
                         label = "水鱼查分器",
                         visitedLabel = "水鱼查分器",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     )
                 )
                 button(
                     id = "2",
                     action = Action(
-                        type = Action.Companion.LINK,
+                        type = Action.LINK,
                         data = "https://otmdb.cn/jump/lxnsprober",
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        permission = Permission(Permission.EVERYONE),
                     ),
                     renderData = RenderData(
                         label = "落雪查分器",
                         visitedLabel = "落雪查分器",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
+                    )
+                )
+            }
+            row {
+                button(
+                    id = "3",
+                    action = Action(
+                        type = Action.AT,
+                        data = message,
+                        permission = Permission(Permission.EVERYONE),
+                        enter = true
+                    ),
+                    renderData = RenderData(
+                        label = "点我重试",
+                        visitedLabel = "点我重试",
+                        style = RenderData.FILLED_BLUE
                     )
                 )
             }
         }
-        val BIND_QQ = Keyboard.Companion.create {
+        
+        val BIND_QQ = Keyboard.create {
             row {
                 button(
                     id = "1",
                     action = Action(
-                        type = Action.Companion.AT,
+                        type = Action.AT,
                         data = "/bind ",
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        permission = Permission(Permission.EVERYONE),
                     ),
                     renderData = RenderData(
                         label = "⬇点我输入",
                         visitedLabel = "⬇点我输入",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     )
                 )
             }
         }
-        val USER_EULA = Keyboard.Companion.create {
+        val USER_EULA = Keyboard.create {
             row {
                 button(
                     id = "1",
                     action = Action(
-                        type = Action.Companion.LINK,
+                        type = Action.LINK,
                         data = "https://otmdb.cn/jump/maimaidxprober",
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        permission = Permission(Permission.EVERYONE),
                     ),
                     renderData = RenderData(
                         label = "前往查分器",
                         visitedLabel = "前往查分器",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     )
                 )
             }
         }
-        val HELP = Keyboard.Companion.create {
+        val HELP = Keyboard.create {
             row {
                 button(
                     id = "1",
                     action = Action(
-                        type = Action.Companion.AT,
+                        type = Action.AT,
                         data = "牛奶歌是什么歌",
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        permission = Permission(Permission.EVERYONE),
                     ),
                     renderData = RenderData(
                         label = "\uD83D\uDD0E查歌",
                         visitedLabel = "\uD83D\uDD0E查歌",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     )
                 )
                 button(
                     id = "1",
                     action = Action(
-                        type = Action.Companion.AT,
+                        type = Action.AT,
                         data = "info 海底谭",
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        permission = Permission(Permission.EVERYONE),
                     ),
                     renderData = RenderData(
                         label = "\uD83D\uDCCB单曲成绩",
                         visitedLabel = "\uD83D\uDCCB单曲成绩",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     )
                 )
             }
@@ -536,27 +554,27 @@ object MarkdownTemplates {
                 button(
                     id = "1",
                     action = Action(
-                        type = Action.Companion.AT,
+                        type = Action.AT,
                         data = "b50",
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        permission = Permission(Permission.EVERYONE),
                     ),
                     renderData = RenderData(
                         label = "\uD83D\uDCAFBest50",
                         visitedLabel = "\uD83D\uDCAFBest50",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     )
                 )
                 button(
                     id = "1",
                     action = Action(
-                        type = Action.Companion.LINK,
+                        type = Action.LINK,
                         data = "https://otmdb.cn/bot/maimai/combo",
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        permission = Permission(Permission.EVERYONE),
                     ),
                     renderData = RenderData(
                         label = "随心配50",
                         visitedLabel = "随心配50",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     )
                 )
             }
@@ -564,27 +582,27 @@ object MarkdownTemplates {
                 button(
                     id = "1",
                     action = Action(
-                        type = Action.Companion.AT,
+                        type = Action.AT,
                         data = "橙将完成表",
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        permission = Permission(Permission.EVERYONE),
                     ),
                     renderData = RenderData(
                         label = "⏳完成表",
                         visitedLabel = "⏳完成表",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     )
                 )
                 button(
                     id = "1",
                     action = Action(
-                        type = Action.Companion.AT,
+                        type = Action.AT,
                         data = "13分数列表",
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        permission = Permission(Permission.EVERYONE),
                     ),
                     renderData = RenderData(
                         label = "\uD83D\uDCD6分数列表",
                         visitedLabel = "\uD83D\uDCD6分数列表",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     )
                 )
             }
@@ -592,43 +610,43 @@ object MarkdownTemplates {
                 button(
                     id = "1",
                     action = Action(
-                        type = Action.Companion.AT,
+                        type = Action.AT,
                         data = "舞萌开字母",
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        permission = Permission(Permission.EVERYONE),
                     ),
                     renderData = RenderData(
                         label = "\uD83D\uDD79\uFE0F开字母",
                         visitedLabel = "\uD83D\uDD79\uFE0F开字母",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     )
                 )
                 button(
                     id = "1",
                     action = Action(
-                        type = Action.Companion.LINK,
+                        type = Action.LINK,
                         data = "https://otmdb.cn/bot/maimai",
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        permission = Permission(Permission.EVERYONE),
                     ),
                     renderData = RenderData(
                         label = "更多功能...",
                         visitedLabel = "更多功能...",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     )
                 )
             }
         }
-        val SETTINGS = Keyboard.Companion.create {
+        val SETTINGS = Keyboard.create {
             row {
                 button(
                     id = "1",
                     renderData = RenderData(
                         label = "\uD83D\uDC64设置头像",
                         visitedLabel = "\uD83D\uDC64设置头像",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     ),
                     action = Action(
-                        type = Action.Companion.AT,
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        type = Action.AT,
+                        permission = Permission(Permission.EVERYONE),
                         data = "设置头像",
                         enter = true
                     )
@@ -638,11 +656,11 @@ object MarkdownTemplates {
                     renderData = RenderData(
                         label = "\uD83D\uDCF0设置牌子",
                         visitedLabel = "\uD83D\uDCF0设置牌子",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     ),
                     action = Action(
-                        type = Action.Companion.AT,
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        type = Action.AT,
+                        permission = Permission(Permission.EVERYONE),
                         data = "设置牌子",
                         enter = true
                     )
@@ -654,11 +672,11 @@ object MarkdownTemplates {
                     renderData = RenderData(
                         label = "\uD83D\uDC1F使用水鱼查分",
                         visitedLabel = "\uD83D\uDC1F使用水鱼查分",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     ),
                     action = Action(
-                        type = Action.Companion.AT,
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        type = Action.AT,
+                        permission = Permission(Permission.EVERYONE),
                         data = "设置查分器 水鱼",
                         enter = true
                     )
@@ -668,11 +686,11 @@ object MarkdownTemplates {
                     renderData = RenderData(
                         label = "❄使用落雪查分",
                         visitedLabel = "❄使用落雪查分",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     ),
                     action = Action(
-                        type = Action.Companion.AT,
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        type = Action.AT,
+                        permission = Permission(Permission.EVERYONE),
                         data = "设置查分器 落雪",
                         enter = true
                     )
@@ -684,46 +702,46 @@ object MarkdownTemplates {
                     renderData = RenderData(
                         label = "\uD83D\uDD03自动选择查分器",
                         visitedLabel = "\uD83D\uDD03自动选择查分器",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     ),
                     action = Action(
-                        type = Action.Companion.AT,
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        type = Action.AT,
+                        permission = Permission(Permission.EVERYONE),
                         data = "设置查分器 自动",
                         enter = true
                     )
                 )
             }
         }
-        val QUEUE_INIT = Keyboard.Companion.create {
+        val QUEUE_INIT = Keyboard.create {
             row {
                 button(
                     id = "",
                     renderData = RenderData(
                         label = "添加机厅",
                         visitedLabel = "添加机厅",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     ),
                     action = Action(
-                        type = Action.Companion.AT,
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        type = Action.AT,
+                        permission = Permission(Permission.EVERYONE),
                         data = "/排卡管理 添加机厅 机厅名称",
                     )
                 )
             }
         }
-        val QUEUE_HELP = Keyboard.Companion.create {
+        val QUEUE_HELP = Keyboard.create {
             row {
                 button(
                     id = "",
                     renderData = RenderData(
                         label = "查询人数",
                         visitedLabel = "查询人数",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     ),
                     action = Action(
-                        type = Action.Companion.AT,
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        type = Action.AT,
+                        permission = Permission(Permission.EVERYONE),
                         data = "几",
                         enter = true
                     )
@@ -733,11 +751,11 @@ object MarkdownTemplates {
                     renderData = RenderData(
                         label = "添加机厅",
                         visitedLabel = "添加机厅",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     ),
                     action = Action(
-                        type = Action.Companion.AT,
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        type = Action.AT,
+                        permission = Permission(Permission.EVERYONE),
                         data = "/排卡管理 添加机厅 机厅名称"
                     )
                 )
@@ -746,11 +764,11 @@ object MarkdownTemplates {
                     renderData = RenderData(
                         label = "删除机厅",
                         visitedLabel = "删除机厅",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     ),
                     action = Action(
-                        type = Action.Companion.AT,
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        type = Action.AT,
+                        permission = Permission(Permission.EVERYONE),
                         data = "/排卡管理 删除机厅 机厅名称"
                     )
                 )
@@ -761,11 +779,11 @@ object MarkdownTemplates {
                     renderData = RenderData(
                         label = "查看别名",
                         visitedLabel = "查看别名",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     ),
                     action = Action(
-                        type = Action.Companion.AT,
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        type = Action.AT,
+                        permission = Permission(Permission.EVERYONE),
                         data = "/排卡管理 查看别名 机厅名称"
                     )
                 )
@@ -774,11 +792,11 @@ object MarkdownTemplates {
                     renderData = RenderData(
                         label = "添加别名",
                         visitedLabel = "添加别名",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     ),
                     action = Action(
-                        type = Action.Companion.AT,
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        type = Action.AT,
+                        permission = Permission(Permission.EVERYONE),
                         data = "/排卡管理 添加别名 机厅名称 别名名称"
                     )
                 )
@@ -787,46 +805,46 @@ object MarkdownTemplates {
                     renderData = RenderData(
                         label = "删除别名",
                         visitedLabel = "删除别名",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     ),
                     action = Action(
-                        type = Action.Companion.AT,
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        type = Action.AT,
+                        permission = Permission(Permission.EVERYONE),
                         data = "/排卡管理 删除别名 机厅名称 别名名称"
                     )
                 )
             }
         }
-        val QUEUE_UPDATE = Keyboard.Companion.create {
+        val QUEUE_UPDATE = Keyboard.create {
             row {
                 button(
                     id = "",
                     renderData = RenderData(
                         label = "更新人数",
                         visitedLabel = "更新人数",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     ),
                     action = Action(
-                        type = Action.Companion.AT,
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        type = Action.AT,
+                        permission = Permission(Permission.EVERYONE),
                         data = "\n"
                     )
                 )
             }
         }
-        val GUESS = Keyboard.Companion.create {
+        val GUESS = Keyboard.create {
             row {
                 button(
                     id = "1",
                     action = Action(
-                        type = Action.Companion.AT,
+                        type = Action.AT,
                         data = " ",
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        permission = Permission(Permission.EVERYONE),
                     ),
                     renderData = RenderData(
                         label = "⬇输入答案",
                         visitedLabel = "⬇输入答案",
-                        style = RenderData.Companion.FILLED_BLUE
+                        style = RenderData.FILLED_BLUE
                     )
                 )
             }
@@ -834,51 +852,51 @@ object MarkdownTemplates {
                 button(
                     id = "2",
                     action = Action(
-                        type = Action.Companion.AT,
+                        type = Action.AT,
                         data = "不玩了",
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        permission = Permission(Permission.EVERYONE),
                         enter = true
                     ),
                     renderData = RenderData(
                         label = "不玩了",
                         visitedLabel = "不玩了",
-                        style = RenderData.Companion.RED
+                        style = RenderData.RED
                     )
                 )
             }
         }
-        val GUESS_AGAIN = Keyboard.Companion.create {
+        val GUESS_AGAIN = Keyboard.create {
             row {
                 button(
                     id = "1",
                     action = Action(
-                        type = Action.Companion.AT,
+                        type = Action.AT,
                         data = "猜歌",
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        permission = Permission(Permission.EVERYONE),
                         enter = true
                     ),
                     renderData = RenderData(
                         label = "\uD83D\uDD79\uFE0F再玩一把",
                         visitedLabel = "\uD83D\uDD79\uFE0F再玩一把",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     )
                 )
             }
         }
-        val GUESS_OPEN_AGAIN = Keyboard.Companion.create {
+        val GUESS_OPEN_AGAIN = Keyboard.create {
             row {
                 button(
                     id = "1",
                     action = Action(
-                        type = Action.Companion.AT,
+                        type = Action.AT,
                         data = "舞萌开字母",
-                        permission = Permission(Permission.Companion.EVERYONE),
+                        permission = Permission(Permission.EVERYONE),
                         enter = true
                     ),
                     renderData = RenderData(
                         label = "\uD83D\uDD79\uFE0F再玩一把",
                         visitedLabel = "\uD83D\uDD79\uFE0F再玩一把",
-                        style = RenderData.Companion.BLUE
+                        style = RenderData.BLUE
                     )
                 )
             }
@@ -1055,17 +1073,15 @@ object MarkdownTemplates {
             }
             return Markdown(data, keyboard)
         }
+        fun selectBackends(
+            message: String
+        ) = Markdown(
+            brief("舞萌DX", "您还未在查分器上绑定QQ号。请选择一个查分器来绑定您的QQ号："),
+            Keyboards.backends(message)
+        )
 
-        val SELECT_BACKENDS = brief("舞萌DX", "您还未在查分器上绑定QQ号。请选择一个查分器来绑定您的QQ号：")
-            .toMessage(Keyboards.BACKENDS)
         val BIND_QQ = brief("舞萌DX", "为了继续后续查询，请输入您的QQ号来绑定：")
             .toMessage(Keyboards.BIND_QQ)
-        val BIND_SUCCESS = brief("舞萌DX",
-            buildString {
-                appendLine("绑定成功！")
-                appendLine("如您尚未设置查分器，请选择一个来绑定您的QQ号：")
-            }.trim()
-        ).toMessage(Keyboards.BACKENDS)
         val USER_EULA = brief("舞萌DX", "请前往查分器同意用户协议再进行查询：")
             .toMessage(Keyboards.USER_EULA)
         val HELP = brief("舞萌DX", buildString {

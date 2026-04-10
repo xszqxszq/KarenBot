@@ -1,17 +1,20 @@
 package xyz.xszq.bot.controller
 
+import okio.IOException
 import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.Maimai.Companion.textMode
 import xyz.xszq.bot.chain
+import xyz.xszq.bot.component.MaimaiQuery
 import xyz.xszq.bot.component.MarkdownTemplates
 import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.database.QQBindTable
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.exception.UserNotFoundException
 import xyz.xszq.bot.message.MessageChain
-import xyz.xszq.bot.message.PlainText
 import xyz.xszq.bot.music.Item
 import xyz.xszq.bot.music.MusicDifficulty
+import xyz.xszq.bot.music.UserQueryParams
 import xyz.xszq.bot.newLine
 import xyz.xszq.bot.query.ComboQuery
 import xyz.xszq.bot.query.ComboQuery.filterCharts
@@ -30,15 +33,18 @@ class SettingsController(
                 return@startsWith
             }
             QQBindTable.update(this.sender.id, qq)
-            if (textMode())
-                reply(buildString {
-                    append("绑定成功，请前往水鱼或落雪查分器上绑定您的QQ号，然后就能使用舞萌 DX 查询功能了。")
-                })
-            else
-                reply(MarkdownTemplates.Templates.BIND_SUCCESS)
-            maimai.messageToReplay[sender.id] ?.let { text ->
-                replayMessage(text.chain())
-                maimai.messageToReplay.remove(sender.id)
+            val user = maimai.query.getQueryParams(this)
+            if (noAPIBindFound(user)) {
+                if (textMode())
+                    reply(MaimaiQuery.NO_BACKEND_BINDINGS)
+                else
+                    reply(MarkdownTemplates.Templates.selectBackends(this.text.trim()))
+            } else {
+                reply("绑定成功。")
+                maimai.messageToReplay[sender.id] ?.let { text ->
+                    replayMessage(text.chain())
+                    maimai.messageToReplay.remove(sender.id)
+                }
             }
         }
         startsWith("设置查分器") { name ->
@@ -179,6 +185,20 @@ class SettingsController(
                 reply(MarkdownTemplates.Templates.SETTINGS)
         }
     }
+
+    private suspend fun noAPIBindFound(
+        user: UserQueryParams
+    ): Boolean {
+        maimai.query.listBackends(user).forEach { backend ->
+            runCatching {
+                backend.getPlayerRating(user)
+            }.onSuccess { response ->
+                return false
+            }
+        }
+        return true
+    }
+
     private suspend fun MessageEvent.replayMessage(
         message: MessageChain,
     ) {
