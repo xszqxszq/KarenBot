@@ -504,6 +504,58 @@ object MarkdownTemplates {
                 )
             }
         }
+        val BIND_DF = Keyboard.create {
+            row {
+                button(
+                    id = "1",
+                    action = Action(
+                        type = Action.AT,
+                        data = "/绑定水鱼 ",
+                        permission = Permission(Permission.EVERYONE),
+                    ),
+                    renderData = RenderData(
+                        label = "⬇点我输入",
+                        visitedLabel = "⬇点我输入",
+                        style = RenderData.BLUE
+                    )
+                )
+            }
+        }
+        val HELP_PROXY = Keyboard.create {
+            row {
+                button(
+                    id = "1",
+                    action = Action(
+                        type = Action.LINK,
+                        data = "https://bot-docs.otmdb.cn/maimai/update",
+                        permission = Permission(Permission.EVERYONE),
+                    ),
+                    renderData = RenderData(
+                        label = "设置代理",
+                        visitedLabel = "设置代理",
+                        style = RenderData.BLUE
+                    )
+                )
+            }
+        }
+        val UPDATE = Keyboard.create {
+            row {
+                button(
+                    id = "1",
+                    action = Action(
+                        type = Action.AT,
+                        data = "更新",
+                        permission = Permission(Permission.EVERYONE),
+                        enter = true
+                    ),
+                    renderData = RenderData(
+                        label = "点击更新",
+                        visitedLabel = "点击更新",
+                        style = RenderData.BLUE
+                    )
+                )
+            }
+        }
         val USER_EULA = Keyboard.create {
             row {
                 button(

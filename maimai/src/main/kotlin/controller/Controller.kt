@@ -93,8 +93,8 @@ sealed class Controller(
     @OptIn(DelicateCoroutinesApi::class)
     suspend fun MessageEvent.requestOA() {
         val token = UUID.randomUUID().toString()
-        maimai.api.bindTokens[token] = WaitingEventData(this)
-        val authUrl = "https://bot-api.otmdb.cn/jump/lxns-oa/$token"
+        maimai.api.lxnsBindTokens[token] = WaitingEventData(this)
+        val authUrl = "${maimai.config.apiServer}/$token"
 
         if (textMode()) {
             reply(buildString {
