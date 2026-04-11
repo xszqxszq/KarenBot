@@ -34,6 +34,7 @@ class ApiController(
     lateinit var server: EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration>
     val lxnsBindTokens = ConcurrentHashMap<String, WaitingEventData>()
     val updateTokens = ConcurrentHashMap<String, WaitingEventData>()
+    var proxyIP: String = ""
     var proxyServer: String = ""
     var proxyPort: Int = 0
 
@@ -47,6 +48,7 @@ class ApiController(
     }
 
     init {
+        proxyIP = maimai.config.tokens["proxy-ip"] ?: throw NotFoundException()
         proxyServer = maimai.config.tokens["proxy-server"] ?: throw NotFoundException()
         proxyPort = maimai.config.tokens["proxy-port"] ?.toInt() ?: throw NotFoundException()
         maimai.scope.launch {
@@ -115,6 +117,8 @@ class ApiController(
                 }
                 when (type) {
                     "sing-box" -> call.respondText(contentType = ContentType.Application.Json) { singBox }
+                    "throne", "nekoray" -> call.respondText(contentType = ContentType.Application.Json) { throne }
+                    "nekobox" -> call.respondText(contentType = ContentType.Application.Json) { nekoBox }
                     "clash" -> call.respondText(clash)
                 }
             }
@@ -279,7 +283,11 @@ class ApiController(
     }
 
     val singBox
-        get() = "{\"log\":{\"level\":\"info\",\"timestamp\":true},\"experimental\":{\"clash_api\":{\"external_controller\":\"127.0.0.1:9090\",\"external_ui\":\"ui\",\"default_mode\":\"rule\"}},\"inbounds\":[{\"type\":\"mixed\",\"tag\":\"mixed-in\",\"listen\":\"127.0.0.1\",\"listen_port\":2080,\"sniff\":true,\"sniff_override_destination\":true}],\"outbounds\":[{\"type\":\"http\",\"tag\":\"maimai-proxy\",\"server\":\"$proxyServer\",\"server_port\":$proxyPort},{\"type\":\"direct\",\"tag\":\"direct\"},{\"type\":\"dns\",\"tag\":\"dns-out\"}],\"route\":{\"rules\":[{\"domain_suffix\":[\"tgk-wcaime.wahlap.com\"],\"outbound\":\"maimai-proxy\"},{\"protocol\":\"dns\",\"outbound\":\"dns-out\"}],\"final\":\"direct\",\"auto_detect_interface\":true}}"
+        get() = "{\"log\":{\"level\":\"info\",\"timestamp\":true},\"inbounds\":[{\"type\":\"mixed\",\"tag\":\"mixed-in\",\"listen\":\"127.0.0.1\",\"listen_port\":2080,\"sniff\":true,\"sniff_override_destination\":true}],\"outbounds\":[{\"type\":\"http\",\"tag\":\"maimai-proxy\",\"server\":\"$proxyServer\",\"server_port\":$proxyPort},{\"type\":\"direct\",\"tag\":\"direct\"},{\"type\":\"dns\",\"tag\":\"dns-out\"}],\"route\":{\"rules\":[{\"domain_suffix\":[\"tgk-wcaime.wahlap.com\"],\"outbound\":\"maimai-proxy\"},{\"protocol\":\"dns\",\"outbound\":\"dns-out\"}],\"final\":\"direct\",\"auto_detect_interface\":true}}"
+    val throne
+        get() = "{\"log\":{\"level\":\"info\",\"timestamp\":true},\"experimental\":{\"clash_api\":{\"external_controller\":\"127.0.0.1:9090\",\"external_ui\":\"ui\",\"default_mode\":\"rule\",\"store_selected\":false}},\"inbounds\":[{\"type\":\"mixed\",\"tag\":\"mixed-in\",\"listen\":\"127.0.0.1\",\"listen_port\":2080,\"sniff\":true,\"sniff_override_destination\":true}],\"outbounds\":[{\"type\":\"http\",\"tag\":\"maimai-proxy\",\"server\":\"$proxyServer\",\"server_port\":$proxyPort},{\"type\":\"direct\",\"tag\":\"direct\"},{\"type\":\"dns\",\"tag\":\"dns-out\"}],\"route\":{\"rules\":[{\"domain_suffix\":[\"tgk-wcaime.wahlap.com\"],\"outbound\":\"maimai-proxy\"},{\"protocol\":\"dns\",\"outbound\":\"dns-out\"}],\"final\":\"direct\",\"auto_detect_interface\":true}}"
+    val nekoBox
+        get() = "{\"dns\":{\"final\":\"dns-remote\",\"independent_cache\":true,\"rules\":[{\"domain\":[\"$proxyServer\",\"tgk-wcaime.wahlap.com\",\"dns.google\"],\"server\":\"dns-direct\"},{\"outbound\":[\"any\"],\"server\":\"dns-direct\"}],\"servers\":[{\"address\":\"rcode://success\",\"tag\":\"dns-block\"},{\"address\":\"local\",\"detour\":\"direct\",\"tag\":\"dns-local\"},{\"address\":\"https://223.5.5.5/dns-query\",\"address_resolver\":\"dns-local\",\"detour\":\"direct\",\"strategy\":\"prefer_ipv4\",\"tag\":\"dns-direct\"},{\"address\":\"https://dns.google/dns-query\",\"address_resolver\":\"dns-direct\",\"strategy\":\"prefer_ipv4\",\"tag\":\"dns-remote\"}]},\"inbounds\":[{\"domain_strategy\":\"\",\"endpoint_independent_nat\":true,\"inet4_address\":[\"172.19.0.1/28\"],\"inet6_address\":[\"fdfe:dcba:9876::1/126\"],\"mtu\":9000,\"sniff\":true,\"sniff_override_destination\":true,\"stack\":\"mixed\",\"tag\":\"tun-in\",\"type\":\"tun\"},{\"domain_strategy\":\"\",\"listen\":\"127.0.0.1\",\"listen_port\":2080,\"sniff\":true,\"sniff_override_destination\":true,\"tag\":\"mixed-in\",\"type\":\"mixed\"}],\"log\":{\"level\":\"info\"},\"outbounds\":[{\"domain_strategy\":\"prefer_ipv4\",\"password\":\"\",\"server\":\"$proxyServer\",\"server_port\":$proxyPort,\"username\":\"\",\"tag\":\"proxy\",\"type\":\"http\"},{\"tag\":\"direct\",\"type\":\"direct\"}],\"route\":{\"auto_detect_interface\":true,\"rule_set\":[],\"rules\":[{\"action\":\"hijack-dns\",\"port\":[53]},{\"action\":\"hijack-dns\",\"protocol\":[\"dns\"]},{\"action\":\"route\",\"domain\":[\"tgk-wcaime.wahlap.com\"],\"outbound\":\"proxy\"},{\"action\":\"reject\",\"ip_cidr\":[\"224.0.0.0/3\",\"ff00::/8\"],\"source_ip_cidr\":[\"224.0.0.0/3\",\"ff00::/8\"]}]}}"
     val clash
         get() = "port: 7890\nsocks-port: 7891\nmode: rule\nproxies:\n  - name: 舞萌DX成绩更新代理\n    server: $proxyServer\n    port: $proxyPort\n    type: http\nproxy-groups:\n  - name: default\n    type: select\n    proxies:\n      - 舞萌DX成绩更新代理\nrules:\n  - DOMAIN-SUFFIX,tgk-wcaime.wahlap.com,default\n  - MATCH,DIRECT"
 }
