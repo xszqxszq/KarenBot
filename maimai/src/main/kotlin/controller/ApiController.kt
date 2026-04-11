@@ -1,9 +1,13 @@
 package xyz.xszq.bot.controller
 
+import com.fleeksoft.ksoup.Ksoup
 import io.ktor.client.*
+import io.ktor.client.call.body
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -19,6 +23,8 @@ import xyz.xszq.bot.component.WaitingEventData
 import xyz.xszq.bot.database.DivingFishBindTable
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.NotFoundException
+import xyz.xszq.bot.payload.DivingFishRecordSimple
+import xyz.xszq.bot.payload.DivingFishUpdateResponse
 import xyz.xszq.bot.reply
 import java.util.concurrent.ConcurrentHashMap
 
@@ -32,7 +38,9 @@ class ApiController(
     var proxyPort: Int = 0
 
     private val client = HttpClient {
-
+        install(ContentNegotiation) {
+            json()
+        }
     }
     private val redirectClient = HttpClient {
         followRedirects = false
@@ -144,27 +152,35 @@ class ApiController(
         event: MessageEvent,
         uri: String
     ) = event.run {
-        val results = fetch(uri) ?: run {
+        val records = fetch(uri) ?: run {
+            reply("更新失败，请稍后重试")
+            return
+        }
+        if (records.isEmpty()) {
             reply("更新失败，请稍后重试")
             return
         }
         val importToken = DivingFishBindTable[sender.id] ?: return
-        results.forEach { recordHtml ->
-            client.post(
-                "https://www.diving-fish.com/api/maimaidxprober/player/update_records_html"
-            ) {
-                headers {
-                    append("Import-Token", importToken)
-                }
-                setBody(recordHtml)
+        val response = client.post(
+            "https://www.diving-fish.com/api/maimaidxprober/player/update_records"
+        ) {
+            headers {
+                append("Import-Token", importToken)
             }
+            contentType(ContentType.Application.Json)
+            setBody(records)
         }
-        reply("更新成功！")
+        if (!response.status.isSuccess()) {
+            reply("更新失败，请稍后重试")
+            return
+        }
+        val result = response.body<DivingFishUpdateResponse>()
+        reply("更新成功，已更新${result.creates}条记录。")
     }
 
     suspend fun fetch(
         uri: String
-    ): List<String>? {
+    ): List<DivingFishRecordSimple>? {
         val getRedirectUrl = URLBuilder("https://tgk-wcaime.wahlap.com$uri").apply {
             parameters.remove("token")
         }.build()
@@ -193,7 +209,93 @@ class ApiController(
                 return null
             htmlResults.add(content)
         }
-        return htmlResults
+        return htmlResults.flatMapIndexed { difficulty, html ->
+            parseDivingFishRecords(
+                html = html,
+                difficulty = difficulty,
+                linkCofMaxDxScore = maimai.music(linkCofMusicId)?.charts?.getOrNull(difficulty)?.maxDeluxeScore
+            )
+        }
+    }
+
+    companion object {
+        const val linkCofMusicId = 383
+        const val musicDetailFormSelector = "form[action='https://maimai.wahlap.com/maimai-mobile/record/musicDetail/']"
+        const val musicNameSelector = ".music_name_block"
+        const val achievementSelector = ".music_score_block.w_112"
+        const val deluxeScoreSelector = ".music_score_block.w_190"
+        const val musicTypeSelector = ".music_kind_icon"
+        const val musicIconSelector = "img[src*='music_icon_']"
+        const val deluxeScoreValueCount = 2
+
+        fun parseDivingFishRecords(
+            html: String,
+            difficulty: Int,
+            linkCofMaxDxScore: Int? = null
+        ): List<DivingFishRecordSimple> {
+            val document = Ksoup.parse(html = html)
+
+            return document.select(musicDetailFormSelector).mapNotNull { form ->
+                val title = form.select(musicNameSelector)
+                    .firstOrNull()
+                    ?.text()
+                    ?.trim()
+                    ?.takeIf(String::isNotEmpty)
+                    ?: return@mapNotNull null
+                val achievement = form.select(achievementSelector)
+                    .firstOrNull()
+                    ?.text()
+                    ?.removeSuffix("%")
+                    ?.trim()
+                    ?.toDoubleOrNull()
+                    ?: return@mapNotNull null
+                val deluxeScoreText = form.select(deluxeScoreSelector)
+                    .firstOrNull()
+                    ?.text()
+                    ?.trim()
+                    ?: return@mapNotNull null
+                val deluxeScoreValues = deluxeScoreText
+                    .split("/")
+                    .map(String::trim)
+                    .map { value -> value.replace(",", "") }
+                if (deluxeScoreValues.size != deluxeScoreValueCount)
+                    return@mapNotNull null
+                val dxScore = deluxeScoreValues[0].toIntOrNull() ?: return@mapNotNull null
+                val totalDxScore = deluxeScoreValues[1].toIntOrNull() ?: return@mapNotNull null
+                val type = when (form.select(musicTypeSelector).firstOrNull()?.attr("src")?.substringAfterLast('/')?.substringBefore('.')) {
+                    "music_standard" -> "SD"
+                    "music_dx" -> "DX"
+                    else -> return@mapNotNull null
+                }
+                val icons = form.select(musicIconSelector)
+                    .map { icon -> musicIconValue(icon.attr("src")) }
+                val fs = icons.firstOrNull().orEmpty()
+                val fc = icons.getOrNull(1).orEmpty()
+                val normalizedTitle = if (
+                    title == "Link" &&
+                    totalDxScore == linkCofMaxDxScore
+                ) {
+                    "Link(CoF)"
+                } else {
+                    title
+                }
+
+                DivingFishRecordSimple(
+                    title = normalizedTitle,
+                    achievements = achievement,
+                    dxScore = dxScore,
+                    fc = fc,
+                    fs = fs,
+                    levelIndex = difficulty,
+                    type = type
+                )
+            }
+        }
+
+        private fun musicIconValue(src: String): String {
+            val icon = src.substringAfterLast("music_icon_").substringBefore('.')
+            return if (icon == "back") "" else icon
+        }
     }
 
     val singBox

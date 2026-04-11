@@ -19,6 +19,7 @@ repositories {
 dependencies {
     compileOnly(project(":"))
     implementation("com.github.houbb:opencc4j:1.7.2")
+    implementation("com.fleeksoft.ksoup:ksoup:0.2.6")
     implementation("com.h2database:h2:2.2.224")
     implementation("com.sksamuel.hoplite:hoplite-core:${hopliteVersion}")
     implementation("com.sksamuel.hoplite:hoplite-yaml:${hopliteVersion}")
