@@ -12,7 +12,8 @@ class Filter(
     val nowVersion: () -> GameVersion? = defaultVersion,
     val disable15: Boolean = false,
     val name: String? = null,
-    val fitLevelValue: Boolean = false
+    val fitLevelValue: Boolean = false,
+    val singleChart: Boolean = false
 ) {
     companion object {
         val defaultChartFilter: (ChartInfo) -> Boolean = { true }

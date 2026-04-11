@@ -5,7 +5,6 @@ import korlibs.io.file.std.localCurrentDirVfs
 import xyz.xszq.bot.*
 import xyz.xszq.bot.Maimai.Companion.textMode
 import xyz.xszq.bot.component.MarkdownTemplates
-import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.database.MusicAliasesTable
 import xyz.xszq.bot.database.MusicAliasesVoteTable
 import xyz.xszq.bot.event.MessageEvent
@@ -17,10 +16,13 @@ import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.ffmpeg.FFMpegFileType
 import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.bot.message.Audio
+import xyz.xszq.bot.music.ChartInfo
 import xyz.xszq.bot.music.MusicDifficulty
 import xyz.xszq.bot.music.MusicInfo
 import xyz.xszq.bot.query.ComboQuery
+import xyz.xszq.bot.query.ComboQuery.filterCharts
 import xyz.xszq.bot.query.ComboQuery.filterMusics
+import xyz.xszq.bot.query.ComboQuery.isSingleChartSelected
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
@@ -292,7 +294,7 @@ class MusicController(
         "推分", "下埋", "越级", "拼机", "单刷", "练底力", "练手法", "抓准度", "抓绝赞", "收歌", "堵门", "夜勤"
     )
 
-    suspend fun ReplyAble.showResult(
+    suspend fun ReplyAble.showMusics(
         type: String,
         keyword: String,
         result: List<MusicInfo>,
@@ -300,36 +302,29 @@ class MusicController(
         nowPage: Int = 1,
         totalPages: Int = 1,
     ) {
-        val textMode = if (this is MessageEvent)
-            MaimaiSettingsTable[sender.id, "text-mode"] == "1"
-        else
-            false
         when {
             result.isEmpty() -> {
                 reply(notFound)
             }
             result.size == 1 && totalPages == 1 -> {
-                if (textMode)
+                if (textMode())
                     reply(result.first().infoText())
                 else
                     reply(result.first().infoMD(jacketUrl))
             }
             else -> {
-                val hint =
-                    if (totalPages != 1)
-                        "您要查找的歌曲可能是 ($nowPage / $totalPages)："
-                    else
-                        "您要查找的歌曲可能是："
-                if (textMode)
-                    reply(buildString {
+                val hint = if (totalPages != 1)
+                    "您要查找的歌曲可能是 ($nowPage / $totalPages)："
+                else
+                    "您要查找的歌曲可能是："
+                when {
+                    textMode() -> reply(buildString {
                         appendLine(hint)
                         result.forEach { music ->
                             appendLine("${music.id}. ${music.name}")
                         }
                     }.trim())
-                else
-                    reply(
-                        MarkdownTemplates.Templates.selectMusic(
+                    else -> reply(MarkdownTemplates.Templates.selectMusic(
                         title = hint,
                         type = type,
                         keyword = keyword,
@@ -339,6 +334,50 @@ class MusicController(
                         nowPage = nowPage,
                         totalPages = totalPages,
                     ))
+                }
+            }
+        }
+    }
+    suspend fun ReplyAble.showCharts(
+        type: String,
+        keyword: String,
+        result: List<ChartInfo>,
+        displayName: String ?= null,
+        nowPage: Int = 1,
+        totalPages: Int = 1,
+    ) {
+        when {
+            result.isEmpty() -> {
+                reply(notFound)
+            }
+            result.size == 1 && totalPages == 1 -> {
+                if (textMode())
+                    reply(result.first().infoText())
+                else
+                    reply(result.first().infoMD(jacketUrl))
+            }
+            else -> {
+                val hint = if (totalPages != 1)
+                    "您要查找的歌曲可能是 ($nowPage / $totalPages)："
+                else
+                    "您要查找的歌曲可能是："
+                when {
+                    textMode() -> reply(buildString {
+                        appendLine(hint)
+                        result.forEach { chart ->
+                            appendLine("${chart.difficulty.brief}${chart.music.id}. ${chart.music.name}")
+                        }
+                    }.trim())
+                    else -> reply(MarkdownTemplates.Templates.selectChart(
+                        title = hint,
+                        type = type,
+                        keyword = keyword,
+                        result = result,
+                        displayName = displayName,
+                        nowPage = nowPage,
+                        totalPages = totalPages,
+                    ))
+                }
             }
         }
     }
@@ -348,7 +387,7 @@ class MusicController(
     ) {
         val (result, nowPage, totalPages) = maimai.aliases.search(name)
             .pagination(page, maxResults)
-        showResult(
+        showMusics(
             "search-word",
             name,
             result,
@@ -366,12 +405,11 @@ class MusicController(
         val (result, nowPage, totalPages) = maimai.charts()
             .filter { it.difficulty != MusicDifficulty.Utage }
             .filter { it.levelValue in begin..end }
-            .distinctBy { it.music.id }
             .pagination(page, maxResults)
-        showResult(
+        showCharts(
             "search-level",
             "$begin:$end",
-            result.map { it.music },
+            result,
             "",
             nowPage,
             totalPages
@@ -386,12 +424,11 @@ class MusicController(
             .map { it.key }
         val (result, nowPage, totalPages) = maimai.charts()
             .filter { it.notesDesigner in targets || designer == it.notesDesigner || designer in it.notesDesigner }
-            .distinctBy { it.music.id }
             .pagination(page, maxResults)
-        showResult(
+        showCharts(
             "search-designer",
             designer,
-            result.map { it.music },
+            result,
             "",
             nowPage,
             totalPages
@@ -404,7 +441,7 @@ class MusicController(
         val result = maimai.musics()
             .filter { regex.matches(it.name) }
             .take(maxResults)
-        showResult(
+        showMusics(
             "search-regex",
             raw,
             result,
@@ -418,7 +455,7 @@ class MusicController(
         val (result, nowPage, totalPages) = maimai.musics()
             .filter { it.bpm == bpm }
             .pagination(page, maxResults)
-        showResult(
+        showMusics(
             "search-bpm",
             "$bpm",
             result,
@@ -433,16 +470,18 @@ class MusicController(
     ): Boolean {
         // TODO: 全面使用 Exception
         val filters = ComboQuery.filters(query) ?: return false
-        val musics = filters.filterMusics(maimai.musics())
-        val (result, nowPage, totalPages) = musics.pagination(page, maxResults)
-        showResult(
-            "search-combo",
-            query,
-            result,
-            "",
-            nowPage,
-            totalPages
-        )
+        when (filters.isSingleChartSelected()) {
+            true -> {
+                val charts = filters.filterCharts(maimai.musics())
+                val (result, nowPage, totalPages) = charts.pagination(page, maxResults)
+                showCharts("search-combo", query, result, "", nowPage, totalPages)
+            }
+            false -> {
+                val musics = filters.filterMusics(maimai.musics())
+                val (result, nowPage, totalPages) = musics.pagination(page, maxResults)
+                showMusics("search-combo", query, result, "", nowPage, totalPages)
+            }
+        }
         return true
     }
 

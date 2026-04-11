@@ -206,8 +206,6 @@ class ImageController(
         args: String,
         needDifficulty: Boolean
     ): Pair<MusicInfo, MusicDifficulty?>? {
-        val textMode = MaimaiSettingsTable[sender.id, "text-mode"] == "1"
-
         var difficulty = if (needDifficulty) MusicDifficulty.from(args.firstOrNull() ?.toString() ?: "") else null
         val name = difficulty ?.let { args.substring(1, args.length) } ?: args
         var result = maimai.aliases.search(name)
@@ -221,7 +219,7 @@ class ImageController(
             0 -> throw NotFoundException("未找到该歌曲")
             1 -> return Pair(result.first(), difficulty)
             else -> {
-                if (textMode)
+                if (textMode())
                     return Pair(result.first(), difficulty)
                 else
                     reply(

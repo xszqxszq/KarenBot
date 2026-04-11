@@ -149,7 +149,8 @@ object ComboQuery {
         type = FilterType.Difficulty,
         chart = { chart ->
             chart.difficulty == difficulty
-        }
+        },
+        singleChart = true
     )
     fun genre(genre: MusicGenre) = Filter(
         type = FilterType.Genre,
@@ -167,14 +168,16 @@ object ComboQuery {
         chart = { chart ->
             chart.level == level
         },
-        name = "level"
+        name = "level",
+        singleChart = true
     )
     fun levelValue(levelValue: Double) = Filter(
         type = FilterType.Level,
         chart = { chart ->
             chart.difficulty != MusicDifficulty.Utage && chart.levelValue == levelValue
         },
-        name = "levelValue"
+        name = "levelValue",
+        singleChart = true
     )
     fun designer(designer: String) = Filter(
         type = FilterType.Designer,
@@ -189,14 +192,9 @@ object ComboQuery {
                         }
                     } == true ||
                     designer.lowercase() in chart.notesDesigner.lowercase())
-        }
+        },
+        singleChart = true
     )
-//    fun musics(musics: List<Int>, reMasters: List<Int>, name: String? = null) = Filter(chart = { chart ->
-//        if (chart.difficulty == MusicDifficulty.ReMaster)
-//            chart.music.id in reMasters
-//        else
-//            chart.music.id in musics
-//    }, name = name)
     fun musicsPlate(musics: List<Int>, reMasters: List<Int>, plateName: String) = Filter(
         type = FilterType.Plate,
         chart = { chart ->
@@ -503,6 +501,9 @@ object ComboQuery {
 
     fun List<Filter>?.isFitLevelValue() =
         this ?.any { it.fitLevelValue } ?: false
+
+    fun List<Filter>?.isSingleChartSelected() =
+        this ?.any { it.singleChart } ?: false
 
     fun List<Filter>.params(
         name: String

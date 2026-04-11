@@ -229,27 +229,25 @@ object MarkdownTemplates {
     }
 
     object Templates {
-        fun music(music: MusicInfo, cover: String) = Markdown(MarkdownData(
-            """
-            ![img#190px #190px]($cover)
-            **${music.id}. ${music.name}**
-            **曲师:** ${music.artist}
-            **分类:** ${music.genre.genreName}
-            **版本:** ${music.version.name}
-            **BPM:** ${music.bpm}
-            **定数:** ${music.charts.joinToString("/") { it.levelValue.toString() }}
-            **拟合定数:** ${music.charts.joinToString("/") { 
+        fun music(music: MusicInfo, cover: String) = Markdown(MarkdownData(buildString {
+            appendLine("![img#190px #190px]($cover)")
+            appendLine("**${music.id}. ${music.name}**")
+            appendLine("**曲师:** ${music.artist}")
+            appendLine("**分类:** ${music.genre.genreName}")
+            appendLine("**版本:** ${music.version.name}")
+            appendLine("**BPM:** ${music.bpm}")
+            appendLine("**定数:** ${music.charts.joinToString("/") { it.levelValue.toString() }}")
+            appendLine("**拟合定数:** ${music.charts.joinToString("/") {
                 if (it.fitLevelValue == 0.0) "-" else it.fitLevelValue.toStringDecimal(1)
-            }}
-            **谱师:** ${music.charts.joinToString("/") {
+            }}")
+            append("**谱师:** ${music.charts.joinToString("/") {
                 val designer = it.notesDesigner.ifBlank { "-" }
                 if (designer != "-") {
                     val command = "谱师查歌 $designer".encodeURLParameter()
                     "<qqbot-cmd-input text=\"$command\" show=\"${designer.encodeURLParameter()}\" reference=\"false\"/>"
                 } else designer
-            }}
-            """.trimIndent()
-        ), Keyboards.music(music))
+            }}")
+        }), Keyboards.music(music))
 
         fun chart(chart: ChartInfo, cover: String): Markdown {
             var designer = chart.notesDesigner.ifBlank { "-" }
@@ -265,58 +263,48 @@ object MarkdownTemplates {
                 if (chart.notes.touch != 0) "\n**TOUCH:** ${chart.notes.touch}"
                 else ""
 
-            return Markdown(MarkdownData(
-                """
-                ![img#190px #190px]($cover)
-                **${chart.difficulty.names.last()}${chart.music.id}. ${chart.music.name}**
-                **等级:** ${chart.level} (${chart.levelValue})
-                **TAP:** ${chart.notes.tap}
-                **HOLD:** ${chart.notes.hold}
-                **SLIDE:** ${chart.notes.slide}
-                **BREAK:** ${chart.notes.`break`}$touchStr
-                **总物量:** ${chart.notes.total}
-                **总DX分:** ${chart.maxDeluxeScore}
-                **谱师:** $designer$fitLevelStr
-                """.trimIndent()
-            ))
+            return Markdown(MarkdownData(buildString {
+                appendLine("![img#190px #190px]($cover)")
+                appendLine("**${chart.difficulty.names.last()}${chart.music.id}. ${chart.music.name}**")
+                appendLine("**等级:** ${chart.level} (${chart.levelValue})")
+                appendLine("**TAP:** ${chart.notes.tap}")
+                appendLine("**HOLD:** ${chart.notes.hold}")
+                appendLine("**SLIDE:** ${chart.notes.slide}")
+                appendLine("**BREAK:** ${chart.notes.`break`}$touchStr")
+                appendLine("**总物量:** ${chart.notes.total}")
+                appendLine("**总DX分:** ${chart.maxDeluxeScore}")
+                append("**谱师:** $designer$fitLevelStr")
+            }))
         }
 
-        fun oauth(authUrl: String) = Markdown(MarkdownData(
-            """
-            **请求授权**
-            
-            使用该功能时，需要您授权BOT访问您在落雪查分器的全部成绩信息，请点击下方登录并授权：
-            """.trimIndent()
-        ), Keyboards.oauth(authUrl))
+        fun oauth(authUrl: String) = Markdown(MarkdownData(buildString {
+            appendLine("**请求授权**")
+            appendLine()
+            append("使用该功能时，需要您授权BOT访问您在落雪查分器的全部成绩信息，请点击下方登录并授权：")
+        }), Keyboards.oauth(authUrl))
 
-        fun queue(title: String, content: String, now: String? = null) = Markdown(MarkdownData(
-            """
-            **$title**
-            
-            $content
-            """.trimIndent()
-        ), Keyboards.queue(now))
+        fun queue(title: String, content: String, now: String? = null) = Markdown(MarkdownData(buildString {
+            appendLine("**$title**")
+            appendLine()
+            append(content)
+        }), Keyboards.queue(now))
 
-        fun queueInit(title: String, content: String) = Markdown(MarkdownData(
-            """
-            **$title**
-            
-            $content
-            """.trimIndent()
-        ), Keyboards.QUEUE_INIT)
+        fun queueInit(title: String, content: String) = Markdown(MarkdownData(buildString {
+            appendLine("**$title**")
+            appendLine()
+            append(content)
+        }), Keyboards.QUEUE_INIT)
 
-        fun queueUpdate(info: String) = Markdown(MarkdownData(
-            """
-            **机厅排卡人数：**
-            
-            ${info.split("\n").joinToString("\n") { "> $it" }}
-            > 
-            > 更新数据请使用“机厅名+数量”。
-            	例：某某机厅3
-            	例：机厅+1
-            	例：jt-2
-            """.trimIndent()
-        ), Keyboards.QUEUE_UPDATE)
+        fun queueUpdate(info: String) = Markdown(MarkdownData(buildString {
+            appendLine("**机厅排卡人数：**")
+            appendLine()
+            appendLine(info.split("\n").joinToString("\n") { "> $it" })
+            appendLine("> ")
+            appendLine("> 更新数据请使用“机厅名+数量”。")
+            appendLine("\t例：某某机厅3")
+            appendLine("\t例：机厅+1")
+            append("\t例：jt-2")
+        }), Keyboards.QUEUE_UPDATE)
 
         fun image(
             url: String,
@@ -325,26 +313,22 @@ object MarkdownTemplates {
             description: String?,
             nowPage: Int? = null,
             totalPages: Int? = null
-        ) = Markdown(MarkdownData(
-            """
-            **查询结果**
-            
-            ![img #${size.first}px #${size.second}px]($url)
-            
-            ${description ?: ""}
-            """.trimIndent()
-        ), Keyboards.image(command, nowPage, totalPages))
+        ) = Markdown(MarkdownData(buildString {
+            appendLine("**查询结果**")
+            appendLine()
+            appendLine("![img #${size.first}px #${size.second}px]($url)")
+            appendLine()
+            append(description ?: "")
+        }), Keyboards.image(command, nowPage, totalPages))
 
         fun brief(
             title: String,
             content: String
-        ) = MarkdownData(
-            """
-            **$title**
-            
-            $content
-            """.trimIndent()
-        )
+        ) = MarkdownData(buildString {
+            appendLine("**$title**")
+            appendLine()
+            append(content)
+        })
 
         fun guess(
             hint: String
@@ -353,15 +337,13 @@ object MarkdownTemplates {
         fun guessImage(
             url: String,
             description: String
-        ) = MarkdownData(
-            """
-            **maimai 猜歌**
-            
-            ![img #300px #300px]($url)
-            
-            $description
-            """.trimIndent()
-        )
+        ) = MarkdownData(buildString {
+            appendLine("**maimai 猜歌**")
+            appendLine()
+            appendLine("![img #300px #300px]($url)")
+            appendLine()
+            append(description)
+        })
 
         fun importData(
             backend: MaimaiAPI
@@ -396,13 +378,31 @@ object MarkdownTemplates {
                 "![preview #20px #20px]($url) <qqbot-cmd-input text=\"$textAttr\" show=\"$showAttr\" reference=\"false\"/>"
             }
 
-            val data = MarkdownData(
-                """
-                **$title**
-                
-                $rows
-                """.trimIndent()
-            )
+            val data = MarkdownData("**$title**\n\n$rows")
+            val keyboard =
+                if (totalPages == 1) null
+                else Keyboards.selectPaged(type, keyword, nowPage, totalPages)
+            return Markdown(data, keyboard)
+        }
+
+        fun selectChart(
+            title: String,
+            type: String,
+            keyword: String,
+            result: List<ChartInfo>,
+            displayName: String? = null,
+            nowPage: Int = 1,
+            totalPages: Int = 1
+        ): Markdown {
+            val rows = result.take(10).joinToString("\n") { chart ->
+                val url = "$jacketUrl/${chart.music.resourceId}.jpg"
+                val textAttr = "${displayName ?: type} ${chart.difficulty.brief}id${chart.music.id}"
+                    .trim().encodeURLParameter()
+                val showAttr = "${chart.difficulty.brief}${chart.music.id}. ${chart.music.name}".encodeURLParameter()
+                "![preview #20px #20px]($url) <qqbot-cmd-input text=\"$textAttr\" show=\"$showAttr\" reference=\"false\"/>"
+            }
+
+            val data = MarkdownData("**$title**\n\n$rows")
             val keyboard =
                 if (totalPages == 1) null
                 else Keyboards.selectPaged(type, keyword, nowPage, totalPages)
@@ -418,32 +418,32 @@ object MarkdownTemplates {
 
         val USER_EULA = brief("舞萌DX", "请前往查分器同意用户协议再进行查询：").toMessage(Keyboards.USER_EULA)
 
-        val HELP = brief("舞萌DX", """
-            这是一个查询舞萌DX成绩及相关信息的功能。
-            支持以下功能指令：
-        """.trimIndent()).toMessage(Keyboards.HELP)
+        val HELP = brief("舞萌DX", buildString {
+            appendLine("这是一个查询舞萌DX成绩及相关信息的功能。")
+            append("支持以下功能指令：")
+        }).toMessage(Keyboards.HELP)
 
         val SETTINGS = brief("功能设置", "支持以下设定：").toMessage(Keyboards.SETTINGS)
 
-        val SELECT_ICON = brief("设置头像", """
-            使用方法：设置头像 id/名称
-            👉设置头像 106103
-            👉设置头像 高瀬 梨緒
-             
-            ⏬您可以点击下方按钮查看头像列表。
-        """.trimIndent()).toMessage(Keyboards.collection("头像", "icons"))
+        val SELECT_ICON = brief("设置头像", buildString {
+            appendLine("使用方法：设置头像 id/名称")
+            appendLine("👉设置头像 106103")
+            appendLine("👉设置头像 高瀬 梨緒")
+            appendLine(" ")
+            append("⏬您可以点击下方按钮查看头像列表。")
+        }).toMessage(Keyboards.collection("头像", "icons"))
 
         val SELECT_ICON_SUCCESS = brief("设置头像", "设置头像成功。")
             .toMessage(Keyboards.collection("头像", "icons"))
 
-        val SELECT_PLATE = brief("设置牌子", """
-            使用方法：设置牌子/设置姓名框 id/名称
-            👉设置牌子 100501
-            👉设置牌子 晓将
-            👉设置姓名框 7sRefちほー2
-             
-            ⏬您可以点击下方按钮查看牌子列表。
-        """.trimIndent()).toMessage(Keyboards.collection("牌子", "plates"))
+        val SELECT_PLATE = brief("设置牌子", buildString {
+            appendLine("使用方法：设置牌子/设置姓名框 id/名称")
+            appendLine("👉设置牌子 100501")
+            appendLine("👉设置牌子 晓将")
+            appendLine("👉设置姓名框 7sRefちほー2")
+            appendLine(" ")
+            append("⏬您可以点击下方按钮查看牌子列表。")
+        }).toMessage(Keyboards.collection("牌子", "plates"))
 
         val SELECT_PLATE_SUCCESS = brief("设置牌子", "设置牌子成功。")
             .toMessage(Keyboards.collection("牌子", "plates"))
@@ -470,8 +470,12 @@ object MarkdownTemplates {
         id: String = "1"
     ) = button(
         id = id,
-        renderData = RenderData(label = label, visitedLabel = label, style = style),
-        action = Action(type = Action.AT, data = data, permission = Permission(Permission.EVERYONE), enter = enter)
+        renderData = RenderData(
+            label = label, visitedLabel = label, style = style
+        ),
+        action = Action(
+            type = Action.AT, data = data, permission = Permission(Permission.EVERYONE), enter = enter
+        )
     )
 
     private fun Keyboard.KeyboardRowBuilder.linkButton(
@@ -482,8 +486,12 @@ object MarkdownTemplates {
         id: String = "1"
     ) = button(
         id = id,
-        renderData = RenderData(label = label, visitedLabel = label, style = style),
-        action = Action(type = Action.LINK, data = url, permission = Permission(Permission.EVERYONE), enter = enter)
+        renderData = RenderData(
+            label = label, visitedLabel = label, style = style
+        ),
+        action = Action(
+            type = Action.LINK, data = url, permission = Permission(Permission.EVERYONE), enter = enter
+        )
     )
 
     private fun Keyboard.KeyboardRowBuilder.callbackButton(
@@ -494,7 +502,11 @@ object MarkdownTemplates {
         id: String = "1"
     ) = button(
         id = id,
-        renderData = RenderData(label = label, visitedLabel = label, style = style),
-        action = Action(type = Action.CALLBACK, data = data, permission = Permission(Permission.EVERYONE), enter = enter)
+        renderData = RenderData(
+            label = label, visitedLabel = label, style = style
+        ),
+        action = Action(
+            type = Action.CALLBACK, data = data, permission = Permission(Permission.EVERYONE), enter = enter
+        )
     )
 }
