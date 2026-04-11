@@ -34,7 +34,7 @@ class MusicController(
     private val previewDir = "./data/maimai/preview/"
     private val notFound = "未查找到相关的歌曲，请检查拼写是否有误。"
 
-    private val maxResults = 20
+    private val maxResults = 10
     private val maxResultsLong = 40
 
     private val jacketUrl = maimai.config.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")

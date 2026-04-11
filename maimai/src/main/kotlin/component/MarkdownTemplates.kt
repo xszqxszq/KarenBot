@@ -1099,7 +1099,7 @@ object MarkdownTemplates {
             val rows = result.map { music ->
                 val url = "$jacketUrl/${music.resourceId}.jpg"
                 buildString {
-                    append("![preview #25px #25px]($url)")
+                    append("> ![preview #25px #25px]($url)")
                     append(' ')
                     append("<qqbot-cmd-input text=\"")
                     append("${displayName ?: type} ${difficulty?.brief ?: ""}id${music.id}".trim().encodeURLParameter())
@@ -1107,17 +1107,12 @@ object MarkdownTemplates {
                     append("${music.id}. ${music.name}".encodeURLParameter())
                     append("\" reference=\"false\"/>")
                 }
-            }.take(20)
+            }.take(10)
 
             val data = MarkdownData(buildString {
-                appendLine("| $title |")
-                appendLine("| --- |")
-                rows.forEach { row ->
-                    append("|")
-                    append(row)
-                    append("|")
-                    appendLine()
-                }
+                appendLine("**$title**")
+                appendLine()
+                appendLine(rows.joinToString("\n"))
             })
             val keyboard = when {
                 totalPages == 1 -> null
