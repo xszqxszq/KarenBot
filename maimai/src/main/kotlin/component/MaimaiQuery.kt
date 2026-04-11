@@ -20,6 +20,7 @@ class MaimaiQuery(
         const val NO_BACKEND_BINDINGS = "您还未在查分器上绑定QQ号，请前往水鱼/落雪查分器设置您的QQ号。"
         const val NO_QQ_BINDINGS = "为了继续后续查询，请输入\"/bind qq号\"绑定您的QQ号："
         const val NO_RECORDS = "在当前筛选条件下未查询到歌曲记录。"
+        const val TOO_MANY_RECORDS = "在当前条件下查询到的曲目过多，请缩小范围。"
         const val USER_NOT_FOUND = "您查询的用户不存在。"
         const val USER_DENIED = "您查询的用户设置了查分器隐私或未同意查分器协议，请检查设置。"
         const val USER_EULA = "请先前往查分器同意用户协议再进行查询。"

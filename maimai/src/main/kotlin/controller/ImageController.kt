@@ -12,6 +12,7 @@ import xyz.xszq.bot.component.image.FilterParams
 import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.FilterNoResultException
+import xyz.xszq.bot.exception.FilterTooManyException
 import xyz.xszq.bot.exception.NoDataException
 import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.exception.NotSupportedException
@@ -569,10 +570,18 @@ class ImageController(
             }
             if (grouped.size > 480) {
                 detailed = true
-                if (charts.count { it.difficulty >= MusicDifficulty.Master && it.levelValue >= 14 } > 10)
-                    charts = charts.filter { it.difficulty >= MusicDifficulty.Master && it.levelValue >= 14 }
-                else
-                    throw Exception("TooMany")
+                charts = when {
+                    charts.count { it.difficulty >= MusicDifficulty.Master && it.levelValue >= 14 } > 10 -> {
+                        charts.filter { it.difficulty >= MusicDifficulty.Master && it.levelValue >= 14 }
+                    }
+                    charts.count { it.difficulty >= MusicDifficulty.Master && it.levelValue >= 13.6 } > 10 -> {
+                        charts.filter { it.difficulty >= MusicDifficulty.Master && it.levelValue >= 13.6 }
+                    }
+                    charts.count { it.difficulty >= MusicDifficulty.Expert && it.levelValue >= 13 } > 10 -> {
+                        charts.filter { it.difficulty >= MusicDifficulty.Expert && it.levelValue >= 13 }
+                    }
+                    else -> throw FilterTooManyException()
+                }
             }
         }
         return Pair(charts, detailed)

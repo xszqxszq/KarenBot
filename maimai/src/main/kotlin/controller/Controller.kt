@@ -30,6 +30,7 @@ sealed class Controller(
                 is UserNotFoundException -> messageUserNotFound()
                 is UserDeniedException -> user?.let { messageUserDenied(it) }
                 is FilterNoResultException -> messageFilterNoResult()
+                is FilterTooManyException -> messageFilterTooMany()
                 is NoDataException -> messageNoData(e.api)
                 is NotSupportedException -> messageNotSupported(e.message.orEmpty())
                 is NotFoundException -> messageNotFound(e.message.orEmpty())
@@ -68,6 +69,9 @@ sealed class Controller(
     }
     suspend fun MessageEvent.messageFilterNoResult() {
         reply(MaimaiQuery.NO_RECORDS)
+    }
+    suspend fun MessageEvent.messageFilterTooMany() {
+        reply(MaimaiQuery.TOO_MANY_RECORDS)
     }
     suspend fun MessageEvent.messageNoData(backend: MaimaiAPI) {
         if (textMode())
