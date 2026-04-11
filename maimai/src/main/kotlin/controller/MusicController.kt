@@ -134,18 +134,16 @@ class MusicController(
             val page = args[1].toInt()
             searchLevel(begin, end, page)
         }
-        startsWith("谱师查歌") { raw ->
-            val args = raw.split(" ")
-            val page = args.getOrNull(1)?.toIntOrNull() ?: 1
+        startsWith("谱师查歌") { name ->
             when {
-                args.isNotEmpty() -> {
-                    searchDesigner(args[0], page)
+                name.isNotBlank() -> {
+                    searchDesigner(name, 1)
                 }
                 else -> {
                     reply(buildString {
-                        appendLine("使用方法：谱师查歌 [名称] [页数]")
+                        appendLine("使用方法：谱师查歌 [名称]")
                         appendLine("例：谱师查歌 翠楼屋")
-                        appendLine("例：谱师查歌 maiStar 2")
+                        appendLine("例：谱师查歌 mai-Star")
                     })
                 }
             }

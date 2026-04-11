@@ -984,7 +984,15 @@ object MarkdownTemplates {
                     }
                 }"
             )
-            appendLine("**谱师:** ${music.charts.joinToString("/") { it.notesDesigner }.ifBlank { "-" }}")
+            appendLine("**谱师:** ${music.charts.joinToString("/") { 
+                val designer = it.notesDesigner.ifBlank { "-" }
+                if (designer != "-") {
+                    val command = "谱师查歌 $designer".encodeURLParameter()
+                    "<qqbot-cmd-input text=\"$command\" show=\"${designer.encodeURLParameter()}\" reference=\"false\"/>"
+                } else {
+                    designer
+                }
+            }}")
         }), Keyboards.music(music))
         fun chart(
             chart: ChartInfo,
@@ -1099,7 +1107,7 @@ object MarkdownTemplates {
             val rows = result.map { music ->
                 val url = "$jacketUrl/${music.resourceId}.jpg"
                 buildString {
-                    append("> ![preview #25px #25px]($url)")
+                    append("![preview #20px #20px]($url)")
                     append(' ')
                     append("<qqbot-cmd-input text=\"")
                     append("${displayName ?: type} ${difficulty?.brief ?: ""}id${music.id}".trim().encodeURLParameter())
