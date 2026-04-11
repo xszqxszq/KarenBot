@@ -28,6 +28,8 @@ class SettingsController(
 ): Controller(maimai) {
     override suspend fun setRoute() = maimai.route("/mai") {
         startsWith(listOf("bind", "绑定")) { args ->
+            if ("水鱼" in args)
+                return@startsWith
             val qq = args.toLongOrNull() ?: run {
                 reply("使用方法：/bind qq号")
                 return@startsWith

@@ -37,11 +37,10 @@ class UpdateController(
                 reply(Markdown(
                     MarkdownTemplates.Templates.brief(
                         "更新查分器",
-                        "请点击查看下方教程并设置好代理，然后复制上方链接至微信中打开："
+                        "请连接代理（可点击下方查看教程），然后复制上方链接至微信中打开："
                     ),
                     MarkdownTemplates.Keyboards.HELP_PROXY
                 ))
-            reply("请连接代理，并复制上方链接至微信中打开")
         }
         startsWith("绑定水鱼") { token ->
             if (token.isBlank()) {

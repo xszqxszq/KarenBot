@@ -125,6 +125,7 @@ class ApiController(
                         update(data.event, call.request.uri)
                     }
                     call.respondText("BOT正在更新中，您可以关闭此页面了。")
+                    data.event.reply("正在爬取数据中……")
                 }
             }
         }
