@@ -17,8 +17,6 @@ import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.ffmpeg.FFMpegFileType
 import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.bot.message.Audio
-import xyz.xszq.bot.message.Image
-import xyz.xszq.bot.music.ChartInfo
 import xyz.xszq.bot.music.MusicDifficulty
 import xyz.xszq.bot.music.MusicInfo
 import xyz.xszq.bot.query.ComboQuery
@@ -192,6 +190,25 @@ class MusicController(
             val bpm = args[0].toInt()
             val page = args[1].toInt()
             searchBPM(bpm, page)
+        }
+        // 条件搜索
+        startsWith("搜索") { query ->
+            if (!searchCombo(query)) {
+                reply("未找到相关歌曲。")
+            }
+        }
+        endsWith(listOf("有什么歌", "有什么歌？")) { query ->
+            if (!searchCombo(query)) {
+                reply("未找到相关歌曲。")
+            }
+        }
+        button("search-combo") {
+            val args = data.split("\n", limit = 2)
+            val query = args[0]
+            val page = args[1].toInt()
+            if (!searchCombo(query, page)) {
+                reply("未找到相关歌曲。")
+            }
         }
         // 别名查询/设置
         endsWith(listOf("有什么别名", "有什么别名？")) { name ->
@@ -409,6 +426,24 @@ class MusicController(
             nowPage,
             totalPages
         )
+    }
+    suspend fun ReplyAble.searchCombo(
+        query: String,
+        page: Int = 1
+    ): Boolean {
+        // TODO: 全面使用 Exception
+        val filters = ComboQuery.filters(query) ?: return false
+        val musics = filters.filterMusics(maimai.musics())
+        val (result, nowPage, totalPages) = musics.pagination(page, maxResults)
+        showResult(
+            "search-combo",
+            query,
+            result,
+            "",
+            nowPage,
+            totalPages
+        )
+        return true
     }
 
     suspend fun MessageEvent.addAlias(

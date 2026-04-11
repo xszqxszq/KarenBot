@@ -1009,7 +1009,13 @@ object MarkdownTemplates {
                 appendLine("**TOUCH:** ${chart.notes.touch}")
             appendLine("**总物量:** ${chart.notes.total}")
             appendLine("**总DX分:** ${chart.maxDeluxeScore}")
-            appendLine("**谱师:** ${chart.notesDesigner}")
+
+            var designer = chart.notesDesigner.ifBlank { "-" }
+            if (designer != "-") {
+                val command = "谱师查歌 $designer".encodeURLParameter()
+                designer = "<qqbot-cmd-input text=\"$command\" show=\"${designer.encodeURLParameter()}\" reference=\"false\"/>"
+            }
+            appendLine("**谱师:** $designer")
             if (chart.fitLevelValue != 0.0)
                 appendLine("**拟合定数:** ${chart.fitLevelValue.toStringDecimal(1)}")
         }))
