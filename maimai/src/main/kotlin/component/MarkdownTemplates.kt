@@ -233,19 +233,31 @@ object MarkdownTemplates {
             appendLine("![img#190px #190px]($cover)")
             appendLine("**${music.id}. ${music.name}**")
             appendLine("**曲师:** ${music.artist}")
-            appendLine("**分类:** ${music.genre.genreName}")
-            appendLine("**版本:** ${music.version.name}")
-            appendLine("**BPM:** ${music.bpm}")
-            appendLine("**定数:** ${music.charts.joinToString("/") { it.levelValue.toString() }}")
-            appendLine("**拟合定数:** ${music.charts.joinToString("/") {
-                if (it.fitLevelValue == 0.0) "-" else it.fitLevelValue.toStringDecimal(1)
+            appendLine("**分类:** ${run {
+                val command = "${music.genre.genreName}有什么歌".encodeURLParameter()
+                val genreName = music.genre.genreName.encodeURLParameter()
+                "<qqbot-cmd-input text=\"$command\" show=\"$genreName\" reference=\"false\"/>"
             }}")
-            append("**谱师:** ${music.charts.joinToString("/") {
+            appendLine("**版本:** ${music.version.name}")
+            appendLine("**BPM:** ${run {
+                val command = "BPM查歌 ${music.bpm}".encodeURLParameter()
+                val bpm = music.bpm.toString().encodeURLParameter()
+                "<qqbot-cmd-input text=\"$command\" show=\"$bpm\" reference=\"false\"/>"
+            }}")
+            appendLine("**定数:** ${music.charts.joinToString("/") {
+                val command = "定数查歌 ${it.levelValue}".encodeURLParameter()
+                val levelValue = it.levelValue.toString().encodeURLParameter()
+                "<qqbot-cmd-input text=\"$command\" show=\"$levelValue\" reference=\"false\"/>"
+            }}")
+            appendLine("**谱师:** ${music.charts.joinToString("/") {
                 val designer = it.notesDesigner.ifBlank { "-" }
                 if (designer != "-") {
                     val command = "谱师查歌 $designer".encodeURLParameter()
                     "<qqbot-cmd-input text=\"$command\" show=\"${designer.encodeURLParameter()}\" reference=\"false\"/>"
                 } else designer
+            }}")
+            appendLine("**拟合定数:** ${music.charts.joinToString("/") {
+                if (it.fitLevelValue == 0.0) "-" else it.fitLevelValue.toStringDecimal(1)
             }}")
         }), Keyboards.music(music))
 
