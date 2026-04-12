@@ -30,7 +30,6 @@ class MaimaiQuery(
 
     private fun isRetryableError(e: Throwable) = when (e) {
         is UserNotFoundException -> true
-        is IOException -> true
         else -> false
     }
 

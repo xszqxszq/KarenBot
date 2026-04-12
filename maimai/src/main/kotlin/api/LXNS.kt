@@ -45,13 +45,7 @@ class LXNS(
             json(json)
         }
         install(HttpRequestRetry) {
-            retryOnExceptionOrServerErrors(maxRetries = 2)
-            exponentialDelay()
-        }
-        engine {
-            config {
-                connectionPool(ConnectionPool(50, 30, TimeUnit.SECONDS))
-            }
+            retryOnExceptionOrServerErrors(maxRetries = 5)
         }
     }
     fun HttpRequestBuilder.setDeveloper() {
