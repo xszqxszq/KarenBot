@@ -1,13 +1,13 @@
-package xyz.xszq.bot.controller
+package xyz.xszq.bot.maimai.controller
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
-import xyz.xszq.bot.database.GuessGameStatus
-import xyz.xszq.bot.database.GuessGameTable
-import xyz.xszq.bot.database.MaimaiDatabaseTest
-import xyz.xszq.bot.database.MaimaiSettingsTable
+import xyz.xszq.bot.maimai.database.GuessGameStatus
+import xyz.xszq.bot.maimai.database.GuessGameTable
+import xyz.xszq.bot.maimai.database.MaimaiDatabaseTest
+import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

@@ -1,4 +1,4 @@
-package xyz.xszq.bot.controller
+package xyz.xszq.bot.maimai.controller
 
 import io.mockk.coEvery
 import io.mockk.every
@@ -9,18 +9,18 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import xyz.xszq.bot.*
-import xyz.xszq.bot.component.AliasesSearch
-import xyz.xszq.bot.component.MaimaiData
-import xyz.xszq.bot.component.MaimaiQuery
-import xyz.xszq.bot.config.DatabaseConfig
-import xyz.xszq.bot.config.MaimaiConfig
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.InteractionEvent
+import xyz.xszq.bot.maimai.component.AliasesSearch
+import xyz.xszq.bot.maimai.component.MaimaiData
+import xyz.xszq.bot.maimai.component.MaimaiQuery
+import xyz.xszq.bot.maimai.config.DatabaseConfig
+import xyz.xszq.bot.maimai.config.MaimaiConfig
+import xyz.xszq.bot.maimai.music.*
+import xyz.xszq.bot.maimai.payload.LocalIconInfo
+import xyz.xszq.bot.maimai.payload.LocalPlateInfo
 import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.message.PlainText
-import xyz.xszq.bot.music.*
-import xyz.xszq.bot.payload.LocalIconInfo
-import xyz.xszq.bot.payload.LocalPlateInfo
 import xyz.xszq.bot.subscribe.SubscribeManager
 import java.util.*
 

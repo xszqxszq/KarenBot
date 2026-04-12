@@ -1,9 +1,9 @@
-package xyz.xszq.bot.controller
+package xyz.xszq.bot.maimai.controller
 
 import kotlinx.coroutines.test.runTest
-import xyz.xszq.bot.database.MaimaiDatabaseTest
-import xyz.xszq.bot.database.MaimaiSettingsTable
-import xyz.xszq.bot.database.QQBindTable
+import xyz.xszq.bot.maimai.database.MaimaiDatabaseTest
+import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
+import xyz.xszq.bot.maimai.database.QQBindTable
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

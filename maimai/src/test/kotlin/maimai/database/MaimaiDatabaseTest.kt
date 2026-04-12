@@ -1,4 +1,4 @@
-package xyz.xszq.bot.database
+package xyz.xszq.bot.maimai.database
 
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils

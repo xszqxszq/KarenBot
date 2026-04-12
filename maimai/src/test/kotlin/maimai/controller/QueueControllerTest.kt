@@ -1,12 +1,12 @@
-package xyz.xszq.bot.controller
+package xyz.xszq.bot.maimai.controller
 
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import xyz.xszq.bot.database.Arcade
-import xyz.xszq.bot.database.ArcadeGroup
-import xyz.xszq.bot.database.ArcadeGroupBind
-import xyz.xszq.bot.database.MaimaiDatabaseTest
+import xyz.xszq.bot.maimai.database.Arcade
+import xyz.xszq.bot.maimai.database.ArcadeGroup
+import xyz.xszq.bot.maimai.database.ArcadeGroupBind
+import xyz.xszq.bot.maimai.database.MaimaiDatabaseTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

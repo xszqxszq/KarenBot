@@ -1,8 +1,8 @@
-package xyz.xszq.bot.database
+package xyz.xszq.bot.maimai.database
 
 import kotlinx.coroutines.test.runTest
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import xyz.xszq.bot.controller.ControllerTest.Companion.newOpenId
+import xyz.xszq.bot.maimai.controller.ControllerTest.Companion.newOpenId
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

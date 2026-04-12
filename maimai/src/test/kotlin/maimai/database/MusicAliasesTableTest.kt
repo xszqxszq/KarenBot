@@ -1,10 +1,10 @@
-package xyz.xszq.bot.database
+package xyz.xszq.bot.maimai.database
 
 import kotlinx.coroutines.test.runTest
-import xyz.xszq.bot.music.GameVersion
-import xyz.xszq.bot.music.MusicGenre
-import xyz.xszq.bot.music.MusicInfo
-import xyz.xszq.bot.music.MusicType
+import xyz.xszq.bot.maimai.music.GameVersion
+import xyz.xszq.bot.maimai.music.MusicGenre
+import xyz.xszq.bot.maimai.music.MusicInfo
+import xyz.xszq.bot.maimai.music.MusicType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

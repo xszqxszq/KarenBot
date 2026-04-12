@@ -1,10 +1,10 @@
-package xyz.xszq.bot.controller
+package xyz.xszq.bot.maimai.controller
 
 import kotlinx.coroutines.test.runTest
-import xyz.xszq.bot.controller.ControllerTest.Companion.newOpenId
-import xyz.xszq.bot.database.MaimaiDatabaseTest
-import xyz.xszq.bot.database.MusicAliasesTable
-import xyz.xszq.bot.database.MusicAliasesVoteTable
+import xyz.xszq.bot.maimai.controller.ControllerTest.Companion.newOpenId
+import xyz.xszq.bot.maimai.database.MaimaiDatabaseTest
+import xyz.xszq.bot.maimai.database.MusicAliasesTable
+import xyz.xszq.bot.maimai.database.MusicAliasesVoteTable
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
