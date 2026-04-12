@@ -1,6 +1,6 @@
 package xyz.xszq.bot.maimai.music
 
-import xyz.xszq.bot.toSimple
+import xyz.xszq.bot.maimai.toSimple
 
 object Item {
     val plateTypes = listOf("極", "将", "神", "舞舞")

@@ -10,6 +10,8 @@ import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.maimai.component.MarkdownTemplates.Templates.brief
 import xyz.xszq.bot.maimai.database.Arcade
 import xyz.xszq.bot.maimai.database.ArcadeGroupBind
+import xyz.xszq.bot.maimai.endsWith
+import xyz.xszq.bot.maimai.substringBefore
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.message.MessageElement
 import xyz.xszq.bot.payload.markdown.Keyboard

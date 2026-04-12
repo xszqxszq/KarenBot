@@ -1,4 +1,4 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.maimai
 
 import com.github.houbb.opencc4j.util.ZhConverterUtil
 

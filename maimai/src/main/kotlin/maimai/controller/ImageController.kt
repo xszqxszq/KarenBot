@@ -26,6 +26,7 @@ import xyz.xszq.bot.maimai.query.ComboQuery.isDetailed
 import xyz.xszq.bot.maimai.query.ComboQuery.isPlate
 import xyz.xszq.bot.maimai.query.ComboQuery.params
 import xyz.xszq.bot.maimai.query.Filter
+import xyz.xszq.bot.maimai.toSimple
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.payload.markdown.MarkdownData

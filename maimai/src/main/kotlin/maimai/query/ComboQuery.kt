@@ -12,7 +12,7 @@ import xyz.xszq.bot.maimai.component.Tag
 import xyz.xszq.bot.maimai.component.image.FilterParams
 import xyz.xszq.bot.maimai.config.DesignerConfig
 import xyz.xszq.bot.maimai.music.*
-import xyz.xszq.bot.toSimple
+import xyz.xszq.bot.maimai.toSimple
 import java.io.File
 import kotlin.random.Random
 
