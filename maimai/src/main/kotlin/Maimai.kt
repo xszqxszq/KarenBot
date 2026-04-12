@@ -4,6 +4,7 @@ import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
 import korlibs.io.file.std.localCurrentDirVfs
+import korlibs.math.roundDecimalPlaces
 import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -177,10 +178,8 @@ class Maimai: Plugin() {
 
         stats ?.charts ?.forEach { (id, chartStats) ->
             chartStats.forEachIndexed { difficulty, stat ->
-                music(id.toInt())
-                    ?.charts
-                    ?.getOrNull(difficulty)
-                    ?.fitLevelValue = stat.fitLevelValue ?: return@forEachIndexed
+                music(id.toInt()) ?.charts ?.getOrNull(difficulty)
+                    ?.fitLevelValue = stat.fitLevelValue ?.roundDecimalPlaces(1) ?: return@forEachIndexed
             }
         }
         stats ?.let {

@@ -106,12 +106,7 @@ class MusicController(
 
         // 条件查歌
         startsWith("定数查歌") { raw ->
-            val args = raw.split(" ")
-            val levels = args.filter { '.' in it }.mapNotNull { it.toDoubleOrNull() }
-            val page =
-                if (args.size > 1 && '.' !in args.last())
-                    args.last().toIntOrNull() ?: 1
-                else 1
+            val (levels, page) = raw.levelArgs()
             when {
                 levels.size == 1 -> {
                     searchLevel(levels[0], levels[0], page)
@@ -119,14 +114,12 @@ class MusicController(
                 levels.size >= 2 -> {
                     searchLevel(levels[0], levels[1], page)
                 }
-                else -> {
-                    reply(buildString {
-                        appendLine("使用方法：定数查歌 [定数] [定数] [页数]")
-                        appendLine("例：定数查歌 13.0")
-                        appendLine("例：定数查歌 13.4 13.8")
-                        appendLine("例：定数查歌 12.2 12.5 2")
-                    })
-                }
+                else -> reply(buildString {
+                    appendLine("使用方法：定数查歌 [定数] [定数] [页数]")
+                    appendLine("例：定数查歌 13.0")
+                    appendLine("例：定数查歌 13.4 13.8")
+                    appendLine("例：定数查歌 12.2 12.5 2")
+                })
             }
         }
         button("search-level") {
@@ -134,6 +127,29 @@ class MusicController(
             val (begin, end) = args[0].split(":").map { it.toDouble() }
             val page = args[1].toInt()
             searchLevel(begin, end, page)
+        }
+        startsWith("拟合定数查歌") { raw ->
+            val (levels, page) = raw.levelArgs()
+            when {
+                levels.size == 1 -> {
+                    searchLevelFit(levels[0], levels[0], page)
+                }
+                levels.size >= 2 -> {
+                    searchLevelFit(levels[0], levels[1], page)
+                }
+                else -> reply(buildString {
+                    appendLine("使用方法：拟合定数查歌 [定数] [定数] [页数]")
+                    appendLine("例：拟合定数查歌 13.0")
+                    appendLine("例：拟合定数查歌 13.4 13.8")
+                    appendLine("例：拟合定数查歌 12.2 12.5 2")
+                })
+            }
+        }
+        button("search-level-fit") {
+            val args = data.split("\n", limit = 2)
+            val (begin, end) = args[0].split(":").map { it.toDouble() }
+            val page = args[1].toInt()
+            searchLevelFit(begin, end, page)
         }
         startsWith("谱师查歌") { name ->
             when {
@@ -154,6 +170,46 @@ class MusicController(
             val name = args[0]
             val page = args[1].toInt()
             searchDesigner(name, page)
+        }
+        startsWith("版本查歌") { name ->
+            when {
+                name.isNotBlank() -> {
+                    searchVersion(name, 1)
+                }
+                else -> {
+                    reply(buildString {
+                        appendLine("使用方法：版本查歌 [版本名]")
+                        appendLine("例：版本查歌 舞萌DX 2025")
+                        appendLine("例：版本查歌 ORANGE")
+                    })
+                }
+            }
+        }
+        button("search-version") {
+            val args = data.split("\n", limit = 2)
+            val version = args[0]
+            val page = args[1].toInt()
+            searchVersion(version, page)
+        }
+        startsWith("曲师查歌") { name ->
+            when {
+                name.isNotBlank() -> {
+                    searchArtist(name, 1)
+                }
+                else -> {
+                    reply(buildString {
+                        appendLine("使用方法：曲师查歌 [曲师名]")
+                        appendLine("例：曲师查歌 t+pazolite")
+                        appendLine("例：曲师查歌 豚乙女")
+                    })
+                }
+            }
+        }
+        button("search-artist") {
+            val args = data.split("\n", limit = 2)
+            val artist = args[0]
+            val page = args[1].toInt()
+            searchArtist(artist, page)
         }
         startsWith("正则查歌") { raw ->
             if (raw.isBlank()) {
@@ -294,7 +350,7 @@ class MusicController(
         "推分", "下埋", "越级", "拼机", "单刷", "练底力", "练手法", "抓准度", "抓绝赞", "收歌", "堵门", "夜勤"
     )
 
-    suspend fun ReplyAble.showMusics(
+    private suspend fun ReplyAble.showMusics(
         type: String,
         keyword: String,
         result: List<MusicInfo>,
@@ -338,7 +394,7 @@ class MusicController(
             }
         }
     }
-    suspend fun ReplyAble.showCharts(
+    private suspend fun ReplyAble.showCharts(
         type: String,
         keyword: String,
         result: List<ChartInfo>,
@@ -381,7 +437,7 @@ class MusicController(
             }
         }
     }
-    suspend fun ReplyAble.search(
+    private suspend fun ReplyAble.search(
         name: String,
         page: Int = 1
     ) {
@@ -397,7 +453,7 @@ class MusicController(
         )
     }
 
-    suspend fun ReplyAble.searchLevel(
+    private suspend fun ReplyAble.searchLevel(
         begin: Double,
         end: Double,
         page: Int
@@ -415,7 +471,25 @@ class MusicController(
             totalPages
         )
     }
-    suspend fun ReplyAble.searchDesigner(
+    private suspend fun ReplyAble.searchLevelFit(
+        begin: Double,
+        end: Double,
+        page: Int
+    ) {
+        val (result, nowPage, totalPages) = maimai.charts()
+            .filter { it.difficulty != MusicDifficulty.Utage }
+            .filter { it.fitLevelValue in begin..end }
+            .pagination(page, maxResults)
+        showCharts(
+            "search-level-fit",
+            "$begin:$end",
+            result,
+            "",
+            nowPage,
+            totalPages
+        )
+    }
+    private suspend fun ReplyAble.searchDesigner(
         designer: String,
         page: Int
     ) {
@@ -434,12 +508,44 @@ class MusicController(
             totalPages
         )
     }
-    suspend fun MessageEvent.searchRegex(
+    private suspend fun ReplyAble.searchVersion(
+        version: String,
+        page: Int
+    ) {
+        val (result, nowPage, totalPages) = maimai.musics().filter {
+            version in it.version.name
+        }.pagination(page, maxResults)
+        showMusics(
+            "search-version",
+            version,
+            result,
+            "",
+            nowPage,
+            totalPages
+        )
+    }
+    private suspend fun ReplyAble.searchArtist(
+        artist: String,
+        page: Int
+    ) {
+        val (result, nowPage, totalPages) = maimai.musics().filter {
+            artist in it.artist
+        }.pagination(page, maxResults)
+        showMusics(
+            "search-artist",
+            artist,
+            result,
+            "",
+            nowPage,
+            totalPages
+        )
+    }
+    private suspend fun MessageEvent.searchRegex(
         raw: String,
         regex: Regex
     ) {
         val result = maimai.musics()
-            .filter { regex.matches(it.name) }
+            .filter { regex.find(it.name) != null }
             .take(maxResults)
         showMusics(
             "search-regex",
@@ -448,7 +554,7 @@ class MusicController(
             ""
         )
     }
-    suspend fun ReplyAble.searchBPM(
+    private suspend fun ReplyAble.searchBPM(
         bpm: Int,
         page: Int
     ) {
@@ -464,7 +570,7 @@ class MusicController(
             totalPages
         )
     }
-    suspend fun ReplyAble.searchCombo(
+    private suspend fun ReplyAble.searchCombo(
         query: String,
         page: Int = 1
     ): Boolean {
@@ -485,7 +591,7 @@ class MusicController(
         return true
     }
 
-    suspend fun MessageEvent.addAlias(
+    private suspend fun MessageEvent.addAlias(
         raw: String
     ) {
         val args = raw.trim().split(" ", limit = 2).filter { it.isNotBlank() }
@@ -527,8 +633,16 @@ class MusicController(
                 }).toMessage(single("添加别名 id${music.id} $alias", "点我投票", enter = true)))
         }
     }
+    private fun String.levelArgs(): Pair<List<Double>, Int> {
+        val args = split(" ")
+        val levels = args.filter { '.' in it }.mapNotNull { it.toDoubleOrNull() }
+        val page =
+            if (args.size > 1 && '.' !in args.last())
+                args.last().toIntOrNull() ?: 1
+            else 1
+        return levels to page
+    }
     companion object {
-
         fun VfsFile.toPCM() = FFMpegTask(FFMpegFileType.PCM) {
             input(absolutePath)
             yes()

@@ -106,4 +106,6 @@ object MarkdownTemplates {
             }
         )
     }
+    fun href(link: String, show: String) =
+        "<qqbot-cmd-input text=\"${link.encodeURLParameter()}\" show=\"${show.encodeURLParameter()}\" reference=\"false\"/>"
 }

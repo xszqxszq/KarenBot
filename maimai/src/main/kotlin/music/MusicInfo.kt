@@ -1,9 +1,9 @@
 package xyz.xszq.bot.music
 
-import io.ktor.http.*
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.localCurrentDirVfs
 import korlibs.io.util.toStringDecimal
+import xyz.xszq.bot.component.MarkdownTemplates.href
 import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.newLine
@@ -63,37 +63,31 @@ class MusicInfo(
     ) = Markdown(MarkdownData(buildString {
         appendLine("![img#190px #190px]($jacketUrl/${resourceId}.jpg)")
         appendLine("**${id}. ${name}**")
-        appendLine("**曲师:** $artist")
-        appendLine("**分类:** ${run {
-            val command = "${genre.genreName}有什么歌".encodeURLParameter()
-            val genreName = genre.genreName.encodeURLParameter()
-            "<qqbot-cmd-input text=\"$command\" show=\"$genreName\" reference=\"false\"/>"
-        }}")
-        appendLine("**版本:** ${version.name}")
-        appendLine("**BPM:** ${run {
-            val command = "BPM查歌 $bpm".encodeURLParameter()
-            val bpm = bpm.toString().encodeURLParameter()
-            "<qqbot-cmd-input text=\"$command\" show=\"$bpm\" reference=\"false\"/>"
-        }}")
+        appendLine("**曲师:** ${href("曲师查歌 $artist", artist)}")
+        appendLine("**分类:** ${href("${genre.genreName}有什么歌", genre.genreName)}")
+        appendLine("**版本:** ${href("版本查歌 ${version.name}", version.name)}")
+        appendLine("**BPM:** ${href("BPM查歌 $bpm", bpm.toString())}")
         appendLine("**定数:** ${
             charts.joinToString("/") {
-                val command = "定数查歌 ${it.levelValue}".encodeURLParameter()
-                val levelValue = it.levelValue.toString().encodeURLParameter()
-                "<qqbot-cmd-input text=\"$command\" show=\"$levelValue\" reference=\"false\"/>"
+                href("定数查歌 ${it.levelValue}", it.levelValue.toString())
             }
         }")
         appendLine("**谱师:** ${
             charts.joinToString("/") {
                 val designer = it.notesDesigner.ifBlank { "-" }
                 if (designer != "-") {
-                    val command = "谱师查歌 $designer".encodeURLParameter()
-                    "<qqbot-cmd-input text=\"$command\" show=\"${designer.encodeURLParameter()}\" reference=\"false\"/>"
+                    href("谱师查歌 $designer", designer)
                 } else designer
             }
         }")
         appendLine("**拟合定数:** ${
             charts.joinToString("/") {
-                if (it.fitLevelValue == 0.0) "-" else it.fitLevelValue.toStringDecimal(1)
+                if (it.fitLevelValue == 0.0) {
+                    "-"
+                } else {
+                    val value = it.fitLevelValue.toStringDecimal(1)
+                    href("拟合定数查歌 $value", value)
+                }
             }
         }")
     }), Keyboard.create {
