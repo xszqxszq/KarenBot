@@ -45,4 +45,17 @@ object MaimaiSettingsTable: Table() {
             plate = map["plate"] ?.ifBlank { null } ?.toIntOrNull()
         )
     }.await()
+
+    suspend fun defaultGame(
+        openId: String
+    ): String {
+        return MaimaiSettingsTable[openId, "game-prior"] ?: "maimai"
+    }
+
+    suspend fun setDefaultGame(
+        openId: String,
+        game: String
+    ) {
+        MaimaiSettingsTable[openId, "game-prior"] = game
+    }
 }

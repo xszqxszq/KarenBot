@@ -26,7 +26,7 @@ import xyz.xszq.bot.reply
 class SettingsController(
     override val maimai: Maimai
 ): Controller(maimai) {
-    override suspend fun setRoute() = maimai.route("/mai") {
+    private suspend fun route() = rhythm {
         startsWith(listOf("bind", "绑定")) { args ->
             if ("水鱼" in args)
                 return@startsWith
@@ -165,7 +165,7 @@ class SettingsController(
                 val filters = ComboQuery.filters(Item.toSimplified(plateFile.name))
                 val musics = filters.filterMusics(maimai.musics())
                 val charts = filters.filterCharts(maimai.musics()).filter {
-                   it.difficulty.value >= MusicDifficulty.Master.value
+                    it.difficulty.value >= MusicDifficulty.Master.value
                 }
                 val (response, _) = maimai.query.records(user, musics)
                 val records = filters.filterRecords(
@@ -215,6 +215,16 @@ class SettingsController(
         }
     }
 
+    override suspend fun setRoute() {
+        route()
+        maimai.route("/mai", true) {
+            startsWith(listOf("默认", "设为默认")) {
+                MaimaiSettingsTable.setDefaultGame(sender.id, "maimai")
+                reply("设置成功，在不带“/mai”“/chu”命令前缀时，将默认选择使用舞萌DX的相关功能")
+            }
+        }
+    }
+
     private fun collection(type: String, id: String) = Keyboard.create {
         row {
             link("选择$type", "https://otmdb.cn/bot/maimai/$id", id = "1")
@@ -257,6 +267,6 @@ class SettingsController(
                 seq = seq + 1
             )
         })
-
     }
+
 }

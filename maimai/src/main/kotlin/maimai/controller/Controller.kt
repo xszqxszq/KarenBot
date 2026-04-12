@@ -13,6 +13,7 @@ import xyz.xszq.bot.maimai.component.MaimaiQuery
 import xyz.xszq.bot.maimai.component.MarkdownTemplates
 import xyz.xszq.bot.maimai.component.MarkdownTemplates.Templates.brief
 import xyz.xszq.bot.maimai.component.WaitingEventData
+import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.exception.*
 import xyz.xszq.bot.maimai.music.UserQueryParams
 import xyz.xszq.bot.message.Markdown
@@ -33,7 +34,7 @@ sealed class Controller(
                 name = "rhythm",
                 value = "maimai",
                 defaultHandler = {
-                    maimai.getGamePreference(sender.id, "maimai")
+                    MaimaiSettingsTable.defaultGame(sender.id)
                 },
                 block = block
             )

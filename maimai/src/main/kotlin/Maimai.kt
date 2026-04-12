@@ -146,24 +146,6 @@ class Maimai: Plugin() {
     fun music(id: Int) = maimaiData.musics[id]
     fun charts() = musics().flatMap { it.charts }
 
-    suspend fun getGamePreference(
-        senderId: String,
-        defaultGame: String
-    ): String {
-        if (!this::database.isInitialized)
-            return defaultGame
-        return MaimaiSettingsTable[senderId, "game-prior"] ?: defaultGame
-    }
-
-    suspend fun setGamePreference(
-        senderId: String,
-        game: String
-    ) {
-        if (!this::database.isInitialized)
-            return
-        MaimaiSettingsTable[senderId, "game-prior"] = game
-    }
-
     /**
      * 配置路由
      */

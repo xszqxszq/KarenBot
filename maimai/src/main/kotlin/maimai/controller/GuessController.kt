@@ -41,7 +41,7 @@ class GuessController(
 
     private val jacketUrl = maimai.config.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")
 
-    override suspend fun setRoute() = maimai.route("/mai") {
+    override suspend fun setRoute() = rhythm {
         maimai.pluginLoader.bot.restoreGuessGame()
 
         startsWith("猜歌") {
