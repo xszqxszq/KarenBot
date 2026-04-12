@@ -9,9 +9,11 @@ import xyz.xszq.bot.image.parse.StyleParser
 import xyz.xszq.bot.image.template.Template
 import xyz.xszq.bot.image.template.TemplateManager
 import xyz.xszq.bot.music.ChartInfo
+import xyz.xszq.bot.music.ComboStatus
 import xyz.xszq.bot.music.Level
 import xyz.xszq.bot.music.Record
 import xyz.xszq.bot.music.RequiresType
+import xyz.xszq.bot.music.SyncStatus
 
 class LevelTemplate(
     private val manager: TemplateManager,
@@ -95,16 +97,20 @@ class LevelTemplate(
                         RequiresType.Combo -> {
                             val min = params.completed.values
                                 .filterNotNull()
-                                .filter { it.comboStatus.isFC() }
                                 .minByOrNull { it.comboStatus }
-                            min?.comboStatus?.value
+                            when {
+                                min ?.comboStatus == ComboStatus.None -> null
+                                else -> min ?.comboStatus ?.value
+                            }
                         }
                         RequiresType.Sync -> {
                             val min = params.completed.values
                                 .filterNotNull()
-                                .filter { it.syncStatus.isFS() }
                                 .minByOrNull { it.syncStatus }
-                            min?.syncStatus?.value
+                            when {
+                                min ?.syncStatus == SyncStatus.None -> null
+                                else -> min ?.syncStatus ?.value
+                            }
                         }
                     } ?.let {
                         "all_$it.png"
