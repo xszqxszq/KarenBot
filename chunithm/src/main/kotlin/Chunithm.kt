@@ -55,7 +55,7 @@ class Chunithm: Plugin() {
         route("/chu", true) {
             startsWith(listOf("默认", "设为默认")) {
                 MaimaiSettingsTable.setDefaultGame(sender.id, "maimai")
-                reply("设置成功，在不带“/mai”“/chu”命令前缀时，将默认选择使用舞萌DX的相关功能")
+                reply("设置成功，在不带“/mai”“/chu”命令前缀时，将默认选择使用中二节奏的相关功能")
             }
         }
     }
