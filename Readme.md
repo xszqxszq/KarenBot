@@ -23,6 +23,7 @@ KarenBot
 ├── src/        # 机器人本体功能
 │
 ├── maimai/     # 舞萌DX
+├── chunithm/   # 中二节奏
 ├── otto/       # 活字印刷
 ├── meme/       # 表情包
 ├── guess/      # 东方猜原曲

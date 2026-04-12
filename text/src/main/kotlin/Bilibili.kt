@@ -45,7 +45,7 @@ object Bilibili {
             }
         }.bodyAsText()
         if (MARK_AVAILABLE !in html)
-            return null.also { println(html) }
+            return null
         val raw = html.substringAfter(MARK_BEGIN).substringBefore(MARK_END)
         return json.decodeFromString<BilibiliHtmlResponse>(raw).data.videoData
     }

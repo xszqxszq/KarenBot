@@ -47,7 +47,6 @@ class Touhou(
             )
             val file = baseDir[target.file]
             val duration = file.duration() ?: run {
-                println("no duration")
                 return@startsWith
             }
             val cropped = file.crop(
@@ -133,7 +132,6 @@ class Touhou(
 
         val musicFile = baseDir[music.file]
         val duration = musicFile.duration() ?: run {
-            println("no duration")
             started.remove(id)
             return
         }
