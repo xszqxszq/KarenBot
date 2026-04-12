@@ -1,5 +1,15 @@
 package xyz.xszq.bot.component.image
 
+import korlibs.io.file.baseNameWithoutExtension
+import korlibs.io.file.std.localCurrentDirVfs
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import org.jetbrains.skia.EncodedImageFormat
+import org.jetbrains.skia.Image
+import org.jetbrains.skia.Rect
+import org.jetbrains.skia.SamplingMode
+import org.jetbrains.skia.Surface
 import xyz.xszq.bot.component.MaimaiData
 import xyz.xszq.bot.component.image.templates.CourseTemplate
 import xyz.xszq.bot.component.image.templates.LevelTemplate
@@ -38,8 +48,41 @@ class MaimaiImage(
     /**
      * 载入模板
      */
-    fun load() {
+    fun load(scope: CoroutineScope) {
         manager.init()
+        scope.launch {
+            generateThumb()
+        }
+    }
+
+    private suspend fun generateThumb() = coroutineScope {
+        val covers = localCurrentDirVfs["./data/maimai/covers"]
+        covers.listSimple().filter {
+            it.baseNameWithoutExtension.toIntOrNull() != null
+        }.forEach { cover ->
+            val id = cover.baseNameWithoutExtension.toInt()
+            val small = covers["${id}_s.jpg"]
+            if (!small.exists())
+                launch {
+                    Image.makeFromEncoded(cover.readBytes()).use { original ->
+                        Surface.makeRasterN32Premul(THUMB_SIZE, THUMB_SIZE).use { surface ->
+                            surface.canvas.drawImageRect(
+                                original,
+                                Rect.makeWH(original.width.toFloat(), original.height.toFloat()),
+                                Rect.makeWH(THUMB_SIZE.toFloat(), THUMB_SIZE.toFloat()),
+                                SamplingMode.CATMULL_ROM,
+                                null,
+                                true
+                            )
+                            surface.makeImageSnapshot().use { snapshot ->
+                                snapshot.encodeToData(EncodedImageFormat.JPEG, 85).use {
+                                    small.writeBytes(it!!.bytes)
+                                }
+                            }
+                        }
+                    }
+                }
+        }
     }
 
     companion object {
@@ -54,5 +97,6 @@ class MaimaiImage(
             MusicDifficulty.ReMaster -> "#dbaaff"
             MusicDifficulty.Utage -> "#ff6ffd"
         }.rgbColor()!!
+        const val THUMB_SIZE = 72
     }
 }
