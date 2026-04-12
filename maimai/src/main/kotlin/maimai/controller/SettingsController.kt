@@ -3,23 +3,23 @@ package xyz.xszq.bot.maimai.controller
 import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.Maimai.Companion.textMode
 import xyz.xszq.bot.chain
+import xyz.xszq.bot.event.GroupMessageEvent
+import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.maimai.component.MaimaiQuery
 import xyz.xszq.bot.maimai.component.MarkdownTemplates
 import xyz.xszq.bot.maimai.component.MarkdownTemplates.Templates.brief
 import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.database.QQBindTable
-import xyz.xszq.bot.event.GroupMessageEvent
-import xyz.xszq.bot.event.MessageEvent
-import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.maimai.music.Item
 import xyz.xszq.bot.maimai.music.MusicDifficulty
 import xyz.xszq.bot.maimai.music.UserQueryParams
-import xyz.xszq.bot.newLine
-import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.maimai.query.ComboQuery
 import xyz.xszq.bot.maimai.query.ComboQuery.filterCharts
 import xyz.xszq.bot.maimai.query.ComboQuery.filterMusics
 import xyz.xszq.bot.maimai.query.ComboQuery.filterRecords
+import xyz.xszq.bot.message.MessageChain
+import xyz.xszq.bot.newLine
+import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.reply
 
 @Suppress("unused")

@@ -1,11 +1,11 @@
 package xyz.xszq.bot.maimai.component.image.templates
 
 import org.jetbrains.skia.Image
-import xyz.xszq.bot.maimai.component.image.MaimaiImage.Companion.color
 import xyz.xszq.bot.image.dom.Div
 import xyz.xszq.bot.image.dom.Element
 import xyz.xszq.bot.image.template.Template
 import xyz.xszq.bot.image.template.TemplateManager
+import xyz.xszq.bot.maimai.component.image.MaimaiImage.Companion.color
 import xyz.xszq.bot.maimai.music.*
 
 class ScoreTemplate(

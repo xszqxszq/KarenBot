@@ -3,10 +3,10 @@ package xyz.xszq.bot.maimai.controller
 import korlibs.io.util.UUID
 import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.Maimai.Companion.textMode
+import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.maimai.component.MarkdownTemplates
 import xyz.xszq.bot.maimai.component.WaitingEventData
 import xyz.xszq.bot.maimai.database.DivingFishBindTable
-import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.reply

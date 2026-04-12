@@ -2,10 +2,10 @@ package xyz.xszq.bot.maimai.component
 
 import io.ktor.http.*
 import xyz.xszq.bot.Maimai
-import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.maimai.music.ChartInfo
 import xyz.xszq.bot.maimai.music.MusicDifficulty
 import xyz.xszq.bot.maimai.music.MusicInfo
+import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.payload.markdown.MarkdownData
 import xyz.xszq.bot.payload.markdown.RenderData

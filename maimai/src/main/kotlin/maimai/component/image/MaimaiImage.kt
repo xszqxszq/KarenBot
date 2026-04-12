@@ -1,12 +1,12 @@
 package xyz.xszq.bot.maimai.component.image
 
+import xyz.xszq.bot.image.parse.StyleParser.rgbColor
+import xyz.xszq.bot.image.template.TemplateManager
 import xyz.xszq.bot.maimai.component.MaimaiData
 import xyz.xszq.bot.maimai.component.image.templates.CourseTemplate
 import xyz.xszq.bot.maimai.component.image.templates.LevelTemplate
 import xyz.xszq.bot.maimai.component.image.templates.RatingTemplate
 import xyz.xszq.bot.maimai.component.image.templates.ScoreTemplate
-import xyz.xszq.bot.image.parse.StyleParser.rgbColor
-import xyz.xszq.bot.image.template.TemplateManager
 import xyz.xszq.bot.maimai.music.ChartInfo
 import xyz.xszq.bot.maimai.music.MusicDifficulty
 
