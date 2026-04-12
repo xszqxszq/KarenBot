@@ -1,6 +1,5 @@
 package xyz.xszq.bot.maimai.component
 
-import okio.IOException
 import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.maimai.api.LXNS

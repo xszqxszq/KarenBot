@@ -9,7 +9,6 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.*
-import okhttp3.ConnectionPool
 import xyz.xszq.bot.maimai.component.MaimaiData
 import xyz.xszq.bot.maimai.exception.UnknownException
 import xyz.xszq.bot.maimai.exception.UserDeniedException
@@ -18,7 +17,6 @@ import xyz.xszq.bot.maimai.music.*
 import xyz.xszq.bot.maimai.payload.DivingFishRatingResponse
 import xyz.xszq.bot.maimai.payload.DivingFishRecord
 import xyz.xszq.bot.maimai.payload.DivingFishStats
-import java.util.concurrent.TimeUnit
 
 class DivingFish(
     val token: String,

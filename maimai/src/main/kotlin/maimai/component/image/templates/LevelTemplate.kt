@@ -8,12 +8,7 @@ import xyz.xszq.bot.image.template.TemplateManager
 import xyz.xszq.bot.maimai.component.image.FilterParams
 import xyz.xszq.bot.maimai.component.image.LevelRenderParams
 import xyz.xszq.bot.maimai.component.image.MaimaiImage.Companion.color
-import xyz.xszq.bot.maimai.music.ChartInfo
-import xyz.xszq.bot.maimai.music.ComboStatus
-import xyz.xszq.bot.maimai.music.Level
-import xyz.xszq.bot.maimai.music.Record
-import xyz.xszq.bot.maimai.music.RequiresType
-import xyz.xszq.bot.maimai.music.SyncStatus
+import xyz.xszq.bot.maimai.music.*
 
 class LevelTemplate(
     private val manager: TemplateManager,

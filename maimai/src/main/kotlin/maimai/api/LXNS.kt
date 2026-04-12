@@ -9,7 +9,6 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
-import okhttp3.ConnectionPool
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.maimai.component.MaimaiData
 import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
@@ -19,7 +18,6 @@ import xyz.xszq.bot.maimai.exception.UserNotFoundException
 import xyz.xszq.bot.maimai.exception.UserOARequiredException
 import xyz.xszq.bot.maimai.music.*
 import xyz.xszq.bot.maimai.payload.*
-import java.util.concurrent.TimeUnit
 import kotlin.math.min
 
 class LXNS(
