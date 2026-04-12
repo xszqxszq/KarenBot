@@ -20,6 +20,7 @@ dependencies {
     implementation("com.sksamuel.hoplite:hoplite-core:${hopliteVersion}")
     implementation("com.sksamuel.hoplite:hoplite-yaml:${hopliteVersion}")
     implementation("com.soywiz.korge:korge-core:${korlibsVersion}")
+    implementation("com.h2database:h2:2.2.224")
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
     implementation("io.github.pdvrieze.xmlutil:core-jdk:0.91.0-RC1")
     implementation("io.github.pdvrieze.xmlutil:serialization-jvm:0.91.0-RC1")
