@@ -9,9 +9,11 @@ import xyz.xszq.bot.maimai.component.image.FilterParams
 import xyz.xszq.bot.maimai.component.image.LevelRenderParams
 import xyz.xszq.bot.maimai.component.image.MaimaiImage.Companion.color
 import xyz.xszq.bot.maimai.music.ChartInfo
+import xyz.xszq.bot.maimai.music.ComboStatus
 import xyz.xszq.bot.maimai.music.Level
 import xyz.xszq.bot.maimai.music.Record
 import xyz.xszq.bot.maimai.music.RequiresType
+import xyz.xszq.bot.maimai.music.SyncStatus
 
 class LevelTemplate(
     private val manager: TemplateManager,
@@ -95,16 +97,20 @@ class LevelTemplate(
                         RequiresType.Combo -> {
                             val min = params.completed.values
                                 .filterNotNull()
-                                .filter { it.comboStatus.isFC() }
                                 .minByOrNull { it.comboStatus }
-                            min?.comboStatus?.value
+                            when {
+                                min ?.comboStatus == ComboStatus.None -> null
+                                else -> min ?.comboStatus ?.value
+                            }
                         }
                         RequiresType.Sync -> {
                             val min = params.completed.values
                                 .filterNotNull()
-                                .filter { it.syncStatus.isFS() }
                                 .minByOrNull { it.syncStatus }
-                            min?.syncStatus?.value
+                            when {
+                                min ?.syncStatus == SyncStatus.None -> null
+                                else -> min ?.syncStatus ?.value
+                            }
                         }
                     } ?.let {
                         "all_$it.png"

@@ -104,7 +104,7 @@ class Maimai: Plugin() {
         }
         scope.launch(Dispatchers.IO) {
             logger.info { "[舞萌] 正在加载图片中……" }
-            image.load()
+            image.load(scope)
             logger.info { "[舞萌] 图片载入完毕。" }
         }
         scope.launch(Dispatchers.IO) {

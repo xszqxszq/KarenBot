@@ -478,45 +478,9 @@ class GuessController(
     })
     fun getOpeningButtons() = Keyboard.create {
         row {
-            button(
-                id = "1",
-                action = Action(
-                    type = Action.AT,
-                    data = "开字母 ",
-                    permission = Permission(Permission.EVERYONE)
-                ),
-                renderData = RenderData(
-                    label = "\uD83D\uDD24开字母",
-                    visitedLabel = "\uD83D\uDD24开字母",
-                    style = RenderData.BLUE
-                )
-            )
-            button(
-                id = "2",
-                action = Action(
-                    type = Action.AT,
-                    data = "开歌",
-                    permission = Permission(Permission.EVERYONE)
-                ),
-                renderData = RenderData(
-                    label = "\uD83C\uDFB6开歌",
-                    visitedLabel = "\uD83C\uDFB6开歌",
-                    style = RenderData.BLUE
-                )
-            )
-            button(
-                id = "3",
-                action = Action(
-                    type = Action.AT,
-                    data = "不玩了",
-                    permission = Permission(Permission.EVERYONE)
-                ),
-                renderData = RenderData(
-                    label = "\uD83D\uDD1A不玩了",
-                    visitedLabel = "\uD83D\uDD1A不玩了",
-                    style = RenderData.GRAY
-                )
-            )
+            at("\uD83D\uDD24开字母", "开字母", id = "1")
+            at("\uD83C\uDFB6开歌", "开字母", id = "2")
+            at("\uD83D\uDD1A不玩了", "不玩了", style = RenderData.GRAY, id = "3")
         }
     }
 
