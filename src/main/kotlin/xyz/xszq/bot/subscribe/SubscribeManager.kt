@@ -3,6 +3,7 @@ package xyz.xszq.bot.subscribe
 import kotlinx.coroutines.*
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
+import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.coroutines.CoroutineContext
@@ -16,18 +17,32 @@ class SubscribeManager(
     override val coroutineContext: CoroutineContext = Job()
     private val plugins = ConcurrentHashMap<String, CopyOnWriteArrayList<Subscribe<Event>>>()
     private val temp = ConcurrentHashMap<String, Subscribe<Event>>()
+    private val orderId = AtomicLong(0)
 
     /**
      * Add a Subscribe from the plugin.
      * @param plugin Plugin's name.
      * @param subscribe Subscribe.
      */
-    fun <E: Event> subscribe(plugin: String, subscribe: Subscribe<E>) {
+    fun <E: Event> subscribe(
+        plugin: String,
+        subscribe: Subscribe<E>,
+        domain: String? = null,
+        value: String? = null,
+        defaultHandler: (suspend MessageEvent.() -> String?)? = null
+    ) {
         if (!plugins.containsKey(plugin)) {
             plugins[plugin] = CopyOnWriteArrayList()
         }
         @Suppress("UNCHECKED_CAST")
-        plugins[plugin]?.add(subscribe as Subscribe<Event>)
+        val eventSubscribe = subscribe as Subscribe<Event>
+        (eventSubscribe as? TextSubscribe)?.let {
+            it.domain = domain
+            it.value = value
+            it.defaultHandler = defaultHandler
+            it.order = orderId.getAndIncrement()
+        }
+        plugins[plugin]?.add(eventSubscribe)
     }
 
     // TODO: Support all events
@@ -64,23 +79,65 @@ class SubscribeManager(
     @OptIn(DelicateCoroutinesApi::class)
     suspend fun <E: Event> handle(event: E) = supervisorScope {
         temp.values.forEach { subscribe ->
-            launch(dispatcher) {
-                runCatching {
-                    subscribe.handler(event)
-                }.onFailure { e ->
-                    e.printStackTrace()
+            launchHandle { subscribe.handle(event) }
+        }
+
+        val groups = linkedMapOf<String, MutableList<TextSubscribe>>()
+        plugins.values.forEach { subscribes ->
+            subscribes.forEach { subscribe ->
+                val textSubscribe = subscribe as? TextSubscribe
+                if (textSubscribe?.domain == null) {
+                    launchHandle { subscribe.handle(event) }
+                    return@forEach
+                }
+                if (textSubscribe.matches(event)) {
+                    groups.getOrPut(textSubscribe.domain!!) { mutableListOf() }.add(textSubscribe)
                 }
             }
         }
-        plugins.forEach { plugin, subscribes ->
-            subscribes.forEach { subscribe ->
-                launch(dispatcher) {
-                    runCatching {
-                        subscribe.handler(event)
-                    }.onFailure { e ->
-                        e.printStackTrace()
-                    }
-                }
+
+        groups.values.forEach { list ->
+            selectPrior(event, list)?.let { winner ->
+                launchHandle { winner.handle(event) }
+            }
+        }
+    }
+
+    private suspend fun selectPrior(event: Event, list: List<TextSubscribe>): TextSubscribe? {
+        if (list.isEmpty())
+            return null
+
+        val topPriority = list.maxOf { it.priority }
+        val top = list.filter { it.priority == topPriority }
+
+        val maxLen = top.maxOf { it.length }
+        val same = top.filter { it.length == maxLen }
+        if (same.size == 1)
+            return same.first()
+
+        val defaults = if (event is MessageEvent)
+            same.mapNotNull { it.defaultHandler?.invoke(event)?.trim()?.ifBlank { null } }.distinct()
+        else emptyList()
+
+        if (defaults.size == 1) {
+            val game = defaults.first()
+            val picked = same.filter { it.value == game }
+            if (picked.size == 1)
+                return picked.first()
+            if (picked.isNotEmpty())
+                return picked.minBy { it.order }
+        }
+
+        return same.minBy { it.order }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun CoroutineScope.launchHandle(block: suspend () -> Unit) {
+        launch(dispatcher) {
+            runCatching {
+                block()
+            }.onFailure { e ->
+                e.printStackTrace()
             }
         }
     }

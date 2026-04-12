@@ -14,12 +14,35 @@ class SubscribeBuilder(
     val plugin: String,
     val prefix: String? = null,
     val forcePrefix: Boolean = false,
-    private val manager: SubscribeManager
+    private val manager: SubscribeManager,
+    private val domain: String? = null,
+    private val value: String? = null,
+    private val defaultHandler: suspend MessageEvent.() -> String? = { null }
 ) {
+    suspend fun domain(
+        name: String,
+        value: String,
+        defaultHandler: suspend MessageEvent.() -> String? = { null },
+        block: suspend SubscribeBuilder.() -> Unit
+    ) {
+        block(SubscribeBuilder(
+            plugin = plugin,
+            prefix = prefix,
+            forcePrefix = forcePrefix,
+            manager = manager,
+            domain = name,
+            value = value,
+            defaultHandler = defaultHandler
+        ))
+    }
+
     fun equalsTo(text: String, block: suspend MessageEvent.() -> Unit) {
         manager.subscribe(
             plugin,
-            EqualsTo(prefix, forcePrefix, text, block)
+            EqualsTo(prefix, forcePrefix, text, block),
+            domain,
+            value,
+            defaultHandler
         )
     }
     fun equalsTo(texts: Collection<String>, block: suspend MessageEvent.() -> Unit) = texts.forEach { text ->
@@ -28,7 +51,10 @@ class SubscribeBuilder(
     fun startsWith(text: String, block: suspend MessageEvent.(String) -> Unit) {
         manager.subscribe(
             plugin,
-            StartsWith(prefix, forcePrefix, text, block)
+            StartsWith(prefix, forcePrefix, text, block),
+            domain,
+            value,
+            defaultHandler
         )
     }
     fun startsWith(texts: Collection<String>, block: suspend MessageEvent.(String) -> Unit) = texts.forEach { text ->
@@ -37,7 +63,10 @@ class SubscribeBuilder(
     fun endsWith(text: String, block: suspend MessageEvent.(String) -> Unit) {
         manager.subscribe(
             plugin,
-            EndsWith(prefix, forcePrefix, text, block)
+            EndsWith(prefix, forcePrefix, text, block),
+            domain,
+            value,
+            defaultHandler
         )
     }
     fun endsWith(texts: Collection<String>, block: suspend MessageEvent.(String) -> Unit) = texts.forEach { text ->
@@ -46,7 +75,10 @@ class SubscribeBuilder(
     fun commandEndsWith(text: String, block: suspend MessageEvent.(String) -> Unit) {
         manager.subscribe(
             plugin,
-            CommandEndsWith(prefix, forcePrefix, text, block)
+            CommandEndsWith(prefix, forcePrefix, text, block),
+            domain,
+            value,
+            defaultHandler
         )
     }
     fun commandEndsWith(texts: Collection<String>, block: suspend MessageEvent.(String) -> Unit) = texts.forEach { text ->

@@ -1,6 +1,7 @@
 package xyz.xszq.bot
 
 import korlibs.math.toIntCeil
+import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
 import kotlin.math.max
 import kotlin.math.min
@@ -65,4 +66,23 @@ operator fun Char.times(times: Int): String = buildString {
     repeat(times) {
         append(this@times)
     }
+}
+
+fun normalizeMessage(
+    event: Event,
+    parent: String? = null,
+    forceParent: Boolean = false
+): Pair<MessageEvent, String>? {
+    if (event !is MessageEvent)
+        return null
+
+    var message = event.text.trim()
+    parent?.let {
+        if (message.startsWith(it))
+            message = message.substringAfter(it).trim()
+        else if (forceParent)
+            return null
+    }
+    message = message.removePrefix("/").trim()
+    return event to message
 }

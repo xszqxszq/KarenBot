@@ -1,6 +1,5 @@
 package xyz.xszq.bot.subscribe
 
-import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
 
 /**
@@ -13,23 +12,16 @@ import xyz.xszq.bot.event.MessageEvent
 class StartsWith(
     parent: String? = null,
     forceParent: Boolean = false,
-    prefix: String,
-    handler: suspend MessageEvent.(String) -> Unit
-): Subscribe<MessageEvent>(handler@{ event: Event ->
-    if (event !is MessageEvent)
-        return@handler
+    private val prefix: String,
+    private val matchHandler: suspend MessageEvent.(String) -> Unit
+): TextSubscribe(parent, forceParent) {
+    override val priority = 3
+    override val length = prefix.length
 
-    var message = event.text.trim()
-    parent?.let {
-        if (message.startsWith(it))
-            message = message.substringAfter(it).trim()
-        else if (forceParent) // If force and parent prefix not found
-            return@handler
-    }
-    message = message.removePrefix("/").trim()
+    override fun matchesText(message: String) = message.startsWith(prefix)
 
-    if (message.startsWith(prefix)) {
+    override suspend fun handleText(event: MessageEvent, message: String) {
         val arg = message.substringAfter(prefix).trim()
-        handler(event, arg)
+        matchHandler(event, arg)
     }
-})
+}

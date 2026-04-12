@@ -1,6 +1,5 @@
 package xyz.xszq.bot.subscribe
 
-import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
 
 /**
@@ -13,22 +12,15 @@ import xyz.xszq.bot.event.MessageEvent
 class EqualsTo(
     parent: String? = null,
     forceParent: Boolean = false,
-    text: String,
-    handler: suspend MessageEvent.() -> Unit
-): Subscribe<MessageEvent>(handler@{ event: Event ->
-    if (event !is MessageEvent)
-        return@handler
+    private val text: String,
+    private val matchHandler: suspend MessageEvent.() -> Unit
+): TextSubscribe(parent, forceParent) {
+    override val priority = 4
+    override val length = text.length
 
-    var message = event.text.trim()
-    parent?.let {
-        if (message.startsWith(it))
-            message = message.substringAfter(it).trim()
-        else if (forceParent) // If force and parent prefix not found
-            return@handler
-    }
-    message = message.removePrefix("/").trim()
+    override fun matchesText(message: String) = message == text
 
-    if (message == text) {
-        handler(event)
+    override suspend fun handleText(event: MessageEvent, message: String) {
+        matchHandler(event)
     }
-})
+}

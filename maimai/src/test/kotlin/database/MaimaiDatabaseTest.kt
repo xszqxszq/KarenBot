@@ -8,17 +8,22 @@ import kotlin.test.BeforeTest
 abstract class MaimaiDatabaseTest {
     companion object {
         private var connected = false
+        private lateinit var connectedDatabase: Database
 
-        private fun connectIfNeeded() {
+        private fun connectIfNeeded(): Database {
             if (connected)
-                return
-            Database.connect(
+                return connectedDatabase
+            connectedDatabase = Database.connect(
                 url = "jdbc:h2:mem:maimai;MODE=MySQL;DB_CLOSE_DELAY=-1",
                 driver = "org.h2.Driver",
             )
             connected = true
+            return connectedDatabase
         }
     }
+
+    protected val database: Database
+        get() = connectIfNeeded()
 
     @BeforeTest
     fun resetDatabase() {

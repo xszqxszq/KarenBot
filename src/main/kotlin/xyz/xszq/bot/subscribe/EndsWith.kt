@@ -1,6 +1,5 @@
 package xyz.xszq.bot.subscribe
 
-import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
 
 
@@ -14,23 +13,16 @@ import xyz.xszq.bot.event.MessageEvent
 class EndsWith(
     parent: String? = null,
     forceParent: Boolean = false,
-    suffix: String,
-    handler: suspend MessageEvent.(String) -> Unit
-): Subscribe<MessageEvent>(handler@{ event: Event ->
-    if (event !is MessageEvent)
-        return@handler
+    private val suffix: String,
+    private val matchHandler: suspend MessageEvent.(String) -> Unit
+): TextSubscribe(parent, forceParent) {
+    override val priority = 1
+    override val length = suffix.length
 
-    var message = event.text.trim()
-    parent?.let {
-        if (message.startsWith(it))
-            message = message.substringAfter(it).trim()
-        else if (forceParent) // If force and parent prefix not found
-            return@handler
-    }
-    message = message.removePrefix("/").trim()
+    override fun matchesText(message: String) = message.endsWith(suffix)
 
-    if (message.endsWith(suffix)) {
+    override suspend fun handleText(event: MessageEvent, message: String) {
         val arg = message.substringBefore(suffix).trim()
-        handler(event, arg)
+        matchHandler(event, arg)
     }
-})
+}

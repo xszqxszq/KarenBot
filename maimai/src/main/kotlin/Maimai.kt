@@ -11,22 +11,22 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.exists
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
-import xyz.xszq.bot.api.DivingFish
-import xyz.xszq.bot.api.LXNS
-import xyz.xszq.bot.api.MaimaiAPI
-import xyz.xszq.bot.component.AliasesSearch
-import xyz.xszq.bot.component.MaimaiData
-import xyz.xszq.bot.component.MaimaiQuery
-import xyz.xszq.bot.component.MarkdownTemplates
-import xyz.xszq.bot.component.image.MaimaiImage
-import xyz.xszq.bot.config.MaimaiConfig
-import xyz.xszq.bot.controller.ApiController
-import xyz.xszq.bot.controller.Controller
-import xyz.xszq.bot.database.*
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
-import xyz.xszq.bot.payload.DivingFishStats
-import xyz.xszq.bot.query.ComboQuery
+import xyz.xszq.bot.maimai.api.DivingFish
+import xyz.xszq.bot.maimai.api.LXNS
+import xyz.xszq.bot.maimai.api.MaimaiAPI
+import xyz.xszq.bot.maimai.component.AliasesSearch
+import xyz.xszq.bot.maimai.component.MaimaiData
+import xyz.xszq.bot.maimai.component.MaimaiQuery
+import xyz.xszq.bot.maimai.component.MarkdownTemplates
+import xyz.xszq.bot.maimai.component.image.MaimaiImage
+import xyz.xszq.bot.maimai.config.MaimaiConfig
+import xyz.xszq.bot.maimai.controller.ApiController
+import xyz.xszq.bot.maimai.controller.Controller
+import xyz.xszq.bot.maimai.database.*
+import xyz.xszq.bot.maimai.payload.DivingFishStats
+import xyz.xszq.bot.maimai.query.ComboQuery
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.full.primaryConstructor
 
@@ -145,6 +145,24 @@ class Maimai: Plugin() {
     fun musics() = maimaiData.musics.values
     fun music(id: Int) = maimaiData.musics[id]
     fun charts() = musics().flatMap { it.charts }
+
+    suspend fun getGamePreference(
+        senderId: String,
+        defaultGame: String
+    ): String {
+        if (!this::database.isInitialized)
+            return defaultGame
+        return MaimaiSettingsTable[senderId, "game-prior"] ?: defaultGame
+    }
+
+    suspend fun setGamePreference(
+        senderId: String,
+        game: String
+    ) {
+        if (!this::database.isInitialized)
+            return
+        MaimaiSettingsTable[senderId, "game-prior"] = game
+    }
 
     /**
      * 配置路由

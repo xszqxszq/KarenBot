@@ -1,6 +1,5 @@
 package xyz.xszq.bot.subscribe
 
-import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
 
 /**
@@ -13,29 +12,24 @@ import xyz.xszq.bot.event.MessageEvent
 class CommandEndsWith(
     parent: String? = null,
     forceParent: Boolean = false,
-    suffix: String,
-    handler: suspend MessageEvent.(String) -> Unit
-): Subscribe<MessageEvent>(handler@{ event: Event ->
-    if (event !is MessageEvent)
-        return@handler
+    private val suffix: String,
+    private val matchHandler: suspend MessageEvent.(String) -> Unit
+): TextSubscribe(parent, forceParent) {
+    override val priority = 2
+    override val length = suffix.length
 
-    var message = event.text.trim()
-    parent?.let {
-        if (message.startsWith(it))
-            message = message.substringAfter(it).trim()
-        else if (forceParent) // If force and parent prefix not found
-            return@handler
+    override fun matchesText(message: String): Boolean {
+        val args = message.split(" ")
+        if (args.isEmpty())
+            return false
+        return args.first().endsWith(suffix)
     }
-    message = message.removePrefix("/").trim()
 
-    val args = message.split(" ")
-    if (args.isEmpty())
-        return@handler
-
-    val command = args.first()
-    if (command.endsWith(suffix)) {
+    override suspend fun handleText(event: MessageEvent, message: String) {
+        val args = message.split(" ")
+        val command = args.first()
         val nowArgs = command.substringBefore(suffix).trim() + " " +
                 args.subList(1, args.size).joinToString(" ")
-        handler(event, nowArgs)
+        matchHandler(event, nowArgs)
     }
-})
+}
