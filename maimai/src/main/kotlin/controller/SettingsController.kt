@@ -1,21 +1,21 @@
 package xyz.xszq.bot.controller
 
-import okio.IOException
 import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.Maimai.Companion.textMode
 import xyz.xszq.bot.chain
 import xyz.xszq.bot.component.MaimaiQuery
 import xyz.xszq.bot.component.MarkdownTemplates
+import xyz.xszq.bot.component.MarkdownTemplates.Templates.brief
 import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.database.QQBindTable
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
-import xyz.xszq.bot.exception.UserNotFoundException
 import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.music.Item
 import xyz.xszq.bot.music.MusicDifficulty
 import xyz.xszq.bot.music.UserQueryParams
 import xyz.xszq.bot.newLine
+import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.query.ComboQuery
 import xyz.xszq.bot.query.ComboQuery.filterCharts
 import xyz.xszq.bot.query.ComboQuery.filterMusics
@@ -116,14 +116,21 @@ class SettingsController(
                         appendLine("\t收藏品列表：https://otmdb.cn/bot/maimai/icons")
                     }.trim().newLine())
                 else
-                    reply(MarkdownTemplates.Templates.SELECT_ICON)
+                    reply(brief("设置头像", buildString {
+                        appendLine("使用方法：设置头像 id/名称")
+                        appendLine("👉设置头像 106103")
+                        appendLine("👉设置头像 高瀬 梨緒")
+                        appendLine(" ")
+                        append("⏬您可以点击下方按钮查看头像列表。")
+                    }).toMessage(collection("头像", "icons")))
                 return@startsWith
             }
             MaimaiSettingsTable[sender.id, "icon"] = iconFile.id.toString()
             if (textMode())
                 reply("设置头像成功。")
             else
-                reply(MarkdownTemplates.Templates.SELECT_ICON_SUCCESS)
+                reply(brief("设置头像", "设置头像成功。")
+                    .toMessage(collection("头像", "icons")))
         }
         startsWith(listOf("设置牌子", "设置姓名框")) { plate ->
             val plateFile = maimai.maimaiData.plates.values.firstOrNull {
@@ -143,7 +150,14 @@ class SettingsController(
                         appendLine("\t牌子列表：https://otmdb.cn/bot/maimai/plates")
                     }.trim().newLine())
                 else
-                    reply(MarkdownTemplates.Templates.SELECT_PLATE)
+                    reply(brief("设置牌子", buildString {
+                        appendLine("使用方法：设置牌子/设置姓名框 id/名称")
+                        appendLine("👉设置牌子 100501")
+                        appendLine("👉设置牌子 晓将")
+                        appendLine("👉设置姓名框 7sRefちほー2")
+                        appendLine(" ")
+                        append("⏬您可以点击下方按钮查看牌子列表。")
+                    }).toMessage(collection("牌子", "plates")))
                 return@startsWith
             }
             if (plateFile.genre == "実績" && plateFile.requires.isNotEmpty()) {
@@ -167,7 +181,8 @@ class SettingsController(
             if (textMode())
                 reply("设置牌子成功。")
             else
-                reply(MarkdownTemplates.Templates.SELECT_PLATE_SUCCESS)
+                reply(brief("设置牌子", "设置牌子成功。")
+                    .toMessage(collection("牌子", "plates")))
         }
         startsWith(listOf("设置mai", "设置b50")) {
             if (textMode())
@@ -184,7 +199,26 @@ class SettingsController(
                     appendLine("\t例：设置查分器 落雪")
                 }.trim().newLine())
             else
-                reply(MarkdownTemplates.Templates.SETTINGS)
+                reply(brief("功能设置", "支持以下设定：").toMessage(Keyboard.create {
+                    row {
+                        at("👤设置头像", "设置头像", enter = true, id = "1")
+                        at("📰设置牌子", "设置牌子", enter = true, id = "1")
+                    }
+                    row {
+                        at("🐟使用水鱼查分", "设置查分器 水鱼", enter = true, id = "1")
+                        at("❄使用落雪查分", "设置查分器 落雪", enter = true, id = "1")
+                    }
+                    row {
+                        at("🔄自动选择查分器", "设置查分器 自动", enter = true, id = "1")
+                    }
+                }))
+        }
+    }
+
+    private fun collection(type: String, id: String) = Keyboard.create {
+        row {
+            link("选择$type", "https://otmdb.cn/bot/maimai/$id", id = "1")
+            at("⚙ 设置$type", "设置$type ", id = "2")
         }
     }
 

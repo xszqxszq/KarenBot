@@ -3,14 +3,17 @@ package xyz.xszq.bot.controller
 import kotlinx.datetime.toJavaLocalDateTime
 import xyz.xszq.bot.*
 import xyz.xszq.bot.Maimai.Companion.textMode
-import xyz.xszq.bot.component.MarkdownTemplates
+import xyz.xszq.bot.component.MarkdownTemplates.Templates.brief
 import xyz.xszq.bot.database.Arcade
 import xyz.xszq.bot.database.ArcadeGroupBind
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.exception.IllegalArgsException
 import xyz.xszq.bot.exception.NeedHelpException
 import xyz.xszq.bot.exception.NotFoundException
+import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.message.MessageElement
+import xyz.xszq.bot.payload.markdown.Keyboard
+import xyz.xszq.bot.payload.markdown.MarkdownData
 import java.time.Duration
 
 @Suppress("unused")
@@ -42,11 +45,24 @@ class QueueController(
                 }
             }.onFailure { e ->
                 when (e) {
-                    is NeedHelpException ->
-                        if (textMode())
-                            reply(helpText)
-                        else
-                            reply(MarkdownTemplates.Templates.QUEUE_HELP)
+                    is NeedHelpException -> reply(when(textMode()) {
+                        true -> helpText.toPlainText()
+                        else -> brief(
+                            "排卡管理",
+                            "本功能可以提供机厅人数查询及更新功能，可以点击下方按钮进行操作："
+                        ).toMessage(Keyboard.create {
+                            row {
+                                at("查询人数", "几", enter = true, id = "")
+                                at("添加机厅", "/排卡管理 添加机厅 机厅名称", id = "")
+                                at("删除机厅", "/排卡管理 删除机厅 机厅名称", id = "")
+                            }
+                            row {
+                                at("查看别名", "/排卡管理 查看别名 机厅名称", id = "")
+                                at("添加别名", "/排卡管理 添加别名 机厅名称 别名名称", id = "")
+                                at("删除别名", "/排卡管理 删除别名 机厅名称 别名名称", id = "")
+                            }
+                        })
+                    })
                     is IllegalArgsException -> reply(e.message ?: "")
                     is NotFoundException -> reply(e.message ?: "")
                     else -> e.printStackTrace()
@@ -67,7 +83,7 @@ class QueueController(
         if (textMode())
             reply("添加机厅成功。")
         else
-            reply(MarkdownTemplates.Templates.queue("排卡管理", "添加机厅成功。", name))
+            reply(queue("排卡管理", "添加机厅成功。", name))
     }
 
     suspend fun GroupMessageEvent.delete(name: String) {
@@ -75,7 +91,7 @@ class QueueController(
         if (textMode())
             reply("删除机厅成功。")
         else
-            reply(MarkdownTemplates.Templates.queue("排卡管理", "删除机厅成功。", name))
+            reply(queue("排卡管理", "删除机厅成功。", name))
     }
 
     suspend fun GroupMessageEvent.addAlias(
@@ -88,7 +104,7 @@ class QueueController(
         if (textMode())
             reply("添加机厅别名成功。")
         else
-            reply(MarkdownTemplates.Templates.queue("排卡管理", "添加机厅别名成功。", name))
+            reply(queue("排卡管理", "添加机厅别名成功。", name))
     }
 
     suspend fun GroupMessageEvent.deleteAlias(
@@ -101,7 +117,7 @@ class QueueController(
         if (textMode())
             reply("删除机厅别名成功。")
         else
-            reply(MarkdownTemplates.Templates.queue("排卡管理", "删除机厅别名成功。", name))
+            reply(queue("排卡管理", "删除机厅别名成功。", name))
     }
 
     suspend fun GroupMessageEvent.aliases(
@@ -112,7 +128,7 @@ class QueueController(
         if (textMode())
             reply("机厅别名如下：$aliases")
         else
-            reply(MarkdownTemplates.Templates.queue("排卡管理", "机厅别名如下：$aliases", name))
+            reply(queue("排卡管理", "机厅别名如下：$aliases", name))
     }
 
     suspend fun GroupMessageEvent.setGroup(targetName: String) {
@@ -121,7 +137,7 @@ class QueueController(
         if (textMode())
             reply("设置分组成功。")
         else
-            reply(MarkdownTemplates.Templates.queue("排卡管理", "设置分组成功。"))
+            reply(queue("排卡管理", "设置分组成功。"))
     }
 
     fun validateAlias(raw: String ?= null): String {
@@ -142,7 +158,7 @@ class QueueController(
         if (arcades.size == 1) {
             val nowInfo = status(arcades.first(), nowTime)
             return if (textMode()) nowInfo.toPlainText()
-            else MarkdownTemplates.Templates.queue("排卡管理", nowInfo, arcades.first().name)
+            else queue("排卡管理", nowInfo, arcades.first().name)
         }
         val countInfo = arcades.joinToString("\n") { arcade ->
             status(arcade, nowTime)
@@ -156,7 +172,20 @@ class QueueController(
                 appendLine("更新数据请使用“机厅名+数量”的格式，如 “jt3” 或 “jt+1” 或 “jt-1”。")
             }.toPlainText()
         else
-            MarkdownTemplates.Templates.queueUpdate(countInfo)
+            Markdown(MarkdownData(buildString {
+                appendLine("**机厅排卡人数：**")
+                appendLine()
+                appendLine(countInfo.split("\n").joinToString("\n") { "> $it" })
+                appendLine("> ")
+                appendLine("> 更新数据请使用“机厅名+数量”。")
+                appendLine("\t例：某某机厅3")
+                appendLine("\t例：机厅+1")
+                append("\t例：jt-2")
+            }), Keyboard.create {
+                row {
+                    at("更新人数", "\n", id = "")
+                }
+            })
     }
 
     private fun status(
@@ -188,10 +217,17 @@ class QueueController(
                     if (textMode())
                         reply("当前群未设置机厅，请使用“@可怜BOT /排卡管理 添加机厅”来添加机厅。")
                     else
-                        reply(
-                            MarkdownTemplates.Templates.queueInit(
-                            "排卡管理",
-                            "当前群未设置机厅，请点击下方按钮添加机厅。"
+                        reply(Markdown(
+                            MarkdownData(buildString {
+                                appendLine("**排卡管理**")
+                                appendLine()
+                                appendLine("当前群未设置机厅，请点击下方按钮添加机厅。")
+                            }),
+                            Keyboard.create {
+                                row {
+                                    at("添加机厅", "/排卡管理 添加机厅 机厅名称", id = "")
+                                }
+                            }
                         ))
                     return
                 }
@@ -210,8 +246,7 @@ class QueueController(
                 if (textMode())
                     reply("更新成功，现在${result.arcade.name}人数为${result.arcade.value}人。")
                 else
-                    reply(
-                        MarkdownTemplates.Templates.queue(
+                    reply(queue(
                         "排卡管理", "更新成功，现在${result.arcade.name}人数为${result.arcade.value}人。",
                         result.arcade.name
                     ))
@@ -225,4 +260,18 @@ class QueueController(
         appendLine("修改机厅：@可怜BOT 排卡管理 添加机厅/删除机厅 机厅名称")
         appendLine("机厅别名：@可怜BOT 排卡管理 查看别名/添加别名/删除别名 机厅名称 (别名)")
     }.trim().newLine()
+    
+    private fun queue(
+        title: String,
+        content: String,
+        now: String? = null
+    ) = Markdown(MarkdownData("**$title**\n\n$content"), Keyboard.create {
+        row {
+            at("查询人数", "/j", enter = true, id = "")
+            now?.let {
+                at("添加别名", "/排卡管理 添加别名 $it 这里填别名", id = "")
+            }
+            at("更新人数", now ?: "\n", id = "")
+        }
+    })
 }

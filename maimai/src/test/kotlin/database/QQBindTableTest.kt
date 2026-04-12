@@ -3,7 +3,6 @@ package xyz.xszq.bot.database
 import kotlinx.coroutines.test.runTest
 import xyz.xszq.bot.controller.ControllerTest.Companion.newOpenId
 import kotlin.random.Random
-import kotlin.random.nextLong
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

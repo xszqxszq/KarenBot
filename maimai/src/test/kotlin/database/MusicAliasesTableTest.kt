@@ -1,12 +1,12 @@
 package xyz.xszq.bot.database
 
 import kotlinx.coroutines.test.runTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import xyz.xszq.bot.music.GameVersion
 import xyz.xszq.bot.music.MusicGenre
 import xyz.xszq.bot.music.MusicInfo
 import xyz.xszq.bot.music.MusicType
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class MusicAliasesTableTest: MaimaiDatabaseTest() {
     @Test

@@ -2,12 +2,12 @@ package xyz.xszq.bot.controller
 
 import kotlinx.coroutines.test.runTest
 import xyz.xszq.bot.controller.ControllerTest.Companion.newOpenId
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import xyz.xszq.bot.database.MaimaiDatabaseTest
 import xyz.xszq.bot.database.MusicAliasesTable
 import xyz.xszq.bot.database.MusicAliasesVoteTable
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class MusicControllerTest: MaimaiDatabaseTest() {
     /**

@@ -1,12 +1,11 @@
 package xyz.xszq.bot.controller
 
 import kotlinx.coroutines.test.runTest
-import xyz.xszq.bot.controller.ControllerTest.Companion.newOpenId
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import xyz.xszq.bot.database.MaimaiDatabaseTest
 import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.database.QQBindTable
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class SettingsControllerTest: MaimaiDatabaseTest() {
     /**

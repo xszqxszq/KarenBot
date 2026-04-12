@@ -1,11 +1,15 @@
 package xyz.xszq.bot.music
 
+import io.ktor.http.*
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.localCurrentDirVfs
 import korlibs.io.util.toStringDecimal
-import xyz.xszq.bot.component.MarkdownTemplates
 import xyz.xszq.bot.message.Image
+import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.newLine
+import xyz.xszq.bot.payload.markdown.Keyboard
+import xyz.xszq.bot.payload.markdown.MarkdownData
+import xyz.xszq.bot.payload.markdown.RenderData
 import xyz.xszq.bot.plus
 
 class MusicInfo(
@@ -56,5 +60,70 @@ class MusicInfo(
 
     fun infoMD(
         jacketUrl: String
-    ) = MarkdownTemplates.Templates.music(this, "$jacketUrl/${resourceId}.jpg")
+    ) = Markdown(MarkdownData(buildString {
+        appendLine("![img#190px #190px]($jacketUrl/${resourceId}.jpg)")
+        appendLine("**${id}. ${name}**")
+        appendLine("**曲师:** $artist")
+        appendLine("**分类:** ${run {
+            val command = "${genre.genreName}有什么歌".encodeURLParameter()
+            val genreName = genre.genreName.encodeURLParameter()
+            "<qqbot-cmd-input text=\"$command\" show=\"$genreName\" reference=\"false\"/>"
+        }}")
+        appendLine("**版本:** ${version.name}")
+        appendLine("**BPM:** ${run {
+            val command = "BPM查歌 $bpm".encodeURLParameter()
+            val bpm = bpm.toString().encodeURLParameter()
+            "<qqbot-cmd-input text=\"$command\" show=\"$bpm\" reference=\"false\"/>"
+        }}")
+        appendLine("**定数:** ${
+            charts.joinToString("/") {
+                val command = "定数查歌 ${it.levelValue}".encodeURLParameter()
+                val levelValue = it.levelValue.toString().encodeURLParameter()
+                "<qqbot-cmd-input text=\"$command\" show=\"$levelValue\" reference=\"false\"/>"
+            }
+        }")
+        appendLine("**谱师:** ${
+            charts.joinToString("/") {
+                val designer = it.notesDesigner.ifBlank { "-" }
+                if (designer != "-") {
+                    val command = "谱师查歌 $designer".encodeURLParameter()
+                    "<qqbot-cmd-input text=\"$command\" show=\"${designer.encodeURLParameter()}\" reference=\"false\"/>"
+                } else designer
+            }
+        }")
+        appendLine("**拟合定数:** ${
+            charts.joinToString("/") {
+                if (it.fitLevelValue == 0.0) "-" else it.fitLevelValue.toStringDecimal(1)
+            }
+        }")
+    }), Keyboard.create {
+        row {
+            charts.forEach { chart ->
+                val emoji = chart.difficulty.emoji
+                val display = if (charts.size < 5)
+                    "$emoji${chart.difficulty.brief}"
+                else
+                    emoji
+                at(display, "${chart.difficulty.brief}${id}", enter = true, id = "level")
+            }
+        }
+        row {
+            at("💯查成绩", "info $id", enter = true, id = "1")
+            at("📜歌50", "歌50 $id", enter = true, id = "2")
+        }
+        row {
+            at("🔊试听一下", "预览id$id", enter = true, style = RenderData.GRAY, id = "3")
+            at("➕添加别名", "添加别名 $id", style = RenderData.GRAY, id = "4")
+        }
+    })
+
+    private val MusicDifficulty.emoji: String
+        get() = when(this) {
+            MusicDifficulty.Basic -> "\uD83D\uDFE9"
+            MusicDifficulty.Advanced -> "\uD83D\uDFE8"
+            MusicDifficulty.Expert -> "\uD83D\uDFE5"
+            MusicDifficulty.Master -> "\uD83D\uDFEA"
+            MusicDifficulty.ReMaster -> "⬜"
+            MusicDifficulty.Utage -> "\uD83D\uDFEB"
+        }
 }

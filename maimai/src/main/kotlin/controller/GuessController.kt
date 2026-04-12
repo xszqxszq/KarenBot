@@ -12,7 +12,7 @@ import org.jetbrains.skia.Rect
 import org.jetbrains.skia.Surface
 import xyz.xszq.bot.*
 import xyz.xszq.bot.Maimai.Companion.textMode
-import xyz.xszq.bot.component.MarkdownTemplates
+import xyz.xszq.bot.component.MarkdownTemplates.Templates.brief
 import xyz.xszq.bot.database.GuessGameStatus
 import xyz.xszq.bot.database.GuessGameTable
 import xyz.xszq.bot.database.MaimaiSettingsTable
@@ -246,7 +246,7 @@ class GuessController(
             if (textMode())
                 eventToReply[contextId] ?.reply(hint)
             else
-                eventToReply[contextId] ?.reply(MarkdownTemplates.Templates.guess(hint))
+                eventToReply[contextId] ?.reply(brief("舞萌猜歌", hint).toMessage(buttons))
             eventToReply[contextId] ?.save(GuessGameStatus.Classical(
                 music.id,
                 descriptions.subList(index + 1, descriptions.size),
@@ -266,10 +266,10 @@ class GuessController(
                 }
             } else {
                 val uploaded = bot.cos.uploadBinary(cropped, "jpg")
-                eventToReply[contextId] ?.reply(
-                    MarkdownTemplates.Templates.guessCropped(
-                    uploaded.url, hint)
-                )
+                eventToReply[contextId] ?.reply(guessImage(
+                    uploaded.url,
+                    hint
+                ).toMessage(buttons))
                 maimai.scope.launch {
                     delay(10000L)
                     bot.cos.deleteFromCos(uploaded.filename)
@@ -284,7 +284,7 @@ class GuessController(
             eventToReply[contextId] ?.reply(hint)
         } else {
             val url = "$jacketUrl/${music.resourceId}.jpg"
-            eventToReply[contextId] ?.reply(MarkdownTemplates.Templates.guessFinished(url, hint.text))
+            eventToReply[contextId] ?.reply(guessFinished(url, hint.text))
         }
         endGame(subscribesAt)
     }
@@ -308,7 +308,7 @@ class GuessController(
                 reply(hint)
             } else {
                 val url = "$jacketUrl/${music.resourceId}.jpg"
-                reply(MarkdownTemplates.Templates.guessFinished(url, hint.text))
+                reply(guessFinished(url, hint.text))
             }
             return
         }
@@ -322,7 +322,7 @@ class GuessController(
                     reply(hint)
                 } else {
                     val url = "$jacketUrl/${music.resourceId}.jpg"
-                    reply(MarkdownTemplates.Templates.guessFinished(url, hint.text))
+                    reply(guessFinished(url, hint.text))
                 }
                 return
             }
@@ -446,7 +446,11 @@ class GuessController(
             }
         }
         appendLine("> \uD83D\uDCA1已开出字母：${chars.joinToString(", ")}")
-    }), if (!all) getOpeningButtons() else MarkdownTemplates.Keyboards.GUESS_OPEN_AGAIN)
+    }), if (!all) getOpeningButtons() else Keyboard.create {
+        row {
+            at("🕹️再玩一把", "舞萌开字母", enter = true, id = "1")
+        }
+    })
 
     private fun GroupMessageEvent.showAdminPanel(
         disable: Boolean
@@ -513,6 +517,38 @@ class GuessController(
                     style = RenderData.GRAY
                 )
             )
+        }
+    }
+
+
+
+    private fun guessImage(
+        url: String,
+        description: String
+    ) = MarkdownData(buildString {
+        appendLine("**舞萌猜歌**")
+        appendLine()
+        appendLine("![img #300px #300px]($url)")
+        appendLine()
+        append(description)
+    })
+
+    private fun guessFinished(
+        url: String,
+        hint: String
+    ) = guessImage(url, hint).toMessage(Keyboard.create {
+        row {
+            at("🕹️再玩一把", "猜歌", enter = true, id = "1")
+        }
+    })
+
+
+    private val buttons = Keyboard.create {
+        row {
+            at("⬇输入答案", " ", style = RenderData.FILLED_BLUE, id = "1")
+        }
+        row {
+            at("不玩了", "不玩了", enter = true, style = RenderData.RED, id = "2")
         }
     }
 

@@ -4,14 +4,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import xyz.xszq.bot.database.GuessGameStatus
 import xyz.xszq.bot.database.GuessGameTable
 import xyz.xszq.bot.database.MaimaiDatabaseTest
 import xyz.xszq.bot.database.MaimaiSettingsTable
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class GuessControllerTest: MaimaiDatabaseTest() {
     /**

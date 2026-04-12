@@ -5,6 +5,7 @@ import korlibs.io.file.std.localCurrentDirVfs
 import xyz.xszq.bot.*
 import xyz.xszq.bot.Maimai.Companion.textMode
 import xyz.xszq.bot.component.MarkdownTemplates
+import xyz.xszq.bot.component.MarkdownTemplates.Keyboards.single
 import xyz.xszq.bot.database.MusicAliasesTable
 import xyz.xszq.bot.database.MusicAliasesVoteTable
 import xyz.xszq.bot.event.MessageEvent
@@ -231,9 +232,8 @@ class MusicController(
                 if (textMode())
                     reply(text.newLine())
                 else
-                    reply(
-                        MarkdownTemplates.Templates.brief("别名列表", text)
-                        .toMessage(MarkdownTemplates.Keyboards.aliases("添加别名 id${music.id}")))
+                    reply(MarkdownTemplates.Templates.brief("别名列表", text)
+                        .toMessage(single("添加别名 id${music.id}", "添加别名")))
             }
         }
         startsWith("添加别名") { raw ->
@@ -515,7 +515,7 @@ class MusicController(
                 else
                     reply(MarkdownTemplates.Templates.brief("别名投票", buildString {
                         appendLine("投票成功，该别名还需${-votes}票通过。")
-                    }).toMessage(MarkdownTemplates.Keyboards.aliasVote("添加别名 id${music.id} $alias")))
+                    }).toMessage(single("添加别名 id${music.id} $alias", "点我投票", enter = true)))
             }
         } ?: run {
             if (textMode())
@@ -524,7 +524,7 @@ class MusicController(
                 reply(MarkdownTemplates.Templates.brief("别名投票", buildString {
                     appendLine("别名添加成功，当有3人投票时别名将通过。")
                     appendLine("其他人可以点击下方按钮，或者发送“添加别名 ${music.id} ${alias}”来投票。")
-                }).toMessage(MarkdownTemplates.Keyboards.aliasVote("添加别名 id${music.id} $alias")))
+                }).toMessage(single("添加别名 id${music.id} $alias", "点我投票", enter = true)))
         }
     }
     companion object {

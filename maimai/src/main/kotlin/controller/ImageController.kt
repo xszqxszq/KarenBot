@@ -8,16 +8,15 @@ import org.jetbrains.skia.Image
 import xyz.xszq.bot.*
 import xyz.xszq.bot.Maimai.Companion.textMode
 import xyz.xszq.bot.component.MarkdownTemplates
+import xyz.xszq.bot.component.MarkdownTemplates.Keyboards.single
 import xyz.xszq.bot.component.image.FilterParams
-import xyz.xszq.bot.database.MaimaiSettingsTable
 import xyz.xszq.bot.event.MessageEvent
-import xyz.xszq.bot.exception.FilterNoResultException
-import xyz.xszq.bot.exception.FilterTooManyException
-import xyz.xszq.bot.exception.NoDataException
-import xyz.xszq.bot.exception.NotFoundException
-import xyz.xszq.bot.exception.NotSupportedException
+import xyz.xszq.bot.exception.*
+import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.music.*
 import xyz.xszq.bot.payload.LocalCourseInfo
+import xyz.xszq.bot.payload.markdown.Keyboard
+import xyz.xszq.bot.payload.markdown.MarkdownData
 import xyz.xszq.bot.query.ComboQuery
 import xyz.xszq.bot.query.ComboQuery.filterCharts
 import xyz.xszq.bot.query.ComboQuery.filterMusics
@@ -248,10 +247,28 @@ class ImageController(
             return
         }
         upload(event) { url ->
-            reply(
-                MarkdownTemplates.Templates.image(
-                url, Pair(width, height), command, text, page, totalPages
-            ))
+            reply(Markdown(MarkdownData(buildString {
+                appendLine("**查询结果**")
+                appendLine()
+                appendLine("![img #${width}px #${height}px]($url)")
+                appendLine()
+                append(text ?: "")
+            }), Keyboard.create {
+                row {
+                    at("💯我也要查", command, id = "1")
+                    link("随心配", "https://otmdb.cn/bot/maimai/combo", enter = true, id = "2")
+                    at("🎨修改设置", "设置mai", enter = true, id = "3")
+                }
+                page?.let {
+                    if (totalPages == null || totalPages <= 1) return@let
+                    row {
+                        if (page > 1)
+                            at("⬅️上一页", "$command ${page - 1}", enter = true, id = "4")
+                        if (page < totalPages)
+                            at("➡️下一页", "$command ${page + 1}", enter = true, id = "5")
+                    }
+                }
+            }))
         }
     }
 
@@ -332,13 +349,8 @@ class ImageController(
             if (textMode())
                 reply(help.newLine())
             else
-                reply(
-                    MarkdownTemplates.Templates.brief(
-                    "舞萌DX",
-                    help
-                ).toMessage(
-                    MarkdownTemplates.Keyboards.tryIt("歌50")
-                ))
+                reply(MarkdownTemplates.Templates.brief("舞萌DX", help)
+                    .toMessage(single("歌50 ", "⬇试一试")))
             return
         }
         val (music, difficulty) = selectMusic(

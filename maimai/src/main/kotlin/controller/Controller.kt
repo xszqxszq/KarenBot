@@ -9,11 +9,15 @@ import xyz.xszq.bot.api.LXNS
 import xyz.xszq.bot.api.MaimaiAPI
 import xyz.xszq.bot.component.MaimaiQuery
 import xyz.xszq.bot.component.MarkdownTemplates
+import xyz.xszq.bot.component.MarkdownTemplates.Templates.brief
 import xyz.xszq.bot.component.WaitingEventData
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.*
+import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.music.UserQueryParams
 import xyz.xszq.bot.newLine
+import xyz.xszq.bot.payload.markdown.Keyboard
+import xyz.xszq.bot.payload.markdown.MarkdownData
 import xyz.xszq.bot.reply
 
 sealed class Controller(
@@ -46,7 +50,11 @@ sealed class Controller(
         if (textMode())
             reply(MaimaiQuery.NO_QQ_BINDINGS)
         else
-            reply(MarkdownTemplates.Templates.BIND_QQ)
+            reply(brief("舞萌DX", "为了继续后续查询，请输入您的QQ号来绑定：").toMessage(Keyboard.create {
+                row {
+                    at("⬇点我输入", "/bind ", id = "1")
+                }
+            }))
     }
     suspend fun MessageEvent.messageUserNeedBind() {
         if (textMode())
@@ -62,7 +70,11 @@ sealed class Controller(
             if (textMode())
                 reply(MaimaiQuery.USER_EULA)
             else
-                reply(MarkdownTemplates.Templates.USER_EULA)
+                reply(brief("舞萌DX", "请前往查分器同意用户协议再进行查询：").toMessage(Keyboard.create {
+                    row {
+                        link("前往查分器", "https://otmdb.cn/jump/maimaidxprober", id = "1")
+                    }
+                }))
         } else {
             reply(MaimaiQuery.USER_DENIED)
         }
@@ -82,7 +94,21 @@ sealed class Controller(
                     is LXNS -> appendLine("落雪查分器：https://otmdb.cn/jump/lxnsprober_import")
                 }
             }.trim().newLine())
-        else reply(MarkdownTemplates.Templates.importData(backend))
+        else
+            reply(brief("舞萌DX", "您似乎尚未导入舞萌DX分数到查分器，请参考下方教程：").toMessage(Keyboard.create {
+                when (backend) {
+                    is DivingFish -> row {
+                        link("🐟水鱼(电脑/iOS)", "https://otmdb.cn/jump/maimaidxprober_import", id = "1")
+                    }
+                    is LXNS -> row {
+                        link("❄落雪(电脑/手机)", "https://otmdb.cn/jump/lxnsprober_import", id = "2")
+                    }
+                }
+                row {
+                    link("🐇UsagiPass(iOS/安卓)", "https://otmdb.cn/jump/maimai_prober_mobile", id = "3")
+                    link("🤖可怜BOT(安卓)", "https://bot-docs.otmdb.cn/maimai/update", id = "4")
+                }
+            }))
     }
     suspend fun MessageEvent.messageNotSupported(message: String) {
         reply(message)
@@ -106,7 +132,13 @@ sealed class Controller(
                 appendLine(authUrl)
             }.trim().newLine())
         } else {
-            reply(MarkdownTemplates.Templates.oauth(authUrl))
+            reply(Markdown(MarkdownData(buildString {
+                appendLine("**请求授权**")
+                appendLine()
+                append("使用该功能时，需要您授权BOT访问您在落雪查分器的全部成绩信息，请点击下方登录并授权：")
+            }), Keyboard.create {
+                row { link("点我授权", authUrl) }
+            }))
         }
     }
 }
