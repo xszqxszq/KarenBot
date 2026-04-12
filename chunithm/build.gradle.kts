@@ -1,0 +1,61 @@
+val exposedVersion: String by rootProject.extra
+val hopliteVersion: String by rootProject.extra
+val korlibsVersion: String by rootProject.extra
+val ktorVersion: String by rootProject.extra
+plugins {
+    kotlin("jvm")
+    kotlin("plugin.serialization")
+}
+
+group = "xyz.xszq.bot"
+version = "9.0"
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly(project(":"))
+    implementation("com.sksamuel.hoplite:hoplite-core:${hopliteVersion}")
+    implementation("com.sksamuel.hoplite:hoplite-yaml:${hopliteVersion}")
+    implementation("com.soywiz.korge:korge-core:${korlibsVersion}")
+    implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
+    implementation("io.github.pdvrieze.xmlutil:core-jdk:0.91.0-RC1")
+    implementation("io.github.pdvrieze.xmlutil:serialization-jvm:0.91.0-RC1")
+    implementation("io.ktor:ktor-client-core:${ktorVersion}")
+    implementation("io.ktor:ktor-client-content-negotiation:${ktorVersion}")
+    implementation("io.ktor:ktor-client-okhttp:${ktorVersion}")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:${ktorVersion}")
+    implementation("mysql:mysql-connector-java:8.0.33")
+    implementation("org.jetbrains.exposed:exposed-core:${exposedVersion}")
+    implementation("org.jetbrains.exposed:exposed-crypt:${exposedVersion}")
+    implementation("org.jetbrains.exposed:exposed-dao:${exposedVersion}")
+    implementation("org.jetbrains.exposed:exposed-jdbc:${exposedVersion}")
+    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:${exposedVersion}")
+    implementation("org.jetbrains.exposed:exposed-json:${exposedVersion}")
+    implementation("org.jetbrains.exposed:exposed-money:${exposedVersion}")
+    implementation("org.jetbrains.exposed:exposed-spring-boot-starter:${exposedVersion}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
+    implementation("org.mariadb.jdbc:mariadb-java-client:3.3.1")
+    implementation("xyz.xszq:shinobu:1.0.4")
+    testImplementation("com.soywiz.korge:korge-core:${korlibsVersion}")
+    testImplementation(kotlin("test"))
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
+tasks.jar {
+    archiveBaseName.set("chunithm")
+    archiveClassifier.set("")
+
+    manifest {
+        attributes(
+            "Plugin-Class" to "xyz.xszq.bot.Chunithm"
+        )
+    }
+}
+kotlin {
+    jvmToolchain(22)
+}
