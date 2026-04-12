@@ -59,7 +59,7 @@ class Touhou(
             reply(Markdown(MarkdownData(buildString {
                 appendLine("**随机东方原曲**")
                 appendLine()
-                appendLine("${target.name}\r来自${game.id}. ${game.name}")
+                appendLine("${target.name}\n来自${game.id}. ${game.name}")
             }), Keyboard.create {
                 row {
                     button(

@@ -282,7 +282,7 @@ class ImageController(
         val (elapsed, result) = countTime {
             maimai.image.rating.bests(total, response, api.name)
         }
-        result.sendResultImage("b50", this, "生成时间：${elapsed}ms\r${randomTips()?:""}")
+        result.sendResultImage("b50", this, "生成时间：${elapsed}ms\n${randomTips()?:""}")
     }
     suspend fun MessageEvent.handleRecent(
         total: Int,
@@ -304,7 +304,7 @@ class ImageController(
                 api = api.name
             )
         }
-        result.sendResultImage("r50", this, "生成时间：${elapsed}ms\r${randomTips()?:""}")
+        result.sendResultImage("r50", this, "生成时间：${elapsed}ms\n${randomTips()?:""}")
     }
     suspend fun MessageEvent.handleCombo(
         total: Int,
@@ -330,7 +330,7 @@ class ImageController(
                 api = api.name
             )
         }
-        result.sendResultImage("${combo}50", this, "生成时间：${elapsed}ms\r${randomTips()?:""}")
+        result.sendResultImage("${combo}50", this, "生成时间：${elapsed}ms\n${randomTips()?:""}")
     }
 
     suspend fun MessageEvent.handleMusicRating(
@@ -388,7 +388,7 @@ class ImageController(
                 api = api.name
             )
         }
-        result.sendResultImage("歌50", this, "生成时间：${elapsed}ms\r${randomTips()?:""}")
+        result.sendResultImage("歌50", this, "生成时间：${elapsed}ms\n${randomTips()?:""}")
     }
     suspend fun MessageEvent.handleScoreList(
         combo: String,
@@ -418,7 +418,7 @@ class ImageController(
         image.sendResultImage(
             "${combo}分数列表",
             this,
-            "生成时间：${elapsed}ms\r${randomTips()?:""}",
+            "生成时间：${elapsed}ms\n${randomTips()?:""}",
             page = nowPage,
             totalPages = totalPages
         )
