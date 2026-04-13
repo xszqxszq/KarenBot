@@ -521,11 +521,8 @@ class Meme: Plugin() {
             buildString {
                 append("![preview #${width}px #16px]($url)")
                 append(' ')
-                append("<qqbot-cmd-input text=\"")
-                append("/pjsk $characterId".encodeURLParameter())
-                append("\" show=\"")
-                append(displayName.encodeURLParameter())
-                append("\" reference=\"true\"/>")
+                val command = "/pjsk $characterId".encodeURLParameter()
+                append("[$displayName](mqqapi://aio/inlinecmd?command=${command}&enter=true&reply=false)")
             }
         }.chunked(2)
 
@@ -549,11 +546,8 @@ class Meme: Plugin() {
             buildString {
                 append("![preview #${width}px #26px]($url)")
                 append(' ')
-                append("<qqbot-cmd-input text=\"")
-                append("/pjsk ${character}${id} ".encodeURLParameter())
-                append("\" show=\"")
-                append("#${id}".encodeURLParameter())
-                append("\" reference=\"true\"/>")
+                val command = "/pjsk ${character}${id} ".encodeURLParameter()
+                append("[#${id}](mqqapi://aio/inlinecmd?command=${command}&enter=false&reply=false)")
             }
         }.chunked(4)
         
