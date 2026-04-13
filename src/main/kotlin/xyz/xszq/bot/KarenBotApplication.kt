@@ -10,6 +10,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
 import kotlinx.coroutines.*
+import org.jetbrains.exposed.sql.Database
 import kotlinx.serialization.json.Json
 import xyz.xszq.bot.config.BotConfig
 import xyz.xszq.bot.config.CosConfig
@@ -65,12 +66,19 @@ object KarenBotApplication {
             else listOf()
         }
 
+        val database = Database.connect(
+            url = botConfig.database.url,
+            driver = botConfig.database.driver,
+            user = botConfig.database.username,
+            password = botConfig.database.password
+        )
+
         val filter = WordFilter(sensitiveWords)
         val api = OpenAPI(botConfig, filter)
         val cos = TencentCos(cosConfig)
         val logger = KotlinLogging.logger {}
 
-        val pluginLoader = PluginLoader(api, cos)
+        val pluginLoader = PluginLoader(api, cos, database)
         pluginLoader.reloadAllPlugins()
 
         System.getProperty("cli")?.let {

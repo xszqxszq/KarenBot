@@ -1,6 +1,7 @@
 package xyz.xszq.bot
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.jetbrains.exposed.sql.Database
 import xyz.xszq.bot.subscribe.SubscribeBuilder
 
 /**
@@ -10,6 +11,8 @@ abstract class Plugin {
     lateinit var plugin: String
     lateinit var pluginLoader: PluginLoader
     val logger = KotlinLogging.logger {}
+    val database: Database
+        get() = pluginLoader.database
 
     /**
      * This executes when Plugin is loaded.

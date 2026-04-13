@@ -3,6 +3,7 @@ package xyz.xszq.bot
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.util.collections.*
 import kotlinx.coroutines.*
+import org.jetbrains.exposed.sql.Database
 import xyz.xszq.bot.message.FileManager
 import xyz.xszq.bot.subscribe.SubscribeManager
 import java.io.File
@@ -16,7 +17,8 @@ import java.util.jar.JarFile
  */
 class PluginLoader(
     val api: OpenAPI,
-    cos: TencentCos
+    cos: TencentCos,
+    val database: Database
 ) {
     val bot = Bot(api, cos, this)
     val subscribes = SubscribeManager()

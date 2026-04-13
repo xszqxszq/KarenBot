@@ -82,6 +82,7 @@ class SubscribeManager(
             launchHandle { subscribe.handle(event) }
         }
 
+        val prefix = explicitPrefix(event)
         val groups = linkedMapOf<String, MutableList<TextSubscribe>>()
         plugins.values.forEach { subscribes ->
             subscribes.forEach { subscribe ->
@@ -90,6 +91,8 @@ class SubscribeManager(
                     launchHandle { subscribe.handle(event) }
                     return@forEach
                 }
+                if (prefix != null && textSubscribe.parent != prefix)
+                    return@forEach
                 if (textSubscribe.matches(event)) {
                     groups.getOrPut(textSubscribe.domain!!) { mutableListOf() }.add(textSubscribe)
                 }
@@ -129,6 +132,19 @@ class SubscribeManager(
         }
 
         return same.minBy { it.order }
+    }
+
+    private fun explicitPrefix(event: Event): String? {
+        if (event !is MessageEvent)
+            return null
+        val now = event.text.trim()
+        if (!now.startsWith("/"))
+            return null
+        return plugins.values.asSequence()
+            .flatMap { it.asSequence() }
+            .mapNotNull { (it as? TextSubscribe)?.parent }
+            .distinct()
+            .firstOrNull { now.startsWith(it) }
     }
 
     @OptIn(DelicateCoroutinesApi::class)

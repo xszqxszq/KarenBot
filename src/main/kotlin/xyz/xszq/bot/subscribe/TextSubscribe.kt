@@ -5,7 +5,7 @@ import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.normalizeMessage
 
 abstract class TextSubscribe(
-    private val parent: String? = null,
+    val parent: String? = null,
     private val forceParent: Boolean = false
 ): Subscribe<MessageEvent>() {
     var domain: String? = null

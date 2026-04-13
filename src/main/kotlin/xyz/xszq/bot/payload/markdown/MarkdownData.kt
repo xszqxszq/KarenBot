@@ -26,8 +26,18 @@ data class MarkdownData(
                     result.groupValues[1] to decodeUrlComponent(result.groupValues[2])
                 }
                 val show = attrs["show"] ?: attrs["text"] ?: match.value
-                val text = attrs["text"] ?: attrs["url"] ?: show
+                val text = attrs["command"]
+                    ?: attrs["url"]?.inlineCommand()
+                    ?: attrs["text"]
+                    ?: attrs["url"]
+                    ?: show
                 "[$show]($text)"
+            }
+            .replace(MARKDOWN_LINK_REGEX) { match ->
+                val show = match.groupValues[1]
+                val url = match.groupValues[2]
+                val command = url.inlineCommand() ?: return@replace match.value
+                "[$show]($command)"
             }
             .replace(MARKDOWN_IMAGE_REGEX, "![img](...)")
             .formatMarkdownTables()
@@ -71,6 +81,11 @@ data class MarkdownData(
     private fun decodeUrlComponent(value: String): String =
         URLDecoder.decode(value, StandardCharsets.UTF_8)
 
+    private fun String.inlineCommand(): String? {
+        val command = INLINE_COMMAND_REGEX.find(this)?.groupValues?.get(1) ?: return null
+        return decodeUrlComponent(command)
+    }
+
     class MarkdownBuilder(
         val id: String
     ) {
@@ -85,7 +100,9 @@ data class MarkdownData(
     companion object {
         private val QQ_BOT_CMD_TAG_REGEX = Regex("""<qqbot-cmd-[^\s>/]+\s+[^>]*?/>""")
         private val ATTRIBUTE_REGEX = Regex("(\\w+)=\"([^\"]*)\"")
+        private val MARKDOWN_LINK_REGEX = Regex("""(?<!!)\[([^\]]+)]\(([^)]+)\)""")
         private val MARKDOWN_IMAGE_REGEX = Regex("""!\[[^\]]*]\([^)]*\)""")
+        private val INLINE_COMMAND_REGEX = Regex("(?:^|[?&])command=([^&]+)")
 
         fun create(
             id: String,

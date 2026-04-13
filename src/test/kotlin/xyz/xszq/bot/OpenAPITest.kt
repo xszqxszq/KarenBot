@@ -11,6 +11,7 @@ import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.core.readText
 import io.ktor.utils.io.readRemaining
 import xyz.xszq.bot.config.BotConfig
+import xyz.xszq.bot.config.DatabaseConfig
 import xyz.xszq.bot.payload.MsgType
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -125,7 +126,11 @@ class OpenAPITest {
         filter: WordFilter = WordFilter(emptyList()),
         now: () -> Long = { 0L }
     ) = OpenAPI(
-        config = BotConfig(appId = "app-id", clientSecret = "secret"),
+        config = BotConfig(
+            appId = "app-id",
+            clientSecret = "secret",
+            database = DatabaseConfig("jdbc:h2:mem:test", "org.h2.Driver", "", "")
+        ),
         filter = filter,
         client = HttpClient(engine) {
             install(ContentNegotiation) {
