@@ -139,7 +139,7 @@ sealed class Controller(
     suspend fun MessageEvent.requestOA() {
         val token = UUID.randomUUID().toString()
         maimai.api.lxnsBindTokens[token] = WaitingEventData(this)
-        val authUrl = "${maimai.config.apiServer}/$token"
+        val authUrl = "https://bot-api.otmdb.cn/jump/lxns-oa/$token"
 
         if (textMode()) {
             reply(buildString {
