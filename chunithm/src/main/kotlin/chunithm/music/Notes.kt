@@ -3,13 +3,19 @@ package xyz.xszq.bot.chunithm.music
 import kotlinx.serialization.Serializable
 
 @Serializable
-class Notes(
+data class Notes(
+    val total: Int = 0,
     val tap: Int = 0,
     val hold: Int = 0,
     val slide: Int = 0,
     val air: Int = 0,
     val flick: Int = 0
 ) {
-    val total: Int
-        get() = tap + hold + slide + air + flick
+    constructor(
+        tap: Int,
+        hold: Int,
+        slide: Int,
+        air: Int,
+        flick: Int
+    ) : this(tap + hold + slide + air + flick, tap, hold, slide, air, flick)
 }

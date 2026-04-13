@@ -8,13 +8,13 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
+import org.jetbrains.exposed.sql.Database
 import xyz.xszq.bot.*
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.InteractionEvent
 import xyz.xszq.bot.maimai.component.AliasesSearch
 import xyz.xszq.bot.maimai.component.MaimaiData
 import xyz.xszq.bot.maimai.component.MaimaiQuery
-import xyz.xszq.bot.maimai.config.DatabaseConfig
 import xyz.xszq.bot.maimai.config.MaimaiConfig
 import xyz.xszq.bot.maimai.music.*
 import xyz.xszq.bot.maimai.payload.LocalIconInfo
@@ -33,6 +33,10 @@ class ControllerTest(
     private val api = mockk<OpenAPI>(relaxed = true)
     private val cos = mockk<TencentCos>(relaxed = true)
     private val pluginLoader = mockk<PluginLoader>(relaxed = true)
+    private val database = Database.connect(
+        url = "jdbc:h2:mem:maimai;MODE=MySQL;DB_CLOSE_DELAY=-1",
+        driver = "org.h2.Driver",
+    )
     private var eventIndex = 0
 
     val bot = Bot(api, cos, pluginLoader)
@@ -40,12 +44,6 @@ class ControllerTest(
         plugin = "maimai-test"
         this.pluginLoader = this@ControllerTest.pluginLoader
         config = MaimaiConfig(
-            database = DatabaseConfig(
-                url = "jdbc:h2:mem:maimai;MODE=MySQL;DB_CLOSE_DELAY=-1",
-                driver = "org.h2.Driver",
-                username = "",
-                password = "",
-            ),
             tokens = mapOf("assets-jacket" to "https://example.com"),
             tips = emptyList(),
         )
@@ -64,6 +62,7 @@ class ControllerTest(
     init {
         every { pluginLoader.subscribes } returns subscribes
         every { pluginLoader.bot } returns bot
+        every { pluginLoader.database } returns database
     }
 
     suspend fun register(vararg controllers: Controller) {

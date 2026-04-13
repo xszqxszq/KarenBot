@@ -97,7 +97,7 @@ class MusicController(
             val name = args[0]
             search(name)
         }
-        button("search-word") {
+        button("maimai-search-word") {
             val args = data.split("\n", limit = 2)
             val name = args[0]
             val page = args[1].toInt()
@@ -122,7 +122,7 @@ class MusicController(
                 })
             }
         }
-        button("search-level") {
+        button("maimai-search-level") {
             val args = data.split("\n", limit = 2)
             val (begin, end) = args[0].split(":").map { it.toDouble() }
             val page = args[1].toInt()
@@ -145,7 +145,7 @@ class MusicController(
                 })
             }
         }
-        button("search-level-fit") {
+        button("maimai-search-level-fit") {
             val args = data.split("\n", limit = 2)
             val (begin, end) = args[0].split(":").map { it.toDouble() }
             val page = args[1].toInt()
@@ -165,7 +165,7 @@ class MusicController(
                 }
             }
         }
-        button("search-designer") {
+        button("maimai-search-designer") {
             val args = data.split("\n", limit = 2)
             val name = args[0]
             val page = args[1].toInt()
@@ -185,7 +185,7 @@ class MusicController(
                 }
             }
         }
-        button("search-version") {
+        button("maimai-search-version") {
             val args = data.split("\n", limit = 2)
             val version = args[0]
             val page = args[1].toInt()
@@ -205,7 +205,7 @@ class MusicController(
                 }
             }
         }
-        button("search-artist") {
+        button("maimai-search-artist") {
             val args = data.split("\n", limit = 2)
             val artist = args[0]
             val page = args[1].toInt()
@@ -244,7 +244,7 @@ class MusicController(
             val page = args.getOrNull(1)?.toIntOrNull() ?: 1
             searchBPM(bpm, page)
         }
-        button("search-bpm") {
+        button("maimai-search-bpm") {
             val args = data.split("\n", limit = 2)
             val bpm = args[0].toInt()
             val page = args[1].toInt()
@@ -261,7 +261,7 @@ class MusicController(
                 reply("未找到相关歌曲。")
             }
         }
-        button("search-combo") {
+        button("maimai-search-combo") {
             val args = data.split("\n", limit = 2)
             val query = args[0]
             val page = args[1].toInt()
@@ -444,7 +444,7 @@ class MusicController(
         val (result, nowPage, totalPages) = maimai.aliases.search(name)
             .pagination(page, maxResults)
         showMusics(
-            "search-word",
+            "maimai-search-word",
             name,
             result,
             "",
@@ -463,7 +463,7 @@ class MusicController(
             .filter { it.levelValue in begin..end }
             .pagination(page, maxResults)
         showCharts(
-            "search-level",
+            "maimai-search-level",
             "$begin:$end",
             result,
             "",
@@ -481,7 +481,7 @@ class MusicController(
             .filter { it.fitLevelValue in begin..end }
             .pagination(page, maxResults)
         showCharts(
-            "search-level-fit",
+            "maimai-search-level-fit",
             "$begin:$end",
             result,
             "",
@@ -500,7 +500,7 @@ class MusicController(
             .filter { it.notesDesigner in targets || designer == it.notesDesigner || designer in it.notesDesigner }
             .pagination(page, maxResults)
         showCharts(
-            "search-designer",
+            "maimai-search-designer",
             designer,
             result,
             "",
@@ -516,7 +516,7 @@ class MusicController(
             version in it.version.name
         }.pagination(page, maxResults)
         showMusics(
-            "search-version",
+            "maimai-search-version",
             version,
             result,
             "",
@@ -532,7 +532,7 @@ class MusicController(
             artist in it.artist
         }.pagination(page, maxResults)
         showMusics(
-            "search-artist",
+            "maimai-search-artist",
             artist,
             result,
             "",
@@ -548,7 +548,7 @@ class MusicController(
             .filter { regex.find(it.name) != null }
             .take(maxResults)
         showMusics(
-            "search-regex",
+            "maimai-search-regex",
             raw,
             result,
             ""
@@ -562,7 +562,7 @@ class MusicController(
             .filter { it.bpm == bpm }
             .pagination(page, maxResults)
         showMusics(
-            "search-bpm",
+            "maimai-search-bpm",
             "$bpm",
             result,
             "",
@@ -580,12 +580,12 @@ class MusicController(
             true -> {
                 val charts = filters.filterCharts(maimai.musics())
                 val (result, nowPage, totalPages) = charts.pagination(page, maxResults)
-                showCharts("search-combo", query, result, "", nowPage, totalPages)
+                showCharts("maimai-search-combo", query, result, "", nowPage, totalPages)
             }
             false -> {
                 val musics = filters.filterMusics(maimai.musics())
                 val (result, nowPage, totalPages) = musics.pagination(page, maxResults)
-                showMusics("search-combo", query, result, "", nowPage, totalPages)
+                showMusics("maimai-search-combo", query, result, "", nowPage, totalPages)
             }
         }
         return true

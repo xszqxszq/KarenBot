@@ -25,11 +25,12 @@ data class LXNSPlayer(
     val totalCurrency: Int,
     @SerialName("total_play_count")
     val totalPlayCount: Int,
-    val character: LXNSCollection,
-    @SerialName("map_plate")
-    val namePlate: LXNSCollection,
+    val trophy: LXNSCollection ?= null,
+    val character: LXNSCollection ?= null,
+    @SerialName("name_plate")
+    val namePlate: LXNSCollection ?= null,
     @SerialName("map_icon")
-    val mapIcon: LXNSCollection,
+    val mapIcon: LXNSCollection ?= null,
     @SerialName("upload_time")
-    val uploadTime: String
+    val uploadTime: String ?= null
 )

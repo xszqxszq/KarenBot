@@ -56,10 +56,10 @@ object MarkdownTemplates {
         ): Markdown {
             val rows = result.take(10).joinToString("\n") { music ->
                 val url = "$jacketUrl/${music.resourceId}.jpg"
-                val textAttr = "${displayName ?: type} ${difficulty?.brief ?: ""}id${music.id}"
-                    .trim().encodeURLParameter()
-                val showAttr = "${music.id}. ${music.name}".encodeURLParameter()
-                "![preview #20px #20px]($url) <qqbot-cmd-input text=\"$textAttr\" show=\"$showAttr\" reference=\"false\"/>"
+                val command = "${displayName ?: type} ${difficulty?.brief ?: ""}id${music.id}"
+                    .trim()
+                val musicName = "${music.id}. ${music.name}"
+                "![preview #20px #20px]($url) ${href(command, musicName)}"
             }
 
             val data = MarkdownData("**$title**\n\n$rows")
@@ -80,10 +80,9 @@ object MarkdownTemplates {
         ): Markdown {
             val rows = result.take(10).joinToString("\n") { chart ->
                 val url = "$jacketUrl/${chart.music.resourceId}.jpg"
-                val textAttr = "${displayName ?: type} ${chart.difficulty.brief}id${chart.music.id}"
-                    .trim().encodeURLParameter()
-                val showAttr = "${chart.difficulty.brief}${chart.music.id}. ${chart.music.name}".encodeURLParameter()
-                "![preview #20px #20px]($url) <qqbot-cmd-input text=\"$textAttr\" show=\"$showAttr\" reference=\"false\"/>"
+                val command = "${displayName ?: type} ${chart.difficulty.brief}id${chart.music.id}".trim()
+                val chartName = "${chart.difficulty.brief}${chart.music.id}. ${chart.music.name}"
+                "![preview #20px #20px]($url) ${href(command, chartName)}"
             }
 
             val data = MarkdownData("**$title**\n\n$rows")
@@ -106,6 +105,9 @@ object MarkdownTemplates {
             }
         )
     }
-    fun href(link: String, show: String) =
-        "<qqbot-cmd-input text=\"${link.encodeURLParameter()}\" show=\"${show.encodeURLParameter()}\" reference=\"false\"/>"
+    fun href(
+        link: String,
+        show: String,
+        enter: Boolean = true
+    ) = "[$show](mqqapi://aio/inlinecmd?command=${link.encodeURLParameter()}&enter=${enter}&reply=false)"
 }

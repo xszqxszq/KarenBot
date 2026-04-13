@@ -6,10 +6,8 @@ import com.sksamuel.hoplite.addFileSource
 import korlibs.io.file.std.localCurrentDirVfs
 import korlibs.math.roundDecimalPlaces
 import kotlinx.coroutines.*
-import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.exists
-import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
@@ -42,8 +40,6 @@ class Maimai: Plugin() {
     lateinit var aliases: AliasesSearch
     lateinit var api: ApiController
     private val controllers = mutableListOf<Controller>()
-    // 数据库
-    lateinit var database: Database
 
     // 其他
     var pluginStopped: Boolean = false
@@ -89,11 +85,7 @@ class Maimai: Plugin() {
         MarkdownTemplates.init(this)
 
         // 数据库初始化
-        database = Database.connect(
-            config.database.url, config.database.driver,
-            config.database.username, config.database.password
-        )
-        transaction {
+        transaction(database) {
             listOf(
                 QQBindTable, MusicAliasesTable, MusicAliasesVoteTable,
                 MaimaiSettingsTable, ArcadeTable, ArcadeGroupTable, ArcadeGroupBindTable, GuessGameTable
@@ -160,7 +152,6 @@ class Maimai: Plugin() {
         controllers.forEach { controller ->
             controller.unload()
         }
-        TransactionManager.closeAndUnregister(database)
         logger.info { "[舞萌] 插件已卸载。" }
     }
 

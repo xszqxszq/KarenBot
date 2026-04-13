@@ -3,7 +3,7 @@ package xyz.xszq.bot.chunithm.music
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class MusicDifficulty(val id: Int, val aliases: List<String>) {
+enum class MusicDifficulty(val value: Int, val names: List<String>) {
     Basic(0, listOf("绿谱", "绿")),
     Advanced(1, listOf("黄谱", "黄")),
     Expert(2, listOf("红谱", "红")),
@@ -12,9 +12,10 @@ enum class MusicDifficulty(val id: Int, val aliases: List<String>) {
     WorldsEnd(5, listOf("we谱", "we", "世界末日", "彩"));
 
     companion object {
-        fun of(id: Int): MusicDifficulty =
-            MusicDifficulty.entries.first { it.id == id }
-        fun from(alias: String): MusicDifficulty? =
-            MusicDifficulty.entries.firstOrNull { alias in it.aliases }
+        fun of(value: Int): MusicDifficulty = MusicDifficulty.entries.first { it.value == value }
+        fun from(name: String): MusicDifficulty? = MusicDifficulty.entries.firstOrNull { name in it.names }
     }
+
+    val brief
+        get() = names.last()
 }

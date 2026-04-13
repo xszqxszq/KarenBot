@@ -3,35 +3,30 @@ package xyz.xszq.bot.chunithm.api
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import xyz.xszq.bot.chunithm.music.ChartInfo
-import xyz.xszq.bot.chunithm.music.GameVersion
-import xyz.xszq.bot.chunithm.music.MusicDifficulty
-import xyz.xszq.bot.chunithm.music.MusicGenre
-import xyz.xszq.bot.chunithm.music.MusicInfo
-import xyz.xszq.bot.chunithm.music.Notes
-import xyz.xszq.bot.chunithm.payload.LXNSNotes
-import xyz.xszq.bot.chunithm.payload.LXNSSongs
-import xyz.xszq.bot.chunithm.record.UserQuery
-import xyz.xszq.bot.chunithm.record.UserRating
+import xyz.xszq.bot.chunithm.component.ChunithmData
+import xyz.xszq.bot.chunithm.music.*
+import xyz.xszq.bot.chunithm.payload.*
 
-/**
- * 落雪查分器
- */
 class LXNS(
     val token: String,
     val oauthId: String,
     val oauthSecret: String,
-    val oauthCallback: String
+    val oauthCallback: String,
+    val chunithmData: ChunithmData
 ) : ChunithmAPI {
     override val id = "lxns"
-    override val name = "落雪查分器"
+    override val name = "落雪"
 
-    private val baseUrl = "https://maimai.lxns.net/api/v0"
+    private val apiServer = "https://maimai.lxns.net/api/v0/chunithm"
+    private val musics
+        get() = chunithmData.musics
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -40,91 +35,147 @@ class LXNS(
         install(ContentNegotiation) {
             json(json)
         }
+        install(HttpRequestRetry) {
+            retryOnExceptionOrServerErrors(maxRetries = 5)
+        }
     }
 
     override suspend fun load() {
     }
 
-    override suspend fun getPlayerRating(query: UserQuery): UserRating {
-        TODO()
-    }
-
-    /**
-     * 请求头设置开发者Token
-     */
-    fun HttpRequestBuilder.setDeveloper() {
-        headers["Authorization"] = token
-    }
-    /**
-     * 请求头设置OAuth的AccessToken
-     */
-    fun HttpRequestBuilder.setOAuth(accessToken: String) {
-        headers["Authorization"] = "Bearer $accessToken"
-    }
-
-    /**
-     * 获取所有乐曲
-     */
     suspend fun getMusicList(): Map<Int, MusicInfo> {
-        val data = client.get("$baseUrl/chunithm/song/list").body<LXNSSongs>()
-        val versions = data.versions.map {
-            GameVersion(
-                id = it.id,
-                name = it.title,
-                version = it.version
+        val data = client.get("$apiServer/song/list?notes=true").body<LXNSSongs>()
+        val newest = data.versions.maxByOrNull { it.version } ?: return emptyMap()
+        val versions = data.versions.associate { version ->
+            version.version to GameVersion(
+                id = version.id,
+                name = version.title,
+                version = version.version
             )
         }
-        return data.songs.map {
+        val result = data.songs.map { song ->
             MusicInfo(
-                id = it.id,
-                name = it.title,
-                rights = it.rights,
-                artist = it.artist,
-                genre = MusicGenre.of(it.genre),
-                bpm = it.bpm,
-                version = versions.first { version -> version.version == it.version },
-                locked = it.locked,
-                disabled = it.disabled,
-                map = it.map
+                id = song.id,
+                name = song.title,
+                rights = song.rights,
+                artist = song.artist,
+                genre = MusicGenre.of(song.genre),
+                bpm = song.bpm,
+                version = versions[song.version] ?: GameVersion(0, song.version.toString(), song.version),
+                isNew = song.version == newest.version,
+                locked = song.locked,
+                disabled = song.disabled,
+                map = song.map
             ).also { info ->
-                info.charts = it.difficulties.map { chart ->
+                info.charts = song.difficulties.map { chart ->
                     ChartInfo(
-                        musicInfo = info,
+                        music = info,
                         difficulty = MusicDifficulty.of(chart.difficulty),
                         level = chart.level,
                         levelValue = chart.levelValue,
-                        notes = chart.notes ?.toNotes() ?: Notes(),
+                        notes = chart.notes?.toNotes() ?: Notes(),
                         notesDesigner = chart.noteDesigner,
                         kanji = chart.kanji,
                         star = chart.star
                     )
                 }
             }
-        }.also { musics ->
-            musics.mapNotNull { it.charts.firstOrNull { chart -> chart.difficulty == MusicDifficulty.WorldsEnd } }.forEach {
-                data.songs.firstOrNull { song -> song.id == it.musicInfo.id }?.difficulties
-                    ?.firstOrNull { difficulty -> difficulty.difficulty == it.difficulty.id } ?.let { info ->
-                        it.origin = musics.firstOrNull { music -> music.id == info.originId }
-                    }
+        }
+        result.mapNotNull { music ->
+            music.charts.firstOrNull { chart -> chart.difficulty == MusicDifficulty.WorldsEnd }
+        }.forEach { chart ->
+            val diff = data.songs.firstOrNull { song -> song.id == chart.music.id }
+                ?.difficulties
+                ?.firstOrNull { it.difficulty == chart.difficulty.value }
+            chart.origin = result.firstOrNull { music -> music.id == diff?.originId }
+        }
+        return result.associateBy { music ->
+            music.id
+        }
+    }
+
+    suspend fun getAliases(): Map<Int, Set<String>> = client.get("$apiServer/alias/list")
+        .body<LXNSAliases>()
+        .aliases
+        .associate { alias ->
+            alias.songId to alias.aliases.toSet()
+        }
+
+    override suspend fun getPlayerRating(
+        user: UserQueryParams
+    ): RatingResponse? {
+        val player = getPlayerInfo(user) ?: return null
+        val response = client.get("$apiServer/player/${player.friendCode}/bests") {
+            setDeveloper()
+        }
+        if (response.status != HttpStatusCode.OK)
+            return null
+        val data = response.body<LXNSRatingResponse>()
+        return RatingResponse(
+            player = PlayerInfo(
+                nickname = player.name,
+                rating = player.rating
+            ),
+            settings = PlayerSettings(
+                character = player.character?.id,
+                trophy = player.trophy?.id,
+                plate = player.namePlate?.id,
+                icon = player.mapIcon?.id
+            ),
+            oldRatingList = data.bests.mapNotNull { score ->
+                score.toRecord()
+            },
+            newRatingList = data.newBests.mapNotNull { score ->
+                score.toRecord()
             }
-        }.associateBy { it.id }
+        )
     }
 
-    /**
-     * 获取用户信息
-     */
-    suspend fun getPlayerInfo(query: UserQuery) {
-
+    fun HttpRequestBuilder.setDeveloper() {
+        headers["Authorization"] = token
     }
 
-    /**
-     * 转换为Notes
-     */
-    fun LXNSNotes.toNotes(): Notes = Notes(
+    fun HttpRequestBuilder.setOAuth(
+        accessToken: String
+    ) {
+        headers["Authorization"] = "Bearer $accessToken"
+    }
+
+    suspend fun getPlayerInfo(
+        user: UserQueryParams
+    ): LXNSPlayer? = when (user) {
+        is UserQueryParams.QQ -> {
+            val response = client.get("$apiServer/player/qq/${user.qq}") {
+                setDeveloper()
+            }
+            if (response.status == HttpStatusCode.OK)
+                response.body<LXNSPlayer>()
+            else null
+        }
+        is UserQueryParams.Username -> null
+    }
+
+    fun LXNSNotes.toNotes() = Notes(
+        total = total,
         tap = tap,
         hold = hold,
         slide = slide,
         air = air,
         flick = flick
     )
+
+    fun LXNSScore.toRecord(): Record? {
+        val music = musics[id] ?: return null
+        val chart = music.charts.getOrNull(levelIndex) ?: return null
+        return Record(
+            music = music,
+            chart = chart,
+            score = score,
+            comboStatus = ComboStatus.of(fullCombo),
+            chainStatus = ChainStatus.of(fullChain),
+            clear = clear,
+            rank = rank.orEmpty(),
+            rating = rating ?: 0.0
+        )
+    }
 }

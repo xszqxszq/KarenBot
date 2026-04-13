@@ -3,23 +3,18 @@ package xyz.xszq.bot.chunithm.music
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class MusicGenre(val id: Int, val genreName: String, val aliases: List<String>) {
-    PopsAnime(0, "流行 & 动漫",
-        listOf("动漫", "流行", "二次元")),
-    Niconico(2, "niconico",
-        listOf("nico", "v家", "v", "术力口", "术", "ボカロ", "ボーカロイド", "ニコニコ", "ニコ")),
-    Touhou(3, "东方Project",
-        listOf("东方", "东", "车", "東方")),
-    Original(5, "原创",
-        listOf("中二", "chunithm")),
-    Variety(6, "其他游戏",
-        listOf("其他", "variety")),
-    IrodoriMidori(7, "彩绿",
-        listOf("イロドリミドリ")),
-    GekiMai(9, "音击舞萌",
-        listOf("舞萌音击", "ゲキマイ", "gekimai", "maigeki"));
+enum class MusicGenre(val id: Int, val genreName: String, val names: List<String>) {
+    PopsAnime(0, "流行 & 动漫", listOf("流行 & 动漫", "流行&动漫", "动漫", "流行", "二次元", "pops & anime", "pops&anime")),
+    Niconico(2, "niconico", listOf("niconico", "nico", "v家", "v", "术力口", "术", "ボカロ", "ボーカロイド", "ニコニコ", "ニコ")),
+    Touhou(3, "东方Project", listOf("东方Project", "东方", "东", "车", "東方")),
+    Original(5, "原创", listOf("原创", "中二", "chunithm")),
+    Variety(6, "其他游戏", listOf("其他游戏", "其他", "variety", "game variety")),
+    IrodoriMidori(7, "彩绿", listOf("彩绿", "イロドリミドリ")),
+    GekiMai(9, "音击舞萌", listOf("音击舞萌", "舞萌音击", "ゲキマイ", "gekimai", "maigeki"));
 
     companion object {
-        fun of(genreName: String): MusicGenre = MusicGenre.entries.first { it.genreName == genreName }
+        fun of(name: String): MusicGenre = MusicGenre.entries.firstOrNull { genre ->
+            genre.genreName == name || genre.names.any { value -> value.equals(name, true) }
+        } ?: Original
     }
 }
