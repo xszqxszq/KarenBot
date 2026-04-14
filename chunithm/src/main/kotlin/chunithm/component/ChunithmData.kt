@@ -1,5 +1,9 @@
 package xyz.xszq.bot.chunithm.component
 
+import com.sksamuel.hoplite.ConfigLoaderBuilder
+import com.sksamuel.hoplite.ExperimentalHoplite
+import com.sksamuel.hoplite.addFileSource
+import xyz.xszq.bot.chunithm.config.DesignerConfig
 import xyz.xszq.bot.chunithm.api.LXNS
 import xyz.xszq.bot.chunithm.database.MusicAliasesTable
 import xyz.xszq.bot.chunithm.music.GameVersion
@@ -9,12 +13,18 @@ class ChunithmData {
     val versions = mutableMapOf<String, GameVersion>()
     val musics = mutableMapOf<Int, MusicInfo>()
     lateinit var newestVersion: GameVersion
+    lateinit var designer: DesignerConfig
 
+    @OptIn(ExperimentalHoplite::class)
     suspend fun load(
         api: LXNS
     ) {
         versions.clear()
         musics.clear()
+        designer = ConfigLoaderBuilder.default()
+            .addFileSource("./data/chunithm/designer.yml")
+            .build()
+            .loadConfigOrThrow<DesignerConfig>()
 
         musics.putAll(api.getMusicList())
         versions.putAll(musics.values.map { music ->

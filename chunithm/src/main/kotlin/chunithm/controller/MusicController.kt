@@ -1,5 +1,7 @@
 package xyz.xszq.bot.chunithm.controller
 
+import korlibs.io.file.VfsFile
+import korlibs.io.file.std.localCurrentDirVfs
 import xyz.xszq.bot.Chunithm
 import xyz.xszq.bot.Chunithm.Companion.textMode
 import xyz.xszq.bot.chunithm.component.MarkdownTemplates
@@ -8,6 +10,9 @@ import xyz.xszq.bot.chunithm.music.MusicDifficulty
 import xyz.xszq.bot.chunithm.music.MusicInfo
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.event.ReplyAble
+import xyz.xszq.bot.ffmpeg.FFMpegFileType
+import xyz.xszq.bot.ffmpeg.FFMpegTask
+import xyz.xszq.bot.message.Audio
 import xyz.xszq.bot.pagination
 import xyz.xszq.bot.reply
 import kotlin.random.Random
@@ -16,20 +21,13 @@ import kotlin.random.Random
 class MusicController(
     override val chunithm: Chunithm
 ): Controller(chunithm) {
+    private val previewDir = "./data/chunithm/preview/"
     private val notFound = "未查找到相关的歌曲，请检查拼写是否有误。"
     private val maxResults = 10
 
     private val jacketUrl = chunithm.config.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")
 
     override suspend fun setRoute() = rhythm {
-        startsWith("随个") { raw ->
-            val result = searchMusic(raw)
-            if (result.isEmpty()) {
-                reply(notFound)
-                return@startsWith
-            }
-            reply(result.random(Random(System.currentTimeMillis())).infoText())
-        }
         startsWith("id") { raw ->
             val id = raw.toIntOrNull() ?: return@startsWith
             val music = chunithm.music(id) ?: return@startsWith
@@ -165,6 +163,25 @@ class MusicController(
         button("chunithm-search-bpm") {
             val args = data.split("\n", limit = 2)
             searchBPM(args[0].toInt(), args[1].toInt())
+        }
+        startsWith("随个") { raw ->
+            val result = searchMusic(raw)
+            if (result.isEmpty()) {
+                reply(notFound)
+                return@startsWith
+            }
+            reply(result.random(Random(System.currentTimeMillis())).infoText())
+        }
+        startsWith("预览id") { stringId ->
+            val id = stringId.toIntOrNull() ?: return@startsWith
+            val music = chunithm.music(id) ?: return@startsWith
+            val file = localCurrentDirVfs[previewDir]["${music.resourceId}.ogg"]
+            if (!file.exists()) {
+                return@startsWith
+            }
+            val pcm = file.toPCM()
+            reply(Audio(pcm))
+            pcm.delete()
         }
     }
 
@@ -305,8 +322,11 @@ class MusicController(
         designer: String,
         page: Int
     ) {
+        val targets = chunithm.chunithmData.designer.aliases
+            .filter { (_, value) -> value.any { alias -> alias == designer || designer in alias } }
+            .map { it.key }
         val (result, nowPage, totalPages) = chunithm.charts()
-            .filter { designer == it.notesDesigner || designer in it.notesDesigner }
+            .filter { it.notesDesigner in targets || designer == it.notesDesigner || designer in it.notesDesigner }
             .pagination(page, maxResults)
         showCharts(
             "chunithm-search-designer",
@@ -392,5 +412,16 @@ class MusicController(
                 args.last().toIntOrNull() ?: 1
             else 1
         return levels to page
+    }
+    companion object {
+        fun VfsFile.toPCM() = FFMpegTask(FFMpegFileType.PCM) {
+            input(absolutePath)
+            yes()
+            forceFormat("s16le")
+            audioCodec("pcm_s16le")
+            logLevel("warning")
+            audioRate("24k")
+            audioChannels(1)
+        }.result()
     }
 }
