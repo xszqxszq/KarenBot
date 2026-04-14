@@ -36,9 +36,6 @@ class MusicInfo(
     }
     val fakeReMaster: ChartInfo
         get() = ChartInfo(this, MusicDifficulty.ReMaster, "", 0.0, Notes(), "")
-    companion object {
-        private const val BASEDIR = "./data/maimai/covers"
-    }
 
     suspend fun infoText() = Image(cover()) + buildString {
         appendLine("${id}. $name")
@@ -63,20 +60,20 @@ class MusicInfo(
     ) = Markdown(MarkdownData(buildString {
         appendLine("![img#190px #190px]($jacketUrl/${resourceId}.jpg)")
         appendLine("**${id}. ${name}**")
-        appendLine("**曲师:** ${href("曲师查歌 $artist", artist)}")
-        appendLine("**分类:** ${href("${genre.genreName}有什么歌", genre.genreName)}")
-        appendLine("**版本:** ${href("版本查歌 ${version.name}", version.name)}")
-        appendLine("**BPM:** ${href("BPM查歌 $bpm", bpm.toString())}")
+        appendLine("**曲师:** ${href("/mai 曲师查歌 $artist", artist)}")
+        appendLine("**分类:** ${href("/mai ${genre.genreName}有什么歌", genre.genreName)}")
+        appendLine("**版本:** ${href("/mai 版本查歌 ${version.name}", version.name)}")
+        appendLine("**BPM:** ${href("/mai BPM查歌 $bpm", bpm.toString())}")
         appendLine("**定数:** ${
             charts.joinToString("/") {
-                href("定数查歌 ${it.levelValue}", it.levelValue.toString())
+                href("/mai 定数查歌 ${it.levelValue}", it.levelValue.toString())
             }
         }")
         appendLine("**谱师:** ${
             charts.joinToString("/") {
                 val designer = it.notesDesigner.ifBlank { "-" }
                 if (designer != "-") {
-                    href("谱师查歌 $designer", designer)
+                    href("/mai 谱师查歌 $designer", designer)
                 } else designer
             }
         }")
@@ -86,7 +83,7 @@ class MusicInfo(
                     "-"
                 } else {
                     val value = it.fitLevelValue.toStringDecimal(1)
-                    href("拟合定数查歌 $value", value)
+                    href("/mai 拟合定数查歌 $value", value)
                 }
             }
         }")
@@ -98,26 +95,29 @@ class MusicInfo(
                     "$emoji${chart.difficulty.brief}"
                 else
                     emoji
-                at(display, "${chart.difficulty.brief}${id}", enter = true, id = "level")
+                at(display, "/mai ${chart.difficulty.brief}${id}", enter = true, id = "level")
             }
         }
         row {
-            at("💯查成绩", "info $id", enter = true, id = "1")
-            at("📜歌50", "歌50 $id", enter = true, id = "2")
+            at("💯查成绩", "/mai info $id", enter = true, id = "1")
+            at("📜歌50", "/mai 歌50 $id", enter = true, id = "2")
         }
         row {
-            at("🔊试听一下", "预览id$id", enter = true, style = RenderData.GRAY, id = "3")
-            at("➕添加别名", "添加别名 $id", style = RenderData.GRAY, id = "4")
+            at("🔊试听一下", "/mai 预览id$id", enter = true, style = RenderData.GRAY, id = "3")
+            at("➕添加别名", "/mai 添加别名 $id", style = RenderData.GRAY, id = "4")
         }
     })
 
-    private val MusicDifficulty.emoji: String
-        get() = when(this) {
-            MusicDifficulty.Basic -> "\uD83D\uDFE9"
-            MusicDifficulty.Advanced -> "\uD83D\uDFE8"
-            MusicDifficulty.Expert -> "\uD83D\uDFE5"
-            MusicDifficulty.Master -> "\uD83D\uDFEA"
-            MusicDifficulty.ReMaster -> "⬜"
-            MusicDifficulty.Utage -> "\uD83D\uDFEB"
-        }
+    companion object {
+        private const val BASEDIR = "./data/maimai/covers"
+        private val MusicDifficulty.emoji: String
+            get() = when(this) {
+                MusicDifficulty.Basic -> "\uD83D\uDFE9"
+                MusicDifficulty.Advanced -> "\uD83D\uDFE8"
+                MusicDifficulty.Expert -> "\uD83D\uDFE5"
+                MusicDifficulty.Master -> "\uD83D\uDFEA"
+                MusicDifficulty.ReMaster -> "⬜"
+                MusicDifficulty.Utage -> "\uD83D\uDFEB"
+            }
+    }
 }

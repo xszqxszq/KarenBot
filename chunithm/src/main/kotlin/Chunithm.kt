@@ -16,11 +16,14 @@ import xyz.xszq.bot.chunithm.api.LXNS
 import xyz.xszq.bot.chunithm.component.AliasesSearch
 import xyz.xszq.bot.chunithm.component.ChunithmData
 import xyz.xszq.bot.chunithm.component.ChunithmQuery
+import xyz.xszq.bot.chunithm.component.MarkdownTemplates
 import xyz.xszq.bot.chunithm.config.ChunithmConfig
 import xyz.xszq.bot.chunithm.controller.Controller
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
 import xyz.xszq.bot.chunithm.database.MusicAliasesTable
 import xyz.xszq.bot.chunithm.database.MusicAliasesVoteTable
+import xyz.xszq.bot.event.Event
+import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.subscribe.SubscribeBuilder
 import kotlin.reflect.full.primaryConstructor
 
@@ -60,6 +63,8 @@ class Chunithm: Plugin() {
             DivingFish(config.tokens["diving-fish"].toString(), chunithmData),
             lxns
         )
+
+        MarkdownTemplates.init(this)
 
         transaction(database) {
             listOf(
@@ -129,4 +134,9 @@ class Chunithm: Plugin() {
         id: Int
     ) = chunithmData.musics[id]
     fun charts() = musics().flatMap { it.charts }
+
+    companion object {
+        suspend fun Event.textMode() = if (this is MessageEvent)
+            MaimaiSettingsTable[sender.id, "text-mode"] == "1" else false
+    }
 }

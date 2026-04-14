@@ -43,8 +43,9 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-spring-boot-starter:${exposedVersion}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.3.1")
-    implementation("xyz.xszq:shinobu:1.0.4")
+    implementation("xyz.xszq:shinobu:2.0.0")
     testImplementation("com.soywiz.korge:korge-core:${korlibsVersion}")
+    testImplementation("xyz.xszq:shinobu:2.0.0")
     testImplementation(kotlin("test"))
 }
 

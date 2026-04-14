@@ -1,6 +1,8 @@
 package xyz.xszq.bot.chunithm.controller
 
 import xyz.xszq.bot.Chunithm
+import xyz.xszq.bot.Chunithm.Companion.textMode
+import xyz.xszq.bot.chunithm.component.MarkdownTemplates
 import xyz.xszq.bot.chunithm.music.ChartInfo
 import xyz.xszq.bot.chunithm.music.MusicDifficulty
 import xyz.xszq.bot.chunithm.music.MusicInfo
@@ -17,6 +19,8 @@ class MusicController(
     private val notFound = "未查找到相关的歌曲，请检查拼写是否有误。"
     private val maxResults = 10
 
+    private val jacketUrl = chunithm.config.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")
+
     override suspend fun setRoute() = rhythm {
         startsWith("随个") { raw ->
             val result = searchMusic(raw)
@@ -29,7 +33,10 @@ class MusicController(
         startsWith("id") { raw ->
             val id = raw.toIntOrNull() ?: return@startsWith
             val music = chunithm.music(id) ?: return@startsWith
-            reply(music.infoText())
+            if (textMode())
+                reply(music.infoText())
+            else
+                reply(music.infoMD(jacketUrl))
         }
         MusicDifficulty.entries.forEach { difficulty ->
             val name = difficulty.brief
@@ -37,7 +44,10 @@ class MusicController(
                 val id = raw.toIntOrNull() ?: return@startsWith
                 val music = chunithm.music(id) ?: return@startsWith
                 val chart = music.charts.firstOrNull { it.difficulty == difficulty } ?: return@startsWith
-                reply(chart.infoText())
+                if (textMode())
+                    reply(chart.infoText())
+                else
+                    reply(chart.infoMD(jacketUrl))
             }
         }
 
@@ -168,47 +178,91 @@ class MusicController(
     }
 
     private suspend fun ReplyAble.showMusics(
+        type: String,
+        keyword: String,
         result: List<MusicInfo>,
+        displayName: String ?= null,
         nowPage: Int = 1,
-        totalPages: Int = 1
+        totalPages: Int = 1,
     ) {
         when {
-            result.isEmpty() -> reply(notFound)
-            result.size == 1 && totalPages == 1 -> reply(result.first().infoText())
+            result.isEmpty() -> {
+                reply(notFound)
+            }
+            result.size == 1 && totalPages == 1 -> {
+                if (textMode())
+                    reply(result.first().infoText())
+                else
+                    reply(result.first().infoMD(jacketUrl))
+            }
             else -> {
                 val hint = if (totalPages != 1)
                     "您要查找的歌曲可能是 ($nowPage / $totalPages)："
                 else
                     "您要查找的歌曲可能是："
-                reply(buildString {
-                    appendLine(hint)
-                    result.forEach { music ->
-                        appendLine("${music.id}. ${music.name}")
-                    }
-                }.trim())
+                when {
+                    textMode() -> reply(buildString {
+                        appendLine(hint)
+                        result.forEach { music ->
+                            appendLine("${music.id}. ${music.name}")
+                        }
+                    }.trim())
+                    else -> reply(MarkdownTemplates.Templates.selectMusic(
+                        title = hint,
+                        type = type,
+                        keyword = keyword,
+                        difficulty = null,
+                        result = result,
+                        displayName = displayName,
+                        nowPage = nowPage,
+                        totalPages = totalPages,
+                    ))
+                }
             }
         }
     }
 
     private suspend fun ReplyAble.showCharts(
+        type: String,
+        keyword: String,
         result: List<ChartInfo>,
+        displayName: String ?= null,
         nowPage: Int = 1,
-        totalPages: Int = 1
+        totalPages: Int = 1,
     ) {
         when {
-            result.isEmpty() -> reply(notFound)
-            result.size == 1 && totalPages == 1 -> reply(result.first().infoText())
+            result.isEmpty() -> {
+                reply(notFound)
+            }
+            result.size == 1 && totalPages == 1 -> {
+                if (textMode())
+                    reply(result.first().infoText())
+                else
+                    reply(result.first().infoMD(jacketUrl))
+            }
             else -> {
                 val hint = if (totalPages != 1)
                     "您要查找的歌曲可能是 ($nowPage / $totalPages)："
                 else
                     "您要查找的歌曲可能是："
-                reply(buildString {
-                    appendLine(hint)
-                    result.forEach { chart ->
-                        appendLine("${chart.difficulty.brief}${chart.music.id}. ${chart.music.name}")
-                    }
-                }.trim())
+                when {
+                    textMode() -> reply(buildString {
+                        appendLine(hint)
+                        result.forEach { chart ->
+                            appendLine("${chart.difficulty.brief}${chart.music.id}. ${chart.music.name}")
+                        }
+                    }.trim())
+                    else -> reply(
+                        MarkdownTemplates.Templates.selectChart(
+                        title = hint,
+                        type = type,
+                        keyword = keyword,
+                        result = result,
+                        displayName = displayName,
+                        nowPage = nowPage,
+                        totalPages = totalPages,
+                    ))
+                }
             }
         }
     }
@@ -218,7 +272,14 @@ class MusicController(
         page: Int = 1
     ) {
         val (result, nowPage, totalPages) = searchMusic(name).pagination(page, maxResults)
-        showMusics(result, nowPage, totalPages)
+        showMusics(
+            "chunithm-search-word",
+            name,
+            result,
+            "",
+            nowPage,
+            totalPages
+        )
     }
 
     private suspend fun ReplyAble.searchLevel(
@@ -230,7 +291,14 @@ class MusicController(
             .filter { it.difficulty != MusicDifficulty.WorldsEnd }
             .filter { it.levelValue in begin..end }
             .pagination(page, maxResults)
-        showCharts(result, nowPage, totalPages)
+        showCharts(
+            "chunithm-search-level",
+            "$begin:$end",
+            result,
+            "",
+            nowPage,
+            totalPages
+        )
     }
 
     private suspend fun ReplyAble.searchDesigner(
@@ -240,7 +308,14 @@ class MusicController(
         val (result, nowPage, totalPages) = chunithm.charts()
             .filter { designer == it.notesDesigner || designer in it.notesDesigner }
             .pagination(page, maxResults)
-        showCharts(result, nowPage, totalPages)
+        showCharts(
+            "chunithm-search-designer",
+            designer,
+            result,
+            "",
+            nowPage,
+            totalPages
+        )
     }
 
     private suspend fun ReplyAble.searchVersion(
@@ -250,7 +325,14 @@ class MusicController(
         val (result, nowPage, totalPages) = chunithm.musics()
             .filter { version == it.version.name || version in it.version.name }
             .pagination(page, maxResults)
-        showMusics(result, nowPage, totalPages)
+        showMusics(
+            "chunithm-search-version",
+            version,
+            result,
+            "",
+            nowPage,
+            totalPages
+        )
     }
 
     private suspend fun ReplyAble.searchArtist(
@@ -260,7 +342,14 @@ class MusicController(
         val (result, nowPage, totalPages) = chunithm.musics()
             .filter { artist in it.artist }
             .pagination(page, maxResults)
-        showMusics(result, nowPage, totalPages)
+        showMusics(
+            "chunithm-search-artist",
+            artist,
+            result,
+            "",
+            nowPage,
+            totalPages
+        )
     }
 
     private suspend fun MessageEvent.searchRegex(
@@ -270,7 +359,12 @@ class MusicController(
         val result = chunithm.musics()
             .filter { regex.find(it.name) != null }
             .take(maxResults)
-        showMusics(result)
+        showMusics(
+            "chunithm-search-regex",
+            raw,
+            result,
+            ""
+        )
     }
 
     private suspend fun ReplyAble.searchBPM(
@@ -280,7 +374,14 @@ class MusicController(
         val (result, nowPage, totalPages) = chunithm.musics()
             .filter { it.bpm == bpm }
             .pagination(page, maxResults)
-        showMusics(result, nowPage, totalPages)
+        showMusics(
+            "chunithm-search-bpm",
+            "$bpm",
+            result,
+            "",
+            nowPage,
+            totalPages
+        )
     }
 
     private fun String.levelArgs(): Pair<List<Double>, Int> {

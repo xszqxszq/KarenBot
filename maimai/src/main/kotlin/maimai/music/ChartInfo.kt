@@ -24,7 +24,14 @@ class ChartInfo(
 
     suspend fun infoText() = Image(music.cover()) + buildString {
         appendLine("${difficulty.names.last()}${music.id}. ${music.name}")
+        appendLine("曲师: ${music.artist}")
+        appendLine("分类: ${music.genre.genreName}")
+        appendLine("版本: ${music.version.name}")
+        appendLine("BPM: ${music.bpm}")
         appendLine("等级: $level (${levelValue})")
+        appendLine("谱师: $notesDesigner")
+        if (fitLevelValue != 0.0)
+            appendLine("拟合定数: ${fitLevelValue.toStringDecimal(1)}")
         appendLine("TAP: ${notes.tap}")
         appendLine("HOLD: ${notes.hold}")
         appendLine("SLIDE: ${notes.slide}")
@@ -33,9 +40,6 @@ class ChartInfo(
             appendLine("TOUCH: ${notes.touch}")
         appendLine("总物量: ${notes.total}")
         appendLine("总DX分: $maxDeluxeScore")
-        appendLine("谱师: $notesDesigner")
-        if (fitLevelValue != 0.0)
-            appendLine("拟合定数: ${fitLevelValue.toStringDecimal(1)}")
     }.trim().newLine()
 
     fun infoMD(
@@ -43,16 +47,16 @@ class ChartInfo(
     ) = Markdown(MarkdownData(buildString {
         appendLine("![img#190px #190px]($jacketUrl/${music.resourceId}.jpg)")
         appendLine("**${difficulty.names.last()}${music.id}. ${music.name}**")
-        appendLine("**曲师:** ${href("曲师查歌 ${music.artist}", music.artist)}")
-        appendLine("**分类:** ${href("${music.genre.genreName}有什么歌", music.genre.genreName)}")
-        appendLine("**版本:** ${href("版本查歌 ${music.version.name}", music.version.name)}")
-        appendLine("**BPM:** ${href("BPM查歌 ${music.bpm}", music.bpm.toString())}")
-        appendLine("**等级:** $level (${href("定数查歌 $levelValue", levelValue.toString())})")
+        appendLine("**曲师:** ${href("/mai 曲师查歌 ${music.artist}", music.artist)}")
+        appendLine("**分类:** ${href("/mai ${music.genre.genreName}有什么歌", music.genre.genreName)}")
+        appendLine("**版本:** ${href("/mai 版本查歌 ${music.version.name}", music.version.name)}")
+        appendLine("**BPM:** ${href("/mai BPM查歌 ${music.bpm}", music.bpm.toString())}")
+        appendLine("**等级:** $level (${href("/mai 定数查歌 $levelValue", levelValue.toString())})")
         val designer = notesDesigner.ifBlank { "-" }
-        appendLine("**谱师:** ${href("谱师查歌 $designer", designer)}")
+        appendLine("**谱师:** ${href("/mai 谱师查歌 $designer", designer)}")
         if (fitLevelValue != 0.0) {
             val value = fitLevelValue.toStringDecimal(1)
-            appendLine("**拟合定数:** ${href("拟合定数查歌 $value", value)}")
+            appendLine("**拟合定数:** ${href("/mai 拟合定数查歌 $value", value)}")
         }
         appendLine()
         appendLine("> **TAP:** ${notes.tap}")

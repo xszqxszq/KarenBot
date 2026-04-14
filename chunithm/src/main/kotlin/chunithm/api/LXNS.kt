@@ -56,7 +56,7 @@ class LXNS(
         val result = data.songs.map { song ->
             MusicInfo(
                 id = song.id,
-                name = song.title,
+                title = song.title,
                 rights = song.rights,
                 artist = song.artist,
                 genre = MusicGenre.of(song.genre),
@@ -76,7 +76,8 @@ class LXNS(
                         notes = chart.notes?.toNotes() ?: Notes(),
                         notesDesigner = chart.noteDesigner,
                         kanji = chart.kanji,
-                        star = chart.star
+                        star = chart.star,
+                        originId = chart.originId
                     )
                 }
             }
