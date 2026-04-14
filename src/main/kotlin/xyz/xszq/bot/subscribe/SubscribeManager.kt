@@ -100,38 +100,35 @@ class SubscribeManager(
         }
 
         groups.values.forEach { list ->
-            selectPrior(event, list)?.let { winner ->
-                launchHandle { winner.handle(event) }
+            launchHandle { runText(event, list) }
+        }
+    }
+
+    private suspend fun runText(event: Event, list: List<TextSubscribe>) {
+        orderText(event, list).forEach { subscribe ->
+            try {
+                subscribe.handle(event)
+                return
+            } catch (_: CommandNotMatchedException) {
             }
         }
     }
 
-    private suspend fun selectPrior(event: Event, list: List<TextSubscribe>): TextSubscribe? {
+    private suspend fun orderText(event: Event, list: List<TextSubscribe>): List<TextSubscribe> {
         if (list.isEmpty())
-            return null
-
-        val topPriority = list.maxOf { it.priority }
-        val top = list.filter { it.priority == topPriority }
-
-        val maxLen = top.maxOf { it.length }
-        val same = top.filter { it.length == maxLen }
-        if (same.size == 1)
-            return same.first()
+            return emptyList()
 
         val defaults = if (event is MessageEvent)
-            same.mapNotNull { it.defaultHandler?.invoke(event)?.trim()?.ifBlank { null } }.distinct()
+            list.mapNotNull { it.defaultHandler?.invoke(event)?.trim()?.ifBlank { null } }.distinct()
         else emptyList()
+        val game = defaults.singleOrNull()
 
-        if (defaults.size == 1) {
-            val game = defaults.first()
-            val picked = same.filter { it.value == game }
-            if (picked.size == 1)
-                return picked.first()
-            if (picked.isNotEmpty())
-                return picked.minBy { it.order }
-        }
-
-        return same.minBy { it.order }
+        return list.sortedWith(
+            compareByDescending<TextSubscribe> { it.priority }
+                .thenByDescending { it.length }
+                .thenByDescending { game != null && it.value == game }
+                .thenBy { it.order }
+        )
     }
 
     private fun explicitPrefix(event: Event): String? {

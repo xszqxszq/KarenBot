@@ -15,6 +15,7 @@ import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.bot.message.Audio
 import xyz.xszq.bot.pagination
 import xyz.xszq.bot.reply
+import xyz.xszq.bot.subscribe.CommandNotMatchedException
 import kotlin.random.Random
 
 @Suppress("unused")
@@ -29,8 +30,8 @@ class MusicController(
 
     override suspend fun setRoute() = rhythm {
         startsWith("id") { raw ->
-            val id = raw.toIntOrNull() ?: return@startsWith
-            val music = chunithm.music(id) ?: return@startsWith
+            val id = raw.toIntOrNull() ?: throw CommandNotMatchedException()
+            val music = chunithm.music(id) ?: throw CommandNotMatchedException()
             if (textMode())
                 reply(music.infoText())
             else
@@ -39,9 +40,9 @@ class MusicController(
         MusicDifficulty.entries.forEach { difficulty ->
             val name = difficulty.brief
             startsWith(listOf("${name}id", name)) { raw ->
-                val id = raw.toIntOrNull() ?: return@startsWith
-                val music = chunithm.music(id) ?: return@startsWith
-                val chart = music.charts.firstOrNull { it.difficulty == difficulty } ?: return@startsWith
+                val id = raw.toIntOrNull() ?: throw CommandNotMatchedException()
+                val music = chunithm.music(id) ?: throw CommandNotMatchedException()
+                val chart = music.charts.firstOrNull { it.difficulty == difficulty } ?: throw CommandNotMatchedException()
                 if (textMode())
                     reply(chart.infoText())
                 else

@@ -254,7 +254,7 @@ class ImageController(
                 append(text ?: "")
             }), Keyboard.create {
                 row {
-                    at("💯我也要查", command, id = "1")
+                    at("💯我也要查", "/mai " + command.trim(), id = "1")
                     link("随心配", "https://otmdb.cn/bot/maimai/combo", enter = true, id = "2")
                     at("🎨修改设置", "设置mai", enter = true, id = "3")
                 }

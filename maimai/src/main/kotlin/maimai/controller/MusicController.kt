@@ -24,6 +24,7 @@ import xyz.xszq.bot.maimai.query.ComboQuery.filterCharts
 import xyz.xszq.bot.maimai.query.ComboQuery.filterMusics
 import xyz.xszq.bot.maimai.query.ComboQuery.isSingleChartSelected
 import xyz.xszq.bot.message.Audio
+import xyz.xszq.bot.subscribe.CommandNotMatchedException
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
@@ -43,8 +44,8 @@ class MusicController(
     override suspend fun setRoute() = rhythm {
         // 根据 ID 精准查找
         startsWith("id") { raw ->
-            val id = raw.toIntOrNull() ?: return@startsWith
-            val music = maimai.music(id) ?: return@startsWith
+            val id = raw.toIntOrNull() ?: throw CommandNotMatchedException()
+            val music = maimai.music(id) ?: throw CommandNotMatchedException()
             if (textMode())
                 reply(music.infoText())
             else
@@ -61,8 +62,8 @@ class MusicController(
         MusicDifficulty.entries.forEach { difficulty ->
             val name = difficulty.names.last()
             startsWith(listOf("${name}id", name)) { raw ->
-                val id = raw.toIntOrNull() ?: return@startsWith
-                val music = maimai.music(id) ?: return@startsWith
+                val id = raw.toIntOrNull() ?: throw CommandNotMatchedException()
+                val music = maimai.music(id) ?: throw CommandNotMatchedException()
                 val chart = music.charts.firstOrNull { it.difficulty == difficulty } ?: return@startsWith
                 if (textMode())
                     reply(chart.infoText())
