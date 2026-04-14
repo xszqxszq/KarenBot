@@ -65,9 +65,5 @@ class ChartInfo(
         appendLine("> **AIR:** ${notes.air}")
         appendLine("> **FLICK:** ${notes.flick}")
         appendLine("> **总物量:** ${notes.total}")
-    }), Keyboard.create {
-        row {
-            link("谱面确认", "https://otmdb.cn/jump/maimai_chart?chart_id=${music.id}&difficulty=${difficulty.value}")
-        }
-    })
+    }))
 }
