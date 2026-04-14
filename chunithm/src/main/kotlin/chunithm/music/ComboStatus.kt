@@ -16,4 +16,6 @@ enum class ComboStatus(val values: List<String>) {
 
     fun isAJ() = this == AllJustice || this == AllJusticeCritical
     fun isFC() = this != None
+    val resourceId
+        get() = values.first()
 }

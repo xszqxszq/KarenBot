@@ -15,6 +15,9 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import xyz.xszq.bot.chunithm.component.ChunithmData
+import xyz.xszq.bot.chunithm.exception.UnknownException
+import xyz.xszq.bot.chunithm.exception.UserDeniedException
+import xyz.xszq.bot.chunithm.exception.UserNotFoundException
 import xyz.xszq.bot.chunithm.music.*
 import xyz.xszq.bot.chunithm.payload.DivingFishRatingResponse
 import xyz.xszq.bot.chunithm.payload.DivingFishRecord
@@ -57,8 +60,12 @@ class DivingFish(
                 }
             })
         }
+        when (response.status) {
+            HttpStatusCode.BadRequest -> throw UserNotFoundException()
+            HttpStatusCode.Forbidden -> throw UserDeniedException()
+        }
         if (response.status != HttpStatusCode.OK)
-            return null
+            throw UnknownException()
         val data = response.body<DivingFishRatingResponse>()
         return RatingResponse(
             player = PlayerInfo(
@@ -80,7 +87,7 @@ class DivingFish(
         return Record(
             music = music,
             chart = chart,
-            score = score,
+            achievement = score,
             comboStatus = ComboStatus.of(fc),
             rating = ra
         )

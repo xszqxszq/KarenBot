@@ -11,6 +11,9 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import xyz.xszq.bot.chunithm.component.ChunithmData
+import xyz.xszq.bot.chunithm.exception.AuthorizationException
+import xyz.xszq.bot.chunithm.exception.UnknownException
+import xyz.xszq.bot.chunithm.exception.UserNotFoundException
 import xyz.xszq.bot.chunithm.music.*
 import xyz.xszq.bot.chunithm.payload.*
 
@@ -111,17 +114,17 @@ class LXNS(
         }
         if (response.status != HttpStatusCode.OK)
             return null
-        val data = response.body<LXNSRatingResponse>()
+        val data = response.body<LXNSResponse<LXNSRatingResponse>>().data ?: return null
         return RatingResponse(
             player = PlayerInfo(
                 nickname = player.name,
-                rating = player.rating
+                rating = player.rating,
+                level = player.level
             ),
             settings = PlayerSettings(
-                character = player.character?.id,
                 trophy = player.trophy?.id,
                 plate = player.namePlate?.id,
-                icon = player.mapIcon?.id
+                avatar = player.character?.id
             ),
             oldRatingList = data.bests.mapNotNull { score ->
                 score.toRecord()
@@ -144,16 +147,20 @@ class LXNS(
 
     suspend fun getPlayerInfo(
         user: UserQueryParams
-    ): LXNSPlayer? = when (user) {
-        is UserQueryParams.QQ -> {
-            val response = client.get("$apiServer/player/qq/${user.qq}") {
-                setDeveloper()
-            }
-            if (response.status == HttpStatusCode.OK)
-                response.body<LXNSPlayer>()
-            else null
+    ): LXNSPlayer? {
+        val response = client.get(when (user) {
+            is UserQueryParams.QQ -> "$apiServer/player/qq/${user.qq}"
+            is UserQueryParams.Username -> "$apiServer/player/${user.username}"
+        }) {
+            setDeveloper()
+        }.body<LXNSResponse<LXNSPlayer>>()
+        when (response.code) {
+            401 -> throw AuthorizationException(response.message)
+            404 -> throw UserNotFoundException(response.message)
+            400 -> throw UserNotFoundException(response.message)
+            200 -> return response.data
+            else -> throw UnknownException(response.message)
         }
-        is UserQueryParams.Username -> null
     }
 
     fun LXNSNotes.toNotes() = Notes(
@@ -171,7 +178,7 @@ class LXNS(
         return Record(
             music = music,
             chart = chart,
-            score = score,
+            achievement = score,
             comboStatus = ComboStatus.of(fullCombo),
             chainStatus = ChainStatus.of(fullChain),
             clear = clear,

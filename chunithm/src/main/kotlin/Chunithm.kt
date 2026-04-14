@@ -15,6 +15,7 @@ import xyz.xszq.bot.chunithm.api.DivingFish
 import xyz.xszq.bot.chunithm.api.LXNS
 import xyz.xszq.bot.chunithm.component.AliasesSearch
 import xyz.xszq.bot.chunithm.component.ChunithmData
+import xyz.xszq.bot.chunithm.component.ChunithmImage
 import xyz.xszq.bot.chunithm.component.ChunithmQuery
 import xyz.xszq.bot.chunithm.component.MarkdownTemplates
 import xyz.xszq.bot.chunithm.config.ChunithmConfig
@@ -32,12 +33,13 @@ class Chunithm: Plugin() {
     lateinit var config: ChunithmConfig
     lateinit var backends: List<ChunithmAPI>
     lateinit var chunithmData: ChunithmData
+    lateinit var image: ChunithmImage
     lateinit var query: ChunithmQuery
     lateinit var aliases: AliasesSearch
     private val controllers = mutableListOf<Controller>()
     private lateinit var lxns: LXNS
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     fun backend(
         name: String
@@ -64,7 +66,11 @@ class Chunithm: Plugin() {
             lxns
         )
 
-        MarkdownTemplates.init(this)
+        backends.forEach { backend ->
+            logger.info { "[中二] 正在加载数据源 ${backend.id}……" }
+            backend.load()
+            logger.info { "[中二] 数据源 ${backend.id}加载完毕。" }
+        }
 
         transaction(database) {
             listOf(
@@ -75,16 +81,20 @@ class Chunithm: Plugin() {
             }
         }
 
-        backends.forEach { backend ->
-            logger.info { "[中二] 正在加载数据源 ${backend.id}……" }
-            backend.load()
-            logger.info { "[中二] 数据源 ${backend.id}加载完毕。" }
+        MarkdownTemplates.init(this)
+
+        chunithmData.load(lxns)
+        logger.info { "[中二] 中二数据加载完成。" }
+
+        image = ChunithmImage(chunithmData)
+        image.init()
+
+        scope.launch(Dispatchers.IO) {
+            logger.info { "[中二] 正在加载图片中……" }
+            image.load(scope)
+            logger.info { "[中二] 图片载入完毕。" }
         }
 
-        scope.launch {
-            chunithmData.load(lxns)
-            logger.info { "[中二] 中二数据加载完成。" }
-        }
         query = ChunithmQuery(this)
         aliases = AliasesSearch(this)
         aliases.init()

@@ -23,6 +23,7 @@ class ChunithmData {
         musics.clear()
         designer = ConfigLoaderBuilder.default()
             .addFileSource("./data/chunithm/designer.yml")
+            .withExplicitSealedTypes()
             .build()
             .loadConfigOrThrow<DesignerConfig>()
 

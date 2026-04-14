@@ -11,7 +11,7 @@ data class LXNSPlayer(
     @SerialName("rating_possession")
     val ratingPossession: String,
     @SerialName("friend_code")
-    val friendCode: Int,
+    val friendCode: Long,
     @SerialName("class_emblem")
     val classEmblem: LXNSClassEmblem,
     @SerialName("reborn_count")

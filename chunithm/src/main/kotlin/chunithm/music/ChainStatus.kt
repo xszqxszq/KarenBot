@@ -13,4 +13,6 @@ enum class ChainStatus(val values: List<String>) {
         } ?: None
     }
     fun isFullChain() = this != None
+    val resourceId
+        get() = values.first()
 }

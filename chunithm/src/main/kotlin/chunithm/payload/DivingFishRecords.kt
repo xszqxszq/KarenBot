@@ -6,5 +6,4 @@ import kotlinx.serialization.Serializable
 data class DivingFishRecords(
     val b30: List<DivingFishRecord> = listOf(),
     val n20: List<DivingFishRecord> = listOf(),
-    val r10: List<DivingFishRecord> = listOf()
 )
