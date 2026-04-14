@@ -2,13 +2,13 @@ package xyz.xszq.bot.maimai.component.image.templates
 
 import korlibs.io.util.toStringDecimal
 import org.jetbrains.skia.Image
-import xyz.xszq.bot.image.parse.StyleParser
-import xyz.xszq.bot.image.template.Template
-import xyz.xszq.bot.image.template.TemplateManager
 import xyz.xszq.bot.maimai.component.image.FilterParams
 import xyz.xszq.bot.maimai.component.image.LevelRenderParams
 import xyz.xszq.bot.maimai.component.image.MaimaiImage.Companion.color
 import xyz.xszq.bot.maimai.music.*
+import xyz.xszq.shinobu.parse.StyleParser
+import xyz.xszq.shinobu.template.Template
+import xyz.xszq.shinobu.template.TemplateManager
 
 class LevelTemplate(
     private val manager: TemplateManager,

@@ -1,9 +1,9 @@
 package xyz.xszq.bot
 
 import org.jetbrains.skia.EncodedImageFormat
-import xyz.xszq.bot.image.dom.Element
-import xyz.xszq.bot.image.template.Template
-import xyz.xszq.bot.image.template.TemplateManager
+import xyz.xszq.shinobu.dom.Element
+import xyz.xszq.shinobu.template.Template
+import xyz.xszq.shinobu.template.TemplateManager
 import java.io.File
 
 fun Template.get(): Element {

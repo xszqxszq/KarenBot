@@ -2,18 +2,18 @@ package xyz.xszq.bot.maimai.component.image.templates
 
 import korlibs.io.util.toStringDecimal
 import org.jetbrains.skia.Image
-import xyz.xszq.bot.image.dom.Div
-import xyz.xszq.bot.image.dom.Img
-import xyz.xszq.bot.image.dom.Img.Companion.noScale
-import xyz.xszq.bot.image.parse.StyleParser.rgbColor
-import xyz.xszq.bot.image.style.BackgroundPosition
-import xyz.xszq.bot.image.style.BackgroundSize
-import xyz.xszq.bot.image.template.Template
-import xyz.xszq.bot.image.template.TemplateManager
 import xyz.xszq.bot.maimai.component.image.FilterParams
 import xyz.xszq.bot.maimai.component.image.RatingRenderParams
 import xyz.xszq.bot.maimai.music.*
 import xyz.xszq.bot.pagination
+import xyz.xszq.shinobu.dom.Div
+import xyz.xszq.shinobu.dom.Img
+import xyz.xszq.shinobu.dom.Img.Companion.noScale
+import xyz.xszq.shinobu.parse.StyleParser.rgbColor
+import xyz.xszq.shinobu.style.BackgroundPosition
+import xyz.xszq.shinobu.style.BackgroundSize
+import xyz.xszq.shinobu.template.Template
+import xyz.xszq.shinobu.template.TemplateManager
 import kotlin.math.min
 
 class RatingTemplate(

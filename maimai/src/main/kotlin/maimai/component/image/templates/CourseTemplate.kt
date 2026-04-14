@@ -3,14 +3,14 @@ package xyz.xszq.bot.maimai.component.image.templates
 import korlibs.io.util.isDigit
 import korlibs.math.toIntFloor
 import org.jetbrains.skia.Image
-import xyz.xszq.bot.image.dom.Img
-import xyz.xszq.bot.image.style.ObjectFit
-import xyz.xszq.bot.image.style.Spacing
-import xyz.xszq.bot.image.template.Template
-import xyz.xszq.bot.image.template.TemplateManager
 import xyz.xszq.bot.maimai.music.ChartInfo
 import xyz.xszq.bot.maimai.music.Record
 import xyz.xszq.bot.maimai.payload.LocalCourseInfo
+import xyz.xszq.shinobu.dom.Img
+import xyz.xszq.shinobu.style.ObjectFit
+import xyz.xszq.shinobu.style.Spacing
+import xyz.xszq.shinobu.template.Template
+import xyz.xszq.shinobu.template.TemplateManager
 
 class CourseTemplate(
     private val manager: TemplateManager,

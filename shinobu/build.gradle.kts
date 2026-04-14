@@ -1,4 +1,4 @@
-val korlibsVersion: String by rootProject.extra
+val skikoVersion: String by rootProject.extra
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
@@ -12,17 +12,20 @@ java {
     withSourcesJar()
 }
 group = "xyz.xszq"
-version = "1.0.4"
+version = "2.0.0"
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    api("com.soywiz.korge:korge-core:${korlibsVersion}")
-    api("dev.matrixlab.webp4j:webp4j:1.2.0")
     api("io.github.pdvrieze.xmlutil:core-jdk:0.91.0-RC1")
     api("io.github.pdvrieze.xmlutil:serialization-jvm:0.91.0-RC1")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    api("org.jetbrains.skiko:skiko-awt:${skikoVersion}")
+    api("org.jetbrains.skiko:skiko-awt-runtime-windows-x64:${skikoVersion}")
+    api("org.jetbrains.skiko:skiko-awt-runtime-linux-x64:${skikoVersion}")
+    api("org.jetbrains.skiko:skiko-awt-runtime-macos-arm64:${skikoVersion}")
     testImplementation(kotlin("test"))
 }
 
@@ -38,7 +41,7 @@ mavenPublishing {
 
     pom {
         name.set("Shinobu")
-        description.set("XML based image render library.")
+        description.set("HTML-like image render library.")
         inceptionYear.set("2025")
         url.set("https://github.com/xszqxszq/KarenBot")
         licenses {
