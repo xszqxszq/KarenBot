@@ -109,5 +109,7 @@ object MarkdownTemplates {
         link: String,
         show: String,
         enter: Boolean = true
-    ) = "[$show](mqqapi://aio/inlinecmd?command=${link.encodeURLParameter()}&enter=${enter}&reply=false)"
+    ) = "[${show.markdownEscape()}](mqqapi://aio/inlinecmd?command=${link.encodeURLParameter()}&enter=${enter}&reply=false)"
+    private fun String.markdownEscape() =
+        replace("[", "\\[").replace("]", "\\]")
 }
