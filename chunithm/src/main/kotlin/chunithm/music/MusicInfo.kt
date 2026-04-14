@@ -13,6 +13,7 @@ import xyz.xszq.bot.payload.markdown.MarkdownData
 import xyz.xszq.bot.payload.markdown.RenderData
 import xyz.xszq.bot.plus
 
+@Suppress("unused")
 @Serializable
 class MusicInfo(
     val id: Int,
@@ -94,7 +95,7 @@ class MusicInfo(
                     "$emoji${chart.difficulty.brief}"
                 else
                     emoji
-                at(display, "$/chu {chart.difficulty.brief}${id}", enter = true, id = "level")
+                at(display, "/chu ${chart.difficulty.brief}${id}", enter = true, id = "level")
             }
         }
         row {
