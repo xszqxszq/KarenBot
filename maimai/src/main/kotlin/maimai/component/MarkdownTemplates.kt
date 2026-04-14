@@ -64,7 +64,7 @@ object MarkdownTemplates {
             val data = MarkdownData("**$title**\n\n$rows")
             val keyboard =
                 if (totalPages == 1) null
-                else Keyboards.selectPaged(type, keyword, nowPage, totalPages)
+                else Keyboards.selectPaged(type, "/mai " + keyword.trim(), nowPage, totalPages)
             return Markdown(data, keyboard)
         }
 
@@ -87,7 +87,7 @@ object MarkdownTemplates {
             val data = MarkdownData("**$title**\n\n$rows")
             val keyboard =
                 if (totalPages == 1) null
-                else Keyboards.selectPaged(type, keyword, nowPage, totalPages)
+                else Keyboards.selectPaged(type, "/mai " + keyword.trim(), nowPage, totalPages)
             return Markdown(data, keyboard)
         }
 
