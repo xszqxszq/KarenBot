@@ -322,7 +322,7 @@ object ComboQuery {
         add(listOf("鸟", "sss"), rateGreaterEqual("sss"))
         add(listOf("霸", "clear"), rateGreaterEqual("a"))
         add(listOf("牛逼", "nb"), achievement(1008000))
-        add(listOf("丢人", "越级", "越"), achievementLess(950000))
+        add(listOf("丢人", "招笑", "越级", "越"), achievementLess(950000))
         (1..5).forEach { stars ->
             add(listOf(starsNames[stars-1], "${stars}星"), stars(stars))
         }

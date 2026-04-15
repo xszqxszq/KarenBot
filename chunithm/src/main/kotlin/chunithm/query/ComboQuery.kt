@@ -271,7 +271,7 @@ object ComboQuery {
         add(listOf("鸟", "sss"), rateGreaterEqual("sss"))
         add(listOf("通关", "clear"), rateGreaterEqual("a"))
         add(listOf("牛逼", "nb"), achievement(1009500))
-        add(listOf("丢人", "越级", "越"), achievementLess(950000))
+        add(listOf("丢人", "招笑", "越级", "越"), achievementLess(950000))
         // TODO: 版本&牌子
         // 谱师名称
         chunithmData.musics.values.flatMap { music ->
