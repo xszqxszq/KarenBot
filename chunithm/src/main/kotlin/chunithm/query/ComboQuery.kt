@@ -6,14 +6,17 @@ import xyz.xszq.bot.add
 import xyz.xszq.bot.chunithm.component.ChunithmData
 import xyz.xszq.bot.chunithm.component.image.FilterParams
 import xyz.xszq.bot.chunithm.music.*
+import kotlin.math.roundToInt
 import kotlin.random.Random
 
 
 object ComboQuery {
     lateinit var chunithmData: ChunithmData
 
-    var conditions: MutableList<Pair<List<String>, Filter>> = mutableListOf()
-    var sortedConditions: List<Pair<String, Filter>> = emptyList()
+    val keywordConditions: MutableList<Pair<List<String>, Filter>> = mutableListOf()
+    var sortedKeywordConditions: List<Pair<String, Filter>> = emptyList()
+
+    val regexConditions: MutableList<Pair<String, (String) -> Filter>> = mutableListOf()
 
     val aj = Filter(
         type = FilterType.Combo,
@@ -205,15 +208,28 @@ object ComboQuery {
         },
         nowVersion = { version }
     )
+    val achievementRegex: (String) -> Filter = { raw ->
+        val achievement = raw.toInt()
+        Filter(
+            type = FilterType.Achievement,
+            chart = { chart ->
+                chart.difficulty != MusicDifficulty.WorldsEnd
+            },
+            record = { record ->
+                record.achievement == achievement
+            }
+        )
+    }
 
     @OptIn(ExperimentalHoplite::class)
     fun init(data: ChunithmData) {
         chunithmData = data
 
-        conditions.addConditions()
+        keywordConditions.keywords()
+        regexConditions.regexes()
         compile()
     }
-    fun MutableList<Pair<List<String>, Filter>>.addConditions() {
+    fun MutableList<Pair<List<String>, Filter>>.keywords() {
         // 谱师别称
         chunithmData.designer.aliases.forEach { (designer, aliases) ->
             add(aliases, designer(designer))
@@ -276,9 +292,11 @@ object ComboQuery {
         add(listOf("s"), rateGreaterEqual("s"))
         add(listOf("aaa"), rateGreaterEqual("aaa"))
     }
-
+    fun MutableList<Pair<String, (String) -> Filter>>.regexes() {
+        add("(?<!\\d)(9\\d{5}|100\\d{4}|1010000)(?!\\d)", achievementRegex)
+    }
     fun compile() {
-        sortedConditions = conditions.flatMap { (names, filter) ->
+        sortedKeywordConditions = keywordConditions.flatMap { (names, filter) ->
             names.map { name -> name to filter }
         }.sortedByDescending { it.first.length }
     }
@@ -289,7 +307,18 @@ object ComboQuery {
         val filters = mutableListOf<Filter>()
         var command = fullCommand
 
-        sortedConditions.forEach { (name, filter) ->
+        regexConditions.forEach { (pattern, getFilter) ->
+            val regex = Regex(pattern)
+            regex.findAll(command).forEach { match ->
+                val filter = getFilter(match.value)
+                if (!filters.contains(filter)) {
+                    filters.add(filter)
+                }
+            }
+            command = regex.replace(command, " ")
+        }
+
+        sortedKeywordConditions.forEach { (name, filter) ->
             if (command.contains(name, ignoreCase = true)) {
                 if (!filters.contains(filter))
                     filters.add(filter)

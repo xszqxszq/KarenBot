@@ -14,14 +14,17 @@ import xyz.xszq.bot.maimai.config.DesignerConfig
 import xyz.xszq.bot.maimai.music.*
 import xyz.xszq.bot.maimai.toSimple
 import java.io.File
+import kotlin.math.roundToInt
 import kotlin.random.Random
 
 object ComboQuery {
     lateinit var designerConfig: DesignerConfig
     lateinit var maimaiData: MaimaiData
 
-    var conditions: MutableList<Pair<List<String>, Filter>> = mutableListOf()
-    var sortedConditions: List<Pair<String, Filter>> = emptyList()
+    val keywordConditions: MutableList<Pair<List<String>, Filter>> = mutableListOf()
+    var sortedKeywordConditions: List<Pair<String, Filter>> = emptyList()
+
+    val regexConditions: MutableList<Pair<String, (String) -> Filter>> = mutableListOf()
 
     val ap = Filter(
         type = FilterType.Combo,
@@ -247,6 +250,18 @@ object ComboQuery {
         },
         nowVersion = { version }
     )
+    val achievementRegex: (String) -> Filter = { raw ->
+        val achievement = (raw.toDouble() * 10000).roundToInt()
+        Filter(
+            type = FilterType.Achievement,
+            chart = { chart ->
+                chart.difficulty != MusicDifficulty.Utage
+            },
+            record = { record ->
+                record.achievement == achievement
+            }
+        )
+    }
 
     @OptIn(ExperimentalHoplite::class)
     fun init(data: MaimaiData) {
@@ -257,7 +272,8 @@ object ComboQuery {
             .loadConfigOrThrow<DesignerConfig>()
         maimaiData = data
 
-        conditions.addConditions()
+        keywordConditions.addConditions()
+        regexConditions.regexes()
         compile()
     }
     fun MutableList<Pair<List<String>, Filter>>.addConditions() {
@@ -387,9 +403,12 @@ object ComboQuery {
             add(Pair(tag.aliases, tag(tag.musics, tag.name)))
         }
     }
+    fun MutableList<Pair<String, (String) -> Filter>>.regexes() {
+        add("(?<!\\d)(?:10[0-1]|[1-9]?\\d)\\.\\d{1,4}(?=%|％)", achievementRegex)
+    }
 
     fun compile() {
-        sortedConditions = conditions.flatMap { (names, filter) ->
+        sortedKeywordConditions = keywordConditions.flatMap { (names, filter) ->
             names.map { name -> name to filter }
         }.sortedByDescending { it.first.length }
     }
@@ -400,7 +419,18 @@ object ComboQuery {
         val filters = mutableListOf<Filter>()
         var command = fullCommand
 
-        sortedConditions.forEach { (name, filter) ->
+        regexConditions.forEach { (pattern, getFilter) ->
+            val regex = Regex(pattern)
+            regex.findAll(command).forEach { match ->
+                val filter = getFilter(match.value)
+                if (!filters.contains(filter)) {
+                    filters.add(filter)
+                }
+            }
+            command = regex.replace(command, " ")
+        }
+
+        sortedKeywordConditions.forEach { (name, filter) ->
             if (command.contains(name, ignoreCase = true)) {
                 if (!filters.contains(filter))
                     filters.add(filter)

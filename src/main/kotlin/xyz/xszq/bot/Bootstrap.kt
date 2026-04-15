@@ -22,11 +22,10 @@ object Bootstrap {
             dependencyFiles.forEach { add(it.toURI().toURL()) }
         }.toTypedArray()
 
-        URLClassLoader(urls, ClassLoader.getPlatformClassLoader()).use { classLoader ->
-            Thread.currentThread().contextClassLoader = classLoader
-            val mainClass = Class.forName(MAIN_CLASS, true, classLoader)
-            val mainMethod = mainClass.getMethod("main", Array<String>::class.java)
-            mainMethod.invoke(null, args)
-        }
+        val classLoader = URLClassLoader(urls, ClassLoader.getPlatformClassLoader())
+        Thread.currentThread().contextClassLoader = classLoader
+        val mainClass = Class.forName(MAIN_CLASS, true, classLoader)
+        val mainMethod = mainClass.getMethod("main", Array<String>::class.java)
+        mainMethod.invoke(null, args)
     }
 }
