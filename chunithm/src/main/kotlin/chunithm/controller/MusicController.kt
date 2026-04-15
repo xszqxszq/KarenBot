@@ -8,6 +8,10 @@ import xyz.xszq.bot.chunithm.component.MarkdownTemplates
 import xyz.xszq.bot.chunithm.music.ChartInfo
 import xyz.xszq.bot.chunithm.music.MusicDifficulty
 import xyz.xszq.bot.chunithm.music.MusicInfo
+import xyz.xszq.bot.chunithm.query.ComboQuery
+import xyz.xszq.bot.chunithm.query.ComboQuery.filterCharts
+import xyz.xszq.bot.chunithm.query.ComboQuery.filterMusics
+import xyz.xszq.bot.chunithm.query.ComboQuery.isSingleChartSelected
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.event.ReplyAble
 import xyz.xszq.bot.ffmpeg.FFMpegFileType
@@ -164,6 +168,25 @@ class MusicController(
         button("chunithm-search-bpm") {
             val args = data.split("\n", limit = 2)
             searchBPM(args[0].toInt(), args[1].toInt())
+        }
+        // 条件搜索
+        startsWith("搜索") { query ->
+            if (!searchCombo(query)) {
+                reply("未找到相关歌曲。")
+            }
+        }
+        endsWith(listOf("有什么歌", "有什么歌？")) { query ->
+            if (!searchCombo(query)) {
+                reply("未找到相关歌曲。")
+            }
+        }
+        button("chunithm-search-combo") {
+            val args = data.split("\n", limit = 2)
+            val query = args[0]
+            val page = args[1].toInt()
+            if (!searchCombo(query, page)) {
+                reply("未找到相关歌曲。")
+            }
         }
         startsWith("随个") { raw ->
             val result = searchMusic(raw)
@@ -403,6 +426,26 @@ class MusicController(
             nowPage,
             totalPages
         )
+    }
+    private suspend fun ReplyAble.searchCombo(
+        query: String,
+        page: Int = 1
+    ): Boolean {
+        // TODO: 全面使用 Exception
+        val filters = ComboQuery.filters(query) ?: return false
+        when (filters.isSingleChartSelected()) {
+            true -> {
+                val charts = filters.filterCharts(chunithm.musics())
+                val (result, nowPage, totalPages) = charts.pagination(page, maxResults)
+                showCharts("chunithm-search-combo", query, result, "", nowPage, totalPages)
+            }
+            false -> {
+                val musics = filters.filterMusics(chunithm.musics())
+                val (result, nowPage, totalPages) = musics.pagination(page, maxResults)
+                showMusics("chunithm-search-combo", query, result, "", nowPage, totalPages)
+            }
+        }
+        return true
     }
 
     private fun String.levelArgs(): Pair<List<Double>, Int> {

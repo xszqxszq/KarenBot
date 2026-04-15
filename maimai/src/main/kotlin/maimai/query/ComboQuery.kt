@@ -292,7 +292,7 @@ object ComboQuery {
         add(listOf("完整", "全"), noB15)
         add(listOf("拟合定数", "拟合", "nh"), fitLevelValues)
         // FC/FS
-        add(listOf("极", "fc"), fc)
+        add(listOf("极", "全连", "fc"), fc)
         add(listOf("理论", "ap+", "app"), app)
         add(listOf("神", "ap"), ap)
         add(listOf("fdx+", "fsd+", "fdxp", "fsdp"), fsdp)

@@ -23,6 +23,7 @@ import xyz.xszq.bot.chunithm.controller.Controller
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
 import xyz.xszq.bot.chunithm.database.MusicAliasesTable
 import xyz.xszq.bot.chunithm.database.MusicAliasesVoteTable
+import xyz.xszq.bot.chunithm.query.ComboQuery
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.subscribe.SubscribeBuilder
@@ -88,6 +89,7 @@ class Chunithm: Plugin() {
 
         image = ChunithmImage(chunithmData)
         image.init()
+        ComboQuery.init(chunithmData)
 
         scope.launch(Dispatchers.IO) {
             logger.info { "[中二] 正在加载图片中……" }
