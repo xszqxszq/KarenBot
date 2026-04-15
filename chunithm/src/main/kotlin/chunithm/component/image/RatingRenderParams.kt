@@ -11,10 +11,13 @@ data class RatingRenderParams(
     val avatar: Int,
     val level: Int,
     val plate: Int,
+    // 条件查询参数
+    val filter: FilterParams?= null,
     // 模板参数
     val title: String,
     val oldCount: Int = 30,
     val newCount: Int = 20,
+    val isNewDisabled: Boolean = false,
     val isScoreList: Boolean = false,
     // 成绩
     val oldRecords: List<Record>,

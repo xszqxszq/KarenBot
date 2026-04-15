@@ -2,6 +2,7 @@ package xyz.xszq.bot.chunithm.component.image.templates
 
 import korlibs.io.util.toStringDecimal
 import org.jetbrains.skia.Image
+import xyz.xszq.bot.chunithm.component.image.FilterParams
 import xyz.xszq.bot.chunithm.component.image.RatingRenderParams
 import xyz.xszq.bot.chunithm.music.*
 import xyz.xszq.bot.chunithm.music.Rating.ratingClean
@@ -11,6 +12,7 @@ import xyz.xszq.shinobu.style.BackgroundSize
 import xyz.xszq.shinobu.template.Template
 import xyz.xszq.shinobu.template.TemplateManager
 import kotlin.math.floor
+import kotlin.math.min
 
 class RatingTemplate(
     private val manager: TemplateManager,
@@ -43,7 +45,7 @@ class RatingTemplate(
         val newRatingSum = info.newRatingList.sumOf { it.rating }
         val oldRating = floor(oldRatingSum / oldCount * 100) / 100.0
         val newRating = floor(newRatingSum / newCount * 100) / 100.0
-        val ratingSum = (oldRatingSum + newRatingSum) / 50.0
+        val ratingSum = (oldRatingSum + newRatingSum) / (newCount + oldCount)
         val rating = floor(ratingSum * 100) / 100.0
 
         val title = title(backend, oldRating, newRating)
@@ -84,7 +86,7 @@ class RatingTemplate(
 
             div("upper/scores") {
                 params.oldRecords.forEachIndexed { index, record ->
-                    add(template.score(index, record, params))
+                    add(template.score(index, record))
                 }
                 repeat(params.oldCount - params.oldRecords.size) {
                     add(template["music"]!!)
@@ -92,14 +94,37 @@ class RatingTemplate(
             }
             div("upper/scores-new") {
                 params.newRecords.forEachIndexed { index, record ->
-                    add(template.score(index, record, params))
+                    add(template.score(index, record))
                 }
                 repeat(params.newCount - params.newRecords.size) {
                     add(template["music"]!!)
                 }
             }
 
-            if (params.isScoreList) {
+            div("category-1") {
+                text("name") {
+                    when {
+                        params.isScoreList -> {
+                            text = "分数列表"
+                        }
+                        params.isNewDisabled -> {
+                            text = "BEST 50"
+                        }
+                    }
+                }
+            }
+            div("category-2") {
+                when {
+                    params.isScoreList -> {
+                        style.backgroundImage = null
+                        style.height = 0f
+                    }
+                    params.isNewDisabled -> {
+                        style.backgroundImage = null
+                    }
+                }
+            }
+            if (params.isScoreList && params.filter ?.isAllRequired == true) {
                 style.backgroundSize = BackgroundSize.COVER
                 style.backgroundPosition = BackgroundPosition.TOP_CENTER
                 style.minHeight = style.height
@@ -153,8 +178,7 @@ class RatingTemplate(
      */
     private fun Template.score(
         index: Int,
-        record: Record,
-        params: RatingRenderParams
+        record: Record
     ) = this["music"]!!.modify {
         background = "base_${record.chart.difficulty.name}.png"
         div("cover") {
