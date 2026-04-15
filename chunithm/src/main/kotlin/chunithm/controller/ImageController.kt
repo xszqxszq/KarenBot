@@ -110,9 +110,9 @@ class ImageController(
                         return@let
                     row {
                         if (page > 1)
-                            at("⬅️上一页", "$command ${page - 1}", enter = true, id = "4")
+                            at("⬅️上一页", "/chu $command ${page - 1}", enter = true, id = "4")
                         if (page < totalPages)
-                            at("➡️下一页", "$command ${page + 1}", enter = true, id = "5")
+                            at("➡️下一页", "/chu $command ${page + 1}", enter = true, id = "5")
                     }
                 }
             }))
