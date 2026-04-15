@@ -11,6 +11,7 @@ import xyz.xszq.bot.chunithm.component.MarkdownTemplates.Templates.brief
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
 import xyz.xszq.bot.chunithm.exception.*
 import xyz.xszq.bot.chunithm.music.UserQueryParams
+import xyz.xszq.bot.event.ChannelEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.newLine
@@ -136,6 +137,6 @@ sealed class Controller(
     }
 
     suspend fun MessageEvent.requestOA() {
-        TODO()
+        bot.pluginLoader.subscribes.handle(ChannelEvent(bot, channelName = "lxns-oa", data = this))
     }
 }

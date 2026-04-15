@@ -213,6 +213,9 @@ class SettingsController(
                     }
                 }))
         }
+        channel<MessageEvent>("lxns-oa") { target ->
+            target.requestOA()
+        }
     }
 
     override suspend fun setRoute() {

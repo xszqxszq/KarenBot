@@ -1,5 +1,6 @@
 package xyz.xszq.bot.subscribe
 
+import xyz.xszq.bot.event.ChannelEvent
 import xyz.xszq.bot.event.InteractionEvent
 import xyz.xszq.bot.event.MessageEvent
 
@@ -95,6 +96,12 @@ class SubscribeBuilder(
         manager.subscribe(
             plugin,
             ButtonSubscribe(button, block)
+        )
+    }
+    fun <T: Any> channel(name: String, block: suspend ChannelEvent<T>.(T) -> Unit) {
+        manager.subscribe(
+            plugin,
+            Channel(name, block)
         )
     }
 }

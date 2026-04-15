@@ -55,7 +55,6 @@ class Chunithm: Plugin() {
             config.tokens["lxns"].toString(),
             config.tokens["lxns-oa-id"].toString(),
             config.tokens["lxns-oa-secret"].toString(),
-            config.tokens["lxns-oa-callback"].toString(),
             chunithmData
         )
         backends = listOf(

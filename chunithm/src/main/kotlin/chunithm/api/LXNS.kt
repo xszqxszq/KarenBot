@@ -6,6 +6,7 @@ import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
@@ -24,7 +25,6 @@ class LXNS(
     val token: String,
     val oauthId: String,
     val oauthSecret: String,
-    val oauthCallback: String,
     val chunithmData: ChunithmData
 ) : ChunithmAPI {
     override val id = "lxns"
@@ -127,9 +127,9 @@ class LXNS(
                 level = player.level
             ),
             settings = PlayerSettings(
-                trophy = player.trophy?.id,
-                plate = player.namePlate?.id,
-                avatar = player.character?.id
+                trophy = player.trophy ?.id,
+                plate = player.namePlate ?.id,
+                avatar = player.character ?.id
             ),
             oldRatingList = data.bests.mapNotNull { score ->
                 score.toRecord()
@@ -170,7 +170,7 @@ class LXNS(
         val player = getPlayerInfo(user) ?: return null
         val accessToken = refreshToken(user.event) ?: throw UserOARequiredException()
 
-        val response = client.get("$apiUser/maimai/player/scores") {
+        val response = client.get("$apiUser/chunithm/player/scores") {
             setOAuth(accessToken)
         }.body<LXNSResponse<List<LXNSScore>>>().data ?: return null
         return RecordsResponse(
@@ -180,8 +180,9 @@ class LXNS(
                 level = player.level
             ),
             settings = PlayerSettings(
-                avatar = player.character ?.id,
-                plate = player.namePlate ?.id
+                trophy = player.trophy ?.id,
+                plate = player.namePlate ?.id,
+                avatar = player.character ?.id
             ),
             records = response.mapNotNull { record ->
                 record.toRecord()
@@ -236,7 +237,6 @@ class LXNS(
             comboStatus = ComboStatus.of(fullCombo),
             chainStatus = ChainStatus.of(fullChain),
             clear = clear,
-            rank = rank.orEmpty(),
             rating = Rating.calc(chart, score)
         )
     }
@@ -262,8 +262,9 @@ class LXNS(
                 level = player.level
             ),
             settings = PlayerSettings(
-                avatar = player.character ?.id,
-                plate = player.namePlate ?.id
+                trophy = player.trophy ?.id,
+                plate = player.namePlate ?.id,
+                avatar = player.character ?.id
             ),
             records = response
         )

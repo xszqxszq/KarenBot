@@ -62,7 +62,6 @@ class ImageController(
                         }
                     }
                 }.onFailure { e ->
-                    e.printStackTrace()
                     handleError(this, e, user)
                 }
             }

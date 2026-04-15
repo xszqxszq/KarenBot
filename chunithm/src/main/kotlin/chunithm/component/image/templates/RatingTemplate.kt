@@ -214,7 +214,7 @@ class RatingTemplate(
                 }
             }
 
-            div("category-1") {
+            div("upper/category-1") {
                 text("name") {
                     when {
                         params.isScoreList -> {
@@ -226,7 +226,7 @@ class RatingTemplate(
                     }
                 }
             }
-            div("category-2") {
+            div("upper/category-2") {
                 when {
                     params.isScoreList -> {
                         style.backgroundImage = null
@@ -234,6 +234,9 @@ class RatingTemplate(
                     }
                     params.isNewDisabled -> {
                         style.backgroundImage = null
+                        text("name") {
+                            text = ""
+                        }
                     }
                 }
             }

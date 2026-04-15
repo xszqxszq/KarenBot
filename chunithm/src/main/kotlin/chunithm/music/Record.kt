@@ -7,7 +7,6 @@ class Record(
     val comboStatus: ComboStatus,
     val chainStatus: ChainStatus = ChainStatus.None,
     val clear: String = "",
-    val rank: String = "",
     val rating: Double = 0.0,
-    val rate: String = Rate.get(achievement)
+    val rate: String = Rate[achievement]
 )

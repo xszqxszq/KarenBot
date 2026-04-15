@@ -10,6 +10,7 @@ import xyz.xszq.bot.chunithm.exception.QQBindRequiredException
 import xyz.xszq.bot.chunithm.exception.UserBindRequiredException
 import xyz.xszq.bot.chunithm.exception.UserNotFoundException
 import xyz.xszq.bot.chunithm.music.*
+import xyz.xszq.bot.chunithm.music.Rating.ratingFloor
 import xyz.xszq.bot.event.MessageEvent
 
 class ChunithmQuery(
@@ -93,6 +94,8 @@ class ChunithmQuery(
     suspend fun rating(
         user: UserQueryParams
     ): Pair<RatingResponse, ChunithmAPI> {
+        if (user.isMaxScore())
+            return Pair(maxScoreRating(), listBackends(user).first())
         val result = listBackends(user).firstNotNullOfOrNull { backend ->
             runCatching {
                 backend.getPlayerRating(user)
@@ -126,7 +129,7 @@ class ChunithmQuery(
             user is UserQueryParams.Username -> throw UserNotFoundException()
             else -> throw UserBindRequiredException()
         }
-        result.first.settings = mergeSettings(result.first.settings, user.settings)
+//        result.first.settings = mergeSettings(result.first.settings, user.settings)
         return result
     }
 
@@ -161,7 +164,7 @@ class ChunithmQuery(
             user is UserQueryParams.Username -> throw UserNotFoundException()
             else -> throw UserBindRequiredException()
         }
-        response.settings = mergeSettings(response.settings, user.settings)
+//        response.settings = mergeSettings(response.settings, user.settings)
         return Pair(response, backend)
     }
 
@@ -169,5 +172,30 @@ class ChunithmQuery(
         if (this !is UserQueryParams.Username)
             return false
         return username.lowercase() in listOf("maxscore", "理论", "理论值")
+    }
+    private fun maxScoreRecords(): List<Record> = chunithm.musics().flatMap {
+        it.charts
+    }.map { chart ->
+        Record(
+            music = chart.music,
+            chart = chart,
+            achievement = 1010000,
+            comboStatus = ComboStatus.AllJusticeCritical,
+            chainStatus = ChainStatus.Platinum,
+            clear = "catastrophy",
+            rate = "sssp",
+            rating = Rating.calc(chart, 1010000)
+        )
+    }.sortedByDescending { it.rating }
+    private fun maxScoreRating(): RatingResponse {
+        val scores = maxScoreRecords()
+        val old = scores.filter { !it.music.isNew }.take(30)
+        val new = scores.filter { it.music.isNew }.take(20)
+        val rating = (old.sumOf { it.rating } + new.sumOf { it.rating } / 50).ratingFloor()
+        return RatingResponse(
+            player = PlayerInfo("理论值", rating, 23),
+            oldRatingList = old,
+            newRatingList = new,
+        )
     }
 }
