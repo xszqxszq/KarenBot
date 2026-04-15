@@ -1,5 +1,6 @@
 package xyz.xszq.bot.chunithm.music
 
+import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -31,4 +32,5 @@ object Rating {
         else -> 0.0
     }.ratingClean()
     fun Double.ratingClean() = (max(0.0, this) * 100).roundToInt() / 100.0
+    fun Double.ratingFloor() = floor(this * 100) / 100.0
 }

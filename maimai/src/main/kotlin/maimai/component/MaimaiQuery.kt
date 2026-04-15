@@ -68,8 +68,10 @@ class MaimaiQuery(
             MaimaiSettingsTable[user.event.sender.id, "prober"] ?.let { prefer ->
                 if (prefer.isBlank())
                     return@let
-                backends = ((backends.filter { it.id == prefer }) + backends.filter { it.id != prefer })
-                    .toMutableList()
+                // TODO: 还是按这样查但是解决一下会抛出落雪查分器OA提示的问题
+//                backends = ((backends.filter { it.id == prefer }) + backends.filter { it.id != prefer })
+//                    .toMutableList()
+                backends = backends.filter { it.id == prefer }.toMutableList()
             }
         return backends
     }

@@ -50,9 +50,13 @@ sealed class Controller(
                 is UserBindRequiredException -> messageUserNeedBind()
                 is UserNotFoundException -> messageUserNotFound()
                 is UserDeniedException -> user?.let { messageUserDenied(it) }
+                is FilterNoResultException -> messageFilterNoResult()
+                is FilterTooManyException -> messageFilterTooMany()
                 is NoDataException -> messageNoData(e.api)
+                is NotSupportedException -> messageNotSupported(e.message.orEmpty())
                 is NotFoundException -> messageNotFound(e.message.orEmpty())
                 is AuthorizationException -> messageNeedAuthorization()
+                is UserOARequiredException -> requestOA()
                 else -> reply(ChunithmQuery.QUERY_FAILED)
             }
         }
@@ -90,6 +94,12 @@ sealed class Controller(
             reply(ChunithmQuery.USER_DENIED)
         }
     }
+    suspend fun MessageEvent.messageFilterNoResult() {
+        reply(ChunithmQuery.NO_RECORDS)
+    }
+    suspend fun MessageEvent.messageFilterTooMany() {
+        reply(ChunithmQuery.TOO_MANY_RECORDS)
+    }
     suspend fun MessageEvent.messageNoData(backend: ChunithmAPI) {
         if (textMode())
             reply(buildString {
@@ -115,10 +125,17 @@ sealed class Controller(
                 }
             }))
     }
+    suspend fun MessageEvent.messageNotSupported(message: String) {
+        reply(message)
+    }
     suspend fun MessageEvent.messageNotFound(message: String) {
         reply(message)
     }
     suspend fun MessageEvent.messageNeedAuthorization() {
         reply(ChunithmQuery.NEED_AUTHORIZATION)
+    }
+
+    suspend fun MessageEvent.requestOA() {
+        TODO()
     }
 }

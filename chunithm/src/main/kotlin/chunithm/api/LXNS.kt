@@ -10,12 +10,15 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 import xyz.xszq.bot.chunithm.component.ChunithmData
+import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
 import xyz.xszq.bot.chunithm.exception.AuthorizationException
 import xyz.xszq.bot.chunithm.exception.UnknownException
 import xyz.xszq.bot.chunithm.exception.UserNotFoundException
+import xyz.xszq.bot.chunithm.exception.UserOARequiredException
 import xyz.xszq.bot.chunithm.music.*
 import xyz.xszq.bot.chunithm.music.Level.levelClean
 import xyz.xszq.bot.chunithm.payload.*
+import xyz.xszq.bot.event.MessageEvent
 
 class LXNS(
     val token: String,
@@ -28,6 +31,8 @@ class LXNS(
     override val name = "落雪"
 
     private val apiServer = "https://maimai.lxns.net/api/v0/chunithm"
+    private val apiOauth = "https://maimai.lxns.net/api/v0/oauth"
+    private val apiUser = "https://maimai.lxns.net/api/v0/user"
     private val musics
         get() = chunithmData.musics
 
@@ -135,6 +140,55 @@ class LXNS(
         )
     }
 
+    private suspend fun getSingleRecord(
+        player: LXNSPlayer,
+        music: MusicInfo
+    ): List<Record>? {
+        val response = client.get("$apiServer/player/${player.friendCode}/bests" +
+                "?song_id=${music.id}") {
+            setDeveloper()
+        }.body<LXNSResponse<List<LXNSScore>>>().data ?: return null
+        return response.mapNotNull {
+            it.toRecord()
+        }
+    }
+
+    override suspend fun getPlayerRecord(
+        user: UserQueryParams,
+        music: MusicInfo
+    ): List<Record>? {
+        val player = getPlayerInfo(user) ?: return null
+
+        return getSingleRecord(player, music)
+    }
+
+    override suspend fun getPlayerRecords(
+        user: UserQueryParams,
+        musics: List<MusicInfo>
+    ): RecordsResponse? {
+        // 玩家信息获取一定要在token获取前
+        val player = getPlayerInfo(user) ?: return null
+        val accessToken = refreshToken(user.event) ?: throw UserOARequiredException()
+
+        val response = client.get("$apiUser/maimai/player/scores") {
+            setOAuth(accessToken)
+        }.body<LXNSResponse<List<LXNSScore>>>().data ?: return null
+        return RecordsResponse(
+            player = PlayerInfo(
+                nickname = player.name,
+                rating = player.rating,
+                level = player.level
+            ),
+            settings = PlayerSettings(
+                avatar = player.character ?.id,
+                plate = player.namePlate ?.id
+            ),
+            records = response.mapNotNull { record ->
+                record.toRecord()
+            }
+        )
+    }
+
     fun HttpRequestBuilder.setDeveloper() {
         headers["Authorization"] = token
     }
@@ -185,5 +239,51 @@ class LXNS(
             rank = rank.orEmpty(),
             rating = Rating.calc(chart, score)
         )
+    }
+    private suspend fun getRecent(
+        player: LXNSPlayer
+    ): List<Record>? {
+        val response = client.get("$apiServer/player/${player.friendCode}/recents") {
+            setDeveloper()
+        }.body<LXNSResponse<List<LXNSScore>>>().data ?: return null
+        return response.mapNotNull {
+            it.toRecord()
+        }
+    }
+    suspend fun getPlayerRecent(
+        user: UserQueryParams
+    ): RecordsResponse? {
+        val player = getPlayerInfo(user) ?: return null
+        val response = getRecent(player) ?: return null
+        return RecordsResponse(
+            player = PlayerInfo(
+                nickname = player.name,
+                rating = player.rating,
+                level = player.level
+            ),
+            settings = PlayerSettings(
+                avatar = player.character ?.id,
+                plate = player.namePlate ?.id
+            ),
+            records = response
+        )
+    }
+    suspend fun refreshToken(
+        event: MessageEvent
+    ): String? {
+        // TODO: 不要在查分器端引入任何直接查表
+        val refresh = MaimaiSettingsTable[event.sender.id, "lxns-oa-refresh"] ?: return null
+        val response = client.post("$apiOauth/token") {
+            contentType(ContentType.Application.Json)
+            setBody(LXNSOAToken(
+                clientId = oauthId,
+                clientSecret = oauthSecret,
+                grantType = "refresh_token",
+                refreshToken = refresh
+            ))
+        }.body<LXNSResponse<LXNSOATokenResponse>>()
+        response.data ?: return null
+        MaimaiSettingsTable[event.sender.id, "lxns-oa-refresh"] = response.data.refreshToken
+        return response.data.accessToken
     }
 }

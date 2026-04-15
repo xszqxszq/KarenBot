@@ -8,9 +8,7 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.*
 import xyz.xszq.bot.chunithm.component.ChunithmData
 import xyz.xszq.bot.chunithm.exception.UnknownException
 import xyz.xszq.bot.chunithm.exception.UserDeniedException
@@ -18,6 +16,7 @@ import xyz.xszq.bot.chunithm.exception.UserNotFoundException
 import xyz.xszq.bot.chunithm.music.*
 import xyz.xszq.bot.chunithm.payload.DivingFishRatingResponse
 import xyz.xszq.bot.chunithm.payload.DivingFishRecord
+import xyz.xszq.bot.chunithm.payload.DivingFishRecordsResponse
 
 class DivingFish(
     val token: String,
@@ -48,22 +47,9 @@ class DivingFish(
     override suspend fun getPlayerRating(
         user: UserQueryParams
     ): RatingResponse? {
-        val response = client.post("$server/query/player") {
-            contentType(ContentType.Application.Json)
-            setBody(buildJsonObject {
-                when (user) {
-                    is UserQueryParams.QQ -> put("qq", JsonPrimitive(user.qq))
-                    is UserQueryParams.Username -> put("username", JsonPrimitive(user.username))
-                }
-            })
-        }
-        when (response.status) {
-            HttpStatusCode.BadRequest -> throw UserNotFoundException()
-            HttpStatusCode.Forbidden -> throw UserDeniedException()
-        }
-        if (response.status != HttpStatusCode.OK)
-            throw UnknownException()
-        val data = response.body<DivingFishRatingResponse>()
+        val request = buildRequest(user)
+        val data = ratingRequest(request) ?: return null
+
         return RatingResponse(
             player = PlayerInfo(
                 nickname = data.nickname,
@@ -76,6 +62,102 @@ class DivingFish(
                 record.toRecord()
             }
         )
+    }
+
+    override suspend fun getPlayerRecord(
+        user: UserQueryParams,
+        music: MusicInfo
+    ): List<Record>? {
+        val ids = listOf(music.id)
+        return getRecordsDeveloper(user, ids, true) ?.records
+    }
+
+    override suspend fun getPlayerRecords(
+        user: UserQueryParams,
+        musics: List<MusicInfo>
+    ): RecordsResponse? {
+        val ids = musics.map { it.id }
+        return getRecordsDeveloper(user, ids)
+    }
+
+    suspend fun getRecordsDeveloper(
+        user: UserQueryParams,
+        ids: List<Int>,
+        simple: Boolean = false
+    ): RecordsResponse? {
+        val data = recordsRequestDeveloper(user)
+
+        return getRecordsResponse(simple, ids, data)
+    }
+
+    fun getRecordsResponse(
+        simple: Boolean = false,
+        ids: List<Int>,
+        data: DivingFishRecordsResponse
+    ): RecordsResponse? = if (simple) {
+        RecordsResponse(
+            player = PlayerInfo(),
+            records = data.records.best.filter { it.mid in ids }.mapNotNull { it.toRecord() }
+        )
+    } else {
+        RecordsResponse(
+            player = PlayerInfo(
+                nickname = data.nickname,
+                rating = data.rating
+            ),
+            records = data.records.best.filter { it.mid in ids }.mapNotNull { it.toRecord() }
+        )
+    }
+
+    suspend fun ratingRequest(request: JsonObject): DivingFishRatingResponse? {
+        val response = client.post("$server/query/player") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }
+        return when (response.status) {
+            HttpStatusCode.BadRequest -> throw UserNotFoundException()
+            HttpStatusCode.Forbidden -> throw UserDeniedException()
+            HttpStatusCode.OK -> response.body<DivingFishRatingResponse>()
+            else -> throw UnknownException()
+        }
+    }
+
+    suspend fun recordsRequestDeveloper(
+        user: UserQueryParams
+    ): DivingFishRecordsResponse {
+        val response = client.get(URLBuilder("$server/dev/player/records").apply {
+            when (user) {
+                is UserQueryParams.QQ -> parameters["qq"] = user.qq.toString()
+                is UserQueryParams.Username -> parameters["username"] = user.username
+            }
+        }.build()) {
+            setDeveloper()
+        }
+
+        return when (response.status) {
+            HttpStatusCode.BadRequest -> throw UserNotFoundException()
+            HttpStatusCode.Forbidden -> throw UserDeniedException()
+            HttpStatusCode.OK -> response.body<DivingFishRecordsResponse>()
+            else -> throw UnknownException()
+        }
+    }
+
+    fun HttpRequestBuilder.setDeveloper() {
+        headers["developer-token"] = token
+    }
+
+    fun buildRequest(
+        user: UserQueryParams,
+        additional: JsonObjectBuilder.() -> Unit = {}
+    ): JsonObject {
+        val request = buildJsonObject {
+            when (user) {
+                is UserQueryParams.QQ -> put("qq", JsonPrimitive(user.qq))
+                is UserQueryParams.Username -> put("username", JsonPrimitive(user.username))
+            }
+            additional()
+        }
+        return request
     }
 
     fun DivingFishRecord.toRecord(): Record? {

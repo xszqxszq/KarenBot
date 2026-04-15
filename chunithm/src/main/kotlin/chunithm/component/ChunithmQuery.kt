@@ -2,14 +2,14 @@ package xyz.xszq.bot.chunithm.component
 
 import xyz.xszq.bot.Chunithm
 import xyz.xszq.bot.chunithm.api.ChunithmAPI
+import xyz.xszq.bot.chunithm.api.LXNS
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
 import xyz.xszq.bot.chunithm.database.QQBindTable
+import xyz.xszq.bot.chunithm.exception.NotSupportedException
 import xyz.xszq.bot.chunithm.exception.QQBindRequiredException
 import xyz.xszq.bot.chunithm.exception.UserBindRequiredException
 import xyz.xszq.bot.chunithm.exception.UserNotFoundException
-import xyz.xszq.bot.chunithm.music.PlayerSettings
-import xyz.xszq.bot.chunithm.music.RatingResponse
-import xyz.xszq.bot.chunithm.music.UserQueryParams
+import xyz.xszq.bot.chunithm.music.*
 import xyz.xszq.bot.event.MessageEvent
 
 class ChunithmQuery(
@@ -68,8 +68,10 @@ class ChunithmQuery(
             MaimaiSettingsTable[user.event.sender.id, "prober"] ?.let { prefer ->
                 if (prefer.isBlank())
                     return@let
-                backends = ((backends.filter { it.id == prefer }) + backends.filter { it.id != prefer })
-                    .toMutableList()
+                // TODO: 还是按这样查但是解决一下会抛出落雪查分器OA提示的问题
+//                backends = ((backends.filter { it.id == prefer }) + backends.filter { it.id != prefer })
+//                    .toMutableList()
+                backends = backends.filter { it.id == prefer }.toMutableList()
             }
         return backends
     }
@@ -95,6 +97,7 @@ class ChunithmQuery(
             runCatching {
                 backend.getPlayerRating(user)
             }.onFailure { e ->
+                e.printStackTrace()
                 if (!isRetryableError(e))
                     throw e
             }.getOrNull() ?.let { Pair(it, backend) }
@@ -105,5 +108,66 @@ class ChunithmQuery(
         // TODO: 设置表中用中二单独一个前缀
 //        result.first.settings = mergeSettings(result.first.settings, user.settings)
         return result
+    }
+
+
+    suspend fun records(
+        user: UserQueryParams,
+        musics: List<MusicInfo>
+    ): Pair<RecordsResponse, ChunithmAPI> {
+        val result = listBackends(user).firstNotNullOfOrNull { backend ->
+            runCatching {
+                backend.getPlayerRecords(user, musics)
+            }.onFailure { e ->
+                if (!isRetryableError(e))
+                    throw e
+            }.getOrNull() ?.let { Pair(it, backend) }
+        } ?: when {
+            user is UserQueryParams.Username -> throw UserNotFoundException()
+            else -> throw UserBindRequiredException()
+        }
+        result.first.settings = mergeSettings(result.first.settings, user.settings)
+        return result
+    }
+
+    suspend fun record(
+        user: UserQueryParams,
+        music: MusicInfo
+    ): List<Record> {
+        val result = listBackends(user).firstNotNullOfOrNull { backend ->
+            runCatching {
+                backend.getPlayerRecord(user, music)
+            }.onFailure { e ->
+                if (!isRetryableError(e))
+                    throw e
+            }.getOrNull()
+        } ?: when {
+            user is UserQueryParams.Username -> throw UserNotFoundException()
+            else -> throw UserBindRequiredException()
+        }
+        return result
+    }
+    suspend fun recent(
+        user: UserQueryParams,
+    ): Pair<RecordsResponse, ChunithmAPI> {
+        val backend = listBackends(user).filterIsInstance<LXNS>().firstOrNull()
+            ?: throw NotSupportedException("该功能仅支持落雪查分器")
+        val response = runCatching {
+            backend.getPlayerRecent(user)
+        }.onFailure { e ->
+            if (!isRetryableError(e))
+                throw e
+        }.getOrNull() ?: when {
+            user is UserQueryParams.Username -> throw UserNotFoundException()
+            else -> throw UserBindRequiredException()
+        }
+        response.settings = mergeSettings(response.settings, user.settings)
+        return Pair(response, backend)
+    }
+
+    private fun UserQueryParams.isMaxScore(): Boolean {
+        if (this !is UserQueryParams.Username)
+            return false
+        return username.lowercase() in listOf("maxscore", "理论", "理论值")
     }
 }

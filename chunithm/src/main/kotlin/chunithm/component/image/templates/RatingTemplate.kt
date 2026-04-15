@@ -5,13 +5,13 @@ import org.jetbrains.skia.Image
 import xyz.xszq.bot.chunithm.component.image.FilterParams
 import xyz.xszq.bot.chunithm.component.image.RatingRenderParams
 import xyz.xszq.bot.chunithm.music.*
-import xyz.xszq.bot.chunithm.music.Rating.ratingClean
+import xyz.xszq.bot.chunithm.music.Rating.ratingFloor
+import xyz.xszq.bot.pagination
 import xyz.xszq.shinobu.dom.Div
 import xyz.xszq.shinobu.style.BackgroundPosition
 import xyz.xszq.shinobu.style.BackgroundSize
 import xyz.xszq.shinobu.template.Template
 import xyz.xszq.shinobu.template.TemplateManager
-import kotlin.math.floor
 import kotlin.math.min
 
 class RatingTemplate(
@@ -43,10 +43,10 @@ class RatingTemplate(
 
         val oldRatingSum = info.oldRatingList.sumOf { it.rating }
         val newRatingSum = info.newRatingList.sumOf { it.rating }
-        val oldRating = floor(oldRatingSum / oldCount * 100) / 100.0
-        val newRating = floor(newRatingSum / newCount * 100) / 100.0
-        val ratingSum = (oldRatingSum + newRatingSum) / (newCount + oldCount)
-        val rating = floor(ratingSum * 100) / 100.0
+        val ratingSum = oldRatingSum + newRatingSum
+        val oldRating = (oldRatingSum / oldCount).ratingFloor()
+        val newRating = (newRatingSum / newCount).ratingFloor()
+        val rating = (ratingSum / (newCount + oldCount)).ratingFloor()
 
         val title = title(backend, oldRating, newRating)
 
@@ -61,10 +61,123 @@ class RatingTemplate(
                 title = title,
                 oldCount = oldCount,
                 newCount = newCount,
+                isNewDisabled = false,
                 oldRecords = info.oldRatingList.take(oldCount),
                 newRecords = info.newRatingList.take(newCount),
             )
         )
+    }
+    /**
+     * 随心配最佳成绩列表模板
+     * @param total 取最佳多少项成绩进行统计
+     * @param player 玩家信息
+     * @param settings 玩家设置
+     * @param allRecords 所有成绩
+     * @param filterParams 条件过滤参数
+     * @param api 数据源名称
+     */
+    suspend fun comboBests(
+        player: PlayerInfo,
+        settings: PlayerSettings?= null,
+        allRecords: List<Record>,
+        filterParams: FilterParams?= null,
+        api: String
+    ): Image {
+        val newCount = 20
+        val oldCount = 30
+
+        val bests = allRecords.take(newCount + oldCount)
+        val isNewDisabled = when {
+            filterParams == null -> false
+            filterParams.isAllRequired -> true
+            filterParams.newestVersion == newestVersion ->
+                allRecords.filter { it.music.version == filterParams.newestVersion }.size < newCount
+            allRecords.none { it.music.version != filterParams.newestVersion } -> true
+            else -> false
+        }
+
+        val oldRecords =
+            if (isNewDisabled) bests.take(oldCount)
+            else allRecords.filter { it.music.version != filterParams ?.newestVersion }.take(oldCount)
+        val newRecords =
+            if (isNewDisabled) bests.subList(min(oldCount,oldRecords.size), bests.size)
+            else allRecords.filter { it.music.version == filterParams ?.newestVersion }.take(newCount)
+
+        val oldRatingSum = oldRecords.sumOf { it.rating }
+        val newRatingSum = newRecords.sumOf { it.rating }
+        val ratingSum = oldRatingSum + newRatingSum
+        val oldRating = (oldRatingSum / oldCount).ratingFloor()
+        val newRating = (newRatingSum / newCount).ratingFloor()
+        val rating = (ratingSum / (newCount + oldCount)).ratingFloor()
+
+        val title = title(api, oldRating, newRating)
+
+        return template(
+            RatingRenderParams(
+                nickname = player.nickname,
+                rating = rating,
+                ratingColor = Rating.color(rating),
+                level = player.level,
+                avatar = settings ?.avatar ?: 0,
+                plate = settings ?.plate ?: 140,
+                filter = filterParams,
+                title = title,
+                oldCount = oldCount,
+                newCount = newCount,
+                isNewDisabled = isNewDisabled,
+                oldRecords = oldRecords,
+                newRecords = newRecords,
+            )
+        )
+    }
+    /**
+     * 最佳成绩列表模板
+     * @param player 玩家信息
+     * @param settings 玩家设置
+     * @param allRecords 所有成绩信息
+     * @param filterParams 条件过滤参数
+     * @param page 查询页数
+     */
+    suspend fun scoreList(
+        player: PlayerInfo,
+        settings: PlayerSettings?= null,
+        allRecords: List<Record>,
+        filterParams: FilterParams,
+        page: Int
+    ): Triple<Image, Int, Int> {
+        val pageSize = 50
+
+        val (records, actualPage, totalPages) = allRecords.let { filtered ->
+            val records = filtered.sortedBy { -it.achievement }
+            if (filterParams.isAllRequired)
+                Triple(records, 1, 1)
+            else
+                records.pagination(page, pageSize)
+        }
+
+        val title = if (filterParams.isAllRequired)
+            "${filterParams.name}分数列表"
+        else
+            "${filterParams.name}分数列表，第 $actualPage 页 (共 $totalPages 页)"
+
+        return Triple(template(
+            RatingRenderParams(
+                nickname = player.nickname,
+                rating = player.rating,
+                ratingColor = Rating.color(player.rating),
+                level = player.level,
+                avatar = settings ?.avatar ?: 101,
+                plate = settings ?.plate ?: 11,
+                filter = filterParams,
+                title = title,
+                oldCount = 50,
+                newCount = 0,
+                isNewDisabled = true,
+                isScoreList = true,
+                oldRecords = records,
+                newRecords = emptyList(),
+            )
+        ), actualPage, totalPages)
     }
 
     /**
