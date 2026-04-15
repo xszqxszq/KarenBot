@@ -14,6 +14,7 @@ import xyz.xszq.bot.chunithm.exception.AuthorizationException
 import xyz.xszq.bot.chunithm.exception.UnknownException
 import xyz.xszq.bot.chunithm.exception.UserNotFoundException
 import xyz.xszq.bot.chunithm.music.*
+import xyz.xszq.bot.chunithm.music.Level.levelClean
 import xyz.xszq.bot.chunithm.payload.*
 
 class LXNS(
@@ -74,7 +75,7 @@ class LXNS(
                         music = info,
                         difficulty = MusicDifficulty.of(chart.difficulty),
                         level = chart.level,
-                        levelValue = chart.levelValue,
+                        levelValue = chart.levelValue.levelClean(),
                         notes = chart.notes?.toNotes() ?: Notes(),
                         notesDesigner = chart.noteDesigner,
                         kanji = chart.kanji,
@@ -182,7 +183,7 @@ class LXNS(
             chainStatus = ChainStatus.of(fullChain),
             clear = clear,
             rank = rank.orEmpty(),
-            rating = rating ?: 0.0
+            rating = Rating.calc(chart, score)
         )
     }
 }

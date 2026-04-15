@@ -1,5 +1,8 @@
 package xyz.xszq.bot.chunithm.music
 
+import kotlin.math.max
+import kotlin.math.roundToInt
+
 object Level {
     var levelRange = 1..15
     var plusRange = 7..15
@@ -37,4 +40,5 @@ object Level {
             }
         }
     }
+    fun Double.levelClean() = (max(0.0, this) * 10).roundToInt() / 10.0
 }

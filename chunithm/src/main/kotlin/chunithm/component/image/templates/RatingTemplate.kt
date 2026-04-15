@@ -4,6 +4,7 @@ import korlibs.io.util.toStringDecimal
 import org.jetbrains.skia.Image
 import xyz.xszq.bot.chunithm.component.image.RatingRenderParams
 import xyz.xszq.bot.chunithm.music.*
+import xyz.xszq.bot.chunithm.music.Rating.ratingClean
 import xyz.xszq.shinobu.dom.Div
 import xyz.xszq.shinobu.style.BackgroundPosition
 import xyz.xszq.shinobu.style.BackgroundSize
@@ -42,7 +43,7 @@ class RatingTemplate(
         val newRatingSum = info.newRatingList.sumOf { it.rating }
         val oldRating = floor(oldRatingSum / oldCount * 100) / 100.0
         val newRating = floor(newRatingSum / newCount * 100) / 100.0
-        val ratingSum = (oldRatingSum + newRatingSum) / 50
+        val ratingSum = (oldRatingSum + newRatingSum) / 50.0
         val rating = floor(ratingSum * 100) / 100.0
 
         val title = title(backend, oldRating, newRating)
@@ -164,7 +165,7 @@ class RatingTemplate(
         }
         text("level-rating") {
             val levelValue = record.chart.levelValue.toStringDecimal(1)
-            val ratingValue = (floor(record.rating * 100) / 100.0).toStringDecimal(2)
+            val ratingValue = record.rating.toStringDecimal(2)
             text = "$levelValue→$ratingValue"
         }
         text("title") {

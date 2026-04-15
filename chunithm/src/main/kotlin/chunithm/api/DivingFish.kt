@@ -86,7 +86,7 @@ class DivingFish(
             chart = chart,
             achievement = score,
             comboStatus = ComboStatus.of(fc),
-            rating = ra
+            rating = Rating.calc(chart, score)
         )
     }
 }

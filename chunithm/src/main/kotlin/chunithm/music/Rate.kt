@@ -2,7 +2,6 @@ package xyz.xszq.bot.chunithm.music
 
 import java.text.DecimalFormat
 
-
 @Suppress("unused")
 object Rate {
     operator fun get(achievement: Int) = when (achievement) {
