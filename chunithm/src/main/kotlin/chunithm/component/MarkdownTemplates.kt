@@ -1,6 +1,6 @@
 package xyz.xszq.bot.chunithm.component
 
-import io.ktor.http.encodeURLParameter
+import io.ktor.http.*
 import xyz.xszq.bot.Chunithm
 import xyz.xszq.bot.chunithm.music.ChartInfo
 import xyz.xszq.bot.chunithm.music.MusicDifficulty

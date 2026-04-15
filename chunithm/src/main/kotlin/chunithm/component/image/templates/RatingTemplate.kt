@@ -2,15 +2,8 @@ package xyz.xszq.bot.chunithm.component.image.templates
 
 import korlibs.io.util.toStringDecimal
 import org.jetbrains.skia.Image
-import xyz.xszq.bot.chunithm.component.ChunithmImage.Companion.color
 import xyz.xszq.bot.chunithm.component.image.RatingRenderParams
-import xyz.xszq.bot.chunithm.music.ChainStatus
-import xyz.xszq.bot.chunithm.music.ComboStatus
-import xyz.xszq.bot.chunithm.music.GameVersion
-import xyz.xszq.bot.chunithm.music.Rate
-import xyz.xszq.bot.chunithm.music.Rating
-import xyz.xszq.bot.chunithm.music.RatingResponse
-import xyz.xszq.bot.chunithm.music.Record
+import xyz.xszq.bot.chunithm.music.*
 import xyz.xszq.shinobu.dom.Div
 import xyz.xszq.shinobu.style.BackgroundPosition
 import xyz.xszq.shinobu.style.BackgroundSize

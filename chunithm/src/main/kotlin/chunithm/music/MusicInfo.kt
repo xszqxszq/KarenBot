@@ -2,7 +2,6 @@ package xyz.xszq.bot.chunithm.music
 
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.localCurrentDirVfs
-import korlibs.io.util.toStringDecimal
 import kotlinx.serialization.Serializable
 import xyz.xszq.bot.chunithm.component.MarkdownTemplates.href
 import xyz.xszq.bot.message.Image

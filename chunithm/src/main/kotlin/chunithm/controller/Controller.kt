@@ -9,12 +9,7 @@ import xyz.xszq.bot.chunithm.component.ChunithmQuery
 import xyz.xszq.bot.chunithm.component.MarkdownTemplates
 import xyz.xszq.bot.chunithm.component.MarkdownTemplates.Templates.brief
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
-import xyz.xszq.bot.chunithm.exception.AuthorizationException
-import xyz.xszq.bot.chunithm.exception.NoDataException
-import xyz.xszq.bot.chunithm.exception.QQBindRequiredException
-import xyz.xszq.bot.chunithm.exception.UserBindRequiredException
-import xyz.xszq.bot.chunithm.exception.UserDeniedException
-import xyz.xszq.bot.chunithm.exception.UserNotFoundException
+import xyz.xszq.bot.chunithm.exception.*
 import xyz.xszq.bot.chunithm.music.UserQueryParams
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.NotFoundException

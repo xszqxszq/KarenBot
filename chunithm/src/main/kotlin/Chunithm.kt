@@ -13,11 +13,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import xyz.xszq.bot.chunithm.api.ChunithmAPI
 import xyz.xszq.bot.chunithm.api.DivingFish
 import xyz.xszq.bot.chunithm.api.LXNS
-import xyz.xszq.bot.chunithm.component.AliasesSearch
-import xyz.xszq.bot.chunithm.component.ChunithmData
-import xyz.xszq.bot.chunithm.component.ChunithmImage
-import xyz.xszq.bot.chunithm.component.ChunithmQuery
-import xyz.xszq.bot.chunithm.component.MarkdownTemplates
+import xyz.xszq.bot.chunithm.component.*
 import xyz.xszq.bot.chunithm.config.ChunithmConfig
 import xyz.xszq.bot.chunithm.controller.Controller
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable

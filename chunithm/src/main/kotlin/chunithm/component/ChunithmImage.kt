@@ -5,17 +5,12 @@ import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import org.jetbrains.skia.EncodedImageFormat
-import org.jetbrains.skia.Image
-import org.jetbrains.skia.Rect
-import org.jetbrains.skia.SamplingMode
-import org.jetbrains.skia.Surface
+import org.jetbrains.skia.*
 import xyz.xszq.bot.chunithm.component.image.templates.RatingTemplate
 import xyz.xszq.bot.chunithm.music.ChartInfo
 import xyz.xszq.bot.chunithm.music.MusicDifficulty
 import xyz.xszq.shinobu.parse.StyleParser.rgbColor
 import xyz.xszq.shinobu.template.TemplateManager
-import kotlin.use
 
 class ChunithmImage(
     val chunithmData: ChunithmData,

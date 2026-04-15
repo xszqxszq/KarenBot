@@ -5,7 +5,6 @@ import xyz.xszq.bot.chunithm.component.MarkdownTemplates.href
 import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.newLine
-import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.payload.markdown.MarkdownData
 import xyz.xszq.bot.plus
 

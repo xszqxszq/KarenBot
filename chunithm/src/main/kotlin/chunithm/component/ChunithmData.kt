@@ -3,8 +3,8 @@ package xyz.xszq.bot.chunithm.component
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
-import xyz.xszq.bot.chunithm.config.DesignerConfig
 import xyz.xszq.bot.chunithm.api.LXNS
+import xyz.xszq.bot.chunithm.config.DesignerConfig
 import xyz.xszq.bot.chunithm.database.MusicAliasesTable
 import xyz.xszq.bot.chunithm.music.GameVersion
 import xyz.xszq.bot.chunithm.music.MusicInfo
