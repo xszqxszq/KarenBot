@@ -57,13 +57,14 @@ class ChunithmQuery(
 
     // 根据用户设置列出后端
     suspend fun listBackends(
-        user: UserQueryParams
+        user: UserQueryParams,
+        listAll: Boolean = false
     ): List<ChunithmAPI> {
         var backends = listOf(
             chunithm.backend("diving-fish"),
             chunithm.backend("lxns"),
         ).toMutableList()
-        if (user.isSelf)
+        if (user.isSelf && !listAll)
             MaimaiSettingsTable[user.event.sender.id, "prober"] ?.let { prefer ->
                 if (prefer.isBlank())
                     return@let

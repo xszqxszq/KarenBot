@@ -57,13 +57,14 @@ class MaimaiQuery(
 
     // 根据用户设置列出后端
     suspend fun listBackends(
-        user: UserQueryParams
+        user: UserQueryParams,
+        listAll: Boolean = false
     ): List<MaimaiAPI> {
         var backends = listOf(
             maimai.backend("diving-fish"),
             maimai.backend("lxns"),
         ).toMutableList()
-        if (user.isSelf)
+        if (user.isSelf && !listAll)
             MaimaiSettingsTable[user.event.sender.id, "prober"] ?.let { prefer ->
                 if (prefer.isBlank())
                     return@let
