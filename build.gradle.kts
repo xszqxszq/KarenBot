@@ -105,6 +105,8 @@ allprojects {
     extra["ktorVersion"] = ktorVersion
     tasks.register("generatePluginDependencies") {
         val outputFile = layout.buildDirectory.file("generated/plugin-dependencies.txt")
+        inputs.file(layout.projectDirectory.file("build.gradle.kts"))
+        inputs.files(configurations.runtimeClasspath)
         outputs.file(outputFile)
 
         doLast {
