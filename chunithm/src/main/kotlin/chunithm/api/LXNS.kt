@@ -20,6 +20,7 @@ import xyz.xszq.bot.chunithm.music.*
 import xyz.xszq.bot.chunithm.music.Level.levelClean
 import xyz.xszq.bot.chunithm.payload.*
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.toDBC
 
 class LXNS(
     val token: String,
@@ -122,7 +123,7 @@ class LXNS(
         val data = response.body<LXNSResponse<LXNSRatingResponse>>().data ?: return null
         return RatingResponse(
             player = PlayerInfo(
-                nickname = player.name,
+                nickname = player.name.toDBC(),
                 rating = player.rating,
                 level = player.level
             ),
@@ -175,7 +176,7 @@ class LXNS(
         }.body<LXNSResponse<List<LXNSScore>>>().data ?: return null
         return RecordsResponse(
             player = PlayerInfo(
-                nickname = player.name,
+                nickname = player.name.toDBC(),
                 rating = player.rating,
                 level = player.level
             ),
@@ -257,7 +258,7 @@ class LXNS(
         val response = getRecent(player) ?: return null
         return RecordsResponse(
             player = PlayerInfo(
-                nickname = player.name,
+                nickname = player.name.toDBC(),
                 rating = player.rating,
                 level = player.level
             ),

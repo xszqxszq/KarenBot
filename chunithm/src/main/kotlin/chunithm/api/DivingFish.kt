@@ -17,6 +17,7 @@ import xyz.xszq.bot.chunithm.music.*
 import xyz.xszq.bot.chunithm.payload.DivingFishRatingResponse
 import xyz.xszq.bot.chunithm.payload.DivingFishRecord
 import xyz.xszq.bot.chunithm.payload.DivingFishRecordsResponse
+import xyz.xszq.bot.toDBC
 
 class DivingFish(
     val token: String,
@@ -52,7 +53,7 @@ class DivingFish(
 
         return RatingResponse(
             player = PlayerInfo(
-                nickname = data.nickname,
+                nickname = data.nickname.toDBC(),
                 rating = data.rating
             ),
             oldRatingList = data.records.b30.mapNotNull { record ->
@@ -102,7 +103,7 @@ class DivingFish(
     } else {
         RecordsResponse(
             player = PlayerInfo(
-                nickname = data.nickname,
+                nickname = data.nickname.toDBC(),
                 rating = data.rating
             ),
             records = data.records.best.filter { it.mid in ids }.mapNotNull { it.toRecord() }

@@ -7,6 +7,7 @@ import xyz.xszq.bot.chunithm.component.image.RatingRenderParams
 import xyz.xszq.bot.chunithm.music.*
 import xyz.xszq.bot.chunithm.music.Rating.ratingFloor
 import xyz.xszq.bot.pagination
+import xyz.xszq.bot.toDBC
 import xyz.xszq.shinobu.dom.Div
 import xyz.xszq.shinobu.style.BackgroundPosition
 import xyz.xszq.shinobu.style.BackgroundSize
@@ -30,7 +31,6 @@ class RatingTemplate(
     }
     /**
      * 最佳成绩列表模板
-     * @param total 取最佳多少项成绩进行统计
      * @param info 查询信息
      * @param backend 数据源名称
      */
@@ -69,7 +69,6 @@ class RatingTemplate(
     }
     /**
      * 随心配最佳成绩列表模板
-     * @param total 取最佳多少项成绩进行统计
      * @param player 玩家信息
      * @param settings 玩家设置
      * @param allRecords 所有成绩
@@ -290,7 +289,6 @@ class RatingTemplate(
      * 展示单个成绩
      * @param index 序号
      * @param record 成绩记录
-     * @param params 渲染参数
      */
     private fun Template.score(
         index: Int,
