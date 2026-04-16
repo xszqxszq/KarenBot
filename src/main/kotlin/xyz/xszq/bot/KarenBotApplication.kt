@@ -32,6 +32,7 @@ val json = Json {
  * Entry point.
  */
 object KarenBotApplication {
+    var forwardConfig: ForwardConfig? = null
 
     @JvmStatic
     fun main(args: Array<String>) = runBlocking {
@@ -40,22 +41,36 @@ object KarenBotApplication {
     }
 
     @OptIn(ExperimentalHoplite::class)
+    private fun loadBotConfig() = ConfigLoaderBuilder.default()
+        .addFileSource("./config/bot.yml")
+        .withExplicitSealedTypes()
+        .build()
+        .loadConfigOrThrow<BotConfig>()
+
+    @OptIn(ExperimentalHoplite::class)
+    private fun loadForwardConfig(botConfig: BotConfig) = if (botConfig.forward)
+        ConfigLoaderBuilder.default()
+            .addFileSource("./config/forward.yml")
+            .withExplicitSealedTypes()
+            .build()
+            .loadConfigOrThrow<ForwardConfig>()
+    else
+        null
+
+    fun reloadConfig(pluginLoader: PluginLoader) {
+        val botConfig = loadBotConfig()
+        val forwardConfig = loadForwardConfig(botConfig)
+
+        pluginLoader.api.reloadConfig(botConfig)
+        this.forwardConfig = forwardConfig
+    }
+
+    @OptIn(ExperimentalHoplite::class)
     @Suppress("OPT_IN_USAGE")
     suspend fun start() {
         /* Initialize */
-        val botConfig = ConfigLoaderBuilder.default()
-            .addFileSource("./config/bot.yml")
-            .withExplicitSealedTypes()
-            .build()
-            .loadConfigOrThrow<BotConfig>()
-        val forwardConfig = if (botConfig.forward)
-            ConfigLoaderBuilder.default()
-                .addFileSource("./config/forward.yml")
-                .withExplicitSealedTypes()
-                .build()
-                .loadConfigOrThrow<ForwardConfig>()
-        else
-            null
+        val botConfig = loadBotConfig()
+        forwardConfig = loadForwardConfig(botConfig)
         val cosConfig = ConfigLoaderBuilder.default()
             .addFileSource("./config/cos.yml")
             .withExplicitSealedTypes()
@@ -96,7 +111,7 @@ object KarenBotApplication {
             install(ContentNegotiation) {
                 json(json)
             }
-            configureRouting(logger, pluginLoader, filter, forwardConfig)
+            configureRouting(logger, pluginLoader, filter)
         }.start(wait = true)
     }
     @OptIn(DelicateCoroutinesApi::class)
