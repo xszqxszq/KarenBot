@@ -36,6 +36,16 @@ class Admin: Plugin() {
             pluginLoader.reloadAllPlugins()
             reply("重载所有插件完成。")
         }
+        name == "config" -> {
+            kotlin.runCatching {
+                KarenBotApplication.reloadConfig(pluginLoader)
+            }.onSuccess {
+                reply("重载配置完成。")
+            }.onFailure {
+                reply("重载配置失败。")
+                throw it
+            }
+        }
         else -> {
             File(pluginLoader.pluginDirectory).listFiles()?.firstOrNull {
                 it.extension == "jar" && name in it.nameWithoutExtension

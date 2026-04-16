@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit
  * @param config Bot's config.
  */
 class OpenAPI(
-    val config: BotConfig,
+    var config: BotConfig,
     var filter: WordFilter,
     private val client: HttpClient = defaultHttpClient(),
     private val server: String = DEFAULT_SERVER,
@@ -33,6 +33,12 @@ class OpenAPI(
 
     private var accessToken: String? = null
     private var accessTokenExpiresAt: Long? = null
+
+    fun reloadConfig(config: BotConfig) {
+        this.config = config
+        accessToken = null
+        accessTokenExpiresAt = null
+    }
 
     companion object {
         const val DEFAULT_SERVER = "https://api.sgroup.qq.com"

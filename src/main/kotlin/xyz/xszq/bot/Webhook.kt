@@ -27,8 +27,7 @@ import javax.net.ssl.SSLContext
 fun Application.configureRouting(
     logger: KLogger,
     pluginLoader: PluginLoader,
-    filter: WordFilter,
-    forwardConfig: ForwardConfig ?= null
+    filter: WordFilter
 ) {
     routing {
         get("/") {
@@ -55,9 +54,9 @@ fun Application.configureRouting(
                 when (payload.op) {
                     /* Normal Message */
                     OpCode.DISPATCH -> {
-                        if (forwardConfig != null) {
+                        KarenBotApplication.forwardConfig?.let { forwardConfig ->
                             handleForward(payload, call, logger, filter, pluginLoader, forwardConfig, body)
-                        } else {
+                        } ?: run {
                             handleDispatch(payload, call, logger, filter, pluginLoader)
                         }
                     }
