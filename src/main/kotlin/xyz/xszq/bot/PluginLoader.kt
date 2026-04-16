@@ -9,6 +9,7 @@ import xyz.xszq.bot.subscribe.SubscribeManager
 import java.io.File
 import java.net.URL
 import java.net.URLClassLoader
+import java.net.URLConnection
 import java.util.jar.JarFile
 
 /**
@@ -30,6 +31,11 @@ class PluginLoader(
     private val logger = KotlinLogging.logger {}
     private val loadedPlugins = ConcurrentMap<String, Plugin>()
     private val pluginTimestamps = ConcurrentMap<String, Long>()
+    private val pluginClassLoaders = ConcurrentMap<String, URLClassLoader>()
+
+    init {
+        URLConnection.setDefaultUseCaches("jar", false)
+    }
 
     /**
      * Load a plugin if not exists, or reload it if changed.
@@ -55,6 +61,11 @@ class PluginLoader(
     private suspend fun unloadPlugin(pluginPath: String) {
         val plugin = loadedPlugins[pluginPath]
         plugin?.unload()
+        pluginClassLoaders.remove(pluginPath)?.let { classLoader ->
+            withContext(Dispatchers.IO) {
+                classLoader.close()
+            }
+        }
         subscribes.unsubscribe(pluginPath)
         loadedPlugins.remove(pluginPath)
         pluginTimestamps.remove(pluginPath)
@@ -96,7 +107,7 @@ class PluginLoader(
             }.toTypedArray()
             val classLoader = URLClassLoader(urls, this::class.java.classLoader)
 
-            runCatching {
+            val error = runCatching {
                 val pluginClass = classLoader.loadClass(mainClassName)
                 val plugin = pluginClass.getDeclaredConstructor().newInstance() as? Plugin
                 if (plugin != null) {
@@ -105,9 +116,15 @@ class PluginLoader(
                     plugin.load()
                     loadedPlugins[pluginPath] = plugin
                     pluginTimestamps[pluginPath] = lastModified
+                    pluginClassLoaders[pluginPath] = classLoader
                 }
-            }.onFailure { e ->
-                e.printStackTrace()
+            }.exceptionOrNull()
+
+            if (error != null) {
+                withContext(Dispatchers.IO) {
+                    classLoader.close()
+                }
+                error.printStackTrace()
             }
         }
     }
