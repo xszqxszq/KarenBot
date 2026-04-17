@@ -4,6 +4,11 @@ import java.text.DecimalFormat
 
 @Suppress("unused")
 object Rate {
+    val rates = listOf(
+        "sssp", "sss", "ssp", "ss", "sp", "s",
+        "aaa", "aa", "a", "bbb", "bb", "b",
+        "c", "d"
+    )
     operator fun get(achievement: Int) = when (achievement) {
         in 1009000 .. 1010000 -> "sssp"
         in 1007500 until 1009000 -> "sss"
@@ -47,5 +52,9 @@ object Rate {
                 Pair(raw.substring(0, index + 1), raw.substring(index + 1))
             }
         }
+    }
+    fun next(rate: String) = when (rate) {
+        "sssp" -> "sssp"
+        else -> rates[rates.indexOf(rate) - 1]
     }
 }

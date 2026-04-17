@@ -144,7 +144,7 @@ object ComboQuery {
     )
     fun random(random: Random) = Filter(
         type = FilterType.Sort,
-        sortBy = { record ->
+        sortBy = {
             random.nextInt()
         }
     )
@@ -243,6 +243,14 @@ object ComboQuery {
             -Rating.calc(record.chart.fitLevelValue, record.achievement)
         }
     )
+    val nextRate = Filter(
+        type = FilterType.Modification,
+        modifier = {
+            rate = Rate.next(rate)
+            achievement = Rate.floor(rate)
+            rating = Rating.calc(chart, achievement)
+        }
+    )
     fun nowVersion(version: GameVersion) = Filter(
         type = FilterType.Modification,
         chart = { chart ->
@@ -307,6 +315,7 @@ object ComboQuery {
         // 特殊条件
         add(listOf("完整", "全"), noB15)
         add(listOf("拟合定数", "拟合", "nh"), fitLevelValues)
+        add(listOf("理想"), nextRate)
         // FC/FS
         add(listOf("极", "全连", "fc"), fc)
         add(listOf("理论", "ap+", "app"), app)
@@ -477,6 +486,15 @@ object ComboQuery {
     ): List<Record>? {
         if (this == null || required && noRecordFilter())
             return null
+
+
+        forEach { filter ->
+            records.forEach { record ->
+                filter.modifier ?.let {
+                    record.apply(it)
+                }
+            }
+        }
 
         val groupedFilters = groupBy { it.type }
         var filtered = records.filter { record ->

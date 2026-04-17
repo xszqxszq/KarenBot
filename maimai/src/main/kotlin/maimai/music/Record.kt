@@ -3,10 +3,10 @@ package xyz.xszq.bot.maimai.music
 class Record(
     val music: MusicInfo,
     val chart: ChartInfo,
-    val achievement: Int,
+    var achievement: Int,
     val comboStatus: ComboStatus,
     val syncStatus: SyncStatus,
     val deluxeScore: Int,
-    val rate: String,
+    var rate: String,
     var rating: Int
 )

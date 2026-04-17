@@ -2,6 +2,11 @@ package xyz.xszq.bot.maimai.music
 
 @Suppress("unused")
 object Rate {
+    val rates = listOf(
+        "sssp", "sss", "ssp", "ss", "sp", "s",
+        "aaa", "aa", "a", "bbb", "bb", "b",
+        "c", "d"
+    )
     operator fun get(achievement: Int) = when (achievement) {
         in 1005000 .. 1010000 -> "sssp"
         in 1000000 until 1005000 -> "sss"
@@ -42,5 +47,9 @@ object Rate {
         append('.')
         append((acc % 10000).toString().padStart(4, '0'))
         append('%')
+    }
+    fun next(rate: String) = when (rate) {
+        "sssp" -> "sssp"
+        else -> rates[rates.indexOf(rate) - 1]
     }
 }

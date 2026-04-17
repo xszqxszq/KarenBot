@@ -10,6 +10,7 @@ class Filter(
     val record: (Record) -> Boolean = defaultRecordFilter,
     val sortBy: (Record) -> Comparable<*> = defaultSort,
     val nowVersion: () -> GameVersion? = defaultVersion,
+    val modifier: (Record.() -> Unit)? = null,
     val disableN20: Boolean = false,
     val name: String? = null,
     val singleChart: Boolean = false

@@ -6,7 +6,6 @@ import xyz.xszq.bot.add
 import xyz.xszq.bot.chunithm.component.ChunithmData
 import xyz.xszq.bot.chunithm.component.image.FilterParams
 import xyz.xszq.bot.chunithm.music.*
-import kotlin.math.roundToInt
 import kotlin.random.Random
 
 
@@ -52,15 +51,6 @@ object ComboQuery {
         },
         record = { record ->
             record.chainStatus.isFullChain()
-        }
-    )
-    val fullChainPlatinum = Filter(
-        type = FilterType.Sync,
-        chart = { chart ->
-            chart.difficulty != MusicDifficulty.WorldsEnd
-        },
-        record = { record ->
-            record.chainStatus == ChainStatus.Platinum
         }
     )
     val close = Filter(
@@ -144,9 +134,17 @@ object ComboQuery {
         type = FilterType.Limit,
         disableN20 = true
     )
+    val nextRate = Filter(
+        type = FilterType.Modification,
+        modifier = {
+            rate = Rate.next(rate)
+            achievement = Rate.floor(rate)
+            rating = Rating.calc(chart, achievement)
+        }
+    )
     fun random(random: Random) = Filter(
         type = FilterType.Sort,
-        sortBy = { record ->
+        sortBy = {
             random.nextInt()
         }
     )
@@ -258,6 +256,7 @@ object ComboQuery {
         }
         // 特殊条件
         add(listOf("完整", "全"), noN20)
+        add(listOf("理想"), nextRate)
         // FC/FS
         add(listOf("全连", "fc"), fc)
         add(listOf("理论", "ajc"), ajc)
