@@ -365,6 +365,14 @@ object ComboQuery {
         if (this == null || required && noRecordFilter())
             return null
 
+        forEach { filter ->
+            records.forEach { record ->
+                filter.modifier ?.let {
+                    record.apply(it)
+                }
+            }
+        }
+
         val groupedFilters = groupBy { it.type }
         var filtered = records.filter { record ->
             groupedFilters.all { (_, group) ->
