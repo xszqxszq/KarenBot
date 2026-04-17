@@ -126,7 +126,8 @@ object ComboQuery {
         type = FilterType.Achievement,
         chart = { chart ->
             chart.difficulty != MusicDifficulty.WorldsEnd
-        }, record = { record ->
+        },
+        record = { record ->
             record.achievement < achievement
         }
     )
@@ -136,10 +137,21 @@ object ComboQuery {
     )
     val nextRate = Filter(
         type = FilterType.Modification,
+        chart = { chart ->
+            chart.difficulty != MusicDifficulty.WorldsEnd
+        },
         modifier = {
-            rate = Rate.next(rate)
-            achievement = Rate.floor(rate)
-            rating = Rating.calc(chart, achievement)
+            when (rate) {
+                "sssp" -> {
+                    achievement = 1010000
+                    comboStatus = ComboStatus.AllJusticeCritical
+                }
+                else -> {
+                    rate = Rate.next(rate)
+                    achievement = Rate.floor(rate)
+                    rating = Rating.calc(chart, achievement)
+                }
+            }
         }
     )
     fun random(random: Random) = Filter(
@@ -364,6 +376,14 @@ object ComboQuery {
     ): List<Record>? {
         if (this == null || required && noRecordFilter())
             return null
+
+        forEach { filter ->
+            records.forEach { record ->
+                filter.modifier ?.let {
+                    record.apply(it)
+                }
+            }
+        }
 
         val groupedFilters = groupBy { it.type }
         var filtered = records.filter { record ->

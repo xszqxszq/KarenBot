@@ -4,8 +4,8 @@ class Record(
     val music: MusicInfo,
     val chart: ChartInfo,
     var achievement: Int,
-    val comboStatus: ComboStatus,
-    val syncStatus: SyncStatus,
+    var comboStatus: ComboStatus,
+    var syncStatus: SyncStatus,
     val deluxeScore: Int,
     var rate: String,
     var rating: Int
