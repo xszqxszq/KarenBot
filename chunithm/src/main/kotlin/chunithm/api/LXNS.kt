@@ -54,7 +54,7 @@ class LXNS(
 
     suspend fun getMusicList(): Map<Int, MusicInfo> {
         val data = client.get("$apiServer/song/list?notes=true").body<LXNSSongs>()
-        val newest = data.versions.maxByOrNull { it.version } ?: return emptyMap()
+        val newest = data.versions.sortedByDescending { it.version }.map { it.version }.take(2)
         val versions = data.versions.associate { version ->
             version.version to GameVersion(
                 id = version.id,
@@ -71,7 +71,7 @@ class LXNS(
                 genre = MusicGenre.of(song.genre),
                 bpm = song.bpm,
                 version = versions[song.version] ?: GameVersion(0, song.version.toString(), song.version),
-                isNew = song.version == newest.version,
+                isNew = song.version in newest,
                 locked = song.locked,
                 disabled = song.disabled,
                 map = song.map
