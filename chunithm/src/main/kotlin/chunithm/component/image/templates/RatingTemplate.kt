@@ -89,18 +89,17 @@ class RatingTemplate(
         val isNewDisabled = when {
             filterParams == null -> false
             filterParams.isAllRequired -> true
-            filterParams.newestVersion == newestVersion ->
-                allRecords.filter { it.music.version == filterParams.newestVersion }.size < newCount
-            allRecords.none { it.music.version != filterParams.newestVersion } -> true
-            else -> false
+            // TODO: 国服最新版本不止一个，暂时先屏蔽filterParams.newestVersion\
+            allRecords.none { !it.music.isNew } -> true
+            else -> allRecords.filter { it.music.isNew }.size < newCount
         }
 
         val oldRecords =
             if (isNewDisabled) bests.take(oldCount)
-            else allRecords.filter { it.music.version != filterParams ?.newestVersion }.take(oldCount)
+            else allRecords.filter { !it.music.isNew }.take(oldCount)
         val newRecords =
             if (isNewDisabled) bests.subList(min(oldCount,oldRecords.size), bests.size)
-            else allRecords.filter { it.music.version == filterParams ?.newestVersion }.take(newCount)
+            else allRecords.filter { it.music.isNew }.take(newCount)
 
         val oldRatingSum = oldRecords.sumOf { it.rating }
         val newRatingSum = newRecords.sumOf { it.rating }
