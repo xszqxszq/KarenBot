@@ -13,6 +13,7 @@ import xyz.xszq.bot.maimai.component.image.FilterParams
 import xyz.xszq.bot.maimai.config.DesignerConfig
 import xyz.xszq.bot.maimai.music.*
 import xyz.xszq.bot.maimai.toSimple
+import xyz.xszq.bot.toDBC
 import java.io.File
 import kotlin.math.roundToInt
 import kotlin.random.Random
@@ -182,22 +183,49 @@ object ComboQuery {
         name = "levelValue",
         singleChart = true
     )
-    fun designer(designer: String) = Filter(
-        type = FilterType.Designer,
-        chart = { chart ->
-            (chart.notesDesigner.equals(designer, ignoreCase = true) ||
-                    designerConfig.includes[designer]?.let { chart.notesDesigner in it } == true ||
-                    designerConfig.collabs[designer]?.let { c ->
-                        c.any { raw ->
-                            val nowId = raw.substringBefore("#").toInt()
-                            val nowDiff = MusicDifficulty.of(raw.substringAfter("#").toInt())
-                            chart.music.id == nowId && chart.difficulty == nowDiff
-                        }
-                    } == true ||
-                    designer.lowercase() in chart.notesDesigner.lowercase())
-        },
-        singleChart = true
-    )
+
+    fun designer(designer: String): Filter {
+        val normalized = designer.toDBC()
+
+        val mainName = (designerConfig.aliases.entries.firstOrNull { (key, aliases) ->
+            when {
+                key.toDBC().equals(normalized, ignoreCase = true) -> true
+                aliases.any { it.toDBC().equals(normalized, ignoreCase = true) } -> true
+                else -> false
+            }
+        } ?.key ?: designer).toDBC()
+
+        val includesAliases = designerConfig.includes.entries.firstOrNull {
+            it.key.toDBC().equals(mainName, ignoreCase = true)
+        } ?.value ?: emptyList()
+
+        val searchKeywords = (includesAliases + mainName).map { it.toDBC() }.distinct()
+
+        val collabCharts = designerConfig.collabs.entries.firstOrNull {
+            when {
+                it.key.toDBC().equals(mainName, ignoreCase = true) -> true
+                it.key.toDBC().equals(normalized, ignoreCase = true) -> true
+                else -> false
+            }
+        }?.value ?: emptyList()
+
+        return Filter(
+            type = FilterType.Designer,
+            singleChart = true,
+            chart = { chart ->
+                val matchAlias = searchKeywords.any { keyword ->
+                    chart.notesDesigner.toDBC().contains(keyword, ignoreCase = true)
+                }
+
+                val matchCollab = collabCharts.any { raw ->
+                    val nowId = raw.substringBefore("#").toInt()
+                    val nowDiff = MusicDifficulty.of(raw.substringAfter("#").toInt())
+                    chart.music.id == nowId && chart.difficulty == nowDiff
+                }
+                matchAlias || matchCollab
+            }
+        )
+    }
     fun musicsPlate(musics: List<Int>, reMasters: List<Int>, plateName: String) = Filter(
         type = FilterType.Plate,
         chart = { chart ->

@@ -346,12 +346,9 @@ class MusicController(
         designer: String,
         page: Int
     ) {
-        val targets = chunithm.chunithmData.designer.aliases
-            .filter { (_, value) -> value.any { alias -> alias == designer || designer in alias } }
-            .map { it.key }
-        val (result, nowPage, totalPages) = chunithm.charts()
-            .filter { it.notesDesigner in targets || designer == it.notesDesigner || designer in it.notesDesigner }
-            .pagination(page, maxResults)
+        val (result, nowPage, totalPages) = with(ComboQuery) {
+            listOf(designer(designer)).filterCharts(chunithm.chunithmData.musics.values)
+        }.pagination(page, maxResults)
         showCharts(
             "chunithm-search-designer",
             designer,

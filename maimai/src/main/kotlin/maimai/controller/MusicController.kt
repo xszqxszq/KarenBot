@@ -494,12 +494,9 @@ class MusicController(
         designer: String,
         page: Int
     ) {
-        val targets = ComboQuery.designerConfig.aliases
-            .filter { (_, value) -> value.any { alias -> alias == designer || designer in alias } }
-            .map { it.key }
-        val (result, nowPage, totalPages) = maimai.charts()
-            .filter { it.notesDesigner in targets || designer == it.notesDesigner || designer in it.notesDesigner }
-            .pagination(page, maxResults)
+        val (result, nowPage, totalPages) = with(ComboQuery) {
+            listOf(designer(designer)).filterCharts(maimai.maimaiData.musics.values)
+        }.pagination(page, maxResults)
         showCharts(
             "maimai-search-designer",
             designer,
