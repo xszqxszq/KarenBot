@@ -47,6 +47,11 @@ class LXNS(
         install(HttpRequestRetry) {
             retryOnExceptionOrServerErrors(maxRetries = 5)
         }
+        install(HttpTimeout) {
+            requestTimeoutMillis = 60_000
+            connectTimeoutMillis = 60_000
+            socketTimeoutMillis = 60_000
+        }
     }
 
     override suspend fun load() {
