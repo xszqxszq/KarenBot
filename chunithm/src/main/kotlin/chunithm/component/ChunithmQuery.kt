@@ -69,8 +69,8 @@ class ChunithmQuery(
         listAll: Boolean = false
     ): List<ChunithmAPI> {
         var backends = listOf(
-            chunithm.backend("diving-fish"),
             chunithm.backend("lxns"),
+            chunithm.backend("diving-fish"),
         ).toMutableList()
         if (user.isSelf && !listAll)
             MaimaiSettingsTable[user.event.sender.id, "prober"] ?.let { prefer ->

@@ -21,19 +21,19 @@ class HelpController(
                 }).toMessage(Keyboard.create {
                     row {
                         at("🔎查歌", "/mai 牛奶歌是什么歌", id = "1")
-                        at("📋单曲成绩", "/mai info 海底谭", id = "1")
+                        at("📋单曲成绩", "/mai info 海底谭", id = "2")
                     }
                     row {
-                        at("💯Best50", "/mai b50", id = "1")
-                        link("随心配50", "https://otmdb.cn/bot/maimai/combo", id = "1")
+                        at("💯Best50", "/mai b50", id = "3")
+                        link("随心配50", "https://otmdb.cn/bot/maimai/combo", id = "4")
                     }
                     row {
-                        at("⏳完成表", "/mai 橙将完成表", id = "1")
-                        at("📖分数列表", "/mai 13分数列表", id = "1")
+                        at("⏳完成表", "/mai 橙将完成表", id = "5")
+                        at("📖分数列表", "/mai 13分数列表", id = "6")
                     }
                     row {
-                        at("🕹️开字母", "舞萌开字母", id = "1")
-                        link("更多功能...", "https://otmdb.cn/bot/maimai", id = "1")
+                        at("🕹️开字母", "舞萌开字母", id = "7")
+                        link("更多功能...", "https://otmdb.cn/bot/maimai", id = "8")
                     }
                 }))
             }
