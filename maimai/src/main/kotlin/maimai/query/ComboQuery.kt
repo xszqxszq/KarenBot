@@ -143,12 +143,15 @@ object ComboQuery {
         type = FilterType.Limit,
         disable15 = true
     )
-    fun random(random: Random) = Filter(
-        type = FilterType.Sort,
-        sortBy = {
-            random.nextInt()
-        }
-    )
+    fun random(random: Random): Filter {
+        val orders = mutableMapOf<Record, Int>()
+        return Filter(
+            type = FilterType.Sort,
+            sortBy = { record ->
+                orders.getOrPut(record) { random.nextInt() }
+            }
+        )
+    }
     fun difficulty(difficulty: MusicDifficulty) = Filter(
         type = FilterType.Difficulty,
         chart = { chart ->
