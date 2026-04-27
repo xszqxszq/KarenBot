@@ -21,6 +21,7 @@ data class Keyboard(
             label: String,
             data: String,
             enter: Boolean = false,
+            anchor: Int? = null,
             style: Int = RenderData.BLUE,
             id: String = "1"
         ) = button(
@@ -29,14 +30,14 @@ data class Keyboard(
                 label = label, visitedLabel = label, style = style
             ),
             action = Action(
-                type = Action.AT, data = data, permission = Permission(Permission.EVERYONE), enter = enter
+                type = Action.AT, data = data, permission = Permission(Permission.EVERYONE),
+                enter = enter, anchor = anchor
             )
         )
 
         fun KeyboardRowBuilder.link(
             label: String,
             url: String,
-            enter: Boolean = false,
             style: Int = RenderData.BLUE,
             id: String = "1"
         ) = button(
@@ -45,14 +46,13 @@ data class Keyboard(
                 label = label, visitedLabel = label, style = style
             ),
             action = Action(
-                type = Action.LINK, data = url, permission = Permission(Permission.EVERYONE), enter = enter
+                type = Action.LINK, data = url, permission = Permission(Permission.EVERYONE)
             )
         )
 
         fun KeyboardRowBuilder.callBack(
             label: String,
             data: String,
-            enter: Boolean = false,
             style: Int = RenderData.BLUE,
             id: String = "1"
         ) = button(
@@ -61,7 +61,7 @@ data class Keyboard(
                 label = label, visitedLabel = label, style = style
             ),
             action = Action(
-                type = Action.CALLBACK, data = data, permission = Permission(Permission.EVERYONE), enter = enter
+                type = Action.CALLBACK, data = data, permission = Permission(Permission.EVERYONE)
             )
         )
     }

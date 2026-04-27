@@ -28,9 +28,9 @@ object MarkdownTemplates {
         fun selectPaged(button: String, keyword: String, nowPage: Int = 1, totalPages: Int = 1) = Keyboard.create {
             row {
                 if (nowPage > 1)
-                    callBack("⬅️上一页", "$keyword\n${nowPage - 1}", enter = true, id = button)
+                    callBack("⬅️上一页", "$keyword\n${nowPage - 1}", id = button)
                 if (nowPage < totalPages)
-                    callBack("➡️下一页", "$keyword\n${nowPage + 1}", enter = true, id = button)
+                    callBack("➡️下一页", "$keyword\n${nowPage + 1}", id = button)
             }
         }
     }

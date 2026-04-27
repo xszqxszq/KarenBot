@@ -10,6 +10,7 @@ import korlibs.io.util.isDigit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonPrimitive
+import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.ArgsNotEnoughException
 import xyz.xszq.bot.exception.NeedHelpException
@@ -18,6 +19,7 @@ import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.payload.MemeOption
 import xyz.xszq.bot.payload.markdown.*
+import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.sekai.SekaiCharacter
 import xyz.xszq.bot.sekai.SekaiSticker
 import java.io.File
@@ -160,34 +162,40 @@ class Meme: Plugin() {
         }
     }
     val spherizeErrorHandler: ErrorHandler = { e ->
+        val hint = when (this) {
+            is GroupMessageEvent -> "手机端如想发送图片，请长按输入框，并点击“全屏输入”，再去相册选择图片即可。"
+            else -> null
+        }
         val help = buildString {
             appendLine( "使用方法：“@可怜BOT 球面化”并同时发送图片" )
-            appendLine( "手机端发送方式：长按输入框，点击全屏输入，再去相册勾选即可" )
+            hint ?.let { appendLine(it) }
             appendLine()
-            appendLine( "请发送想要球面化的图片" )
+            appendLine( "请点击下方选择图片：" )
         }.trim()
         when {
             e is ArgsNotEnoughException || e is NeedHelpException -> reply(
-                Markdown(
-                    brief("球面化", help),
-                    callKeyboard("球面化")
-                ))
+                Markdown(brief("球面化", help), Keyboard.create {
+                    row { at("选择图片", "球面化", false, 1) }
+                }))
             else -> e.printStackTrace()
         }
     }
     val imSoHappyErrorHandler: ErrorHandler = { e ->
+        val hint = when (this) {
+            is GroupMessageEvent -> "手机端如想发送图片，请长按输入框，并点击“全屏输入”，再去相册选择图片即可。"
+            else -> null
+        }
         val help = buildString {
             appendLine( "使用方法：“@可怜BOT 我巨爽”并同时发送图片" )
-            appendLine( "手机端发送方式：长按输入框，点击全屏输入，再去相册勾选即可" )
+            hint ?.let { appendLine(it) }
             appendLine()
-            appendLine( "请发送想要我巨爽的图片" )
+            appendLine( "请点击下方选择图片：" )
         }.trim()
         when {
             e is ArgsNotEnoughException || e is NeedHelpException -> reply(
-                Markdown(
-                    brief("我巨爽", help),
-                    callKeyboard("我巨爽")
-                ))
+                Markdown(brief("我巨爽", help), Keyboard.create {
+                    row { at("选择图片", "我巨爽", false, 1) }
+                }))
             else -> e.printStackTrace()
         }
     }

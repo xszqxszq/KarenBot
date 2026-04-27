@@ -12,6 +12,7 @@ data class Action(
     val atBotShowChannelList: Boolean ? = null,
     val reply: Boolean = false,
     val enter: Boolean = false,
+    val anchor: Int ?= null,
     @SerialName("unsupport_tips")
     val unsupportTips: String = "兼容文本"
 ) {

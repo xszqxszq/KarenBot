@@ -17,6 +17,7 @@ import xyz.xszq.bot.maimai.query.ComboQuery
 import xyz.xszq.bot.maimai.query.ComboQuery.filterCharts
 import xyz.xszq.bot.maimai.query.ComboQuery.filterMusics
 import xyz.xszq.bot.maimai.query.ComboQuery.filterRecords
+import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.newLine
 import xyz.xszq.bot.payload.markdown.Keyboard
@@ -31,7 +32,14 @@ class SettingsController(
             if ("水鱼" in args)
                 return@startsWith
             val qq = args.toLongOrNull() ?: run {
-                reply("使用方法：/bind qq号")
+                when (textMode()) {
+                    true -> reply("使用方法：/bind qq号")
+                    false -> reply(Markdown(brief("可怜BOT", "请点击下方按钮输入您的QQ号："), Keyboard.create {
+                        row {
+                            at("⬇点我输入", "/bind ", id = "1")
+                        }
+                    }))
+                }
                 return@startsWith
             }
             QQBindTable.update(this.sender.id, qq)

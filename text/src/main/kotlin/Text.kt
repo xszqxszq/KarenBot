@@ -27,8 +27,6 @@ import kotlin.random.Random
 
 @Suppress("unused")
 class Text: Plugin() {
-    val templateBrief = "102112100_1761189409"
-    val templateImage = "102112100_1761189134"
     val presets = buildMap {
         put("在", "bot在")
         put("有人吗", "有bot在哦")
