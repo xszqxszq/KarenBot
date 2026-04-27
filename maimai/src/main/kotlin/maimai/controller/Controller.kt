@@ -113,7 +113,7 @@ sealed class Controller(
                 }
             }.trim().newLine())
         else
-            reply(brief("舞萌DX", "您似乎尚未导入舞萌DX分数到查分器，请参考下方教程：").toMessage(Keyboard.create {
+            reply(brief("舞萌DX", "您似乎尚未导入舞萌DX分数到${backend.name}查分器，请参考下方教程：").toMessage(Keyboard.create {
                 when (backend) {
                     is DivingFish -> row {
                         link("🐟水鱼(电脑/iOS)", "https://otmdb.cn/jump/maimaidxprober_import", id = "1")
@@ -125,6 +125,17 @@ sealed class Controller(
                 row {
                     link("🐇UsagiPass(iOS/安卓)", "https://otmdb.cn/jump/maimai_prober_mobile", id = "3")
                     link("🤖可怜BOT(安卓)", "https://bot-docs.otmdb.cn/maimai/update", id = "4")
+                }
+                row {
+                    when (backend) {
+                        is DivingFish -> row {
+                            at("❄切换到落雪", "设置查分器 落雪", enter = true, id = "5")
+                        }
+                        is LXNS -> row {
+                            at("🐟切换到水鱼", "设置查分器 水鱼", enter = true, id = "5")
+                        }
+                    }
+                    at("切换到自动", "设置查分器 自动", enter = true, id = "6")
                 }
             }))
     }

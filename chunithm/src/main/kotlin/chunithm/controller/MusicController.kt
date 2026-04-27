@@ -175,7 +175,7 @@ class MusicController(
                 reply("未找到相关歌曲。")
             }
         }
-        endsWith(listOf("有什么歌", "有什么歌？")) { query ->
+        endsWith(listOf("有什么歌", "有什么歌？", "有哪些歌", "有哪些歌？")) { query ->
             if (!searchCombo(query)) {
                 reply("未找到相关歌曲。")
             }

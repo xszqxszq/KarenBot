@@ -1,15 +1,13 @@
 package xyz.xszq.bot.maimai.component
 
+import kotlinx.coroutines.CancellationException
 import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.maimai.api.LXNS
 import xyz.xszq.bot.maimai.api.MaimaiAPI
 import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.database.QQBindTable
-import xyz.xszq.bot.maimai.exception.NotSupportedException
-import xyz.xszq.bot.maimai.exception.QQBindRequiredException
-import xyz.xszq.bot.maimai.exception.UserBindRequiredException
-import xyz.xszq.bot.maimai.exception.UserNotFoundException
+import xyz.xszq.bot.maimai.exception.*
 import xyz.xszq.bot.maimai.music.*
 
 class MaimaiQuery(
@@ -23,13 +21,22 @@ class MaimaiQuery(
         const val USER_NOT_FOUND = "您查询的用户不存在。"
         const val USER_DENIED = "您查询的用户设置了查分器隐私或未同意查分器协议，请检查设置。"
         const val USER_EULA = "请先前往查分器同意用户协议再进行查询。"
-        const val NEED_AUTHORIZATION = "该功能需要您授权BOT访问您的成绩信息"
+        const val NEED_AUTHORIZATION = "该功能需要您在查分器授权BOT访问您的成绩信息"
         const val QUERY_FAILED = "查询失败，请重试"
-    }
 
-    private fun isRetryableError(e: Throwable) = when (e) {
-        is UserNotFoundException -> true
-        else -> false
+        private val queryExceptionOrder = listOf(
+            FilterNoResultException::class.java,
+            FilterTooManyException::class.java,
+            QQBindRequiredException::class.java,
+            UserDeniedException::class.java,
+            AuthorizationException::class.java,
+            UserOARequiredException::class.java,
+            NoDataException::class.java,
+            UserNotFoundException::class.java,
+            UserBindRequiredException::class.java,
+            NotSupportedException::class.java,
+            UnknownException::class.java,
+        )
     }
 
     // 获取要查询的目标用户的参数
@@ -68,10 +75,8 @@ class MaimaiQuery(
             MaimaiSettingsTable[user.event.sender.id, "prober"] ?.let { prefer ->
                 if (prefer.isBlank())
                     return@let
-                // TODO: 还是按这样查但是解决一下会抛出落雪查分器OA提示的问题
-//                backends = ((backends.filter { it.id == prefer }) + backends.filter { it.id != prefer })
-//                    .toMutableList()
-                backends = backends.filter { it.id == prefer }.toMutableList()
+                backends = ((backends.filter { it.id == prefer }) + backends.filter { it.id != prefer })
+                    .toMutableList()
             }
         return backends
     }
@@ -95,16 +100,11 @@ class MaimaiQuery(
     ): Pair<RatingResponse, MaimaiAPI> {
         if (user.isMaxScore())
             return Pair(maxScoreRating(), listBackends(user).first())
-        val result = listBackends(user).firstNotNullOfOrNull { backend ->
-            runCatching {
-                backend.getPlayerRating(user)
-            }.onFailure { e ->
-                if (!isRetryableError(e))
-                    throw e
-            }.getOrNull() ?.let { Pair(it, backend) }
-        } ?: when {
-            user is UserQueryParams.Username -> throw UserNotFoundException()
-            else -> throw UserBindRequiredException()
+        val result = queryBackends(user, listBackends(user)) { backend ->
+            val response = backend.getPlayerRating(user) ?: return@queryBackends null
+            if (response.oldRatingList.isEmpty() && response.newRatingList.isEmpty())
+                throw NoDataException(api = backend)
+            response
         }
         result.first.settings = mergeSettings(result.first.settings, user.settings)
         return result
@@ -114,16 +114,8 @@ class MaimaiQuery(
         user: UserQueryParams,
         musics: List<MusicInfo>
     ): Pair<RecordsResponse, MaimaiAPI> {
-        val result = listBackends(user).firstNotNullOfOrNull { backend ->
-            runCatching {
-                backend.getPlayerRecords(user, musics)
-            }.onFailure { e ->
-                if (!isRetryableError(e))
-                    throw e
-            }.getOrNull() ?.let { Pair(it, backend) }
-        } ?: when {
-            user is UserQueryParams.Username -> throw UserNotFoundException()
-            else -> throw UserBindRequiredException()
+        val result = queryBackends(user, listBackends(user)) { backend ->
+            backend.getPlayerRecords(user, musics)
         }
         result.first.settings = mergeSettings(result.first.settings, user.settings)
         return result
@@ -133,35 +125,78 @@ class MaimaiQuery(
         user: UserQueryParams,
         music: MusicInfo
     ): List<Record> {
-        val result = listBackends(user).firstNotNullOfOrNull { backend ->
-            runCatching {
-                backend.getPlayerRecord(user, music)
-            }.onFailure { e ->
-                if (!isRetryableError(e))
-                    throw e
-            }.getOrNull()
-        } ?: when {
-            user is UserQueryParams.Username -> throw UserNotFoundException()
-            else -> throw UserBindRequiredException()
+        val result = queryBackends(user, listBackends(user)) { backend ->
+            backend.getPlayerRecord(user, music)
         }
-        return result
+        return result.first
     }
     suspend fun recent(
         user: UserQueryParams,
     ): Pair<RecordsResponse, MaimaiAPI> {
-        val backend = listBackends(user).filterIsInstance<LXNS>().firstOrNull()
-            ?: throw NotSupportedException("该功能仅支持落雪查分器")
-        val response = runCatching {
+        val backends = listBackends(user).filterIsInstance<LXNS>()
+        if (backends.isEmpty())
+            throw NotSupportedException("该功能仅支持落雪查分器")
+        val result = queryBackends(user, backends) { backend ->
             backend.getPlayerRecent(user)
-        }.onFailure { e ->
-            if (!isRetryableError(e))
-                throw e
-        }.getOrNull() ?: when {
-            user is UserQueryParams.Username -> throw UserNotFoundException()
-            else -> throw UserBindRequiredException()
         }
+        val response = result.first
+        val backend = result.second
         response.settings = mergeSettings(response.settings, user.settings)
         return Pair(response, backend)
+    }
+
+    private suspend fun <T: Any, A: MaimaiAPI> queryBackends(
+        user: UserQueryParams,
+        backends: List<A>,
+        block: suspend (A) -> T?
+    ): Pair<T, A> {
+        val failures = mutableListOf<QueryFailure>()
+        backends.forEach { backend ->
+            runCatching {
+                block(backend)
+            }.onSuccess { result ->
+                result ?.let {
+                    return Pair(it, backend)
+                }
+            }.onFailure { e ->
+                if (e is CancellationException)
+                    throw e
+                if (e is Exception)
+                    failures.add(QueryFailure(backend, e.asQueryException(user)))
+            }
+        }
+        throw failures.takeIf { it.isNotEmpty() } ?.selectException(user) ?: UnknownException()
+    }
+
+    private data class QueryFailure(
+        val backend: MaimaiAPI,
+        val exception: Exception
+    )
+
+    private fun Exception.asQueryException(user: UserQueryParams) = when {
+        user is UserQueryParams.QQ && this is UserNotFoundException -> UserBindRequiredException(message)
+        else -> this
+    }
+
+    private fun List<QueryFailure>.selectException(user: UserQueryParams): Exception {
+        val failures = filter { failure ->
+            failure.exception !is UserOARequiredException || shouldHandleUserOARequired(user)
+        }.ifEmpty { this }
+        return queryExceptionOrder.firstNotNullOfOrNull { type ->
+            failures.firstOrNull { type.isInstance(it.exception) } ?.exception
+        } ?: failures.first().exception
+    }
+
+    private fun List<QueryFailure>.shouldHandleUserOARequired(user: UserQueryParams): Boolean {
+        if (user.isSelf && firstOrNull() ?.backend is LXNS)
+            return true
+        return any { failure ->
+            failure.backend.id == "diving-fish" && when (failure.exception) {
+                is NoDataException -> true
+                is UserBindRequiredException -> true
+                else -> false
+            }
+        }
     }
 
     private fun UserQueryParams.isMaxScore(): Boolean {

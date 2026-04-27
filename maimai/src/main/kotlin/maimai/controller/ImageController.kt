@@ -30,6 +30,7 @@ import xyz.xszq.bot.maimai.toSimple
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.payload.markdown.MarkdownData
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 
 @Suppress("unused")
@@ -37,6 +38,7 @@ class ImageController(
     override val maimai: Maimai
 ): Controller(maimai) {
     private var tips = mutableListOf<String>()
+    private val scoreListCaches = ConcurrentHashMap<String, ScoreListCache>()
 
     override suspend fun setRoute() = rhythm {
         tips = maimai.config.tips.toMutableList()
@@ -396,11 +398,22 @@ class ImageController(
         user: UserQueryParams,
         page: Int
     ) {
+        cleanScoreListCache()
+
         val filters = ComboQuery.filters(combo) ?: throw FilterNoResultException()
         val musics = filters.filterMusics(maimai.musics())
         val filterParams = filters.params(combo)
 
-        val (response, _) = maimai.query.records(user, musics)
+        val key = user.cacheKey(combo)
+        val response = scoreListCaches[key] ?.takeIf {
+            it.command == combo && !it.isExpired()
+        } ?.response ?: maimai.query.records(user, musics).first.also { response ->
+            scoreListCaches[key] = ScoreListCache(
+                command = combo,
+                response = response,
+                expiresAt = System.currentTimeMillis() + SCORE_LIST_CACHE_TTL
+            )
+        }
         val filtered = filters.filterRecords(response.records) ?: emptyList()
         if (filterParams.isAllRequired && filtered.size > 1500) {
             throw NotSupportedException("您查询的记录过多，全分数列表最多支持1500条记录")
@@ -624,6 +637,16 @@ class ImageController(
     }
 
     companion object {
+        private const val SCORE_LIST_CACHE_TTL = 5 * 60 * 1000L
+
+        private data class ScoreListCache(
+            val command: String,
+            val response: RecordsResponse,
+            val expiresAt: Long
+        ) {
+            fun isExpired(now: Long = System.currentTimeMillis()) = now > expiresAt
+        }
+
         val courseAliases = buildMap {
             put(452201, listOf("随机红初级", "随机expert初级", "红初级"))
             put(452202, listOf("随机红中级", "随机expert中级", "红中级"))
@@ -640,5 +663,17 @@ class ImageController(
             val result = block()
             return Pair(System.currentTimeMillis() - start, result)
         }
+    }
+
+    private fun cleanScoreListCache() {
+        scoreListCaches.entries.removeIf { it.value.isExpired() }
+    }
+
+    private fun UserQueryParams.cacheKey(command: String): String {
+        val target = when (this) {
+            is UserQueryParams.QQ -> "qq:$qq"
+            is UserQueryParams.Username -> "username:${username.lowercase()}"
+        }
+        return "${event.sender.id}:$target:$command"
     }
 }

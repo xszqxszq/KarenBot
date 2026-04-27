@@ -26,11 +26,14 @@ import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.payload.markdown.MarkdownData
+import xyz.xszq.bot.chunithm.music.RecordsResponse
+import java.util.concurrent.ConcurrentHashMap
 
 @Suppress("unused")
 class ImageController(
     override val chunithm: Chunithm
 ): Controller(chunithm) {
+    private val scoreListCaches = ConcurrentHashMap<String, ScoreListCache>()
 
     override suspend fun setRoute() = rhythm {
         // b50 及扩展功能
@@ -237,11 +240,22 @@ class ImageController(
         user: UserQueryParams,
         page: Int
     ) {
+        cleanScoreListCache()
+
         val filters = ComboQuery.filters(combo) ?: throw FilterNoResultException()
         val musics = filters.filterMusics(chunithm.musics())
         val filterParams = filters.params(combo)
 
-        val (response, _) = chunithm.query.records(user, musics)
+        val key = user.cacheKey(combo)
+        val response = scoreListCaches[key] ?.takeIf {
+            it.command == combo && !it.isExpired()
+        } ?.response ?: chunithm.query.records(user, musics).first.also { response ->
+            scoreListCaches[key] = ScoreListCache(
+                command = combo,
+                response = response,
+                expiresAt = System.currentTimeMillis() + SCORE_LIST_CACHE_TTL
+            )
+        }
         val filtered = filters.filterRecords(response.records) ?: emptyList()
         if (filterParams.isAllRequired && filtered.size > 1500) {
             throw NotSupportedException("您查询的记录过多，全分数列表最多支持1500条记录")
@@ -328,10 +342,32 @@ class ImageController(
     }
 
     companion object {
+        private const val SCORE_LIST_CACHE_TTL = 5 * 60 * 1000L
+
+        private data class ScoreListCache(
+            val command: String,
+            val response: RecordsResponse,
+            val expiresAt: Long
+        ) {
+            fun isExpired(now: Long = System.currentTimeMillis()) = now > expiresAt
+        }
+
         suspend fun <T> countTime(block: suspend () -> T): Pair<Long, T> {
             val start = System.currentTimeMillis()
             val result = block()
             return Pair(System.currentTimeMillis() - start, result)
         }
+    }
+
+    private fun cleanScoreListCache() {
+        scoreListCaches.entries.removeIf { it.value.isExpired() }
+    }
+
+    private fun UserQueryParams.cacheKey(command: String): String {
+        val target = when (this) {
+            is UserQueryParams.QQ -> "qq:$qq"
+            is UserQueryParams.Username -> "username:${username.lowercase()}"
+        }
+        return "${event.sender.id}:$target:$command"
     }
 }

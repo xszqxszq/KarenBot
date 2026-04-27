@@ -137,7 +137,10 @@ class DivingFish(
             HttpStatusCode.BadRequest -> throw UserNotFoundException()
             HttpStatusCode.Forbidden -> throw UserDeniedException()
             HttpStatusCode.OK -> response.body<DivingFishRatingResponse>()
-            else -> throw UnknownException()
+            else -> {
+                println(response)
+                throw UnknownException()
+            }
         }
     }
 
@@ -152,7 +155,10 @@ class DivingFish(
             HttpStatusCode.BadRequest -> throw UserNotFoundException()
             HttpStatusCode.Forbidden -> throw UserDeniedException()
             HttpStatusCode.OK -> response.body<Map<String, List<DivingFishRecord>>>().values.flatten()
-            else -> throw UnknownException()
+            else -> {
+                println(response)
+                throw UnknownException()
+            }
         }
     }
 

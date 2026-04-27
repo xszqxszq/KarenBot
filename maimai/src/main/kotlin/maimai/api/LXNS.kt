@@ -71,7 +71,10 @@ class LXNS(
             404 -> throw UserNotFoundException(response.message)
             400 -> throw UserNotFoundException(response.message)
             200 -> return response.data
-            else -> throw UnknownException(response.message)
+            else -> {
+                println(response)
+                throw UnknownException(response.message)
+            }
         }
     }
     override suspend fun load() {
