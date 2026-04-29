@@ -14,6 +14,7 @@ import xyz.xszq.bot.ffmpeg.FFMpegFileType
 import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.bot.maimai.component.MarkdownTemplates
 import xyz.xszq.bot.maimai.component.MarkdownTemplates.Keyboards.single
+import xyz.xszq.bot.maimai.component.MarkdownTemplates.Templates.selectMusic
 import xyz.xszq.bot.maimai.database.MusicAliasesTable
 import xyz.xszq.bot.maimai.database.MusicAliasesVoteTable
 import xyz.xszq.bot.maimai.music.ChartInfo
@@ -334,9 +335,9 @@ class MusicController(
             }.toPlainText() + message
             reply(message)
         }
-        startsWith("预览id") { stringId ->
-            val id = stringId.toIntOrNull() ?: return@startsWith
-            val music = maimai.music(id) ?: return@startsWith
+        startsWith("预览") { musicQuery ->
+            val (music, _) = selectMusic("预览", musicQuery, false)
+                ?: return@startsWith
             val file = localCurrentDirVfs[previewDir]["${music.resourceId}.ogg"]
             if (!file.exists()) {
                 return@startsWith

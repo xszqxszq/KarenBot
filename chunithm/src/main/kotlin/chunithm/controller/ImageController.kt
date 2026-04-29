@@ -9,13 +9,11 @@ import xyz.xszq.bot.*
 import xyz.xszq.bot.Chunithm.Companion.textMode
 import xyz.xszq.bot.chunithm.component.MarkdownTemplates
 import xyz.xszq.bot.chunithm.component.MarkdownTemplates.Keyboards.single
-import xyz.xszq.bot.chunithm.component.MarkdownTemplates.Templates.selectMusic
 import xyz.xszq.bot.chunithm.component.image.FilterParams
 import xyz.xszq.bot.chunithm.exception.FilterNoResultException
 import xyz.xszq.bot.chunithm.exception.NoDataException
 import xyz.xszq.bot.chunithm.exception.NotSupportedException
-import xyz.xszq.bot.chunithm.music.MusicDifficulty
-import xyz.xszq.bot.chunithm.music.MusicInfo
+import xyz.xszq.bot.chunithm.music.RecordsResponse
 import xyz.xszq.bot.chunithm.music.UserQueryParams
 import xyz.xszq.bot.chunithm.query.ComboQuery
 import xyz.xszq.bot.chunithm.query.ComboQuery.filterMusics
@@ -26,7 +24,6 @@ import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.payload.markdown.MarkdownData
-import xyz.xszq.bot.chunithm.music.RecordsResponse
 import java.util.concurrent.ConcurrentHashMap
 
 @Suppress("unused")
@@ -278,41 +275,6 @@ class ImageController(
             page = nowPage,
             totalPages = totalPages
         )
-    }
-
-
-    suspend fun MessageEvent.selectMusic(
-        type: String,
-        args: String,
-        needDifficulty: Boolean
-    ): Pair<MusicInfo, MusicDifficulty?>? {
-        var difficulty = if (needDifficulty) MusicDifficulty.from(args.firstOrNull() ?.toString() ?: "") else null
-        val name = difficulty ?.let { args.substring(1, args.length) } ?: args
-        var result = chunithm.aliases.search(name)
-        if (difficulty != null)
-            result = result.filter { it.charts.any { chart -> chart.difficulty == difficulty } }
-        if (difficulty != null && result.isEmpty()) {
-            difficulty = null
-            result = chunithm.aliases.search(args)
-        }
-        when (result.size) {
-            0 -> throw NotFoundException("未找到该歌曲")
-            1 -> return Pair(result.first(), difficulty)
-            else -> {
-                if (textMode())
-                    return Pair(result.first(), difficulty)
-                else
-                    reply(
-                        selectMusic(
-                            title = "您要查找的歌曲可能是：",
-                            type = type,
-                            keyword = args,
-                            difficulty = difficulty,
-                            result = result
-                        ))
-            }
-        }
-        return null
     }
 
     suspend fun Image.send(

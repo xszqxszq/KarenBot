@@ -196,9 +196,9 @@ class MusicController(
             }
             reply(result.random(Random(System.currentTimeMillis())).infoText())
         }
-        startsWith("预览id") { stringId ->
-            val id = stringId.toIntOrNull() ?: return@startsWith
-            val music = chunithm.music(id) ?: return@startsWith
+        startsWith("预览") { musicQuery ->
+            val (music, _) = selectMusic("预览", musicQuery, false)
+                ?: return@startsWith
             val file = localCurrentDirVfs[previewDir]["${music.resourceId}.ogg"]
             if (!file.exists()) {
                 return@startsWith

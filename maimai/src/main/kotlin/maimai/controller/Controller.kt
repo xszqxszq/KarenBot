@@ -15,6 +15,8 @@ import xyz.xszq.bot.maimai.component.MarkdownTemplates.Templates.brief
 import xyz.xszq.bot.maimai.component.WaitingEventData
 import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.exception.*
+import xyz.xszq.bot.maimai.music.MusicDifficulty
+import xyz.xszq.bot.maimai.music.MusicInfo
 import xyz.xszq.bot.maimai.music.UserQueryParams
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.newLine
@@ -169,5 +171,39 @@ sealed class Controller(
                 row { link("点我授权", authUrl) }
             }))
         }
+    }
+
+    suspend fun MessageEvent.selectMusic(
+        type: String,
+        args: String,
+        needDifficulty: Boolean
+    ): Pair<MusicInfo, MusicDifficulty?>? {
+        var difficulty = if (needDifficulty) MusicDifficulty.from(args.firstOrNull() ?.toString() ?: "") else null
+        val name = difficulty ?.let { args.substring(1, args.length) } ?: args
+        var result = maimai.aliases.search(name)
+        if (difficulty != null)
+            result = result.filter { it.charts.any { chart -> chart.difficulty == difficulty } }
+        if (difficulty != null && result.isEmpty()) {
+            difficulty = null
+            result = maimai.aliases.search(args)
+        }
+        when (result.size) {
+            0 -> throw NotFoundException("未找到该歌曲")
+            1 -> return Pair(result.first(), difficulty)
+            else -> {
+                if (textMode())
+                    return Pair(result.first(), difficulty)
+                else
+                    reply(
+                        MarkdownTemplates.Templates.selectMusic(
+                            title = "您要查找的歌曲可能是：",
+                            type = type,
+                            keyword = args,
+                            difficulty = difficulty,
+                            result = result
+                        ))
+            }
+        }
+        return null
     }
 }
