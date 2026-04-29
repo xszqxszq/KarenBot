@@ -3,12 +3,13 @@ package xyz.xszq.bot.ffmpeg
 import java.io.File
 import java.util.concurrent.TimeUnit
 
+@Suppress("unused")
 class ProgramExecutor(
     private val command: List<String>,
     private val showOutput: Boolean = false,
     private val builder: Builder.() -> Unit = {}
 ) {
-    inner class Builder {
+    class Builder {
         var env = emptyArray<String>()
         var timeout: Long? = null
         fun environment(builder: EnvironmentBuilder.() -> Unit) {
@@ -16,7 +17,7 @@ class ProgramExecutor(
         }
         fun timeout(timeMs: Long) { timeout = timeMs }
     }
-    inner class EnvironmentBuilder {
+    class EnvironmentBuilder {
         val env = mutableListOf<String>()
         fun append(str: String) = if (str.isNotBlank()) env.add(str) else false
         fun append(str: String?) = str?.let { if (it.isNotBlank()) env.add(it) }

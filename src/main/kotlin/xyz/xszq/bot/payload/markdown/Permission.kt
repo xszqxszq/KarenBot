@@ -2,6 +2,7 @@ package xyz.xszq.bot.payload.markdown
 
 import kotlinx.serialization.Serializable
 
+@Suppress("unused")
 @Serializable
 data class Permission(
     val type: Int

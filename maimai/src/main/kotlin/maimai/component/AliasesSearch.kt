@@ -94,7 +94,7 @@ class AliasesSearch(
             toIndex.forEach { entry ->
                 insertDocument(entry)
             }
-            writer.setLiveCommitData(mapOf(MUSIC_SNAPSHOT_SIGNATURE to latestSignature).entries)
+            writer.liveCommitData = mapOf(MUSIC_SNAPSHOT_SIGNATURE to latestSignature).entries
             writer.commit()
             indexedMusicSnapshot = latestSnapshot
             indexedMusicSignature = latestSignature
@@ -138,11 +138,13 @@ class AliasesSearch(
 
     fun fuzzy(query: String): List<MusicNameAlias> {
         val terms = analyzeTerms(query)
+            .asSequence()
             .map { it.trim().lowercase() }
             .filter { it.isNotEmpty() }
             .distinct()
             .sortedByDescending { it.length }
             .take(6)
+            .toList()
         if (terms.isEmpty()) return emptyList()
 
         val bool = BooleanQuery.Builder().apply {

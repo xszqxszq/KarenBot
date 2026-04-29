@@ -17,7 +17,7 @@ class OttoVoice: Plugin() {
     lateinit var tts: TTSParser
     @OptIn(ExperimentalHoplite::class)
     override suspend fun load() {
-        presets = ConfigLoaderBuilder.Companion.default()
+        presets = ConfigLoaderBuilder.default()
             .addFileSource("./data/audio/otto/presets.yml")
             .withExplicitSealedTypes()
             .build()

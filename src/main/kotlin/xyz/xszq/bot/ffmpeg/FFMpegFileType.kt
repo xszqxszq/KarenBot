@@ -1,5 +1,6 @@
 package xyz.xszq.bot.ffmpeg
 
+@Suppress("unused")
 data class FFMpegFileType(val ext: String, val requiredArgs: List<Argument> = emptyList()) {
     companion object {
         val MP3 = FFMpegFileType("mp3")

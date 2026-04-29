@@ -90,10 +90,10 @@ object MusicAliasesTable: Table() {
         if (entries.isEmpty()) return@suspendedTransactionAsync
 
         val musicIds = entries.map { it.first }.distinct()
-        val existing = select(MusicAliasesTable.id, MusicAliasesTable.name).where {
+        val existing = select(MusicAliasesTable.id, name).where {
             MusicAliasesTable.id inList musicIds
         }.map {
-            it[MusicAliasesTable.id] to it[MusicAliasesTable.name]
+            it[MusicAliasesTable.id] to it[name]
         }.toSet()
 
         val toInsert = entries.filterNot(existing::contains)
@@ -102,7 +102,7 @@ object MusicAliasesTable: Table() {
 
         toReset.forEach { (musicId, names) ->
             update({
-                (MusicAliasesTable.id eq musicId) and (MusicAliasesTable.name inList names)
+                (MusicAliasesTable.id eq musicId) and (name inList names)
             }) {
                 it[votes] = 0
             }
@@ -110,7 +110,7 @@ object MusicAliasesTable: Table() {
 
         batchInsert(toInsert, shouldReturnGeneratedValues = false) { entry: Pair<Int, String> ->
             this[MusicAliasesTable.id] = entry.first
-            this[MusicAliasesTable.name] = entry.second
+            this[name] = entry.second
             this[votes] = 0
         }
     }.await()

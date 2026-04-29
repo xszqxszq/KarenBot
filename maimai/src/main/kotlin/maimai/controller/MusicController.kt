@@ -382,7 +382,7 @@ class MusicController(
                             appendLine("${music.id}. ${music.name}")
                         }
                     }.trim())
-                    else -> reply(MarkdownTemplates.Templates.selectMusic(
+                    else -> reply(selectMusic(
                         title = hint,
                         type = type,
                         keyword = keyword,

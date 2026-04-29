@@ -2,10 +2,10 @@ package xyz.xszq.bot.chunithm.query
 
 enum class FilterType {
     // 成绩类
-    Achievement, Combo, Sync, Star,
+    Achievement, Combo, Sync,
     // 谱面信息类
     Difficulty, Level, Designer, Genre,
-    Version, Type, Plate, Tag,
+    Version,
     // 排序类
     Sort,
     // 修改数据类,

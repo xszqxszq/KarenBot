@@ -103,7 +103,7 @@ class AliasesSearch(
             toIndex.forEach { entry ->
                 insertDocument(entry)
             }
-            writer.setLiveCommitData(mapOf(MUSIC_SNAPSHOT_SIGNATURE to latestSignature).entries)
+            writer.liveCommitData = mapOf(MUSIC_SNAPSHOT_SIGNATURE to latestSignature).entries
             writer.commit()
             indexedMusicSignature = latestSignature
         }
@@ -152,11 +152,13 @@ class AliasesSearch(
         query: String
     ): List<MusicNameAlias> {
         val terms = analyzeTerms(query)
+            .asSequence()
             .map { it.trim().lowercase() }
             .filter { it.isNotEmpty() }
             .distinct()
             .sortedByDescending { it.length }
             .take(6)
+            .toList()
         if (terms.isEmpty())
             return emptyList()
 

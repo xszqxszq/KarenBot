@@ -104,7 +104,7 @@ suspend fun ReplyAble.reply(message: MessageChain) {
     }
     val markdown = message.filterIsInstance<Markdown>().firstOrNull()
     val content = when (msgType) {
-        MsgType.MEDIA -> if (message.textToSend().isBlank()) " " else message.textToSend()
+        MsgType.MEDIA -> message.textToSend().ifBlank { " " }
         MsgType.TEXT -> message.textToSend()
         else -> " "
     }

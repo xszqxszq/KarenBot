@@ -9,8 +9,8 @@ import java.nio.file.StandardCopyOption
 import java.util.jar.JarFile
 
 object RuntimeDependencyResolver {
-    private const val timeoutMillis = 30_000
-    private const val dependenciesEntry = "META-INF/plugin-dependencies.txt"
+    private const val TIMEOUT_MILLS = 30_000
+    private const val DEPENDENCIES_ENTRY = "META-INF/plugin-dependencies.txt"
     private val repositories = listOf(
         Repository("阿里云镜像") { "https://maven.aliyun.com/repository/public/${it.path()}" },
         Repository("Maven中央仓库") { "https://repo1.maven.org/maven2/${it.path()}" },
@@ -24,7 +24,7 @@ object RuntimeDependencyResolver {
 
     @JvmStatic
     fun readDependencies(jarFile: JarFile): List<DependencyCoordinate> {
-        val entry = jarFile.getJarEntry(dependenciesEntry) ?: return emptyList()
+        val entry = jarFile.getJarEntry(DEPENDENCIES_ENTRY) ?: return emptyList()
         return jarFile.getInputStream(entry).use(::parseDependencies)
     }
 
@@ -98,8 +98,8 @@ object RuntimeDependencyResolver {
 
     private fun openConnection(sourceUrl: String): HttpURLConnection {
         return (URI.create(sourceUrl).toURL().openConnection() as HttpURLConnection).apply {
-            connectTimeout = timeoutMillis
-            readTimeout = timeoutMillis
+            connectTimeout = TIMEOUT_MILLS
+            readTimeout = TIMEOUT_MILLS
             instanceFollowRedirects = true
             setRequestProperty("User-Agent", "KarenBot-Bootstrap")
         }

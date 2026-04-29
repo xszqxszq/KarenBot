@@ -9,6 +9,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 /**
  * The Chain of Message.
  */
+@Suppress("unused")
 class MessageChain() {
     private val list = mutableListOf<MessageElement>()
 

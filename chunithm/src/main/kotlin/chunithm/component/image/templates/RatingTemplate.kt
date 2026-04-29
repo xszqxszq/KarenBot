@@ -7,7 +7,6 @@ import xyz.xszq.bot.chunithm.component.image.RatingRenderParams
 import xyz.xszq.bot.chunithm.music.*
 import xyz.xszq.bot.chunithm.music.Rating.ratingFloor
 import xyz.xszq.bot.pagination
-import xyz.xszq.bot.toDBC
 import xyz.xszq.shinobu.dom.Div
 import xyz.xszq.shinobu.style.BackgroundPosition
 import xyz.xszq.shinobu.style.BackgroundSize

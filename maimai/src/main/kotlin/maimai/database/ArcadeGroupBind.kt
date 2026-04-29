@@ -18,11 +18,11 @@ class ArcadeGroupBind(id: EntityID<String>): Entity<String>(id) {
     companion object : EntityClass<String, ArcadeGroupBind>(ArcadeGroupBindTable) {
         private fun currentTime() = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 
-        private fun findGroupInTransaction(openId: String) = findById(openId) ?.let {
+        private fun findGroup(openId: String) = findById(openId) ?.let {
             ArcadeGroup.findById(it.group)
         }
 
-        private fun groupOrCreateInTransaction(openId: String) = findGroupInTransaction(openId) ?: ArcadeGroup.new {
+        private fun groupOrCreate(openId: String) = findGroup(openId) ?: ArcadeGroup.new {
             name = openId
         }.also { newGroup ->
             new(openId) {
@@ -33,13 +33,13 @@ class ArcadeGroupBind(id: EntityID<String>): Entity<String>(id) {
         suspend fun group(
             openId: String
         ) = suspendedTransactionAsync {
-            groupOrCreateInTransaction(openId)
+            groupOrCreate(openId)
         }.await()
 
         suspend fun find(
             openId: String
         ) = suspendedTransactionAsync {
-            findGroupInTransaction(openId)
+            findGroup(openId)
         }.await()
 
         suspend fun bind(openId: String, group: ArcadeGroup) = newSuspendedTransaction {
@@ -61,8 +61,8 @@ class ArcadeGroupBind(id: EntityID<String>): Entity<String>(id) {
         }
 
         suspend fun addArcade(openId: String, name: String) = newSuspendedTransaction {
-            val group = groupOrCreateInTransaction(openId)
-            if (group.findInTransaction(name) != null)
+            val group = groupOrCreate(openId)
+            if (group.find(name) != null)
                 throw IllegalArgsException("机厅已存在！")
             Arcade.new {
                 this.group = group.id
@@ -73,51 +73,51 @@ class ArcadeGroupBind(id: EntityID<String>): Entity<String>(id) {
         }
 
         suspend fun deleteArcade(openId: String, name: String) = newSuspendedTransaction {
-            val group = findGroupInTransaction(openId) ?: throw NotFoundException("机厅不存在！")
-            val arcade = group.findInTransaction(name) ?: throw NotFoundException("机厅不存在！")
+            val group = findGroup(openId) ?: throw NotFoundException("机厅不存在！")
+            val arcade = group.find(name) ?: throw NotFoundException("机厅不存在！")
             arcade.delete()
         }
 
         suspend fun addAlias(openId: String, name: String, alias: String) = newSuspendedTransaction {
-            val group = findGroupInTransaction(openId) ?: throw NotFoundException("机厅不存在！")
-            val arcade = group.findInTransaction(name) ?: throw NotFoundException("机厅不存在！")
+            val group = findGroup(openId) ?: throw NotFoundException("机厅不存在！")
+            val arcade = group.find(name) ?: throw NotFoundException("机厅不存在！")
             val aliases = arcade.aliases.split(",").filter { it.isNotBlank() }.toMutableList()
-            if (group.findInTransaction(alias) != null || aliases.any { it.equals(alias, ignoreCase = true) })
+            if (group.find(alias) != null || aliases.any { it.equals(alias, ignoreCase = true) })
                 throw IllegalArgsException("别名已存在！")
             aliases.add(alias)
             arcade.aliases = aliases.joinToString(",")
         }
 
         suspend fun deleteAlias(openId: String, name: String, alias: String) = newSuspendedTransaction {
-            val group = findGroupInTransaction(openId) ?: throw NotFoundException("机厅不存在！")
-            val arcade = group.findInTransaction(name) ?: throw NotFoundException("机厅不存在！")
+            val group = findGroup(openId) ?: throw NotFoundException("机厅不存在！")
+            val arcade = group.find(name) ?: throw NotFoundException("机厅不存在！")
             val aliases = arcade.aliases.split(",").filter { it.isNotBlank() }.toMutableList()
             aliases.removeAll { it == alias }
             arcade.aliases = aliases.joinToString(",")
         }
 
         suspend fun aliases(openId: String, name: String) = newSuspendedTransaction {
-            val group = findGroupInTransaction(openId) ?: throw NotFoundException("机厅不存在！")
-            val arcade = group.findInTransaction(name) ?: throw NotFoundException("机厅不存在！")
+            val group = findGroup(openId) ?: throw NotFoundException("机厅不存在！")
+            val arcade = group.find(name) ?: throw NotFoundException("机厅不存在！")
             arcade.aliases.split(",").filter { it.isNotBlank() }
         }
 
         suspend fun listArcades(openId: String) = newSuspendedTransaction {
-            val group = findGroupInTransaction(openId) ?: return@newSuspendedTransaction null
+            val group = findGroup(openId) ?: return@newSuspendedTransaction null
             val arcades = group.arcades.toList()
-            arcades.forEach { it.clearInTransaction() }
+            arcades.forEach { it.clear() }
             arcades.map { it.snapshot() }
         }
 
         suspend fun findArcade(openId: String, name: String) = newSuspendedTransaction {
-            val group = findGroupInTransaction(openId) ?: return@newSuspendedTransaction null
-            val arcade = group.findInTransaction(name) ?: return@newSuspendedTransaction null
-            arcade.clearInTransaction()
+            val group = findGroup(openId) ?: return@newSuspendedTransaction null
+            val arcade = group.find(name) ?: return@newSuspendedTransaction null
+            arcade.clear()
             arcade.snapshot()
         }
 
         suspend fun updateArcade(openId: String, raw: String, modifiedAt: LocalDateTime = currentTime()) = newSuspendedTransaction {
-            val group = findGroupInTransaction(openId) ?: return@newSuspendedTransaction null
+            val group = findGroup(openId) ?: return@newSuspendedTransaction null
             for (arcade in group.arcades) {
                 for (alias in arcade.aliases.split(",").filter { it.isNotBlank() }) {
                     if (!raw.startsWith(alias))

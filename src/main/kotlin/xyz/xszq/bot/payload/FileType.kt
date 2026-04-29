@@ -1,5 +1,6 @@
 package xyz.xszq.bot.payload
 
+@Suppress("unused")
 object FileType {
     const val IMAGE = 1
     const val VIDEO = 2

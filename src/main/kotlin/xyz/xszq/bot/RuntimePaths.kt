@@ -4,6 +4,7 @@ import java.io.File
 import java.lang.management.ManagementFactory
 import kotlin.system.exitProcess
 
+@Suppress("unused")
 object RuntimePaths {
     private const val RUNTIME_HOME = "karenbot.path"
     private const val RELAUNCHED = "karenbot.relaunched"

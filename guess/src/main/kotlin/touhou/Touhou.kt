@@ -393,6 +393,6 @@ class Touhou(
             Difficulty.Lunatic -> 1.0
 //            Difficulty.Extra -> 2.0
         }
-        fun String.toSimple() = ZhConverterUtil.toSimple(this)
+        fun String.toSimple() = ZhConverterUtil.toSimple(this) ?: this
     }
 }

@@ -9,7 +9,7 @@ class ArcadeGroup(id: EntityID<Int>) : IntEntity(id) {
     var name    by ArcadeGroupTable.name
     val arcades by Arcade referrersOn ArcadeTable.group
 
-    fun findInTransaction(name: String) = arcades.firstOrNull { arcade ->
+    fun find(name: String) = arcades.firstOrNull { arcade ->
         arcade.matches(name)
     }
 
@@ -18,8 +18,4 @@ class ArcadeGroup(id: EntityID<Int>) : IntEntity(id) {
             find { ArcadeGroupTable.name eq name }
         }.await().firstOrNull()
     }
-
-    suspend fun find(name: String) = suspendedTransactionAsync {
-        findInTransaction(name)
-    }.await()
 }

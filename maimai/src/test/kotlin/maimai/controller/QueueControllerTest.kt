@@ -81,7 +81,7 @@ class QueueControllerTest: MaimaiDatabaseTest() {
 
             newSuspendedTransaction {
                 val group = ArcadeGroup.findById(ArcadeGroupBind.findById(harness.testGroupId)!!.group)!!
-                val arcade = group.findInTransaction("测试")!!
+                val arcade = group.find("测试")!!
                 arcade.value = 10
                 arcade.modified = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
             }
@@ -90,7 +90,7 @@ class QueueControllerTest: MaimaiDatabaseTest() {
 
             newSuspendedTransaction {
                 val group = ArcadeGroup.findById(ArcadeGroupBind.findById(harness.testGroupId)!!.group)!!
-                val arcade = group.findInTransaction("测试")!!
+                val arcade = group.find("测试")!!
                 arcade.value = 5
                 arcade.modified = LocalDateTime(2024, 1, 1, 0, 0)
             }
@@ -99,7 +99,7 @@ class QueueControllerTest: MaimaiDatabaseTest() {
 
             newSuspendedTransaction {
                 val group = ArcadeGroup.findById(ArcadeGroupBind.findById(harness.testGroupId)!!.group)!!
-                val arcade = group.findInTransaction("测试")!!
+                val arcade = group.find("测试")!!
                 arcade.value = 10
                 // 边界测试，假设上次更新是前一天23:59:59
                 arcade.modified = LocalDateTime(

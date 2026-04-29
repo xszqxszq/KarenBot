@@ -7,9 +7,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.skia.*
 import xyz.xszq.bot.chunithm.component.image.templates.RatingTemplate
-import xyz.xszq.bot.chunithm.music.ChartInfo
-import xyz.xszq.bot.chunithm.music.MusicDifficulty
-import xyz.xszq.shinobu.parse.StyleParser.rgbColor
 import xyz.xszq.shinobu.template.TemplateManager
 
 class ChunithmImage(
@@ -66,17 +63,6 @@ class ChunithmImage(
     }
 
     companion object {
-        /**
-         * 获得难度对应的颜色
-         */
-        fun ChartInfo.color() = when (difficulty) {
-            MusicDifficulty.Basic -> "#029c73"
-            MusicDifficulty.Advanced -> "#ee7508"
-            MusicDifficulty.Expert -> "#e32b2c"
-            MusicDifficulty.Master -> "#7e18ca"
-            MusicDifficulty.Ultima -> "#131413"
-            MusicDifficulty.WorldsEnd -> "#f4e819"
-        }.rgbColor()!!
         const val THUMB_SIZE = 54
     }
 }

@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package xyz.xszq.bot
 
 import korlibs.math.toIntCeil

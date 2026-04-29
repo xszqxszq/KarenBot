@@ -10,12 +10,4 @@ data class Notes(
     val slide: Int = 0,
     val air: Int = 0,
     val flick: Int = 0
-) {
-    constructor(
-        tap: Int,
-        hold: Int,
-        slide: Int,
-        air: Int,
-        flick: Int
-    ) : this(tap + hold + slide + air + flick, tap, hold, slide, air, flick)
-}
+)

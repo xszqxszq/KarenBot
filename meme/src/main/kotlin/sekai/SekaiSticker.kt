@@ -26,9 +26,9 @@ class SekaiSticker {
     fun draw(
         character: SekaiCharacter,
         text: String,
-    ): org.jetbrains.skia.Image {
+    ): Image {
         val sticker = Surface.makeRasterN32Premul(296, 256)
-        val template = org.jetbrains.skia.Image.makeFromEncoded(File(imgDir, character.img).readBytes())
+        val template = Image.makeFromEncoded(File(imgDir, character.img).readBytes())
         val ratio = min(296f / template.width, 256f / template.height)
         val width = template.width * ratio
         val height = template.height * ratio
@@ -183,7 +183,7 @@ class SekaiSticker {
         onBounds: (Float, Float) -> Unit
     ) {
         if (abs(coeff) < 0.0001f) {
-            if (base < min || base > max)
+            if (base !in min..max)
                 onBounds(Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY)
             return
         }

@@ -5,13 +5,14 @@ import korlibs.io.file.std.toVfs
 import java.io.File
 import kotlin.io.path.createTempFile
 
+@Suppress("unused")
 class FFMpegTask(
     private val outputFormat: FFMpegFileType,
     private val argsBuilder: Builder.() -> Unit
 ) {
     @DslMarker annotation class FFMpegBuilder
     @FFMpegBuilder
-    inner class Builder {
+    class Builder {
         val arguments = mutableListOf<Argument>()
         private fun insert(arg: Argument) = arguments.add(arg)
         fun input(path: String) = insert(Argument("i", path))

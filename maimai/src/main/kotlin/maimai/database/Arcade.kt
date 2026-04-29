@@ -30,11 +30,7 @@ class Arcade(id: EntityID<Int>): IntEntity(id) {
         data object TooLarge: UpdateResult
     }
 
-    suspend fun clear() = newSuspendedTransaction {
-        clearInTransaction()
-    }
-
-    fun clearInTransaction(currentTime: LocalDateTime = currentTime()) {
+    fun clear(currentTime: LocalDateTime = currentTime()) {
         if (modified == initTime || currentTime.isSameDay(modified))
             return
         value = 0
@@ -52,8 +48,6 @@ class Arcade(id: EntityID<Int>): IntEntity(id) {
         modified = modified,
     )
 
-    fun noUpdates() = modified == initTime
-
     companion object : IntEntityClass<Arcade>(ArcadeTable) {
         internal val initTime = LocalDateTime(2000, 1, 1, 0, 0)
 
@@ -70,7 +64,7 @@ class Arcade(id: EntityID<Int>): IntEntity(id) {
 
         suspend fun clearAll() = newSuspendedTransaction {
             all().forEach {
-                it.clearInTransaction()
+                it.clear()
             }
         }
 

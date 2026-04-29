@@ -51,10 +51,8 @@ fun createDownloadClient() = HttpClient(OkHttp)
  */
 suspend fun downloadFile(url: String, filename: String, logger: KLogger): VfsFile? {
     val client = createDownloadClient()
-    return try {
+    return client.use { client ->
         downloadFile(url, filename, logger, client)
-    } finally {
-        client.close()
     }
 }
 
