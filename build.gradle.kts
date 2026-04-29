@@ -24,14 +24,14 @@ repositories {
 }
 
 dependencies {
-    implementation("ch.qos.logback:logback-classic:1.5.15")
-    implementation("com.qcloud:cos_api:5.6.240")
+    implementation("ch.qos.logback:logback-classic:1.5.18")
+    implementation("com.qcloud:cos_api:5.6.247")
     implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
     implementation("com.sksamuel.hoplite:hoplite-yaml:$hopliteVersion")
-    implementation("com.h2database:h2:2.2.224")
+    implementation("com.h2database:h2:2.3.232")
     implementation("com.soywiz.korge:korge-core:$korlibsVersion")
     implementation("io.github.kasukusakura:silk-codec:0.0.5")
-    implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
+    implementation("io.github.oshai:kotlin-logging-jvm:7.0.7")
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
@@ -42,14 +42,14 @@ dependencies {
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation("io.ktor:ktor-network-tls-certificates:$ktorVersion")
-    implementation("mysql:mysql-connector-java:8.0.33")
-    implementation("org.bouncycastle:bcprov-jdk15on:1.70")
+    implementation("com.mysql:mysql-connector-j:9.3.0")
+    implementation("org.bouncycastle:bcprov-jdk18on:1.80")
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
-    implementation("org.mariadb.jdbc:mariadb-java-client:3.3.1")
+    implementation("org.mariadb.jdbc:mariadb-java-client:3.5.3")
     testImplementation(kotlin("test"))
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
-    testImplementation("io.mockk:mockk:1.13.13")
+    testImplementation("io.mockk:mockk:1.14.3")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 }
 
