@@ -7,4 +7,6 @@ import kotlinx.serialization.Serializable
 data class Author(
     @SerialName("user_openid")
     val id: String,
+    val username: String = "",
+    val bot: Boolean = false
 )

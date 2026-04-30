@@ -12,11 +12,13 @@ class GroupMessageEvent(
     message: MessageChain,
     sender: User,
     override val group: Group,
-    override var seq: Int = 1
+    override var seq: Int = 1,
+    override val reference: MessageChain? = null,
 ): MessageEvent(
     bot = bot,
     eventId = eventId,
     id = id,
     message = message,
     sender = sender,
+    reference = reference
 ), GroupReplyAbleEvent

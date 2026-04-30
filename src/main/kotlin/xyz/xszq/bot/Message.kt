@@ -79,7 +79,7 @@ private fun ReplyAble.log(message: MessageChain) {
     bot.api.logger.info {
         when (this) {
             is GroupReplyAbleEvent -> "[${group.id}] <- ${message.content.replace("\n", "\\n").replace("\r", "\\r")}"
-            is UserReplyAbleEvent -> "(${user.id}) <- ${message.content.replace("\n", "\\n").replace("\r", "\\r")}"
+            is UserReplyAbleEvent -> "${user.username}(${user.id}) <- ${message.content.replace("\n", "\\n").replace("\r", "\\r")}"
         }
     }
 }

@@ -124,14 +124,14 @@ suspend fun Application.handleDispatch(
             val content = filter.filter(data.content)
             val message = MessageChain(content, images, files)
             logger.info {
-                "(${data.author.id}) -> ${message.content.trim().replace("\n", "\\n")}"
+                "${data.author.username}(${data.author.id}) -> ${message.content.trim().replace("\n", "\\n")}"
             }
             MessageEvent(
                 bot = pluginLoader.bot,
                 eventId = payload.id!!,
                 id = data.id,
                 message = message,
-                sender = User(pluginLoader.bot, data.author.id)
+                sender = User(pluginLoader.bot, data.author.id, data.author.username)
             )
         }
         /* 群聊消息 */
@@ -144,15 +144,16 @@ suspend fun Application.handleDispatch(
             val content = filter.filter(data.content)
             val message = MessageChain(content, images, files)
             logger.info {
-                "[${data.group}] (${data.author.id}) -> ${message.content.trim().replace("\n", "\\n")}"
+                "[${data.group}] ${data.author.username}(${data.author.id}) -> ${message.content.trim().replace("\n", "\\n")}"
             }
             GroupMessageEvent(
                 bot = pluginLoader.bot,
                 eventId = payload.id!!,
                 id = data.id,
                 message = message,
-                sender = User(pluginLoader.bot, data.author.id),
-                group = Group(pluginLoader.bot, data.group)
+                sender = User(pluginLoader.bot, data.author.id, data.author.username),
+                group = Group(pluginLoader.bot, data.group),
+                reference = data.messageElements.firstOrNull() ?.toMessageChain()
             )
         }
         /* 新增好友 */
