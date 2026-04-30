@@ -76,8 +76,7 @@ class ChunithmQuery(
             MaimaiSettingsTable[user.event.sender.id, "prober"] ?.let { prefer ->
                 if (prefer.isBlank())
                     return@let
-                backends = ((backends.filter { it.id == prefer }) + backends.filter { it.id != prefer })
-                    .toMutableList()
+                backends = backends.filter { it.id == prefer }.toMutableList()
             }
         return backends
     }
