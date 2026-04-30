@@ -111,9 +111,6 @@ class Text: Plugin() {
             if (message.text.isBlank() && message.filter { it !is PlainText }.isEmpty()) {
                 reply(Image(randomImage.random()))
             }
-            message.firstOrNull { this is File }?.let {
-                reply(it)
-            }
         }
         startsWith(listOf("来点金发", "来点金毛", "来点黄毛", "随机金发", "随机黄毛")) {
             reply(Image(randomImage.random()))

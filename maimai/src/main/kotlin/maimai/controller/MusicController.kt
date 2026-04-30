@@ -90,9 +90,23 @@ class MusicController(
 
         // 模糊搜索
         startsWith("查歌") { raw ->
-            val args = raw.split("\n", limit = 2)
-            val name = args[0]
-            search(name)
+            val args = raw.trim().split("\n", limit = 2)
+            var name = args.getOrNull(0)
+            if (name ?.isEmpty() == true)
+                name = null
+            name ?.let {
+                search(name)
+            } ?: run {
+                reference ?.let {
+                    with(maimai.query) {
+                        parseImage()
+                    }.forEach {
+                        search(it.title)
+                    }
+                } ?: run {
+                    reply("使用方法：查歌 歌曲名称/别名")
+                }
+            }
         }
         endsWith(listOf("是什么歌", "是什么歌？")) { raw ->
             val args = raw.split("\n", limit = 2)

@@ -6,6 +6,7 @@ import xyz.xszq.bot.payload.llm.*
 class ChatBuilder {
     internal val messages = mutableListOf<LLMMessage>()
     internal var thinking: LLMThinking? = LLMThinking("disabled")
+    internal var responseFormat: ResponseFormat? = null
 
     fun system(content: String) {
         messages.add(LLMMessage("system", MessageContentSingle(content)))
@@ -30,5 +31,9 @@ class ChatBuilder {
 
     fun thinking(type: String) {
         thinking = LLMThinking(type)
+    }
+
+    fun responseFormat(type: String) {
+        responseFormat = ResponseFormat(type)
     }
 }

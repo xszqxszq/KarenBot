@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import xyz.xszq.bot.payload.Attachment
 import xyz.xszq.bot.payload.Member
-import xyz.xszq.bot.payload.MessageElement
+import xyz.xszq.bot.payload.ReferenceMessage
 
 @Serializable
 data class GroupAtMessageCreate(
@@ -15,5 +15,6 @@ data class GroupAtMessageCreate(
     @SerialName("group_openid")
     val group: String,
     val attachments: List<Attachment> = listOf(),
-    val messageElements: List<MessageElement> = listOf()
+    @SerialName("msg_elements")
+    val messageElements: List<ReferenceMessage> = listOf()
 )

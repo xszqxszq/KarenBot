@@ -1,0 +1,9 @@
+package xyz.xszq.bot.maimai.component
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class ImageParseResult(
+    val title: String = "",
+    val achievement: String = "",
+)

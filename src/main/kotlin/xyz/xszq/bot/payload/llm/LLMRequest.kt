@@ -9,4 +9,5 @@ data class LLMRequest(
     val stream: Boolean = false,
     val temperature: Double,
     val thinking: LLMThinking? = null,
+    val response_format: ResponseFormat? = null,
 )

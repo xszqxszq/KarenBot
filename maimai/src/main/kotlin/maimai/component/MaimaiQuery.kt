@@ -1,6 +1,7 @@
 package xyz.xszq.bot.maimai.component
 
 import kotlinx.coroutines.CancellationException
+import kotlinx.serialization.json.Json
 import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.maimai.api.LXNS
@@ -9,6 +10,7 @@ import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.database.QQBindTable
 import xyz.xszq.bot.maimai.exception.*
 import xyz.xszq.bot.maimai.music.*
+import xyz.xszq.bot.message.RemoteImage
 
 class MaimaiQuery(
     val maimai: Maimai
@@ -143,6 +145,38 @@ class MaimaiQuery(
         val backend = result.second
         response.settings = mergeSettings(response.settings, user.settings)
         return Pair(response, backend)
+    }
+
+    suspend fun MessageEvent.parseImage(): List<ImageParseResult> {
+        val client = bot.pluginLoader.llmClient ?: return emptyList()
+        val images = reference ?.filterIsInstance<RemoteImage>() ?: emptyList()
+        if (images.isEmpty())
+            return emptyList()
+
+        val json = Json { ignoreUnknownKeys = true }
+        return runCatching {
+            val content = client.chat {
+                responseFormat("json_object")
+                system(buildString {
+                    appendLine("你的职责是解析每张图片并以json格式返回结果。")
+                    appendLine("对于每张图片，首先判断是否是音游成绩图，如果不是则不要加入结果列表；")
+                    appendLine("如果是音游成绩图，那么在列表中对应位置加入一项，格式参考如下：")
+                    appendLine("{\"title\": \"曲目标题\", \"achievement\": \"100.3249%\"}")
+                    appendLine("如果图中只拍到了曲目标题，那么achievement一项为\"\"；")
+                    appendLine("如果图中只拍到了达成率而没有曲目标题，那么title一项为\"\"；")
+                    appendLine("如果两者都没有，请不要加入结果列表。")
+                    appendLine("你的回复必须严格使用以下 json 格式：")
+                    appendLine("{\"results\": [{\"title\": \"曲目标题\", \"achievement\": \"100.3249%\"}]}")
+                    appendLine("其中 results 是一个数组，数组长度必须小于等于传入的图片数量。")
+                })
+                user {
+                    images.forEach { img ->
+                        image(img.url)
+                    }
+                }
+            }
+            json.decodeFromString<ImageParseResponse>(content).results
+        }.getOrDefault(emptyList())
     }
 
     private suspend fun <T: Any, A: MaimaiAPI> queryBackends(

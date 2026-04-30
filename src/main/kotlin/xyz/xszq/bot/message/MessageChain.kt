@@ -1,9 +1,6 @@
 package xyz.xszq.bot.message
 
 import korlibs.io.file.VfsFile
-import kotlinx.serialization.json.Json
-import xyz.xszq.bot.payload.FaceExt
-import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 /**
@@ -28,39 +25,8 @@ class MessageChain() {
      */
     @OptIn(ExperimentalEncodingApi::class)
     constructor(raw: String, images: List<VfsFile>, files: List<VfsFile>) : this() {
-        /* Parse QQ Face */
-        val faceRegex = Regex("""<faceType=(\d+),faceId="(\d+)",ext="([^"]+)">""")
-        var index = 0
-
-        faceRegex.findAll(raw).forEach { match ->
-            val matchStart = match.range.first
-            val matchEnd = match.range.last + 1
-            /* Leading PlainText */
-            if (index < matchStart) {
-                val plainText = raw.substring(index, matchStart)
-                list.add(PlainText(plainText))
-            }
-            val faceType = match.groups[1]?.value?.toInt() ?: 0
-            val faceId = match.groups[2]?.value?.toInt() ?: 0
-            val base64Ext = match.groups[3]?.value ?: ""
-            val ext = Json.decodeFromString<FaceExt>(
-                Base64.decode(base64Ext).toString(Charsets.UTF_8)
-            )
-            list.add(Face(
-                type = faceType,
-                id = faceId,
-                name = ext.text
-            ))
-            index = matchEnd
-        }
-        /* Trailing PlainText */
-        if (index < raw.length) {
-            list.add(PlainText(raw.substring(index)))
-        }
-
-        /* Add Images */
+        list.addAll(raw.parseFaceElements())
         list.addAll(images.map { Image(it) })
-        /* Add Files */
         list.addAll(files.map { File(it) })
     }
 
