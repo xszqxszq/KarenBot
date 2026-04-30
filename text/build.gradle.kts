@@ -27,6 +27,7 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(project(":"))
     testImplementation("io.ktor:ktor-client-mock:${ktorVersion}")
+    testImplementation("io.mockk:mockk:1.14.3")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 }
 

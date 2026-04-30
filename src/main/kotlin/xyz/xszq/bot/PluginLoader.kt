@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.util.collections.*
 import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.Database
+import xyz.xszq.bot.llm.LLMClient
 import xyz.xszq.bot.message.FileManager
 import xyz.xszq.bot.subscribe.SubscribeManager
 import java.io.File
@@ -19,7 +20,8 @@ import java.util.jar.JarFile
 class PluginLoader(
     val api: OpenAPI,
     cos: TencentCos,
-    val database: Database
+    val database: Database,
+    val llmClient: LLMClient? = null,
 ) {
     val bot = Bot(api, cos, this)
     val subscribes = SubscribeManager()

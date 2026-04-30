@@ -16,6 +16,8 @@ import xyz.xszq.bot.config.BotConfig
 import xyz.xszq.bot.config.CosConfig
 import xyz.xszq.bot.config.ForwardConfig
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.llm.LLMClient
+import xyz.xszq.bot.llm.LLMConfig
 import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.message.PlainText
 import java.io.File
@@ -93,7 +95,16 @@ object KarenBotApplication {
         val cos = TencentCos(cosConfig)
         val logger = KotlinLogging.logger {}
 
-        val pluginLoader = PluginLoader(api, cos, database)
+        val llmConfig = runCatching {
+            ConfigLoaderBuilder.default()
+                .addFileSource("./config/llm.yml")
+                .withExplicitSealedTypes()
+                .build()
+                .loadConfigOrThrow<LLMConfig>()
+        }.getOrNull()
+        val llmClient = llmConfig?.let { LLMClient(it) }
+
+        val pluginLoader = PluginLoader(api, cos, database, llmClient)
         pluginLoader.reloadAllPlugins()
 
         System.getProperty("cli")?.let {

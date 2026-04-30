@@ -6,6 +6,7 @@ import com.sksamuel.hoplite.addFileSource
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
@@ -14,7 +15,7 @@ import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 import org.scilab.forge.jlatexmath.TeXConstants
 import org.scilab.forge.jlatexmath.TeXFormula
-import xyz.xszq.bot.config.LLMConfig
+import xyz.xszq.bot.config.TextConfig
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.message.File
 import xyz.xszq.bot.message.Image
@@ -27,16 +28,8 @@ import kotlin.random.Random
 
 @Suppress("unused")
 class Text: Plugin() {
-    val presets = buildMap {
-        put("在", "bot在")
-        put("有人吗", "有bot在哦")
-        put("在？", "BIG BOT IS WATCHING YOU")
-        put("在吗", "bot一直都在哦")
-        put("有美少女吗", "(づ￣3￣)づ")
-        put("？", "问我干嘛")
-    }
+    lateinit var textConfig: TextConfig
     lateinit var stereotypes: StereotypesPresets
-    lateinit var llmConfig: LLMConfig
     val randomImage = RandomImage()
 
     internal var client = createHttpClient()
@@ -60,11 +53,11 @@ class Text: Plugin() {
             .loadConfigOrThrow<StereotypesPresets>()
 
 
-        llmConfig = ConfigLoaderBuilder.default()
-            .addFileSource("./config/llm.yml")
+        textConfig = ConfigLoaderBuilder.default()
+            .addFileSource("./config/text.yml")
             .withExplicitSealedTypes()
             .build()
-            .loadConfigOrThrow<LLMConfig>()
+            .loadConfigOrThrow<TextConfig>()
 
         randomImage.init()
 
@@ -95,8 +88,11 @@ class Text: Plugin() {
                 }
             }))
         }
+        equalsTo("在") {
+            reply("bot在")
+        }
         always {
-            presets[message.text.trim()]?.let { text ->
+            textConfig.presets[message.text.trim()]?.let { text ->
                 reply(text)
             }
         }
@@ -244,31 +240,17 @@ class Text: Plugin() {
         }
     }
     suspend fun audit(text: String): Boolean {
-        val endpoint = "${llmConfig.url}/chat/completions"
-        val messages = listOf(
-            LLMMessage(role = "system", content = llmConfig.system),
-            LLMMessage(role = "user", content = text)
-        )
-        val httpResponse = client.post(endpoint) {
-            contentType(ContentType.Application.Json)
-            headers {
-                append(HttpHeaders.Authorization, "Bearer ${llmConfig.apikey}")
+        val client = pluginLoader.llmClient ?: return true
+        return try {
+            val content = client.chat {
+                system(textConfig.system)
+                user(text)
             }
-            setBody(LLMRequest(
-                model = llmConfig.model,
-                messages = messages,
-                stream = false,
-                temperature = llmConfig.temperature,
-                thinking = LLMThinking("disabled")
-            ))
-        }
-        return when (httpResponse.status) {
-            HttpStatusCode.OK -> {
-                val response = httpResponse.body<LLMResponse>()
-                response.choices.firstOrNull() ?.message ?.content ?.toBooleanStrictOrNull() ?: true
-            }
-            HttpStatusCode.BadRequest -> false
-            else -> true
+            content.toBooleanStrictOrNull() ?: true
+        } catch (e: ClientRequestException) {
+            false
+        } catch (e: Exception) {
+            true
         }
     }
 }
