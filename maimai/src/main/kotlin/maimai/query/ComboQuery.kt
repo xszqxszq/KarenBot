@@ -402,6 +402,10 @@ object ComboQuery {
             val year = version.name.substringAfter("舞萌DX ")
             add(0, Pair(listOf("dx$year", year), nowVersion(version)))
         }
+        // TODO: Remove this on 2026 update
+        add(0, Pair(listOf("dx2026", "2026"), nowVersion(GameVersion(
+            id = 25, "舞萌DX 2026", 26000
+        ))))
         maimaiData.versions.values.firstOrNull { it.version == 20000 } ?.let { version ->
             add(0, Pair(listOf("dx无印"), nowVersion(version)))
         }
