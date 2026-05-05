@@ -9,6 +9,7 @@ import xyz.xszq.bot.maimai.music.*
 import xyz.xszq.shinobu.parse.StyleParser
 import xyz.xszq.shinobu.template.Template
 import xyz.xszq.shinobu.template.TemplateManager
+import kotlin.math.roundToInt
 
 class LevelTemplate(
     private val manager: TemplateManager,
@@ -26,6 +27,8 @@ class LevelTemplate(
         records: List<Record>? = null,
         title: String,
         filterParams: FilterParams,
+        showProgress: Boolean = false,
+        progressData: Map<MusicDifficulty, Pair<Int, Int>> = emptyMap(),
     ): Image {
         val groups = if (filterParams.isDetailed) {
             charts.groupBy {
@@ -59,6 +62,8 @@ class LevelTemplate(
             groups = groups,
             matched = matched,
             completed = completed,
+            showProgress = showProgress,
+            progressData = progressData,
         ))
     }
 
@@ -110,6 +115,42 @@ class LevelTemplate(
                     } ?.let {
                         "all_$it.png"
                     }
+                }
+
+                if (params.showProgress) {
+                    val hasReMaster = params.groups.any { (_, charts) ->
+                        charts.any { it.difficulty == MusicDifficulty.ReMaster }
+                    }
+                    val smallText = params.progressData.values.any { (total, _) -> total >= 100 }
+                    add(template[if (hasReMaster) "progress-5" else "progress-4"]!!.modify {
+                        div("bar") {
+                            MusicDifficulty.entries.forEach { diff ->
+                                if (diff == MusicDifficulty.Utage) return@forEach
+                                val id = diff.name.lowercase()
+                                div(id) {
+                                    val barWidth = style.width ?: 80f
+                                    val (total, completedCount) = params.progressData[diff] ?: (0 to 0)
+                                    div("overlay") {
+                                        style.width = if (total > 0) (completedCount.toFloat() / total * barWidth).roundToInt().toFloat() else 0f
+                                    }
+                                }
+                            }
+                        }
+                        div("num") {
+                            MusicDifficulty.entries.forEach { diff ->
+                                if (diff == MusicDifficulty.Utage) return@forEach
+                                val id = diff.name.lowercase()
+                                div(id) {
+                                    val (total, completedCount) = params.progressData[diff] ?: (0 to 0)
+                                    text("text") {
+                                        if (smallText)
+                                            style.textSize = 16f
+                                        text = "${completedCount}/$total"
+                                    }
+                                }
+                            }
+                        }
+                    })
                 }
             }
 

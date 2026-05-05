@@ -25,6 +25,7 @@ import xyz.xszq.bot.maimai.query.ComboQuery.filterRecords
 import xyz.xszq.bot.maimai.query.ComboQuery.isDetailed
 import xyz.xszq.bot.maimai.query.ComboQuery.isPlate
 import xyz.xszq.bot.maimai.query.ComboQuery.params
+import xyz.xszq.bot.maimai.query.ComboQuery.requiresType
 import xyz.xszq.bot.maimai.query.Filter
 import xyz.xszq.bot.maimai.toSimple
 import xyz.xszq.bot.message.Markdown
@@ -432,6 +433,10 @@ class ImageController(
         val filterParams = filters.params(combo)
         filterParams.isDetailed = isDetailed
 
+        val allCharts = filters.filterCharts(
+            maimai.musics().filter { it.genre != MusicGenre.Utage }
+        )
+
         val musics = charts.map { it.music }.toSet().toList()
         val (response, _) = maimai.query.records(user, musics)
 
@@ -439,7 +444,9 @@ class ImageController(
             charts = charts,
             records = response.records,
             title = "${combo}完成表",
-            filterParams = filterParams
+            filterParams = filterParams,
+            showProgress = true,
+            progressData = computeProgressData(filters, allCharts, response.records),
         ).sendResultImage("${combo}完成表", this, randomTips())
     }
     suspend fun MessageEvent.handleLevelIncomplete(
@@ -469,11 +476,17 @@ class ImageController(
             return
         }
 
+        val allCharts = filters.filterCharts(
+            maimai.musics().filter { it.genre != MusicGenre.Utage }
+        )
+
         maimai.image.level.level(
             charts = filtered,
             records = response.records,
             title = "${combo}未完成表",
-            filterParams = filterParams
+            filterParams = filterParams,
+            showProgress = true,
+            progressData = computeProgressData(filters, allCharts, response.records),
         ).sendResultImage("${combo}未完成表", this, randomTips())
     }
     suspend fun MessageEvent.handleInfoScore(
@@ -523,6 +536,36 @@ class ImageController(
             this,
             randomTips()
         )
+    }
+
+    private fun computeProgressData(
+        filters: List<Filter>,
+        allCharts: List<ChartInfo>,
+        records: List<Record>?,
+    ): Map<MusicDifficulty, Pair<Int, Int>> {
+        val total = allCharts.groupBy { it.difficulty }.mapValues { it.value.size }
+        val completed: Map<MusicDifficulty, Int> = if (records != null) {
+            val filtered = filters.filterRecords(records, true)
+            if (filtered != null) {
+                filtered.groupBy { it.chart.difficulty }.mapValues { it.value.size }
+            } else {
+                val requiresType = filters.requiresType()
+                records.groupBy { it.chart.difficulty }.mapValues { entry ->
+                    entry.value.count { record ->
+                        when (requiresType) {
+                            RequiresType.Achievement -> record.achievement >= 800000
+                            RequiresType.Combo -> record.comboStatus != ComboStatus.None
+                            RequiresType.Sync -> record.syncStatus != SyncStatus.None
+                        }
+                    }
+                }
+            }
+        } else {
+            emptyMap()
+        }
+        return MusicDifficulty.entries.filter { it != MusicDifficulty.Utage }.associateWith { diff ->
+            (total[diff] ?: 0) to (completed[diff] ?: 0)
+        }
     }
 
     fun filterCharts(

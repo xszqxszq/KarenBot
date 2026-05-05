@@ -251,7 +251,7 @@ object ComboQuery {
     fun version(version: List<GameVersion>) = Filter(
         type = FilterType.Version,
         chart = { chart ->
-            chart.music.genre != MusicGenre.Utage && chart.music.version in version
+            chart.difficulty != MusicDifficulty.Utage && chart.music.version in version
         }
     )
     fun type(type: MusicType) = Filter(
@@ -296,7 +296,7 @@ object ComboQuery {
     fun nowVersion(version: GameVersion) = Filter(
         type = FilterType.Modification,
         chart = { chart ->
-            chart.music.version.version <= version.version
+            chart.difficulty != MusicDifficulty.Utage && chart.music.version.version <= version.version
         },
         nowVersion = { version }
     )
