@@ -12,7 +12,7 @@ enum class MusicDifficulty(val value: Int, val names: List<String>) {
         fun of(value: Int): MusicDifficulty =
             MusicDifficulty.entries.first { it.value == value }
         fun from(name: String): MusicDifficulty? =
-            MusicDifficulty.entries.firstOrNull { name in it.names }
+            MusicDifficulty.entries.firstOrNull { name in it.names || name in it.name }
     }
     val brief
         get() = names.last()

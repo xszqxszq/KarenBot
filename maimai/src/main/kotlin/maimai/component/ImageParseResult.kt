@@ -10,4 +10,6 @@ data class ImageParseResult(
     val difficulty: String = "",
     val combo: String = "",
     val sync: String = "",
+    val type: String = "",
+    val deluxeScore: Int = 0
 )
