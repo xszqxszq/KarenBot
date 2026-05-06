@@ -132,13 +132,15 @@ class ImageController(
             }
         }
         // 歌曲信息+成绩
-        startsWith(listOf("info", "minfo")) { musicQuery ->
-            var user: UserQueryParams? = null
-            runCatching {
-                user = maimai.query.getQueryParams(this)
-                handleInfoScore(user, musicQuery)
-            }.onFailure { e ->
-                handleError(this, e, user)
+        startsWith(listOf("info", "minfo")) { text ->
+            queryByTextOrImage(text) { musicQuery ->
+                var user: UserQueryParams? = null
+                runCatching {
+                    user = maimai.query.getQueryParams(this)
+                    handleInfoScore(user, musicQuery)
+                }.onFailure { e ->
+                    handleError(this, e, user)
+                }
             }
         }
         // 段位表

@@ -206,4 +206,19 @@ sealed class Controller(
         }
         return null
     }
+    suspend fun MessageEvent.queryByTextOrImage(
+        text: String,
+        helpText: String ?= null,
+        action: suspend (String) -> Unit
+    ) = when {
+        text.isNotBlank() -> action(text.trim())
+        reference != null -> with(maimai.query) {
+            parseImage()
+        }.forEach {
+            action(it.title)
+        }
+        else -> helpText ?.let {
+            reply(helpText)
+        }
+    }
 }

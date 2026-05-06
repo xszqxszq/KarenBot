@@ -16,7 +16,7 @@ class UpdateController(
     override val maimai: Maimai
 ): Controller(maimai) {
     override suspend fun setRoute() = rhythm {
-        startsWith("更新") {
+        startsWith(listOf("更新", "导")) {
             if (DivingFishBindTable[sender.id] == null) {
                 hintBind()
                 return@startsWith

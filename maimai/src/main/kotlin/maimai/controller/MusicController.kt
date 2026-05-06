@@ -89,29 +89,15 @@ class MusicController(
         }
 
         // 模糊搜索
-        startsWith("查歌") { raw ->
-            val args = raw.trim().split("\n", limit = 2)
-            var name = args.getOrNull(0)
-            if (name ?.isEmpty() == true)
-                name = null
-            name ?.let {
-                search(name)
-            } ?: run {
-                reference ?.let {
-                    with(maimai.query) {
-                        parseImage()
-                    }.forEach {
-                        search(it.title)
-                    }
-                } ?: run {
-                    reply("使用方法：查歌 歌曲名称/别名")
-                }
+        startsWith("查歌") { name ->
+            queryByTextOrImage(name, "使用方法：查歌 歌曲名称/别名") { music ->
+                search(music)
             }
         }
-        endsWith(listOf("是什么歌", "是什么歌？")) { raw ->
-            val args = raw.split("\n", limit = 2)
-            val name = args[0]
-            search(name)
+        endsWith(listOf("是什么歌", "是什么歌？")) { name ->
+            queryByTextOrImage(name, "使用方法：xx是什么歌") { music ->
+                search(music)
+            }
         }
         button("maimai-search-word") {
             val args = data.split("\n", limit = 2)
@@ -287,7 +273,8 @@ class MusicController(
         }
         // 别名查询/设置
         endsWith(listOf("有什么别名", "有什么别名？")) { name ->
-            maimai.aliases.search(name).firstOrNull() ?.let { music ->
+            queryByTextOrImage(name) {
+                val music = maimai.aliases.search(name).firstOrNull() ?: return@queryByTextOrImage
                 val aliases = MusicAliasesTable[music]
                     .filter { it.first != music.name }
                     .take(maxResultsLong)
@@ -349,16 +336,17 @@ class MusicController(
             }.toPlainText() + message
             reply(message)
         }
-        startsWith("预览") { musicQuery ->
-            val (music, _) = selectMusic("预览", musicQuery, false)
-                ?: return@startsWith
-            val file = localCurrentDirVfs[previewDir]["${music.resourceId}.ogg"]
-            if (!file.exists()) {
-                return@startsWith
+        startsWith("预览") { raw ->
+            queryByTextOrImage(raw) { musicQuery ->
+                val (music, _) = selectMusic("预览", musicQuery, false) ?: return@queryByTextOrImage
+                val file = localCurrentDirVfs[previewDir]["${music.resourceId}.ogg"]
+                if (!file.exists()) {
+                    return@queryByTextOrImage
+                }
+                val pcm = file.toPCM()
+                reply(Audio(pcm))
+                pcm.delete()
             }
-            val pcm = file.toPCM()
-            reply(Audio(pcm))
-            pcm.delete()
         }
     }
 
