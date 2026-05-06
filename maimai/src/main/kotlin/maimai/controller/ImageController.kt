@@ -437,8 +437,10 @@ class ImageController(
             maimai.musics().filter { it.genre != MusicGenre.Utage }
         )
 
-        val musics = charts.map { it.music }.toSet().toList()
-        val (response, _) = maimai.query.records(user, musics)
+        val (response, _) = maimai.query.records(
+            user,
+            filters.filterMusics(maimai.musics().filter { it.genre != MusicGenre.Utage })
+        )
 
         maimai.image.level.level(
             charts = charts,
@@ -459,8 +461,13 @@ class ImageController(
         if (charts.isEmpty())
             throw FilterNoResultException()
 
-        val musics = charts.map { it.music }.toSet().toList()
-        val (response, _) = maimai.query.records(user, musics)
+        val allCharts = filters.filterCharts(
+            maimai.musics().filter { it.genre != MusicGenre.Utage }
+        )
+        val (response, _) = maimai.query.records(
+            user,
+            filters.filterMusics(maimai.musics().filter { it.genre != MusicGenre.Utage })
+        )
 
         val completed = filters.filterRecords(response.records, true) ?: emptyList()
         val remains = charts.filter { chart ->
@@ -475,10 +482,6 @@ class ImageController(
             reply("恭喜您已完成所有谱面！")
             return
         }
-
-        val allCharts = filters.filterCharts(
-            maimai.musics().filter { it.genre != MusicGenre.Utage }
-        )
 
         maimai.image.level.level(
             charts = filtered,
