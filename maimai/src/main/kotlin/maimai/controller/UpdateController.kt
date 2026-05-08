@@ -43,7 +43,7 @@ class UpdateController(
                 }.filter {
                     it.game == "maimai"
                 }.map { record ->
-                    val music = maimai.musics().first { record.title in it.name && record.type == it.type.value }
+                    val music = maimai.musics().first { record.title.lowercase() in it.name.lowercase() && record.type == it.type.value }
                     DivingFishRecordSimple(
                         title = music.name,
                         achievements = record.achievement.replace("%", "").toDouble(),
@@ -54,6 +54,7 @@ class UpdateController(
                         type = record.type
                     )
                 }
+                println(records)
                 if (records.isEmpty())
                     return@startsWith
 
@@ -72,7 +73,7 @@ class UpdateController(
                     return@startsWith
                 }
                 val result = response.body<DivingFishUpdateResponse>()
-                reply("更新成功，已更新${result.creates}条记录。")
+                reply("更新成功，已更新${result.updates + result.creates}条记录。")
                 return@startsWith
             }
             val token = UUID.randomUUID().toString().replace("-", "")
