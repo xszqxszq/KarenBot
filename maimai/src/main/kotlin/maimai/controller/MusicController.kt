@@ -2,6 +2,7 @@ package xyz.xszq.bot.maimai.controller
 
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.localCurrentDirVfs
+import org.jetbrains.skia.EncodedImageFormat
 import xyz.xszq.bot.*
 import xyz.xszq.bot.Maimai.Companion.textMode
 import xyz.xszq.bot.event.MessageEvent
@@ -25,6 +26,7 @@ import xyz.xszq.bot.maimai.query.ComboQuery.filterCharts
 import xyz.xszq.bot.maimai.query.ComboQuery.filterMusics
 import xyz.xszq.bot.maimai.query.ComboQuery.isSingleChartSelected
 import xyz.xszq.bot.message.Audio
+import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.subscribe.CommandNotMatchedException
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -70,6 +72,13 @@ class MusicController(
                     reply(chart.infoText())
                 else
                     reply(chart.infoMD(jacketUrl))
+//
+//                val radar = maimai.image.radar.generate(chart, 500, false) ?: return@startsWith
+//                useTempFile { file ->
+//                    val bytes = radar.encodeToData(EncodedImageFormat.JPEG, 90)!!.bytes
+//                    file.writeBytes(bytes)
+//                    reply(Image(file))
+//                }
             }
         }
 

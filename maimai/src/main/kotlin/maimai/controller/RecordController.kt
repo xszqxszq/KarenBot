@@ -31,6 +31,9 @@ class RecordController(
                 handleError(this, e, user)
             }
         }
+        startsWith(listOf("上分推荐", "吃分推荐")) {
+
+        }
     }
 
     suspend fun handleProgress(

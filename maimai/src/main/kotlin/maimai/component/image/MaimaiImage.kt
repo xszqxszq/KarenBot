@@ -9,6 +9,7 @@ import org.jetbrains.skia.*
 import xyz.xszq.bot.maimai.component.MaimaiData
 import xyz.xszq.bot.maimai.component.image.templates.CourseTemplate
 import xyz.xszq.bot.maimai.component.image.templates.LevelTemplate
+import xyz.xszq.bot.maimai.component.image.templates.RadarTemplate
 import xyz.xszq.bot.maimai.component.image.templates.RatingTemplate
 import xyz.xszq.bot.maimai.component.image.templates.ScoreTemplate
 import xyz.xszq.bot.maimai.music.ChartInfo
@@ -23,23 +24,28 @@ class MaimaiImage(
     val maimaiData: MaimaiData,
     val resourcePath: String = "../.."
 ) {
+    private val dataPath = "./data/maimai/"
     lateinit var manager: TemplateManager
 
     lateinit var rating: RatingTemplate
     lateinit var score: ScoreTemplate
     lateinit var level: LevelTemplate
     lateinit var course: CourseTemplate
+    lateinit var radar: RadarTemplate
 
     /**
      * 初始化
      */
     fun init() {
-        manager = TemplateManager("./data/maimai/")
+        manager = TemplateManager(dataPath)
 
         rating = RatingTemplate(manager, resourcePath, maimaiData.newestVersion)
         score = ScoreTemplate(manager, resourcePath)
         level = LevelTemplate(manager, resourcePath)
         course = CourseTemplate(manager, resourcePath)
+        radar = RadarTemplate(dataPath)
+
+        radar.init()
     }
     /**
      * 载入模板
