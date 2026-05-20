@@ -33,6 +33,8 @@ class UpdateController(
 
     override suspend fun setRoute() = rhythm {
         startsWith(listOf("更新", "导")) {
+            if (text.trim() !in listOf("更新", "导"))
+                return@startsWith
             if (DivingFishBindTable[sender.id] == null) {
                 hintBind()
                 return@startsWith

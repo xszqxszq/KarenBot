@@ -1,6 +1,6 @@
 package xyz.xszq.bot.message
 
-import kotlinx.serialization.json.Json
+import xyz.xszq.bot.json
 import xyz.xszq.bot.payload.FaceExt
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -19,7 +19,7 @@ fun String.parseFaceElements(): List<MessageElement> {
         val faceType = match.groups[1]?.value?.toInt() ?: 0
         val faceId = match.groups[2]?.value?.toInt() ?: 0
         val base64Ext = match.groups[3]?.value ?: ""
-        val ext = Json.decodeFromString<FaceExt>(
+        val ext = json.decodeFromString<FaceExt>(
             Base64.decode(base64Ext).toString(Charsets.UTF_8)
         )
         elements.add(Face(type = faceType, id = faceId, name = ext.text))

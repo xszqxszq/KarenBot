@@ -60,6 +60,7 @@ sealed class Controller(
                 is NotFoundException -> messageNotFound(e.message.orEmpty())
                 is AuthorizationException -> messageNeedAuthorization()
                 is UserOARequiredException -> requestOA()
+                is IgnoreException -> {}
                 else -> reply(ChunithmQuery.QUERY_FAILED)
             }
         }

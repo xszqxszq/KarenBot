@@ -57,6 +57,7 @@ sealed class Controller(
                 is NotFoundException -> messageNotFound(e.message.orEmpty())
                 is AuthorizationException -> messageNeedAuthorization()
                 is UserOARequiredException -> requestOA()
+                is IgnoreException -> {}
                 else -> {
                     e.printStackTrace()
                     reply(MaimaiQuery.QUERY_FAILED)

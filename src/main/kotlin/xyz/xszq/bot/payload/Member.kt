@@ -8,5 +8,8 @@ data class Member(
     @SerialName("member_openid")
     val id: String,
     val username: String = "",
-    val bot: Boolean = false
+    val bot: Boolean = false,
+    val scope: String = "single",
+    @SerialName("is_you")
+    val isSelf: Boolean = false,
 )

@@ -14,6 +14,7 @@ class GroupMessageEvent(
     override val group: Group,
     override var seq: Int = 1,
     override val reference: MessageChain? = null,
+    val mentions: List<User> = emptyList()
 ): MessageEvent(
     bot = bot,
     eventId = eventId,

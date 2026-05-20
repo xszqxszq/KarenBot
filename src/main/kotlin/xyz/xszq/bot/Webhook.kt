@@ -134,8 +134,8 @@ suspend fun Application.handleDispatch(
                 sender = User(pluginLoader.bot, data.author.id, data.author.username)
             )
         }
-        /* 群聊消息 */
-        EventType.Group.Message -> {
+        /* 群聊AT消息 */
+        EventType.Group.AtMessage -> {
             val data = json.decodeFromString<GroupAtMessageCreate>(payload.d!!)
             val images = downloadFiles(
                 data.attachments.filter { "image" in it.contentType }, pluginLoader.files, logger)
@@ -153,7 +153,36 @@ suspend fun Application.handleDispatch(
                 message = message,
                 sender = User(pluginLoader.bot, data.author.id, data.author.username),
                 group = Group(pluginLoader.bot, data.group),
-                reference = data.messageElements.firstOrNull() ?.toMessageChain()
+                reference = data.messageElements.firstOrNull() ?.toMessageChain(),
+                // TODO: Replace to Authentic bot data
+                mentions = listOf(User(pluginLoader.bot, "", "", isBot = true, isSelf = true))
+            )
+        }
+        /* 群聊消息 */
+        EventType.Group.Message -> {
+            val data = json.decodeFromString<GroupMessageCreate>(payload.d!!)
+            println(payload.d)
+            val images = downloadFiles(
+                data.attachments.filter { "image" in it.contentType }, pluginLoader.files, logger)
+            val files = downloadFiles(
+                data.attachments.filter { it.contentType == "file" }, pluginLoader.files, logger)
+            val content = filter.filter(data.content)
+            val message = MessageChain(content, images, files)
+            logger.info {
+                "[${data.group}] ${data.author.username}(${data.author.id}) -> ${message.content.trim().replace("\n", "\\n")}"
+            }
+            GroupMessageEvent(
+                bot = pluginLoader.bot,
+                eventId = payload.id!!,
+                id = data.id,
+                message = message,
+                sender = User(pluginLoader.bot, data.author.id, data.author.username),
+                group = Group(pluginLoader.bot, data.group),
+                reference = data.messageElements.firstOrNull() ?.toMessageChain(),
+                mentions = data.mentions.map { mention ->
+                    User(pluginLoader.bot, mention.id, mention.username,
+                        isBot = mention.bot, isSelf = mention.isSelf)
+                }
             )
         }
         /* 新增好友 */
@@ -333,8 +362,19 @@ suspend fun Application.handleForward(
             }
         }
         /* Group @at message */
-        EventType.Group.Message -> {
+        EventType.Group.AtMessage -> {
             val data = json.decodeFromString<GroupAtMessageCreate>(payload.d!!)
+            if (forwardConfig.debug)
+                println("Received: [${data.group}] (${data.author.id})")
+            when {
+                data.group in forwardConfig.groups -> forward(body, call, forwardConfig.whitelist)
+                forwardConfig.otherwise.isNotBlank() -> forward(body, call, forwardConfig.otherwise)
+                else -> handleDispatch(payload, call, logger, filter, pluginLoader)
+            }
+        }
+        /* Group message */
+        EventType.Group.Message -> {
+            val data = json.decodeFromString<GroupMessageCreate>(payload.d!!)
             if (forwardConfig.debug)
                 println("Received: [${data.group}] (${data.author.id})")
             when {

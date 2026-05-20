@@ -11,6 +11,7 @@ import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.maimai.component.MarkdownTemplates
 import xyz.xszq.bot.maimai.component.MarkdownTemplates.Keyboards.single
+import xyz.xszq.bot.maimai.component.RadarValue
 import xyz.xszq.bot.maimai.component.image.FilterParams
 import xyz.xszq.bot.maimai.exception.FilterNoResultException
 import xyz.xszq.bot.maimai.exception.FilterTooManyException
@@ -254,6 +255,15 @@ class ImageController(
         val (elapsed, result) = countTime {
             maimai.image.rating.bests(total, response, api.name)
         }
+//        useTempFile(suffix = ".jpg") { file ->
+//            val radar = maimai.image.radar.generate((response.newRatingList + response.oldRatingList).map {
+//                it.chart
+//            }) ?: return@useTempFile
+//            radar.encodeToData(EncodedImageFormat.JPEG, 90) ?.bytes ?.let {
+//                file.writeBytes(it)
+//                reply(xyz.xszq.bot.message.Image(file))
+//            }
+//        }
         result.sendResultImage("b$total", this, "生成时间：${elapsed}ms\n${randomTips()?:""}")
     }
     suspend fun MessageEvent.handleRecent(

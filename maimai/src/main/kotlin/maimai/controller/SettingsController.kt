@@ -81,10 +81,14 @@ class SettingsController(
             reply("设置查分器成功。")
         }
         startsWith(listOf("设置水鱼", "水鱼")) {
+            if (!text.startsWith("设置") && text.trim() != "水鱼")
+                return@startsWith
             MaimaiSettingsTable[sender.id, "prober"] = "diving-fish"
             reply("设置查分器成功。")
         }
         startsWith(listOf("设置落雪", "落雪")) {
+            if (!text.startsWith("设置") && text.trim() != "落雪")
+                return@startsWith
             MaimaiSettingsTable[sender.id, "prober"] = "lxns"
             reply("设置查分器成功。")
         }

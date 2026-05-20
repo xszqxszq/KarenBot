@@ -57,17 +57,40 @@ class RadarTemplate(val basePath: String) {
     }
 
     fun generate(
+        charts: List<ChartInfo>,
+        size: Int = 500,
+        transparent: Boolean = true
+    ): Image? {
+        val data = charts.mapNotNull { chart -> data[chart.music.id.toString()]?.get(chart.difficulty.value) }
+        return generate(RadarValue(
+            notes = data.sumOf { it.notes } / data.size,
+            peak = data.sumOf { it.peak } / data.size,
+            stamina = data.sumOf { it.stamina } / data.size,
+            slide = data.sumOf { it.slide } / data.size,
+            handTrip = data.sumOf { it.handTrip } / data.size
+        ), size, transparent)
+    }
+
+    fun generate(
         chart: ChartInfo,
         size: Int = 500,
         transparent: Boolean = true
     ): Image? {
-        val radarInfo = data[chart.music.id.toString()]?.get(chart.difficulty.value) ?: return null
+        val data = data[chart.music.id.toString()]?.get(chart.difficulty.value) ?: return null
+        return generate(data, size, transparent)
+    }
+
+    fun generate(
+        data: RadarValue,
+        size: Int = 500,
+        transparent: Boolean = true
+    ): Image {
         val values = floatArrayOf(
-            radarInfo.notes.toFloat(),
-            radarInfo.peak.toFloat(),
-            radarInfo.stamina.toFloat(),
-            radarInfo.slide.toFloat(),
-            radarInfo.handTrip.toFloat()
+            data.notes.toFloat(),
+            data.peak.toFloat(),
+            data.stamina.toFloat(),
+            data.slide.toFloat(),
+            data.handTrip.toFloat()
         )
 
         val dimensionNames = arrayOf("键盘", "爆发", "耐力", "星星", "出张")

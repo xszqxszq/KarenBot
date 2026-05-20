@@ -9,6 +9,7 @@ import xyz.xszq.bot.chunithm.database.QQBindTable
 import xyz.xszq.bot.chunithm.exception.*
 import xyz.xszq.bot.chunithm.music.*
 import xyz.xszq.bot.chunithm.music.Rating.ratingFloor
+import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 
 class ChunithmQuery(
@@ -45,6 +46,12 @@ class ChunithmQuery(
         event: MessageEvent,
         queryArgs: String ?= null
     ): UserQueryParams = when {
+        event is GroupMessageEvent && event.mentions.isNotEmpty() && event.mentions.none { it.isBot || it.isSelf } -> {
+            val mentioned = event.mentions.first()
+            val qq = QQBindTable[mentioned.id] ?: throw IgnoreException()
+            val settings = MaimaiSettingsTable.settings(mentioned.id)
+            UserQueryParams.QQ(qq, event, true, settings)
+        }
         queryArgs.isNullOrBlank() -> {
             val qq = QQBindTable[event.sender.id] ?: throw QQBindRequiredException()
             val settings = MaimaiSettingsTable.settings(event.sender.id)

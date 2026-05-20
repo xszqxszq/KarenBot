@@ -10,7 +10,8 @@ object EventType {
         const val Reject = "C2C_MSG_REJECT"
     }
     object Group {
-        const val Message = "GROUP_AT_MESSAGE_CREATE"
+        const val Message = "GROUP_MESSAGE_CREATE"
+        const val AtMessage = "GROUP_AT_MESSAGE_CREATE"
         const val Add = "GROUP_ADD_ROBOT"
         const val Remove = "GROUP_DEL_ROBOT"
         const val Receive = "GROUP_MSG_RECEIVE"

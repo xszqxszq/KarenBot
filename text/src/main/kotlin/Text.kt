@@ -91,6 +91,10 @@ class Text: Plugin() {
         equalsTo("在") {
             reply("bot在")
         }
+        equalsTo(listOf("？", "?")) {
+            if (this !is GroupMessageEvent || mentions.any { it.isSelf })
+                reply("问我干嘛")
+        }
         always {
             textConfig.presets[message.text.trim()]?.let { text ->
                 reply(text)
@@ -108,7 +112,7 @@ class Text: Plugin() {
                 reply("检测到疑似违规内容，请检查输入")
         }
         always {
-            if (message.text.isBlank() && message.filter { it !is PlainText }.isEmpty()) {
+            if (message.text.isBlank() && message.filter { it !is PlainText }.isEmpty() && (this !is GroupMessageEvent || mentions.any { it.isSelf })) {
                 reply(Image(randomImage.random()))
             }
         }

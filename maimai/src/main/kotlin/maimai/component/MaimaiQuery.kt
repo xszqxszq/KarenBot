@@ -3,6 +3,7 @@ package xyz.xszq.bot.maimai.component
 import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.json.Json
 import xyz.xszq.bot.Maimai
+import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.maimai.api.LXNS
 import xyz.xszq.bot.maimai.api.MaimaiAPI
@@ -46,6 +47,12 @@ class MaimaiQuery(
         event: MessageEvent,
         queryArgs: String ?= null
     ): UserQueryParams = when {
+        event is GroupMessageEvent && event.mentions.isNotEmpty() && event.mentions.none { it.isBot || it.isSelf } -> {
+            val mentioned = event.mentions.first()
+            val qq = QQBindTable[mentioned.id] ?: throw IgnoreException()
+            val settings = MaimaiSettingsTable.settings(mentioned.id)
+            UserQueryParams.QQ(qq, event, true, settings)
+        }
         queryArgs.isNullOrBlank() -> {
             val qq = QQBindTable[event.sender.id] ?: throw QQBindRequiredException()
             val settings = MaimaiSettingsTable.settings(event.sender.id)
