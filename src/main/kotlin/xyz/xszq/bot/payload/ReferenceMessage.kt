@@ -4,7 +4,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.message.RemoteImage
-import xyz.xszq.bot.message.parseFaceElements
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 @Serializable
@@ -19,7 +18,7 @@ data class ReferenceMessage(
 ) {
     @OptIn(ExperimentalEncodingApi::class)
     fun toMessageChain(): MessageChain {
-        val chain = MessageChain(content.parseFaceElements())
+        val chain = MessageChain(content)
         attachments.forEach { attachment ->
             if ("image" in attachment.contentType) {
                 chain += RemoteImage(

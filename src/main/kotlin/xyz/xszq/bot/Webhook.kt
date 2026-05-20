@@ -167,7 +167,7 @@ suspend fun Application.handleDispatch(
             val files = downloadFiles(
                 data.attachments.filter { it.contentType == "file" }, pluginLoader.files, logger)
             val content = filter.filter(data.content)
-            val message = MessageChain(content, images, files)
+            val message = MessageChain(content, images, files, pluginLoader.bot, data.mentions)
             logger.info {
                 "[${data.group}] ${data.author.username}(${data.author.id}) -> ${message.content.trim().replace("\n", "\\n")}"
             }

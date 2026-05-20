@@ -1,39 +1,30 @@
 package xyz.xszq.bot.message
 
 import korlibs.io.file.VfsFile
+import xyz.xszq.bot.Bot
+import xyz.xszq.bot.User
+import xyz.xszq.bot.json
+import xyz.xszq.bot.payload.FaceExt
+import xyz.xszq.bot.payload.Member
+import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
-/**
- * The Chain of Message.
- */
 @Suppress("unused")
 class MessageChain() {
     private val list = mutableListOf<MessageElement>()
 
-    /**
-     * Create MessageChain with a List.
-     * @param elements the list.
-     */
     constructor(elements: List<MessageElement>) : this() {
         list.addAll(elements)
     }
 
-    /**
-     * Create MessageChain from server's response.
-     * @param raw Raw Message String.
-     * @param images downloaded images.
-     */
     @OptIn(ExperimentalEncodingApi::class)
-    constructor(raw: String, images: List<VfsFile>, files: List<VfsFile>) : this() {
-        list.addAll(raw.parseFaceElements())
+    constructor(raw: String, images: List<VfsFile> = emptyList(), files: List<VfsFile> = emptyList(),
+                bot: Bot? = null, mentions: List<Member>? = null) : this() {
+        list.addAll(raw.parseMessageElements(bot, mentions))
         list.addAll(images.map { Image(it) })
         list.addAll(files.map { File(it) })
     }
 
-    /**
-     * Get MessageChain with single element.
-     * @param message the element.
-     */
     constructor(message: MessageElement) : this(mutableListOf(message))
 
     operator fun plus(message: MessageElement): MessageChain {
@@ -75,4 +66,46 @@ class MessageChain() {
         return list.filterIsInstance<PlainText>().joinToString(separator = "") { it.content }
     }
     fun textToSend() = list.filter { it is PlainText || it is Face }.joinToString("") { it.toString() }
+
+    @OptIn(ExperimentalEncodingApi::class)
+    private fun String.parseMessageElements(bot: Bot? = null, mentions: List<Member>? = null): List<MessageElement> {
+        val faceRegex = Regex("""<faceType=(\d+),faceId="(\d+)",ext="([^"]+)">""")
+        val atRegex = Regex("<@([A-Fa-f0-9]+)>")
+        val elements = mutableListOf<MessageElement>()
+        var index = 0
+        while (index < length) {
+            val faceMatch = faceRegex.find(this, index)
+            val atMatch = atRegex.find(this, index)
+            val candidates = listOfNotNull(faceMatch, atMatch)
+            if (candidates.isEmpty()) {
+                elements.add(PlainText(substring(index)))
+                break
+            }
+            val next = candidates.minBy { it.range.first }
+            if (index < next.range.first)
+                elements.add(PlainText(substring(index, next.range.first)))
+            when (next) {
+                faceMatch -> {
+                    val type = next.groups[1]?.value?.toInt() ?: 0
+                    val id = next.groups[2]?.value?.toInt() ?: 0
+                    val base64Ext = next.groups[3]?.value ?: ""
+                    val ext = json.decodeFromString<FaceExt>(
+                        Base64.decode(base64Ext).toString(Charsets.UTF_8)
+                    )
+                    elements.add(Face(type = type, id = id, name = ext.text))
+                }
+                atMatch -> if (bot != null && mentions != null) {
+                    val atId = next.groups[1]?.value ?: ""
+                    val mention = mentions.find { it.id == atId }
+                    val user = if (mention != null)
+                        User(bot, mention.id, mention.username, isBot = mention.bot, isSelf = mention.isSelf)
+                    else
+                        User(bot, atId)
+                    elements.add(At(user))
+                }
+            }
+            index = next.range.last + 1
+        }
+        return elements
+    }
 }
