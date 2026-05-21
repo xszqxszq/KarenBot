@@ -11,7 +11,6 @@ import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.maimai.component.MarkdownTemplates
 import xyz.xszq.bot.maimai.component.MarkdownTemplates.Keyboards.single
-import xyz.xszq.bot.maimai.component.RadarValue
 import xyz.xszq.bot.maimai.component.image.FilterParams
 import xyz.xszq.bot.maimai.exception.FilterNoResultException
 import xyz.xszq.bot.maimai.exception.FilterTooManyException

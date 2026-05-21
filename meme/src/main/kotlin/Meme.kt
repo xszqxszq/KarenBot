@@ -19,7 +19,6 @@ import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.payload.MemeOption
 import xyz.xszq.bot.payload.markdown.*
-import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.sekai.SekaiCharacter
 import xyz.xszq.bot.sekai.SekaiSticker
 import java.io.File

@@ -3,9 +3,9 @@ package xyz.xszq.bot.subscribe
 import kotlinx.coroutines.*
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
-import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.CoroutineContext
 
 /**

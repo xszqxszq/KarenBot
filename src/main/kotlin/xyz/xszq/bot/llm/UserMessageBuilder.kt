@@ -1,8 +1,8 @@
 package xyz.xszq.bot.llm
 
+import io.ktor.http.*
 import xyz.xszq.bot.payload.llm.ContentPart
 import xyz.xszq.bot.payload.llm.ImageUrl
-import io.ktor.http.ContentType
 import kotlin.io.encoding.Base64
 
 @Suppress("unused")

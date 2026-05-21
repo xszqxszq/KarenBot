@@ -300,7 +300,7 @@ class GuessController(
         eventToReply[contextId] = this
         val input = text.trim()
         if (input.startsWith("不玩了")) {
-            hintJob.cancelAndJoin()
+            runCatching { hintJob.cancelAndJoin() }
             endGame(subscribesAt)
 
             val hint = "游戏已结束。答案如下：".toPlainText() + music.infoText()
@@ -314,7 +314,7 @@ class GuessController(
         }
         maimai.aliases.search(input).take(10).forEach { answer ->
             if (answer.name == music.name) {
-                hintJob.cancelAndJoin()
+                runCatching { hintJob.cancelAndJoin() }
                 endGame(subscribesAt)
 
                 val hint = "恭喜你猜中了哦~".toPlainText() + music.infoText()
@@ -375,7 +375,9 @@ class GuessController(
             return
         }
         if (text.trim().startsWith("不玩了")) {
-            reply(showOpening(musics, chars, true))
+            runCatching {
+                reply(showOpening(musics, chars, true))
+            }
             endGame(subscribesAt)
             return
         }

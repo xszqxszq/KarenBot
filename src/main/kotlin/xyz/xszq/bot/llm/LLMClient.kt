@@ -9,7 +9,8 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
-import xyz.xszq.bot.payload.llm.*
+import xyz.xszq.bot.payload.llm.LLMRequest
+import xyz.xszq.bot.payload.llm.LLMResponse
 
 class LLMClient(
     private val config: LLMConfig,

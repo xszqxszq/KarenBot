@@ -5,7 +5,6 @@ import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.maimai.music.ChartInfo
 import xyz.xszq.bot.maimai.music.MusicDifficulty
 import xyz.xszq.bot.maimai.music.MusicInfo
-import xyz.xszq.bot.maimai.music.UserQueryParams
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.payload.markdown.MarkdownData

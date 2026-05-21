@@ -1,7 +1,7 @@
 package xyz.xszq.bot.subscribe
 
-import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.ChannelEvent
+import xyz.xszq.bot.event.Event
 
 class Channel<T: Any>(
     val name: String,

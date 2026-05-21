@@ -2,7 +2,6 @@ package xyz.xszq.bot.maimai.controller
 
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.localCurrentDirVfs
-import org.jetbrains.skia.EncodedImageFormat
 import xyz.xszq.bot.*
 import xyz.xszq.bot.Maimai.Companion.textMode
 import xyz.xszq.bot.event.MessageEvent
@@ -26,7 +25,6 @@ import xyz.xszq.bot.maimai.query.ComboQuery.filterCharts
 import xyz.xszq.bot.maimai.query.ComboQuery.filterMusics
 import xyz.xszq.bot.maimai.query.ComboQuery.isSingleChartSelected
 import xyz.xszq.bot.message.Audio
-import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.subscribe.CommandNotMatchedException
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -346,15 +344,17 @@ class MusicController(
             reply(message)
         }
         startsWith("预览") { raw ->
-            queryByTextOrImage(raw) { musicQuery ->
-                val (music, _) = selectMusic("预览", musicQuery, false) ?: return@queryByTextOrImage
-                val file = localCurrentDirVfs[previewDir]["${music.resourceId}.ogg"]
-                if (!file.exists()) {
-                    return@queryByTextOrImage
+            runCatching {
+                queryByTextOrImage(raw) { musicQuery ->
+                    val (music, _) = selectMusic("预览", musicQuery, false) ?: return@queryByTextOrImage
+                    val file = localCurrentDirVfs[previewDir]["${music.resourceId}.ogg"]
+                    if (!file.exists()) {
+                        return@queryByTextOrImage
+                    }
+                    val pcm = file.toPCM()
+                    reply(Audio(pcm))
+                    pcm.delete()
                 }
-                val pcm = file.toPCM()
-                reply(Audio(pcm))
-                pcm.delete()
             }
         }
     }

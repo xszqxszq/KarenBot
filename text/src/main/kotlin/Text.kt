@@ -5,8 +5,8 @@ import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
 import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
@@ -17,11 +17,12 @@ import org.scilab.forge.jlatexmath.TeXConstants
 import org.scilab.forge.jlatexmath.TeXFormula
 import xyz.xszq.bot.config.TextConfig
 import xyz.xszq.bot.event.GroupMessageEvent
-import xyz.xszq.bot.message.File
 import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.message.PlainText
-import xyz.xszq.bot.payload.*
+import xyz.xszq.bot.payload.BilibiliResponse
+import xyz.xszq.bot.payload.BilibiliVideoInfo
+import xyz.xszq.bot.payload.RandomOtomads
 import xyz.xszq.bot.payload.markdown.*
 import java.awt.Color
 import kotlin.random.Random

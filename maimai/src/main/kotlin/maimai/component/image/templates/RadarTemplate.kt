@@ -6,7 +6,6 @@ import kotlinx.serialization.json.Json
 import org.jetbrains.skia.*
 import xyz.xszq.bot.maimai.component.RadarValue
 import xyz.xszq.bot.maimai.music.ChartInfo
-import xyz.xszq.bot.maimai.payload.LocalMusicInfo
 import java.io.File
 import kotlin.math.PI
 import kotlin.math.cos

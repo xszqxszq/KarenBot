@@ -110,7 +110,7 @@ class OpenAPI(
         }
         val result = kotlin.runCatching {
             client.post(url) {
-                contentType(ContentType.Application.Json)
+                contentType(ContentType.Application.Json.withCharset(Charsets.UTF_8))
                 setBody(payload)
                 setToken()
             }.resultOrThrow<MessageResponse>()
