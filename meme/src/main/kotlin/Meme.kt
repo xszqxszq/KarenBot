@@ -200,32 +200,8 @@ class Meme: Plugin() {
     }
     val memeKeyboard = Keyboard.create {
         row {
-            button(
-                id = "1",
-                renderData = RenderData(
-                    label = "选择表情",
-                    visitedLabel = "选择表情",
-                    style = RenderData.BLUE
-                ),
-                action = Action(
-                    type = Action.LINK,
-                    permission = Permission(Permission.EVERYONE),
-                    data = "https://otmdb.cn/bot/meme/"
-                )
-            )
-            button(
-                id = "2",
-                renderData = RenderData(
-                    label = "⚙ 生成表情",
-                    visitedLabel = "⚙ 生成表情",
-                    style = RenderData.BLUE
-                ),
-                action = Action(
-                    type = Action.AT,
-                    permission = Permission(Permission.EVERYONE),
-                    data = "\n"
-                )
-            )
+            link("选择表情", "https://otmdb.cn/bot/meme/", id = "1")
+            at("⚙ 生成表情", "\n", id = "2")
         }
     }
     val memeHelp = Markdown(
@@ -239,32 +215,8 @@ class Meme: Plugin() {
     )
     val sekaiKeyboard = Keyboard.create {
         row {
-            button(
-                id = "1",
-                renderData = RenderData(
-                    label = "选择表情",
-                    visitedLabel = "选择表情",
-                    style = RenderData.BLUE
-                ),
-                action = Action(
-                    type = Action.LINK,
-                    permission = Permission(Permission.EVERYONE),
-                    data = "https://otmdb.cn/bot/meme/pjsk"
-                )
-            )
-            button(
-                id = "2",
-                renderData = RenderData(
-                    label = "⚙ 生成表情",
-                    visitedLabel = "⚙ 生成表情",
-                    style = RenderData.BLUE
-                ),
-                action = Action(
-                    type = Action.AT,
-                    permission = Permission(Permission.EVERYONE),
-                    data = "/pjsk "
-                )
-            )
+            link("选择表情", "https://otmdb.cn/bot/meme/pjsk", id = "1")
+            at("⚙ 生成表情", "/pjsk ", id = "2")
         }
     }
     val sekaiNotFound = Markdown(
@@ -275,19 +227,7 @@ class Meme: Plugin() {
         name: String
     ) = Keyboard.create {
         row {
-            button(
-                id = "1",
-                renderData = RenderData(
-                    label = name,
-                    visitedLabel = name,
-                    style = RenderData.BLUE
-                ),
-                action = Action(
-                    type = Action.AT,
-                    permission = Permission(Permission.EVERYONE),
-                    data = name
-                )
-            )
+            at(name, name, id = "1")
         }
     }
 

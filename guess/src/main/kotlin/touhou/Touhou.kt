@@ -60,20 +60,7 @@ class Touhou(
                     appendLine("${target.name}\n来自${game.id}. ${game.name}")
                 }), Keyboard.create {
                     row {
-                        button(
-                            id = "1",
-                            renderData = RenderData(
-                                label = "再来一抽",
-                                visitedLabel = "再来一抽",
-                                style = RenderData.FILLED_BLUE
-                            ),
-                            action = Action(
-                                type = Action.AT,
-                                permission = Permission(Permission.EVERYONE),
-                                data = "随机东方原曲",
-                                enter = true
-                            )
-                        )
+                        at("再来一抽", "随机东方原曲", enter = true, style = RenderData.FILLED_BLUE, id = "1")
                     }
                 }))
             }
@@ -172,33 +159,8 @@ class Touhou(
                 appendLine("请回答该原曲的名称，一分钟后揭晓答案~")
             }), Keyboard.create {
                 row {
-                    button(
-                        id = "",
-                        renderData = RenderData(
-                            label = "回答",
-                            visitedLabel = "回答",
-                            style = RenderData.BLUE
-                        ),
-                        action = Action(
-                            type = Action.AT,
-                            permission = Permission(Permission.EVERYONE),
-                            data = " "
-                        )
-                    )
-                    button(
-                        id = "",
-                        renderData = RenderData(
-                            label = "不玩了",
-                            visitedLabel = "不玩了",
-                            style = RenderData.GRAY
-                        ),
-                        action = Action(
-                            type = Action.AT,
-                            permission = Permission(Permission.EVERYONE),
-                            data = "不玩了",
-                            enter = true
-                        )
-                    )
+                    at("回答", " ", id = "")
+                    at("不玩了", "不玩了", enter = true, style = RenderData.GRAY, id = "")
                 }
             }))
 
@@ -250,20 +212,8 @@ class Touhou(
         range: Range
     ) = Keyboard.create {
         row {
-            button(
-                id = "",
-                renderData = RenderData(
-                    label = "再来一局",
-                    visitedLabel = "再来一局",
-                    style = RenderData.BLUE
-                ),
-                action = Action(
-                    type = Action.AT,
-                    permission = Permission(Permission.EVERYONE),
-                    data = "/原曲认知测验 ${difficulty.name}" +
-                            if (range != defaultRange) " ${range.value}" else ""
-                )
-            )
+            at("再来一局", "/原曲认知测验 ${difficulty.name}" +
+                    if (range != defaultRange) " ${range.value}" else "", id = "")
         }
     }
 
@@ -308,65 +258,13 @@ class Touhou(
                 }), Keyboard.create {
                 row {
                     Difficulty.entries.forEach { difficulty ->
-                        button(
-                            id = "",
-                            renderData = RenderData(
-                                label = difficulty.name,
-                                visitedLabel = difficulty.name,
-                                style = RenderData.BLUE
-                            ),
-                            action = Action(
-                                type = Action.AT,
-                                permission = Permission(Permission.EVERYONE),
-                                data = "/原曲认知测验 ${difficulty.name.lowercase()}",
-                                enter = true
-                            )
-                        )
+                        at(difficulty.name, "/原曲认知测验 ${difficulty.name.lowercase()}", enter = true, id = "")
                     }
                 }
                 row {
-                    button(
-                        id = "",
-                        renderData = RenderData(
-                            label = "猜新作",
-                            visitedLabel = "猜新作",
-                            style = RenderData.BLUE
-                        ),
-                        action = Action(
-                            type = Action.AT,
-                            permission = Permission(Permission.EVERYONE),
-                            data = "/原曲认知测验 normal 新作",
-                            enter = true
-                        )
-                    )
-                    button(
-                        id = "",
-                        renderData = RenderData(
-                            label = "猜旧作",
-                            visitedLabel = "猜旧作",
-                            style = RenderData.BLUE
-                        ),
-                        action = Action(
-                            type = Action.AT,
-                            permission = Permission(Permission.EVERYONE),
-                            data = "/原曲认知测验 normal 旧作",
-                            enter = true
-                        )
-                    )
-                    button(
-                        id = "",
-                        renderData = RenderData(
-                            label = "猜全部",
-                            visitedLabel = "猜全部",
-                            style = RenderData.BLUE
-                        ),
-                        action = Action(
-                            type = Action.AT,
-                            permission = Permission(Permission.EVERYONE),
-                            data = "/原曲认知测验 normal 全部",
-                            enter = true
-                        )
-                    )
+                    at("猜新作", "/原曲认知测验 normal 新作", enter = true, id = "")
+                    at("猜旧作", "/原曲认知测验 normal 旧作", enter = true, id = "")
+                    at("猜全部", "/原曲认知测验 normal 全部", enter = true, id = "")
                 }
             }))
             is IllegalArgsException -> reply(e.message ?: "")

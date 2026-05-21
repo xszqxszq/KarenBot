@@ -73,19 +73,7 @@ class Text: Plugin() {
                 appendLine("请点击下方查看帮助：")
             }), Keyboard.create {
                 row {
-                    button(
-                        id = "1",
-                        action = Action(
-                            type = Action.LINK,
-                            data = "https://otmdb.cn/bot/features",
-                            permission = Permission(Permission.EVERYONE),
-                        ),
-                        renderData = RenderData(
-                            label = "查看帮助",
-                            visitedLabel = "查看帮助",
-                            style = RenderData.BLUE
-                        )
-                    )
+                    link("查看帮助", "https://otmdb.cn/bot/features", id = "1")
                 }
             }))
         }
@@ -171,48 +159,11 @@ class Text: Plugin() {
                 }.trim().replace("\n", "\r"))
             }), Keyboard.create {
                 row {
-                    button(
-                        id = "1",
-                        action = Action(
-                            type = Action.LINK,
-                            data = "https://bilibili.com/video/${video.bvid}",
-                            permission = Permission(Permission.EVERYONE),
-                        ),
-                        renderData = RenderData(
-                            label = "查看音MAD",
-                            visitedLabel = "已观看",
-                            style = RenderData.FILLED_BLUE
-                        )
-                    )
+                    link("查看音MAD", "https://bilibili.com/video/${video.bvid}", style = RenderData.FILLED_BLUE, id = "1")
                 }
                 row {
-                    button(
-                        id = "2",
-                        action = Action(
-                            type = Action.AT,
-                            data = "随机音mad",
-                            permission = Permission(Permission.EVERYONE),
-                            enter = true
-                        ),
-                        renderData = RenderData(
-                            label = "再抽一个",
-                            visitedLabel = "再抽一个",
-                            style = RenderData.BLUE
-                        )
-                    )
-                    button(
-                        id = "3",
-                        action = Action(
-                            type = Action.LINK,
-                            data = "https://otmdb.cn/jump/otamad_top",
-                            permission = Permission(Permission.EVERYONE),
-                        ),
-                        renderData = RenderData(
-                            label = "otaMAD⋅top",
-                            visitedLabel = "otaMAD⋅top",
-                            style = RenderData.BLUE
-                        )
-                    )
+                    at("再抽一个", "随机音mad", enter = true, id = "2")
+                    link("otaMAD⋅top", "https://otmdb.cn/jump/otamad_top", id = "3")
                 }
             }))
         }
