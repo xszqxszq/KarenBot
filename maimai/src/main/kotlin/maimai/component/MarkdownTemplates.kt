@@ -111,5 +111,5 @@ object MarkdownTemplates {
         enter: Boolean = true
     ) = "[${show.markdownEscape()}](mqqapi://aio/inlinecmd?command=${link.encodeURLParameter()}&enter=${enter}&reply=false)"
     private fun String.markdownEscape() =
-        replace("[", "\\[").replace("]", "\\]")
+        replace("[", "\u200B[\u200B").replace("]", "\u200B]\u200B")
 }

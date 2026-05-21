@@ -3,11 +3,21 @@ package xyz.xszq.bot
 class WordFilter(
     val words: List<String>
 ) {
-    fun filter(text: String): String {
-        var result = text
-        words.forEach { word ->
-            result = result.replace(word, '*' * word.length, true)
+    private val regex = if (words.isNotEmpty()) {
+        val pattern = words.filter {
+            it.isNotEmpty()
+        }.sortedByDescending {
+            it.length
+        }.joinToString("|") {
+            Regex.escape(it)
         }
-        return result
+        Regex(pattern, RegexOption.IGNORE_CASE)
+    } else null
+    fun filter(text: String): String {
+        if (regex == null)
+            return text
+        return regex.replace(text) { matchResult ->
+            "*".repeat(matchResult.value.length)
+        }
     }
 }

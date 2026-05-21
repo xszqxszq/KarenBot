@@ -29,54 +29,36 @@ object ComboQuery {
 
     val ap = Filter(
         type = FilterType.Combo,
-        chart = { chart ->
-            chart.music.genre != MusicGenre.Utage
-        },
         record = { record ->
             record.comboStatus.isAP()
         }
     )
     val app = Filter(
         type = FilterType.Combo,
-        chart = { chart ->
-            chart.music.genre != MusicGenre.Utage
-        },
         record = { record ->
             record.comboStatus == ComboStatus.AllPerfectPlus
         }
     )
     val fc = Filter(
         type = FilterType.Combo,
-        chart = { chart ->
-            chart.music.genre != MusicGenre.Utage
-        },
         record = { record ->
             record.comboStatus.isFC()
         }
     )
     val fsd = Filter(
         type = FilterType.Sync,
-        chart = { chart ->
-            chart.music.genre != MusicGenre.Utage
-        },
         record = { record ->
             record.syncStatus.isFSD()
         }
     )
     val fsdp = Filter(
         type = FilterType.Sync,
-        chart = { chart ->
-            chart.music.genre != MusicGenre.Utage
-        },
         record = { record ->
             record.syncStatus == SyncStatus.FullSyncDeluxePlus
         }
     )
     val close = Filter(
         type = FilterType.Achievement,
-        chart = { chart ->
-            chart.music.genre != MusicGenre.Utage
-        },
         record = { record ->
             val decimal = record.achievement % 10000
             record.achievement in 994250..1004999
@@ -90,9 +72,6 @@ object ComboQuery {
         })
     val just = Filter(
         type = FilterType.Achievement,
-        chart = { chart ->
-            chart.music.genre != MusicGenre.Utage
-        },
         record = { record ->
             val decimal = record.achievement % 10000
             record.achievement in 1000000..1005250
@@ -106,36 +85,25 @@ object ComboQuery {
         })
     fun rate(rate: String) = Filter(
         type = FilterType.Achievement,
-        chart = { chart ->
-            chart.music.genre != MusicGenre.Utage
-        },
         record = { record ->
             record.rate == rate
         }
     )
     fun rateGreaterEqual(rate: String) = Filter(
         type = FilterType.Achievement,
-        chart = { chart ->
-            chart.music.genre != MusicGenre.Utage
-        },
         record = { record ->
             Rate.greaterEqual(record.achievement, rate)
         }
     )
     fun achievement(achievement: Int) = Filter(
         type = FilterType.Achievement,
-        chart = { chart ->
-            chart.music.genre != MusicGenre.Utage
-        },
         record = { record ->
             record.achievement >= achievement
         }
     )
     fun achievementLess(achievement: Int) = Filter(
         type = FilterType.Achievement,
-        chart = { chart ->
-            chart.music.genre != MusicGenre.Utage
-        }, record = { record ->
+        record = { record ->
             record.achievement < achievement
         }
     )
@@ -181,7 +149,7 @@ object ComboQuery {
     fun levelValue(levelValue: Double) = Filter(
         type = FilterType.Level,
         chart = { chart ->
-            chart.difficulty != MusicDifficulty.Utage && chart.levelValue == levelValue
+            chart.levelValue == levelValue
         },
         name = "levelValue",
         singleChart = true
@@ -251,7 +219,7 @@ object ComboQuery {
     fun version(version: List<GameVersion>) = Filter(
         type = FilterType.Version,
         chart = { chart ->
-            chart.difficulty != MusicDifficulty.Utage && chart.music.version in version
+            chart.music.version in version
         }
     )
     fun type(type: MusicType) = Filter(
@@ -276,9 +244,6 @@ object ComboQuery {
     )
     val nextRate = Filter(
         type = FilterType.Modification,
-        chart = { chart ->
-            chart.difficulty != MusicDifficulty.Utage
-        },
         modifier = {
             when (rate) {
                 "sssp" -> {
@@ -296,7 +261,7 @@ object ComboQuery {
     fun nowVersion(version: GameVersion) = Filter(
         type = FilterType.Modification,
         chart = { chart ->
-            chart.difficulty != MusicDifficulty.Utage && chart.music.version.version <= version.version
+            chart.music.version.version <= version.version
         },
         nowVersion = { version }
     )
@@ -304,14 +269,26 @@ object ComboQuery {
         val achievement = (raw.toDouble() * 10000).roundToInt()
         Filter(
             type = FilterType.Achievement,
-            chart = { chart ->
-                chart.difficulty != MusicDifficulty.Utage
-            },
             record = { record ->
                 record.achievement == achievement
             }
         )
     }
+
+    val excludeUtage = Filter(
+        type = FilterType.Default,
+        chart = { chart ->
+            chart.difficulty != MusicDifficulty.Utage
+        }
+    )
+    val utage = Filter(
+        type = FilterType.Difficulty,
+        chart = { chart ->
+            chart.difficulty == MusicDifficulty.Utage
+        },
+        singleChart = true,
+        name = "utage"
+    )
 
     @OptIn(ExperimentalHoplite::class)
     fun init(data: MaimaiData) {
@@ -332,7 +309,7 @@ object ComboQuery {
             add(aliases, designer(designer))
         }
         // 曲目分类
-        MusicGenre.entries.forEach { genre ->
+        MusicGenre.entries.filter { it != MusicGenre.Utage }.forEach { genre ->
             add(buildList {
                 add(genre.genreName)
                 add(genre.value)
@@ -343,6 +320,8 @@ object ComboQuery {
         MusicDifficulty.entries.filter { it != MusicDifficulty.Utage }.forEach { difficulty ->
             add(difficulty.names, difficulty(difficulty))
         }
+        // 宴谱
+        add(listOf("宴谱", "宴会场"), utage)
         // 谱面定数
         Level.levelValues.reversed().forEach { levelValue ->
             add(listOf(levelValue.toStringDecimal(1)), levelValue(levelValue))
@@ -499,6 +478,9 @@ object ComboQuery {
         }
         if (filters.isEmpty())
             return null
+        if (filters.none { it.name == "utage" }) {
+            filters.add(0, excludeUtage)
+        }
         return filters
     }
 

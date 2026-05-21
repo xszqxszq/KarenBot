@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets
 
 @Serializable
 data class MarkdownData(
-    val content: String ?= null,
+    var content: String ?= null,
     @SerialName("custom_template_id")
     val customTemplateId: String ?= null,
     val params: List<MarkdownParam> ?= null

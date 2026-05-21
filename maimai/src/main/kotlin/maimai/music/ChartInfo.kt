@@ -69,7 +69,17 @@ class ChartInfo(
         appendLine("> **总DX分:** $maxDeluxeScore")
     }), Keyboard.create {
         row {
-            link("谱面确认", "https://otmdb.cn/jump/maimai_chart?chart_id=${music.resourceId}&difficulty=${difficulty.value}")
+            link("谱面确认", "https://otmdb.cn/jump/maimai_chart?chart_id=${
+                if (difficulty == MusicDifficulty.Utage)
+                    music.resourceId + 100000
+                else
+                    music.resourceId
+            }&difficulty=${
+                if (difficulty == MusicDifficulty.Utage)
+                    0
+                else
+                    difficulty.value
+            }")
         }
     })
 }

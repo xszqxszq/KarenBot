@@ -11,5 +11,7 @@ enum class FilterType {
     // 修改数据类,
     Modification,
     // 条件类
-    Limit
+    Limit,
+    // 默认过滤类
+    Default
 }

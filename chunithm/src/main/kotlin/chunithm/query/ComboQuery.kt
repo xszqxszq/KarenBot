@@ -20,45 +20,30 @@ object ComboQuery {
 
     val aj = Filter(
         type = FilterType.Combo,
-        chart = { chart ->
-            chart.difficulty != MusicDifficulty.WorldsEnd
-        },
         record = { record ->
             record.comboStatus.isAJ()
         }
     )
     val ajc = Filter(
         type = FilterType.Combo,
-        chart = { chart ->
-            chart.difficulty != MusicDifficulty.WorldsEnd
-        },
         record = { record ->
             record.comboStatus == ComboStatus.AllJusticeCritical
         }
     )
     val fc = Filter(
         type = FilterType.Combo,
-        chart = { chart ->
-            chart.difficulty != MusicDifficulty.WorldsEnd
-        },
         record = { record ->
             record.comboStatus.isFC()
         }
     )
     val fullChain = Filter(
         type = FilterType.Sync,
-        chart = { chart ->
-            chart.difficulty != MusicDifficulty.WorldsEnd
-        },
         record = { record ->
             record.chainStatus.isFullChain()
         }
     )
     val close = Filter(
         type = FilterType.Achievement,
-        chart = { chart ->
-            chart.difficulty != MusicDifficulty.WorldsEnd
-        },
         record = { record ->
             when (record.achievement) {
                 in 1004750..1004999 -> true
@@ -77,9 +62,6 @@ object ComboQuery {
         })
     val just = Filter(
         type = FilterType.Achievement,
-        chart = { chart ->
-            chart.difficulty != MusicDifficulty.WorldsEnd
-        },
         record = { record ->
             when (record.achievement) {
                 in 1005000..1005250 -> true
@@ -98,36 +80,24 @@ object ComboQuery {
         })
     fun rate(rate: String) = Filter(
         type = FilterType.Achievement,
-        chart = { chart ->
-            chart.difficulty != MusicDifficulty.WorldsEnd
-        },
         record = { record ->
             record.rate == rate
         }
     )
     fun rateGreaterEqual(rate: String) = Filter(
         type = FilterType.Achievement,
-        chart = { chart ->
-            chart.difficulty != MusicDifficulty.WorldsEnd
-        },
         record = { record ->
             Rate.greaterEqual(record.achievement, rate)
         }
     )
     fun achievement(achievement: Int) = Filter(
         type = FilterType.Achievement,
-        chart = { chart ->
-            chart.difficulty != MusicDifficulty.WorldsEnd
-        },
         record = { record ->
             record.achievement >= achievement
         }
     )
     fun achievementLess(achievement: Int) = Filter(
         type = FilterType.Achievement,
-        chart = { chart ->
-            chart.difficulty != MusicDifficulty.WorldsEnd
-        },
         record = { record ->
             record.achievement < achievement
         }
@@ -138,9 +108,6 @@ object ComboQuery {
     )
     val nextRate = Filter(
         type = FilterType.Modification,
-        chart = { chart ->
-            chart.difficulty != MusicDifficulty.WorldsEnd
-        },
         modifier = {
             when (rate) {
                 "sssp" -> {
@@ -188,7 +155,7 @@ object ComboQuery {
     fun levelValue(levelValue: Double) = Filter(
         type = FilterType.Level,
         chart = { chart ->
-            chart.difficulty != MusicDifficulty.WorldsEnd && chart.levelValue == levelValue
+            chart.levelValue == levelValue
         },
         name = "levelValue",
         singleChart = true
@@ -238,7 +205,7 @@ object ComboQuery {
     fun version(version: List<GameVersion>) = Filter(
         type = FilterType.Version,
         chart = { chart ->
-            chart.difficulty != MusicDifficulty.WorldsEnd && chart.music.version in version
+            chart.music.version in version
         }
     )
     fun nowVersion(version: GameVersion) = Filter(
@@ -252,14 +219,26 @@ object ComboQuery {
         val achievement = raw.toInt()
         Filter(
             type = FilterType.Achievement,
-            chart = { chart ->
-                chart.difficulty != MusicDifficulty.WorldsEnd
-            },
             record = { record ->
                 record.achievement == achievement
             }
         )
     }
+
+    val excludeWorldsEnd = Filter(
+        type = FilterType.Default,
+        chart = { chart ->
+            chart.difficulty != MusicDifficulty.WorldsEnd
+        }
+    )
+    val worldsEnd = Filter(
+        type = FilterType.Difficulty,
+        chart = { chart ->
+            chart.difficulty == MusicDifficulty.WorldsEnd
+        },
+        singleChart = true,
+        name = "worldsEnd"
+    )
 
     @OptIn(ExperimentalHoplite::class)
     fun init(data: ChunithmData) {
@@ -285,6 +264,8 @@ object ComboQuery {
         MusicDifficulty.entries.filter { it != MusicDifficulty.WorldsEnd }.forEach { difficulty ->
             add(difficulty.names, difficulty(difficulty))
         }
+        // 世界末日后
+        add(MusicDifficulty.WorldsEnd.names, worldsEnd)
         // 谱面定数
         Level.levelValues.reversed().forEach { levelValue ->
             add(listOf(levelValue.toStringDecimal(1)), levelValue(levelValue))
@@ -373,6 +354,9 @@ object ComboQuery {
         }
         if (filters.isEmpty())
             return null
+        if (filters.none { it.name == "worldsEnd" }) {
+            filters.add(0, excludeWorldsEnd)
+        }
         return filters
     }
 

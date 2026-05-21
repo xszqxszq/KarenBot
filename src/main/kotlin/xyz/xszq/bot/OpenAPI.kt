@@ -104,6 +104,9 @@ class OpenAPI(
             markdown.params ?.forEach { param ->
                 param.values = param.values.map { filter.filter(it) }
             }
+            markdown.content ?.let { content ->
+                markdown.content = filter.filter(content)
+            }
         }
         val result = kotlin.runCatching {
             client.post(url) {
