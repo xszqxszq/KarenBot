@@ -9,7 +9,7 @@ class FFProbe(
     private val showStreams: Boolean = false,
     private val showFormat: Boolean = true
 ) {
-    fun getResult(): FFProbeResult {
+    suspend fun getResult(): FFProbeResult {
         return createTempFile(suffix = ".json").toFile().let { file ->
             ProgramExecutor(buildList {
                 add(ffprobeBin)

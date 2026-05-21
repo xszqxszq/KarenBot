@@ -203,9 +203,9 @@ class MusicController(
             if (!file.exists()) {
                 return@startsWith
             }
-            val pcm = file.toPCM()
-            reply(Audio(pcm))
-            pcm.delete()
+            file.toPCM { pcm ->
+                reply(Audio(pcm))
+            }
         }
     }
 
@@ -455,14 +455,21 @@ class MusicController(
         return levels to page
     }
     companion object {
-        fun VfsFile.toPCM() = FFMpegTask(FFMpegFileType.PCM) {
-            input(absolutePath)
-            yes()
-            forceFormat("s16le")
-            audioCodec("pcm_s16le")
-            logLevel("warning")
-            audioRate("24k")
-            audioChannels(1)
-        }.result()
+        suspend inline fun VfsFile.toPCM(block: suspend (VfsFile) -> Unit) {
+            val pcm = FFMpegTask(FFMpegFileType.PCM) {
+                input(absolutePath)
+                yes()
+                forceFormat("s16le")
+                audioCodec("pcm_s16le")
+                logLevel("warning")
+                audioRate("24k")
+                audioChannels(1)
+            }.result()
+            try {
+                block(pcm)
+            } finally {
+                pcm.delete()
+            }
+        }
     }
 }

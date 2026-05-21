@@ -46,7 +46,7 @@ class FFMpegTask(
             add(result)
         }
     }
-    fun getResult(output: File = createTempFile(suffix = ".${outputFormat.ext}").toFile()): File {
+    suspend fun getResult(output: File = createTempFile(suffix = ".${outputFormat.ext}").toFile()): File {
         val command = buildCommand(output.absolutePath)
         ProgramExecutor(command, false) {
             environment {
@@ -55,7 +55,7 @@ class FFMpegTask(
         }.start()
         return output
     }
-    fun result(output: VfsFile = createTempFile(suffix = ".${outputFormat.ext}").toFile().toVfs()): VfsFile {
+    suspend fun result(output: VfsFile = createTempFile(suffix = ".${outputFormat.ext}").toFile().toVfs()): VfsFile {
         val command = buildCommand(output.absolutePath)
         ProgramExecutor(command, false) {
             environment {

@@ -101,19 +101,27 @@ object AudioHandler {
         }
         return silkFile.toVfs()
     }
-    fun VfsFile.crop(
+    suspend inline fun VfsFile.crop(
         start: Double,
-        duration: Double
-    ) = FFMpegTask(FFMpegFileType.PCM) {
-        input(absolutePath)
-        yes()
-        forceFormat("s16le")
-        audioCodec("pcm_s16le")
-        logLevel("warning")
-        startAt(start)
-        duration(duration)
-        audioRate("24k")
-        audioChannels(1)
-    }.result()
-    fun VfsFile.duration() = FFProbe(File(this.absolutePath)).getResult().format?.duration?.toDouble()
+        duration: Double,
+        block: suspend (VfsFile) -> Unit
+    ) {
+        val cropped = FFMpegTask(FFMpegFileType.PCM) {
+            input(absolutePath)
+            yes()
+            forceFormat("s16le")
+            audioCodec("pcm_s16le")
+            logLevel("warning")
+            startAt(start)
+            duration(duration)
+            audioRate("24k")
+            audioChannels(1)
+        }.result()
+        try {
+            block(cropped)
+        } finally {
+            cropped.delete()
+        }
+    }
+    suspend fun VfsFile.duration() = FFProbe(File(this.absolutePath)).getResult().format?.duration?.toDouble()
 }

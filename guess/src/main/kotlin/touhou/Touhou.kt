@@ -49,34 +49,34 @@ class Touhou(
             val duration = file.duration() ?: run {
                 return@startsWith
             }
-            val cropped = file.crop(
+            file.crop(
                 Random(System.currentTimeMillis()).nextDouble(0.0, duration - RANDOM_DURATION),
                 RANDOM_DURATION
-            )
-            reply(Audio(cropped))
-            cropped.delete()
-            reply(Markdown(MarkdownData(buildString {
-                appendLine("**随机东方原曲**")
-                appendLine()
-                appendLine("${target.name}\n来自${game.id}. ${game.name}")
-            }), Keyboard.create {
-                row {
-                    button(
-                        id = "1",
-                        renderData = RenderData(
-                            label = "再来一抽",
-                            visitedLabel = "再来一抽",
-                            style = RenderData.FILLED_BLUE
-                        ),
-                        action = Action(
-                            type = Action.AT,
-                            permission = Permission(Permission.EVERYONE),
-                            data = "随机东方原曲",
-                            enter = true
+            ) { cropped ->
+                reply(Audio(cropped))
+                reply(Markdown(MarkdownData(buildString {
+                    appendLine("**随机东方原曲**")
+                    appendLine()
+                    appendLine("${target.name}\n来自${game.id}. ${game.name}")
+                }), Keyboard.create {
+                    row {
+                        button(
+                            id = "1",
+                            renderData = RenderData(
+                                label = "再来一抽",
+                                visitedLabel = "再来一抽",
+                                style = RenderData.FILLED_BLUE
+                            ),
+                            action = Action(
+                                type = Action.AT,
+                                permission = Permission(Permission.EVERYONE),
+                                data = "随机东方原曲",
+                                enter = true
+                            )
                         )
-                    )
-                }
-            }))
+                    }
+                }))
+            }
         }
         startsWith(listOf("原曲认知测验", "猜东方原曲")) { raw ->
             runCatching {
@@ -136,116 +136,114 @@ class Touhou(
             return
         }
         val slice = difficulty.duration()
-        val cropped = musicFile.crop(
-            Random(System.currentTimeMillis()).nextDouble(0.0,
-                duration - slice),
+        musicFile.crop(
+            Random(System.currentTimeMillis()).nextDouble(0.0, duration - slice),
             slice
-        )
-
-        var answers = music.aliases.toMutableList()
-        answers.filter { "～" in it }.forEach { before ->
-            before.split("～").map { it.trim() }.forEach {
-                answers.add(it)
+        ) { cropped ->
+            var answers = music.aliases.toMutableList()
+            answers.filter { "～" in it }.forEach { before ->
+                before.split("～").map { it.trim() }.forEach {
+                    answers.add(it)
+                }
             }
-        }
-        val gamePrefix = game.substringAfter("东方")
-        val gameSimplified = gamePrefix.map {
-            PinyinHelper.toPinyin(it.toString(), PinyinStyleEnum.NORMAL).first()
-        }.joinToString("")
-        answers.filter { true }.forEach { before ->
-            answers.add(game + before)
-            answers.add(gamePrefix + before)
-            answers.add(gameSimplified + before)
-        }
-        answers.filter { "面道中" in it || "面boss" in it || "面主题曲" in it }.forEach { before ->
-            val levelName = before.replace("面道中", "面").replace("面boss", "面").replace("面主题曲", "面")
-            answers.add(game + levelName)
-            answers.add(gamePrefix + levelName)
-            answers.add(gameSimplified + levelName)
-        }
-        answers = answers.map { it.toSimple().lowercase() }.toSet().toMutableList()
-        println(answers)
-        var finished = false
+            val gamePrefix = game.substringAfter("东方")
+            val gameSimplified = gamePrefix.map {
+                PinyinHelper.toPinyin(it.toString(), PinyinStyleEnum.NORMAL).first()
+            }.joinToString("")
+            answers.filter { true }.forEach { before ->
+                answers.add(game + before)
+                answers.add(gamePrefix + before)
+                answers.add(gameSimplified + before)
+            }
+            answers.filter { "面道中" in it || "面boss" in it || "面主题曲" in it }.forEach { before ->
+                val levelName = before.replace("面道中", "面").replace("面boss", "面").replace("面主题曲", "面")
+                answers.add(game + levelName)
+                answers.add(gamePrefix + levelName)
+                answers.add(gameSimplified + levelName)
+            }
+            answers = answers.map { it.toSimple().lowercase() }.toSet().toMutableList()
+            println(answers)
+            var finished = false
 
-        reply(Audio(cropped))
-        cropped.delete()
-        reply(Markdown(MarkdownData(buildString {
-            appendLine("**原曲认知测验**")
-            appendLine()
-            appendLine("请回答该原曲的名称，一分钟后揭晓答案~")
-        }), Keyboard.create {
-            row {
-                button(
-                    id = "",
-                    renderData = RenderData(
-                        label = "回答",
-                        visitedLabel = "回答",
-                        style = RenderData.BLUE
-                    ),
-                    action = Action(
-                        type = Action.AT,
-                        permission = Permission(Permission.EVERYONE),
-                        data = " "
+            reply(Audio(cropped))
+            reply(Markdown(MarkdownData(buildString {
+                appendLine("**原曲认知测验**")
+                appendLine()
+                appendLine("请回答该原曲的名称，一分钟后揭晓答案~")
+            }), Keyboard.create {
+                row {
+                    button(
+                        id = "",
+                        renderData = RenderData(
+                            label = "回答",
+                            visitedLabel = "回答",
+                            style = RenderData.BLUE
+                        ),
+                        action = Action(
+                            type = Action.AT,
+                            permission = Permission(Permission.EVERYONE),
+                            data = " "
+                        )
                     )
-                )
-                button(
-                    id = "",
-                    renderData = RenderData(
-                        label = "不玩了",
-                        visitedLabel = "不玩了",
-                        style = RenderData.GRAY
-                    ),
-                    action = Action(
-                        type = Action.AT,
-                        permission = Permission(Permission.EVERYONE),
-                        data = "不玩了",
-                        enter = true
+                    button(
+                        id = "",
+                        renderData = RenderData(
+                            label = "不玩了",
+                            visitedLabel = "不玩了",
+                            style = RenderData.GRAY
+                        ),
+                        action = Action(
+                            type = Action.AT,
+                            permission = Permission(Permission.EVERYONE),
+                            data = "不玩了",
+                            enter = true
+                        )
                     )
-                )
-            }
-        }))
+                }
+            }))
 
-        val subscribeId = UUID.randomUUID().toString()
-        bot.pluginLoader.subscribes.always(subscribeId) {
+            val subscribeId = UUID.randomUUID().toString()
+            bot.pluginLoader.subscribes.always(subscribeId) {
 
-            val nowId = if (this is GroupMessageEvent) group.id else sender.id
-            if (id != nowId) {
-                return@always
-            }
-            if (text.trim().startsWith("不玩了")) {
-                finished = true
-                reply(Markdown(MarkdownData(buildString {
-                    appendLine("**原曲认知测验**")
-                    appendLine()
-                    appendLine("游戏已结束。答案是${music.answer()}")
-                }), againKeyboard(difficulty, range)))
-                bot.pluginLoader.subscribes.stop(subscribeId)
-                return@always
+                val nowId = if (this is GroupMessageEvent) group.id else sender.id
+                if (id != nowId) {
+                    return@always
+                }
+                if (text.trim().startsWith("不玩了")) {
+                    finished = true
+                    reply(Markdown(MarkdownData(buildString {
+                        appendLine("**原曲认知测验**")
+                        appendLine()
+                        appendLine("游戏已结束。答案是${music.answer()}")
+                    }), againKeyboard(difficulty, range)))
+                    bot.pluginLoader.subscribes.stop(subscribeId)
+                    return@always
+                }
+
+                if (answers.isAnswer(text.trim())) {
+                    finished = true
+                    reply(Markdown(MarkdownData(buildString {
+                        appendLine("**原曲认知测验**")
+                        appendLine()
+                        appendLine("恭喜你猜中了哦~答案是${music.answer()}")
+                    }), againKeyboard(difficulty, range)))
+                    bot.pluginLoader.subscribes.stop(subscribeId)
+                    started.remove(id)
+                    return@always
+                }
             }
 
-            if (answers.isAnswer(text.trim())) {
-                finished = true
-                reply(Markdown(MarkdownData(buildString {
-                    appendLine("**原曲认知测验**")
-                    appendLine()
-                    appendLine("恭喜你猜中了哦~答案是${music.answer()}")
-                }), againKeyboard(difficulty, range)))
-                bot.pluginLoader.subscribes.stop(subscribeId)
-                started.remove(id)
-                return@always
-            }
+            delay(TIMESUP)
+            if (finished)
+                return@guess
+            reply(Markdown(MarkdownData(buildString {
+                appendLine("**原曲认知测验**")
+                appendLine()
+                appendLine("很遗憾，没有人猜中哦，答案是${music.answer()}")
+            }), againKeyboard(difficulty, range)))
+            bot.pluginLoader.subscribes.stop(subscribeId)
+            started.remove(id)
         }
-
-        delay(TIMESUP)
-        if (finished)
-            return
-        reply(Markdown(MarkdownData(buildString {
-            appendLine("**原曲认知测验**")
-            appendLine()
-            appendLine("很遗憾，没有人猜中哦，答案是${music.answer()}")
-        }), againKeyboard(difficulty, range)))
-        bot.pluginLoader.subscribes.stop(subscribeId)
-        started.remove(id)
     }
     fun againKeyboard(
         difficulty: Difficulty,

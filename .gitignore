@@ -46,4 +46,4 @@ keystore.jks
 todo.txt
 plugins/
 
-hs_err*.log
+*.log

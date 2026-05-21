@@ -2,6 +2,8 @@ package xyz.xszq.bot.ffmpeg
 
 import java.io.File
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Suppress("unused")
 class ProgramExecutor(
@@ -24,22 +26,24 @@ class ProgramExecutor(
     }
 
     private val nullFile = File("/dev/null")
-    fun start() = Builder().apply(builder).run {
-        val procBuilder = ProcessBuilder()
-        env.forEach {
-            val args = it.split("=")
-            val name = args.first()
-            val value = args.last()
-            procBuilder.environment().putIfAbsent(name, value)
-        }
-        val realCommand = listOf("/bin/bash", "-c", command.joinToString(" "))
-        val proc =
-            if (showOutput) procBuilder.inheritIO().command(realCommand).start()
-            else procBuilder.inheritIO().redirectOutput(nullFile).redirectError(nullFile).command(realCommand).start()
-        timeout ?.let {
-            proc.waitFor(it, TimeUnit.MILLISECONDS)
-        } ?: run {
-            proc.waitFor()
+    suspend fun start() = withContext(Dispatchers.IO) {
+        Builder().apply(builder).run {
+            val procBuilder = ProcessBuilder()
+            env.forEach {
+                val args = it.split("=")
+                val name = args.first()
+                val value = args.last()
+                procBuilder.environment().putIfAbsent(name, value)
+            }
+            val realCommand = listOf("/bin/bash", "-c", command.joinToString(" "))
+            val proc =
+                if (showOutput) procBuilder.inheritIO().command(realCommand).start()
+                else procBuilder.inheritIO().redirectOutput(nullFile).redirectError(nullFile).command(realCommand).start()
+            timeout ?.let {
+                proc.waitFor(it, TimeUnit.MILLISECONDS)
+            } ?: run {
+                proc.waitFor()
+            }
         }
     }
 }
