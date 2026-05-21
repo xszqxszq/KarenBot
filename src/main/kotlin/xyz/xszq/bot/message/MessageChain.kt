@@ -70,7 +70,7 @@ class MessageChain() {
     @OptIn(ExperimentalEncodingApi::class)
     private fun String.parseMessageElements(bot: Bot? = null, mentions: List<Member>? = null): List<MessageElement> {
         val faceRegex = Regex("""<faceType=(\d+),faceId="(\d+)",ext="([^"]+)">""")
-        val atRegex = Regex("<@([A-Fa-f0-9]+)>")
+        val atRegex = Regex("<@([A-Fa-f0-9]+|all)>")
         val elements = mutableListOf<MessageElement>()
         var index = 0
         while (index < length) {
@@ -95,13 +95,16 @@ class MessageChain() {
                     elements.add(Face(type = type, id = id, name = ext.text))
                 }
                 atMatch -> if (bot != null && mentions != null) {
-                    val atId = next.groups[1]?.value ?: ""
+                    val atId = next.groups[1] ?.value ?: ""
                     val mention = mentions.find { it.id == atId }
-                    val user = if (mention != null)
-                        User(bot, mention.id, mention.username, isBot = mention.bot, isSelf = mention.isSelf)
-                    else
-                        User(bot, atId)
-                    elements.add(At(user))
+                    val at = when {
+                        atId == "all" -> At(isAll = true)
+                        mention != null ->
+                            At(User(bot, mention.id, mention.username, isBot = mention.bot, isSelf = mention.isSelf))
+                        else ->
+                            At(User(bot, atId))
+                    }
+                    elements.add(at)
                 }
             }
             index = next.range.last + 1

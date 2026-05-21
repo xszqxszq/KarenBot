@@ -179,7 +179,7 @@ suspend fun Application.handleDispatch(
                 sender = User(pluginLoader.bot, data.author.id, data.author.username),
                 group = Group(pluginLoader.bot, data.group),
                 reference = data.messageElements.firstOrNull() ?.toMessageChain(),
-                mentions = data.mentions.map { mention ->
+                mentions = data.mentions.filter { it.scope != "all" }.map { mention ->
                     User(pluginLoader.bot, mention.id, mention.username,
                         isBot = mention.bot, isSelf = mention.isSelf)
                 }

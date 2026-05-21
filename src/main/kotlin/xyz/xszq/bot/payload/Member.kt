@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Member(
     @SerialName("member_openid")
-    val id: String,
+    val id: String = "",
     val username: String = "",
     val bot: Boolean = false,
     val scope: String = "single",
