@@ -158,7 +158,12 @@ class GuessController(
                     subscribeId[event.contextId] = subscribesAt
                     eventToReply[event.contextId] = event
 
-                    val hintJob = maimai.scope.launch {
+                    val hintJob = maimai.scope.launch(
+                        CoroutineExceptionHandler { _, e ->
+                            if (e !is java.util.concurrent.CancellationException)
+                                maimai.logger.error(e) {  }
+                        }
+                    ) {
                         hintClassical(event.contextId, subscribesAt, music, descriptions)
                     }
 
@@ -215,7 +220,12 @@ class GuessController(
 
         maimai.logger.info { "当前正在猜测: ${music.id}. ${music.name}" }
 
-        val hintJob = maimai.scope.launch {
+        val hintJob = maimai.scope.launch(
+            CoroutineExceptionHandler { _, e ->
+                if (e !is java.util.concurrent.CancellationException)
+                    maimai.logger.error(e) {  }
+            }
+        ) {
             reply(buildString {
                 appendLine()
                 append( "这是一个 maimai 猜歌小游戏~" )

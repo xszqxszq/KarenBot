@@ -75,7 +75,7 @@ suspend fun ReplyAble.uploadMedia(media: Media): FileResponse? {
     return response
 }
 
-private fun ReplyAble.log(message: MessageChain) {
+fun ReplyAble.log(message: MessageChain) {
     bot.api.logger.info {
         when (this) {
             is GroupReplyAbleEvent -> "[${group.id}] <- ${message.content.replace("\n", "\\n").replace("\r", "\\r")}"

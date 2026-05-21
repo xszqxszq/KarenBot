@@ -135,8 +135,8 @@ class OpenAPI(
         msgType: Int,
         markdown: MarkdownData ?= null,
         keyboard: Keyboard ?= null,
-        eventId: String,
-        msgId: String,
+        eventId: String ?= null,
+        msgId: String ?= null,
         msgSeq: Int = 1,
         media: FileResponse? = null,
     ) = sendMessage("$server/v2/users/$user/messages", MessagePayload(
@@ -156,8 +156,8 @@ class OpenAPI(
         msgType: Int,
         markdown: MarkdownData ?= null,
         keyboard: Keyboard ?= null,
-        eventId: String,
-        msgId: String,
+        eventId: String ?= null,
+        msgId: String ?= null,
         msgSeq: Int = 1,
         media: FileResponse? = null,
     ) = sendMessage("$server/v2/groups/$group/messages", MessagePayload(
@@ -200,4 +200,18 @@ class OpenAPI(
         ))
         setToken()
     }.result<FileResponse>()
+
+    suspend fun recallC2CMessage(
+        user: String,
+        messageId: String
+    ) = client.delete("$server/v2/users/$user/$messageId") {
+        setToken()
+    }.status == HttpStatusCode.OK
+
+    suspend fun recallGroupMessage(
+        group: String,
+        messageId: String
+    ) = client.delete("$server/v2/groups/$group/$messageId") {
+        setToken()
+    }.status == HttpStatusCode.OK
 }

@@ -17,6 +17,7 @@ import org.scilab.forge.jlatexmath.TeXConstants
 import org.scilab.forge.jlatexmath.TeXFormula
 import xyz.xszq.bot.config.TextConfig
 import xyz.xszq.bot.event.GroupMessageEvent
+import xyz.xszq.bot.message.At
 import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.message.PlainText
@@ -101,7 +102,7 @@ class Text: Plugin() {
                 reply("检测到疑似违规内容，请检查输入")
         }
         always {
-            if (message.text.isBlank() && message.filter { it !is PlainText }.isEmpty() && (this !is GroupMessageEvent || mentions.any { it.isSelf })) {
+            if (message.text.isBlank() && message.filter { it !is PlainText && it !is At }.isEmpty() && (this !is GroupMessageEvent || mentions.all { it.isSelf })) {
                 reply(Image(randomImage.random()))
             }
         }

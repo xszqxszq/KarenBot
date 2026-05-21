@@ -12,8 +12,8 @@ data class MessagePayload(
     val msgType: Int,
     val markdown: MarkdownData ?= null,
     val keyboard: Keyboard ?= null,
-    val eventId: String,
-    val msgId: String,
+    val eventId: String ?= null,
+    val msgId: String ?= null,
     var msgSeq: Int = 1,
     val media: FileResponse? = null,
 )

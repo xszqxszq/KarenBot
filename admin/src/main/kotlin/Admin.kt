@@ -3,7 +3,10 @@ package xyz.xszq.bot
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
+import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.message.MessageChain
+import xyz.xszq.bot.payload.MsgType
 import java.io.File
 
 @Suppress("unused")
@@ -25,6 +28,17 @@ class Admin: Plugin() {
         startsWith("reload") { name ->
             if (isAdmin()) {
                 handleReload(name)
+            }
+        }
+        startsWith("msg") { raw ->
+            if (isAdmin()) {
+                val (openid, content) = raw.split(" ", limit = 2)
+                bot.api.sendGroupMessage(
+                    group = openid,
+                    content = content,
+                    msgType = MsgType.TEXT
+                )
+                log(MessageChain(content))
             }
         }
     }
