@@ -25,7 +25,6 @@ class MessageChain() {
         list.addAll(raw.parseMessageElements(bot, mentions))
         list.addAll(images.map { Image(it) })
         list.addAll(files.map { File(it) })
-        ark?.parsedFields()
         ark ?.let { list.add(Ark(it)) }
     }
 
