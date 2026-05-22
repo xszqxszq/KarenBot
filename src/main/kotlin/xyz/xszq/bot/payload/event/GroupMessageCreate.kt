@@ -2,6 +2,7 @@ package xyz.xszq.bot.payload.event
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import xyz.xszq.bot.payload.ArkData
 import xyz.xszq.bot.payload.Attachment
 import xyz.xszq.bot.payload.Member
 import xyz.xszq.bot.payload.ReferenceMessage
@@ -17,5 +18,7 @@ data class GroupMessageCreate(
     val attachments: List<Attachment> = listOf(),
     val mentions: List<Member> = listOf(),
     @SerialName("msg_elements")
-    val messageElements: List<ReferenceMessage> = listOf()
+    val messageElements: List<ReferenceMessage> = listOf(),
+    @SerialName("ark_data")
+    val arkData: ArkData? = null
 )
