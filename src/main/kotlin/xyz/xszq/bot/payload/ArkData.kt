@@ -2,7 +2,7 @@ package xyz.xszq.bot.payload
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonElement
+import xyz.xszq.bot.JsonAsStringSerializer
 import xyz.xszq.bot.json
 
 @Serializable
@@ -12,13 +12,17 @@ data class ArkData(
     val arkType: String = "",
     @SerialName("ark_name")
     val arkName: String = "",
-    val fields: JsonElement? = null
+    @Serializable(with = JsonAsStringSerializer::class)
+    val fields: String = ""
 ) {
-    fun parsedFields(): ArkFields? {
-        val raw = fields ?: return null
-        return when (arkType) {
-            "miniapp" -> json.decodeFromJsonElement<ArkMiniApp>(raw)
-            "tuwen" -> json.decodeFromJsonElement<ArkMixed>(raw)
+    var data: ArkFields? = null
+        private set
+
+    fun parsedFields() {
+        data = if (fields.isBlank()) null
+        else when (arkType) {
+            "miniapp" -> json.decodeFromString<ArkMiniApp>(fields)
+            "tuwen" -> json.decodeFromString<ArkMixed>(fields)
             else -> null
         }
     }
