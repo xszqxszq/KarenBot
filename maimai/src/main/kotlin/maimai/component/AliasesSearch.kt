@@ -25,7 +25,7 @@ import java.security.MessageDigest
 class AliasesSearch(
     val maimai: Maimai
 ) {
-    private val index = "music_name"
+    private val index = "maimai_music_name"
     private val indexPath: Path = Path.of("database/lucene/$index")
     private val directory = FSDirectory.open(indexPath)
     private val analyzer: Analyzer = SmartChineseAnalyzer()
