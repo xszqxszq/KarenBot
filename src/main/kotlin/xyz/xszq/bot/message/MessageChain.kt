@@ -74,9 +74,7 @@ class MessageChain() {
 
     @OptIn(ExperimentalEncodingApi::class)
     private fun Attachment.toMessageElement(): RemoteMedia? = when {
-        "image" in contentType -> RemoteImage(
-            url, filename, contentType, width ?: 0, height ?: 0
-        )
+        "image" in contentType -> null
         "video" in contentType -> RemoteVideo(
             url, filename, contentType, width ?: 0, height ?: 0
         )
@@ -106,6 +104,7 @@ class MessageChain() {
             when (next) {
                 faceMatch -> {
                     val type = next.groups[1]?.value?.toInt() ?: 0
+                    if (type == 6) { index = next.range.last + 1; continue }
                     val id = next.groups[2]?.value?.toInt() ?: 0
                     val base64Ext = next.groups[3]?.value ?: ""
                     val ext = json.decodeFromString<FaceExt>(
