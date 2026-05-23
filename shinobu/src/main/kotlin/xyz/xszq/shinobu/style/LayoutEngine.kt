@@ -6,6 +6,7 @@ import org.jetbrains.skia.FontWidth
 import org.jetbrains.skia.paragraph.*
 import xyz.xszq.shinobu.dom.Div
 import xyz.xszq.shinobu.dom.Element
+import xyz.xszq.shinobu.dom.FontResolver
 import xyz.xszq.shinobu.dom.Img
 import xyz.xszq.shinobu.dom.Span
 
@@ -72,19 +73,6 @@ object LayoutEngine {
             is Span -> {
                 if (element.text.isNotEmpty() && element.fontCollection != null) {
                     fun buildPara(fontSize: Float): Paragraph {
-                        val textStyle = TextStyle().apply {
-                            this.fontSize = fontSize
-                            element.style.fontFamilies ?.let {
-                                fontFamilies = it.toTypedArray()
-                            }
-
-                            fontStyle = FontStyle(
-                                element.style.fontWeight,
-                                FontWidth.NORMAL,
-                                FontSlant.UPRIGHT
-                            )
-                        }
-
                         val paragraphStyle = ParagraphStyle().apply {
                             if (element.style.whiteSpace == WhiteSpace.NOWRAP)
                                 maxLinesCount = 1
@@ -95,9 +83,33 @@ object LayoutEngine {
                             }
                         }
 
+                        val runs = FontResolver.resolve(
+                            text = element.text,
+                            fontFamilies = element.style.fontFamilies ?: emptyList(),
+                            fontWeight = element.style.fontWeight,
+                            fontCollection = element.fontCollection!!
+                        )
+
                         val builder = ParagraphBuilder(paragraphStyle, element.fontCollection!!)
-                        builder.pushStyle(textStyle)
-                        builder.addText(element.text)
+                        for (run in runs) {
+                            val textStyle = TextStyle().apply {
+                                this.fontSize = fontSize
+                                if (run.typeface != null) {
+                                    setTypeface(run.typeface)
+                                } else if (run.fontFamily != null) {
+                                    fontFamilies = arrayOf(run.fontFamily)
+                                }
+
+                                fontStyle = FontStyle(
+                                    element.style.fontWeight,
+                                    FontWidth.NORMAL,
+                                    FontSlant.UPRIGHT
+                                )
+                            }
+                            builder.pushStyle(textStyle)
+                            builder.addText(run.text)
+                            builder.popStyle()
+                        }
                         return builder.build()
                     }
 

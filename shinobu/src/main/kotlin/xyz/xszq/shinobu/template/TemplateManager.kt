@@ -20,6 +20,7 @@ class TemplateManager(val basePath: String) {
         fontCollection = FontCollection().apply {
             setDefaultFontManager(FontMgr.default)
             setAssetFontManager(fontProvider)
+            setDynamicFontManager(FontMgr.default)
         }
         initFontAliases(fontProvider)
 
