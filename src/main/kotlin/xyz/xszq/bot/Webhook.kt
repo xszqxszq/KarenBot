@@ -183,7 +183,7 @@ suspend fun Application.handleDispatch(
         EventType.C2C.Add -> {
             val data = json.decodeFromString<C2CBotUpdate>(payload.d!!)
             logger.info {
-                "Friend Added: ${data.user}"
+                "添加好友: ${data.user}"
             }
             BotAddFriendEvent(
                 bot = pluginLoader.bot,
@@ -195,7 +195,7 @@ suspend fun Application.handleDispatch(
         EventType.Group.Add -> {
             val data = json.decodeFromString<GroupBotUpdate>(payload.d!!)
             logger.info {
-                "Group Added: ${data.group} (by ${data.operator})"
+                "加入群聊: ${data.group} (by ${data.operator})"
             }
             BotJoinGroupEvent(
                 bot = pluginLoader.bot,
@@ -208,7 +208,7 @@ suspend fun Application.handleDispatch(
         EventType.C2C.Remove -> {
             val data = json.decodeFromString<C2CBotUpdate>(payload.d!!)
             logger.info {
-                "Friend Deleted: ${data.user}"
+                "删除好友: ${data.user}"
             }
             BotRemoveFriendEvent(
                 bot = pluginLoader.bot,
@@ -220,7 +220,7 @@ suspend fun Application.handleDispatch(
         EventType.Group.Remove -> {
             val data = json.decodeFromString<GroupBotUpdate>(payload.d!!)
             logger.info {
-                "Group Deleted: ${data.group} (by ${data.operator})"
+                "退出群聊: ${data.group} (by ${data.operator})"
             }
             BotLeaveGroupEvent(
                 bot = pluginLoader.bot,
