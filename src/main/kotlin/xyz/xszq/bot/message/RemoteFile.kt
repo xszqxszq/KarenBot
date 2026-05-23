@@ -5,5 +5,5 @@ class RemoteFile(
     filename: String = "",
     contentType: String = "",
 ) : RemoteMedia(url, filename, contentType) {
-    override val content = "[远程文件]"
+    override val content = "[远程文件:$url]"
 }

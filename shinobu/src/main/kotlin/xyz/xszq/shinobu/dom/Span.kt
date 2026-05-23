@@ -28,30 +28,18 @@ class Span(
         }
 
         fun paintTextLayer(styleConfig: TextStyle.() -> Unit) {
-            val runs = FontResolver.resolve(
-                text = text,
-                fontFamilies = style.fontFamilies ?: emptyList(),
-                fontWeight = style.fontWeight,
-                fontCollection = fontCollection!!
-            )
+            val textStyle = TextStyle().apply {
+                fontSize = computedFontSize ?: style.textSize
+                style.fontFamilies ?.let {
+                    fontFamilies = it.toTypedArray()
+                }
+
+                styleConfig()
+            }
 
             val builder = ParagraphBuilder(paragraphStyle, fontCollection!!)
-            for (run in runs) {
-                val runStyle = TextStyle().apply {
-                    fontSize = computedFontSize ?: style.textSize
-                    if (run.typeface != null) {
-                        setTypeface(run.typeface)
-                    } else if (run.fontFamily != null) {
-                        fontFamilies = arrayOf(run.fontFamily)
-                    } else {
-                        style.fontFamilies?.let { fontFamilies = it.toTypedArray() }
-                    }
-                    styleConfig()
-                }
-                builder.pushStyle(runStyle)
-                builder.addText(run.text)
-                builder.popStyle()
-            }
+            builder.pushStyle(textStyle)
+            builder.addText(text)
 
             val paragraph = builder.build()
 

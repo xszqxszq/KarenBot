@@ -102,7 +102,9 @@ class Text: Plugin() {
                 reply("检测到疑似违规内容，请检查输入")
         }
         always {
-            if (message.text.isBlank() && message.filter { it !is PlainText && it !is At }.isEmpty() && (this !is GroupMessageEvent || mentions.all { it.isSelf })) {
+            val isBlank = message.text.isBlank() && message.filter { it !is PlainText && it !is At }.isEmpty()
+            val hasAt = this !is GroupMessageEvent || (mentions.isNotEmpty() && mentions.all { it.isSelf })
+            if (isBlank && hasAt) {
                 reply(Image(randomImage.random()))
             }
         }

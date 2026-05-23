@@ -7,5 +7,5 @@ open class RemoteMedia(
     val width: Int = 0,
     val height: Int = 0,
 ) : MessageElement {
-    override val content = "[远程媒体]"
+    override val content = "[远程媒体:$url]"
 }

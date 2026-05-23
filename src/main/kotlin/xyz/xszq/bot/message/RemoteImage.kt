@@ -7,5 +7,5 @@ class RemoteImage(
     width: Int = 0,
     height: Int = 0,
 ) : RemoteMedia(url, filename, contentType, width, height) {
-    override val content = "[远程图片]"
+    override val content = "[远程图片:$url]"
 }

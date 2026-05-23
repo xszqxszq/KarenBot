@@ -8,7 +8,7 @@ class MessageChainTest {
     fun shouldParseFaceAndOmitInPlainText() {
         val raw = "Example ${Face(1, 2, "Laugh")} Text"
 
-        val chain = MessageChain(raw, emptyList(), emptyList())
+        val chain = MessageChain(raw)
 
         assertEquals("Example [Laugh] Text", chain.content)
         assertEquals("Example  Text", chain.text)
