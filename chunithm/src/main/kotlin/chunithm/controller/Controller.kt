@@ -37,7 +37,7 @@ sealed class Controller(
             channelName = "admin-check",
             data = AdminCheckRequest(sender.id, deferred)
         ))
-        return withTimeout(5000L) { deferred.await() }
+        return runCatching { withTimeout(5000L) { deferred.await() } }.getOrDefault(false)
     }
 
     suspend fun rhythm(
