@@ -29,8 +29,8 @@ abstract class MaimaiDatabaseTest {
     fun resetDatabase() {
         connectIfNeeded()
         transaction {
-            SchemaUtils.drop(GuessGameTable, MusicAliasesVoteTable, ArcadeTable, ArcadeGroupBindTable, ArcadeGroupTable, QQBindTable, MaimaiSettingsTable, MusicAliasesTable)
-            SchemaUtils.create(ArcadeGroupTable, ArcadeGroupBindTable, ArcadeTable, QQBindTable, MaimaiSettingsTable, MusicAliasesTable, MusicAliasesVoteTable, GuessGameTable)
+            SchemaUtils.drop(GuessGameTable, MaimaiMusicAliasesVoteTable, ArcadeTable, ArcadeGroupBindTable, ArcadeGroupTable, QQBindTable, MaimaiSettingsTable, MaimaiMusicAliasesTable)
+            SchemaUtils.create(ArcadeGroupTable, ArcadeGroupBindTable, ArcadeTable, QQBindTable, MaimaiSettingsTable, MaimaiMusicAliasesTable, MaimaiMusicAliasesVoteTable, GuessGameTable)
         }
     }
 }

@@ -1,6 +1,7 @@
 package xyz.xszq.bot.maimai.controller
 
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -13,6 +14,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class GuessControllerTest: MaimaiDatabaseTest() {
     /**
      * 猜歌/舞萌开字母/不玩了
@@ -28,13 +30,13 @@ class GuessControllerTest: MaimaiDatabaseTest() {
             harness.sendGroupMessage("猜歌", userId = harness.testUserId, groupId = harness.testGroupId)
             assertEquals("classical", currentGuessType(harness.testGroupId))
             harness.sendGroupMessage("不玩了", userId = harness.testUserId, groupId = harness.testGroupId)
-            delay(300L)
+            advanceUntilIdle()
             assertNull(currentGuessTypeOrNull(harness.testGroupId))
 
             harness.sendGroupMessage("舞萌开字母", userId = harness.testUserId, groupId = harness.testGroupId)
             assertEquals("opening", currentGuessType(harness.testGroupId))
             harness.sendGroupMessage("不玩了", userId = harness.testUserId, groupId = harness.testGroupId)
-            delay(300L)
+            advanceUntilIdle()
             assertNull(currentGuessTypeOrNull(harness.testGroupId))
 
         } finally {

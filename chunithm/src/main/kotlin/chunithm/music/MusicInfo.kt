@@ -99,7 +99,7 @@ class MusicInfo(
         }
         row {
             at("🔊试听一下", "/chu 预览id$id", enter = true, style = RenderData.GRAY, id = "3")
-//            at("➕添加别名", "/chu 添加别名 $id", style = RenderData.GRAY, id = "4")
+            at("➕添加别名", "/chu 添加别名 $id", style = RenderData.GRAY, id = "4")
         }
     })
 

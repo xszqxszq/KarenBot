@@ -13,17 +13,17 @@ class MusicAliasesTableTest: MaimaiDatabaseTest() {
     fun testVote() = runTest {
         val music = musicInfo(10001)
 
-        MusicAliasesTable.vote(music, "测试别名")
-        assertEquals(-2, MusicAliasesTable[music, "测试别名"])
+        MaimaiMusicAliasesTable.vote(music, "测试别名")
+        assertEquals(-2, MaimaiMusicAliasesTable[music, "测试别名"])
 
-        MusicAliasesTable.vote(music, "测试别名")
-        assertEquals(-1, MusicAliasesTable[music, "测试别名"])
+        MaimaiMusicAliasesTable.vote(music, "测试别名")
+        assertEquals(-1, MaimaiMusicAliasesTable[music, "测试别名"])
 
-        MusicAliasesTable.add(music, "测试别名")
+        MaimaiMusicAliasesTable.add(music, "测试别名")
 
-        assertEquals(0, MusicAliasesTable[music, "测试别名"])
-        assertEquals(listOf("测试别名" to 0), MusicAliasesTable[music])
-        assertEquals(listOf(10001), MusicAliasesTable.exact("测试别名"))
+        assertEquals(0, MaimaiMusicAliasesTable[music, "测试别名"])
+        assertEquals(listOf("测试别名" to 0), MaimaiMusicAliasesTable[music])
+        assertEquals(listOf(10001), MaimaiMusicAliasesTable.exact("测试别名"))
     }
 
     private fun musicInfo(id: Int) = MusicInfo(
