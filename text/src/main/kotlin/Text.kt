@@ -33,6 +33,7 @@ class Text: Plugin() {
     lateinit var textConfig: TextConfig
     lateinit var stereotypes: StereotypesPresets
     val randomImage = RandomImage()
+    lateinit var blondeHairDetector: BlondeHairDetector
 
     internal var client = createHttpClient()
 
@@ -62,6 +63,11 @@ class Text: Plugin() {
             .loadConfigOrThrow<TextConfig>()
 
         randomImage.init()
+
+        blondeHairDetector = BlondeHairDetector(
+            "models/wd-v1-4-moat-tagger-v2/wd-v1-4-moat-tagger-v2.onnx",
+            "models/wd-v1-4-moat-tagger-v2/selected_tags.csv")
+        blondeHairDetector.init()
 
         setRoute()
         logger.info { "[文本] 插件加载完成。" }
@@ -106,6 +112,14 @@ class Text: Plugin() {
             val hasAt = this !is GroupMessageEvent || (mentions.isNotEmpty() && mentions.all { it.isSelf })
             if (isBlank && hasAt) {
                 reply(Image(randomImage.random()))
+                return@always
+            }
+            if (message.any { it is Image }) {
+                if (message.filterIsInstance<Image>().any {
+                    blondeHairDetector.recognize(it.file)
+                }) {
+                    reply(Image(randomImage.random()))
+                }
             }
         }
         startsWith(listOf("来点金发", "来点金毛", "来点黄毛", "随机金发", "随机黄毛")) {
