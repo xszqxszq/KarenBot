@@ -119,10 +119,8 @@ suspend fun Application.handleDispatch(
             val data = json.decodeFromString<C2CMessageCreate>(payload.d!!)
             val images = downloadFiles(
                 data.attachments.filter { "image" in it.contentType }, pluginLoader.files, logger)
-            val files = downloadFiles(
-                data.attachments.filter { it.contentType == "file" }, pluginLoader.files, logger)
             val content = filter.filter(data.content)
-            val message = MessageChain(content, images, files)
+            val message = MessageChain(content, images, attachments = data.attachments)
             logger.info {
                 "${data.author.username}(${data.author.id}) -> ${message.content.trim().replace("\n", "\\n")}"
             }
@@ -139,10 +137,8 @@ suspend fun Application.handleDispatch(
             val data = json.decodeFromString<GroupAtMessageCreate>(payload.d!!)
             val images = downloadFiles(
                 data.attachments.filter { "image" in it.contentType }, pluginLoader.files, logger)
-            val files = downloadFiles(
-                data.attachments.filter { it.contentType == "file" }, pluginLoader.files, logger)
             val content = filter.filter(data.content)
-            val message = MessageChain(content, images, files, ark = data.arkData)
+            val message = MessageChain(content, images, ark = data.arkData, attachments = data.attachments)
             logger.info {
                 "[${data.group}] ${data.author.username}(${data.author.id}) -> ${message.content.trim().replace("\n", "\\n")}"
             }
@@ -164,10 +160,8 @@ suspend fun Application.handleDispatch(
             println(payload.d)
             val images = downloadFiles(
                 data.attachments.filter { "image" in it.contentType }, pluginLoader.files, logger)
-            val files = downloadFiles(
-                data.attachments.filter { it.contentType == "file" }, pluginLoader.files, logger)
             val content = filter.filter(data.content)
-            val message = MessageChain(content, images, files, pluginLoader.bot, data.mentions, ark = data.arkData)
+            val message = MessageChain(content, images, pluginLoader.bot, data.mentions, ark = data.arkData, attachments = data.attachments)
             logger.info {
                 "[${data.group}] ${data.author.username}(${data.author.id}) -> ${message.content.trim().replace("\n", "\\n")}"
             }

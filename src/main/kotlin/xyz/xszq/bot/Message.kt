@@ -40,6 +40,7 @@ suspend fun ReplyAble.uploadMedia(media: Media): FileResponse? {
     val remoteFile = bot.cos.upload(media.file)
     val fileType = when (media) {
         is Image -> FileType.IMAGE
+        is Video -> FileType.VIDEO
         is Audio -> FileType.AUDIO
         is File -> FileType.FILE
         else -> throw Exception()

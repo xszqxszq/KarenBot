@@ -5,6 +5,7 @@ import xyz.xszq.bot.Bot
 import xyz.xszq.bot.User
 import xyz.xszq.bot.json
 import xyz.xszq.bot.payload.ArkData
+import xyz.xszq.bot.payload.Attachment
 import xyz.xszq.bot.payload.FaceExt
 import xyz.xszq.bot.payload.Member
 import kotlin.io.encoding.Base64
@@ -19,12 +20,13 @@ class MessageChain() {
     }
 
     @OptIn(ExperimentalEncodingApi::class)
-    constructor(raw: String, images: List<VfsFile> = emptyList(), files: List<VfsFile> = emptyList(),
+    constructor(raw: String, images: List<VfsFile> = emptyList(),
                 bot: Bot? = null, mentions: List<Member>? = null,
-                ark: ArkData? = null) : this() {
+                ark: ArkData? = null,
+                attachments: List<Attachment> = emptyList()) : this() {
         list.addAll(raw.parseMessageElements(bot, mentions))
         list.addAll(images.map { Image(it) })
-        list.addAll(files.map { File(it) })
+        list.addAll(attachments.mapNotNull { it.toMessageElement() })
         ark ?.let { list.add(Ark(it)) }
     }
 
@@ -71,6 +73,20 @@ class MessageChain() {
     fun textToSend() = list.filter { it is PlainText || it is Face }.joinToString("") { it.toString() }
 
     @OptIn(ExperimentalEncodingApi::class)
+    private fun Attachment.toMessageElement(): RemoteMedia? = when {
+        "image" in contentType -> RemoteImage(
+            url, filename, contentType, width ?: 0, height ?: 0
+        )
+        "video" in contentType -> RemoteVideo(
+            url, filename, contentType, width ?: 0, height ?: 0
+        )
+        "file" in contentType || contentType == "file" -> RemoteFile(
+            url, filename, contentType
+        )
+
+        else -> null
+    }
+
     private fun String.parseMessageElements(bot: Bot? = null, mentions: List<Member>? = null): List<MessageElement> {
         val faceRegex = Regex("""<faceType=(\d+),faceId="(\d+)",ext="([^"]+)">""")
         val atRegex = Regex("<@([A-Fa-f0-9]+|all)>")
