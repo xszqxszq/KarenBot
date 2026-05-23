@@ -66,6 +66,10 @@ class AliasesSearch(
         )
         insertDocument(data)
     }
+    fun delete(id: Int, alias: String) {
+        writer.deleteDocuments(Term("uid", uid(id, alias)))
+        writer.commit()
+    }
     private suspend fun refreshIndex(force: Boolean = false) {
         val currentSnapshot = maimai.musics().associate { it.id to it.name }
         val currentSignature = snapshotSignature(currentSnapshot)
@@ -216,7 +220,7 @@ class AliasesSearch(
         }
         val exact = MusicAliasesTable.exact(name)
         if (exact.isNotEmpty()) {
-            return exact.mapNotNull { maimai.music(it) }
+            return exact.distinct().mapNotNull { maimai.music(it) }
         }
         val fuzzy = fuzzy(name.lowercase()).mapNotNull { maimai.music(it.musicId) }
         if (fuzzy.isNotEmpty()) {

@@ -1,6 +1,8 @@
 package xyz.xszq.bot.maimai.database
 
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import xyz.xszq.bot.maimai.music.MusicInfo
 
@@ -45,6 +47,11 @@ object MusicAliasesTable: Table() {
                 it[name] = alias
                 it[votes] = -2
             }
+        }
+    }.await()
+    suspend fun remove(music: MusicInfo, alias: String) = suspendedTransactionAsync {
+        MusicAliasesTable.deleteWhere {
+            (MusicAliasesTable.id eq music.id) and (MusicAliasesTable.name eq alias)
         }
     }.await()
     suspend fun add(music: MusicInfo, alias: String) = suspendedTransactionAsync {

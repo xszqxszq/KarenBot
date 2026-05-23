@@ -320,6 +320,27 @@ class MusicController(
                 }
             }
         }
+        startsWith("删除别名") { raw ->
+            if (!isAdmin()) return@startsWith
+            val args = raw.trim().split(" ", limit = 2).filter { it.isNotBlank() }
+            if (args.size < 2) {
+                reply("使用方法：删除别名 id/名称 别名")
+                return@startsWith
+            }
+            val (name, alias) = args.take(2)
+            val music = maimai.aliases.search(name).firstOrNull() ?: run {
+                reply("未找到该歌曲。")
+                return@startsWith
+            }
+            val existing = MusicAliasesTable[music, alias]
+            if (existing == null) {
+                reply("该别名不存在。")
+                return@startsWith
+            }
+            MusicAliasesTable.remove(music, alias)
+            maimai.aliases.delete(music.id, alias)
+            reply("别名删除成功。")
+        }
         startsWith("今日舞萌") {
             val time = LocalDate.now()
             val random = Random((sender.id + time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
@@ -611,6 +632,12 @@ class MusicController(
         if (alias.length >= 32)
             throw IllegalArgsException("别名太长！")
         val music = maimai.aliases.search(name).firstOrNull() ?: throw NotFoundException()
+        if (isAdmin()) {
+            MusicAliasesTable.add(music, alias)
+            maimai.aliases.insert(music.id, alias)
+            reply("别名添加成功。")
+            return
+        }
         var votes = MusicAliasesTable[music, alias] ?.also { votes ->
             if (votes >= 0)
                 throw IllegalOperationException("该别名已存在！")

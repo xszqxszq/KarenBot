@@ -6,6 +6,7 @@ import com.sksamuel.hoplite.addFileSource
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.message.MessageChain
+import xyz.xszq.bot.payload.AdminCheckRequest
 import xyz.xszq.bot.payload.MsgType
 import java.io.File
 
@@ -25,6 +26,9 @@ class Admin: Plugin() {
     }
     fun MessageEvent.isAdmin() = sender.id in config.admins
     suspend fun setRoute() = route {
+        channel<AdminCheckRequest>("admin-check") { data ->
+            data.deferred.complete(data.userId in config.admins)
+        }
         startsWith("reload") { name ->
             if (isAdmin()) {
                 handleReload(name)

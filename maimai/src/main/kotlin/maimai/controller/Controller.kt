@@ -1,7 +1,9 @@
 package xyz.xszq.bot.maimai.controller
 
 import korlibs.io.util.UUID
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.withTimeout
 import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.Maimai.Companion.textMode
 import xyz.xszq.bot.event.MessageEvent
@@ -20,6 +22,8 @@ import xyz.xszq.bot.maimai.music.MusicInfo
 import xyz.xszq.bot.maimai.music.UserQueryParams
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.newLine
+import xyz.xszq.bot.event.ChannelEvent
+import xyz.xszq.bot.payload.AdminCheckRequest
 import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.payload.markdown.MarkdownData
 import xyz.xszq.bot.reply
@@ -29,6 +33,16 @@ sealed class Controller(
 ) {
     abstract suspend fun setRoute()
     open suspend fun unload() {}
+
+    suspend fun MessageEvent.isAdmin(): Boolean {
+        val deferred = CompletableDeferred<Boolean>()
+        maimai.pluginLoader.subscribes.handle(ChannelEvent(
+            bot = maimai.pluginLoader.bot,
+            channelName = "admin-check",
+            data = AdminCheckRequest(sender.id, deferred)
+        ))
+        return withTimeout(5000L) { deferred.await() }
+    }
 
     suspend fun rhythm(block: suspend xyz.xszq.bot.subscribe.SubscribeBuilder.() -> Unit) {
         maimai.route("/mai") {
