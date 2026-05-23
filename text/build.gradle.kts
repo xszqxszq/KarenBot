@@ -30,6 +30,8 @@ dependencies {
     implementation("org.jetbrains.skiko:skiko-awt-runtime-windows-x64:${skikoVersion}")
     implementation("org.jetbrains.skiko:skiko-awt-runtime-linux-x64:${skikoVersion}")
     implementation("org.jetbrains.skiko:skiko-awt-runtime-macos-arm64:${skikoVersion}")
+    implementation("io.ktor:ktor-server-core:${ktorVersion}")
+    implementation("io.ktor:ktor-server-netty:${ktorVersion}")
     testImplementation(kotlin("test"))
     testImplementation(project(":"))
     testImplementation("io.ktor:ktor-client-mock:${ktorVersion}")

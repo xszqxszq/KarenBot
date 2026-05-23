@@ -90,10 +90,10 @@ suspend fun Application.downloadFiles(
     fileManager: FileManager,
     logger: KLogger
 ) = attachments.mapNotNull { attachment ->
-    downloadFile(attachment.url, attachment.filename, logger)
-}.also {
+    downloadFile(attachment.url, attachment.filename, logger)?.let { attachment.url to it }
+}.also { pairs ->
     launch(Dispatchers.IO) {
-        fileManager.addFiles(it)
+        fileManager.addFiles(pairs.map { it.second })
     }
 }
 

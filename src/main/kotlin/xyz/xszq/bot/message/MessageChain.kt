@@ -20,12 +20,12 @@ class MessageChain() {
     }
 
     @OptIn(ExperimentalEncodingApi::class)
-    constructor(raw: String, images: List<VfsFile> = emptyList(),
+    constructor(raw: String, images: List<Pair<String, VfsFile>> = emptyList(),
                 bot: Bot? = null, mentions: List<Member>? = null,
                 ark: ArkData? = null,
                 attachments: List<Attachment> = emptyList()) : this() {
         list.addAll(raw.parseMessageElements(bot, mentions))
-        list.addAll(images.map { Image(it) })
+        list.addAll(images.map { Image(it.second, it.first) })
         list.addAll(attachments.mapNotNull { it.toMessageElement() })
         ark ?.let { list.add(Ark(it)) }
     }

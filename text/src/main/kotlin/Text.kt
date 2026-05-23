@@ -6,10 +6,17 @@ import com.sksamuel.hoplite.addFileSource
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
-import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import korlibs.io.util.UUID
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
@@ -24,7 +31,9 @@ import xyz.xszq.bot.message.PlainText
 import xyz.xszq.bot.payload.BilibiliResponse
 import xyz.xszq.bot.payload.BilibiliVideoInfo
 import xyz.xszq.bot.payload.RandomOtomads
-import xyz.xszq.bot.payload.markdown.*
+import xyz.xszq.bot.payload.markdown.Keyboard
+import xyz.xszq.bot.payload.markdown.MarkdownData
+import xyz.xszq.bot.payload.markdown.RenderData
 import java.awt.Color
 import kotlin.random.Random
 
@@ -33,7 +42,8 @@ class Text: Plugin() {
     lateinit var textConfig: TextConfig
     lateinit var stereotypes: StereotypesPresets
     val randomImage = RandomImage()
-    lateinit var blondeHairDetector: BlondeHairDetector
+    var blondeHairDetector: BlondeHairDetector? = null
+    private var apiServer: EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration>? = null
 
     internal var client = createHttpClient()
 
@@ -64,10 +74,18 @@ class Text: Plugin() {
 
         randomImage.init()
 
-        blondeHairDetector = BlondeHairDetector(
-            "models/wd-v1-4-moat-tagger-v2/wd-v1-4-moat-tagger-v2.onnx",
-            "models/wd-v1-4-moat-tagger-v2/selected_tags.csv")
-        blondeHairDetector.init()
+        textConfig.remoteApi ?.let {
+            logger.info { "[文本] 使用远程API: ${textConfig.remoteApi}" }
+        } ?: run {
+            BlondeHairDetector(
+                "models/wd-v1-4-moat-tagger-v2/wd-v1-4-moat-tagger-v2.onnx",
+                "models/wd-v1-4-moat-tagger-v2/selected_tags.csv"
+            ).also { detector ->
+                detector.init()
+                blondeHairDetector = detector
+            }
+            startApiServer()
+        }
 
         setRoute()
         logger.info { "[文本] 插件加载完成。" }
@@ -115,11 +133,12 @@ class Text: Plugin() {
                 return@always
             }
             if (message.any { it is Image }) {
-                if (message.filterIsInstance<Image>().any {
-                    blondeHairDetector.recognize(it.file)
-                }) {
-                    reply(Image(randomImage.random()))
+                val detected = message.filterIsInstance<Image>().any { img ->
+                    blondeHairDetector ?.recognize(img.file)
+                        ?: remoteDetect(img.url)
                 }
+                if (detected)
+                    reply(Image(randomImage.random()))
             }
         }
         startsWith(listOf("来点金发", "来点金毛", "来点黄毛", "随机金发", "随机黄毛")) {
@@ -222,5 +241,48 @@ class Text: Plugin() {
         } catch (e: Exception) {
             true
         }
+    }
+
+    private fun startApiServer() {
+        val key = textConfig.remoteKey
+        apiServer = embeddedServer(Netty, host = "0.0.0.0", port = 18101) {
+            routing {
+                post("/blonde") {
+                    val auth = call.request.header(HttpHeaders.Authorization)
+                    if (auth != "Bearer $key") {
+                        call.respond(HttpStatusCode.Unauthorized)
+                        return@post
+                    }
+                    val imageUrl = call.receiveParameters()["url"] ?: run {
+                        call.respond(HttpStatusCode.BadRequest)
+                        return@post
+                    }
+                    val detector = blondeHairDetector ?: run {
+                        call.respond(HttpStatusCode.InternalServerError)
+                        return@post
+                    }
+                    val imageBytes = client.get(imageUrl).bodyAsBytes()
+                    useTempFile(suffix = ".jpg") { file ->
+                        file.writeBytes(imageBytes)
+                        val result = detector.recognize(file)
+                        call.respondText(if (result) "true" else "false")
+                    }
+                }
+            }
+        }.start(wait = false)
+    }
+
+    private suspend fun remoteDetect(imageUrl: String): Boolean {
+        val api = textConfig.remoteApi ?: return false
+        val key = textConfig.remoteKey
+        val response = client.submitForm(
+            url = "$api/blonde",
+            formParameters = Parameters.build {
+                append("url", imageUrl)
+            }
+        ) {
+            header(HttpHeaders.Authorization, "Bearer $key")
+        }
+        return response.bodyAsText().toBooleanStrictOrNull() ?: false
     }
 }

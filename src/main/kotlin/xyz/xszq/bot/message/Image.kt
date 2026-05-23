@@ -7,7 +7,8 @@ import korlibs.io.file.VfsFile
  * @param file The actual file on disk.
  */
 class Image(
-    file: VfsFile
+    file: VfsFile,
+    val url: String = "",
 ): Media(file) {
     override val content: String = "[图片]"
 }
