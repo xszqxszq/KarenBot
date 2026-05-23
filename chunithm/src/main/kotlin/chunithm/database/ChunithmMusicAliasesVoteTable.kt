@@ -7,7 +7,7 @@ import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import xyz.xszq.bot.chunithm.music.MusicInfo
 
-object MusicAliasesVoteTable: Table() {
+object ChunithmMusicAliasesVoteTable: Table() {
     val id = integer("id")
     val name = varchar("name", 128)
     val user = varchar("user", 32)
@@ -20,7 +20,7 @@ object MusicAliasesVoteTable: Table() {
         openId: String
     ) = suspendedTransactionAsync {
         if (selectAll().where {
-                (MusicAliasesVoteTable.id eq music.id) and (name eq alias) and (user eq openId)
+                (ChunithmMusicAliasesVoteTable.id eq music.id) and (name eq alias) and (user eq openId)
             }.count() > 0)
             return@suspendedTransactionAsync
         else
@@ -37,7 +37,7 @@ object MusicAliasesVoteTable: Table() {
         openId: String
     ) = suspendedTransactionAsync {
         selectAll().where {
-            (MusicAliasesVoteTable.id eq music.id) and (name eq alias) and (user eq openId)
+            (ChunithmMusicAliasesVoteTable.id eq music.id) and (name eq alias) and (user eq openId)
         }.count() > 0
     }.await()
 }

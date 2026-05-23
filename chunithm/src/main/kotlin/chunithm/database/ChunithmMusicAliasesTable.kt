@@ -1,10 +1,12 @@
 package xyz.xszq.bot.chunithm.database
 
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import xyz.xszq.bot.chunithm.music.MusicInfo
 
-object MusicAliasesTable: Table() {
+object ChunithmMusicAliasesTable: Table() {
     val id = integer("id")
     val name = varchar("name", 128)
     val votes = integer("votes")
@@ -15,7 +17,7 @@ object MusicAliasesTable: Table() {
         music: MusicInfo
     ) = suspendedTransactionAsync {
         select(name, votes).where {
-            (MusicAliasesTable.id eq music.id) and (votes greaterEq 0)
+            (ChunithmMusicAliasesTable.id eq music.id) and (votes greaterEq 0)
         }.map { Pair(it[name], it[votes]) }
     }.await()
 
@@ -24,23 +26,23 @@ object MusicAliasesTable: Table() {
         alias: String
     ) = suspendedTransactionAsync {
         select(votes).where {
-            (MusicAliasesTable.id eq music.id) and (name eq alias)
+            (ChunithmMusicAliasesTable.id eq music.id) and (name eq alias)
         }.map { it[votes] }.firstOrNull()
     }.await()
 
     suspend fun all() = suspendedTransactionAsync {
-        select(MusicAliasesTable.id, name).where {
+        select(ChunithmMusicAliasesTable.id, name).where {
             votes greaterEq 0
-        }.map { Pair(it[MusicAliasesTable.id], it[name]) }
+        }.map { Pair(it[ChunithmMusicAliasesTable.id], it[name]) }
     }.await()
 
     suspend fun exact(
         alias: String
     ) = suspendedTransactionAsync {
         val cleaned = alias.trim().lowercase()
-        select(MusicAliasesTable.id).where {
+        select(ChunithmMusicAliasesTable.id).where {
             (name.lowerCase() eq cleaned) and (votes greaterEq 0)
-        }.map { it[MusicAliasesTable.id] }
+        }.map { it[ChunithmMusicAliasesTable.id] }
     }.await()
 
     suspend fun vote(
@@ -48,9 +50,9 @@ object MusicAliasesTable: Table() {
         alias: String
     ) = suspendedTransactionAsync {
         if (selectAll().where {
-                (MusicAliasesTable.id eq music.id) and (name eq alias)
+                (ChunithmMusicAliasesTable.id eq music.id) and (name eq alias)
             }.count() != 0L) {
-            update({ (MusicAliasesTable.id eq music.id) and (name eq alias) }) {
+            update({ (ChunithmMusicAliasesTable.id eq music.id) and (name eq alias) }) {
                 with(SqlExpressionBuilder) {
                     it[votes] = votes + 1
                 }
@@ -69,9 +71,9 @@ object MusicAliasesTable: Table() {
         alias: String
     ) = suspendedTransactionAsync {
         if (selectAll().where {
-                (MusicAliasesTable.id eq music.id) and (name eq alias)
+                (ChunithmMusicAliasesTable.id eq music.id) and (name eq alias)
             }.count() != 0L) {
-            update({ (MusicAliasesTable.id eq music.id) and (name eq alias) }) {
+            update({ (ChunithmMusicAliasesTable.id eq music.id) and (name eq alias) }) {
                 it[votes] = 0
             }
         } else {
@@ -83,6 +85,12 @@ object MusicAliasesTable: Table() {
         }
     }.await()
 
+    suspend fun remove(music: MusicInfo, alias: String) = suspendedTransactionAsync {
+        ChunithmMusicAliasesTable.deleteWhere {
+            (ChunithmMusicAliasesTable.id eq music.id) and (ChunithmMusicAliasesTable.name eq alias)
+        }
+    }.await()
+
     suspend fun addAll(
         aliases: Collection<Pair<Int, String>>
     ) = suspendedTransactionAsync {
@@ -90,10 +98,10 @@ object MusicAliasesTable: Table() {
         if (entries.isEmpty()) return@suspendedTransactionAsync
 
         val musicIds = entries.map { it.first }.distinct()
-        val existing = select(MusicAliasesTable.id, name).where {
-            MusicAliasesTable.id inList musicIds
+        val existing = select(ChunithmMusicAliasesTable.id, name).where {
+            ChunithmMusicAliasesTable.id inList musicIds
         }.map {
-            it[MusicAliasesTable.id] to it[name]
+            it[ChunithmMusicAliasesTable.id] to it[name]
         }.toSet()
 
         val toInsert = entries.filterNot(existing::contains)
@@ -102,14 +110,14 @@ object MusicAliasesTable: Table() {
 
         toReset.forEach { (musicId, names) ->
             update({
-                (MusicAliasesTable.id eq musicId) and (name inList names)
+                (ChunithmMusicAliasesTable.id eq musicId) and (name inList names)
             }) {
                 it[votes] = 0
             }
         }
 
         batchInsert(toInsert, shouldReturnGeneratedValues = false) { entry: Pair<Int, String> ->
-            this[MusicAliasesTable.id] = entry.first
+            this[ChunithmMusicAliasesTable.id] = entry.first
             this[name] = entry.second
             this[votes] = 0
         }

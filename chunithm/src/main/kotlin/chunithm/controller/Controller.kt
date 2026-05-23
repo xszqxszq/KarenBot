@@ -1,5 +1,7 @@
 package xyz.xszq.bot.chunithm.controller
 
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.withTimeout
 import xyz.xszq.bot.Chunithm
 import xyz.xszq.bot.Chunithm.Companion.textMode
 import xyz.xszq.bot.chunithm.api.ChunithmAPI
@@ -17,6 +19,7 @@ import xyz.xszq.bot.event.ChannelEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.newLine
+import xyz.xszq.bot.payload.AdminCheckRequest
 import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.reply
 import xyz.xszq.bot.subscribe.SubscribeBuilder
@@ -26,6 +29,16 @@ sealed class Controller(
 ) {
     abstract suspend fun setRoute()
     open suspend fun unload() {}
+
+    suspend fun MessageEvent.isAdmin(): Boolean {
+        val deferred = CompletableDeferred<Boolean>()
+        chunithm.pluginLoader.subscribes.handle(ChannelEvent(
+            bot = chunithm.pluginLoader.bot,
+            channelName = "admin-check",
+            data = AdminCheckRequest(sender.id, deferred)
+        ))
+        return withTimeout(5000L) { deferred.await() }
+    }
 
     suspend fun rhythm(
         block: suspend SubscribeBuilder.() -> Unit

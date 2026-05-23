@@ -17,8 +17,8 @@ import xyz.xszq.bot.chunithm.component.*
 import xyz.xszq.bot.chunithm.config.ChunithmConfig
 import xyz.xszq.bot.chunithm.controller.Controller
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
-import xyz.xszq.bot.chunithm.database.MusicAliasesTable
-import xyz.xszq.bot.chunithm.database.MusicAliasesVoteTable
+import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesTable
+import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesVoteTable
 import xyz.xszq.bot.chunithm.query.ComboQuery
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
@@ -70,7 +70,7 @@ class Chunithm: Plugin() {
 
         transaction(database) {
             listOf(
-                MaimaiSettingsTable, MusicAliasesTable, MusicAliasesVoteTable
+                MaimaiSettingsTable, ChunithmMusicAliasesTable, ChunithmMusicAliasesVoteTable
             ).forEach { table ->
                 if (!table.exists())
                     SchemaUtils.create(table)

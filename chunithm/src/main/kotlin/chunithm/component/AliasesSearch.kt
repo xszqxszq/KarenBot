@@ -16,7 +16,7 @@ import org.apache.lucene.index.Term
 import org.apache.lucene.search.*
 import org.apache.lucene.store.FSDirectory
 import xyz.xszq.bot.Chunithm
-import xyz.xszq.bot.chunithm.database.MusicAliasesTable
+import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesTable
 import xyz.xszq.bot.chunithm.music.MusicInfo
 import xyz.xszq.bot.chunithm.music.MusicNameAlias
 import java.nio.file.Path
@@ -74,6 +74,10 @@ class AliasesSearch(
         )
         insertDocument(data)
     }
+    fun delete(id: Int, alias: String) {
+        writer.deleteDocuments(Term("uid", uid(id, alias)))
+        writer.commit()
+    }
 
     private suspend fun refreshIndex(
         force: Boolean = false
@@ -89,7 +93,7 @@ class AliasesSearch(
             if (!force && latestSignature == indexedMusicSignature)
                 return
 
-            val aliases = MusicAliasesTable.all().map { (id, alias) ->
+            val aliases = ChunithmMusicAliasesTable.all().map { (id, alias) ->
                 MusicNameAlias(id, alias)
             }
             val currentNames = chunithm.musics().map { music ->
@@ -232,7 +236,7 @@ class AliasesSearch(
         if (nameMatch.isNotEmpty())
             return nameMatch
 
-        val exact = MusicAliasesTable.exact(name)
+        val exact = ChunithmMusicAliasesTable.exact(name)
         if (exact.isNotEmpty())
             return exact.mapNotNull { chunithm.music(it) }
 

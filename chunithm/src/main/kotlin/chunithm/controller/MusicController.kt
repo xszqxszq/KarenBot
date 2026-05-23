@@ -5,6 +5,8 @@ import korlibs.io.file.std.localCurrentDirVfs
 import xyz.xszq.bot.Chunithm
 import xyz.xszq.bot.Chunithm.Companion.textMode
 import xyz.xszq.bot.chunithm.component.MarkdownTemplates
+import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesTable
+import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesVoteTable
 import xyz.xszq.bot.chunithm.music.ChartInfo
 import xyz.xszq.bot.chunithm.music.MusicDifficulty
 import xyz.xszq.bot.chunithm.music.MusicInfo
@@ -19,6 +21,10 @@ import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.bot.message.Audio
 import xyz.xszq.bot.pagination
 import xyz.xszq.bot.reply
+import xyz.xszq.bot.exception.IllegalArgsException
+import xyz.xszq.bot.exception.IllegalOperationException
+import xyz.xszq.bot.exception.NeedHelpException
+import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.subscribe.CommandNotMatchedException
 import kotlin.random.Random
 
@@ -195,6 +201,57 @@ class MusicController(
                 return@startsWith
             }
             reply(result.random(Random(System.currentTimeMillis())).infoText())
+        }
+        endsWith(listOf("有什么别名", "有什么别名？")) { name ->
+            val search = chunithm.aliases.search(name).firstOrNull() ?: return@endsWith
+            val aliases = ChunithmMusicAliasesTable[search]
+                .filter { it.first != search.name }
+                .take(40)
+                .joinToString("\n") { (alias, _) -> alias }
+            reply(buildString {
+                appendLine("${search.id}.${search.name} 有如下别名：")
+                appendLine(aliases)
+                appendLine()
+                appendLine("可以发送\"添加别名 id/name 别名\"来添加别名。")
+            }.trim())
+        }
+        startsWith("添加别名") { raw ->
+            runCatching {
+                addAlias(raw)
+            }.onFailure { e ->
+                val help = buildString {
+                    appendLine("使用方法：添加别名 id/name 别名")
+                    appendLine(" 例：添加别名 2579 祝福荣光")
+                }.trim()
+                when (e) {
+                    is NeedHelpException -> reply(help)
+                    is NotFoundException -> reply("未找到该歌曲。$help")
+                    is IllegalArgsException -> reply(e.message ?: "")
+                    is IllegalOperationException -> reply(e.message ?: "")
+                    else -> e.printStackTrace()
+                }
+            }
+        }
+        startsWith("删除别名") { raw ->
+            if (!isAdmin()) return@startsWith
+            val args = raw.trim().split(" ", limit = 2).filter { it.isNotBlank() }
+            if (args.size < 2) {
+                reply("使用方法：删除别名 id/name 别名")
+                return@startsWith
+            }
+            val (name, alias) = args.take(2)
+            val music = chunithm.aliases.search(name).firstOrNull() ?: run {
+                reply("未找到该歌曲。")
+                return@startsWith
+            }
+            val existing = ChunithmMusicAliasesTable[music, alias]
+            if (existing == null) {
+                reply("该别名不存在。")
+                return@startsWith
+            }
+            ChunithmMusicAliasesTable.remove(music, alias)
+            chunithm.aliases.delete(music.id, alias)
+            reply("别名已删除。")
         }
         startsWith("预览") { musicQuery ->
             val (music, _) = selectMusic("预览", musicQuery, false)
@@ -453,6 +510,19 @@ class MusicController(
                 args.last().toIntOrNull() ?: 1
             else 1
         return levels to page
+    }
+    private suspend fun MessageEvent.addAlias(raw: String) {
+        val args = raw.trim().split(" ", limit = 2).filter { it.isNotBlank() }
+        if (args.size < 2) throw NeedHelpException()
+        val (name, alias) = args.take(2)
+        if (alias.length >= 32) throw IllegalArgsException("别名太长！")
+        val music = chunithm.aliases.search(name).firstOrNull() ?: throw NotFoundException()
+        if (isAdmin()) {
+            ChunithmMusicAliasesTable.add(music, alias)
+            chunithm.aliases.insert(music.id, alias)
+            reply("别名已添加。")
+            return
+        }
     }
     companion object {
         suspend inline fun VfsFile.toPCM(block: suspend (VfsFile) -> Unit) {
