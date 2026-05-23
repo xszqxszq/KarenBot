@@ -15,8 +15,8 @@ import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.bot.maimai.component.MarkdownTemplates
 import xyz.xszq.bot.maimai.component.MarkdownTemplates.Keyboards.single
 import xyz.xszq.bot.maimai.component.MarkdownTemplates.Templates.selectMusic
-import xyz.xszq.bot.maimai.database.MusicAliasesTable
-import xyz.xszq.bot.maimai.database.MusicAliasesVoteTable
+import xyz.xszq.bot.maimai.database.MaimaiMusicAliasesTable
+import xyz.xszq.bot.maimai.database.MaimaiMusicAliasesVoteTable
 import xyz.xszq.bot.maimai.music.ChartInfo
 import xyz.xszq.bot.maimai.music.MusicDifficulty
 import xyz.xszq.bot.maimai.music.MusicInfo
@@ -282,7 +282,7 @@ class MusicController(
         endsWith(listOf("有什么别名", "有什么别名？")) { name ->
             queryByTextOrImage(name) {
                 val music = maimai.aliases.search(name).firstOrNull() ?: return@queryByTextOrImage
-                val aliases = MusicAliasesTable[music]
+                val aliases = MaimaiMusicAliasesTable[music]
                     .filter { it.first != music.name }
                     .take(maxResultsLong)
                     .joinToString("\n") { (alias, _) ->
@@ -332,12 +332,12 @@ class MusicController(
                 reply("未找到该歌曲。")
                 return@startsWith
             }
-            val existing = MusicAliasesTable[music, alias]
+            val existing = MaimaiMusicAliasesTable[music, alias]
             if (existing == null) {
                 reply("该别名不存在。")
                 return@startsWith
             }
-            MusicAliasesTable.remove(music, alias)
+            MaimaiMusicAliasesTable.remove(music, alias)
             maimai.aliases.delete(music.id, alias)
             reply("别名删除成功。")
         }
@@ -633,20 +633,20 @@ class MusicController(
             throw IllegalArgsException("别名太长！")
         val music = maimai.aliases.search(name).firstOrNull() ?: throw NotFoundException()
         if (isAdmin()) {
-            MusicAliasesTable.add(music, alias)
+            MaimaiMusicAliasesTable.add(music, alias)
             maimai.aliases.insert(music.id, alias)
             reply("别名添加成功。")
             return
         }
-        var votes = MusicAliasesTable[music, alias] ?.also { votes ->
+        var votes = MaimaiMusicAliasesTable[music, alias] ?.also { votes ->
             if (votes >= 0)
                 throw IllegalOperationException("该别名已存在！")
-            if (MusicAliasesVoteTable[music, alias, sender.id]) {
+            if (MaimaiMusicAliasesVoteTable[music, alias, sender.id]) {
                 throw IllegalOperationException("您已经投过票啦，还需${-votes}票通过")
             }
         }
-        MusicAliasesVoteTable.vote(music, alias, sender.id)
-        MusicAliasesTable.vote(music, alias)
+        MaimaiMusicAliasesVoteTable.vote(music, alias, sender.id)
+        MaimaiMusicAliasesTable.vote(music, alias)
         votes ?.let {
             votes += 1
             if (votes >= 0) {

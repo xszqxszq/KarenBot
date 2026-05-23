@@ -87,7 +87,7 @@ class Maimai: Plugin() {
         // 数据库初始化
         transaction(database) {
             listOf(
-                QQBindTable, MusicAliasesTable, MusicAliasesVoteTable,
+                QQBindTable, MaimaiMusicAliasesTable, MaimaiMusicAliasesVoteTable,
                 MaimaiSettingsTable, ArcadeTable, ArcadeGroupTable, ArcadeGroupBindTable, GuessGameTable
             ).forEach { table ->
                 if (!table.exists())

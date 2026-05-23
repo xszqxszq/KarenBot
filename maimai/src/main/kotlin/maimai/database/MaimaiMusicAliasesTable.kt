@@ -6,37 +6,37 @@ import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import xyz.xszq.bot.maimai.music.MusicInfo
 
-object MusicAliasesTable: Table() {
+object MaimaiMusicAliasesTable: Table() {
     val id = integer("id")
     val name = varchar("name", 128)
     val votes = integer("votes")
     override val primaryKey = PrimaryKey(id, name)
     suspend operator fun get(music: MusicInfo) = suspendedTransactionAsync {
         select(name, votes).where {
-            (MusicAliasesTable.id eq music.id) and (votes greaterEq 0)
+            (MaimaiMusicAliasesTable.id eq music.id) and (votes greaterEq 0)
         }.map { Pair(it[name], it[votes]) }
     }.await()
     suspend operator fun get(music: MusicInfo, alias: String) = suspendedTransactionAsync {
         select(votes).where {
-            (MusicAliasesTable.id eq music.id) and (name eq alias)
+            (MaimaiMusicAliasesTable.id eq music.id) and (name eq alias)
         }.map { it[votes] }.firstOrNull()
     }.await()
     suspend fun all() = suspendedTransactionAsync {
-        select(MusicAliasesTable.id, name).where {
+        select(MaimaiMusicAliasesTable.id, name).where {
             votes greaterEq 0
-        }.map { Pair(it[MusicAliasesTable.id], it[name]) }
+        }.map { Pair(it[MaimaiMusicAliasesTable.id], it[name]) }
     }.await()
     suspend fun exact(alias: String) = suspendedTransactionAsync {
         val cleaned = alias.trim().lowercase()
-        select(MusicAliasesTable.id).where {
+        select(MaimaiMusicAliasesTable.id).where {
             (name.lowerCase() eq cleaned) and (votes greaterEq 0)
-        }.map { it[MusicAliasesTable.id] }
+        }.map { it[MaimaiMusicAliasesTable.id] }
     }.await()
     suspend fun vote(music: MusicInfo, alias: String) = suspendedTransactionAsync {
         if (selectAll().where {
-                (MusicAliasesTable.id eq music.id) and (name eq alias)
+                (MaimaiMusicAliasesTable.id eq music.id) and (name eq alias)
             }.count() != 0L) {
-            update({ (MusicAliasesTable.id eq music.id) and (name eq alias) }) {
+            update({ (MaimaiMusicAliasesTable.id eq music.id) and (name eq alias) }) {
                 with(SqlExpressionBuilder) {
                     it[votes] = votes + 1
                 }
@@ -50,15 +50,15 @@ object MusicAliasesTable: Table() {
         }
     }.await()
     suspend fun remove(music: MusicInfo, alias: String) = suspendedTransactionAsync {
-        MusicAliasesTable.deleteWhere {
-            (MusicAliasesTable.id eq music.id) and (MusicAliasesTable.name eq alias)
+        MaimaiMusicAliasesTable.deleteWhere {
+            (MaimaiMusicAliasesTable.id eq music.id) and (MaimaiMusicAliasesTable.name eq alias)
         }
     }.await()
     suspend fun add(music: MusicInfo, alias: String) = suspendedTransactionAsync {
         if (selectAll().where {
-                (MusicAliasesTable.id eq music.id) and (name eq alias)
+                (MaimaiMusicAliasesTable.id eq music.id) and (name eq alias)
             }.count() != 0L) {
-            update({ (MusicAliasesTable.id eq music.id) and (name eq alias) }) {
+            update({ (MaimaiMusicAliasesTable.id eq music.id) and (name eq alias) }) {
                 it[votes] = 0
             }
         } else {
