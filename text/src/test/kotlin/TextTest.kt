@@ -79,7 +79,7 @@ class TextTest {
         val mockPluginLoader = mockk<PluginLoader>()
         every { mockPluginLoader.llmClient } returns llmClient
         return Text().also {
-            it.textConfig = TextConfig(system = "prompt", presets = emptyMap())
+            it.textConfig = TextConfig(system = "prompt", presets = emptyMap(), remoteKey = "")
             it.pluginLoader = mockPluginLoader
         }
     }
