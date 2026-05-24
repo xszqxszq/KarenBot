@@ -2,178 +2,170 @@ package xyz.xszq.bot.chunithm.query
 
 import com.sksamuel.hoplite.ExperimentalHoplite
 import korlibs.io.util.toStringDecimal
-import xyz.xszq.bot.add
 import xyz.xszq.bot.chunithm.component.ChunithmData
 import xyz.xszq.bot.chunithm.component.image.FilterParams
 import xyz.xszq.bot.chunithm.music.*
 import xyz.xszq.bot.toDBC
 import kotlin.random.Random
 
-
 object ComboQuery {
     lateinit var chunithmData: ChunithmData
 
-    val keywordConditions: MutableList<Pair<List<String>, Filter>> = mutableListOf()
+    val keywordConditions = mutableListOf<Pair<List<String>, Filter>>()
     var sortedKeywordConditions: List<Pair<String, Filter>> = emptyList()
+    val regexConditions = mutableListOf<Pair<String, (String) -> Filter>>()
 
-    val regexConditions: MutableList<Pair<String, (String) -> Filter>> = mutableListOf()
+    private val excludeWorldsEnd = Filter(
+        FilterType.Default, chart = { it.difficulty != MusicDifficulty.WorldsEnd },
+        name = "excludeWorldsEnd"
+    )
 
-    val aj = Filter(
-        type = FilterType.Combo,
-        record = { record ->
-            record.comboStatus.isAJ()
-        }
-    )
-    val ajc = Filter(
-        type = FilterType.Combo,
-        record = { record ->
-            record.comboStatus == ComboStatus.AllJusticeCritical
-        }
-    )
-    val fc = Filter(
-        type = FilterType.Combo,
-        record = { record ->
-            record.comboStatus.isFC()
-        }
-    )
-    val fullChain = Filter(
-        type = FilterType.Sync,
-        record = { record ->
-            record.chainStatus.isFullChain()
-        }
-    )
-    val close = Filter(
-        type = FilterType.Achievement,
-        record = { record ->
-            when (record.achievement) {
-                in 1004750..1004999 -> true
-                in 1007250..1007499 -> true
-                in 1008750..1008999 -> true
-                else -> false
-            }
-        },
-        sortBy = { record ->
-            when (record.achievement) {
-                in 1004750..1004999 -> 1005000 - record.achievement
-                in 1007250..1007499 -> 1007500 - record.achievement
-                in 1008750..1008999 -> 1009000 - record.achievement
-                else -> 1010000
-            }
-        })
-    val just = Filter(
-        type = FilterType.Achievement,
-        record = { record ->
-            when (record.achievement) {
-                in 1005000..1005250 -> true
-                in 1007500..1007750 -> true
-                in 1009000..1009250 -> true
-                else -> false
-            }
-        },
-        sortBy = { record ->
-            when (record.achievement) {
-                in 1005000..1005250 -> record.achievement - 1005000
-                in 1007500..1007750 -> record.achievement - 1007500
-                in 1009000..1009250 -> record.achievement - 1009000
-                else -> 1010000
-            }
-        })
-    fun rate(rate: String) = Filter(
-        type = FilterType.Achievement,
-        record = { record ->
-            record.rate == rate
-        }
-    )
-    fun rateGreaterEqual(rate: String) = Filter(
-        type = FilterType.Achievement,
-        record = { record ->
-            Rate.greaterEqual(record.achievement, rate)
-        }
-    )
-    fun achievement(achievement: Int) = Filter(
-        type = FilterType.Achievement,
-        record = { record ->
-            record.achievement >= achievement
-        }
-    )
-    fun achievementLess(achievement: Int) = Filter(
-        type = FilterType.Achievement,
-        record = { record ->
-            record.achievement < achievement
-        }
-    )
-    val noN20 = Filter(
-        type = FilterType.Limit,
-        disableN20 = true
-    )
-    val nextRate = Filter(
-        type = FilterType.Modification,
-        modifier = {
-            when (rate) {
-                "sssp" -> {
-                    achievement = 1010000
-                    comboStatus = ComboStatus.AllJusticeCritical
+    fun rules() = register {
+        aliases("全连", "fc") { combo(name = "fc") { it.comboStatus.isFC() } }
+        aliases("理论", "ajc") { combo(name = "ajc") { it.comboStatus == ComboStatus.AllJusticeCritical } }
+        aliases("aj", "ap") { combo(name = "aj") { it.comboStatus.isAJ() } }
+
+        aliases("fullchain") { sync(name = "fullChain") { it.chainStatus.isFullChain() } }
+
+        aliases("寸") {
+            achievement(sortBy = { r ->
+                when (r.achievement) {
+                    in 1004750..1004999 -> 1005000 - r.achievement
+                    in 1007250..1007499 -> 1007500 - r.achievement
+                    in 1008750..1008999 -> 1009000 - r.achievement
+                    else -> 1010000
                 }
-                else -> {
-                    rate = Rate.next(rate)
-                    achievement = Rate.floor(rate)
-                    rating = Rating.calc(chart, achievement)
+            }) { r ->
+                r.achievement in 1004750..1004999
+                        || r.achievement in 1007250..1007499
+                        || r.achievement in 1008750..1008999
+            }
+        }
+        aliases("锁血", "锁", "名刀", "血压") {
+            achievement(sortBy = { r ->
+                when (r.achievement) {
+                    in 1005000..1005250 -> r.achievement - 1005000
+                    in 1007500..1007750 -> r.achievement - 1007500
+                    in 1009000..1009250 -> r.achievement - 1009000
+                    else -> 1010000
+                }
+            }) { r ->
+                r.achievement in 1005000..1005250
+                        || r.achievement in 1007500..1007750
+                        || r.achievement in 1009000..1009250
+            }
+        }
+
+        aliases("鸟加", "sss+", "sssp") { rateGE("sssp") }
+        aliases("纯鸟", "纯sss", "仅鸟", "仅sss") { rate("sss") }
+        aliases("鸟", "sss") { rateGE("sss") }
+        aliases("通关", "clear") { rateGE("a") }
+        aliases("牛逼", "nb") { achievement { it.achievement >= 1009500 } }
+        aliases("丢人", "招笑", "越级", "越") { achievement { it.achievement < 950000 } }
+
+        aliases("纯ss+", "仅ss+") { rate("ssp") }
+        aliases("纯ss", "仅ss") { rate("ss") }
+        aliases("纯s+", "仅s+") { rate("sp") }
+        aliases("纯s", "仅s") { rate("s") }
+        aliases("纯aaa", "仅aaa") { rate("aaa") }
+        aliases("ss+", "ssp") { rateGE("ssp") }
+        aliases("ss", "ss") { rateGE("ss") }
+        aliases("s+", "sp") { rateGE("sp") }
+        aliases("s") { rateGE("s") }
+        aliases("aaa") { rateGE("aaa") }
+
+        aliases("完整", "全") { limit(disableN20 = true) }
+        aliases("理想") {
+            modification(modifier = {
+                when (rate) {
+                    "sssp" -> {
+                        achievement = 1010000
+                        comboStatus = ComboStatus.AllJusticeCritical
+                    }
+                    else -> {
+                        rate = Rate.next(rate)
+                        achievement = Rate.floor(rate)
+                        rating = Rating.calc(chart, achievement)
+                    }
+                }
+            })
+        }
+
+        dynamic {
+            MusicGenre.entries.forEach { g ->
+                aliases(g.genreName, *g.names) { genre(g) }
+            }
+            MusicDifficulty.entries.filter { it != MusicDifficulty.WorldsEnd }.forEach { d ->
+                aliases(*d.names) { difficulty(d) }
+            }
+            aliases(*MusicDifficulty.WorldsEnd.names) {
+                difficulty(MusicDifficulty.WorldsEnd, name = "worldsEnd")
+            }
+            Level.levelValues.reversed().forEach { value ->
+                aliases(value.toStringDecimal(1)) { levelValue(value) }
+            }
+            Level.levels.reversed().forEach { level ->
+                when {
+                    Level.numberPart(level) >= 10 -> aliases(listOf("${level}级", level)) { level(level) }
+                    else -> aliases(listOf("${level}级")) { level(level) }
                 }
             }
-        }
-    )
-    fun random(random: Random): Filter {
-        val orders = mutableMapOf<Record, Int>()
-        return Filter(
-            type = FilterType.Sort,
-            sortBy = { record ->
-                orders.getOrPut(record) { random.nextInt() }
+            chunithmData.designer.aliases.forEach { (name, aliases) ->
+                aliases(aliases) { designer(name) }
             }
-        )
+        }
+
+        dynamic {
+            chunithmData.musics.values.flatMap { music ->
+                music.charts.map { chart -> chart.notesDesigner }
+            }.toSet().toList().forEach { designer ->
+                if (designer.isNotBlank() && designer != "-")
+                    add(0, listOf(designer), this@ComboQuery.designer(designer))
+            }
+        }
+
+        regex("(?<!\\d)(9\\d{5}|100\\d{4}|1010000)(?!\\d)") { matched ->
+            achievement { it.achievement == matched.toInt() }
+        }
     }
-    fun difficulty(difficulty: MusicDifficulty) = Filter(
-        type = FilterType.Difficulty,
-        chart = { chart ->
-            chart.difficulty == difficulty
-        },
-        singleChart = true
-    )
-    fun genre(genre: MusicGenre) = Filter(
-        type = FilterType.Genre,
-        chart = { chart ->
-            chart.music.genre == genre
-        }
-    )
-    fun level(level: String) = Filter(
-        type = FilterType.Level,
-        chart = { chart ->
-            chart.level == level
-        },
-        name = "level",
-        singleChart = true
-    )
-    fun levelValue(levelValue: Double) = Filter(
-        type = FilterType.Level,
-        chart = { chart ->
-            chart.levelValue == levelValue
-        },
-        name = "levelValue",
-        singleChart = true
-    )
+
+    @OptIn(ExperimentalHoplite::class)
+    fun init(data: ChunithmData) {
+        chunithmData = data
+        rules()
+    }
+
+    private fun register(block: ComboQueryBuilder.() -> Unit) {
+        val builder = ComboQueryBuilder()
+        builder.apply(block)
+        keywordConditions += builder.entries
+        regexConditions += builder.regexes
+        compile()
+    }
+
+    fun compile() {
+        sortedKeywordConditions = keywordConditions.flatMap { (names, filter) ->
+            names.map { name -> name to filter }
+        }.sortedByDescending { it.first.length }
+    }
+
+    private fun named(name: String) = keywordConditions
+        .firstOrNull { (_, filter) -> filter.name == name }
+        ?.second
+
     fun designer(designer: String): Filter {
         val normalized = designer.toDBC()
-
         val mainName = (chunithmData.designer.aliases.entries.firstOrNull { (key, aliases) ->
             when {
                 key.toDBC().equals(normalized, ignoreCase = true) -> true
                 aliases.any { it.toDBC().equals(normalized, ignoreCase = true) } -> true
                 else -> false
             }
-        } ?.key ?: designer).toDBC()
+        }?.key ?: designer).toDBC()
 
         val includesAliases = chunithmData.designer.includes.entries.firstOrNull {
             it.key.toDBC().equals(mainName, ignoreCase = true)
-        } ?.value ?: emptyList()
+        }?.value ?: emptyList()
 
         val searchKeywords = (includesAliases + mainName).map { it.toDBC() }.distinct()
 
@@ -192,7 +184,6 @@ object ComboQuery {
                 val matchAlias = searchKeywords.any { keyword ->
                     chart.notesDesigner.toDBC().contains(keyword, ignoreCase = true)
                 }
-
                 val matchCollab = collabCharts.any { raw ->
                     val nowId = raw.substringBefore("#").toInt()
                     val nowDiff = MusicDifficulty.of(raw.substringAfter("#").toInt())
@@ -202,130 +193,8 @@ object ComboQuery {
             }
         )
     }
-    fun version(version: List<GameVersion>) = Filter(
-        type = FilterType.Version,
-        chart = { chart ->
-            chart.music.version in version
-        }
-    )
-    fun nowVersion(version: GameVersion) = Filter(
-        type = FilterType.Modification,
-        chart = { chart ->
-            chart.music.version.version <= version.version
-        },
-        nowVersion = { version }
-    )
-    val achievementRegex: (String) -> Filter = { raw ->
-        val achievement = raw.toInt()
-        Filter(
-            type = FilterType.Achievement,
-            record = { record ->
-                record.achievement == achievement
-            }
-        )
-    }
 
-    val excludeWorldsEnd = Filter(
-        type = FilterType.Default,
-        chart = { chart ->
-            chart.difficulty != MusicDifficulty.WorldsEnd
-        }
-    )
-    val worldsEnd = Filter(
-        type = FilterType.Difficulty,
-        chart = { chart ->
-            chart.difficulty == MusicDifficulty.WorldsEnd
-        },
-        singleChart = true,
-        name = "worldsEnd"
-    )
-
-    @OptIn(ExperimentalHoplite::class)
-    fun init(data: ChunithmData) {
-        chunithmData = data
-
-        keywordConditions.keywords()
-        regexConditions.regexes()
-        compile()
-    }
-    fun MutableList<Pair<List<String>, Filter>>.keywords() {
-        // 谱师别称
-        chunithmData.designer.aliases.forEach { (designer, aliases) ->
-            add(aliases, designer(designer))
-        }
-        // 曲目分类
-        MusicGenre.entries.forEach { genre ->
-            add(buildList {
-                add(genre.genreName)
-                addAll(genre.names)
-            }, genre(genre))
-        }
-        // 谱面难度
-        MusicDifficulty.entries.filter { it != MusicDifficulty.WorldsEnd }.forEach { difficulty ->
-            add(difficulty.names, difficulty(difficulty))
-        }
-        // 世界末日后
-        add(MusicDifficulty.WorldsEnd.names, worldsEnd)
-        // 谱面定数
-        Level.levelValues.reversed().forEach { levelValue ->
-            add(listOf(levelValue.toStringDecimal(1)), levelValue(levelValue))
-        }
-        // 谱面等级
-        Level.levels.reversed().forEach { level ->
-            if (Level.numberPart(level) >= 10)
-                add(listOf(level + "级", level), level(level))
-            else
-                add(listOf(level + "级"), level(level))
-        }
-        // 特殊条件
-        add(listOf("完整", "全"), noN20)
-        add(listOf("理想"), nextRate)
-        // FC/FS
-        add(listOf("全连", "fc"), fc)
-        add(listOf("理论", "ajc"), ajc)
-        add(listOf("aj", "ap"), aj)
-        add(listOf("fullchain"), fullChain)
-        // 成绩分数
-        add(listOf("寸"), close)
-        add(listOf("锁血", "锁", "名刀", "血压"), just)
-        add(listOf("鸟加", "sss+", "sssp"), rateGreaterEqual("sssp"))
-        add(listOf("纯鸟", "纯sss", "仅鸟", "仅sss"), rate("sss"))
-        add(listOf("鸟", "sss"), rateGreaterEqual("sss"))
-        add(listOf("通关", "clear"), rateGreaterEqual("a"))
-        add(listOf("牛逼", "nb"), achievement(1009500))
-        add(listOf("丢人", "招笑", "越级", "越"), achievementLess(950000))
-        // TODO: 版本&牌子
-        // 谱师名称
-        chunithmData.musics.values.flatMap { music ->
-            music.charts.map { chart -> chart.notesDesigner }
-        }.toSet().toList().forEach { designer ->
-            if (designer.isNotBlank() && designer != "-")
-                add(0, Pair(listOf(designer), designer(designer)))
-        }
-        // 谱面分数
-        add(listOf("纯ss+", "仅ss+"), rate("ssp"))
-        add(listOf("纯ss", "仅ss"), rate("ss"))
-        add(listOf("纯s+", "仅s+"), rate("sp"))
-        add(listOf("纯s", "仅s"), rate("s"))
-        add(listOf("纯aaa", "仅aaa"), rate("aaa"))
-        add(listOf("ss+", "ssp"), rateGreaterEqual("ssp"))
-        add(listOf("ss", "ss"), rateGreaterEqual("ss"))
-        add(listOf("s+", "sp"), rateGreaterEqual("sp"))
-        add(listOf("s"), rateGreaterEqual("s"))
-        add(listOf("aaa"), rateGreaterEqual("aaa"))
-    }
-    fun MutableList<Pair<String, (String) -> Filter>>.regexes() {
-        add("(?<!\\d)(9\\d{5}|100\\d{4}|1010000)(?!\\d)", achievementRegex)
-    }
-    fun compile() {
-        sortedKeywordConditions = keywordConditions.flatMap { (names, filter) ->
-            names.map { name -> name to filter }
-        }.sortedByDescending { it.first.length }
-    }
-
-    fun filters(
-        fullCommand: String
-    ): List<Filter>? {
+    fun filters(fullCommand: String): List<Filter>? {
         val filters = mutableListOf<Filter>()
         var command = fullCommand
 
@@ -349,8 +218,9 @@ object ComboQuery {
         }
 
         if (command.contains("随机")) {
-            val random = Random(System.currentTimeMillis())
-            filters.add(random(random))
+            val rng = Random(System.currentTimeMillis())
+            val orders = mutableMapOf<Record, Int>()
+            filters.add(Filter(FilterType.Sort, sortBy = { orders.getOrPut(it) { rng.nextInt() } }))
         }
         if (filters.isEmpty())
             return null
@@ -360,27 +230,19 @@ object ComboQuery {
         return filters
     }
 
-    fun List<Filter>?.filterCharts(
-        musics: Collection<MusicInfo>
-    ): List<ChartInfo> {
+    fun List<Filter>?.filterCharts(musics: Collection<MusicInfo>): List<ChartInfo> {
         if (isNullOrEmpty())
             return musics.flatMap { it.charts }
 
         val groupedFilters = groupBy { it.type }
-        return musics.flatMap {
-            it.charts
-        }.filter { chart ->
+        return musics.flatMap { it.charts }.filter { chart ->
             groupedFilters.all { (_, group) ->
-                group.any { filter ->
-                    filter.chart(chart)
-                }
+                group.any { filter -> filter.chart(chart) }
             }
         }
     }
 
-    fun List<Filter>?.filterMusics(
-        musics: Collection<MusicInfo>
-    ): List<MusicInfo> {
+    fun List<Filter>?.filterMusics(musics: Collection<MusicInfo>): List<MusicInfo> {
         return filterCharts(musics).map { it.music }.toSet().toList()
     }
 
@@ -393,9 +255,7 @@ object ComboQuery {
 
         forEach { filter ->
             records.forEach { record ->
-                filter.modifier ?.let {
-                    record.apply(it)
-                }
+                filter.modifier?.let { record.apply(it) }
             }
         }
 
@@ -410,22 +270,24 @@ object ComboQuery {
         filtered = filtered.sortedBy(Filter.defaultSort)
         filter { it.sortBy != Filter.defaultSort }.forEach { filter ->
             @Suppress("UNCHECKED_CAST")
-            filtered = filtered.sortedBy<Record, Comparable<Any>>(filter.sortBy as (Record) -> Comparable<Any>?)
+            filtered = filtered.sortedBy<Record, Comparable<Any>>(
+                filter.sortBy as (Record) -> Comparable<Any>?
+            )
         }
         return filtered
     }
 
     fun List<Filter>?.requiresType(): RequiresType {
         this ?: return RequiresType.Achievement
-        if (fc in this || aj in this)
+        if (any { it.name in listOf("fc", "aj", "ajc") })
             return RequiresType.Combo
-        if (fullChain in this)
+        if (any { it.name in listOf("fullChain") })
             return RequiresType.Sync
         return RequiresType.Achievement
     }
 
     fun List<Filter>.filterNowVersion(): GameVersion? =
-        lastOrNull { it.nowVersion != Filter.defaultVersion } ?.nowVersion()
+        lastOrNull { it.nowVersion != Filter.defaultVersion }?.nowVersion()
 
     fun List<Filter>?.noRecordFilter() =
         this == null || all { it.record == Filter.defaultRecordFilter }
@@ -436,14 +298,12 @@ object ComboQuery {
     }
 
     fun List<Filter>?.isAllRequired() =
-        this ?.any { it.disableN20 } ?: false
+        this?.any { it.disableN20 } ?: false
 
     fun List<Filter>?.isSingleChartSelected() =
-        this ?.any { it.singleChart } ?: false
+        this?.any { it.singleChart } ?: false
 
-    fun List<Filter>.params(
-        name: String
-    ): FilterParams = FilterParams(
+    fun List<Filter>.params(name: String): FilterParams = FilterParams(
         name = name,
         newestVersion = filterNowVersion() ?: chunithmData.newestVersion,
         isAllRequired = isAllRequired(),

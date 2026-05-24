@@ -1,12 +1,12 @@
 package xyz.xszq.bot.maimai.music
 
-enum class MusicDifficulty(val value: Int, val names: List<String>) {
-    Basic(0, listOf("绿谱", "绿")),
-    Advanced(1, listOf("黄谱", "黄")),
-    Expert(2, listOf("红谱", "红")),
-    Master(3, listOf("紫谱", "紫")),
-    ReMaster(4, listOf("白谱", "白")),
-    Utage(10, listOf("宴谱", "宴"));
+enum class MusicDifficulty(val value: Int, val names: Array<String>) {
+    Basic(0, arrayOf("绿谱", "绿")),
+    Advanced(1, arrayOf("黄谱", "黄")),
+    Expert(2, arrayOf("红谱", "红")),
+    Master(3, arrayOf("紫谱", "紫")),
+    ReMaster(4, arrayOf("白谱", "白")),
+    Utage(10, arrayOf("宴谱", "宴"));
 
     companion object {
         fun of(value: Int): MusicDifficulty =

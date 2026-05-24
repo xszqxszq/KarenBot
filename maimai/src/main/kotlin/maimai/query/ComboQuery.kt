@@ -5,7 +5,6 @@ import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
 import korlibs.io.util.toStringDecimal
 import korlibs.math.toIntRound
-import xyz.xszq.bot.add
 import xyz.xszq.bot.json
 import xyz.xszq.bot.maimai.component.MaimaiData
 import xyz.xszq.bot.maimai.component.Tag
@@ -22,153 +21,248 @@ object ComboQuery {
     lateinit var designerConfig: DesignerConfig
     lateinit var maimaiData: MaimaiData
 
-    val keywordConditions: MutableList<Pair<List<String>, Filter>> = mutableListOf()
+    val keywordConditions = mutableListOf<Pair<List<String>, Filter>>()
     var sortedKeywordConditions: List<Pair<String, Filter>> = emptyList()
+    val regexConditions = mutableListOf<Pair<String, (String) -> Filter>>()
 
-    val regexConditions: MutableList<Pair<String, (String) -> Filter>> = mutableListOf()
+    private val excludeUtage = Filter(
+        FilterType.Default, chart = { it.difficulty != MusicDifficulty.Utage },
+        name = "excludeUtage"
+    )
 
-    val ap = Filter(
-        type = FilterType.Combo,
-        record = { record ->
-            record.comboStatus.isAP()
+    fun rules() = register {
+        aliases("极", "全连", "fc") {
+            combo(name = "fc") { it.comboStatus.isFC() }
         }
-    )
-    val app = Filter(
-        type = FilterType.Combo,
-        record = { record ->
-            record.comboStatus == ComboStatus.AllPerfectPlus
+        aliases("理论", "ap+", "app") {
+            combo(name = "app") { it.comboStatus == ComboStatus.AllPerfectPlus }
         }
-    )
-    val fc = Filter(
-        type = FilterType.Combo,
-        record = { record ->
-            record.comboStatus.isFC()
+        aliases("神", "ap") {
+            combo(name = "ap") { it.comboStatus.isAP() }
         }
-    )
-    val fsd = Filter(
-        type = FilterType.Sync,
-        record = { record ->
-            record.syncStatus.isFSD()
+
+        aliases("fdx+", "fsd+", "fdxp", "fsdp") {
+            sync(name = "fsdp") { it.syncStatus == SyncStatus.FullSyncDeluxePlus }
         }
-    )
-    val fsdp = Filter(
-        type = FilterType.Sync,
-        record = { record ->
-            record.syncStatus == SyncStatus.FullSyncDeluxePlus
+        aliases("舞舞", "fdx", "fsd") {
+            sync(name = "fsd") { it.syncStatus.isFSD() }
         }
-    )
-    val close = Filter(
-        type = FilterType.Achievement,
-        record = { record ->
-            val decimal = record.achievement % 10000
-            record.achievement in 994250..1004999
-                    && (decimal in 4250..4999 || decimal in 9250..9999)
-        },
-        sortBy = { record ->
-            var target = (record.achievement.toDouble() / 10000).toIntRound() * 10000
-            if (target < record.achievement)
-                target += 5000
-            target - record.achievement
-        })
-    val just = Filter(
-        type = FilterType.Achievement,
-        record = { record ->
-            val decimal = record.achievement % 10000
-            record.achievement in 1000000..1005250
-                    && (decimal in 5000..5250 || decimal in 0..1250)
-        },
-        sortBy = { record ->
-            var target = (record.achievement.toDouble() / 10000).toIntRound() * 10000
-            if (target > record.achievement)
-                target -= 5000
-            record.achievement - target
-        })
-    fun rate(rate: String) = Filter(
-        type = FilterType.Achievement,
-        record = { record ->
-            record.rate == rate
-        }
-    )
-    fun rateGreaterEqual(rate: String) = Filter(
-        type = FilterType.Achievement,
-        record = { record ->
-            Rate.greaterEqual(record.achievement, rate)
-        }
-    )
-    fun achievement(achievement: Int) = Filter(
-        type = FilterType.Achievement,
-        record = { record ->
-            record.achievement >= achievement
-        }
-    )
-    fun achievementLess(achievement: Int) = Filter(
-        type = FilterType.Achievement,
-        record = { record ->
-            record.achievement < achievement
-        }
-    )
-    val noB15 = Filter(
-        type = FilterType.Limit,
-        disable15 = true
-    )
-    fun random(random: Random): Filter {
-        val orders = mutableMapOf<Record, Int>()
-        return Filter(
-            type = FilterType.Sort,
-            sortBy = { record ->
-                orders.getOrPut(record) { random.nextInt() }
+
+        aliases("寸") {
+            achievement(sortBy = { r ->
+                var target = (r.achievement.toDouble() / 10000).toIntRound() * 10000
+                if (target < r.achievement) target += 5000
+                target - r.achievement
+            }) { r ->
+                val decimal = r.achievement % 10000
+                r.achievement in 994250..1004999
+                        && (decimal in 4250..4999 || decimal in 9250..9999)
             }
-        )
-    }
-    fun difficulty(difficulty: MusicDifficulty) = Filter(
-        type = FilterType.Difficulty,
-        chart = { chart ->
-            chart.difficulty == difficulty
-        },
-        singleChart = true
-    )
-    fun genre(genre: MusicGenre) = Filter(
-        type = FilterType.Genre,
-        chart = { chart ->
-            chart.music.genre == genre
         }
-    )
-    fun tag(musics: List<Int>, tag: String? = null) = Filter(
-        type = FilterType.Tag,
-        chart = { chart ->
-            chart.music.id in musics
-        }, name = tag)
-    fun level(level: String) = Filter(
-        type = FilterType.Level,
-        chart = { chart ->
-            chart.level == level
-        },
-        name = "level",
-        singleChart = true
-    )
-    fun levelValue(levelValue: Double) = Filter(
-        type = FilterType.Level,
-        chart = { chart ->
-            chart.levelValue == levelValue
-        },
-        name = "levelValue",
-        singleChart = true
-    )
+        aliases("锁血", "锁", "名刀", "血压") {
+            achievement(sortBy = { r ->
+                var target = (r.achievement.toDouble() / 10000).toIntRound() * 10000
+                if (target > r.achievement) target -= 5000
+                r.achievement - target
+            }) { r ->
+                val decimal = r.achievement % 10000
+                r.achievement in 1000000..1005250
+                        && (decimal in 5000..5250 || decimal in 0..1250)
+            }
+        }
+
+        aliases("大将", "鸟加", "sss+", "sssp") { rateGE("sssp") }
+        aliases("将") { rateGE("sss") }
+        aliases("纯鸟", "纯sss", "仅鸟", "仅sss") { rate("sss") }
+        aliases("鸟", "sss") { rateGE("sss") }
+        aliases("霸", "clear") { rateGE("a") }
+        aliases("牛逼", "nb") { achievement { it.achievement >= 1008000 } }
+        aliases("丢人", "招笑", "越级", "越") { achievement { it.achievement < 950000 } }
+
+        aliases("纯ss+", "仅ss+") { rate("ssp") }
+        aliases("纯ss", "仅ss") { rate("ss") }
+        aliases("纯s+", "仅s+") { rate("sp") }
+        aliases("纯s", "仅s") { rate("s") }
+        aliases("纯aaa", "仅aaa") { rate("aaa") }
+        aliases("ss+", "ssp") { rateGE("ssp") }
+        aliases("ss") { rateGE("ss") }
+        aliases("s+", "sp") { rateGE("sp") }
+        aliases("s") { rateGE("s") }
+        aliases("aaa") { rateGE("aaa") }
+
+        aliases("完整", "全") { limit(disable15 = true) }
+        aliases("拟合定数", "拟合", "nh") {
+            modification(
+                fitLevelValue = true,
+                sortBy = { -Rating.calc(it.chart.fitLevelValue, it.achievement) }
+            )
+        }
+        aliases("理想") {
+            modification(modifier = {
+                when (rate) {
+                    "sssp" -> {
+                        achievement = 1010000
+                        comboStatus = ComboStatus.AllPerfectPlus
+                    }
+                    else -> {
+                        rate = Rate.next(rate)
+                        achievement = Rate.floor(rate)
+                        rating = Rating.calc(chart, achievement)
+                    }
+                }
+            })
+        }
+
+        aliases("宴谱", "宴会场") { difficulty(MusicDifficulty.Utage, name = "utage") }
+        aliases("标准", "标") { type(MusicType.Standard) }
+        aliases("dx谱") { type(MusicType.Deluxe) }
+        aliases("旧框") {
+            version(maimaiData.versions.values.filter { it.version <= 19900 })
+        }
+        aliases("dx") {
+            version(maimaiData.versions.values.filter { it.version > 19900 })
+        }
+        aliases("旧版本", "旧") {
+            version(maimaiData.versions.values.filter { it != maimaiData.newestVersion })
+        }
+        aliases("新版本", "新歌", "新") {
+            version(listOf(maimaiData.newestVersion))
+        }
+
+        dynamic {
+            listOf("一星", "二星", "三星", "四星", "五星").forEachIndexed { index, name ->
+                aliases(name, "${index + 1}星") { stars(index + 1) }
+            }
+            MusicGenre.entries.filter { it != MusicGenre.Utage }.forEach { g ->
+                aliases(g.genreName, g.value, *g.names) { genre(g) }
+            }
+            MusicDifficulty.entries.filter { it != MusicDifficulty.Utage }.forEach { d ->
+                aliases(*d.names) { difficulty(d) }
+            }
+            Level.levelValues.reversed().forEach { value ->
+                aliases(value.toStringDecimal(1)) { levelValue(value) }
+            }
+            Level.levels.reversed().forEach { level ->
+                when {
+                    Level.numberPart(level) >= 10 -> aliases(listOf("${level}级", level)) { level(level) }
+                    else -> aliases(listOf("${level}级")) { level(level)}
+                }
+            }
+            designerConfig.aliases.forEach { (name, aliases) ->
+                aliases(aliases) { designer(name) }
+            }
+        }
+
+        dynamic {
+            maimaiData.plates.values.filter {
+                it.genre == "実績" && it.requires.isNotEmpty() && it.name != "覇者"
+            }.associateBy {
+                it.name.replace(Item.plateTypes.first { type -> it.name.endsWith(type) }, "")
+            }.also { filtered ->
+                val early = filtered.filter { (version, _) ->
+                    version in listOf("真", "超", "檄")
+                }.flatMap { (_, plate) ->
+                    plate.requires.mapNotNull { maimaiData.musics[it]?.version }.toSet().toList()
+                }.toSet().toList()
+                add(0, listOf("真超檄"), version(early))
+            }.forEach { (version, plate) ->
+                val simplified = Item.simplifyTable[version] ?: version.toSimple()
+                val gameVersions = plate.requires
+                    .mapNotNull { maimaiData.musics[it]?.version }.toSet().toList()
+                add(listOf(version, simplified), version(gameVersions))
+                add(0, listOf(simplified + "代"), version(gameVersions))
+            }
+        }
+
+        dynamic {
+            maimaiData.versions.values.filter { it.version > 20000 }.forEach { v ->
+                val year = v.name.substringAfter("舞萌DX ")
+                add(0, listOf("dx$year", year), nowVersion(v))
+            }
+            add(0, listOf("dx2026", "2026"), nowVersion(
+                GameVersion(id = 25, "舞萌DX 2026", 26000)
+            ))
+            maimaiData.versions.values.firstOrNull { it.version == 20000 }?.let { v ->
+                add(0, listOf("dx无印"), nowVersion(v))
+            }
+        }
+
+        dynamic {
+            maimaiData.musics.values.flatMap { music ->
+                music.charts.map { chart -> chart.notesDesigner }
+            }.toSet().toList().forEach { designer ->
+                if (designer.isNotBlank() && designer != "-")
+                    add(0, listOf(designer), this@ComboQuery.designer(designer))
+            }
+        }
+
+        dynamic {
+            maimaiData.plates.values.filter {
+                it.genre == "実績" && it.requires.isNotEmpty()
+            }.forEach { p ->
+                val name = Item.toSimplified(p.name)
+                add(0, listOf(p.name, name), plate(p.requires, p.remasters, p.name))
+            }
+        }
+
+        dynamic {
+            val customTags = json.decodeFromString<Map<String, Tag>>(
+                File(maimaiData.dataDir.absolutePath + "/tag.json").readText(Charsets.UTF_8)
+            )
+            customTags.forEach { (_, tag) ->
+                aliases(tag.aliases) { tag(tag.musics, tag.name) }
+            }
+        }
+
+        regex("(?<!\\d)(?:10[0-1]|[1-9]?\\d)\\.\\d{1,4}(?=%|％)") { matched ->
+            achievement { it.achievement == (matched.toDouble() * 10000).roundToInt() }
+        }
+    }
+
+    @OptIn(ExperimentalHoplite::class)
+    fun init(data: MaimaiData) {
+        designerConfig = ConfigLoaderBuilder.default()
+            .addFileSource("./data/maimai/designer.yml")
+            .withExplicitSealedTypes()
+            .build()
+            .loadConfigOrThrow<DesignerConfig>()
+        maimaiData = data
+
+        rules()
+    }
+
+    private fun register(block: ComboQueryBuilder.() -> Unit) {
+        val builder = ComboQueryBuilder()
+        builder.apply(block)
+        keywordConditions += builder.entries
+        regexConditions += builder.regexes
+
+        compile()
+    }
+
+    fun compile() {
+        sortedKeywordConditions = keywordConditions.flatMap { (names, filter) ->
+            names.map { name -> name to filter }
+        }.sortedByDescending { it.first.length }
+    }
+
+    private fun named(name: String) = keywordConditions
+        .firstOrNull { (_, filter) -> filter.name == name }
+        ?.second
 
     fun designer(designer: String): Filter {
         val normalized = designer.toDBC()
-
         val mainName = (designerConfig.aliases.entries.firstOrNull { (key, aliases) ->
             when {
                 key.toDBC().equals(normalized, ignoreCase = true) -> true
                 aliases.any { it.toDBC().equals(normalized, ignoreCase = true) } -> true
                 else -> false
             }
-        } ?.key ?: designer).toDBC()
+        }?.key ?: designer).toDBC()
 
         val includesAliases = designerConfig.includes.entries.firstOrNull {
             it.key.toDBC().equals(mainName, ignoreCase = true)
-        } ?.value ?: emptyList()
+        }?.value ?: emptyList()
 
         val searchKeywords = (includesAliases + mainName).map { it.toDBC() }.distinct()
 
@@ -187,7 +281,6 @@ object ComboQuery {
                 val matchAlias = searchKeywords.any { keyword ->
                     chart.notesDesigner.toDBC().contains(keyword, ignoreCase = true)
                 }
-
                 val matchCollab = collabCharts.any { raw ->
                     val nowId = raw.substringBefore("#").toInt()
                     val nowDiff = MusicDifficulty.of(raw.substringAfter("#").toInt())
@@ -197,259 +290,8 @@ object ComboQuery {
             }
         )
     }
-    fun musicsPlate(musics: List<Int>, reMasters: List<Int>, plateName: String) = Filter(
-        type = FilterType.Plate,
-        chart = { chart ->
-            if (chart.difficulty == MusicDifficulty.ReMaster)
-                chart.music.id in reMasters
-            else
-                chart.music.id in musics
-        },
-        record = { record ->
-            when {
-                plateName.endsWith("極") -> record.comboStatus.isFC()
-                plateName.endsWith("将") -> Rate.greaterEqual(record.achievement, "sss")
-                plateName.endsWith("神") -> record.comboStatus.isAP()
-                plateName.endsWith("舞舞") -> record.syncStatus.isFSD()
-                plateName == "覇者" -> record.achievement >= 800000
-                else -> throw UnknownError()
-            }
-        }, name = "plate_$plateName"
-    )
-    fun version(version: List<GameVersion>) = Filter(
-        type = FilterType.Version,
-        chart = { chart ->
-            chart.music.version in version
-        }
-    )
-    fun type(type: MusicType) = Filter(
-        type = FilterType.Type,
-        chart = { chart ->
-            chart.music.type == type
-        }
-    )
-    val starsNames = listOf("一星", "二星", "三星", "四星", "五星")
-    fun stars(stars: Int) = Filter(
-        type = FilterType.Star,
-        record = { record ->
-            DeluxeScore.stars(record.deluxeScore, record.chart.maxDeluxeScore) == stars
-        }
-    )
-    val fitLevelValues = Filter(
-        type = FilterType.Modification,
-        fitLevelValue = true,
-        sortBy = { record ->
-            -Rating.calc(record.chart.fitLevelValue, record.achievement)
-        }
-    )
-    val nextRate = Filter(
-        type = FilterType.Modification,
-        modifier = {
-            when (rate) {
-                "sssp" -> {
-                    achievement = 1010000
-                    comboStatus = ComboStatus.AllPerfectPlus
-                }
-                else -> {
-                    rate = Rate.next(rate)
-                    achievement = Rate.floor(rate)
-                    rating = Rating.calc(chart, achievement)
-                }
-            }
-        }
-    )
-    fun nowVersion(version: GameVersion) = Filter(
-        type = FilterType.Modification,
-        chart = { chart ->
-            chart.music.version.version <= version.version
-        },
-        nowVersion = { version }
-    )
-    val achievementRegex: (String) -> Filter = { raw ->
-        val achievement = (raw.toDouble() * 10000).roundToInt()
-        Filter(
-            type = FilterType.Achievement,
-            record = { record ->
-                record.achievement == achievement
-            }
-        )
-    }
 
-    val excludeUtage = Filter(
-        type = FilterType.Default,
-        chart = { chart ->
-            chart.difficulty != MusicDifficulty.Utage
-        }
-    )
-    val utage = Filter(
-        type = FilterType.Difficulty,
-        chart = { chart ->
-            chart.difficulty == MusicDifficulty.Utage
-        },
-        singleChart = true,
-        name = "utage"
-    )
-
-    @OptIn(ExperimentalHoplite::class)
-    fun init(data: MaimaiData) {
-        designerConfig = ConfigLoaderBuilder.default()
-            .addFileSource("./data/maimai/designer.yml")
-            .withExplicitSealedTypes()
-            .build()
-            .loadConfigOrThrow<DesignerConfig>()
-        maimaiData = data
-
-        keywordConditions.addConditions()
-        regexConditions.regexes()
-        compile()
-    }
-    fun MutableList<Pair<List<String>, Filter>>.addConditions() {
-        // 谱师别称
-        designerConfig.aliases.forEach { (designer, aliases) ->
-            add(aliases, designer(designer))
-        }
-        // 曲目分类
-        MusicGenre.entries.filter { it != MusicGenre.Utage }.forEach { genre ->
-            add(buildList {
-                add(genre.genreName)
-                add(genre.value)
-                addAll(genre.names)
-            }, genre(genre))
-        }
-        // 谱面难度
-        MusicDifficulty.entries.filter { it != MusicDifficulty.Utage }.forEach { difficulty ->
-            add(difficulty.names, difficulty(difficulty))
-        }
-        // 宴谱
-        add(listOf("宴谱", "宴会场"), utage)
-        // 谱面定数
-        Level.levelValues.reversed().forEach { levelValue ->
-            add(listOf(levelValue.toStringDecimal(1)), levelValue(levelValue))
-        }
-        // 谱面等级
-        Level.levels.reversed().forEach { level ->
-            if (Level.numberPart(level) >= 10)
-                add(listOf(level + "级", level), level(level))
-            else
-                add(listOf(level + "级"), level(level))
-        }
-        // 特殊条件
-        add(listOf("完整", "全"), noB15)
-        add(listOf("拟合定数", "拟合", "nh"), fitLevelValues)
-        add(listOf("理想"), nextRate)
-        // FC/FS
-        add(listOf("极", "全连", "fc"), fc)
-        add(listOf("理论", "ap+", "app"), app)
-        add(listOf("神", "ap"), ap)
-        add(listOf("fdx+", "fsd+", "fdxp", "fsdp"), fsdp)
-        add(listOf("舞舞", "fdx", "fsd"), fsd)
-        // 成绩分数
-        add(listOf("寸"), close)
-        add(listOf("锁血", "锁", "名刀", "血压"), just)
-        add(listOf("大将", "鸟加", "sss+", "sssp"), rateGreaterEqual("sssp"))
-        add(listOf("将"), rateGreaterEqual("sss"))
-        add(listOf("纯鸟", "纯sss", "仅鸟", "仅sss"), rate("sss"))
-        add(listOf("鸟", "sss"), rateGreaterEqual("sss"))
-        add(listOf("霸", "clear"), rateGreaterEqual("a"))
-        add(listOf("牛逼", "nb"), achievement(1008000))
-        add(listOf("丢人", "招笑", "越级", "越"), achievementLess(950000))
-        (1..5).forEach { stars ->
-            add(listOf(starsNames[stars-1], "${stars}星"), stars(stars))
-        }
-        // 标准版本
-        maimaiData.plates.values.filter {
-            it.genre == "実績" && it.requires.isNotEmpty() && it.name != "覇者"
-        }.associateBy {
-            it.name.replace(Item.plateTypes.first { type -> it.name.endsWith(type) }, "")
-        }.also { filtered ->
-            val early = filtered.filter { (version, _) ->
-                version in listOf("真", "超", "檄")
-            }.flatMap { (_, plate) ->
-                plate.requires.mapNotNull { maimaiData.musics[it] ?.version }.toSet().toList()
-            }.toSet().toList()
-            add(0, Pair(listOf("真超檄"),version(early)))
-        }.forEach { (version, plate) ->
-            val simplified = Item.simplifyTable[version] ?: version.toSimple()
-            val gameVersions = plate.requires.mapNotNull { maimaiData.musics[it] ?.version }.toSet().toList()
-            add(Pair(listOf(version, simplified),
-                version(gameVersions)))
-            add(0, Pair(listOf(simplified + "代"),
-                version(gameVersions)))
-        }
-        // DX版本
-        maimaiData.versions.values.filter { it.version > 20000 }.forEach { version ->
-            val year = version.name.substringAfter("舞萌DX ")
-            add(0, Pair(listOf("dx$year", year), nowVersion(version)))
-        }
-        // TODO: Remove this on 2026 update
-        add(0, Pair(listOf("dx2026", "2026"), nowVersion(GameVersion(
-            id = 25, "舞萌DX 2026", 26000
-        ))))
-        maimaiData.versions.values.firstOrNull { it.version == 20000 } ?.let { version ->
-            add(0, Pair(listOf("dx无印"), nowVersion(version)))
-        }
-        // 谱面类型
-        add(Pair(listOf("标准", "标"), type(MusicType.Standard)))
-        add(Pair(listOf("dx谱"), type(MusicType.Deluxe)))
-        add(Pair(listOf("旧框"),
-            version(maimaiData.versions.values.filter { it.version <= 19900 })
-        ))
-        add(Pair(listOf("dx"),
-            version(maimaiData.versions.values.filter { it.version > 19900 })
-        ))
-        add(Pair(listOf("旧版本", "旧"),
-            version(maimaiData.versions.values.filter { it != maimaiData.newestVersion })
-        ))
-        add(Pair(listOf("新版本", "新歌", "新"),
-            version(listOf(maimaiData.newestVersion))
-        ))
-        // 牌子谱面
-        maimaiData.plates.values.filter {
-            it.genre == "実績" && it.requires.isNotEmpty()
-        }.forEach { plate ->
-            val name = Item.toSimplified(plate.name)
-            add(0, Pair(listOf(plate.name, name),
-                musicsPlate(plate.requires, plate.remasters, plate.name)))
-        }
-        // 谱师名称
-        maimaiData.musics.values.flatMap { music ->
-            music.charts.map { chart -> chart.notesDesigner }
-        }.toSet().toList().forEach { designer ->
-            if (designer.isNotBlank() && designer != "-")
-                add(0, Pair(listOf(designer), designer(designer)))
-        }
-        // 谱面分数
-        add(listOf("纯ss+", "仅ss+"), rate("ssp"))
-        add(listOf("纯ss", "仅ss"), rate("ss"))
-        add(listOf("纯s+", "仅s+"), rate("sp"))
-        add(listOf("纯s", "仅s"), rate("s"))
-        add(listOf("纯aaa", "仅aaa"), rate("aaa"))
-        add(listOf("ss+", "ssp"), rateGreaterEqual("ssp"))
-        add(listOf("ss", "ss"), rateGreaterEqual("ss"))
-        add(listOf("s+", "sp"), rateGreaterEqual("sp"))
-        add(listOf("s"), rateGreaterEqual("s"))
-        add(listOf("aaa"), rateGreaterEqual("aaa"))
-        // 谱面标签
-        val customTags = json.decodeFromString<Map<String, Tag>>(
-            File(maimaiData.dataDir.absolutePath + "/tag.json").readText(Charsets.UTF_8)
-        )
-        customTags.forEach { (_, tag) ->
-            add(Pair(tag.aliases, tag(tag.musics, tag.name)))
-        }
-    }
-    fun MutableList<Pair<String, (String) -> Filter>>.regexes() {
-        add("(?<!\\d)(?:10[0-1]|[1-9]?\\d)\\.\\d{1,4}(?=%|％)", achievementRegex)
-    }
-
-    fun compile() {
-        sortedKeywordConditions = keywordConditions.flatMap { (names, filter) ->
-            names.map { name -> name to filter }
-        }.sortedByDescending { it.first.length }
-    }
-
-    fun filters(
-        fullCommand: String
-    ): List<Filter>? {
+    fun filters(fullCommand: String): List<Filter>? {
         val filters = mutableListOf<Filter>()
         var command = fullCommand
 
@@ -473,8 +315,9 @@ object ComboQuery {
         }
 
         if (command.contains("随机")) {
-            val random = Random(System.currentTimeMillis())
-            filters.add(random(random))
+            val rng = Random(System.currentTimeMillis())
+            val orders = mutableMapOf<Record, Int>()
+            filters.add(Filter(FilterType.Sort, sortBy = { orders.getOrPut(it) { rng.nextInt() } }))
         }
         if (filters.isEmpty())
             return null
@@ -484,27 +327,19 @@ object ComboQuery {
         return filters
     }
 
-    fun List<Filter>?.filterCharts(
-        musics: Collection<MusicInfo>
-    ): List<ChartInfo> {
+    fun List<Filter>?.filterCharts(musics: Collection<MusicInfo>): List<ChartInfo> {
         if (isNullOrEmpty())
             return musics.flatMap { it.charts }
 
         val groupedFilters = groupBy { it.type }
-        return musics.flatMap {
-            it.charts
-        }.filter { chart ->
+        return musics.flatMap { it.charts }.filter { chart ->
             groupedFilters.all { (_, group) ->
-                group.any { filter ->
-                    filter.chart(chart)
-                }
+                group.any { filter -> filter.chart(chart) }
             }
         }
     }
 
-    fun List<Filter>?.filterMusics(
-        musics: Collection<MusicInfo>
-    ): List<MusicInfo> {
+    fun List<Filter>?.filterMusics(musics: Collection<MusicInfo>): List<MusicInfo> {
         return filterCharts(musics).map { it.music }.toSet().toList()
     }
 
@@ -517,9 +352,7 @@ object ComboQuery {
 
         forEach { filter ->
             records.forEach { record ->
-                filter.modifier ?.let {
-                    record.apply(it)
-                }
+                filter.modifier?.let { record.apply(it) }
             }
         }
 
@@ -534,18 +367,20 @@ object ComboQuery {
         filtered = filtered.sortedBy(Filter.defaultSort)
         filter { it.sortBy != Filter.defaultSort }.forEach { filter ->
             @Suppress("UNCHECKED_CAST")
-            filtered = filtered.sortedBy<Record, Comparable<Any>>(filter.sortBy as (Record) -> Comparable<Any>?)
+            filtered = filtered.sortedBy<Record, Comparable<Any>>(
+                filter.sortBy as (Record) -> Comparable<Any>?
+            )
         }
         return filtered
     }
 
     fun List<Filter>?.requiresType(): RequiresType {
         this ?: return RequiresType.Achievement
-        if (fc in this || ap in this)
+        if (any { it.name in listOf("fc", "ap", "app") })
             return RequiresType.Combo
-        if (fsd in this)
+        if (any { it.name in listOf("fsd", "fsdp") })
             return RequiresType.Sync
-        return mapNotNull { it.name }.firstOrNull { it.startsWith("plate") } ?.let { plateName ->
+        return mapNotNull { it.name }.firstOrNull { it.startsWith("plate") }?.let { plateName ->
             when {
                 plateName.endsWith("極") -> RequiresType.Combo
                 plateName.endsWith("神") -> RequiresType.Combo
@@ -556,7 +391,7 @@ object ComboQuery {
     }
 
     fun List<Filter>.filterNowVersion(): GameVersion? =
-        lastOrNull { it.nowVersion != Filter.defaultVersion } ?.nowVersion()
+        lastOrNull { it.nowVersion != Filter.defaultVersion }?.nowVersion()
 
     fun List<Filter>?.noRecordFilter() =
         this == null || all { it.record == Filter.defaultRecordFilter }
@@ -572,17 +407,15 @@ object ComboQuery {
     }
 
     fun List<Filter>?.isAllRequired() =
-        this ?.any { it.disable15 } ?: false
+        this?.any { it.disable15 } ?: false
 
     fun List<Filter>?.isFitLevelValue() =
-        this ?.any { it.fitLevelValue } ?: false
+        this?.any { it.fitLevelValue } ?: false
 
     fun List<Filter>?.isSingleChartSelected() =
-        this ?.any { it.singleChart } ?: false
+        this?.any { it.singleChart } ?: false
 
-    fun List<Filter>.params(
-        name: String
-    ): FilterParams = FilterParams(
+    fun List<Filter>.params(name: String): FilterParams = FilterParams(
         name = name,
         newestVersion = filterNowVersion() ?: maimaiData.newestVersion,
         isAllRequired = isAllRequired(),
