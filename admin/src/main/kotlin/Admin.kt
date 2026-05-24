@@ -5,9 +5,11 @@ import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.payload.AdminCheckRequest
 import xyz.xszq.bot.payload.MsgType
+import xyz.xszq.bot.payload.markdown.MarkdownData
 import java.io.File
 
 @Suppress("unused")
@@ -43,6 +45,11 @@ class Admin: Plugin() {
                     msgType = MsgType.TEXT
                 )
                 log(MessageChain(content))
+            }
+        }
+        startsWith("markdown") { content ->
+            if (isAdmin()) {
+                reply(Markdown(MarkdownData(content)))
             }
         }
     }
