@@ -15,8 +15,6 @@ import xyz.xszq.bot.maimai.endsWith
 import xyz.xszq.bot.maimai.substringBefore
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.message.MessageElement
-import xyz.xszq.bot.payload.markdown.Keyboard
-import xyz.xszq.bot.payload.markdown.MarkdownData
 import java.time.Duration
 
 @Suppress("unused")
@@ -103,25 +101,25 @@ class QueueController(
         command: String,
         hint: String,
         enter: Boolean = false
-    ) {
-        val arcades = ArcadeGroupBind.listArcades(group.id) ?: run {
-            reply {
+    ): Markdown {
+        return ArcadeGroupBind.listArcades(group.id) ?.let { arcades ->
+            Markdown.create {
+                line(bold("排卡管理"))
+                line()
+                line(hint)
+                line()
+                arcades.map { it.name }.forEach { name ->
+                    line("> " + MarkdownTemplates.href("$command $name", name, enter = false))
+                }
+            }
+        } ?: run {
+            Markdown.create {
                 brief("排卡管理", "本群还未添加机厅，请点击下方按钮并输入机厅名称来添加。")
                 keyboard {
                     row {
                         at("添加机厅", "/排卡管理 添加机厅 ")
                     }
                 }
-            }
-            return
-        }
-        reply {
-            line(bold("排卡管理"))
-            line()
-            line(hint)
-            line()
-            arcades.map { it.name }.forEach { name ->
-                line("> " + MarkdownTemplates.href("$command $name", name, enter = false))
             }
         }
     }
@@ -131,10 +129,9 @@ class QueueController(
         raw: String ?= null
     ) {
         if (name.isNullOrBlank()) {
-            if (textMode())
-                reply("请输入别名！")
-            else
-                selectArcade("/排卡管理 添加别名", "请点击要添加别名的机厅，并输入别名：")
+            reply("请输入别名！", selectArcade(
+                "/排卡管理 添加别名", "请点击要添加别名的机厅，并输入别名："
+            ))
             return
         }
         val alias = validateAlias(raw)
@@ -147,10 +144,9 @@ class QueueController(
         raw: String ?= null
     ) {
         if (name.isNullOrBlank()) {
-            if (textMode())
-                reply("请输入别名！")
-            else
-                selectArcade("/排卡管理 删除别名", "请点击要删除别名的机厅，并输入要删除的别名：")
+            reply("请输入别名！", selectArcade(
+                "/排卡管理 删除别名", "请点击要删除别名的机厅，并输入要删除的别名："
+            ))
             return
         }
         val alias = validateAlias(raw)
@@ -162,10 +158,9 @@ class QueueController(
         name: String?
     ) {
         if (name.isNullOrBlank()) {
-            if (textMode())
-                reply("请输入要查看别名的机厅！")
-            else
-                selectArcade("/排卡管理 查看别名", "请点击要查看别名的机厅：")
+            reply("请输入要查看别名的机厅！", selectArcade(
+                "/排卡管理 查看别名", "请点击要查看别名的机厅："
+            ))
             return
         }
         val aliases = ArcadeGroupBind.aliases(group.id, name).joinToString("，")
@@ -210,16 +205,16 @@ class QueueController(
                 appendLine("更新数据请使用“机厅名+数量”的格式，如 “jt3” 或 “jt+1” 或 “jt-1”。")
             }.toPlainText()
         else
-            Markdown(MarkdownData(buildString {
-                appendLine("**机厅排卡人数：**")
-                appendLine()
-                appendLine(countInfo.split("\n").joinToString("\n") { "> $it" })
-                appendLine("> ")
-                appendLine("> 可以点击上方机厅名并输入人数来更新。")
-                appendLine("> \t例：某某机厅3")
-                appendLine("> \t例：机厅+1")
-                append("> \t例：jt-2")
-            }))
+            Markdown.create {
+                line(bold("机厅排卡人数："))
+                line()
+                line(countInfo.split("\n").joinToString("\n") { "> $it" })
+                line("> ")
+                line("> 可以点击上方机厅名并输入人数来更新。")
+                line("> \t例：某某机厅3")
+                line("> \t例：机厅+1")
+                line("> \t例：jt-2")
+            }
     }
 
     private fun status(
@@ -291,15 +286,18 @@ class QueueController(
     
     private fun queue(
         title: String,
-        content: String,
+        body: String,
         now: String? = null
-    ) = Markdown(MarkdownData("**$title**\n\n$content"), Keyboard.create {
-        row {
-            at("查询人数", "/j", enter = true, id = "")
-            now?.let {
-                at("添加别名", "/排卡管理 添加别名 $it 这里填别名", id = "")
+    ) = Markdown.create {
+        content = bold(title) + "\n\n" + body
+        keyboard {
+            row {
+                at("查询人数", "/j", enter = true)
+                now?.let {
+                    at("添加别名", "/排卡管理 添加别名 $it 这里填别名")
+                }
+                at("更新人数", now ?: "\n")
             }
-            at("更新人数", now ?: "\n", id = "")
         }
-    })
+    }
 }

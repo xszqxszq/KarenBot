@@ -295,12 +295,8 @@ class GuessController(
         delay(30000L)
 
         val hint = "很遗憾，没有人猜中哦".toPlainText() + music.infoText()
-        if (textMode()) {
-            eventToReply[contextId] ?.reply(hint)
-        } else {
-            val url = "$jacketUrl/${music.resourceId}.jpg"
-            eventToReply[contextId] ?.reply(guessFinished(url, hint.text))
-        }
+        val url = "$jacketUrl/${music.resourceId}.jpg"
+        eventToReply[contextId] ?.reply(hint, guessFinished(url, hint.text))
         endGame(subscribesAt)
     }
     private suspend fun MessageEvent.listenClassical(
@@ -319,12 +315,8 @@ class GuessController(
             endGame(subscribesAt)
 
             val hint = "游戏已结束。答案如下：".toPlainText() + music.infoText()
-            if (textMode()) {
-                reply(hint)
-            } else {
-                val url = "$jacketUrl/${music.resourceId}.jpg"
-                reply(guessFinished(url, hint.text))
-            }
+            val url = "$jacketUrl/${music.resourceId}.jpg"
+            reply(hint, guessFinished(url, hint.text))
             return
         }
         maimai.aliases.search(input).take(10).forEach { answer ->
@@ -333,12 +325,8 @@ class GuessController(
                 endGame(subscribesAt)
 
                 val hint = "恭喜你猜中了哦~".toPlainText() + music.infoText()
-                if (textMode()) {
-                    reply(hint)
-                } else {
-                    val url = "$jacketUrl/${music.resourceId}.jpg"
-                    reply(guessFinished(url, hint.text))
-                }
+                val url = "$jacketUrl/${music.resourceId}.jpg"
+                reply(hint, guessFinished(url, hint.text))
                 return
             }
         }
@@ -443,56 +431,49 @@ class GuessController(
         musics: List<Pair<MusicInfo, Boolean>>,
         chars: List<Char>,
         all: Boolean = false
-    ) = Markdown(MarkdownData(buildString {
-        appendLine("## 舞萌开字母")
-        appendLine()
+    ) = Markdown.create {
+        line("## 舞萌开字母")
+        line()
         musics.forEachIndexed { index, (music, status) ->
             if (status) {
-                appendLine("> ✅${music.name}")
+                line("> ✅${music.name}")
             } else {
-                appendLine(buildString {
-                    append("> ")
-                    if (all)
-                        append("❌")
-                    else
-                        append("\uD83E\uDD14")
-                    appendLine(music.name.map { c ->
-                        if (c.lowercase().toDBC().first() !in chars && c.toString().isNotBlank() && !all) '?' else c
-                    }.joinToString(""))
-                })
+                line("> " + (if (all) "❌" else "\uD83E\uDD14") + music.name.map { c ->
+                    if (c.lowercase().toDBC().first() !in chars && c.toString().isNotBlank() && !all) '?' else c
+                }.joinToString(""))
             }
         }
-        appendLine("> \uD83D\uDCA1已开出字母：${chars.joinToString(", ")}")
-    }), if (!all) getOpeningButtons() else Keyboard.create {
-        row {
-            at("🕹️再玩一把", "舞萌开字母", enter = true, id = "1")
-        }
-    })
+        line("> \uD83D\uDCA1已开出字母：${chars.joinToString(", ")}")
+        keyboard(if (!all) getOpeningButtons() else Keyboard.create {
+            row { at("🕹️再玩一把", "舞萌开字母", enter = true) }
+        })
+    }
 
     private fun GroupMessageEvent.showAdminPanel(
         disable: Boolean
-    ) = Markdown(MarkdownData(buildString {
-        appendLine("**猜歌设置**")
-        appendLine()
-        appendLine("请管理员点击下方按钮确认" + (if (disable) "禁用" else "启用") + "猜歌：")
-    }), Keyboard.create {
-        row {
-            val display = if (disable) "⚠禁用猜歌" else "✅启用猜歌"
-            button(
-                id = "admin/guess",
-                action = Action(
-                    type = Action.CALLBACK,
-                    data = (if (disable) "0" else "1") + ",${group.id}",
-                    permission = Permission(Permission.OPERATORS)
-                ),
-                renderData = RenderData(
-                    label = display,
-                    visitedLabel = display,
-                    style = RenderData.BLUE
+    ) = Markdown.create {
+        line(bold("猜歌设置"))
+        line()
+        line("请管理员点击下方按钮确认" + (if (disable) "禁用" else "启用") + "猜歌：")
+        keyboard {
+            row {
+                val display = if (disable) "⚠禁用猜歌" else "✅启用猜歌"
+                button(
+                    id = "admin/guess",
+                    action = Action(
+                        type = Action.CALLBACK,
+                        data = (if (disable) "0" else "1") + ",${group.id}",
+                        permission = Permission(Permission.OPERATORS)
+                    ),
+                    renderData = RenderData(
+                        label = display,
+                        visitedLabel = display,
+                        style = RenderData.BLUE
+                    )
                 )
-            )
+            }
         }
-    })
+    }
     fun getOpeningButtons() = Keyboard.create {
         row {
             at("\uD83D\uDD24开字母", "开字母", id = "1")
