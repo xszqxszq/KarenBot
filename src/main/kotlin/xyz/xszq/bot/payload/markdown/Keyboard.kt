@@ -1,5 +1,6 @@
 package xyz.xszq.bot.payload.markdown
 
+import java.util.UUID
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -23,7 +24,7 @@ data class Keyboard(
             enter: Boolean = false,
             anchor: Int? = null,
             style: Int = RenderData.BLUE,
-            id: String = "1"
+            id: String = UUID.randomUUID().toString().take(8)
         ) = button(
             id = id,
             renderData = RenderData(
@@ -39,7 +40,7 @@ data class Keyboard(
             label: String,
             url: String,
             style: Int = RenderData.BLUE,
-            id: String = "1"
+            id: String = UUID.randomUUID().toString().take(8)
         ) = button(
             id = id,
             renderData = RenderData(
@@ -54,7 +55,7 @@ data class Keyboard(
             label: String,
             data: String,
             style: Int = RenderData.BLUE,
-            id: String = "1"
+            id: String = UUID.randomUUID().toString().take(8)
         ) = button(
             id = id,
             renderData = RenderData(

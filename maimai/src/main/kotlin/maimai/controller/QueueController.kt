@@ -9,7 +9,6 @@ import xyz.xszq.bot.exception.IllegalArgsException
 import xyz.xszq.bot.exception.NeedHelpException
 import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.maimai.component.MarkdownTemplates
-import xyz.xszq.bot.maimai.component.MarkdownTemplates.Templates.brief
 import xyz.xszq.bot.maimai.database.Arcade
 import xyz.xszq.bot.maimai.database.ArcadeGroupBind
 import xyz.xszq.bot.maimai.endsWith
@@ -62,24 +61,21 @@ class QueueController(
 
     val queueErrorHandler: ErrorHandler = { e ->
         when (e) {
-            is NeedHelpException -> reply(when(textMode()) {
-                true -> helpText.toPlainText()
-                else -> brief(
-                    "排卡管理",
-                    "本功能可以提供机厅人数查询及更新功能，可以点击下方按钮进行操作："
-                ).toMessage(Keyboard.create {
+            is NeedHelpException -> reply(helpText) {
+                brief("排卡管理", "本功能可以提供机厅人数查询及更新功能，可以点击下方按钮进行操作：")
+                keyboard {
                     row {
-                        at("查询人数", "几", id = "", enter = true)
-                        at("添加机厅", "/排卡管理 添加机厅 ", id = "")
-                        at("删除机厅", "/排卡管理 删除机厅 ", id = "", enter = true)
+                        at("查询人数", "几", enter = true)
+                        at("添加机厅", "/排卡管理 添加机厅 ")
+                        at("删除机厅", "/排卡管理 删除机厅 ", enter = true)
                     }
                     row {
-                        at("查看别名", "/排卡管理 查看别名", id = "", enter = true)
-                        at("添加别名", "/排卡管理 添加别名", id = "", enter = true)
-                        at("删除别名", "/排卡管理 删除别名", id = "", enter = true)
+                        at("查看别名", "/排卡管理 查看别名", enter = true)
+                        at("添加别名", "/排卡管理 添加别名", enter = true)
+                        at("删除别名", "/排卡管理 删除别名", enter = true)
                     }
-                })
-            })
+                }
+            }
             is IllegalArgsException -> reply(e.message ?: "")
             is NotFoundException -> reply(e.message ?: "")
             else -> e.printStackTrace()
@@ -91,10 +87,7 @@ class QueueController(
         if (name.length > 32)
             throw IllegalArgsException("机厅名称过长！")
         ArcadeGroupBind.addArcade(group.id, name)
-        if (textMode())
-            reply("添加机厅成功。")
-        else
-            reply(queue("排卡管理", "添加机厅成功。", name))
+        reply("添加机厅成功。", queue("排卡管理", "添加机厅成功。", name))
     }
 
     suspend fun GroupMessageEvent.delete(name: String?) {
@@ -103,10 +96,7 @@ class QueueController(
             return
         }
         ArcadeGroupBind.deleteArcade(group.id, name)
-        if (textMode())
-            reply("删除机厅成功。")
-        else
-            reply(queue("排卡管理", "删除机厅成功。", name))
+        reply("删除机厅成功。", queue("排卡管理", "删除机厅成功。", name))
     }
 
     private suspend fun GroupMessageEvent.selectArcade(
@@ -115,26 +105,25 @@ class QueueController(
         enter: Boolean = false
     ) {
         val arcades = ArcadeGroupBind.listArcades(group.id) ?: run {
-            reply(Markdown(MarkdownData(buildString {
-                appendLine("**排卡管理**")
-                appendLine()
-                appendLine("本群还未添加机厅，请点击下方按钮并输入机厅名称来添加。")
-            }), Keyboard.create {
-                row {
-                    at("添加机厅", "/排卡管理 添加机厅 ", id = "")
+            reply {
+                brief("排卡管理", "本群还未添加机厅，请点击下方按钮并输入机厅名称来添加。")
+                keyboard {
+                    row {
+                        at("添加机厅", "/排卡管理 添加机厅 ")
+                    }
                 }
-            }))
+            }
             return
         }
-        reply(Markdown(MarkdownData(buildString {
-            appendLine("**排卡管理**")
-            appendLine()
-            appendLine(hint)
-            appendLine()
+        reply {
+            line(bold("排卡管理"))
+            line()
+            line(hint)
+            line()
             arcades.map { it.name }.forEach { name ->
-                appendLine("> " + MarkdownTemplates.href("$command $name", name, enter = false))
+                line("> " + MarkdownTemplates.href("$command $name", name, enter = false))
             }
-        })))
+        }
     }
 
     suspend fun GroupMessageEvent.addAlias(
@@ -150,11 +139,7 @@ class QueueController(
         }
         val alias = validateAlias(raw)
         ArcadeGroupBind.addAlias(group.id, name, alias)
-
-        if (textMode())
-            reply("添加机厅别名成功。")
-        else
-            reply(queue("排卡管理", "添加机厅别名成功。", name))
+        reply("添加机厅别名成功。", queue("排卡管理", "添加机厅别名成功。", name))
     }
 
     suspend fun GroupMessageEvent.deleteAlias(
@@ -170,11 +155,7 @@ class QueueController(
         }
         val alias = validateAlias(raw)
         ArcadeGroupBind.deleteAlias(group.id, name, alias)
-
-        if (textMode())
-            reply("删除机厅别名成功。")
-        else
-            reply(queue("排卡管理", "删除机厅别名成功。", name))
+        reply("删除机厅别名成功。", queue("排卡管理", "删除机厅别名成功。", name))
     }
 
     suspend fun GroupMessageEvent.aliases(
@@ -188,21 +169,13 @@ class QueueController(
             return
         }
         val aliases = ArcadeGroupBind.aliases(group.id, name).joinToString("，")
-
-        if (textMode())
-            reply("机厅别名如下：$aliases")
-        else
-            reply(queue("排卡管理", "机厅别名如下：$aliases", name))
+        reply("机厅别名如下：$aliases", queue("排卡管理", "机厅别名如下：$aliases", name))
     }
 
     suspend fun GroupMessageEvent.setGroup(targetName: String?) {
         targetName ?: throw NeedHelpException()
         ArcadeGroupBind.bind(group.id, targetName)
-
-        if (textMode())
-            reply("设置分组成功。")
-        else
-            reply(queue("排卡管理", "设置分组成功。"))
+        reply("设置分组成功。", queue("排卡管理", "设置分组成功。"))
     }
 
     fun validateAlias(raw: String ?= null): String {
@@ -276,21 +249,14 @@ class QueueController(
             if (name.isBlank()) {
                 val arcades = ArcadeGroupBind.listArcades(group.id)
                 if (arcades.isNullOrEmpty()) {
-                    if (textMode())
-                        reply("当前群未设置机厅，请使用“@可怜BOT /排卡管理 添加机厅”来添加机厅。")
-                    else
-                        reply(Markdown(
-                            MarkdownData(buildString {
-                                appendLine("**排卡管理**")
-                                appendLine()
-                                appendLine("当前群未设置机厅，请点击下方按钮添加机厅。")
-                            }),
-                            Keyboard.create {
-                                row {
-                                    at("添加机厅", "/排卡管理 添加机厅 机厅名称", id = "")
-                                }
+                    reply("当前群未设置机厅，请使用“@可怜BOT /排卡管理 添加机厅”来添加机厅。") {
+                        brief("排卡管理", "当前群未设置机厅，请点击下方按钮添加机厅。")
+                        keyboard {
+                            row {
+                                at("添加机厅", "/排卡管理 添加机厅 机厅名称")
                             }
-                        ))
+                        }
+                    }
                     return
                 }
                 reply(list(arcades))
@@ -305,13 +271,13 @@ class QueueController(
             null -> return
             Arcade.UpdateResult.TooLarge -> reply("机厅很小，请你忍一忍")
             is Arcade.UpdateResult.Updated -> {
-                if (textMode())
-                    reply("更新成功，现在${result.arcade.name}人数为${result.arcade.value}人。")
-                else
-                    reply(queue(
+                reply(
+                    "更新成功，现在${result.arcade.name}人数为${result.arcade.value}人。",
+                    queue(
                         "排卡管理", "更新成功，现在${result.arcade.name}人数为${result.arcade.value}人。",
                         result.arcade.name
-                    ))
+                    )
+                )
             }
         }
     }

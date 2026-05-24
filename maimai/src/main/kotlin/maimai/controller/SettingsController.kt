@@ -1,13 +1,9 @@
 package xyz.xszq.bot.maimai.controller
 
 import xyz.xszq.bot.Maimai
-import xyz.xszq.bot.Maimai.Companion.textMode
 import xyz.xszq.bot.chain
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
-import xyz.xszq.bot.maimai.component.MaimaiQuery
-import xyz.xszq.bot.maimai.component.MarkdownTemplates
-import xyz.xszq.bot.maimai.component.MarkdownTemplates.Templates.brief
 import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.database.QQBindTable
 import xyz.xszq.bot.maimai.music.Item
@@ -17,7 +13,6 @@ import xyz.xszq.bot.maimai.query.ComboQuery
 import xyz.xszq.bot.maimai.query.ComboQuery.filterCharts
 import xyz.xszq.bot.maimai.query.ComboQuery.filterMusics
 import xyz.xszq.bot.maimai.query.ComboQuery.filterRecords
-import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.newLine
 import xyz.xszq.bot.payload.markdown.Keyboard
@@ -32,23 +27,20 @@ class SettingsController(
             if ("水鱼" in args)
                 return@startsWith
             val qq = args.toLongOrNull() ?: run {
-                when (textMode()) {
-                    true -> reply("使用方法：/bind qq号")
-                    false -> reply(Markdown(brief("可怜BOT", "请点击下方按钮输入您的QQ号："), Keyboard.create {
+                reply("使用方法：/bind qq号") {
+                    brief("可怜BOT", "请点击下方按钮输入您的QQ号：")
+                    keyboard {
                         row {
-                            at("⬇点我输入", "/bind ", id = "1")
+                            at("⬇点我输入", "/bind ")
                         }
-                    }))
+                    }
                 }
                 return@startsWith
             }
             QQBindTable.update(this.sender.id, qq)
             val user = maimai.query.getQueryParams(this)
             if (noAPIBindFound(user)) {
-                if (textMode())
-                    reply(MaimaiQuery.NO_BACKEND_BINDINGS)
-                else
-                    reply(MarkdownTemplates.Templates.selectBackends(this.text.trim()))
+                messageUserNeedBind()
             } else {
                 reply("绑定成功。")
                 maimai.messageToReplay[sender.id] ?.let { text ->
@@ -119,30 +111,39 @@ class SettingsController(
                         it.filename == icon.trim() ||
                         it.filename.substringBefore(".png") == icon.trim()
             } ?: run {
-                if (textMode())
-                    reply(buildString {
-                        appendLine("使用方法：设置头像 <id/名称>")
-                        appendLine("\t例：设置头像 106103")
-                        appendLine("\t例：设置头像 高瀬 梨緒")
-                        appendLine()
-                        appendLine("\t收藏品列表：https://otmdb.cn/bot/maimai/icons")
-                    }.trim().newLine())
-                else
-                    reply(brief("设置头像", buildString {
+                reply(buildString {
+                    appendLine("使用方法：设置头像 <id/名称>")
+                    appendLine("\t例：设置头像 106103")
+                    appendLine("\t例：设置头像 高瀬 梨緒")
+                    appendLine()
+                    appendLine("\t收藏品列表：https://otmdb.cn/bot/maimai/icons")
+                }.trim().newLine()) {
+                    brief("设置头像", buildString {
                         appendLine("使用方法：设置头像 id/名称")
                         appendLine("👉设置头像 106103")
                         appendLine("👉设置头像 高瀬 梨緒")
                         appendLine(" ")
                         append("⏬您可以点击下方按钮查看头像列表。")
-                    }).toMessage(collection("头像", "icons")))
+                    })
+                    keyboard {
+                        row {
+                            link("选择头像", "https://otmdb.cn/bot/maimai/icons")
+                            at("⚙ 设置头像", "设置头像 ")
+                        }
+                    }
+                }
                 return@startsWith
             }
             MaimaiSettingsTable[sender.id, "icon"] = iconFile.id.toString()
-            if (textMode())
-                reply("设置头像成功。")
-            else
-                reply(brief("设置头像", "设置头像成功。")
-                    .toMessage(collection("头像", "icons")))
+            reply("设置头像成功。") {
+                brief("设置头像", "设置头像成功。")
+                keyboard {
+                    row {
+                        link("选择头像", "https://otmdb.cn/bot/maimai/icons")
+                        at("⚙ 设置头像", "设置头像 ")
+                    }
+                }
+            }
         }
         startsWith(listOf("设置牌子", "设置姓名框")) { plate ->
             val plateFile = maimai.maimaiData.plates.values.firstOrNull {
@@ -152,24 +153,29 @@ class SettingsController(
                         it.filename == plate.trim() ||
                         it.filename.substringBefore(".png") == plate.trim()
             } ?: run {
-                if (textMode())
-                    reply(buildString {
-                        appendLine("使用方法：设置牌子/设置姓名框 id/名称")
-                        appendLine("\t例：设置牌子 100501")
-                        appendLine("\t例：设置牌子 晓将")
-                        appendLine("\t例：设置姓名框 7sRefちほー2")
-                        appendLine()
-                        appendLine("\t牌子列表：https://otmdb.cn/bot/maimai/plates")
-                    }.trim().newLine())
-                else
-                    reply(brief("设置牌子", buildString {
+                reply(buildString {
+                    appendLine("使用方法：设置牌子/设置姓名框 id/名称")
+                    appendLine("\t例：设置牌子 100501")
+                    appendLine("\t例：设置牌子 晓将")
+                    appendLine("\t例：设置姓名框 7sRefちほー2")
+                    appendLine()
+                    appendLine("\t牌子列表：https://otmdb.cn/bot/maimai/plates")
+                }.trim().newLine()) {
+                    brief("设置牌子", buildString {
                         appendLine("使用方法：设置牌子/设置姓名框 id/名称")
                         appendLine("👉设置牌子 100501")
                         appendLine("👉设置牌子 晓将")
                         appendLine("👉设置姓名框 7sRefちほー2")
                         appendLine(" ")
                         append("⏬您可以点击下方按钮查看牌子列表。")
-                    }).toMessage(collection("牌子", "plates")))
+                    })
+                    keyboard {
+                        row {
+                            link("选择牌子", "https://otmdb.cn/bot/maimai/plates")
+                            at("⚙ 设置牌子", "设置牌子 ")
+                        }
+                    }
+                }
                 return@startsWith
             }
             if (plateFile.genre == "実績" && plateFile.requires.isNotEmpty()) {
@@ -190,40 +196,44 @@ class SettingsController(
                 }
             }
             MaimaiSettingsTable[sender.id, "plate"] = plateFile.id.toString()
-            if (textMode())
-                reply("设置牌子成功。")
-            else
-                reply(brief("设置牌子", "设置牌子成功。")
-                    .toMessage(collection("牌子", "plates")))
+            reply("设置牌子成功。") {
+                brief("设置牌子", "设置牌子成功。")
+                keyboard {
+                    row {
+                        link("选择牌子", "https://otmdb.cn/bot/maimai/plates")
+                        at("⚙ 设置牌子", "设置牌子 ")
+                    }
+                }
+            }
         }
         startsWith(listOf("设置mai", "设置b50")) {
-            if (textMode())
-                reply(buildString {
-                    appendLine("支持以下设置：")
-                    appendLine("→设置头像 头像ID/名称")
-                    appendLine("\t例：设置头像 106103")
-                    appendLine("\t例：设置头像 高瀬 梨緒")
-                    appendLine("→设置牌子 牌子ID/名称")
-                    appendLine("\t例：设置牌子 100501")
-                    appendLine("\t例：设置牌子 晓将")
-                    appendLine("→设置查分器 查分器名称")
-                    appendLine("\t例：设置查分器 水鱼")
-                    appendLine("\t例：设置查分器 落雪")
-                }.trim().newLine())
-            else
-                reply(brief("功能设置", "支持以下设定：").toMessage(Keyboard.create {
+            reply(buildString {
+                appendLine("支持以下设置：")
+                appendLine("→设置头像 头像ID/名称")
+                appendLine("\t例：设置头像 106103")
+                appendLine("\t例：设置头像 高瀬 梨緒")
+                appendLine("→设置牌子 牌子ID/名称")
+                appendLine("\t例：设置牌子 100501")
+                appendLine("\t例：设置牌子 晓将")
+                appendLine("→设置查分器 查分器名称")
+                appendLine("\t例：设置查分器 水鱼")
+                appendLine("\t例：设置查分器 落雪")
+            }.trim().newLine()) {
+                brief("功能设置", "支持以下设定：")
+                keyboard {
                     row {
-                        at("👤设置头像", "设置头像", enter = true, id = "1")
-                        at("📰设置牌子", "设置牌子", enter = true, id = "1")
+                        at("👤设置头像", "设置头像", enter = true)
+                        at("📰设置牌子", "设置牌子", enter = true)
                     }
                     row {
-                        at("🐟使用水鱼查分", "设置查分器 水鱼", enter = true, id = "1")
-                        at("❄使用落雪查分", "设置查分器 落雪", enter = true, id = "1")
+                        at("🐟使用水鱼查分", "设置查分器 水鱼", enter = true)
+                        at("❄使用落雪查分", "设置查分器 落雪", enter = true)
                     }
                     row {
-                        at("🔄自动选择查分器", "设置查分器 自动", enter = true, id = "1")
+                        at("🔄自动选择查分器", "设置查分器 自动", enter = true)
                     }
-                }))
+                }
+            }
         }
         channel<MessageEvent>("lxns-oa") { target ->
             target.requestOA()

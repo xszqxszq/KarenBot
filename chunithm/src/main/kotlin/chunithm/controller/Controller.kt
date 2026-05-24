@@ -2,17 +2,14 @@ package xyz.xszq.bot.chunithm.controller
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withTimeout
-import xyz.xszq.bot.chunithm.component.ImageParseResult
-import xyz.xszq.bot.json
-import xyz.xszq.bot.message.RemoteImage
 import xyz.xszq.bot.Chunithm
 import xyz.xszq.bot.Chunithm.Companion.textMode
 import xyz.xszq.bot.chunithm.api.ChunithmAPI
 import xyz.xszq.bot.chunithm.api.DivingFish
 import xyz.xszq.bot.chunithm.api.LXNS
 import xyz.xszq.bot.chunithm.component.ChunithmQuery
+import xyz.xszq.bot.chunithm.component.ImageParseResult
 import xyz.xszq.bot.chunithm.component.MarkdownTemplates
-import xyz.xszq.bot.chunithm.component.MarkdownTemplates.Templates.brief
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
 import xyz.xszq.bot.chunithm.exception.*
 import xyz.xszq.bot.chunithm.music.MusicDifficulty
@@ -20,13 +17,20 @@ import xyz.xszq.bot.chunithm.music.MusicInfo
 import xyz.xszq.bot.chunithm.music.UserQueryParams
 import xyz.xszq.bot.event.ChannelEvent
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.event.ReplyAble
 import xyz.xszq.bot.exception.NotFoundException
+import xyz.xszq.bot.json
+import xyz.xszq.bot.message.Markdown
+import xyz.xszq.bot.message.MessageChain
+import xyz.xszq.bot.message.RemoteImage
 import xyz.xszq.bot.newLine
 import xyz.xszq.bot.payload.AdminCheckRequest
-import xyz.xszq.bot.payload.markdown.Keyboard
+import xyz.xszq.bot.payload.markdown.MarkdownDsl
+import xyz.xszq.bot.payload.markdown.RenderData
 import xyz.xszq.bot.reply
 import xyz.xszq.bot.subscribe.SubscribeBuilder
 
+@Suppress("unused")
 sealed class Controller(
     open val chunithm: Chunithm
 ) {
@@ -58,6 +62,58 @@ sealed class Controller(
         }
     }
 
+    suspend fun MessageEvent.reply(
+        fallback: String,
+        block: MarkdownDsl.() -> Unit
+    ) {
+        if (textMode()) reply(fallback)
+        else reply(block)
+    }
+
+    suspend fun MessageEvent.reply(fallback: String, markdown: Markdown) {
+        if (textMode()) reply(fallback)
+        else reply(markdown)
+    }
+
+    suspend fun MessageEvent.reply(
+        fallback: MessageChain,
+        block: MarkdownDsl.() -> Unit
+    ) {
+        if (textMode()) reply(fallback)
+        else reply(block)
+    }
+
+    suspend fun MessageEvent.reply(fallback: MessageChain, markdown: Markdown) {
+        if (textMode()) reply(fallback)
+        else reply(markdown)
+    }
+
+    suspend fun ReplyAble.reply(
+        fallback: String,
+        block: MarkdownDsl.() -> Unit
+    ) {
+        if (textMode()) reply(fallback)
+        else reply(block)
+    }
+
+    suspend fun ReplyAble.reply(fallback: String, markdown: Markdown) {
+        if (textMode()) reply(fallback)
+        else reply(markdown)
+    }
+
+    suspend fun ReplyAble.reply(
+        fallback: MessageChain,
+        block: MarkdownDsl.() -> Unit
+    ) {
+        if (textMode()) reply(fallback)
+        else reply(block)
+    }
+
+    suspend fun ReplyAble.reply(fallback: MessageChain, markdown: Markdown) {
+        if (textMode()) reply(fallback)
+        else reply(markdown)
+    }
+
     suspend fun handleError(
         event: MessageEvent,
         e: Throwable,
@@ -82,34 +138,43 @@ sealed class Controller(
         }
     }
     suspend fun MessageEvent.messageUserNeedQQBind() {
-        if (textMode())
-            reply(ChunithmQuery.NO_QQ_BINDINGS)
-        else
-            reply(brief("中二节奏", "为了继续后续查询，请输入您的QQ号来绑定：").toMessage(Keyboard.create {
+        reply(ChunithmQuery.NO_QQ_BINDINGS) {
+            brief("中二节奏", "为了继续后续查询，请输入您的QQ号来绑定：")
+            keyboard {
                 row {
-                    at("⬇点我输入", "/bind ", id = "1")
+                    at("⬇点我输入", "/bind ")
                 }
-            }))
+            }
+        }
     }
     suspend fun MessageEvent.messageUserNeedBind() {
-        if (textMode())
-            reply(ChunithmQuery.NO_BACKEND_BINDINGS)
-        else
-            reply(MarkdownTemplates.Templates.selectBackends(this.text))
+        val msg = this.text
+        reply(ChunithmQuery.NO_BACKEND_BINDINGS) {
+            brief("中二节奏", "您还未在查分器上绑定QQ号。请选择一个查分器来绑定您的QQ号：")
+            keyboard {
+                row {
+                    link("水鱼查分器", "https://otmdb.cn/jump/maimaidxprober")
+                    link("落雪查分器", "https://otmdb.cn/jump/lxnsprober")
+                }
+                row {
+                    at("点我重试", msg, enter = true, style = RenderData.FILLED_BLUE)
+                }
+            }
+        }
     }
     suspend fun MessageEvent.messageUserNotFound() {
         reply(ChunithmQuery.USER_NOT_FOUND)
     }
     suspend fun MessageEvent.messageUserDenied(user: UserQueryParams) {
         if (user.isSelf) {
-            if (textMode())
-                reply(ChunithmQuery.USER_EULA)
-            else
-                reply(brief("中二节奏", "请前往查分器同意用户协议再进行查询：").toMessage(Keyboard.create {
+            reply(ChunithmQuery.USER_EULA) {
+                brief("中二节奏", "请前往查分器同意用户协议再进行查询：")
+                keyboard {
                     row {
-                        link("前往查分器", "https://otmdb.cn/jump/maimaidxprober", id = "1")
+                        link("前往查分器", "https://otmdb.cn/jump/maimaidxprober")
                     }
-                }))
+                }
+            }
         } else {
             reply(ChunithmQuery.USER_DENIED)
         }
@@ -121,36 +186,36 @@ sealed class Controller(
         reply(ChunithmQuery.TOO_MANY_RECORDS)
     }
     suspend fun MessageEvent.messageNoData(backend: ChunithmAPI) {
-        if (textMode())
-            reply(buildString {
-                appendLine("您似乎尚未导入中二节奏分数，请查看数据导入教程：")
-                when (backend) {
-                    is DivingFish -> appendLine("水鱼查分器：https://otmdb.cn/jump/maimaidxprober_import")
-                    is LXNS -> appendLine("落雪查分器：https://otmdb.cn/jump/lxnsprober_import")
-                }
-            }.trim().newLine())
-        else
-            reply(brief("中二节奏", "您似乎尚未导入中二节奏分数到${backend.name}查分器，请参考下方教程：").toMessage(Keyboard.create {
+        reply(buildString {
+            appendLine("您似乎尚未导入中二节奏分数，请查看数据导入教程：")
+            when (backend) {
+                is DivingFish -> appendLine("水鱼查分器：https://otmdb.cn/jump/maimaidxprober_import")
+                is LXNS -> appendLine("落雪查分器：https://otmdb.cn/jump/lxnsprober_import")
+            }
+        }.trim().newLine()) {
+            brief("中二节奏", "您似乎尚未导入中二节奏分数到${backend.name}查分器，请参考下方教程：")
+            keyboard {
                 when (backend) {
                     is DivingFish -> row {
-                        link("🐟水鱼(电脑/iOS)", "https://otmdb.cn/jump/maimaidxprober_import", id = "1")
+                        link("🐟水鱼(电脑/iOS)", "https://otmdb.cn/jump/maimaidxprober_import")
                     }
                     is LXNS -> row {
-                        link("❄落雪(电脑/手机)", "https://otmdb.cn/jump/lxnsprober_import", id = "2")
+                        link("❄落雪(电脑/手机)", "https://otmdb.cn/jump/lxnsprober_import")
                     }
                 }
                 row {
                     when (backend) {
                         is DivingFish -> row {
-                            at("❄切换到落雪", "设置查分器 落雪", enter = true, id = "3")
+                            at("❄切换到落雪", "设置查分器 落雪", enter = true)
                         }
                         is LXNS -> row {
-                            at("🐟切换到水鱼", "设置查分器 水鱼", enter = true, id = "3")
+                            at("🐟切换到水鱼", "设置查分器 水鱼", enter = true)
                         }
                     }
-                    at("切换到自动", "设置查分器 自动", enter = true, id = "4")
+                    at("切换到自动", "设置查分器 自动", enter = true)
                 }
-            }))
+            }
+        }
     }
     suspend fun MessageEvent.messageNotSupported(message: String) {
         reply(message)

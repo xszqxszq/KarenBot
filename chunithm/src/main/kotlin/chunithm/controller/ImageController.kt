@@ -7,8 +7,6 @@ import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.Image
 import xyz.xszq.bot.*
 import xyz.xszq.bot.Chunithm.Companion.textMode
-import xyz.xszq.bot.chunithm.component.MarkdownTemplates
-import xyz.xszq.bot.chunithm.component.MarkdownTemplates.Keyboards.single
 import xyz.xszq.bot.chunithm.component.image.FilterParams
 import xyz.xszq.bot.chunithm.exception.FilterNoResultException
 import xyz.xszq.bot.chunithm.exception.NoDataException
@@ -21,9 +19,6 @@ import xyz.xszq.bot.chunithm.query.ComboQuery.filterRecords
 import xyz.xszq.bot.chunithm.query.ComboQuery.params
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.NotFoundException
-import xyz.xszq.bot.message.Markdown
-import xyz.xszq.bot.payload.markdown.Keyboard
-import xyz.xszq.bot.payload.markdown.MarkdownData
 import java.util.concurrent.ConcurrentHashMap
 
 @Suppress("unused")
@@ -93,29 +88,30 @@ class ImageController(
             return
         }
         upload(event) { url ->
-            reply(Markdown(MarkdownData(buildString {
-                appendLine("**查询结果**")
-                appendLine()
-                appendLine("![img #${width}px #${height}px]($url)")
-                appendLine()
-                append(text ?: "")
-            }), Keyboard.create {
-                row {
-                    at("💯我也要查", "/chu " + command.trim(), id = "1")
+            reply {
+                line(bold("查询结果"))
+                line()
+                line(image(url, "img #${width}px #${height}px"))
+                line()
+                line(text ?: "")
+                keyboard {
+                    row {
+                        at("💯我也要查", "/chu " + command.trim())
 //                    link("随心配", "https://otmdb.cn/bot/maimai/combo", enter = true, id = "2")
 //                    at("🎨修改设置", "设置mai", enter = true, id = "3")
-                }
-                page?.let {
-                    if (totalPages == null || totalPages <= 1)
-                        return@let
-                    row {
-                        if (page > 1)
-                            at("⬅️上一页", "/chu $command ${page - 1}", enter = true, id = "4")
-                        if (page < totalPages)
-                            at("➡️下一页", "/chu $command ${page + 1}", enter = true, id = "5")
+                    }
+                    page?.let {
+                        if (totalPages == null || totalPages <= 1)
+                            return@let
+                        row {
+                            if (page > 1)
+                                at("⬅️上一页", "/chu $command ${page - 1}", enter = true, id = "4")
+                            if (page < totalPages)
+                                at("➡️下一页", "/chu $command ${page + 1}", enter = true, id = "5")
+                        }
                     }
                 }
-            }))
+            }
         }
     }
 
@@ -189,11 +185,12 @@ class ImageController(
                 appendLine("\t例：歌${total} 紫茄子")
                 appendLine("\t例：歌${total} kib")
             }.trim()
-            if (textMode())
-                reply(help.newLine())
-            else
-                reply(MarkdownTemplates.Templates.brief("舞萌DX", help)
-                    .toMessage(single("歌50 ", "⬇试一试")))
+            reply(help.newLine()) {
+                brief("舞萌DX", help)
+                keyboard {
+                    row { at("⬇试一试", "歌50 ") }
+                }
+            }
             return
         }
         val (music, difficulty) = selectMusic(

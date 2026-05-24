@@ -13,7 +13,6 @@ import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.ffmpeg.FFMpegFileType
 import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.bot.maimai.component.MarkdownTemplates
-import xyz.xszq.bot.maimai.component.MarkdownTemplates.Keyboards.single
 import xyz.xszq.bot.maimai.component.MarkdownTemplates.Templates.selectMusic
 import xyz.xszq.bot.maimai.database.MaimaiMusicAliasesTable
 import xyz.xszq.bot.maimai.database.MaimaiMusicAliasesVoteTable
@@ -47,10 +46,7 @@ class MusicController(
         startsWith("id") { raw ->
             val id = raw.toIntOrNull() ?: throw CommandNotMatchedException()
             val music = maimai.music(id) ?: throw CommandNotMatchedException()
-            if (textMode())
-                reply(music.infoText())
-            else
-                reply(music.infoMD(jacketUrl))
+            reply(music.infoText(), music.infoMD(jacketUrl))
         }
         button("maimai-id") {
             val id = data.toIntOrNull() ?: return@button
@@ -66,10 +62,7 @@ class MusicController(
                 val id = raw.toIntOrNull() ?: throw CommandNotMatchedException()
                 val music = maimai.music(id) ?: throw CommandNotMatchedException()
                 val chart = music.charts.firstOrNull { it.difficulty == difficulty } ?: return@startsWith
-                if (textMode())
-                    reply(chart.infoText())
-                else
-                    reply(chart.infoMD(jacketUrl))
+                reply(chart.infoText(), chart.infoMD(jacketUrl))
 //
 //                val radar = maimai.image.radar.generate(chart, 500, false) ?: return@startsWith
 //                useTempFile { file ->
@@ -89,10 +82,7 @@ class MusicController(
                 return@startsWith
             }
             val selected = musics.random(Random(System.currentTimeMillis()))
-            if (textMode())
-                reply(selected.infoText())
-            else
-                reply(selected.infoMD(jacketUrl))
+            reply(selected.infoText(), selected.infoMD(jacketUrl))
         }
 
         // 模糊搜索
@@ -295,11 +285,14 @@ class MusicController(
                     appendLine()
                     appendLine("可以@机器人使用“添加别名 id 别名”来添加别名。")
                 }.trim()
-                if (textMode())
-                    reply(text.newLine())
-                else
-                    reply(MarkdownTemplates.Templates.brief("别名列表", text)
-                        .toMessage(single("添加别名 id${music.id}", "添加别名")))
+                reply(text.newLine()) {
+                    brief("别名列表", text)
+                    keyboard {
+                        row {
+                            at("添加别名", "添加别名 id${music.id}")
+                        }
+                    }
+                }
             }
         }
         startsWith("添加别名") { raw ->
@@ -397,34 +390,28 @@ class MusicController(
                 reply(notFound)
             }
             result.size == 1 && totalPages == 1 -> {
-                if (textMode())
-                    reply(result.first().infoText())
-                else
-                    reply(result.first().infoMD(jacketUrl))
+                reply(result.first().infoText(), result.first().infoMD(jacketUrl))
             }
             else -> {
                 val hint = if (totalPages != 1)
                     "您要查找的歌曲可能是 ($nowPage / $totalPages)："
                 else
                     "您要查找的歌曲可能是："
-                when {
-                    textMode() -> reply(buildString {
-                        appendLine(hint)
-                        result.forEach { music ->
-                            appendLine("${music.id}. ${music.name}")
-                        }
-                    }.trim())
-                    else -> reply(selectMusic(
-                        title = hint,
-                        type = type,
-                        keyword = keyword,
-                        difficulty = null,
-                        result = result,
-                        displayName = displayName,
-                        nowPage = nowPage,
-                        totalPages = totalPages,
-                    ))
-                }
+                reply(buildString {
+                    appendLine(hint)
+                    result.forEach { music ->
+                        appendLine("${music.id}. ${music.name}")
+                    }
+                }.trim(), selectMusic(
+                    title = hint,
+                    type = type,
+                    keyword = keyword,
+                    difficulty = null,
+                    result = result,
+                    displayName = displayName,
+                    nowPage = nowPage,
+                    totalPages = totalPages,
+                ))
             }
         }
     }
@@ -441,33 +428,27 @@ class MusicController(
                 reply(notFound)
             }
             result.size == 1 && totalPages == 1 -> {
-                if (textMode())
-                    reply(result.first().infoText())
-                else
-                    reply(result.first().infoMD(jacketUrl))
+                reply(result.first().infoText(), result.first().infoMD(jacketUrl))
             }
             else -> {
                 val hint = if (totalPages != 1)
                     "您要查找的歌曲可能是 ($nowPage / $totalPages)："
                 else
                     "您要查找的歌曲可能是："
-                when {
-                    textMode() -> reply(buildString {
-                        appendLine(hint)
-                        result.forEach { chart ->
-                            appendLine("${chart.difficulty.brief}${chart.music.id}. ${chart.music.name}")
-                        }
-                    }.trim())
-                    else -> reply(MarkdownTemplates.Templates.selectChart(
-                        title = hint,
-                        type = type,
-                        keyword = keyword,
-                        result = result,
-                        displayName = displayName,
-                        nowPage = nowPage,
-                        totalPages = totalPages,
-                    ))
-                }
+                reply(buildString {
+                    appendLine(hint)
+                    result.forEach { chart ->
+                        appendLine("${chart.difficulty.brief}${chart.music.id}. ${chart.music.name}")
+                    }
+                }.trim(), MarkdownTemplates.Templates.selectChart(
+                    title = hint,
+                    type = type,
+                    keyword = keyword,
+                    result = result,
+                    displayName = displayName,
+                    nowPage = nowPage,
+                    totalPages = totalPages,
+                ))
             }
         }
     }
@@ -653,21 +634,29 @@ class MusicController(
                 maimai.aliases.insert(music.id, alias)
                 reply("投票成功，该别名已经通过啦")
             } else {
-                if (textMode())
-                    reply("投票成功，该别名还需${-votes}票通过。")
-                else
-                    reply(MarkdownTemplates.Templates.brief("别名投票", buildString {
+                reply("投票成功，该别名还需${-votes}票通过。") {
+                    brief("别名投票", buildString {
                         appendLine("投票成功，该别名还需${-votes}票通过。")
-                    }).toMessage(single("添加别名 id${music.id} $alias", "点我投票", enter = true)))
+                    })
+                    keyboard {
+                        row {
+                            at("点我投票", "添加别名 id${music.id} $alias", enter = true)
+                        }
+                    }
+                }
             }
         } ?: run {
-            if (textMode())
-                reply("别名添加成功，请使用“添加别名 ${music.id} ${alias}”来进行投票，当有3人投票时别名将通过。")
-            else
-                reply(MarkdownTemplates.Templates.brief("别名投票", buildString {
+            reply("别名添加成功，请使用“添加别名 ${music.id} ${alias}”来进行投票，当有3人投票时别名将通过。") {
+                brief("别名投票", buildString {
                     appendLine("别名添加成功，当有3人投票时别名将通过。")
                     appendLine("其他人可以点击下方按钮，或者发送“添加别名 ${music.id} ${alias}”来投票。")
-                }).toMessage(single("添加别名 id${music.id} $alias", "点我投票", enter = true)))
+                })
+                keyboard {
+                    row {
+                        at("点我投票", "添加别名 id${music.id} $alias", enter = true)
+                    }
+                }
+            }
         }
     }
     private fun String.levelArgs(): Pair<List<Double>, Int> {

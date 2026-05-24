@@ -3,10 +3,8 @@ package xyz.xszq.bot.chunithm.controller
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.localCurrentDirVfs
 import xyz.xszq.bot.Chunithm
-import xyz.xszq.bot.Chunithm.Companion.textMode
 import xyz.xszq.bot.chunithm.component.MarkdownTemplates
 import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesTable
-import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesVoteTable
 import xyz.xszq.bot.chunithm.music.ChartInfo
 import xyz.xszq.bot.chunithm.music.MusicDifficulty
 import xyz.xszq.bot.chunithm.music.MusicInfo
@@ -16,15 +14,15 @@ import xyz.xszq.bot.chunithm.query.ComboQuery.filterMusics
 import xyz.xszq.bot.chunithm.query.ComboQuery.isSingleChartSelected
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.event.ReplyAble
+import xyz.xszq.bot.exception.IllegalArgsException
+import xyz.xszq.bot.exception.IllegalOperationException
+import xyz.xszq.bot.exception.NeedHelpException
+import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.ffmpeg.FFMpegFileType
 import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.bot.message.Audio
 import xyz.xszq.bot.pagination
 import xyz.xszq.bot.reply
-import xyz.xszq.bot.exception.IllegalArgsException
-import xyz.xszq.bot.exception.IllegalOperationException
-import xyz.xszq.bot.exception.NeedHelpException
-import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.subscribe.CommandNotMatchedException
 import kotlin.random.Random
 
@@ -42,10 +40,7 @@ class MusicController(
         startsWith("id") { raw ->
             val id = raw.toIntOrNull() ?: throw CommandNotMatchedException()
             val music = chunithm.music(id) ?: throw CommandNotMatchedException()
-            if (textMode())
-                reply(music.infoText())
-            else
-                reply(music.infoMD(jacketUrl))
+            reply(music.infoText(), music.infoMD(jacketUrl))
         }
         MusicDifficulty.entries.forEach { difficulty ->
             val name = difficulty.brief
@@ -53,10 +48,7 @@ class MusicController(
                 val id = raw.toIntOrNull() ?: throw CommandNotMatchedException()
                 val music = chunithm.music(id) ?: throw CommandNotMatchedException()
                 val chart = music.charts.firstOrNull { it.difficulty == difficulty } ?: throw CommandNotMatchedException()
-                if (textMode())
-                    reply(chart.infoText())
-                else
-                    reply(chart.infoMD(jacketUrl))
+                reply(chart.infoText(), chart.infoMD(jacketUrl))
             }
         }
 
@@ -213,11 +205,14 @@ class MusicController(
                     appendLine()
                     appendLine("可以@机器人使用“添加别名 id 别名”来添加别名。")
                 }.trim()
-                if (textMode())
-                    reply(text)
-                else
-                    reply(MarkdownTemplates.Templates.brief("别名列表", text)
-                        .toMessage(MarkdownTemplates.Keyboards.single("添加别名 id${music.id}", "添加别名")))
+                reply(text) {
+                    brief("别名列表", text)
+                    keyboard {
+                        row {
+                            at("添加别名", "添加别名 id${music.id}")
+                        }
+                    }
+                }
             }
         }
         startsWith("添加别名") { raw ->
@@ -295,24 +290,19 @@ class MusicController(
                 reply(notFound)
             }
             result.size == 1 && totalPages == 1 -> {
-                if (textMode())
-                    reply(result.first().infoText())
-                else
-                    reply(result.first().infoMD(jacketUrl))
+                reply(result.first().infoText(), result.first().infoMD(jacketUrl))
             }
             else -> {
                 val hint = if (totalPages != 1)
                     "您要查找的歌曲可能是 ($nowPage / $totalPages)："
                 else
                     "您要查找的歌曲可能是："
-                when {
-                    textMode() -> reply(buildString {
-                        appendLine(hint)
-                        result.forEach { music ->
-                            appendLine("${music.id}. ${music.name}")
-                        }
-                    }.trim())
-                    else -> reply(MarkdownTemplates.Templates.selectMusic(
+                reply(buildString {
+                    appendLine(hint)
+                    result.forEach { music ->
+                        appendLine("${music.id}. ${music.name}")
+                    }
+                }.trim(), MarkdownTemplates.Templates.selectMusic(
                         title = hint,
                         type = type,
                         keyword = keyword,
@@ -322,7 +312,6 @@ class MusicController(
                         nowPage = nowPage,
                         totalPages = totalPages,
                     ))
-                }
             }
         }
     }
@@ -340,34 +329,27 @@ class MusicController(
                 reply(notFound)
             }
             result.size == 1 && totalPages == 1 -> {
-                if (textMode())
-                    reply(result.first().infoText())
-                else
-                    reply(result.first().infoMD(jacketUrl))
+                reply(result.first().infoText(), result.first().infoMD(jacketUrl))
             }
             else -> {
                 val hint = if (totalPages != 1)
                     "您要查找的歌曲可能是 ($nowPage / $totalPages)："
                 else
                     "您要查找的歌曲可能是："
-                when {
-                    textMode() -> reply(buildString {
-                        appendLine(hint)
-                        result.forEach { chart ->
-                            appendLine("${chart.difficulty.brief}${chart.music.id}. ${chart.music.name}")
-                        }
-                    }.trim())
-                    else -> reply(
-                        MarkdownTemplates.Templates.selectChart(
-                        title = hint,
-                        type = type,
-                        keyword = keyword,
-                        result = result,
-                        displayName = displayName,
-                        nowPage = nowPage,
-                        totalPages = totalPages,
-                    ))
-                }
+                reply(buildString {
+                    appendLine(hint)
+                    result.forEach { chart ->
+                        appendLine("${chart.difficulty.brief}${chart.music.id}. ${chart.music.name}")
+                    }
+                }.trim(), MarkdownTemplates.Templates.selectChart(
+                    title = hint,
+                    type = type,
+                    keyword = keyword,
+                    result = result,
+                    displayName = displayName,
+                    nowPage = nowPage,
+                    totalPages = totalPages,
+                ))
             }
         }
     }

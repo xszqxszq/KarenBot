@@ -12,6 +12,7 @@ import xyz.xszq.bot.message.*
 import xyz.xszq.bot.payload.FileResponse
 import xyz.xszq.bot.payload.FileType
 import xyz.xszq.bot.payload.MsgType
+import xyz.xszq.bot.payload.markdown.MarkdownDsl
 
 /**
  * Retry the block for specified times.
@@ -164,6 +165,9 @@ suspend fun ReplyAble.reply(message: MessageChain) {
 }
 suspend fun ReplyAble.reply(message: String) = reply(PlainText(message))
 suspend fun ReplyAble.reply(message: MessageElement) = reply(MessageChain(message))
+suspend fun ReplyAble.reply(block: MarkdownDsl.() -> Unit) {
+    reply(MarkdownDsl().apply(block).build())
+}
 
 fun String.toPlainText() = PlainText(this)
 fun MessageElement.chain() = MessageChain(this)

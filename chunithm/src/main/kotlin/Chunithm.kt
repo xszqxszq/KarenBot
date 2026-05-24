@@ -16,9 +16,9 @@ import xyz.xszq.bot.chunithm.api.LXNS
 import xyz.xszq.bot.chunithm.component.*
 import xyz.xszq.bot.chunithm.config.ChunithmConfig
 import xyz.xszq.bot.chunithm.controller.Controller
-import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
 import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesTable
 import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesVoteTable
+import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
 import xyz.xszq.bot.chunithm.query.ComboQuery
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent

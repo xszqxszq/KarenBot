@@ -6,15 +6,15 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.withTimeout
 import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.Maimai.Companion.textMode
+import xyz.xszq.bot.event.ChannelEvent
 import xyz.xszq.bot.event.MessageEvent
-import xyz.xszq.bot.message.RemoteImage
+import xyz.xszq.bot.event.ReplyAble
 import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.maimai.api.DivingFish
 import xyz.xszq.bot.maimai.api.LXNS
 import xyz.xszq.bot.maimai.api.MaimaiAPI
 import xyz.xszq.bot.maimai.component.MaimaiQuery
 import xyz.xszq.bot.maimai.component.MarkdownTemplates
-import xyz.xszq.bot.maimai.component.MarkdownTemplates.Templates.brief
 import xyz.xszq.bot.maimai.component.WaitingEventData
 import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.exception.*
@@ -22,13 +22,15 @@ import xyz.xszq.bot.maimai.music.MusicDifficulty
 import xyz.xszq.bot.maimai.music.MusicInfo
 import xyz.xszq.bot.maimai.music.UserQueryParams
 import xyz.xszq.bot.message.Markdown
+import xyz.xszq.bot.message.MessageChain
+import xyz.xszq.bot.message.RemoteImage
 import xyz.xszq.bot.newLine
-import xyz.xszq.bot.event.ChannelEvent
 import xyz.xszq.bot.payload.AdminCheckRequest
-import xyz.xszq.bot.payload.markdown.Keyboard
-import xyz.xszq.bot.payload.markdown.MarkdownData
+import xyz.xszq.bot.payload.markdown.MarkdownDsl
+import xyz.xszq.bot.payload.markdown.RenderData
 import xyz.xszq.bot.reply
 
+@Suppress("unused")
 sealed class Controller(
     open val maimai: Maimai
 ) {
@@ -58,6 +60,58 @@ sealed class Controller(
         }
     }
 
+    suspend fun MessageEvent.reply(
+        fallback: String,
+        block: MarkdownDsl.() -> Unit
+    ) {
+        if (textMode()) reply(fallback)
+        else reply(block)
+    }
+
+    suspend fun MessageEvent.reply(fallback: String, markdown: Markdown) {
+        if (textMode()) reply(fallback)
+        else reply(markdown)
+    }
+
+    suspend fun MessageEvent.reply(
+        fallback: MessageChain,
+        block: MarkdownDsl.() -> Unit
+    ) {
+        if (textMode()) reply(fallback)
+        else reply(block)
+    }
+
+    suspend fun MessageEvent.reply(fallback: MessageChain, markdown: Markdown) {
+        if (textMode()) reply(fallback)
+        else reply(markdown)
+    }
+
+    suspend fun ReplyAble.reply(
+        fallback: String,
+        block: MarkdownDsl.() -> Unit
+    ) {
+        if (textMode()) reply(fallback)
+        else reply(block)
+    }
+
+    suspend fun ReplyAble.reply(fallback: String, markdown: Markdown) {
+        if (textMode()) reply(fallback)
+        else reply(markdown)
+    }
+
+    suspend fun ReplyAble.reply(
+        fallback: MessageChain,
+        block: MarkdownDsl.() -> Unit
+    ) {
+        if (textMode()) reply(fallback)
+        else reply(block)
+    }
+
+    suspend fun ReplyAble.reply(fallback: MessageChain, markdown: Markdown) {
+        if (textMode()) reply(fallback)
+        else reply(markdown)
+    }
+
     suspend fun handleError(event: MessageEvent, e: Throwable, user: UserQueryParams?) {
         with(event) {
             when (e) {
@@ -83,34 +137,42 @@ sealed class Controller(
 
     suspend fun MessageEvent.messageUserNeedQQBind() {
         maimai.messageToReplay[sender.id] = message.text.trim()
-        if (textMode())
-            reply(MaimaiQuery.NO_QQ_BINDINGS)
-        else
-            reply(brief("舞萌DX", "为了继续后续查询，请输入您的QQ号来绑定：").toMessage(Keyboard.create {
+        reply(MaimaiQuery.NO_QQ_BINDINGS) {
+            brief("舞萌DX", "为了继续后续查询，请输入您的QQ号来绑定：")
+            keyboard {
                 row {
-                    at("⬇点我输入", "/bind ", id = "1")
+                    at("⬇点我输入", "/bind ")
                 }
-            }))
+            }
+        }
     }
     suspend fun MessageEvent.messageUserNeedBind() {
-        if (textMode())
-            reply(MaimaiQuery.NO_BACKEND_BINDINGS)
-        else
-            reply(MarkdownTemplates.Templates.selectBackends(this.text))
+        reply(MaimaiQuery.NO_BACKEND_BINDINGS) {
+            brief("舞萌DX", "您还未在查分器上绑定QQ号。请选择一个查分器来绑定您的QQ号：")
+            keyboard {
+                row {
+                    link("水鱼查分器", "https://otmdb.cn/jump/maimaidxprober")
+                    link("落雪查分器", "https://otmdb.cn/jump/lxnsprober")
+                }
+                row {
+                    at("点我重试", this@messageUserNeedBind.text.trim(), enter = true, style = RenderData.FILLED_BLUE)
+                }
+            }
+        }
     }
     suspend fun MessageEvent.messageUserNotFound() {
         reply(MaimaiQuery.USER_NOT_FOUND)
     }
     suspend fun MessageEvent.messageUserDenied(user: UserQueryParams) {
         if (user.isSelf) {
-            if (textMode())
-                reply(MaimaiQuery.USER_EULA)
-            else
-                reply(brief("舞萌DX", "请前往查分器同意用户协议再进行查询：").toMessage(Keyboard.create {
+            reply(MaimaiQuery.USER_EULA) {
+                brief("舞萌DX", "请前往查分器同意用户协议再进行查询：")
+                keyboard {
                     row {
-                        link("前往查分器", "https://otmdb.cn/jump/maimaidxprober", id = "1")
+                        link("前往查分器", "https://otmdb.cn/jump/maimaidxprober")
                     }
-                }))
+                }
+            }
         } else {
             reply(MaimaiQuery.USER_DENIED)
         }
@@ -122,40 +184,40 @@ sealed class Controller(
         reply(MaimaiQuery.TOO_MANY_RECORDS)
     }
     suspend fun MessageEvent.messageNoData(backend: MaimaiAPI) {
-        if (textMode())
-            reply(buildString {
-                appendLine("您似乎尚未导入舞萌DX分数，请查看数据导入教程：")
-                when (backend) {
-                    is DivingFish -> appendLine("水鱼查分器：https://otmdb.cn/jump/maimaidxprober_import")
-                    is LXNS -> appendLine("落雪查分器：https://otmdb.cn/jump/lxnsprober_import")
-                }
-            }.trim().newLine())
-        else
-            reply(brief("舞萌DX", "您似乎尚未导入舞萌DX分数到${backend.name}查分器，请参考下方教程：").toMessage(Keyboard.create {
+        reply(buildString {
+            appendLine("您似乎尚未导入舞萌DX分数，请查看数据导入教程：")
+            when (backend) {
+                is DivingFish -> appendLine("水鱼查分器：https://otmdb.cn/jump/maimaidxprober_import")
+                is LXNS -> appendLine("落雪查分器：https://otmdb.cn/jump/lxnsprober_import")
+            }
+        }.trim().newLine()) {
+            brief("舞萌DX", "您似乎尚未导入舞萌DX分数到${backend.name}查分器，请参考下方教程：")
+            keyboard {
                 when (backend) {
                     is DivingFish -> row {
-                        link("🐟水鱼(电脑/iOS)", "https://otmdb.cn/jump/maimaidxprober_import", id = "1")
+                        link("🐟水鱼(电脑/iOS)", "https://otmdb.cn/jump/maimaidxprober_import")
                     }
                     is LXNS -> row {
-                        link("❄落雪(电脑/手机)", "https://otmdb.cn/jump/lxnsprober_import", id = "2")
+                        link("❄落雪(电脑/手机)", "https://otmdb.cn/jump/lxnsprober_import")
                     }
                 }
                 row {
-                    link("🤖Bakapiano", "https://www.bilibili.com/video/BV1La576LEWT", id = "3")
-                    link("🐇UsagiPass", "https://otmdb.cn/jump/maimai_prober_mobile", id = "4")
+                    link("🤖Bakapiano", "https://www.bilibili.com/video/BV1La576LEWT")
+                    link("🐇UsagiPass", "https://otmdb.cn/jump/maimai_prober_mobile")
                 }
                 row {
                     when (backend) {
                         is DivingFish -> row {
-                            at("❄切换到落雪", "设置查分器 落雪", enter = true, id = "5")
+                            at("❄切换到落雪", "设置查分器 落雪", enter = true)
                         }
                         is LXNS -> row {
-                            at("🐟切换到水鱼", "设置查分器 水鱼", enter = true, id = "5")
+                            at("🐟切换到水鱼", "设置查分器 水鱼", enter = true)
                         }
                     }
-                    at("切换到自动", "设置查分器 自动", enter = true, id = "6")
+                    at("切换到自动", "设置查分器 自动", enter = true)
                 }
-            }))
+            }
+        }
     }
     suspend fun MessageEvent.messageNotSupported(message: String) {
         reply(message)
@@ -173,19 +235,14 @@ sealed class Controller(
         maimai.api.lxnsBindTokens[token] = WaitingEventData(this)
         val authUrl = "https://bot-api.otmdb.cn/jump/lxns-oa/$token"
 
-        if (textMode()) {
-            reply(buildString {
-                appendLine("使用该功能时，需要您授权BOT访问您在落雪查分器的全部成绩信息。请您点击链接授权：")
-                appendLine(authUrl)
-            }.trim().newLine())
-        } else {
-            reply(Markdown(MarkdownData(buildString {
-                appendLine("**请求授权**")
-                appendLine()
-                append("使用该功能时，需要您授权BOT访问您在落雪查分器的全部成绩信息，请点击下方登录并授权：")
-            }), Keyboard.create {
+        reply(buildString {
+            appendLine("使用该功能时，需要您授权BOT访问您在落雪查分器的全部成绩信息。请您点击链接授权：")
+            appendLine(authUrl)
+        }.trim().newLine()) {
+            brief("请求授权", "使用该功能时，需要您授权BOT访问您在落雪查分器的全部成绩信息，请点击下方登录并授权：")
+            keyboard {
                 row { link("点我授权", authUrl) }
-            }))
+            }
         }
     }
 
