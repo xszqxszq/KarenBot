@@ -7,6 +7,7 @@ import kotlinx.coroutines.withTimeout
 import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.Maimai.Companion.textMode
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.message.RemoteImage
 import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.maimai.api.DivingFish
 import xyz.xszq.bot.maimai.api.LXNS
@@ -140,8 +141,8 @@ sealed class Controller(
                     }
                 }
                 row {
-                    link("🐇UsagiPass(iOS/安卓)", "https://otmdb.cn/jump/maimai_prober_mobile", id = "3")
-                    link("🤖可怜BOT(安卓)", "https://bot-docs.otmdb.cn/maimai/update", id = "4")
+                    link("🤖Bakapiano", "https://www.bilibili.com/video/BV1La576LEWT", id = "3")
+                    link("🐇UsagiPass", "https://otmdb.cn/jump/maimai_prober_mobile", id = "4")
                 }
                 row {
                     when (backend) {
@@ -225,15 +226,23 @@ sealed class Controller(
         text: String,
         helpText: String ?= null,
         action: suspend (String) -> Unit
-    ) = when {
-        text.isNotBlank() -> action(text.trim())
-        reference != null -> with(maimai.query) {
-            parseImage()
-        }.forEach {
-            action(it.title)
-        }
-        else -> helpText ?.let {
-            reply(helpText)
+    ) {
+        when {
+            text.isNotBlank() -> action(text.trim())
+            reference != null -> {
+                val client = bot.pluginLoader.llmClient
+                if (client == null)
+                    return
+                val images = reference?.filterIsInstance<RemoteImage>() ?: emptyList()
+                if (images.isEmpty())
+                    return
+                maimai.query.parseImage(client, images.map { it.url }).forEach {
+                    action(it.title)
+                }
+            }
+            else -> helpText ?.let {
+                reply(helpText)
+            }
         }
     }
 }

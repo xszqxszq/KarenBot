@@ -5,6 +5,7 @@ import kotlinx.serialization.json.Json
 import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.llm.LLMClient
 import xyz.xszq.bot.maimai.api.LXNS
 import xyz.xszq.bot.maimai.api.MaimaiAPI
 import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
@@ -154,10 +155,8 @@ class MaimaiQuery(
         return Pair(response, backend)
     }
 
-    suspend fun MessageEvent.parseImage(): List<ImageParseResult> {
-        val client = bot.pluginLoader.llmClient ?: return emptyList()
-        val images = reference ?.filterIsInstance<RemoteImage>() ?: emptyList()
-        if (images.isEmpty())
+    suspend fun parseImage(client: LLMClient, urls: List<String>): List<ImageParseResult> {
+        if (urls.isEmpty())
             return emptyList()
 
         val json = Json { ignoreUnknownKeys = true }
@@ -175,8 +174,8 @@ class MaimaiQuery(
                     appendLine("其中 results 是一个数组。")
                 })
                 user {
-                    images.forEach { img ->
-                        image(img.url)
+                    urls.forEach { url ->
+                        image(url)
                     }
                 }
             }
@@ -184,10 +183,8 @@ class MaimaiQuery(
         }.getOrDefault(emptyList())
     }
 
-    suspend fun MessageEvent.parseScoreImage(): List<ImageParseResult> {
-        val client = bot.pluginLoader.llmClient ?: return emptyList()
-        val images = reference ?.filterIsInstance<RemoteImage>() ?: emptyList()
-        if (images.isEmpty())
+    suspend fun parseScoreImage(client: LLMClient, urls: List<String>): List<ImageParseResult> {
+        if (urls.isEmpty())
             return emptyList()
 
         val json = Json { ignoreUnknownKeys = true }
@@ -220,8 +217,8 @@ class MaimaiQuery(
                     appendLine("其中 results 是一个数组，数组长度必须小于等于传入的图片数量。")
                 })
                 user {
-                    images.forEach { img ->
-                        image(img.url)
+                    urls.forEach { url ->
+                        image(url)
                     }
                 }
             }

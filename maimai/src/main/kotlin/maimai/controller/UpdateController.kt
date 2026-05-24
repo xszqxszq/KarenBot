@@ -40,9 +40,10 @@ class UpdateController(
                 return@startsWith
             }
             if (reference ?.any { it is RemoteImage } == true) {
-                val records = with(maimai.query) {
-                    parseScoreImage()
-                }.filter {
+                val llmClient = bot.pluginLoader.llmClient
+                if (llmClient == null) return@startsWith
+                val images = reference?.filterIsInstance<RemoteImage>() ?: return@startsWith
+                val records = maimai.query.parseScoreImage(llmClient, images.map { it.url }).filter {
                     it.game == "maimai"
                 }.map { record ->
                     val music = maimai.musics().first { record.title.lowercase() in it.name.lowercase() && record.type == it.type.value }

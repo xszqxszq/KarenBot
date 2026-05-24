@@ -1,12 +1,13 @@
 package xyz.xszq.bot.maimai.controller
 
+import kotlinx.coroutines.*
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.Image
 import xyz.xszq.bot.*
 import xyz.xszq.bot.Maimai.Companion.textMode
+import xyz.xszq.bot.json
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.maimai.component.MarkdownTemplates
@@ -42,6 +43,15 @@ class ImageController(
     private val scoreListCaches = ConcurrentHashMap<String, ScoreListCache>()
 
     override suspend fun setRoute() = rhythm {
+        channel<Pair<String, CompletableDeferred<String>>>("parse-image") { (urlsJson, deferred) ->
+            val urls = json.decodeFromString<List<String>>(urlsJson)
+            val client = maimai.pluginLoader.llmClient
+            val results = if (client != null)
+                maimai.query.parseImage(client, urls)
+            else
+                emptyList()
+            deferred.complete(json.encodeToString(results))
+        }
         tips = maimai.config.tips.toMutableList()
         // b50 / b40 及扩展功能
         listOf(50, 40).forEach { total ->

@@ -61,12 +61,10 @@ class MusicController(
         }
 
         startsWith("查歌") { raw ->
-            val args = raw.split("\n", limit = 2)
-            search(args[0])
+            queryByTextOrImage(raw) { search(it) }
         }
         endsWith(listOf("是什么歌", "是什么歌？")) { raw ->
-            val args = raw.split("\n", limit = 2)
-            search(args[0])
+            queryByTextOrImage(raw) { search(it) }
         }
         button("chunithm-search-word") {
             val args = data.split("\n", limit = 2)
@@ -203,24 +201,31 @@ class MusicController(
             reply(result.random(Random(System.currentTimeMillis())).infoText())
         }
         endsWith(listOf("有什么别名", "有什么别名？")) { name ->
-            val search = chunithm.aliases.search(name).firstOrNull() ?: return@endsWith
-            val aliases = ChunithmMusicAliasesTable[search]
-                .filter { it.first != search.name }
-                .take(40)
-                .joinToString("\n") { (alias, _) -> alias }
-            reply(buildString {
-                appendLine("${search.id}.${search.name} 有如下别名：")
-                appendLine(aliases)
-                appendLine()
-                appendLine("可以发送\"添加别名 id/name 别名\"来添加别名。")
-            }.trim())
+            queryByTextOrImage(name) {
+                val music = chunithm.aliases.search(it).firstOrNull() ?: return@queryByTextOrImage
+                val aliases = ChunithmMusicAliasesTable[music]
+                    .filter { a -> a.first != music.name }
+                    .take(40)
+                    .joinToString("\n") { (alias, _) -> alias }
+                val text = buildString {
+                    appendLine("${music.id}.${music.name} 有如下别名：")
+                    appendLine(aliases)
+                    appendLine()
+                    appendLine("可以@机器人使用“添加别名 id 别名”来添加别名。")
+                }.trim()
+                if (textMode())
+                    reply(text)
+                else
+                    reply(MarkdownTemplates.Templates.brief("别名列表", text)
+                        .toMessage(MarkdownTemplates.Keyboards.single("添加别名 id${music.id}", "添加别名")))
+            }
         }
         startsWith("添加别名") { raw ->
             runCatching {
                 addAlias(raw)
             }.onFailure { e ->
                 val help = buildString {
-                    appendLine("使用方法：添加别名 id/name 别名")
+                    appendLine("使用方法：添加别名 id/名称 别名")
                     appendLine(" 例：添加别名 2579 祝福荣光")
                 }.trim()
                 when (e) {
@@ -236,7 +241,7 @@ class MusicController(
             if (!isAdmin()) return@startsWith
             val args = raw.trim().split(" ", limit = 2).filter { it.isNotBlank() }
             if (args.size < 2) {
-                reply("使用方法：删除别名 id/name 别名")
+                reply("使用方法：删除别名 id/名称 别名")
                 return@startsWith
             }
             val (name, alias) = args.take(2)
@@ -254,14 +259,16 @@ class MusicController(
             reply("别名已删除。")
         }
         startsWith("预览") { musicQuery ->
-            val (music, _) = selectMusic("预览", musicQuery, false)
-                ?: return@startsWith
-            val file = localCurrentDirVfs[previewDir]["${music.resourceId}.ogg"]
-            if (!file.exists()) {
-                return@startsWith
-            }
-            file.toPCM { pcm ->
-                reply(Audio(pcm))
+            queryByTextOrImage(musicQuery) {
+                val (music, _) = selectMusic("预览", it, false)
+                    ?: return@queryByTextOrImage
+                val file = localCurrentDirVfs[previewDir]["${music.resourceId}.ogg"]
+                if (!file.exists()) {
+                    return@queryByTextOrImage
+                }
+                file.toPCM { pcm ->
+                    reply(Audio(pcm))
+                }
             }
         }
     }

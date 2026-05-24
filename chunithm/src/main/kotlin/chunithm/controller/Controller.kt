@@ -2,6 +2,9 @@ package xyz.xszq.bot.chunithm.controller
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withTimeout
+import xyz.xszq.bot.chunithm.component.ImageParseResult
+import xyz.xszq.bot.json
+import xyz.xszq.bot.message.RemoteImage
 import xyz.xszq.bot.Chunithm
 import xyz.xszq.bot.Chunithm.Companion.textMode
 import xyz.xszq.bot.chunithm.api.ChunithmAPI
@@ -161,6 +164,32 @@ sealed class Controller(
 
     suspend fun MessageEvent.requestOA() {
         bot.pluginLoader.subscribes.handle(ChannelEvent(bot, channelName = "lxns-oa", data = this))
+    }
+
+    suspend fun MessageEvent.queryByTextOrImage(
+        text: String,
+        helpText: String? = null,
+        action: suspend (String) -> Unit
+    ) {
+        if (text.isNotBlank()) {
+            action(text.trim())
+            return
+        }
+        val images = reference?.filterIsInstance<RemoteImage>() ?: emptyList()
+        if (images.isEmpty()) {
+            helpText?.let { reply(it) }
+            return
+        }
+        val deferred = CompletableDeferred<String>()
+        chunithm.pluginLoader.subscribes.handle(ChannelEvent(
+            bot = chunithm.pluginLoader.bot,
+            channelName = "parse-image",
+            data = json.encodeToString(images.map { it.url }) to deferred
+        ))
+        val results = json.decodeFromString<List<ImageParseResult>>(
+            withTimeout(60000L) { deferred.await() }
+        )
+        results.forEach { action(it.title) }
     }
 
     suspend fun MessageEvent.selectMusic(
