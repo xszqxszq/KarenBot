@@ -403,7 +403,7 @@ object ComboQuery {
 
     fun List<Filter>?.isPlate() = when {
         this == null -> false
-        else -> size == 1 && first().name?.startsWith("plate") == true
+        else -> any { it.name?.startsWith("plate") == true }
     }
 
     fun List<Filter>?.isAllRequired() =

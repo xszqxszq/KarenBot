@@ -12,7 +12,6 @@ import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.maimai.component.image.FilterParams
 import xyz.xszq.bot.maimai.exception.FilterNoResultException
-import xyz.xszq.bot.maimai.exception.FilterTooManyException
 import xyz.xszq.bot.maimai.exception.NoDataException
 import xyz.xszq.bot.maimai.exception.NotSupportedException
 import xyz.xszq.bot.maimai.music.*
@@ -21,6 +20,7 @@ import xyz.xszq.bot.maimai.query.ComboQuery
 import xyz.xszq.bot.maimai.query.ComboQuery.filterCharts
 import xyz.xszq.bot.maimai.query.ComboQuery.filterMusics
 import xyz.xszq.bot.maimai.query.ComboQuery.filterRecords
+import xyz.xszq.bot.maimai.query.ComboQuery.isAllRequired
 import xyz.xszq.bot.maimai.query.ComboQuery.isDetailed
 import xyz.xszq.bot.maimai.query.ComboQuery.isPlate
 import xyz.xszq.bot.maimai.query.ComboQuery.params
@@ -598,48 +598,33 @@ class ImageController(
         filters: List<Filter>,
         preFiltered: List<ChartInfo>? = null
     ): Pair<List<ChartInfo>, Boolean> {
-        var charts = preFiltered ?: run {
-            filters.filterCharts(
-                maimai.musics().filter { it.genre != MusicGenre.Utage }
-            )
-        }
-
+        if (preFiltered != null)
+            return Pair(preFiltered, filters.isDetailed())
+        val raw = filters.filterCharts(maimai.musics())
         var detailed = filters.isDetailed()
-        if (filters.isPlate()) {
-            charts = if (charts.distinctBy { it.music.id }.size > 250) {
-                detailed = true
-                charts.filter { it.difficulty >= MusicDifficulty.Master && it.levelValue >= 14 }
-            } else {
-                charts.filter { it.difficulty == MusicDifficulty.Master }
-            }
+
+        if (filters.any { it.type.matchesChart } || filters.isAllRequired())
+            return Pair(raw, detailed)
+        var charts = if (filters.isPlate()) {
+            raw.filter { it.difficulty >= MusicDifficulty.Master }
         } else {
-            val grouped = charts.groupBy { it.music.id }.values
-            charts = mutableListOf()
-            grouped.forEach { levelCharts ->
-                val maxDifficulty = levelCharts.maxOf { it.difficulty }
-                when {
-                    maxDifficulty >= MusicDifficulty.ReMaster -> {
-                        charts.addAll(levelCharts.filter { it.difficulty >= MusicDifficulty.Master })
-                    }
-                    else -> {
-                        charts.addAll(levelCharts.filter { it.difficulty >= MusicDifficulty.Expert })
-                    }
-                }
+            val result = mutableListOf<ChartInfo>()
+            raw.groupBy { it.music.id }.values.forEach { levelCharts ->
+                val maxD = levelCharts.maxOf { it.difficulty }
+                if (maxD >= MusicDifficulty.ReMaster)
+                    result.addAll(levelCharts.filter { it.difficulty >= MusicDifficulty.Master })
+                else
+                    result.addAll(levelCharts.filter { it.difficulty == maxD })
             }
-            if (grouped.size > 480) {
-                detailed = true
-                charts = when {
-                    charts.count { it.difficulty >= MusicDifficulty.Master && it.levelValue >= 14 } > 10 -> {
-                        charts.filter { it.difficulty >= MusicDifficulty.Master && it.levelValue >= 14 }
-                    }
-                    charts.count { it.difficulty >= MusicDifficulty.Master && it.levelValue >= 13.6 } > 10 -> {
-                        charts.filter { it.difficulty >= MusicDifficulty.Master && it.levelValue >= 13.6 }
-                    }
-                    charts.count { it.difficulty >= MusicDifficulty.Expert && it.levelValue >= 13 } > 10 -> {
-                        charts.filter { it.difficulty >= MusicDifficulty.Expert && it.levelValue >= 13 }
-                    }
-                    else -> throw FilterTooManyException()
-                }
+            result
+        }
+        if (charts.size > 400) {
+            detailed = true
+
+            val masterOnly = charts.filter { it.difficulty >= MusicDifficulty.Master }
+            charts = when {
+                masterOnly.size <= 200 -> masterOnly
+                else -> masterOnly.filter { it.levelValue >= 14.0 }
             }
         }
         return Pair(charts, detailed)
