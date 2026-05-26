@@ -177,9 +177,9 @@ object ComboQuery {
         dynamic {
             maimaiData.versions.values.filter { it.version > 20000 }.forEach { v ->
                 val year = v.name.substringAfter("舞萌DX ")
-                add(0, listOf("dx$year", year), nowVersion(v))
+                add(0, listOf("舞萌dx$year", "dx$year", year), nowVersion(v))
             }
-            add(0, listOf("dx2026", "2026"), nowVersion(
+            add(0, listOf("舞萌dx2026", "dx2026", "2026"), nowVersion(
                 GameVersion(id = 25, "舞萌DX 2026", 26000)
             ))
             maimaiData.versions.values.firstOrNull { it.version == 20000 }?.let { v ->
