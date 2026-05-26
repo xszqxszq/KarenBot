@@ -27,9 +27,6 @@ import xyz.xszq.bot.maimai.query.ComboQuery.params
 import xyz.xszq.bot.maimai.query.ComboQuery.requiresType
 import xyz.xszq.bot.maimai.query.Filter
 import xyz.xszq.bot.maimai.toSimple
-import xyz.xszq.bot.message.Markdown
-import xyz.xszq.bot.payload.markdown.Keyboard
-import xyz.xszq.bot.payload.markdown.MarkdownData
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 
@@ -568,21 +565,26 @@ class ImageController(
         records: List<Record>?,
     ): Map<MusicDifficulty, Pair<Int, Int>> {
         val total = allCharts.groupBy { it.difficulty }.mapValues { it.value.size }
+        val allChartSet = allCharts.toSet()
         val completed: Map<MusicDifficulty, Int> = if (records != null) {
             val filtered = filters.filterRecords(records, true)
             if (filtered != null) {
-                filtered.groupBy { it.chart.difficulty }.mapValues { it.value.size }
+                filtered.filter { it.chart in allChartSet }
+                    .groupBy { it.chart.difficulty }
+                    .mapValues { it.value.size }
             } else {
                 val requiresType = filters.requiresType()
-                records.groupBy { it.chart.difficulty }.mapValues { entry ->
-                    entry.value.count { record ->
-                        when (requiresType) {
-                            RequiresType.Achievement -> record.achievement >= 800000
-                            RequiresType.Combo -> record.comboStatus != ComboStatus.None
-                            RequiresType.Sync -> record.syncStatus != SyncStatus.None
+                records.filter { it.chart in allChartSet }
+                    .groupBy { it.chart.difficulty }
+                    .mapValues { entry ->
+                        entry.value.count { record ->
+                            when (requiresType) {
+                                RequiresType.Achievement -> record.achievement >= 800000
+                                RequiresType.Combo -> record.comboStatus != ComboStatus.None
+                                RequiresType.Sync -> record.syncStatus != SyncStatus.None
+                            }
                         }
                     }
-                }
             }
         } else {
             emptyMap()
