@@ -5,6 +5,7 @@ import korlibs.io.file.std.localCurrentDirVfs
 import xyz.xszq.bot.Chunithm
 import xyz.xszq.bot.chunithm.component.MarkdownTemplates
 import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesTable
+import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesVoteTable
 import xyz.xszq.bot.chunithm.music.ChartInfo
 import xyz.xszq.bot.chunithm.music.MusicDifficulty
 import xyz.xszq.bot.chunithm.music.MusicInfo
@@ -511,6 +512,46 @@ class MusicController(
             chunithm.aliases.insert(music.id, alias)
             reply("别名已添加。")
             return
+        }
+        val existing = ChunithmMusicAliasesTable[music, alias]
+        if (existing != null) {
+            if (existing >= 0)
+                throw IllegalOperationException("该别名已存在！")
+            if (ChunithmMusicAliasesVoteTable[music, alias, sender.id]) {
+                throw IllegalOperationException("您已经投过票啦，还需${-existing}票通过")
+            }
+        }
+        ChunithmMusicAliasesVoteTable.vote(music, alias, sender.id)
+        ChunithmMusicAliasesTable.vote(music, alias)
+        val current = existing?.let { it + 1 } ?: -2
+        if (existing != null) {
+            if (current >= 0) {
+                chunithm.aliases.insert(music.id, alias)
+                reply("投票成功，该别名已经通过啦")
+            } else {
+                reply("投票成功，该别名还需${-current}票通过。") {
+                    brief("别名投票", buildString {
+                        appendLine("投票成功，该别名还需${-current}票通过。")
+                    })
+                    keyboard {
+                        row {
+                            at("点我投票", "添加别名 id${music.id} $alias", enter = true)
+                        }
+                    }
+                }
+            }
+        } else {
+            reply("别名添加成功，请使用“添加别名 ${music.id} ${alias}”来进行投票，当有3人投票时别名将通过。") {
+                brief("别名投票", buildString {
+                    appendLine("别名添加成功，当有3人投票时别名将通过。")
+                    appendLine("其他人可以点击下方按钮，或者发送“添加别名 ${music.id} ${alias}”来投票。")
+                })
+                keyboard {
+                    row {
+                        at("点我投票", "添加别名 id${music.id} $alias", enter = true)
+                    }
+                }
+            }
         }
     }
     companion object {
