@@ -242,6 +242,8 @@ class MaimaiQuery(
             }.onFailure { e ->
                 if (e is CancellationException)
                     throw e
+                if (e is UserOARequiredException)
+                    throw e
                 if (e is Exception)
                     failures.add(QueryFailure(backend, e.asQueryException(user)))
             }

@@ -400,9 +400,6 @@ class ImageController(
             )
         }
         val filtered = filters.filterRecords(response.records) ?: emptyList()
-        if (filterParams.isAllRequired && filtered.size > 1500) {
-            throw NotSupportedException("您查询的记录过多，全分数列表最多支持1500条记录")
-        }
         val (elapsed, result) = countTime {
             maimai.image.rating.scoreList(
                 player = response.player,
