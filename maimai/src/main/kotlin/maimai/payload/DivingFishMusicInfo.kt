@@ -15,28 +15,3 @@ data class DivingFishMusicInfo(
     @SerialName("basic_info")
     val basicInfo: DivingFishMusicBasicInfo
 )
-
-@Serializable
-data class DivingFishMusicChart(
-    val notes: List<Int>,
-    val charter: String
-)
-
-@Serializable
-data class DivingFishMusicBasicInfo(
-    val title: String,
-    val artist: String,
-    val genre: String,
-    val bpm: Int,
-    @SerialName("release_date")
-    val releaseDate: String,
-    val from: String,
-    @SerialName("is_new")
-    val isNew: Boolean
-)
-
-@Serializable
-data class DivingFishMusicCache(
-    val etag: String = "",
-    val musics: List<DivingFishMusicInfo> = emptyList()
-)

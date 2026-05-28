@@ -201,39 +201,24 @@ class DivingFish(
         val cacheFile = File("./data/maimai/diving-fish.json")
         val cached = runCatching {
             if (cacheFile.exists())
-                json.decodeFromString<DivingFishMusicCache>(cacheFile.readText(Charsets.UTF_8))
+                json.decodeFromString<List<DivingFishMusicInfo>>(cacheFile.readText(Charsets.UTF_8))
             else null
         }.getOrNull()
         if (cached != null) {
-            divingFishTitleMap = cached.musics.associate { m ->
+            divingFishTitleMap = cached.associate { m ->
                 m.id.toInt() to m.title
             }
-        } else if (cacheFile.exists()) {
-            runCatching {
-                val musics = json.decodeFromString<List<DivingFishMusicInfo>>(cacheFile.readText(Charsets.UTF_8))
-                divingFishTitleMap = musics.associate { m ->
-                    m.id.toInt() to m.title
-                }
-            }
         }
-        val etag = cached ?.etag ?: ""
         runCatching {
-            val response = client.get("$server/music_data") {
-                if (etag.isNotBlank())
-                    header(HttpHeaders.IfNoneMatch, "\"$etag\"")
+            val musics: List<DivingFishMusicInfo> = client.get("$server/music_data").body()
+            divingFishTitleMap = musics.associate { m ->
+                m.id.toInt() to m.title
             }
-            if (response.status == HttpStatusCode.OK) {
-                val newEtag = response.headers[HttpHeaders.ETag] ?.removeSurrounding("\"") ?: ""
-                val musics: List<DivingFishMusicInfo> = response.body()
-                divingFishTitleMap = musics.associate { m ->
-                    m.id.toInt() to m.title
-                }
-                cacheFile.parentFile ?.mkdirs()
-                cacheFile.writeText(
-                    json.encodeToString(DivingFishMusicCache(etag = newEtag, musics = musics)),
-                    Charsets.UTF_8
-                )
-            }
+            cacheFile.parentFile ?.mkdirs()
+            cacheFile.writeText(
+                json.encodeToString(musics),
+                Charsets.UTF_8
+            )
         }
     }
 
