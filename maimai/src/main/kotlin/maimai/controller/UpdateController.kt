@@ -9,6 +9,7 @@ import io.ktor.serialization.kotlinx.json.*
 import korlibs.io.util.UUID
 import xyz.xszq.bot.Maimai
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.maimai.api.DivingFish
 import xyz.xszq.bot.maimai.component.WaitingEventData
 import xyz.xszq.bot.maimai.database.DivingFishBindTable
 import xyz.xszq.bot.maimai.music.MusicDifficulty
@@ -39,12 +40,13 @@ class UpdateController(
                 val llmClient = bot.pluginLoader.llmClient
                 if (llmClient == null) return@startsWith
                 val images = reference?.filterIsInstance<RemoteImage>() ?: return@startsWith
+                val divingFish = maimai.backend("diving-fish") as DivingFish
                 val records = maimai.query.parseScoreImage(llmClient, images.map { it.url }).filter {
                     it.game == "maimai"
                 }.map { record ->
                     val music = maimai.musics().first { record.title.lowercase() in it.name.lowercase() && record.type == it.type.value }
                     DivingFishRecordSimple(
-                        title = music.name,
+                        title = divingFish.getDivingFishTitle(music.id, music.name),
                         achievements = record.achievement.replace("%", "").toDouble(),
                         dxScore = record.deluxeScore,
                         fc = record.combo,
