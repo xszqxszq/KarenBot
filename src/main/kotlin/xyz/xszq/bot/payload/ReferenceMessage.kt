@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.message.RemoteImage
-import kotlin.io.encoding.ExperimentalEncodingApi
+import xyz.xszq.bot.message.RemoteVoice
 
 @Serializable
 data class ReferenceMessage(
@@ -16,16 +16,25 @@ data class ReferenceMessage(
     val content: String,
     val attachments: List<Attachment> = listOf(),
 ) {
-    @OptIn(ExperimentalEncodingApi::class)
     fun toMessageChain(): MessageChain {
         val chain = MessageChain(content)
         attachments.forEach { attachment ->
-            if ("image" in attachment.contentType) {
-                chain += RemoteImage(
-                    url = attachment.url,
-                    filename = attachment.filename,
-                    contentType = attachment.contentType,
-                )
+            when {
+                "image" in attachment.contentType -> {
+                    chain += RemoteImage(
+                        url = attachment.url,
+                        filename = attachment.filename,
+                        contentType = attachment.contentType,
+                    )
+                }
+                "voice" in attachment.contentType -> {
+                    chain += RemoteVoice(
+                        url = attachment.url,
+                        filename = attachment.filename,
+                        contentType = attachment.contentType,
+                        wavUrl = attachment.voiceWavUrl ?: "",
+                    )
+                }
             }
         }
         return chain

@@ -13,4 +13,8 @@ data class Attachment(
     @SerialName("content_type")
     val contentType: String,
     val content: String ?= null,
+    @SerialName("voice_wav_url")
+    val voiceWavUrl: String? = null,
+    @SerialName("asr_refer_text")
+    val asrReferText: String? = null,
 )

@@ -81,7 +81,9 @@ class MessageChain() {
         "file" in contentType || contentType == "file" -> RemoteFile(
             url, filename, contentType
         )
-
+        "voice" in contentType -> RemoteVoice(
+            url, filename, contentType, voiceWavUrl ?: ""
+        )
         else -> null
     }
 
