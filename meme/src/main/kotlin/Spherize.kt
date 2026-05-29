@@ -49,9 +49,9 @@ class Spherize {
         input: VfsFile
     ) = useTempFile { normal ->
         val source = input.readSkikoImage()
-        normal.writeBytes(spherize(source, false).toSkiaImage().encodePng())
+        normal.writeBytes(spherize(source, false).toSkiaImage().encodePNG())
         useTempFile { reversed ->
-            reversed.writeBytes(spherize(source, true).toSkiaImage().encodePng())
+            reversed.writeBytes(spherize(source, true).toSkiaImage().encodePNG())
             event.reply(Image(normal))
             event.reply(Image(reversed))
         }

@@ -4,8 +4,6 @@ import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
 import io.ktor.http.*
-import korlibs.image.format.PNG
-import korlibs.image.format.encode
 import korlibs.io.util.isDigit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -308,7 +306,7 @@ class Meme: Plugin() {
             return
         }
         text ?: throw ArgsNotEnoughException("请在点击图片编号后输入文本！\n使用方法：/pjsk 角色名+编号 要生成的文本")
-        sekai.draw(config, text).encodePng().send(this)
+        sekai.draw(config, text).encodePNG().send(this)
     }
     private suspend fun MessageEvent.ba(
         raw: String
@@ -323,12 +321,12 @@ class Meme: Plugin() {
                 args = raw.trim().split("\n", limit = 2)
                 val textL = args[0].trim()
                 val textR = args.getOrNull(1)?.trim() ?: throw ArgsNotEnoughException()
-                ba.draw(textL, textR).encode(PNG).send(this)
+                ba.draw(textL, textR).encodePNG().send(this)
             }
             args.size == 2 -> {
                 val textL = args[0].trim()
                 val textR = args[1].trim()
-                ba.draw(textL, textR).encode(PNG).send(this)
+                ba.draw(textL, textR).encodePNG().send(this)
             }
             else -> {
                 throw ArgsNotEnoughException()
@@ -344,12 +342,12 @@ class Meme: Plugin() {
                 args = raw.trim().split("\n", limit = 2).filter { it.isNotBlank() }
                 val top = args.getOrNull(0)?.trim() ?: throw ArgsNotEnoughException()
                 val bottom = args.getOrNull(1)?.trim()
-                fiveThousand.draw(top, bottom).encode(PNG).send(this)
+                fiveThousand.draw(top, bottom).encodePNG().send(this)
             }
             args.isNotEmpty() -> {
                 val top = args[0].trim()
                 val bottom = args.getOrNull(1)?.trim()
-                fiveThousand.draw(top, bottom).encode(PNG).send(this)
+                fiveThousand.draw(top, bottom).encodePNG().send(this)
             }
             else -> {
                 if (message.text.trim() == "/5k")

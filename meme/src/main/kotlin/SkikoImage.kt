@@ -42,7 +42,35 @@ fun SkikoImageData.toSkiaImage(): Image = Image.makeRaster(
     rowBytes = width * 4
 )
 
-fun Image.encodePng(): ByteArray = encodeToData(EncodedImageFormat.PNG)!!.bytes
+fun Image.encodePNG(): ByteArray = encodeToData(EncodedImageFormat.PNG)!!.bytes
+
+private fun norm(s: String) = s.lowercase().replace(" ", "").replace("-", "").replace("_", "")
+
+fun matchFamily(vararg names: String, weight: Int = 400): Typeface? {
+    names.forEach { name ->
+        FontMgr.default.matchFamilyStyle(
+            name,
+            FontStyle(weight, 5, FontSlant.UPRIGHT)
+        ) ?.let {
+            return it
+        }
+        val n = norm(name)
+        val mgr = FontMgr.default
+        (0 until mgr.familiesCount).forEach { i ->
+            val family = mgr.getFamilyName(i)
+            if (norm(family) != n)
+                return@forEach
+            val styleSet = mgr.makeStyleSet(i) ?: return@forEach
+            (0 until styleSet.count()).forEach { j ->
+                val tf = styleSet.getTypeface(j) ?: return@forEach
+                if (tf.fontStyle.weight == weight)
+                    return tf
+            }
+            return styleSet.getTypeface(0)
+        }
+    }
+    return null
+}
 
 fun copyPixel(
     source: ByteArray,

@@ -1,110 +1,122 @@
 package xyz.xszq.bot
 
-import korlibs.image.bitmap.Bitmap
-import korlibs.image.bitmap.NativeImage
-import korlibs.image.bitmap.NativeImageOrBitmap32
-import korlibs.image.bitmap.context2d
-import korlibs.image.color.Colors
-import korlibs.image.color.RGBA
-import korlibs.image.font.FontRegistry
-import korlibs.image.font.SystemFontRegistry
-import korlibs.image.font.getTextBoundsWithGlyphs
-import korlibs.image.format.readNativeImage
-import korlibs.io.file.std.localCurrentDirVfs
-import korlibs.math.geom.Point
-import korlibs.math.geom.Size
-import korlibs.math.isAlmostEquals
+import org.jetbrains.skia.*
+import java.io.File
 
 class BlueArchiveLogo {
-    val imgDir = localCurrentDirVfs[ASSETS_DIR]
-    lateinit var halo: NativeImage
-    lateinit var cross: NativeImage
-    lateinit var registry: FontRegistry
-    suspend fun init() {
-        halo = imgDir["halo.png"].readNativeImage()
-        cross = imgDir["cross.png"].readNativeImage()
-        registry = SystemFontRegistry()
+    val imgDir = File(ASSETS_DIR)
+    lateinit var halo: Image
+    lateinit var cross: Image
+    private var defaultTypeface: Typeface? = null
+    private var fallbackTypeface: Typeface? = null
+    fun init() {
+        halo = Image.makeFromEncoded(File(imgDir, "halo.png").readBytes())
+        cross = Image.makeFromEncoded(File(imgDir, "cross.png").readBytes())
+        defaultTypeface = matchFamily(DEFAULT_FONT, "Ro GSan Serif Std B", weight = 400)
+        fallbackTypeface = matchFamily(FALLBACK_FONT, "Glow Sans SC", weight = 900)
     }
-    private fun getFont(text: String): String {
-        val default = registry[DEFAULT_FONT]
-        text.forEach {
-            val glyphs = default.getTextBoundsWithGlyphs(SIZE, it.toString())
-            if (it.code > 255 && (glyphs.metrics.bounds.x.isAlmostEquals(34.272) || glyphs.metrics.bounds.x == 0.0))
-                return FALLBACK_FONT
+    private fun getTypeface(text: String): Typeface {
+        val typeface = defaultTypeface!!
+        text.forEach { char ->
+            if (char.code > 255) {
+                val glyphId = Font(typeface, SIZE).getUTF32Glyph(char.code)
+                if (glyphId == 0.toShort())
+                    return fallbackTypeface!!
+            }
         }
-        return DEFAULT_FONT
+        return typeface
     }
-    fun draw(textL: String, textR: String): Bitmap {
-        val fontL = registry[getFont(textL)]
-        val fontR = registry[getFont(textR)]
-        val textMetricsL = fontL.getTextBoundsWithGlyphs(SIZE, textL)
-        val textMetricsR = fontR.getTextBoundsWithGlyphs(SIZE, textR)
-        val textWidthL = textMetricsL.metrics.width -
-                (TEXT_BASELINE * CANVAS_HEIGHT + textMetricsL.fmetrics.descent) * HORIZONTAL_TILT
-        val textWidthR = textMetricsR.metrics.width +
-                (TEXT_BASELINE * CANVAS_HEIGHT - textMetricsL.fmetrics.ascent) * HORIZONTAL_TILT
+    fun draw(textL: String, textR: String): Image {
+        val typefaceL = getTypeface(textL)
+        val typefaceR = getTypeface(textR)
+        val fontL = Font(typefaceL, SIZE)
+        val fontR = Font(typefaceR, SIZE)
+        val textWidthL = fontL.measureTextWidth(textL) -
+                (TEXT_BASELINE * CANVAS_HEIGHT + fontL.metrics.descent) * HORIZONTAL_TILT
+        val textWidthR = fontR.measureTextWidth(textR) +
+                (TEXT_BASELINE * CANVAS_HEIGHT + fontR.metrics.ascent) * HORIZONTAL_TILT
         val canvasWidthL = textWidthL + PADDING_X
         val canvasWidthR = textWidthR + PADDING_X
-        val realWidth = canvasWidthL + canvasWidthR
-        val result = NativeImageOrBitmap32(realWidth.toInt(), CANVAS_HEIGHT, true)
-        return result.context2d {
-            fontSize = SIZE
-            fillStyle = RGBA(0x12, 0x8a, 0xfa, 0xff)
-            setTransform(1.0, 0.0, HORIZONTAL_TILT, 1.0, 0.0, 0.0)
-            font = fontL
-            fillText(textL, Point(canvasWidthL - textMetricsL.metrics.width, height * TEXT_BASELINE))
+        val realWidth = (canvasWidthL + canvasWidthR).toInt()
+        val surface = Surface.makeRasterN32Premul(realWidth, CANVAS_HEIGHT)
+        val canvas = surface.canvas
 
-            setTransform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
-            drawImage(halo,
-                Point(canvasWidthL - this.height / 2 + GRAPH_OFFSET_X, GRAPH_OFFSET_Y),
-                Size(CANVAS_HEIGHT, CANVAS_HEIGHT)
-            )
-
-            fillStyle = RGBA(0x2b, 0x2b, 0x2b, 0xff)
-            strokeStyle = Colors.WHITE
-            lineWidth = 12.0
-            setTransform(1.0, 0.0, HORIZONTAL_TILT, 1.0, 0.0, 0.0)
-            font = fontR
-            strokeText(textR, Point(canvasWidthL, height * TEXT_BASELINE))
-
-            fillStyle = Colors.BLACK
-            fillText(textR, Point(canvasWidthL, height * TEXT_BASELINE))
-            setTransform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
-            val graphX = canvasWidthL - height / 2 + GRAPH_OFFSET_X
-            val graphY = GRAPH_OFFSET_Y
-            beginPath()
-            moveTo(
-                graphX + (HOLLOW_PATH[0].first / 500.0) * CANVAS_HEIGHT,
-                graphY + (HOLLOW_PATH[0].second / 500.0) * CANVAS_HEIGHT
-            )
-            for (i in 1 until 4) {
-                lineTo(
-                    graphX + (HOLLOW_PATH[i].first / 500.0) * CANVAS_HEIGHT,
-                    graphY + (HOLLOW_PATH[i].second / 500.0) * CANVAS_HEIGHT
-                )
-            }
-            close()
-            fillStyle = Colors.WHITE
-            fill()
-
-            drawImage(
-                cross,
-                Point(canvasWidthL - this.height / 2 + GRAPH_OFFSET_X, GRAPH_OFFSET_Y),
-                Size(CANVAS_HEIGHT, CANVAS_HEIGHT)
-            )
-            dispose()
+        val bluePaint = Paint().apply {
+            color = Color.makeRGB(0x12, 0x8a, 0xfa)
+            isAntiAlias = true
         }
+        canvas.save()
+        canvas.skew(HORIZONTAL_TILT, 0f)
+        canvas.drawString(
+            textL,
+            canvasWidthL - fontL.measureTextWidth(textL),
+            CANVAS_HEIGHT * TEXT_BASELINE,
+            fontL,
+            bluePaint
+        )
+        canvas.restore()
+
+        canvas.drawImageRect(
+            halo,
+            Rect.makeWH(halo.width.toFloat(), halo.height.toFloat()),
+            Rect.makeXYWH(
+                canvasWidthL - CANVAS_HEIGHT / 2f + GRAPH_OFFSET_X,
+                GRAPH_OFFSET_Y,
+                CANVAS_HEIGHT.toFloat(),
+                CANVAS_HEIGHT.toFloat()
+            )
+        )
+
+        val p = Paint().apply {
+            strokeJoin = PaintStrokeJoin.ROUND
+            strokeCap = PaintStrokeCap.ROUND
+            isAntiAlias = true
+        }
+        canvas.save()
+        canvas.skew(HORIZONTAL_TILT, 0f)
+        p.color = Color.WHITE
+        p.mode = PaintMode.STROKE
+        p.strokeWidth = 12f
+        canvas.drawString(textR, canvasWidthL, CANVAS_HEIGHT * TEXT_BASELINE, fontR, p)
+        p.color = Color.makeRGB(43, 43, 43)
+        p.mode = PaintMode.FILL
+        canvas.drawString(textR, canvasWidthL, CANVAS_HEIGHT * TEXT_BASELINE, fontR, p)
+        canvas.restore()
+
+        val graphX = canvasWidthL - CANVAS_HEIGHT / 2f + GRAPH_OFFSET_X
+        val graphY = GRAPH_OFFSET_Y
+        val verts = floatArrayOf(
+            graphX + (HOLLOW_PATH[0].first / 500f) * CANVAS_HEIGHT, graphY + (HOLLOW_PATH[0].second / 500f) * CANVAS_HEIGHT,
+            graphX + (HOLLOW_PATH[1].first / 500f) * CANVAS_HEIGHT, graphY + (HOLLOW_PATH[1].second / 500f) * CANVAS_HEIGHT,
+            graphX + (HOLLOW_PATH[2].first / 500f) * CANVAS_HEIGHT, graphY + (HOLLOW_PATH[2].second / 500f) * CANVAS_HEIGHT,
+            graphX + (HOLLOW_PATH[3].first / 500f) * CANVAS_HEIGHT, graphY + (HOLLOW_PATH[3].second / 500f) * CANVAS_HEIGHT
+        )
+        val hollowFill = Paint()
+        hollowFill.color = Color.WHITE
+        canvas.drawVertices(VertexMode.TRIANGLE_STRIP, verts, null, null, null, BlendMode.SRC_OVER, hollowFill)
+
+        canvas.drawImageRect(
+            cross,
+            Rect.makeWH(cross.width.toFloat(), cross.height.toFloat()),
+            Rect.makeXYWH(
+                canvasWidthL - CANVAS_HEIGHT / 2f + GRAPH_OFFSET_X,
+                GRAPH_OFFSET_Y,
+                CANVAS_HEIGHT.toFloat(),
+                CANVAS_HEIGHT.toFloat()
+            )
+        )
+        return surface.makeImageSnapshot()
     }
     companion object {
         private const val ASSETS_DIR = "./data/meme/ba/"
         private const val CANVAS_HEIGHT: Int = 250
-        private const val SIZE: Double = 84.0
-        private const val TEXT_BASELINE: Double = 0.68
-        private const val HORIZONTAL_TILT: Double = -0.4
+        private const val SIZE: Float = 84f
+        private const val TEXT_BASELINE: Float = 0.68f
+        private const val HORIZONTAL_TILT: Float = -0.4f
         private const val PADDING_X: Int = 10
-        private const val GRAPH_OFFSET_X: Int = -15
-        private const val GRAPH_OFFSET_Y: Int = 0
-        private const val DEFAULT_FONT = "RoGSanSrfStd-Bd"
+        private const val GRAPH_OFFSET_X: Float = -15f
+        private const val GRAPH_OFFSET_Y: Float = 0f
+        private const val DEFAULT_FONT = "Ro GSan Serif Std B"
         private const val FALLBACK_FONT = "Glow Sans SC Normal Heavy"
         private val HOLLOW_PATH = listOf(
             Pair(284, 136),

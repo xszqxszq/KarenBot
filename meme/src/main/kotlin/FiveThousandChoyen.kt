@@ -1,187 +1,196 @@
 package xyz.xszq.bot
 
-import korlibs.image.bitmap.*
-import korlibs.image.color.Colors
-import korlibs.image.color.RGBA
-import korlibs.image.font.FontRegistry
-import korlibs.image.font.SystemFontRegistry
-import korlibs.image.font.getTextBoundsWithGlyphs
-import korlibs.image.vector.Context2d
-import korlibs.math.geom.Point
-import korlibs.math.geom.vector.LineCap
-import korlibs.math.geom.vector.LineJoin
-import korlibs.math.toIntCeil
+import org.jetbrains.skia.*
 import kotlin.math.max
 
 class FiveThousandChoyen {
-    lateinit var registry: FontRegistry
-    suspend fun init() {
-        registry = SystemFontRegistry()
+    private var topTypeface: Typeface? = null
+    private var botTypeface: Typeface? = null
+    fun init() {
+        topTypeface = matchFamily(TOP_FONT, "Source Han Sans", weight = 700)
+        botTypeface = matchFamily(BOTTOM_FONT, "Source Han Serif CN", weight = 700)
     }
-    fun draw(top: String, bottom: String ?= null): Bitmap {
-        var rightBorder = 1500.0
-        val result = NativeImage(1500, 270).context2d {
-            setTransform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
-            fillStyle = Colors.WHITE
-            fillRect(0, 0, width, height)
-
-            lineJoin = LineJoin.ROUND
-            lineCap = LineCap.ROUND
-
-            rightBorder = drawTop(top)
-            bottom ?.let {
-                rightBorder = max(rightBorder, drawBottom(bottom))
+    fun draw(top: String, bottom: String ?= null): Image {
+        var rightBorder = 0f
+        val surface = Surface.makeRasterN32Premul(1500, 270)
+        val canvas = surface.canvas
+        canvas.drawRect(Rect.makeWH(1500f, 270f), Paint().also { it.color = Color.WHITE })
+        with (canvas) {
+            val topW = drawTop(top)
+            rightBorder = TOP_X + topW
+            bottom?.let {
+                val botW = drawBottom(it)
+                rightBorder = max(rightBorder, BOTTOM_X + botW)
             }
         }
-        return result.sliceWithSize(0, 0, rightBorder.toIntCeil(), result.height).extract()
+        return surface.makeImageSnapshot(IRect.makeXYWH(0, 0, rightBorder.toInt(), 270))!!
     }
-    fun Context2d.drawTop(
+    fun Canvas.drawTop(
         top: String,
-        x: Int = TOP_X,
-        y: Int = TOP_Y
-    ): Double {
-        font = registry[TOP_FONT]
-        fontSize = SIZE
-        setTransform(1.0, 0.0, -0.45, 1.0, 0.0, 0.0)
+        x: Float = TOP_X,
+        y: Float = TOP_Y
+    ): Float {
+        val font = Font(topTypeface!!, SIZE)
+        save()
+        skew(-0.45f, 0f)
 
-        // Black
-        strokeStyle = Colors.BLACK
-        lineWidth = 22.0
-        strokeText(top, Point(x + 4, y + 4))
-        // Silver
-        strokeStyle = createLinearGradient(0, 24, 0, 122) {
-            add(0.0, RGBA(0, 15, 36))
-            add(0.10, RGBA(255, 255, 255))
-            add(0.18,  RGBA(55, 58, 59))
-            add(0.25,  RGBA(55, 58, 59))
-            add(0.5,  RGBA(200, 200, 200))
-            add(0.75,  RGBA(55, 58, 59))
-            add(0.85,  RGBA(25, 20, 31))
-            add(0.91,  RGBA(240, 240, 240))
-            add(0.95,  RGBA(166, 175, 194))
-            add(1.0,  RGBA(50, 50, 50))
+        val p = Paint().apply {
+            strokeJoin = PaintStrokeJoin.ROUND
+            strokeCap = PaintStrokeCap.ROUND
         }
-        lineWidth = 20.0
-        strokeText(top, Point(x + 4, y + 4))
-        
-        // Black
-        strokeStyle = Colors.BLACK
-        lineWidth = 16.0
-        strokeText(top, Point(x, y))
 
-        // Gold
-        strokeStyle = createLinearGradient(0, 20, 0, 100) {
-            add(0.0, RGBA(253, 241, 0))
-            add(0.25, RGBA(245, 253, 187))
-            add(0.4, RGBA(255, 255, 255))
-            add(0.75, RGBA(253, 219, 9))
-            add(0.9, RGBA(127, 53, 0))
-            add(1.0, RGBA(243, 196, 11))
-        }
-        lineWidth = 10.0
-        strokeText(top, Point(x, y))
+        p.color = Color.BLACK
+        p.mode = PaintMode.STROKE
+        p.strokeWidth = 22f
+        p.shader = null
+        drawString(top, x + 4, y + 4, font, p)
 
-        // Black
-        strokeStyle = Colors.BLACK
-        lineWidth = 6.0
-        strokeText(top, Point(x + 2, y - 3))
+        p.color = Color.BLACK
+        p.shader = Shader.makeLinearGradient(0f, 24f, 0f, 122f,
+            intArrayOf(
+                Color.makeRGB(0, 15, 36), Color.makeRGB(255, 255, 255),
+                Color.makeRGB(55, 58, 59), Color.makeRGB(55, 58, 59),
+                Color.makeRGB(200, 200, 200), Color.makeRGB(55, 58, 59),
+                Color.makeRGB(25, 20, 31), Color.makeRGB(240, 240, 240),
+                Color.makeRGB(166, 175, 194), Color.makeRGB(50, 50, 50)
+            ), floatArrayOf(0f, .10f, .18f, .25f, .5f, .75f, .85f, .91f, .95f, 1f),
+            GradientStyle(FilterTileMode.CLAMP, false, Matrix33.IDENTITY))
+        p.strokeWidth = 20f
+        p.mode = PaintMode.STROKE
+        drawString(top, x + 4, y + 4, font, p)
 
-        // White
-        strokeStyle = Colors.WHITE
-        lineWidth = 6.0
-        strokeText(top, Point(x, y - 3))
+        p.shader = null
+        p.color = Color.BLACK
+        p.strokeWidth = 16f
+        p.mode = PaintMode.STROKE
+        drawString(top, x, y, font, p)
 
-        // Red
-        strokeStyle = createLinearGradient(0, 20, 0, 100) {
-            add(0.0, RGBA(255, 100, 0))
-            add(0.5, RGBA(123, 0, 0))
-            add(0.51, RGBA(240, 0, 0))
-            add(1.0, RGBA(5, 0, 0))
-        }
-        lineWidth = 4.0
-        strokeText(top, Point(x, y - 3))
+        p.shader = Shader.makeLinearGradient(0f, 20f, 0f, 100f,
+            intArrayOf(
+                Color.makeRGB(253, 241, 0), Color.makeRGB(245, 253, 187),
+                Color.makeRGB(255, 255, 255), Color.makeRGB(253, 219, 9),
+                Color.makeRGB(127, 53, 0), Color.makeRGB(243, 196, 11)
+            ), floatArrayOf(0f, .25f, .4f, .75f, .9f, 1f),
+            GradientStyle(FilterTileMode.CLAMP, false, Matrix33.IDENTITY))
+        p.strokeWidth = 10f
+        p.mode = PaintMode.STROKE
+        drawString(top, x, y, font, p)
 
-        // Red
-        fillStyle = createLinearGradient(0, 20, 0, 100) {
-            add(0.0, RGBA(230, 0, 0))
-            add(0.5, RGBA(123, 0, 0))
-            add(0.51, RGBA(240, 0, 0))
-            add(1.0, RGBA(5, 0, 0))
-        }
-        fillText(top, Point(x, y - 3))
+        p.shader = null
+        p.color = Color.BLACK
+        p.strokeWidth = 6f
+        p.mode = PaintMode.STROKE
+        drawString(top, x + 2, y - 3, font, p)
 
-        return font!!.getTextBoundsWithGlyphs(fontSize, top).metrics.width + TOP_X
+        p.color = Color.WHITE
+        p.strokeWidth = 6f
+        p.mode = PaintMode.STROKE
+        drawString(top, x, y - 3, font, p)
+
+        p.shader = Shader.makeLinearGradient(0f, 20f, 0f, 100f,
+            intArrayOf(
+                Color.makeRGB(255, 100, 0), Color.makeRGB(123, 0, 0),
+                Color.makeRGB(240, 0, 0), Color.makeRGB(5, 0, 0)
+            ), floatArrayOf(0f, .5f, .51f, 1f),
+            GradientStyle(FilterTileMode.CLAMP, false, Matrix33.IDENTITY))
+        p.color = Color.makeRGB(200, 0, 0)
+        p.strokeWidth = 4f
+        p.mode = PaintMode.STROKE
+        drawString(top, x, y - 3, font, p)
+
+        p.shader = Shader.makeLinearGradient(0f, 20f, 0f, 100f,
+            intArrayOf(
+                Color.makeRGB(230, 0, 0), Color.makeRGB(123, 0, 0),
+                Color.makeRGB(240, 0, 0), Color.makeRGB(5, 0, 0)
+            ), floatArrayOf(0f, .5f, .51f, 1f),
+            GradientStyle(FilterTileMode.CLAMP, false, Matrix33.IDENTITY))
+        p.color = Color.makeRGB(200, 0, 0)
+        p.mode = PaintMode.FILL
+        drawString(top, x, y - 3, font, p)
+
+        restore()
+        return font.measureTextWidth(top)
     }
 
-    fun Context2d.drawBottom(
+    fun Canvas.drawBottom(
         bottom: String,
-        x: Int = BOTTOM_X,
-        y: Int = BOTTOM_Y
-    ): Double {
-        font = registry[BOTTOM_FONT]
-        fontSize = SIZE
-        setTransform(1.0, 0.0, -0.45, 1.0, 0.0, 0.0)
+        x: Float = BOTTOM_X,
+        y: Float = BOTTOM_Y
+    ): Float {
+        val font = Font(botTypeface!!, SIZE)
+        save()
+        skew(-0.45f, 0f)
 
-        // Black
-        strokeStyle = Colors.BLACK
-        lineWidth = 22.0
-        strokeText(bottom, Point(x + 5, y + 2))
-
-        // Silver
-        strokeStyle = createLinearGradient(0, y - 80, 0, y + 18) {
-            add(0.0, RGBA(0, 15, 36))
-            add(0.25, RGBA(250, 250, 250))
-            add(0.5, RGBA(150, 150, 150))
-            add(0.75, RGBA(55, 58, 59))
-            add(0.85, RGBA(25, 20, 31))
-            add(0.91, RGBA(240, 240, 240))
-            add(0.95, RGBA(166, 175, 194))
-            add(1.0, RGBA(50, 50, 50))
+        val p = Paint().apply {
+            strokeJoin = PaintStrokeJoin.ROUND
+            strokeCap = PaintStrokeCap.ROUND
         }
-        lineWidth = 19.0
-        strokeText(bottom, Point(x + 5, y + 2))
 
-        // Black
-        strokeStyle = RGBA(16, 25, 58)
-        lineWidth = 17.0
-        strokeText(bottom, Point(x, y))
+        p.color = Color.BLACK
+        p.mode = PaintMode.STROKE
+        p.strokeWidth = 22f
+        p.shader = null
+        drawString(bottom, x + 5, y + 2, font, p)
 
-        // White
-        strokeStyle = RGBA(221, 221, 221)
-        lineWidth = 8.0
-        strokeText(bottom, Point(x, y))
+        p.shader = Shader.makeLinearGradient(0f, y - 80, 0f, y + 18,
+            intArrayOf(
+                Color.makeRGB(0, 15, 36), Color.makeRGB(250, 250, 250),
+                Color.makeRGB(150, 150, 150), Color.makeRGB(55, 58, 59),
+                Color.makeRGB(25, 20, 31), Color.makeRGB(240, 240, 240),
+                Color.makeRGB(166, 175, 194), Color.makeRGB(50, 50, 50)
+            ), floatArrayOf(0f, .25f, .5f, .75f, .85f, .91f, .95f, 1f),
+            GradientStyle(FilterTileMode.CLAMP, false, Matrix33.IDENTITY))
+        p.color = Color.makeRGB(200, 210, 220)
+        p.strokeWidth = 19f
+        p.mode = PaintMode.STROKE
+        drawString(bottom, x + 5, y + 2, font, p)
 
-        // Navy blue
-        strokeStyle = createLinearGradient(0, y - 80, 0, y) {
-            add(0.0, RGBA(16, 25, 58))
-            add(0.03, RGBA(255, 255, 255))
-            add(0.08, RGBA(16, 25, 58))
-            add(0.2, RGBA(16, 25, 58))
-            add(1.0, RGBA(16, 25, 58))
-        }
-        lineWidth = 7.0
-        strokeText(bottom, Point(x, y))
+        p.shader = null
+        p.color = Color.makeRGB(16, 25, 58)
+        p.strokeWidth = 17f
+        p.mode = PaintMode.STROKE
+        drawString(bottom, x, y, font, p)
 
-        // Silver
-        fillStyle = createLinearGradient(0, y - 80, 0, y) {
-            add(0.0, RGBA(245, 246, 248))
-            add(0.15, RGBA(255, 255, 255))
-            add(0.35, RGBA(195, 213, 220))
-            add(0.5, RGBA(160, 190, 201))
-            add(0.51, RGBA(160, 190, 201))
-            add(0.52, RGBA(196, 215, 222))
-            add(1.0, RGBA(255, 255, 255))
-        }
-        fillText(bottom, Point(x, y - 3))
-        return font!!.getTextBoundsWithGlyphs(SIZE, bottom).metrics.width + x - 50
+        p.color = Color.makeRGB(221, 221, 221)
+        p.strokeWidth = 8f
+        p.mode = PaintMode.STROKE
+        drawString(bottom, x, y, font, p)
+
+        p.shader = Shader.makeLinearGradient(0f, y - 80, 0f, y,
+            intArrayOf(
+                Color.makeRGB(16, 25, 58), Color.makeRGB(255, 255, 255),
+                Color.makeRGB(16, 25, 58), Color.makeRGB(16, 25, 58),
+                Color.makeRGB(16, 25, 58)
+            ), floatArrayOf(0f, .03f, .08f, .2f, 1f),
+            GradientStyle(FilterTileMode.CLAMP, false, Matrix33.IDENTITY))
+        p.color = Color.makeRGB(16, 25, 58)
+        p.strokeWidth = 7f
+        p.mode = PaintMode.STROKE
+        drawString(bottom, x, y, font, p)
+
+        p.shader = Shader.makeLinearGradient(0f, y - 80, 0f, y,
+            intArrayOf(
+                Color.makeRGB(245, 246, 248), Color.makeRGB(255, 255, 255),
+                Color.makeRGB(195, 213, 220), Color.makeRGB(160, 190, 201),
+                Color.makeRGB(160, 190, 201), Color.makeRGB(196, 215, 222),
+                Color.makeRGB(255, 255, 255)
+            ), floatArrayOf(0f, .15f, .35f, .5f, .51f, .52f, 1f),
+            GradientStyle(FilterTileMode.CLAMP, false, Matrix33.IDENTITY))
+        p.color = Color.makeRGB(200, 210, 220)
+        p.mode = PaintMode.FILL
+        drawString(bottom, x, y - 3, font, p)
+
+        restore()
+        return font.measureTextWidth(bottom)
     }
+
     companion object {
         const val TOP_FONT = "Source Han Sans CN Bold"
-        const val BOTTOM_FONT = "Source Han Serif SC Bold"
-        const val SIZE = 100.0
-        const val TOP_X = 70
-        const val TOP_Y = 100
-        const val BOTTOM_X = 250
-        const val BOTTOM_Y = 230
+        const val BOTTOM_FONT = "Source Han Serif SC"
+        const val SIZE = 100f
+        const val TOP_X = 70f
+        const val TOP_Y = 100f
+        const val BOTTOM_X = 250f
+        const val BOTTOM_Y = 230f
     }
 }
