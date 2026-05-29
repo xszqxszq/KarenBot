@@ -17,8 +17,8 @@ class Spherize {
         val maxRad = min(cx, cy)
         val out = ByteArray(input.pixels.size)
 
-        for (y in 0 until height) {
-            for (x in 0 until width) {
+        (0 until height).forEach { y ->
+            (0 until width).forEach { x ->
                 val dx = (x - cx) / maxRad
                 val dy = (y - cy) / maxRad
                 val r  = hypot(dx, dy)
@@ -81,7 +81,7 @@ class Spherize {
         val i11 = (y1 * input.width + x1) * 4
         val offset = (y * input.width + x) * 4
 
-        repeat(4) { channel ->
+        (0 until 4).forEach { channel ->
             val c00 = input.pixels[i00 + channel].toInt() and 0xFF
             val c10 = input.pixels[i10 + channel].toInt() and 0xFF
             val c01 = input.pixels[i01 + channel].toInt() and 0xFF

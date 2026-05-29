@@ -16,9 +16,9 @@ class ImSoHappy {
         val dstL2R = ByteArray(srcData.size)
         val dstR2L = ByteArray(srcData.size)
 
-        for (y in 0 until height) {
+        (0 until height).forEach { y ->
             val rowStart = y * width * 4
-            for (x in 0 until halfWidth) {
+            (0 until halfWidth).forEach { x ->
                 val left = rowStart + x * 4
                 val right = rowStart + (width - 1 - x) * 4
 
