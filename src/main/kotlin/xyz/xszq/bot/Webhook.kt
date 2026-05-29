@@ -165,6 +165,10 @@ suspend fun Application.handleDispatch(
             logger.info {
                 "[${data.group}] ${data.author.username}(${data.author.id}) -> ${message.content.trim().replace("\n", "\\n")}"
             }
+            if (data.author.bot)
+                return
+            if (data.mentions.any { it.bot && !it.isSelf })
+                return
             GroupMessageEvent(
                 bot = pluginLoader.bot,
                 eventId = payload.id!!,
