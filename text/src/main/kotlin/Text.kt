@@ -110,8 +110,13 @@ class Text: Plugin() {
                 reply("问我干嘛")
         }
         always {
-            textConfig.presets[message.text.trim()]?.let { text ->
+            textConfig.presets[message.text.trim()] ?.let { text ->
                 reply(text)
+            }
+            textConfig.userSpecifiedPresets.firstOrNull { preset ->
+                sender.id == preset.openId && message.text.trim() == preset.match
+            } ?.let {
+                reply(it.reply)
             }
         }
         startsWith("发病") { target ->

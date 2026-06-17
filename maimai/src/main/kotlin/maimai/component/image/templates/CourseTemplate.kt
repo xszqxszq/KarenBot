@@ -54,7 +54,7 @@ class CourseTemplate(
                     if (life <= 0)
                         background = "final_2.png"
                     image("course") {
-                        src = "title_${course.id}.png"
+                        src = "title_${realId}.png"
                     }
                 }
                 div("life") {
