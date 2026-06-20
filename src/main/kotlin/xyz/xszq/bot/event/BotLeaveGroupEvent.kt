@@ -3,7 +3,6 @@ package xyz.xszq.bot.event
 import xyz.xszq.bot.Bot
 import xyz.xszq.bot.Group
 import xyz.xszq.bot.Member
-import xyz.xszq.bot.User
 
 class BotLeaveGroupEvent(
     override val bot: Bot,

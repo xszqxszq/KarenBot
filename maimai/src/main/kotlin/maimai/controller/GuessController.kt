@@ -133,7 +133,7 @@ class GuessController(
                     eventId = result[GuessGameTable.eventId],
                     id = result[GuessGameTable.messageId],
                     message = MessageChain(),
-                    sender = User(this@restoreGuessGame, result[GuessGameTable.senderId]),
+                    sender = Member(this@restoreGuessGame, result[GuessGameTable.senderId]),
                     group = Group(this@restoreGuessGame, result[GuessGameTable.id].value),
                     seq = result[GuessGameTable.seq]
                 )

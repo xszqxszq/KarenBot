@@ -45,7 +45,7 @@ object MarkdownTemplates {
             totalPages: Int = 1
         ): Markdown {
             val rows = result.take(10).joinToString("\n") { music ->
-                val url = "$jacketUrl/${music.resourceId}.jpg"
+                val url = "$jacketUrl/${music.resourceId}_s.jpg"
                 val command = "/mai " + "${displayName ?: type} ${difficulty?.brief ?: ""}id${music.id}".trim()
                 val musicName = "${music.id}. ${music.name}"
                 "![preview #20px #20px]($url) ${href(command, musicName)}"
