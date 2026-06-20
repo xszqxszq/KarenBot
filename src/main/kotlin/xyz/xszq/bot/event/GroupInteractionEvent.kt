@@ -2,6 +2,7 @@ package xyz.xszq.bot.event
 
 import xyz.xszq.bot.Bot
 import xyz.xszq.bot.Group
+import xyz.xszq.bot.Member
 import xyz.xszq.bot.User
 
 class GroupInteractionEvent(
@@ -10,7 +11,7 @@ class GroupInteractionEvent(
     id: String,
     data: String,
     button: String,
-    sender: User,
+    override val sender: Member,
     override val group: Group,
     override var seq: Int = 1
 ): InteractionEvent(

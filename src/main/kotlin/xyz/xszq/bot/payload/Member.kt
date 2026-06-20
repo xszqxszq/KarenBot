@@ -12,4 +12,6 @@ data class Member(
     val scope: String = "single",
     @SerialName("is_you")
     val isSelf: Boolean = false,
+    @SerialName("member_role")
+    val role: String = "member"
 )

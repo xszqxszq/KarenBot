@@ -1,6 +1,6 @@
 package xyz.xszq.bot
 
-class User(
+open class User(
     val bot: Bot,
     val id: String,
     val username: String = "",

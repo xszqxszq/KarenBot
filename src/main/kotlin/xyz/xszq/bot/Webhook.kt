@@ -147,7 +147,12 @@ suspend fun Application.handleDispatch(
                 eventId = payload.id!!,
                 id = data.id,
                 message = message,
-                sender = User(pluginLoader.bot, data.author.id, data.author.username),
+                sender = Member(
+                    bot = pluginLoader.bot,
+                    id = data.author.id,
+                    username = data.author.username,
+                    role = MemberRole.of(data.author.role)
+                ),
                 group = Group(pluginLoader.bot, data.group),
                 reference = data.messageElements.firstOrNull() ?.toMessageChain(),
                 // TODO: Replace to Authentic bot data
@@ -174,7 +179,12 @@ suspend fun Application.handleDispatch(
                 eventId = payload.id!!,
                 id = data.id,
                 message = message,
-                sender = User(pluginLoader.bot, data.author.id, data.author.username),
+                sender = Member(
+                    bot = pluginLoader.bot,
+                    id = data.author.id,
+                    username = data.author.username,
+                    role = MemberRole.of(data.author.role)
+                ),
                 group = Group(pluginLoader.bot, data.group),
                 reference = data.messageElements.firstOrNull() ?.toMessageChain(),
                 mentions = data.mentions.filter { it.scope != "all" }.map { mention ->
@@ -205,7 +215,7 @@ suspend fun Application.handleDispatch(
                 bot = pluginLoader.bot,
                 eventId = payload.id!!,
                 group = Group(pluginLoader.bot, data.group),
-                operator = User(pluginLoader.bot, data.operator)
+                operator = Member(pluginLoader.bot, data.operator)
             )
         }
         /* 好友移除 */
@@ -230,7 +240,7 @@ suspend fun Application.handleDispatch(
                 bot = pluginLoader.bot,
                 eventId = payload.id!!,
                 group = Group(pluginLoader.bot, data.group),
-                operator = User(pluginLoader.bot, data.operator)
+                operator = Member(pluginLoader.bot, data.operator)
             )
         }
         /* 允许私聊消息推送(已下线) */
@@ -255,7 +265,7 @@ suspend fun Application.handleDispatch(
                 bot = pluginLoader.bot,
                 eventId = payload.id!!,
                 group = Group(pluginLoader.bot, data.group),
-                operator = User(pluginLoader.bot, data.operator)
+                operator = Member(pluginLoader.bot, data.operator)
             )
         }
         /* 拒绝私聊消息推送(已下线) */
@@ -280,7 +290,7 @@ suspend fun Application.handleDispatch(
                 bot = pluginLoader.bot,
                 eventId = payload.id!!,
                 group = Group(pluginLoader.bot, data.group),
-                operator = User(pluginLoader.bot, data.operator)
+                operator = Member(pluginLoader.bot, data.operator)
             )
         }
         /* 互动消息 */
@@ -297,7 +307,7 @@ suspend fun Application.handleDispatch(
                     id = "",
                     data = data.data.resolved.buttonData,
                     button = data.data.resolved.buttonId,
-                    sender = User(pluginLoader.bot, data.groupMemberOpenId!!),
+                    sender = Member(pluginLoader.bot, data.groupMemberOpenId!!),
                     group = Group(pluginLoader.bot, data.groupOpenId!!)
                 ).also {
                     logger.info {
@@ -320,6 +330,26 @@ suspend fun Application.handleDispatch(
                 }
                 else -> null
             }
+        }
+        /* 群有新成员加入 */
+        EventType.Group.MemberAdd -> {
+            val data = json.decodeFromString<GroupMemberUpdate>(payload.d!!)
+            UserJoinGroupEvent(
+                bot = pluginLoader.bot,
+                eventId = payload.id!!,
+                group = Group(pluginLoader.bot, data.group),
+                user = Member(pluginLoader.bot, data.member)
+            )
+        }
+        /* 群有成员退群 */
+        EventType.Group.MemberRemove -> {
+            val data = json.decodeFromString<GroupMemberUpdate>(payload.d!!)
+            UserLeaveGroupEvent(
+                bot = pluginLoader.bot,
+                eventId = payload.id!!,
+                group = Group(pluginLoader.bot, data.group),
+                user = Member(pluginLoader.bot, data.member)
+            )
         }
         /* 无法处理的事件 */
         else -> null

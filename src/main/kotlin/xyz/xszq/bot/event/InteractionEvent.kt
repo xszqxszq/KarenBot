@@ -9,7 +9,7 @@ open class InteractionEvent(
     override var id: String,
     var data: String,
     val button: String,
-    val sender: User,
+    open val sender: User,
     override var seq: Int = 1
 ): UserReplyAbleEvent {
     override val user: User = sender

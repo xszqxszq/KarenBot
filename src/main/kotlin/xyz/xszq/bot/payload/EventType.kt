@@ -16,6 +16,8 @@ object EventType {
         const val Remove = "GROUP_DEL_ROBOT"
         const val Receive = "GROUP_MSG_RECEIVE"
         const val Reject = "GROUP_MSG_REJECT"
+        const val MemberAdd = "GROUP_MEMBER_ADD"
+        const val MemberRemove = "GROUP_MEMBER_REMOVE"
     }
     const val Interaction = "INTERACTION_CREATE"
 }

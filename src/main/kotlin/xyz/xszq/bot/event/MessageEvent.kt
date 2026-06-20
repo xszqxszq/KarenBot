@@ -9,7 +9,7 @@ open class MessageEvent(
     override val eventId: String,
     override val id: String,
     val message: MessageChain,
-    val sender: User,
+    open val sender: User,
     override var seq: Int = 1,
     open val reference: MessageChain ?= null
 ): UserReplyAbleEvent {
