@@ -179,9 +179,6 @@ object ComboQuery {
                 val year = v.name.substringAfter("舞萌DX ")
                 add(0, listOf("舞萌dx$year", "dx$year", year), nowVersion(v))
             }
-            add(0, listOf("舞萌dx2026", "dx2026", "2026"), nowVersion(
-                GameVersion(id = 25, "舞萌DX 2026", 26000)
-            ))
             maimaiData.versions.values.firstOrNull { it.version == 20000 }?.let { v ->
                 add(0, listOf("dx无印"), nowVersion(v))
             }

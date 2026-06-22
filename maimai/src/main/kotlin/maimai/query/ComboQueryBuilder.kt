@@ -95,7 +95,7 @@ class ComboQueryBuilder {
         achievement { Rate.greaterEqual(it.achievement, r) }
 
     fun nowVersion(v: GameVersion) =
-        Filter(FilterType.Modification, chart = { it.music.version.version <= v.version },
+        Filter(FilterType.Version, chart = { it.music.version.version <= v.version },
             nowVersion = { v })
 
     fun random(random: Random): Filter {
