@@ -80,4 +80,27 @@ class ComboQueryBuilder {
 
     fun nowVersion(v: GameVersion) =
         Filter(FilterType.Modification, chart = { it.music.version.version <= v.version }, nowVersion = { v })
+
+    fun trophy(
+        songIds: List<Int>,
+        difficulties: List<MusicDifficulty>,
+        rank: String ?= null,
+        fullCombo: String ?= null,
+        fullChain: String ?= null,
+        name: String
+    ) = Filter(FilterType.Trophy, chart = { chart ->
+        chart.music.id in songIds && chart.difficulty in difficulties
+    }, record = { record ->
+        when {
+            rank != null -> Rate.greaterEqual(record.achievement, rank)
+            fullCombo == "alljustice" -> record.comboStatus.isAJ()
+            fullCombo == "fullcombo" -> record.comboStatus.isFC()
+            fullChain == "fullchain" -> record.chainStatus.isFullChain()
+            else -> true
+        }
+    }, name = "trophy_" + when {
+        fullCombo != null -> "combo_"
+        fullChain != null -> "chain_"
+        else -> ""
+    } + name)
 }

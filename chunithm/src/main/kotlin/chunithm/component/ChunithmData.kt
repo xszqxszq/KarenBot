@@ -8,10 +8,12 @@ import xyz.xszq.bot.chunithm.config.DesignerConfig
 import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesTable
 import xyz.xszq.bot.chunithm.music.GameVersion
 import xyz.xszq.bot.chunithm.music.MusicInfo
+import xyz.xszq.bot.chunithm.payload.LXNSTrophyInfo
 
 class ChunithmData {
     val versions = mutableMapOf<String, GameVersion>()
     val musics = mutableMapOf<Int, MusicInfo>()
+    val trophies = mutableMapOf<Int, LXNSTrophyInfo>()
     lateinit var newestVersion: GameVersion
     lateinit var designer: DesignerConfig
 
@@ -43,5 +45,7 @@ class ChunithmData {
             else emptyList()
         }
         ChunithmMusicAliasesTable.addAll(aliases)
+
+        trophies.putAll(api.getTrophyList())
     }
 }

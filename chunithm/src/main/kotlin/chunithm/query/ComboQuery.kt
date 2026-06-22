@@ -124,6 +124,27 @@ object ComboQuery {
             }
         }
 
+        dynamic {
+            chunithmData.trophies.values.forEach { trophy ->
+                val levelPart = trophy.name.substringBefore(" of ")
+                val versionPart = trophy.name.substringAfter(" of ")
+                val required = trophy.required?.firstOrNull() ?: return@forEach
+                val songIds = required.songs?.map { it.id } ?: return@forEach
+                val difficulties = required.difficulties?.map { MusicDifficulty.of(it) } ?: return@forEach
+
+                add(0, listOf(trophy.name, "$versionPart $levelPart"),
+                    trophy(
+                        songIds = songIds,
+                        difficulties = difficulties,
+                        rank = required.rank,
+                        fullCombo = required.fullCombo,
+                        fullChain = required.fullChain,
+                        name = trophy.name
+                    )
+                )
+            }
+        }
+
         regex("(?<!\\d)(9\\d{5}|100\\d{4}|1010000)(?!\\d)") { matched ->
             achievement { it.achievement == matched.toInt() }
         }
@@ -283,7 +304,13 @@ object ComboQuery {
             return RequiresType.Combo
         if (any { it.name in listOf("fullChain") })
             return RequiresType.Sync
-        return RequiresType.Achievement
+        return mapNotNull { it.name }.firstOrNull { it.startsWith("trophy_") }?.let { name ->
+            when {
+                name.startsWith("trophy_combo_") -> RequiresType.Combo
+                name.startsWith("trophy_chain_") -> RequiresType.Sync
+                else -> RequiresType.Achievement
+            }
+        } ?: RequiresType.Achievement
     }
 
     fun List<Filter>.filterNowVersion(): GameVersion? =

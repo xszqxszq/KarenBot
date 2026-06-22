@@ -5,7 +5,7 @@ enum class FilterType {
     Achievement, Combo, Sync,
     // 谱面信息类
     Difficulty, Level, Designer, Genre,
-    Version,
+    Version, Trophy,
     // 排序类
     Sort,
     // 修改数据类,

@@ -115,6 +115,12 @@ class LXNS(
             alias.songId to alias.aliases.toSet()
         }
 
+    suspend fun getTrophyList(): Map<Int, LXNSTrophyInfo> = client.get("$apiServer/trophy/list")
+        .body<LXNSTrophyList>()
+        .trophies
+        .filter { it.color == "image" && it.required != null }
+        .associateBy { it.id }
+
     override suspend fun getPlayerRating(
         user: UserQueryParams
     ): RatingResponse? {

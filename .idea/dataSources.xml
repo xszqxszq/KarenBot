@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="maimai-update.h2" uuid="72a9d37d-501d-4c83-979b-2c365c0fd92a">
+    <data-source source="LOCAL" name="database.h2" uuid="a2e2dbaf-d8b1-4e7e-903a-ba903a84360a">
       <driver-ref>h2.unified</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.h2.Driver</jdbc-driver>
-      <jdbc-url>jdbc:h2:$PROJECT_DIR$/../KarenBot-runtime/database/maimai-update.h2</jdbc-url>
+      <jdbc-url>jdbc:h2:$PROJECT_DIR$/../KarenBot-runtime/database/database.h2</jdbc-url>
       <jdbc-additional-properties>
         <property name="com.intellij.clouds.kubernetes.db.host.port" />
         <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
