@@ -239,7 +239,7 @@ object ComboQuery {
 
     fun compile() {
         sortedKeywordConditions = keywordConditions.flatMap { (names, filter) ->
-            names.map { name -> name to filter }
+            names.map { name -> name.lowercase() to filter }
         }.sortedByDescending { it.first.length }
     }
 
@@ -290,7 +290,7 @@ object ComboQuery {
 
     fun filters(fullCommand: String): List<Filter>? {
         val filters = mutableListOf<Filter>()
-        var command = fullCommand
+        var command = fullCommand.lowercase()
 
         regexConditions.forEach { (pattern, getFilter) ->
             val regex = Regex(pattern)
@@ -304,10 +304,10 @@ object ComboQuery {
         }
 
         sortedKeywordConditions.forEach { (name, filter) ->
-            if (command.contains(name, ignoreCase = true)) {
+            if (command.contains(name)) {
                 if (!filters.contains(filter))
                     filters.add(filter)
-                command = command.replace(name, " ", ignoreCase = true)
+                command = command.replace(name, " ")
             }
         }
 
