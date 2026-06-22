@@ -1,8 +1,12 @@
 package xyz.xszq.bot.maimai.database
 
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.dao.id.IdTable
 import org.jetbrains.exposed.sql.json.jsonb
+import org.jetbrains.exposed.sql.kotlin.datetime.datetime
 
 object GuessGameTable: IdTable<String>() {
     override val id = varchar("context", 32).entityId()
@@ -13,5 +17,8 @@ object GuessGameTable: IdTable<String>() {
     val seq = integer("seq")
     val type = varchar("type", 32)
     val status = jsonb<GuessGameStatus>("status", Json, GuessGameStatus.serializer())
+    val modified = datetime("modified").clientDefault {
+        Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+    }
     override val primaryKey = PrimaryKey(id)
 }

@@ -2,6 +2,10 @@ package xyz.xszq.bot.maimai.controller
 
 import korlibs.io.file.VfsFile
 import kotlinx.coroutines.*
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
@@ -111,6 +115,7 @@ class GuessController(
                 is GuessGameStatus.Opening -> "opening"
             }
             it[GuessGameTable.status] = status
+            it[GuessGameTable.modified] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         }
     }
     private suspend fun MessageEvent.endGame(
@@ -126,7 +131,14 @@ class GuessController(
         }
     }
     suspend fun Bot.restoreGuessGame() = newSuspendedTransaction(Dispatchers.IO) {
+        val now = Clock.System.now()
         GuessGameTable.selectAll().forEach { result ->
+            if ((now - result[GuessGameTable.modified].toInstant(TimeZone.currentSystemDefault())).inWholeMinutes >= 30) {
+                GuessGameTable.deleteWhere {
+                    GuessGameTable.id eq result[GuessGameTable.id]
+                }
+                return@forEach
+            }
             val event = when (result[GuessGameTable.eventType]) {
                 "group" -> GroupMessageEvent(
                     bot = this@restoreGuessGame,
