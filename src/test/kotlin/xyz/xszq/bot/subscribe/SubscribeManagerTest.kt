@@ -44,7 +44,7 @@ class SubscribeManagerTest {
         val called = mutableListOf<String>()
 
         manager.subscribe("plugin-a", StartsWith(prefix = "id") { called += "start:$it" }, "rhythm", "mai")
-        manager.subscribe("plugin-a", CommandEndsWith(suffix = "50") { called += "end:$it" }, "rhythm", "mai")
+        manager.subscribe("plugin-a", CommandEndsWith(suffix = "50") { (command, _) -> called += "end:$command" }, "rhythm", "mai")
 
         manager.handle(messageEvent("id11450"))
 
@@ -72,7 +72,7 @@ class SubscribeManagerTest {
         val called = mutableListOf<String>()
 
         manager.subscribe("plugin-a", StartsWith(prefix = "设置b50") { called += "setting:$it" }, "rhythm", "mai")
-        manager.subscribe("plugin-a", CommandEndsWith(suffix = "50") { called += "suffix:$it" }, "rhythm", "mai")
+        manager.subscribe("plugin-a", CommandEndsWith(suffix = "50") { (command, _) -> called += "suffix:$command" }, "rhythm", "mai")
 
         manager.handle(messageEvent("设置b50"))
 

@@ -30,29 +30,25 @@ class ImageController(
     override suspend fun setRoute() = rhythm {
         // b50 及扩展功能
         listOf(30, 50).forEach { total ->
-            commandEndsWith(total.toString()) { raw ->
-                val args = raw.split(" ")
-                val command = args.first()
-
-                val queryArgs = args.getOrNull(1) ?: ""
+            commandEndsWith(total.toString()) { (command, queryArgs) ->
                 var user: UserQueryParams? = null
                 runCatching {
                     when (command) {
                         "b" -> {
-                            user = chunithm.query.getQueryParams(this, queryArgs)
+                            user = chunithm.query.getQueryParams(this, queryArgs ?: "")
                             handleRating(user)
                         }
                         "r" -> {
-                            user = chunithm.query.getQueryParams(this, queryArgs)
+                            user = chunithm.query.getQueryParams(this, queryArgs ?: "")
                             handleRecent(total, user)
                         }
                         "歌" -> {
                             user = chunithm.query.getQueryParams(this)
-                            val musicQuery = args.subList(1, args.size).joinToString(" ")
+                            val musicQuery = queryArgs ?: ""
                             handleMusicRating(total, user, musicQuery)
                         }
                         else -> {
-                            user = chunithm.query.getQueryParams(this, queryArgs)
+                            user = chunithm.query.getQueryParams(this, queryArgs ?: "")
                             handleCombo(total, user, command)
                         }
                     }
@@ -62,10 +58,8 @@ class ImageController(
             }
         }
         // 成绩列表
-        commandEndsWith(listOf("分数列表", "分数表", "成绩列表", "成绩表")) { raw ->
-            val args = raw.split(" ")
-            val command = args.first()
-            val page = args.getOrNull(1) ?.toIntOrNull() ?: 1
+        commandEndsWith(listOf("分数列表", "分数表", "成绩列表", "成绩表")) { (command, pageArg) ->
+            val page = pageArg ?.toIntOrNull() ?: 1
             var user: UserQueryParams? = null
             runCatching {
                 user = chunithm.query.getQueryParams(this)
@@ -145,7 +139,7 @@ class ImageController(
                 api = api.name
             )
         }
-        result.sendResultImage("r50", this, "生成时间：${elapsed}ms")
+        result.sendResultImage("r${total}", this, "生成时间：${elapsed}ms")
     }
     suspend fun MessageEvent.handleCombo(
         total: Int,
@@ -170,7 +164,7 @@ class ImageController(
                 api = api.name
             )
         }
-        result.sendResultImage("${combo}50", this, "生成时间：${elapsed}ms")
+        result.sendResultImage("${combo}${total}", this, "生成时间：${elapsed}ms")
     }
 
     suspend fun MessageEvent.handleMusicRating(

@@ -73,7 +73,7 @@ class SubscribeBuilder(
     fun endsWith(texts: Collection<String>, block: suspend MessageEvent.(String) -> Unit) = texts.forEach { text ->
         endsWith(text, block)
     }
-    fun commandEndsWith(text: String, block: suspend MessageEvent.(String) -> Unit) {
+    fun commandEndsWith(text: String, block: suspend MessageEvent.(Pair<String, String?>) -> Unit) {
         manager.subscribe(
             plugin,
             CommandEndsWith(prefix, forcePrefix, text, block),
@@ -82,7 +82,7 @@ class SubscribeBuilder(
             defaultHandler
         )
     }
-    fun commandEndsWith(texts: Collection<String>, block: suspend MessageEvent.(String) -> Unit) = texts.forEach { text ->
+    fun commandEndsWith(texts: Collection<String>, block: suspend MessageEvent.(Pair<String, String?>) -> Unit) = texts.forEach { text ->
         commandEndsWith(text, block)
     }
     fun always(block: suspend MessageEvent.() -> Unit) {

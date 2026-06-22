@@ -41,12 +41,13 @@ class SubscribeTest {
 
     @Test
     fun shouldMoveSuffixToArgument() = runTest {
-        var argument: String? = null
-        val subscribe = CommandEndsWith(suffix = "分") { argument = it }
+        var pair: Pair<String, String?>? = null
+        val subscribe = CommandEndsWith(suffix = "分") { pair = it }
 
         subscribe.handler(messageEvent("100分 extra"))
 
-        assertEquals("100 extra", argument)
+        assertEquals("100", pair?.first)
+        assertEquals("extra", pair?.second)
     }
 
     @Test

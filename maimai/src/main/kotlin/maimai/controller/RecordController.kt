@@ -20,13 +20,10 @@ class RecordController(
     override val maimai: Maimai
 ): Controller(maimai) {
     override suspend fun setRoute() = rhythm {
-        commandEndsWith("进度") { raw ->
-            val args = raw.split(" ")
-            val command = args.first()
-            val queryArgs = args.getOrNull(1) ?: ""
+        commandEndsWith("进度") { (command, queryArgs) ->
             var user: UserQueryParams? = null
             runCatching {
-                user = maimai.query.getQueryParams(this, queryArgs)
+                user = maimai.query.getQueryParams(this, queryArgs ?: "")
                 handleProgress(this, command, user) ?.let { result ->
                     reply(result)
                 } ?: reply(MaimaiQuery.NO_RECORDS)

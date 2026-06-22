@@ -50,34 +50,30 @@ class ImageController(
         tips = maimai.config.tips.toMutableList()
         // b50 / b40 及扩展功能
         listOf(50, 40).forEach { total ->
-            commandEndsWith(total.toString()) { raw ->
-                val args = raw.split(" ")
-                val command = args.first()
-
+            commandEndsWith(total.toString()) { (command, queryArgs) ->
                 if (command == "随心配") {
                     reply("https://otmdb.cn/bot/maimai/combo")
                     return@commandEndsWith
                 }
 
-                val queryArgs = args.getOrNull(1) ?: ""
                 var user: UserQueryParams? = null
                 runCatching {
                     when (command) {
                         "b" -> {
-                            user = maimai.query.getQueryParams(this, queryArgs)
+                            user = maimai.query.getQueryParams(this, queryArgs ?: "")
                             handleRating(total, user)
                         }
                         "r" -> {
-                            user = maimai.query.getQueryParams(this, queryArgs)
+                            user = maimai.query.getQueryParams(this, queryArgs ?: "")
                             handleRecent(total, user)
                         }
                         "歌" -> {
                             user = maimai.query.getQueryParams(this)
-                            val musicQuery = args.subList(1, args.size).joinToString(" ")
+                            val musicQuery = queryArgs ?: ""
                             handleMusicRating(total, user, musicQuery)
                         }
                         else -> {
-                            user = maimai.query.getQueryParams(this, queryArgs)
+                            user = maimai.query.getQueryParams(this, queryArgs ?: "")
                             handleCombo(total, user, command)
                         }
                     }
@@ -87,10 +83,8 @@ class ImageController(
             }
         }
         // 成绩列表
-        commandEndsWith(listOf("分数列表", "分数表", "成绩列表", "成绩表")) { raw ->
-            val args = raw.split(" ")
-            val command = args.first()
-            val page = args.getOrNull(1) ?.toIntOrNull() ?: 1
+        commandEndsWith(listOf("分数列表", "分数表", "成绩列表", "成绩表")) { (command, pageArg) ->
+            val page = pageArg ?.toIntOrNull() ?: 1
             var user: UserQueryParams? = null
             runCatching {
                 user = maimai.query.getQueryParams(this)
@@ -100,9 +94,7 @@ class ImageController(
             }
         }
         // 定数表
-        commandEndsWith("定数表") { raw ->
-            val args = raw.split(" ")
-            val command = args.first()
+        commandEndsWith("定数表") { (command, _) ->
             runCatching {
                 handleLevelList(command)
             }.onFailure { e->
@@ -110,27 +102,20 @@ class ImageController(
             }
         }
         // 完成表
-        commandEndsWith(listOf("完成表", "进度表")) { raw ->
-            val args = raw.split(" ")
-            val command = args.first()
-
-            val queryArgs = args.getOrNull(1) ?: ""
+        commandEndsWith(listOf("完成表", "进度表")) { (command, queryArgs) ->
             var user: UserQueryParams? = null
             runCatching {
-                user = maimai.query.getQueryParams(this, queryArgs)
+                user = maimai.query.getQueryParams(this, queryArgs ?: "")
                 handleLevelComplete(command, user)
             }.onFailure { e ->
                 handleError(this, e, user)
             }
         }
         // 未完成表
-        commandEndsWith(listOf("未完成表", "未完成列表")) { raw ->
-            val args = raw.split(" ")
-            val command = args.first()
-            val queryArgs = args.getOrNull(1) ?: ""
+        commandEndsWith(listOf("未完成表", "未完成列表")) { (command, queryArgs) ->
             var user: UserQueryParams? = null
             runCatching {
-                user = maimai.query.getQueryParams(this, queryArgs)
+                user = maimai.query.getQueryParams(this, queryArgs ?: "")
                 handleLevelIncomplete(command, user)
             }.onFailure { e ->
                 handleError(this, e, user)
