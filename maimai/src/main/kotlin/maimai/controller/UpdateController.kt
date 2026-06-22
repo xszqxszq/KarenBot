@@ -15,6 +15,7 @@ import xyz.xszq.bot.maimai.database.DivingFishBindTable
 import xyz.xszq.bot.maimai.music.MusicDifficulty
 import xyz.xszq.bot.maimai.payload.DivingFishRecordSimple
 import xyz.xszq.bot.maimai.payload.DivingFishUpdateResponse
+import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.message.RemoteImage
 import xyz.xszq.bot.reply
 
@@ -36,10 +37,13 @@ class UpdateController(
                 hintBind()
                 return@startsWith
             }
-            if (reference ?.any { it is RemoteImage } == true) {
+            if (reference ?.any { it is RemoteImage } == true || message.any { it is Image }) {
                 val llmClient = bot.pluginLoader.llmClient
                 if (llmClient == null) return@startsWith
-                val images = reference?.filterIsInstance<RemoteImage>() ?: return@startsWith
+                val images = message.filterIsInstance<RemoteImage>().toMutableList()
+                reference?.filterIsInstance<RemoteImage>() ?.let {
+                    images.addAll(it)
+                }
                 val divingFish = maimai.backend("diving-fish") as DivingFish
                 val records = maimai.query.parseScoreImage(llmClient, images.map { it.url }).filter {
                     it.game == "maimai"

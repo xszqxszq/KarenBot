@@ -162,7 +162,6 @@ suspend fun Application.handleDispatch(
         /* 群聊消息 */
         EventType.Group.Message -> {
             val data = json.decodeFromString<GroupMessageCreate>(payload.d!!)
-            println(payload.d)
             val images = downloadFiles(
                 data.attachments.filter { "image" in it.contentType }, pluginLoader.files, logger)
             val content = filter.filter(data.content)

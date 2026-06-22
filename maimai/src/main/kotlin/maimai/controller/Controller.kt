@@ -21,6 +21,7 @@ import xyz.xszq.bot.maimai.exception.*
 import xyz.xszq.bot.maimai.music.MusicDifficulty
 import xyz.xszq.bot.maimai.music.MusicInfo
 import xyz.xszq.bot.maimai.music.UserQueryParams
+import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.message.RemoteImage
@@ -286,11 +287,14 @@ sealed class Controller(
     ) {
         when {
             text.isNotBlank() -> action(text.trim())
-            reference != null -> {
+            reference != null || message.any { it is Image } -> {
                 val client = bot.pluginLoader.llmClient
                 if (client == null)
                     return
-                val images = reference?.filterIsInstance<RemoteImage>() ?: emptyList()
+                val images = message.filterIsInstance<RemoteImage>().toMutableList()
+                reference?.filterIsInstance<RemoteImage>() ?.let {
+                    images.addAll(it)
+                }
                 if (images.isEmpty())
                     return
                 maimai.query.parseImage(client, images.map { it.url }).forEach {
