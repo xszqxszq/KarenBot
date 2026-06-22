@@ -289,6 +289,8 @@ class MaimaiQuery(
     }
     private fun maxScoreRecords(): List<Record> = maimai.musics().flatMap {
         it.charts
+    }.filter {
+        it.difficulty != MusicDifficulty.Utage
     }.map { chart ->
         Record(
             music = chart.music,

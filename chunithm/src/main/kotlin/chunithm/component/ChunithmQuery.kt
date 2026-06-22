@@ -215,6 +215,8 @@ class ChunithmQuery(
     }
     private fun maxScoreRecords(): List<Record> = chunithm.musics().flatMap {
         it.charts
+    }.filter {
+        it.difficulty != MusicDifficulty.WorldsEnd
     }.map { chart ->
         Record(
             music = chart.music,
