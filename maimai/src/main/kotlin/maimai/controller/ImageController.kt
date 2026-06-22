@@ -335,7 +335,7 @@ class ImageController(
             reply(help.newLine()) {
                 brief("舞萌DX", help)
                 keyboard {
-                    row { at("⬇试一试", "歌50 ") }
+                    row { at("⬇试一试", "/mai 歌50 ") }
                 }
             }
             return

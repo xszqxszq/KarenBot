@@ -128,7 +128,7 @@ class SettingsController(
                     keyboard {
                         row {
                             link("选择头像", "https://otmdb.cn/bot/maimai/icons")
-                            at("⚙ 设置头像", "设置头像 ")
+                            at("⚙ 设置头像", "/mai 设置头像 ")
                         }
                     }
                 }
@@ -140,7 +140,7 @@ class SettingsController(
                 keyboard {
                     row {
                         link("选择头像", "https://otmdb.cn/bot/maimai/icons")
-                        at("⚙ 设置头像", "设置头像 ")
+                        at("⚙ 设置头像", "/mai 设置头像 ")
                     }
                 }
             }
@@ -172,7 +172,7 @@ class SettingsController(
                     keyboard {
                         row {
                             link("选择牌子", "https://otmdb.cn/bot/maimai/plates")
-                            at("⚙ 设置牌子", "设置牌子 ")
+                            at("⚙ 设置牌子", "/mai 设置牌子 ")
                         }
                     }
                 }
@@ -201,7 +201,7 @@ class SettingsController(
                 keyboard {
                     row {
                         link("选择牌子", "https://otmdb.cn/bot/maimai/plates")
-                        at("⚙ 设置牌子", "设置牌子 ")
+                        at("⚙ 设置牌子", "/mai 设置牌子 ")
                     }
                 }
             }
@@ -222,8 +222,8 @@ class SettingsController(
                 brief("功能设置", "支持以下设定：")
                 keyboard {
                     row {
-                        at("👤设置头像", "设置头像", enter = true)
-                        at("📰设置牌子", "设置牌子", enter = true)
+                        at("👤设置头像", "/mai 设置头像", enter = true)
+                        at("📰设置牌子", "/mai 设置牌子", enter = true)
                     }
                     row {
                         at("🐟使用水鱼查分", "设置查分器 水鱼", enter = true)
@@ -253,7 +253,7 @@ class SettingsController(
     private fun collection(type: String, id: String) = Keyboard.create {
         row {
             link("选择$type", "https://otmdb.cn/bot/maimai/$id", id = "1")
-            at("⚙ 设置$type", "设置$type ", id = "2")
+            at("⚙ 设置$type", "/mai 设置$type ", id = "2")
         }
     }
 

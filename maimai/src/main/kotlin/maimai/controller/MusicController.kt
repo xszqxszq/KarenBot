@@ -289,7 +289,7 @@ class MusicController(
                     brief("别名列表", text)
                     keyboard {
                         row {
-                            at("添加别名", "添加别名 id${music.id}")
+                            at("添加别名", "/mai 添加别名 id${music.id}")
                         }
                     }
                 }
@@ -640,7 +640,7 @@ class MusicController(
                     })
                     keyboard {
                         row {
-                            at("点我投票", "添加别名 id${music.id} $alias", enter = true)
+                            at("点我投票", "/mai 添加别名 id${music.id} $alias", enter = true)
                         }
                     }
                 }
@@ -653,7 +653,7 @@ class MusicController(
                 })
                 keyboard {
                     row {
-                        at("点我投票", "添加别名 id${music.id} $alias", enter = true)
+                        at("点我投票", "/mai 添加别名 id${music.id} $alias", enter = true)
                     }
                 }
             }
