@@ -81,7 +81,7 @@ class ControllerTest(
             eventId = eventId,
             id = nextId("message"),
             message = MessageChain(PlainText(text)),
-            sender = User(bot, userId),
+            sender = Member(bot, userId),
             group = Group(bot, groupId),
         )
         subscribes.handle(event)
