@@ -12,6 +12,7 @@ import xyz.xszq.bot.exception.NeedHelpException
 import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.ffmpeg.FFMpegFileType
 import xyz.xszq.bot.ffmpeg.FFMpegTask
+import xyz.xszq.bot.maimai.component.AliasAudit
 import xyz.xszq.bot.maimai.component.MarkdownTemplates
 import xyz.xszq.bot.maimai.component.MarkdownTemplates.Templates.selectMusic
 import xyz.xszq.bot.maimai.database.MaimaiMusicAliasesTable
@@ -33,6 +34,7 @@ import kotlin.random.Random
 class MusicController(
     override val maimai: Maimai
 ): Controller(maimai) {
+    private lateinit var aliasAudit: AliasAudit
     private val previewDir = "./data/maimai/preview/"
     private val notFound = "未查找到相关的歌曲，请检查拼写是否有误。"
 
@@ -42,6 +44,7 @@ class MusicController(
     private val jacketUrl = maimai.config.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")
 
     override suspend fun setRoute() = rhythm {
+        aliasAudit = AliasAudit(maimai)
         // 根据 ID 精准查找
         startsWith("id") { raw ->
             val id = raw.toIntOrNull() ?: throw CommandNotMatchedException()
@@ -626,6 +629,16 @@ class MusicController(
                 throw IllegalOperationException("您已经投过票啦，还需${-votes}票通过")
             }
         }
+        var auditNameWarning = false
+        if (votes == null) {
+            val auditResult = aliasAudit.audit(music, alias)
+            when (auditResult.type) {
+                "political" -> throw IllegalOperationException("该别名疑似存在敏感内容，请检查输入")
+                "name" -> auditNameWarning = true
+                "nsfw" -> throw IllegalOperationException("该别名疑似存在敏感内容，请检查输入")
+                "school" -> throw IllegalOperationException("该别名疑似包含具体学校名称，请检查输入")
+            }
+        }
         MaimaiMusicAliasesVoteTable.vote(music, alias, sender.id)
         MaimaiMusicAliasesTable.vote(music, alias)
         votes ?.let {
@@ -646,8 +659,15 @@ class MusicController(
                 }
             }
         } ?: run {
-            reply("别名添加成功，请使用“添加别名 ${music.id} ${alias}”来进行投票，当有3人投票时别名将通过。") {
+            val message = buildString {
+                if (auditNameWarning)
+                    appendLine("疑似检测到人名，请勿滥用此功能将您的亲朋好友真实姓名加入别名")
+                append("别名添加成功，请使用“添加别名 ${music.id} ${alias}”来进行投票，当有3人投票时别名将通过。")
+            }
+            reply(message) {
                 brief("别名投票", buildString {
+                    if (auditNameWarning)
+                        appendLine("> 疑似检测到人名，请勿滥用此功能将您的亲朋好友真实姓名加入别名")
                     appendLine("别名添加成功，当有3人投票时别名将通过。")
                     appendLine("其他人可以点击下方按钮，或者发送“添加别名 ${music.id} ${alias}”来投票。")
                 })
