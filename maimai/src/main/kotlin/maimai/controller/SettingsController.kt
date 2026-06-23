@@ -24,18 +24,31 @@ class SettingsController(
 ): Controller(maimai) {
     private suspend fun route() = rhythm {
         startsWith(listOf("bind", "绑定")) { args ->
-            if ("水鱼" in args)
-                return@startsWith
-            val qq = args.toLongOrNull() ?: run {
-                reply("使用方法：/bind qq号") {
-                    brief("可怜BOT", "请点击下方按钮输入您的QQ号：")
-                    keyboard {
-                        row {
-                            at("⬇点我输入", "/bind ")
+            val qq = args.toLongOrNull()
+            when {
+                "水鱼" in args -> return@startsWith
+                args.startsWith("SGWCMAID") -> {
+                    reply("输入错误，使用方法：/bind qq号\n请不要随意泄露自己的账号二维码") {
+                        brief("可怜BOT", "输入错误，请不要随意泄露自己的账号二维码\n\n请点击下方按钮输入您的QQ号：")
+                        keyboard {
+                            row {
+                                at("⬇点我输入", "/bind ")
+                            }
                         }
                     }
+                    return@startsWith
                 }
-                return@startsWith
+                qq == null -> {
+                    reply("使用方法：/bind qq号") {
+                        brief("可怜BOT", "请点击下方按钮输入您的QQ号：")
+                        keyboard {
+                            row {
+                                at("⬇点我输入", "/bind ")
+                            }
+                        }
+                    }
+                    return@startsWith
+                }
             }
             QQBindTable.update(this.sender.id, qq)
             val user = maimai.query.getQueryParams(this)

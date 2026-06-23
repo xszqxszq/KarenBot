@@ -149,7 +149,7 @@ sealed class Controller(
     }
     suspend fun MessageEvent.messageUserNeedBind() {
         reply(MaimaiQuery.NO_BACKEND_BINDINGS) {
-            brief("舞萌DX", "您还未在查分器上绑定QQ号。请选择一个查分器来绑定您的QQ号：")
+            brief("舞萌DX", "您还未在下列任一查分器上绑定QQ号。请到查分器网页上绑定您的QQ号：")
             keyboard {
                 row {
                     link("水鱼查分器", "https://otmdb.cn/jump/maimaidxprober")
