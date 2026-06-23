@@ -666,8 +666,10 @@ class MusicController(
             }
             reply(message) {
                 brief("别名投票", buildString {
-                    if (auditNameWarning)
+                    if (auditNameWarning) {
                         appendLine("> 疑似检测到人名，请勿滥用此功能将您的亲朋好友真实姓名加入别名")
+                        appendLine()
+                    }
                     appendLine("别名添加成功，当有3人投票时别名将通过。")
                     appendLine("其他人可以点击下方按钮，或者发送“添加别名 ${music.id} ${alias}”来投票。")
                 })
