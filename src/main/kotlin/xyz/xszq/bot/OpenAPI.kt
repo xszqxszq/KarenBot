@@ -204,14 +204,14 @@ class OpenAPI(
     suspend fun recallC2CMessage(
         user: String,
         messageId: String
-    ) = client.delete("$server/v2/users/$user/$messageId") {
+    ) = client.delete("$server/v2/users/$user/messages/$messageId") {
         setToken()
     }.status == HttpStatusCode.OK
 
     suspend fun recallGroupMessage(
         group: String,
         messageId: String
-    ) = client.delete("$server/v2/groups/$group/$messageId") {
+    ) = client.delete("$server/v2/groups/$group/messages/$messageId") {
         setToken()
     }.status == HttpStatusCode.OK
 }

@@ -4,6 +4,7 @@ import korlibs.image.format.readNativeImage
 import korlibs.image.format.showImageAndWait
 import korlibs.io.file.extensionLC
 import kotlinx.coroutines.DelicateCoroutinesApi
+import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.GroupReplyAbleEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.event.ReplyAble
@@ -167,6 +168,10 @@ suspend fun ReplyAble.reply(message: String) = reply(PlainText(message))
 suspend fun ReplyAble.reply(message: MessageElement) = reply(MessageChain(message))
 suspend fun ReplyAble.reply(block: MarkdownDsl.() -> Unit) {
     reply(MarkdownDsl().apply(block).build())
+}
+suspend fun MessageEvent.recall() = when (this) {
+    is GroupMessageEvent -> bot.api.recallGroupMessage(group.id, this.id)
+    else -> bot.api.recallC2CMessage(user.id, this.id)
 }
 
 fun String.toPlainText() = PlainText(this)

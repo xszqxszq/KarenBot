@@ -162,6 +162,7 @@ suspend fun Application.handleDispatch(
         /* 群聊消息 */
         EventType.Group.Message -> {
             val data = json.decodeFromString<GroupMessageCreate>(payload.d!!)
+            println(payload.d)
             val images = downloadFiles(
                 data.attachments.filter { "image" in it.contentType }, pluginLoader.files, logger)
             val content = filter.filter(data.content)
@@ -242,11 +243,11 @@ suspend fun Application.handleDispatch(
                 operator = Member(pluginLoader.bot, data.operator)
             )
         }
-        /* 允许私聊消息推送(已下线) */
+        /* 允许私聊主动消息 */
         EventType.C2C.Receive -> {
             val data = json.decodeFromString<C2CBotUpdate>(payload.d!!)
             logger.info {
-                "Friend receive message: ${data.user}"
+                "用户允许主动消息: ${data.user}"
             }
             BotReceiveFriendEvent(
                 bot = pluginLoader.bot,
@@ -254,11 +255,11 @@ suspend fun Application.handleDispatch(
                 user = User(pluginLoader.bot, data.user)
             )
         }
-        /* 允许群组消息推送(已下线) */
+        /* 允许群组主动消息 */
         EventType.Group.Receive -> {
             val data = json.decodeFromString<GroupBotUpdate>(payload.d!!)
             logger.info {
-                "Group receive message: ${data.group} (by ${data.operator})"
+                "群聊允许主动消息: ${data.group} (by ${data.operator})"
             }
             BotReceiveGroupEvent(
                 bot = pluginLoader.bot,
@@ -267,11 +268,11 @@ suspend fun Application.handleDispatch(
                 operator = Member(pluginLoader.bot, data.operator)
             )
         }
-        /* 拒绝私聊消息推送(已下线) */
+        /* 拒绝私聊主动消息 */
         EventType.C2C.Reject -> {
             val data = json.decodeFromString<C2CBotUpdate>(payload.d!!)
             logger.info {
-                "Friend reject message: ${data.user}"
+                "用户关闭主动消息: ${data.user}"
             }
             BotRejectFriendEvent(
                 bot = pluginLoader.bot,
@@ -279,17 +280,37 @@ suspend fun Application.handleDispatch(
                 user = User(pluginLoader.bot, data.user)
             )
         }
-        /* 拒绝群组消息推送(已下线) */
+        /* 拒绝群组主动消息 */
         EventType.Group.Reject -> {
             val data = json.decodeFromString<GroupBotUpdate>(payload.d!!)
             logger.info {
-                "Group reject message: ${data.group} (by ${data.operator})"
+                "群聊关闭主动消息: ${data.group} (by ${data.operator})"
             }
             BotRejectGroupEvent(
                 bot = pluginLoader.bot,
                 eventId = payload.id!!,
                 group = Group(pluginLoader.bot, data.group),
                 operator = Member(pluginLoader.bot, data.operator)
+            )
+        }
+        /* 群有新成员加入 */
+        EventType.Group.MemberAdd -> {
+            val data = json.decodeFromString<GroupMemberUpdate>(payload.d!!)
+            UserJoinGroupEvent(
+                bot = pluginLoader.bot,
+                eventId = payload.id!!,
+                group = Group(pluginLoader.bot, data.group),
+                user = Member(pluginLoader.bot, data.member)
+            )
+        }
+        /* 群有成员退群 */
+        EventType.Group.MemberRemove -> {
+            val data = json.decodeFromString<GroupMemberUpdate>(payload.d!!)
+            UserLeaveGroupEvent(
+                bot = pluginLoader.bot,
+                eventId = payload.id!!,
+                group = Group(pluginLoader.bot, data.group),
+                user = Member(pluginLoader.bot, data.member)
             )
         }
         /* 互动消息 */
@@ -330,26 +351,6 @@ suspend fun Application.handleDispatch(
                 else -> null
             }
         }
-        /* 群有新成员加入 */
-        EventType.Group.MemberAdd -> {
-            val data = json.decodeFromString<GroupMemberUpdate>(payload.d!!)
-            UserJoinGroupEvent(
-                bot = pluginLoader.bot,
-                eventId = payload.id!!,
-                group = Group(pluginLoader.bot, data.group),
-                user = Member(pluginLoader.bot, data.member)
-            )
-        }
-        /* 群有成员退群 */
-        EventType.Group.MemberRemove -> {
-            val data = json.decodeFromString<GroupMemberUpdate>(payload.d!!)
-            UserLeaveGroupEvent(
-                bot = pluginLoader.bot,
-                eventId = payload.id!!,
-                group = Group(pluginLoader.bot, data.group),
-                user = Member(pluginLoader.bot, data.member)
-            )
-        }
         /* 无法处理的事件 */
         else -> null
     } ?.let { event ->
@@ -377,33 +378,143 @@ suspend fun Application.handleForward(
 ) {
     call.respond(Payload(OpCode.HTTP_CALLBACK_ACK))
     when (payload.t) {
-        /* Private message */
+        /* 私聊消息 */
         EventType.C2C.Message -> {
             val data = json.decodeFromString<C2CMessageCreate>(payload.d!!)
             if (forwardConfig.debug)
-                println("Received: [${data.author.id}]")
+                logger.debug { "Received: [${data.author.id}]" }
             when {
                 data.author.id in forwardConfig.subjects -> forward(body, call, forwardConfig.whitelist)
                 forwardConfig.otherwise.isNotBlank() -> forward(body, call, forwardConfig.otherwise)
                 else -> handleDispatch(payload, call, logger, filter, pluginLoader)
             }
         }
-        /* Group @at message */
+        /* 群聊AT消息 */
         EventType.Group.AtMessage -> {
             val data = json.decodeFromString<GroupAtMessageCreate>(payload.d!!)
             if (forwardConfig.debug)
-                println("Received: [${data.group}] (${data.author.id})")
+                logger.debug { "Received: [${data.group}] (${data.author.id})" }
             when {
                 data.group in forwardConfig.groups -> forward(body, call, forwardConfig.whitelist)
                 forwardConfig.otherwise.isNotBlank() -> forward(body, call, forwardConfig.otherwise)
                 else -> handleDispatch(payload, call, logger, filter, pluginLoader)
             }
         }
-        /* Group message */
+        /* 群聊消息 */
         EventType.Group.Message -> {
             val data = json.decodeFromString<GroupMessageCreate>(payload.d!!)
             if (forwardConfig.debug)
-                println("Received: [${data.group}] (${data.author.id})")
+                logger.debug { "Received: [${data.group}] (${data.author.id})" }
+            when {
+                data.group in forwardConfig.groups -> forward(body, call, forwardConfig.whitelist)
+                forwardConfig.otherwise.isNotBlank() -> forward(body, call, forwardConfig.otherwise)
+                else -> handleDispatch(payload, call, logger, filter, pluginLoader)
+            }
+        }
+        /* 新增好友 */
+        EventType.C2C.Add -> {
+            val data = json.decodeFromString<C2CBotUpdate>(payload.d!!)
+            if (forwardConfig.debug)
+                logger.debug { "Received: Friend ${data.user} Added" }
+            when {
+                data.user in forwardConfig.subjects -> forward(body, call, forwardConfig.whitelist)
+                forwardConfig.otherwise.isNotBlank() -> forward(body, call, forwardConfig.otherwise)
+                else -> handleDispatch(payload, call, logger, filter, pluginLoader)
+            }
+        }
+        /* 新增群聊 */
+        EventType.Group.Add -> {
+            val data = json.decodeFromString<GroupBotUpdate>(payload.d!!)
+            if (forwardConfig.debug)
+                logger.debug { "Received: Joined group [${data.group}] by (${data.operator})" }
+            when {
+                data.group in forwardConfig.groups -> forward(body, call, forwardConfig.whitelist)
+                forwardConfig.otherwise.isNotBlank() -> forward(body, call, forwardConfig.otherwise)
+                else -> handleDispatch(payload, call, logger, filter, pluginLoader)
+            }
+        }
+        /* 好友移除 */
+        EventType.C2C.Remove -> {
+            val data = json.decodeFromString<C2CBotUpdate>(payload.d!!)
+            if (forwardConfig.debug)
+                logger.debug { "Received: Friend ${data.user} Deleted" }
+            when {
+                data.user in forwardConfig.subjects -> forward(body, call, forwardConfig.whitelist)
+                forwardConfig.otherwise.isNotBlank() -> forward(body, call, forwardConfig.otherwise)
+                else -> handleDispatch(payload, call, logger, filter, pluginLoader)
+            }
+        }
+        /* 群聊移除 */
+        EventType.Group.Remove -> {
+            val data = json.decodeFromString<GroupBotUpdate>(payload.d!!)
+            if (forwardConfig.debug)
+                logger.debug { "Received: Left group [${data.group}] by (${data.operator})" }
+            when {
+                data.group in forwardConfig.groups -> forward(body, call, forwardConfig.whitelist)
+                forwardConfig.otherwise.isNotBlank() -> forward(body, call, forwardConfig.otherwise)
+                else -> handleDispatch(payload, call, logger, filter, pluginLoader)
+            }
+        }
+        /* 允许私聊主动消息 */
+        EventType.C2C.Receive -> {
+            val data = json.decodeFromString<C2CBotUpdate>(payload.d!!)
+            if (forwardConfig.debug)
+                logger.debug { "Received: User ${data.user} allowed message push" }
+            when {
+                data.user in forwardConfig.subjects -> forward(body, call, forwardConfig.whitelist)
+                forwardConfig.otherwise.isNotBlank() -> forward(body, call, forwardConfig.otherwise)
+                else -> handleDispatch(payload, call, logger, filter, pluginLoader)
+            }
+        }
+        /* 允许群组主动消息 */
+        EventType.Group.Receive -> {
+            val data = json.decodeFromString<GroupBotUpdate>(payload.d!!)
+            if (forwardConfig.debug)
+                logger.debug { "Received: Group [${data.group}] allowed message push by (${data.operator})" }
+            when {
+                data.group in forwardConfig.groups -> forward(body, call, forwardConfig.whitelist)
+                forwardConfig.otherwise.isNotBlank() -> forward(body, call, forwardConfig.otherwise)
+                else -> handleDispatch(payload, call, logger, filter, pluginLoader)
+            }
+        }
+        /* 拒绝私聊主动消息 */
+        EventType.C2C.Reject -> {
+            val data = json.decodeFromString<C2CBotUpdate>(payload.d!!)
+            if (forwardConfig.debug)
+                logger.debug { "Received: User ${data.user} denied message push" }
+            when {
+                data.user in forwardConfig.subjects -> forward(body, call, forwardConfig.whitelist)
+                forwardConfig.otherwise.isNotBlank() -> forward(body, call, forwardConfig.otherwise)
+                else -> handleDispatch(payload, call, logger, filter, pluginLoader)
+            }
+        }
+        /* 拒绝群组主动消息 */
+        EventType.Group.Reject -> {
+            val data = json.decodeFromString<GroupBotUpdate>(payload.d!!)
+            if (forwardConfig.debug)
+                logger.debug { "Received: Group [${data.group}] denied message push by (${data.operator})" }
+            when {
+                data.group in forwardConfig.groups -> forward(body, call, forwardConfig.whitelist)
+                forwardConfig.otherwise.isNotBlank() -> forward(body, call, forwardConfig.otherwise)
+                else -> handleDispatch(payload, call, logger, filter, pluginLoader)
+            }
+        }
+        /* 群有新成员加入 */
+        EventType.Group.MemberAdd -> {
+            val data = json.decodeFromString<GroupMemberUpdate>(payload.d!!)
+            if (forwardConfig.debug)
+                logger.debug { "Received: Group [${data.group}] has member (${data.member}) joined" }
+            when {
+                data.group in forwardConfig.groups -> forward(body, call, forwardConfig.whitelist)
+                forwardConfig.otherwise.isNotBlank() -> forward(body, call, forwardConfig.otherwise)
+                else -> handleDispatch(payload, call, logger, filter, pluginLoader)
+            }
+        }
+        /* 群有成员退群 */
+        EventType.Group.MemberRemove -> {
+            val data = json.decodeFromString<GroupMemberUpdate>(payload.d!!)
+            if (forwardConfig.debug)
+                logger.debug { "Received: Group [${data.group}] has member (${data.member}) left" }
             when {
                 data.group in forwardConfig.groups -> forward(body, call, forwardConfig.whitelist)
                 forwardConfig.otherwise.isNotBlank() -> forward(body, call, forwardConfig.otherwise)
@@ -412,6 +523,8 @@ suspend fun Application.handleForward(
         }
         EventType.Interaction -> {
             val data = json.decodeFromString<InteractionCreate>(payload.d!!)
+            if (forwardConfig.debug)
+                logger.debug { "Received: Interaction [${data.groupOpenId ?: "C2C"}] (${data.userOpenId})" }
             when {
                 data.chatType == ChatType.GROUP && data.groupOpenId in forwardConfig.groups ->
                     forward(body, call, forwardConfig.whitelist)

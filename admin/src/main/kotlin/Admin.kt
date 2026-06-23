@@ -52,6 +52,15 @@ class Admin: Plugin() {
                 reply(Markdown(MarkdownData(content)))
             }
         }
+        startsWith("recall") { raw ->
+            if (isAdmin()) {
+                val (groupId, messageId) = raw.split(" ", limit = 2)
+                if (bot.api.recallGroupMessage(groupId, messageId))
+                    reply("撤回成功")
+                else
+                    reply("撤回失败")
+            }
+        }
     }
 
     private suspend fun MessageEvent.handleReload(
