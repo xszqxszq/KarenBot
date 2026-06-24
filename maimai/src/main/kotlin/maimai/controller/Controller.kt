@@ -296,13 +296,14 @@ sealed class Controller(
                 val client = bot.pluginLoader.llmClient
                 if (client == null)
                     return
-                val images = message.filterIsInstance<RemoteImage>().toMutableList()
-                reference?.filterIsInstance<RemoteImage>() ?.let {
-                    images.addAll(it)
-                }
+                val images = (message.filterIsInstance<Image>().mapNotNull {
+                    it.url.ifBlank { null }
+                }) + (reference ?.filterIsInstance<RemoteImage>() ?.let {
+                    it.map { image -> image.url }
+                } ?: emptyList())
                 if (images.isEmpty())
                     return
-                maimai.query.parseImage(client, images.map { it.url }).forEach {
+                maimai.query.parseImage(client, images).forEach {
                     action(it.title)
                 }
             }

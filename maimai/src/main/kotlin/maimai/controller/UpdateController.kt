@@ -40,12 +40,13 @@ class UpdateController(
             if (reference ?.any { it is RemoteImage } == true || message.any { it is Image }) {
                 val llmClient = bot.pluginLoader.llmClient
                 if (llmClient == null) return@startsWith
-                val images = message.filterIsInstance<RemoteImage>().toMutableList()
-                reference?.filterIsInstance<RemoteImage>() ?.let {
-                    images.addAll(it)
-                }
+                val images = (message.filterIsInstance<Image>().mapNotNull {
+                    it.url.ifBlank { null }
+                }) + (reference ?.filterIsInstance<RemoteImage>() ?.let {
+                    it.map { image -> image.url }
+                } ?: emptyList())
                 val divingFish = maimai.backend("diving-fish") as DivingFish
-                val records = maimai.query.parseScoreImage(llmClient, images.map { it.url }).filter {
+                val records = maimai.query.parseScoreImage(llmClient, images).filter {
                     it.game == "maimai"
                 }.map { record ->
                     val music = maimai.musics().first { record.title.lowercase() in it.name.lowercase() && record.type == it.type.value }
