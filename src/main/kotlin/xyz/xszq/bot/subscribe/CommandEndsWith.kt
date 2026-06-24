@@ -37,7 +37,11 @@ class CommandEndsWith(
 
         val command = when (matchingIndex) {
             0 -> matchingToken.removeSuffix(suffix).takeIf { it.isNotEmpty() } ?: matchingToken
-            else -> args.subList(0, matchingIndex).joinToString(" ")
+            else -> {
+                val prefixPart = args.subList(0, matchingIndex).joinToString(" ")
+                val suffixPart = matchingToken.removeSuffix(suffix)
+                if (suffixPart.isNotEmpty()) "$prefixPart $suffixPart" else prefixPart
+            }
         }
 
         val remaining = args.drop(matchingIndex + 1)
