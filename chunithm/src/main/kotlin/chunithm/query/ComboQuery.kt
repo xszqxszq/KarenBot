@@ -126,15 +126,15 @@ object ComboQuery {
 
         dynamic {
             chunithmData.trophies.values.forEach { trophy ->
-                val levelPart = trophy.name.substringBefore(" of ")
-                val versionPart = trophy.name.substringAfter(" of ")
-                val required = trophy.required?.firstOrNull() ?: return@forEach
-                val songIds = required.songs?.map { it.id } ?: return@forEach
-                val difficulties = required.difficulties?.map { MusicDifficulty.of(it) } ?: return@forEach
+                val type = trophy.name.substringBefore(" of ")
+                val versionName = trophy.name.substringAfter(" of ")
+                val required = trophy.required ?.firstOrNull() ?: return@forEach
+                val ids = required.songs ?.map { it.id } ?: return@forEach
+                val difficulties = required.difficulties ?.map { MusicDifficulty.of(it) } ?: return@forEach
 
-                add(0, listOf(trophy.name, "$versionPart $levelPart"),
+                add(0, listOf(trophy.name, "$versionName $type"),
                     trophy(
-                        songIds = songIds,
+                        songIds = ids,
                         difficulties = difficulties,
                         rank = required.rank,
                         fullCombo = required.fullCombo,
@@ -142,6 +142,8 @@ object ComboQuery {
                         name = trophy.name
                     )
                 )
+                val version = chunithmData.musics[ids.first()] ?.version ?: return@forEach
+                add(listOf(versionName, version.name), version(listOf(version)))
             }
         }
 
@@ -322,6 +324,10 @@ object ComboQuery {
     fun List<Filter>?.isDetailed() = when {
         this == null -> false
         else -> any { it.name == "level" }
+    }
+    fun List<Filter>?.isPlate() = when {
+        this == null -> false
+        else -> any { it.name?.startsWith("plate") == true }
     }
 
     fun List<Filter>?.isAllRequired() =

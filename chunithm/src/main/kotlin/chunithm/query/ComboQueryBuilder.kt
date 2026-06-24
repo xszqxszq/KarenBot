@@ -98,7 +98,7 @@ class ComboQueryBuilder {
             fullChain == "fullchain" -> record.chainStatus.isFullChain()
             else -> true
         }
-    }, name = "trophy_" + when {
+    }, name = "plate_" + when {
         fullCombo != null -> "combo_"
         fullChain != null -> "chain_"
         else -> ""

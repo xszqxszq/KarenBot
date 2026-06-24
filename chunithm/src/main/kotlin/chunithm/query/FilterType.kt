@@ -13,5 +13,7 @@ enum class FilterType {
     // 条件类
     Limit,
     // 默认过滤类
-    Default
+    Default;
+
+    val matchesChart: Boolean get() = this in listOf(Difficulty, Level, Designer)
 }
