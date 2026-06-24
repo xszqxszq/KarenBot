@@ -22,6 +22,10 @@ class HelpController(
                         link("💯随心配30", "https://otmdb.cn/bot/chunithm/combo")
                         at("📖分数列表", "/chu 14分数列表")
                     }
+                    row {
+                        at("⏳定数表", "/chu 14+定数表")
+                        link("更多功能...", "https://otmdb.cn/bot/chunithm")
+                    }
                 }
             }
         }
