@@ -489,7 +489,7 @@ class GuessController(
     fun getOpeningButtons() = Keyboard.create {
         row {
             at("\uD83D\uDD24开字母", "开字母", id = "1")
-            at("\uD83C\uDFB6开歌", "开字母", id = "2")
+            at("\uD83C\uDFB6开歌", "开歌", id = "2")
             at("\uD83D\uDD1A不玩了", "不玩了", style = RenderData.GRAY, id = "3")
         }
     }
