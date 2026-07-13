@@ -9,10 +9,10 @@ import xyz.xszq.bot.message.RemoteVoice
 @Serializable
 data class ReferenceMessage(
     @SerialName("msg_idx")
-    val id: String,
-    val author: MessageAuthor,
+    val id: String ?= null,
+    val author: MessageAuthor ?= null,
     @SerialName("message_type")
-    val messageType: Int,
+    val messageType: Int ?= null,
     val content: String,
     val attachments: List<Attachment> = listOf(),
 ) {
