@@ -339,7 +339,9 @@ class Meme: Plugin() {
         var args = raw.trim().split(" ", limit = 2).filter { it.isNotBlank() }
         when {
             "\n" in raw -> {
-                args = raw.trim().split("\n", limit = 2).filter { it.isNotBlank() }
+                args = raw.trim().replace("\r", "\n").split("\n", limit = 2).filter {
+                    it.isNotBlank()
+                }
                 val top = args.getOrNull(0)?.trim() ?: throw ArgsNotEnoughException()
                 val bottom = args.getOrNull(1)?.trim()
                 fiveThousand.draw(top, bottom).encodePNG().send(this)
