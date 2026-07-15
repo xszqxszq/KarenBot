@@ -25,11 +25,6 @@ class Arcade(id: EntityID<Int>): IntEntity(id) {
         fun noUpdates() = modified == initTime
     }
 
-    sealed interface UpdateResult {
-        data class Updated(val arcade: Snapshot): UpdateResult
-        data object TooLarge: UpdateResult
-    }
-
     fun clear(currentTime: LocalDateTime = currentTime()) {
         if (modified == initTime || currentTime.isSameDay(modified))
             return

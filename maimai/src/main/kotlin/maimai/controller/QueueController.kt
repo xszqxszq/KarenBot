@@ -262,18 +262,15 @@ class QueueController(
             }
             return
         }
-        when (val result = ArcadeGroupBind.updateArcade(group.id, raw)) {
-            null -> return
-            Arcade.UpdateResult.TooLarge -> reply("机厅很小，请你忍一忍")
-            is Arcade.UpdateResult.Updated -> {
-                reply(
-                    "更新成功，现在${result.arcade.name}人数为${result.arcade.value}人。",
-                    queue(
-                        "排卡管理", "更新成功，现在${result.arcade.name}人数为${result.arcade.value}人。",
-                        result.arcade.name
-                    )
+        val snapshot = ArcadeGroupBind.updateArcade(group.id, raw)
+        if (snapshot != null) {
+            reply(
+                "更新成功，现在${snapshot.name}人数为${snapshot.value}人。",
+                queue(
+                    "排卡管理", "更新成功，现在${snapshot.name}人数为${snapshot.value}人。",
+                    snapshot.name
                 )
-            }
+            )
         }
     }
 

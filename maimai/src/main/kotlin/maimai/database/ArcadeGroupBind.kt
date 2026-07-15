@@ -7,8 +7,10 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
+import org.jetbrains.exposed.sql.update
 import xyz.xszq.bot.exception.IllegalArgsException
 import xyz.xszq.bot.exception.NotFoundException
 
@@ -118,26 +120,34 @@ class ArcadeGroupBind(id: EntityID<String>): Entity<String>(id) {
 
         suspend fun updateArcade(openId: String, raw: String, modifiedAt: LocalDateTime = currentTime()) = newSuspendedTransaction {
             val group = findGroup(openId) ?: return@newSuspendedTransaction null
-            for (arcade in group.arcades) {
-                for (alias in arcade.aliases.split(",").filter { it.isNotBlank() }) {
-                    if (!raw.startsWith(alias))
-                        continue
-
-                    var newValue = when {
-                        raw.startsWith("$alias+") -> arcade.value + raw.substringAfter("${alias}+").filter { it.isDigit() }.toInt()
-                        raw.startsWith("$alias-") -> arcade.value - raw.substringAfter("${alias}-").filter { it.isDigit() }.toInt()
-                        else -> raw.substringAfter(alias).replace("=", "").toIntOrNull() ?: return@newSuspendedTransaction null
-                    }
-                    if (newValue > 50)
-                        return@newSuspendedTransaction Arcade.UpdateResult.TooLarge
-                    if (newValue < 0)
-                        newValue = 0
-                    arcade.value = newValue
-                    arcade.modified = modifiedAt
-                    return@newSuspendedTransaction Arcade.UpdateResult.Updated(arcade.snapshot())
+            val (arcade, alias) = group.arcades.firstNotNullOfOrNull { arcade ->
+                arcade.aliases.split(",").filter { it.isNotBlank() }.firstOrNull { alias ->
+                    raw.startsWith(alias)
+                } ?.let { alias ->
+                    Pair(arcade, alias)
                 }
+            } ?: return@newSuspendedTransaction null
+
+            var newValue = when {
+                raw.startsWith("$alias+") -> arcade.value + raw.substringAfter("${alias}+").filter { it.isDigit() }.toInt()
+                raw.startsWith("$alias-") -> arcade.value - raw.substringAfter("${alias}-").filter { it.isDigit() }.toInt()
+                else -> raw.substringAfter(alias).replace("=", "").toIntOrNull() ?: return@newSuspendedTransaction null
             }
-            null
+            if (newValue > 50)
+                return@newSuspendedTransaction null
+            if (newValue < 0)
+                newValue = 0
+            ArcadeTable.update({ ArcadeTable.id eq arcade.id }) {
+                it[ArcadeTable.value] = newValue
+                it[ArcadeTable.modified] = modifiedAt
+            }
+
+            return@newSuspendedTransaction Arcade.Snapshot(
+                name = arcade.name,
+                aliases = arcade.aliases.split(",").filter { it.isNotBlank() },
+                value = newValue,
+                modified = modifiedAt,
+            )
         }
     }
 }
