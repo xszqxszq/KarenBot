@@ -51,6 +51,7 @@ fun Application.configureRouting(
             /* Parse Webhook payload */
             kotlin.runCatching {
                 val payload = json.decodeFromString<Payload>(body)
+                logger.debug { body }
                 when (payload.op) {
                     /* Normal Message */
                     OpCode.DISPATCH -> {
@@ -162,7 +163,6 @@ suspend fun Application.handleDispatch(
         /* 群聊消息 */
         EventType.Group.Message -> {
             val data = json.decodeFromString<GroupMessageCreate>(payload.d!!)
-            println(payload.d)
             val images = downloadFiles(
                 data.attachments.filter { "image" in it.contentType }, pluginLoader.files, logger)
             val content = filter.filter(data.content)

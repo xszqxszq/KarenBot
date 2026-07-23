@@ -36,6 +36,17 @@ val json = Json {
 object KarenBotApplication {
     var forwardConfig: ForwardConfig? = null
 
+    private val appLogger = org.slf4j.LoggerFactory.getLogger("xyz.xszq") as ch.qos.logback.classic.Logger
+
+    /**
+     * 调试日志开关。开启后 xyz.xszq 包下 logger 级别为 DEBUG，可输出原始 payload 等调试信息。
+     */
+    var debugLog: Boolean
+        get() = appLogger.level == ch.qos.logback.classic.Level.DEBUG
+        set(value) {
+            appLogger.level = if (value) ch.qos.logback.classic.Level.DEBUG else ch.qos.logback.classic.Level.INFO
+        }
+
     @JvmStatic
     fun main(args: Array<String>) = runBlocking {
         RuntimePaths.relaunchIfNeeded(KarenBotApplication::class.java.name, args)

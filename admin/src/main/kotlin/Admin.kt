@@ -31,6 +31,12 @@ class Admin: Plugin() {
         channel<AdminCheckRequest>("admin-check") { data ->
             data.deferred.complete(data.userId in config.admins)
         }
+        startsWith("log") {
+            if (isAdmin()) {
+                KarenBotApplication.debugLog = !KarenBotApplication.debugLog
+                reply("调试日志已${if (KarenBotApplication.debugLog) "开启" else "关闭"}。")
+            }
+        }
         startsWith("reload") { name ->
             if (isAdmin()) {
                 handleReload(name)
