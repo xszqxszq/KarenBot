@@ -84,7 +84,7 @@ class OpenAPI(
             return body<T>()
         }
         val error = body<ErrorResponse>()
-        logger.error { "[${error.code}] ${error.message}" }
+        errorLogger.error { "[${error.code}] ${error.message}" }
         return null
     }
     private suspend inline fun <reified T> HttpResponse.result(): T? = result {  }
@@ -125,7 +125,7 @@ class OpenAPI(
                 }
                 else -> {}
             }
-            logger.error { "[${e.response.code}] ${e.response.message}" }
+            errorLogger.error { "[${e.response.code}] ${e.response.message}" }
         }.getOrNull()
         return result != null
     }

@@ -67,7 +67,7 @@ suspend fun ReplyAble.uploadMedia(media: Media): FileResponse? {
             }
         }
     } ?: run {
-        bot.api.logger.error { "图片上传失败" }
+        errorLogger.error { "图片上传失败" }
         null
     }
 
@@ -79,11 +79,9 @@ suspend fun ReplyAble.uploadMedia(media: Media): FileResponse? {
 }
 
 fun ReplyAble.log(message: MessageChain) {
-    bot.api.logger.info {
-        when (this) {
-            is GroupReplyAbleEvent -> "[${group.id}] <- ${message.content.replace("\n", "\\n").replace("\r", "\\r")}"
-            is UserReplyAbleEvent -> "${user.username}(${user.id}) <- ${message.content.replace("\n", "\\n").replace("\r", "\\r")}"
-        }
+    when (this) {
+        is GroupReplyAbleEvent -> sendGroupLogger.info { "[${group.id}] <- ${message.content.replace("\n", "\\n").replace("\r", "\\r")}" }
+        is UserReplyAbleEvent -> sendC2CLogger.info { "${user.username}(${user.id}) <- ${message.content.replace("\n", "\\n").replace("\r", "\\r")}" }
     }
 }
 

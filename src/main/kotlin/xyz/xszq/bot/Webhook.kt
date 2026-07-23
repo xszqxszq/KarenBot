@@ -122,7 +122,7 @@ suspend fun Application.handleDispatch(
                 data.attachments.filter { "image" in it.contentType }, pluginLoader.files, logger)
             val content = filter.filter(data.content)
             val message = MessageChain(content, images, attachments = data.attachments)
-            logger.info {
+            recvC2CLogger.info {
                 "${data.author.username}(${data.author.id}) -> ${message.content.trim().replace("\n", "\\n")}"
             }
             MessageEvent(
@@ -140,7 +140,7 @@ suspend fun Application.handleDispatch(
                 data.attachments.filter { "image" in it.contentType }, pluginLoader.files, logger)
             val content = filter.filter(data.content)
             val message = MessageChain(content, images, ark = data.arkData, attachments = data.attachments)
-            logger.info {
+            recvGroupAtLogger.info {
                 "[${data.group}] ${data.author.username}(${data.author.id}) -> ${message.content.trim().replace("\n", "\\n")}"
             }
             GroupMessageEvent(
@@ -167,9 +167,10 @@ suspend fun Application.handleDispatch(
                 data.attachments.filter { "image" in it.contentType }, pluginLoader.files, logger)
             val content = filter.filter(data.content)
             val message = MessageChain(content, images, pluginLoader.bot, data.mentions, ark = data.arkData, attachments = data.attachments)
-            logger.info {
-                "[${data.group}] ${data.author.username}(${data.author.id}) -> ${message.content.trim().replace("\n", "\\n")}"
-            }
+            if (data.author.bot)
+                recvGroupBotLogger.info { "[${data.group}] ${data.author.username}(${data.author.id}) -> ${message.content.trim().replace("\n", "\\n")}" }
+            else
+                recvGroupLogger.info { "[${data.group}] ${data.author.username}(${data.author.id}) -> ${message.content.trim().replace("\n", "\\n")}" }
             if (data.author.bot)
                 return
             if (data.mentions.any { it.bot && !it.isSelf })
@@ -196,7 +197,7 @@ suspend fun Application.handleDispatch(
         /* 新增好友 */
         EventType.C2C.Add -> {
             val data = json.decodeFromString<C2CBotUpdate>(payload.d!!)
-            logger.info {
+            eventLogger.info {
                 "添加好友: ${data.user}"
             }
             BotAddFriendEvent(
@@ -208,7 +209,7 @@ suspend fun Application.handleDispatch(
         /* 新增群聊 */
         EventType.Group.Add -> {
             val data = json.decodeFromString<GroupBotUpdate>(payload.d!!)
-            logger.info {
+            eventLogger.info {
                 "加入群聊: ${data.group} (by ${data.operator})"
             }
             BotJoinGroupEvent(
@@ -221,7 +222,7 @@ suspend fun Application.handleDispatch(
         /* 好友移除 */
         EventType.C2C.Remove -> {
             val data = json.decodeFromString<C2CBotUpdate>(payload.d!!)
-            logger.info {
+            eventLogger.info {
                 "删除好友: ${data.user}"
             }
             BotRemoveFriendEvent(
@@ -233,7 +234,7 @@ suspend fun Application.handleDispatch(
         /* 群聊移除 */
         EventType.Group.Remove -> {
             val data = json.decodeFromString<GroupBotUpdate>(payload.d!!)
-            logger.info {
+            eventLogger.info {
                 "退出群聊: ${data.group} (by ${data.operator})"
             }
             BotLeaveGroupEvent(
@@ -246,7 +247,7 @@ suspend fun Application.handleDispatch(
         /* 允许私聊主动消息 */
         EventType.C2C.Receive -> {
             val data = json.decodeFromString<C2CBotUpdate>(payload.d!!)
-            logger.info {
+            eventLogger.info {
                 "用户允许主动消息: ${data.user}"
             }
             BotReceiveFriendEvent(
@@ -258,7 +259,7 @@ suspend fun Application.handleDispatch(
         /* 允许群组主动消息 */
         EventType.Group.Receive -> {
             val data = json.decodeFromString<GroupBotUpdate>(payload.d!!)
-            logger.info {
+            eventLogger.info {
                 "群聊允许主动消息: ${data.group} (by ${data.operator})"
             }
             BotReceiveGroupEvent(
@@ -271,7 +272,7 @@ suspend fun Application.handleDispatch(
         /* 拒绝私聊主动消息 */
         EventType.C2C.Reject -> {
             val data = json.decodeFromString<C2CBotUpdate>(payload.d!!)
-            logger.info {
+            eventLogger.info {
                 "用户关闭主动消息: ${data.user}"
             }
             BotRejectFriendEvent(
@@ -283,7 +284,7 @@ suspend fun Application.handleDispatch(
         /* 拒绝群组主动消息 */
         EventType.Group.Reject -> {
             val data = json.decodeFromString<GroupBotUpdate>(payload.d!!)
-            logger.info {
+            eventLogger.info {
                 "群聊关闭主动消息: ${data.group} (by ${data.operator})"
             }
             BotRejectGroupEvent(
@@ -330,7 +331,7 @@ suspend fun Application.handleDispatch(
                     sender = Member(pluginLoader.bot, data.groupMemberOpenId!!),
                     group = Group(pluginLoader.bot, data.groupOpenId!!)
                 ).also {
-                    logger.info {
+                    eventLogger.info {
                         "[互动] [${data.groupOpenId}] (${data.groupMemberOpenId}) " +
                                 "<${data.data.resolved.buttonId}> ${data.data.resolved.buttonData}"
                     }
@@ -343,7 +344,7 @@ suspend fun Application.handleDispatch(
                     button = data.data.resolved.buttonId,
                     sender = User(pluginLoader.bot, data.userOpenId!!)
                 ).also {
-                    logger.info {
+                    eventLogger.info {
                         "[互动] [${data.userOpenId}] " +
                                 "<${data.data.resolved.buttonId}> ${data.data.resolved.buttonData.replace("\n", "\\n")}"
                     }
