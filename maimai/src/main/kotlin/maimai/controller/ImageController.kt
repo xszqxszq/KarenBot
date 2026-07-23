@@ -83,12 +83,19 @@ class ImageController(
             }
         }
         // 成绩列表
-        commandEndsWith(listOf("分数列表", "分数表", "成绩列表", "成绩表")) { (command, pageArg) ->
-            val page = pageArg ?.toIntOrNull() ?: 1
+        commandEndsWith(listOf("分数列表", "分数表", "成绩列表", "成绩表")) { (command, raw) ->
+            var page = 1
+            var userArg: String? = null
+            raw ?.split(" ") ?.filter { it.isNotBlank() } ?.forEach { token ->
+                when {
+                    token.toIntOrNull() != null && token.length <= 2 -> page = token.toInt()
+                    else -> userArg = token
+                }
+            }
             var user: UserQueryParams? = null
             runCatching {
-                user = maimai.query.getQueryParams(this)
-                handleScoreList(command, user, page)
+                user = maimai.query.getQueryParams(this, userArg)
+                handleScoreList(command, user, page, userArg)
             }.onFailure { e ->
                 handleError(this, e, user)
             }
@@ -123,11 +130,14 @@ class ImageController(
         }
         // 歌曲信息+成绩
         startsWith(listOf("info", "minfo")) { text ->
-            queryByTextOrImage(text) { musicQuery ->
+            val args = text.trim().split(" ").filter { it.isNotBlank() }
+            val musicQuery = args.firstOrNull() ?: ""
+            val userArg = args.getOrNull(1)
+            queryByTextOrImage(musicQuery) { query ->
                 var user: UserQueryParams? = null
                 runCatching {
-                    user = maimai.query.getQueryParams(this)
-                    handleInfoScore(user, musicQuery)
+                    user = maimai.query.getQueryParams(this, userArg)
+                    handleInfoScore(user, query)
                 }.onFailure { e ->
                     handleError(this, e, user)
                 }
@@ -366,7 +376,8 @@ class ImageController(
     suspend fun MessageEvent.handleScoreList(
         combo: String,
         user: UserQueryParams,
-        page: Int
+        page: Int,
+        userArg: String? = null
     ) {
         cleanScoreListCache()
 
@@ -396,8 +407,12 @@ class ImageController(
         }
         val (image, nowPage, totalPages) = result
 
+        val buttonCommand = buildString {
+            append("${combo}分数列表")
+            userArg?.let { append(" $it") }
+        }
         image.sendResultImage(
-            "${combo}分数列表",
+            buttonCommand,
             this,
             "生成时间：${elapsed}ms\n${randomTips()?:""}",
             page = nowPage,
