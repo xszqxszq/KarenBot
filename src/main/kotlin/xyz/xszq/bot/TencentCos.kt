@@ -19,76 +19,69 @@ import java.util.concurrent.Executors
 class TencentCos(
     val config: CosConfig
 ) {
+    private companion object {
+        const val PUT_OBJECT_MAX_SIZE = 20L * 1024 * 1024
+    }
     val cosClient = COSClient(
         BasicCOSCredentials(config.secretId, config.secretKey),
         ClientConfig(Region(config.region)).also {
             it.httpProtocol = HttpProtocol.https
         })
-    val transferManager = TransferManager(cosClient, Executors.newFixedThreadPool(32))
+    private val transferManager = TransferManager(cosClient, Executors.newFixedThreadPool(4))
+
     fun deleteFromCos(filename: String) {
         when (config.lightMode) {
             true -> {
                 File(config.lightDir).resolve(filename).delete()
             }
             false -> {
-                val bucketName = config.appId
-                cosClient.deleteObject(bucketName, filename)
+                cosClient.deleteObject(config.appId, filename)
             }
         }
     }
+
     fun upload(file: File): UploadResult {
         val filename = UUID.randomUUID().toString() + "." + file.extension
-        when (config.lightMode) {
-            true -> {
-                file.copyTo(File(config.lightDir).resolve(filename))
-                return UploadResult("${config.lightUrl}/${filename}", filename)
-            }
-            false -> {
-                val bucketName = config.appId
-                kotlin.runCatching {
-                    val upload = transferManager.upload(PutObjectRequest(
-                        bucketName, filename, file
-                    ))
-                    upload.waitForUploadResult()
-                }.onFailure {
-                    it.printStackTrace()
-                }
-
-                val expiration = Date(Date().time + 2 * 60 * 1000)
-                return UploadResult(cosClient.generatePresignedUrl(bucketName, filename, expiration).toString(), filename)
-            }
+        if (config.lightMode) {
+            file.copyTo(File(config.lightDir).resolve(filename))
+            return UploadResult("${config.lightUrl}/${filename}", filename)
         }
+        val bucket = config.appId
+        val request = PutObjectRequest(bucket, filename, file)
+        return uploadToCos(filename, file.length(), request)
     }
+
     fun uploadBinary(binary: ByteArray, suffix: String = ""): UploadResult {
         val extensionStr = if (suffix.isNotBlank()) ".$suffix" else ""
         val filename = UUID.randomUUID().toString() + extensionStr
-
-        when (config.lightMode) {
-            true -> {
-                File(config.lightDir).resolve(filename).writeBytes(binary)
-                return UploadResult("${config.lightUrl}/${filename}", filename)
-            }
-            false -> {
-                val bucketName = config.appId
-                kotlin.runCatching {
-                    val inputStream = ByteArrayInputStream(binary)
-
-                    val metadata = ObjectMetadata().apply {
-                        contentLength = binary.size.toLong()
-                    }
-
-                    val upload = transferManager.upload(
-                        PutObjectRequest(bucketName, filename, inputStream, metadata)
-                    )
-                    upload.waitForUploadResult()
-                }.onFailure {
-                    it.printStackTrace()
-                }
-
-                val expiration = Date(Date().time + 2 * 60 * 1000)
-                return UploadResult(cosClient.generatePresignedUrl(bucketName, filename, expiration).toString(), filename)
-            }
+        if (config.lightMode) {
+            File(config.lightDir).resolve(filename).writeBytes(binary)
+            return UploadResult("${config.lightUrl}/${filename}", filename)
         }
+        val bucket = config.appId
+        val request = PutObjectRequest(bucket, filename,
+            ByteArrayInputStream(binary),
+            ObjectMetadata().apply { contentLength = binary.size.toLong() })
+        return uploadToCos(filename, binary.size.toLong(), request)
     }
+
+    private fun uploadToCos(
+        filename: String,
+        size: Long,
+        request: PutObjectRequest
+    ): UploadResult {
+        val bucket = config.appId
+        kotlin.runCatching {
+            if (size < PUT_OBJECT_MAX_SIZE) {
+                cosClient.putObject(request)
+            } else {
+                transferManager.upload(request).waitForUploadResult()
+            }
+        }.onFailure {
+            it.printStackTrace()
+        }
+        return UploadResult("https://${bucket}.cos.${config.region}.myqcloud.com/$filename", filename)
+    }
+
     fun upload(file: VfsFile) = upload(File(file.absolutePath))
 }
