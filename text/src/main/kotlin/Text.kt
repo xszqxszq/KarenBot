@@ -6,7 +6,7 @@ import com.sksamuel.hoplite.addFileSource
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
@@ -280,14 +280,16 @@ class Text: Plugin() {
     private suspend fun remoteDetect(imageUrl: String): Boolean {
         val api = textConfig.remoteApi ?: return false
         val key = textConfig.remoteKey
-        val response = client.submitForm(
-            url = "$api/blonde",
-            formParameters = Parameters.build {
-                append("url", imageUrl)
+        return runCatching {
+            val response = client.submitForm(
+                url = "$api/blonde",
+                formParameters = Parameters.build {
+                    append("url", imageUrl)
+                }
+            ) {
+                header(HttpHeaders.Authorization, "Bearer $key")
             }
-        ) {
-            header(HttpHeaders.Authorization, "Bearer $key")
-        }
-        return response.bodyAsText().toBooleanStrictOrNull() ?: false
+            response.bodyAsText().toBooleanStrictOrNull() ?: false
+        }.getOrElse { false }
     }
 }
