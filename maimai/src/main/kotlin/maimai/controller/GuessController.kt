@@ -19,7 +19,6 @@ import xyz.xszq.bot.Maimai.Companion.textMode
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.maimai.database.GuessGameStatus
-import xyz.xszq.bot.payload.markdown.RenderData
 import xyz.xszq.bot.maimai.database.GuessGameTable
 import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.music.MusicGenre

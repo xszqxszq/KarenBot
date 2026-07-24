@@ -12,7 +12,6 @@ import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.database.QQBindTable
 import xyz.xszq.bot.maimai.exception.*
 import xyz.xszq.bot.maimai.music.*
-import xyz.xszq.bot.message.RemoteImage
 
 class MaimaiQuery(
     val maimai: Maimai

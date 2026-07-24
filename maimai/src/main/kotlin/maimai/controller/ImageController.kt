@@ -13,7 +13,6 @@ import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.maimai.component.image.FilterParams
 import xyz.xszq.bot.maimai.exception.FilterNoResultException
 import xyz.xszq.bot.maimai.exception.NoDataException
-import xyz.xszq.bot.maimai.exception.NotSupportedException
 import xyz.xszq.bot.maimai.music.*
 import xyz.xszq.bot.maimai.payload.LocalCourseInfo
 import xyz.xszq.bot.maimai.query.ComboQuery
