@@ -15,13 +15,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.*
+import okhttp3.ConnectionPool
+import okhttp3.Protocol
 import xyz.xszq.bot.maimai.component.MaimaiData
-import xyz.xszq.bot.maimai.exception.*
+import xyz.xszq.bot.maimai.exception.UnknownException
+import xyz.xszq.bot.maimai.exception.UserDeniedException
+import xyz.xszq.bot.maimai.exception.UserNotFoundException
 import xyz.xszq.bot.maimai.music.*
 import xyz.xszq.bot.maimai.payload.*
 import java.io.File
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import java.util.concurrent.TimeUnit
 
 class DivingFish(
     val token: String,
@@ -38,6 +41,19 @@ class DivingFish(
         ignoreUnknownKeys = true
     }
     val client = HttpClient(OkHttp) {
+        engine {
+            config {
+                connectionPool(ConnectionPool(
+                    maxIdleConnections = 5,
+                    keepAliveDuration = 5,
+                    timeUnit = TimeUnit.MINUTES
+                ))
+                protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
+                connectTimeout(30, TimeUnit.SECONDS)
+                readTimeout(30, TimeUnit.SECONDS)
+                writeTimeout(30, TimeUnit.SECONDS)
+            }
+        }
         install(ContentNegotiation) {
             json(json)
         }
