@@ -311,8 +311,12 @@ class MaimaiQuery(
 
     private fun maxScoreRecordsResponse(musics: List<MusicInfo>): RecordsResponse {
         val records = maxScoreRecords(musics)
+        val all = maxScoreRecords()
+        val old = all.filter { !it.music.isNew }.take(35)
+        val new = all.filter { it.music.isNew }.take(15)
+        val rating = old.sumOf { it.rating } + new.sumOf { it.rating }
         return RecordsResponse(
-            player = PlayerInfo("理论值", records.sumOf { it.rating }, 23),
+            player = PlayerInfo("理论值", rating, 23),
             records = records
         )
     }
