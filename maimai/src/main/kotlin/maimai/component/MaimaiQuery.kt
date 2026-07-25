@@ -123,6 +123,8 @@ class MaimaiQuery(
         user: UserQueryParams,
         musics: List<MusicInfo>
     ): Pair<RecordsResponse, MaimaiAPI> {
+        if (user.isMaxScore())
+            return Pair(maxScoreRecordsResponse(musics), listBackends(user).first())
         val result = queryBackends(user, listBackends(user)) { backend ->
             backend.getPlayerRecords(user, musics)
         }
@@ -134,6 +136,8 @@ class MaimaiQuery(
         user: UserQueryParams,
         music: MusicInfo
     ): List<Record> {
+        if (user.isMaxScore())
+            return maxScoreRecord(music)
         val result = queryBackends(user, listBackends(user)) { backend ->
             backend.getPlayerRecord(user, music)
         }
@@ -286,7 +290,9 @@ class MaimaiQuery(
             return false
         return username.lowercase() in listOf("maxscore", "理论", "理论值")
     }
-    private fun maxScoreRecords(): List<Record> = maimai.musics().flatMap {
+    private fun maxScoreRecords(): List<Record> = maxScoreRecords(maimai.musics().toList())
+
+    private fun maxScoreRecords(musics: List<MusicInfo>): List<Record> = musics.flatMap {
         it.charts
     }.filter {
         it.difficulty != MusicDifficulty.Utage
@@ -302,6 +308,30 @@ class MaimaiQuery(
             rating = Rating.calc(chart, 1010000)
         )
     }.sortedByDescending { it.rating }
+
+    private fun maxScoreRecordsResponse(musics: List<MusicInfo>): RecordsResponse {
+        val records = maxScoreRecords(musics)
+        return RecordsResponse(
+            player = PlayerInfo("理论值", records.sumOf { it.rating }, 23),
+            records = records
+        )
+    }
+
+    private fun maxScoreRecord(music: MusicInfo): List<Record> = music.charts
+        .filter { it.difficulty != MusicDifficulty.Utage }
+        .map { chart ->
+            Record(
+                music = chart.music,
+                chart = chart,
+                achievement = 1010000,
+                comboStatus = ComboStatus.AllPerfectPlus,
+                syncStatus = SyncStatus.FullSyncDeluxePlus,
+                deluxeScore = chart.maxDeluxeScore,
+                rate = "sssp",
+                rating = Rating.calc(chart, 1010000)
+            )
+        }
+
     private fun maxScoreRating(): RatingResponse {
         val scores = maxScoreRecords()
         val old = scores.filter { !it.music.isNew }.take(35)
