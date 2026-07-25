@@ -95,10 +95,11 @@ object LayoutEngine {
                             }
                         }
 
-                        val builder = ParagraphBuilder(paragraphStyle, element.fontCollection!!)
-                        builder.pushStyle(textStyle)
-                        builder.addText(element.text)
-                        return builder.build()
+                        return ParagraphBuilder(paragraphStyle, element.fontCollection!!).use { builder ->
+                            builder.pushStyle(textStyle)
+                            builder.addText(element.text)
+                            builder.build()
+                        }
                     }
 
                     var currentSize = element.style.textSize
@@ -117,6 +118,7 @@ object LayoutEngine {
 
                         while (paragraph.maxIntrinsicWidth > availableContentW && currentSize > minSize) {
                             currentSize -= 1f
+                            paragraph.close()
                             paragraph = buildPara(currentSize)
                             paragraph.layout(Float.POSITIVE_INFINITY)
                         }
@@ -128,6 +130,7 @@ object LayoutEngine {
                     val linesCount = paragraph.lineMetrics.size.coerceAtLeast(1)
                     intrinsicContentW = minOf(paragraph.maxIntrinsicWidth, layoutWidth)
                     intrinsicContentH = minOf(paragraph.height, currentSize * 1.4f * linesCount)
+                    paragraph.close()
                 }
             }
             is Img -> {

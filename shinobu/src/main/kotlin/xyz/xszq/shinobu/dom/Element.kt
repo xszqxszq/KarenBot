@@ -107,11 +107,12 @@ sealed class Element(
     }
 
     fun recordPicture() {
-        val recorder = PictureRecorder()
-        val canvas = recorder.beginRecording(Rect.makeWH(measuredWidth, measuredHeight))
-        draw(canvas)
-
-        renderPicture = recorder.finishRecordingAsPicture()
+        renderPicture?.close()
+        PictureRecorder().use { recorder ->
+            val canvas = recorder.beginRecording(Rect.makeWH(measuredWidth, measuredHeight))
+            draw(canvas)
+            renderPicture = recorder.finishRecordingAsPicture()
+        }
     }
 
     protected abstract fun draw(canvas: Canvas)

@@ -127,6 +127,8 @@ class RadarTemplate(val basePath: String) {
         }
         bgPath.closePath()
         canvas.drawPath(bgPath, bgPaint)
+        bgPath.close()
+        bgPaint.close()
 
         val dataPath = Path()
         (0 until 5).forEach { index ->
@@ -148,6 +150,7 @@ class RadarTemplate(val basePath: String) {
             isAntiAlias = true
         }
         canvas.drawPath(dataPath, fillPaint)
+        fillPaint.close()
 
         val strokePaint = Paint().apply {
             color = Color.makeARGB(255, 159, 81, 220)
@@ -156,6 +159,8 @@ class RadarTemplate(val basePath: String) {
             isAntiAlias = true
         }
         canvas.drawPath(dataPath, strokePaint)
+        strokePaint.close()
+        dataPath.close()
 
         val nameFont = Font(typeface, 18f * scale)
         val valueFont = Font(typeface, 16f * scale)
@@ -192,6 +197,11 @@ class RadarTemplate(val basePath: String) {
             )
         }
 
-        return surface.makeImageSnapshot()
+        val result = surface.makeImageSnapshot()!!
+        nameFont.close()
+        valueFont.close()
+        textPaint.close()
+        surface.close()
+        return result
     }
 }

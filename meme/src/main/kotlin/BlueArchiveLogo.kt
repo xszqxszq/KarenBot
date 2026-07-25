@@ -55,6 +55,7 @@ class BlueArchiveLogo {
             bluePaint
         )
         canvas.restore()
+        bluePaint.close()
 
         canvas.drawImageRect(
             halo,
@@ -82,6 +83,7 @@ class BlueArchiveLogo {
         p.mode = PaintMode.FILL
         canvas.drawString(textR, canvasWidthL, CANVAS_HEIGHT * TEXT_BASELINE, fontR, p)
         canvas.restore()
+        p.close()
 
         val graphX = canvasWidthL - CANVAS_HEIGHT / 2f + GRAPH_OFFSET_X
         val graphY = GRAPH_OFFSET_Y
@@ -91,9 +93,9 @@ class BlueArchiveLogo {
             graphX + (HOLLOW_PATH[2].first / 500f) * CANVAS_HEIGHT, graphY + (HOLLOW_PATH[2].second / 500f) * CANVAS_HEIGHT,
             graphX + (HOLLOW_PATH[3].first / 500f) * CANVAS_HEIGHT, graphY + (HOLLOW_PATH[3].second / 500f) * CANVAS_HEIGHT
         )
-        val hollowFill = Paint()
-        hollowFill.color = Color.WHITE
-        canvas.drawVertices(VertexMode.TRIANGLE_STRIP, verts, null, null, null, BlendMode.SRC_OVER, hollowFill)
+        Paint().apply { color = Color.WHITE }.use { hollowFill ->
+            canvas.drawVertices(VertexMode.TRIANGLE_STRIP, verts, null, null, null, BlendMode.SRC_OVER, hollowFill)
+        }
 
         canvas.drawImageRect(
             cross,
@@ -105,7 +107,11 @@ class BlueArchiveLogo {
                 CANVAS_HEIGHT.toFloat()
             )
         )
-        return surface.makeImageSnapshot()
+        val result = surface.makeImageSnapshot()!!
+        fontL.close()
+        fontR.close()
+        surface.close()
+        return result
     }
     companion object {
         private const val ASSETS_DIR = "./data/meme/ba/"

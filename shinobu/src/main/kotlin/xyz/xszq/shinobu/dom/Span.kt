@@ -37,41 +37,41 @@ class Span(
                 styleConfig()
             }
 
-            val builder = ParagraphBuilder(paragraphStyle, fontCollection!!)
-            builder.pushStyle(textStyle)
-            builder.addText(text)
+            ParagraphBuilder(paragraphStyle, fontCollection!!).use { builder ->
+                builder.pushStyle(textStyle)
+                builder.addText(text)
+                builder.build().use { paragraph ->
+                    val layoutW = if (style.whiteSpace == WhiteSpace.NOWRAP) {
+                        Float.POSITIVE_INFINITY
+                    } else {
+                        contentRect.width
+                    }
+                    paragraph.layout(layoutW)
 
-            val paragraph = builder.build()
+                    val metrics = paragraph.lineMetrics.firstOrNull()
 
-            val layoutW = if (style.whiteSpace == WhiteSpace.NOWRAP) {
-                Float.POSITIVE_INFINITY
-            } else {
-                contentRect.width
-            }
-            paragraph.layout(layoutW)
+                    val yOffset = if (metrics != null) {
+                        val linesCount = paragraph.lineMetrics.size
 
-            val metrics = paragraph.lineMetrics.firstOrNull()
+                        if (linesCount > 1) {
+                            (contentRect.height - paragraph.height) / 2f
+                        } else {
+                            val ascent = metrics.ascent.toFloat()
+                            val descent = metrics.descent.toFloat()
+                            val baseline = metrics.baseline.toFloat()
 
-            val yOffset = if (metrics != null) {
-                val linesCount = paragraph.lineMetrics.size
+                            val inkCenterY = baseline + (descent - ascent) / 2f
+                            val boxCenterY = contentRect.height / 2f
 
-                if (linesCount > 1) {
-                    (contentRect.height - paragraph.height) / 2f
-                } else {
-                    val ascent = metrics.ascent.toFloat()
-                    val descent = metrics.descent.toFloat()
-                    val baseline = metrics.baseline.toFloat()
+                            boxCenterY - inkCenterY
+                        }
+                    } else {
+                        0f
+                    }
 
-                    val inkCenterY = baseline + (descent - ascent) / 2f
-                    val boxCenterY = contentRect.height / 2f
-
-                    boxCenterY - inkCenterY
+                    paragraph.paint(canvas, contentRect.left, contentRect.top + yOffset)
                 }
-            } else {
-                0f
             }
-
-            paragraph.paint(canvas, contentRect.left, contentRect.top + yOffset)
         }
 
         canvas.save()

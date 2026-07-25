@@ -54,11 +54,13 @@ class BlondeHairDetector(
                 Rect(ox, oy, ox + sw, oy + sh))
             close()
         }
+        img.close()
 
         val pixels = bmp.readPixels(
             ImageInfo.makeN32(size, size, ColorAlphaType.OPAQUE),
             size * 4, 0, 0
         )!!
+        bmp.close()
         val inp = FloatArray(size * size * 3)
         var j = 0
         (0 until pixels.size step 4).forEach { i ->

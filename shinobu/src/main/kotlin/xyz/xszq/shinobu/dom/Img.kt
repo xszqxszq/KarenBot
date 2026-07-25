@@ -73,18 +73,18 @@ class Img(
             canvas.drawImageRect(img, makeWH(imgW, imgH), dstRect, samplingMode, null, true)
 
             if (hasMask) {
-                val maskPaint = Paint().apply {
+                Paint().apply {
                     blendMode = org.jetbrains.skia.BlendMode.DST_IN
+                }.use { maskPaint ->
+                    canvas.drawImageRect(
+                        maskSkiaImage!!,
+                        makeWH(maskSkiaImage!!.width.toFloat(), maskSkiaImage!!.height.toFloat()),
+                        contentRect,
+                        SamplingMode.DEFAULT,
+                        maskPaint,
+                        true
+                    )
                 }
-
-                canvas.drawImageRect(
-                    maskSkiaImage!!,
-                    makeWH(maskSkiaImage!!.width.toFloat(), maskSkiaImage!!.height.toFloat()),
-                    contentRect,
-                    SamplingMode.DEFAULT,
-                    maskPaint,
-                    true
-                )
             }
 
             canvas.restore()

@@ -12,8 +12,9 @@ class Div(
     var maskSkiaImage: Image? = null
     override fun draw(canvas: Canvas) {
         style.backgroundColor ?.let { colorInt ->
-            val paint = Paint().apply { color = colorInt }
-            canvas.drawRect(Rect.makeWH(measuredWidth, measuredHeight), paint)
+            Paint().apply { color = colorInt }.use { paint ->
+                canvas.drawRect(Rect.makeWH(measuredWidth, measuredHeight), paint)
+            }
         }
 
         bgSkiaImage ?.let { image ->
@@ -88,21 +89,20 @@ class Div(
             }
 
             if (hasMask) {
-                val maskPaint = Paint().apply {
-                    blendMode = BlendMode.DST_IN
+                Paint().apply { blendMode = BlendMode.DST_IN }.use { maskPaint ->
+                    canvas.drawImageRect(
+                        maskSkiaImage!!,
+                        Rect.makeWH(maskSkiaImage!!.width.toFloat(), maskSkiaImage!!.height.toFloat()),
+                        Rect.makeWH(destW, destH),
+                        SamplingMode.DEFAULT,
+                        maskPaint,
+                        true
+                    )
                 }
-
-                canvas.drawImageRect(
-                    maskSkiaImage!!,
-                    Rect.makeWH(maskSkiaImage!!.width.toFloat(), maskSkiaImage!!.height.toFloat()),
-                    Rect.makeWH(destW, destH),
-                    SamplingMode.DEFAULT,
-                    maskPaint,
-                    true
-                )
 
                 canvas.restore()
             }
+            bgPaint.close()
         }
 
         children.forEach { child ->

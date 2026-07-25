@@ -21,9 +21,9 @@ class Template(
         val w = element.measuredWidth.toInt()
         val h = element.measuredHeight.toInt()
 
-        val surface = Surface.makeRasterN32Premul(w, h)
-        element.renderPicture?.let { surface.canvas.drawPicture(it) }
-
-        return surface.makeImageSnapshot()
+        return Surface.makeRasterN32Premul(w, h).use { surface ->
+            element.renderPicture?.let { surface.canvas.drawPicture(it) }
+            surface.makeImageSnapshot()!!
+        }
     }
 }

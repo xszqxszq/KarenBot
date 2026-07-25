@@ -12,18 +12,21 @@ class FiveThousandChoyen {
     }
     fun draw(top: String, bottom: String ?= null): Image {
         var rightBorder = 0f
-        val surface = Surface.makeRasterN32Premul(1500, 270)
-        val canvas = surface.canvas
-        canvas.drawRect(Rect.makeWH(1500f, 270f), Paint().also { it.color = Color.WHITE })
-        with (canvas) {
-            val topW = drawTop(top)
-            rightBorder = TOP_X + topW
-            bottom?.let {
-                val botW = drawBottom(it)
-                rightBorder = max(rightBorder, BOTTOM_X + botW)
+        return Surface.makeRasterN32Premul(1500, 270).use { surface ->
+            val canvas = surface.canvas
+            Paint().apply { color = Color.WHITE }.use { bgPaint ->
+                canvas.drawRect(Rect.makeWH(1500f, 270f), bgPaint)
             }
+            with (canvas) {
+                val topW = drawTop(top)
+                rightBorder = TOP_X + topW
+                bottom?.let {
+                    val botW = drawBottom(it)
+                    rightBorder = max(rightBorder, BOTTOM_X + botW)
+                }
+            }
+            surface.makeImageSnapshot(IRect.makeXYWH(0, 0, rightBorder.toInt(), 270))!!
         }
-        return surface.makeImageSnapshot(IRect.makeXYWH(0, 0, rightBorder.toInt(), 270))!!
     }
     fun Canvas.drawTop(
         top: String,
@@ -108,8 +111,11 @@ class FiveThousandChoyen {
         p.mode = PaintMode.FILL
         drawString(top, x, y - 3, font, p)
 
+        val width = font.measureTextWidth(top)
         restore()
-        return font.measureTextWidth(top)
+        font.close()
+        p.close()
+        return width
     }
 
     fun Canvas.drawBottom(
@@ -180,8 +186,11 @@ class FiveThousandChoyen {
         p.mode = PaintMode.FILL
         drawString(bottom, x, y - 3, font, p)
 
+        val width = font.measureTextWidth(bottom)
         restore()
-        return font.measureTextWidth(bottom)
+        font.close()
+        p.close()
+        return width
     }
 
     companion object {

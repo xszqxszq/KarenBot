@@ -341,8 +341,10 @@ class ImageController(
         event: MessageEvent,
         message: String ?= null
     ): Unit = useTempFile { file ->
-        val bytes = this.encodeToData(EncodedImageFormat.JPEG, 95)!!.bytes
-        file.writeBytes(bytes)
+        this.encodeToData(EncodedImageFormat.JPEG, 95).use { data ->
+            file.writeBytes(data!!.bytes)
+        }
+        this.close()
         message ?.let {
             event.reply(xyz.xszq.bot.message.Image(file) + it.toPlainText())
         } ?: run {
@@ -354,13 +356,16 @@ class ImageController(
         event: MessageEvent,
         handle: suspend MessageEvent.(String) -> Unit
     ): Unit = useTempFile(suffix = ".jpg") { file ->
-        val bytes = this.encodeToData(EncodedImageFormat.JPEG, 95)!!.bytes
-        val uploaded = event.bot.cos.uploadBinary(bytes, suffix = ".jpg")
-        handle.invoke(event, uploaded.url)
-        chunithm.scope.launch {
-            delay(10000L)
-            event.bot.cos.deleteFromCos(uploaded.filename)
+        this.encodeToData(EncodedImageFormat.JPEG, 95).use { data ->
+            val bytes = data!!.bytes
+            val uploaded = event.bot.cos.uploadBinary(bytes, suffix = ".jpg")
+            handle.invoke(event, uploaded.url)
+            chunithm.scope.launch {
+                delay(10000L)
+                event.bot.cos.deleteFromCos(uploaded.filename)
+            }
         }
+        this.close()
     }
 
     companion object {

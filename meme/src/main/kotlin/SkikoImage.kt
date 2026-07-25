@@ -30,10 +30,12 @@ data class SkikoImageData(
 }
 
 suspend fun VfsFile.readSkikoImage(): SkikoImageData {
-    val image = Image.makeFromEncoded(readBytes())
-    val bitmap = Bitmap.makeFromImage(image)
-    val info = ImageInfo(image.width, image.height, ColorType.RGBA_8888, ColorAlphaType.UNPREMUL)
-    return SkikoImageData(image.width, image.height, bitmap.readPixels(info)!!)
+    return Image.makeFromEncoded(readBytes()).use { image ->
+        Bitmap.makeFromImage(image).use { bitmap ->
+            val info = ImageInfo(image.width, image.height, ColorType.RGBA_8888, ColorAlphaType.UNPREMUL)
+            SkikoImageData(image.width, image.height, bitmap.readPixels(info)!!)
+        }
+    }
 }
 
 fun SkikoImageData.toSkiaImage(): Image = Image.makeRaster(
@@ -42,7 +44,7 @@ fun SkikoImageData.toSkiaImage(): Image = Image.makeRaster(
     rowBytes = width * 4
 )
 
-fun Image.encodePNG(): ByteArray = encodeToData(EncodedImageFormat.PNG)!!.bytes
+fun Image.encodePNG(): ByteArray = encodeToData(EncodedImageFormat.PNG).use { it!!.bytes }
 
 private fun norm(s: String) = s.lowercase().replace(" ", "").replace("-", "").replace("_", "")
 
