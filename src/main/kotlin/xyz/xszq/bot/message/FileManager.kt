@@ -1,6 +1,7 @@
 package xyz.xszq.bot.message
 
 import korlibs.io.file.VfsFile
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -14,6 +15,7 @@ class FileManager(
 ){
     private val mutex = Mutex()
     private val files = mutableListOf<Pair<VfsFile, Long>>()
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private suspend fun cleanExpired(currentTime: Long) {
         files.filter { it.second <= currentTime }.forEach {
@@ -28,6 +30,21 @@ class FileManager(
             cleanExpired(currentTime)
             files.addAll(filesToAdd.map { Pair(it, currentTime + expiresAfter) })
         }
+    }
+
+    fun start() {
+        scope.launch {
+            while (isActive) {
+                delay(30_000)
+                mutex.withLock {
+                    cleanExpired(now())
+                }
+            }
+        }
+    }
+
+    fun stop() {
+        scope.cancel()
     }
 
     suspend fun addFile(file: VfsFile) {

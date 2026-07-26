@@ -24,7 +24,11 @@ fun newTempFile(
  * @param block The code to use the VfsFile.
  */
 suspend fun <T> VfsFile.use(block: suspend (VfsFile) -> T): T {
-    return block.invoke(this).also { delete() }
+    return try {
+        block.invoke(this)
+    } finally {
+        delete()
+    }
 }
 
 /**

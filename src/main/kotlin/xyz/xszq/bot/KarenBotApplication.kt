@@ -116,6 +116,7 @@ object KarenBotApplication {
         val llmClient = llmConfig?.let { LLMClient(it) }
 
         val pluginLoader = PluginLoader(api, cos, database, llmClient)
+        pluginLoader.files.start()
         pluginLoader.reloadAllPlugins()
 
         System.getProperty("cli")?.let {
