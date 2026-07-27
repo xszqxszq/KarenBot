@@ -16,8 +16,7 @@ import kotlin.math.min
 
 class RatingTemplate(
     private val manager: TemplateManager,
-    private val resourcePath: String,
-    private val newestVersion: GameVersion
+    private val resourcePath: String
 ) {
     fun title(
         backend: String,
@@ -191,6 +190,7 @@ class RatingTemplate(
                 header(params)
                 text("name-title") {
                     text = params.title
+                    style.fontCharset = "chunithm-data"
                 }
             }
 
@@ -274,6 +274,7 @@ class RatingTemplate(
         }
         text("level") {
             text = params.level.toString()
+            style.fontCharset = "chunithm-data"
         }
         text("name") {
             text = params.nickname
@@ -298,21 +299,26 @@ class RatingTemplate(
         }
         text("index-id") {
             text = "#${index + 1} ${record.music.id}"
+            style.fontCharset = "chunithm-data"
         }
         text("level-rating") {
             val levelValue = record.chart.levelValue.toStringDecimal(1)
             val ratingValue = record.rating.toStringDecimal(2)
             text = "$levelValue→$ratingValue"
+            style.fontCharset = "chunithm-data"
         }
         text("title") {
             text = record.music.name
+            style.fontCharset = "chunithm-data"
         }
         val (acc1, acc2) = Rate.formatted(record.achievement)
         text("achievement-1") {
             text = acc1
+            style.fontCharset = "chunithm-data"
         }
         text("achievement-2") {
             text = acc2
+            style.fontCharset = "chunithm-data"
         }
         image("status") {
             src = when {

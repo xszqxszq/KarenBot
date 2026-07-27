@@ -88,6 +88,7 @@ sealed class Element(
 
         if (this is Span) {
             this.fontCollection = rm.fontCollection
+            this.bitmapFontManager = rm.bitmapFontManager
         }
 
         this.children.forEach { it.resolveResources(rm) }

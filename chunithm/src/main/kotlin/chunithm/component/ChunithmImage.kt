@@ -12,6 +12,7 @@ import xyz.xszq.bot.chunithm.music.ChartInfo
 import xyz.xszq.bot.chunithm.music.MusicDifficulty
 import xyz.xszq.shinobu.parse.StyleParser.rgbColor
 import xyz.xszq.shinobu.template.TemplateManager
+import java.io.File
 
 class ChunithmImage(
     val chunithmData: ChunithmData,
@@ -25,7 +26,7 @@ class ChunithmImage(
     fun init() {
         manager = TemplateManager("./data/chunithm/")
 
-        rating = RatingTemplate(manager, resourcePath, chunithmData.newestVersion)
+        rating = RatingTemplate(manager, resourcePath)
         level = LevelTemplate(manager, resourcePath)
     }
     /**
@@ -33,9 +34,25 @@ class ChunithmImage(
      */
     fun load(scope: CoroutineScope) {
         manager.init()
+
+        val chars = collectTemplateChars() + chunithmData.musics.values.flatMap { it.name.asIterable() }
+        manager.registerCharset("chunithm-data", chars.joinToString(""))
+
         scope.launch {
             generateThumb()
         }
+    }
+
+    private fun collectTemplateChars(): Set<Char> {
+        val base = "0123456789.#%→+-".toSet()
+        val dir = File("./data/chunithm/templates")
+        if (!dir.exists()) return base
+        return base + dir.walkTopDown()
+            .filter { it.name == "template.html" }
+            .flatMap { file ->
+                Regex(">([^<]+)<").findAll(file.readText())
+                    .flatMap { it.groupValues[1].trim().asIterable() }
+            }.toSet()
     }
 
     private suspend fun generateThumb() = coroutineScope {

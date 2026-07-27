@@ -26,6 +26,7 @@ dependencies {
     api("org.jetbrains.skiko:skiko-awt-runtime-windows-x64:${skikoVersion}")
     api("org.jetbrains.skiko:skiko-awt-runtime-linux-x64:${skikoVersion}")
     api("org.jetbrains.skiko:skiko-awt-runtime-macos-arm64:${skikoVersion}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
     testImplementation(kotlin("test"))
 }
 

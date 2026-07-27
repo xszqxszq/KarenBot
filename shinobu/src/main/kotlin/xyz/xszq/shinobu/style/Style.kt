@@ -38,6 +38,8 @@ data class Style(
     var opacity: Float = 1.0f,
     var objectFit: ObjectFit = ObjectFit.FILL,
     var maskImage: String ?= null,
+
+    var fontCharset: String? = null
 ) {
     fun deepCopy(): Style {
         return this.copy(

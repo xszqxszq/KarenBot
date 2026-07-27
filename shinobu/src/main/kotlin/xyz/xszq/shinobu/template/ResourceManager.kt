@@ -8,7 +8,8 @@ class ResourceManager(
     val basePath: File,
     val parent: ResourceManager? = null,
     preloadLocal: Boolean = false,
-    val fontCollection: FontCollection
+    val fontCollection: FontCollection,
+    val bitmapFontManager: BitmapFontManager? = null
 ) {
     private val imageCache = mutableMapOf<String, Image>()
 

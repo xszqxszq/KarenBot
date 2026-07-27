@@ -4,6 +4,7 @@ import org.jetbrains.skia.*
 import org.jetbrains.skia.paragraph.*
 import xyz.xszq.shinobu.style.TextAlign
 import xyz.xszq.shinobu.style.WhiteSpace
+import xyz.xszq.shinobu.template.BitmapFontManager
 
 @Suppress("unused")
 class Span(
@@ -11,10 +12,17 @@ class Span(
     var text: String = ""
 ) : Element(id) {
     var fontCollection: FontCollection ?= null
+    var bitmapFontManager: BitmapFontManager? = null
     var computedFontSize: Float ?= null
     override fun draw(canvas: Canvas) {
         if (text.isEmpty() || fontCollection == null)
             return
+
+        if (style.fontCharset != null && bitmapFontManager != null &&
+            style.textStroke == null && style.textShadow == null
+        ) {
+            if (drawBitmapText(canvas)) return
+        }
 
         val paragraphStyle = ParagraphStyle().apply {
             if (style.whiteSpace == WhiteSpace.NOWRAP)
@@ -135,6 +143,32 @@ class Span(
         }
 
         canvas.restore()
+    }
+
+    private fun drawBitmapText(canvas: Canvas): Boolean {
+        val charsetId = style.fontCharset!!
+        val fontSize = computedFontSize ?: style.textSize
+        val atlas = bitmapFontManager!!.getAtlas(
+            charsetId, fontSize, style.fontFamilies
+        ) ?: return false
+
+        for (ch in text) {
+            if (ch !in atlas.glyphs) return false
+        }
+
+        val paint = Paint().apply { color = style.textColor }
+        var x = contentRect.left
+        val y = contentRect.top
+        val h = atlas.height.toFloat()
+
+        for (ch in text) {
+            val glyph = atlas.glyphs[ch]!!
+            val src = Rect.makeXYWH(glyph.x.toFloat(), 0f, glyph.w.toFloat(), h)
+            val dst = Rect.makeXYWH(x, y, glyph.w.toFloat(), h)
+            canvas.drawImageRect(atlas.image, src, dst, paint)
+            x += glyph.w
+        }
+        return true
     }
 
     override fun clone(): Element {

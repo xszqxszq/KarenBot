@@ -14,21 +14,27 @@ class TemplateManager(val basePath: String) {
 
     lateinit var globalResourceManager: ResourceManager
     lateinit var fontCollection: FontCollection
+    lateinit var bitmapFontManager: BitmapFontManager
 
-    fun init() {
+    fun init(cacheDir: String = "../.fonts/") {
         val fontProvider = TypefaceFontProvider()
         fontCollection = FontCollection().apply {
             setDefaultFontManager(FontMgr.default)
             setAssetFontManager(fontProvider)
             setDynamicFontManager(FontMgr.default)
         }
-        initFontAliases(fontProvider)
+
+        FontAliasCache(File(basePath, cacheDir)).loadAndRegister(fontProvider)
+
+        val bmCacheDir = File(basePath, cacheDir).resolve("bitmap")
+        bitmapFontManager = BitmapFontManager(bmCacheDir, fontCollection)
 
         globalResourceManager = ResourceManager(
             basePath = File(basePath),
             parent = null,
             preloadLocal = false,
-            fontCollection = fontCollection
+            fontCollection = fontCollection,
+            bitmapFontManager = bitmapFontManager
         )
 
         var templates: File? = File(basePath, "templates")
@@ -46,7 +52,8 @@ class TemplateManager(val basePath: String) {
                     basePath = folder,
                     parent = globalResourceManager,
                     preloadLocal = true,
-                    fontCollection = fontCollection
+                    fontCollection = fontCollection,
+                    bitmapFontManager = bitmapFontManager
                 )
 
                 loadedTemplates[templateName] = RawData(topLevelElements, localRM)
@@ -54,32 +61,12 @@ class TemplateManager(val basePath: String) {
         }
     }
 
-    private fun initFontAliases(fontProvider: TypefaceFontProvider) {
-        val fontMgr = FontMgr.default
-        for (i in 0 until fontMgr.familiesCount) {
-            val familyName = fontMgr.getFamilyName(i)
-            val styleSet = fontMgr.makeStyleSet(i) ?: continue
-            for (j in 0 until styleSet.count()) {
-                val typeface = styleSet.getTypeface(j) ?: continue
-                val styleName = styleSet.getStyleName(j)
-
-                val styleIdentifier = when {
-                    styleName.contains("Heavy", ignoreCase = true) -> "H"
-                    styleName.contains("Bold", ignoreCase = true) -> "B"
-                    styleName.contains("Regular", ignoreCase = true) -> "R"
-                    styleName.contains("Medium", ignoreCase = true) -> "M"
-                    styleName.contains("Light", ignoreCase = true) -> "L"
-                    else -> ""
-                }
-                if (styleIdentifier.isNotEmpty()) {
-                    fontProvider.registerTypeface(typeface, "$familyName-$styleIdentifier")
-                }
-            }
-        }
-    }
-
     operator fun get(name: String): Template? {
         val data = loadedTemplates[name] ?: return null
         return Template(data.elements, data.localRM)
+    }
+
+    fun registerCharset(id: String, chars: String) {
+        bitmapFontManager.registerCharset(id, chars)
     }
 }
