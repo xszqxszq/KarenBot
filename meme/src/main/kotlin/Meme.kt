@@ -49,7 +49,7 @@ class Meme: Plugin() {
         runCatching {
             api.init()
         }.onFailure { e ->
-            e.printStackTrace()
+            logger.warn { "警告：无法连接到 meme 服务器" }
         }
 
         setRoute()
