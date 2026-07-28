@@ -152,22 +152,32 @@ class Span(
             charsetId, fontSize, style.fontFamilies
         ) ?: return false
 
+        var totalW = 0
         for (ch in text) {
-            if (ch !in atlas.glyphs) return false
+            val g = atlas.glyphs[ch] ?: return false
+            totalW += g.w
+        }
+
+        val startX = when (style.textAlign) {
+            TextAlign.CENTER -> contentRect.left + (contentRect.width - totalW) / 2f
+            TextAlign.RIGHT -> contentRect.right - totalW
+            else -> contentRect.left
         }
 
         val paint = Paint().apply { color = style.textColor }
-        var x = contentRect.left
-        val y = contentRect.top
         val h = atlas.height.toFloat()
+        canvas.save()
+        canvas.clipRect(contentRect)
+        var x = startX
+        val y = contentRect.top
 
         for (ch in text) {
             val glyph = atlas.glyphs[ch]!!
             val src = Rect.makeXYWH(glyph.x.toFloat(), 0f, glyph.w.toFloat(), h)
-            val dst = Rect.makeXYWH(x, y, glyph.w.toFloat(), h)
-            canvas.drawImageRect(atlas.image, src, dst, paint)
+            canvas.drawImageRect(atlas.image, src, Rect.makeXYWH(x, y, glyph.w.toFloat(), h), paint)
             x += glyph.w
         }
+        canvas.restore()
         return true
     }
 
