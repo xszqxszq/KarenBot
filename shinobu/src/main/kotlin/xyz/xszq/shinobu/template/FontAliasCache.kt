@@ -35,7 +35,8 @@ class FontAliasCache(
 
         val fontMgr = FontMgr.default
         val currentCount = fontMgr.familiesCount
-        if (currentCount != cache.familyCount) {
+        val needScan = currentCount != cache.familyCount
+        if (needScan) {
             scanSystemFonts(fontMgr, fontProvider)
         } else {
             registerFromCache(fontMgr, fontProvider)
