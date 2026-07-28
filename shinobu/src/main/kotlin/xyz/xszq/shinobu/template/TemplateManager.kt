@@ -26,8 +26,7 @@ class TemplateManager(val basePath: String) {
 
         FontAliasCache(File(basePath, cacheDir)).loadAndRegister(fontProvider)
 
-        val bmCacheDir = File(basePath, cacheDir).resolve("bitmap")
-        bitmapFontManager = BitmapFontManager(bmCacheDir, fontCollection)
+        bitmapFontManager = BitmapFontManager(fontCollection)
 
         globalResourceManager = ResourceManager(
             basePath = File(basePath),
@@ -68,5 +67,9 @@ class TemplateManager(val basePath: String) {
 
     fun registerCharset(id: String, chars: String) {
         bitmapFontManager.registerCharset(id, chars)
+    }
+
+    fun warmUpCharset(id: String, fontSizes: List<Float>, fontFamilies: List<String>) {
+        bitmapFontManager.warmUp(id, fontSizes, fontFamilies)
     }
 }

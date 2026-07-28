@@ -2,10 +2,8 @@ package xyz.xszq.shinobu.template
 
 import org.jetbrains.skia.*
 import org.jetbrains.skia.paragraph.*
-import java.io.File
 
 class BitmapFontManager(
-    private val cacheDir: File,
     private val fontCollection: FontCollection
 ) {
     data class GlyphEntry(val ch: String, val x: Int, val w: Int)
@@ -23,6 +21,12 @@ class BitmapFontManager(
         charsets[id] = chars.toSet().joinToString("")
     }
 
+    fun warmUp(charsetId: String, fontSizes: List<Float>, fontFamilies: List<String>) {
+        for (size in fontSizes) {
+            getAtlas(charsetId, size, fontFamilies)
+        }
+    }
+
     fun getAtlas(
         charsetId: String,
         fontSize: Float,
@@ -32,10 +36,8 @@ class BitmapFontManager(
         val key = buildKey(charsetId, fontSize, fontFamilies)
 
         atlases[key]?.let { return it }
-        loadFromDisk(key)?.let { atlases[key] = it; return it }
         val atlas = buildAtlas(charset, fontSize, fontFamilies)
         atlases[key] = atlas
-        saveToDisk(key, atlas)
         return atlas
     }
 
@@ -113,43 +115,5 @@ class BitmapFontManager(
     private fun buildKey(charsetId: String, fontSize: Float, fontFamilies: List<String>?): String {
         val fams = fontFamilies?.joinToString(",") ?: "default"
         return "$charsetId|${fontSize.toInt()}|$fams"
-    }
-
-    private fun loadFromDisk(key: String): AtlasCache? {
-        return runCatching {
-            val png = File(cacheDir, "$key.png")
-            val metaFile = File(cacheDir, "$key.json")
-            if (!png.exists() || !metaFile.exists()) return null
-            val lines = metaFile.readLines()
-            val height = lines[0].toInt()
-            val glyphs = mutableMapOf<Char, GlyphEntry>()
-            for (i in 1 until lines.size) {
-                val parts = lines[i].split(",")
-                if (parts.size >= 3) {
-                    val ch = parts[0].single()
-                    val x = parts[1].toInt()
-                    val w = parts[2].toInt()
-                    glyphs[ch] = GlyphEntry(parts[0], x, w)
-                }
-            }
-            val image = Image.makeFromEncoded(png.readBytes())
-            AtlasCache(image, glyphs, height)
-        }.getOrNull()
-    }
-
-    private fun saveToDisk(key: String, atlas: AtlasCache) {
-        runCatching {
-            cacheDir.mkdirs()
-            val encoded = atlas.image.encodeToData(EncodedImageFormat.PNG) ?: return
-            File(cacheDir, "$key.png").writeBytes(encoded.bytes)
-            File(cacheDir, "$key.json").writeText(
-                buildString {
-                    appendLine(atlas.height)
-                    atlas.glyphs.values.forEach { g ->
-                        appendLine("${g.ch},${g.x},${g.w}")
-                    }
-                }
-            )
-        }
     }
 }

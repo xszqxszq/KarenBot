@@ -52,10 +52,25 @@ class MaimaiImage(
 
         val chars = collectTemplateChars() + maimaiData.musics.values.flatMap { it.name.asIterable() }
         manager.registerCharset("maimai-data", chars.joinToString(""))
+        manager.warmUpCharset("maimai-data",
+            listOf(10f, 12f, 14f, 18f, 22f, 24f, 27f, 30f),
+            collectFontFamilies())
 
         scope.launch {
             generateThumb()
         }
+    }
+
+    private fun collectFontFamilies(): List<String> {
+        val cssDir = File(dataPath, "assets")
+        if (!cssDir.exists()) return emptyList()
+        val families = mutableListOf<String>()
+        cssDir.listFiles()?.filter { it.name.endsWith(".css") }?.forEach { file ->
+            Regex("@font-face\\s*\\{[^}]*font-family\\s*:\\s*'([^']+)'")
+                .findAll(file.readText())
+                .forEach { families.add(it.groupValues[1]) }
+        }
+        return families.distinct()
     }
 
     private fun collectTemplateChars(): Set<Char> {

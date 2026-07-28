@@ -164,7 +164,9 @@ class Span(
             else -> contentRect.left
         }
 
-        val paint = Paint().apply { color = style.textColor }
+        val paint = Paint().apply {
+            colorFilter = ColorFilter.makeBlend(style.textColor, BlendMode.SRC_IN)
+        }
         val h = atlas.height.toFloat()
         canvas.save()
         canvas.clipRect(contentRect)

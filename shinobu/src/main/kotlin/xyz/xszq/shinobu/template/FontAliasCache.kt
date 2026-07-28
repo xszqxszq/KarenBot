@@ -51,7 +51,10 @@ class FontAliasCache(
     }.getOrDefault(CacheData())
 
     private fun writeCache() = runCatching {
-        cacheFile.writeText(json.encodeToString(cache))
+        cacheDir.mkdirs()
+        val tmp = File(cacheDir, "alias-cache.json.tmp")
+        tmp.writeText(json.encodeToString(cache))
+        tmp.renameTo(cacheFile)
     }
 
     private fun scanSystemFonts(fontMgr: FontMgr, fontProvider: TypefaceFontProvider) {

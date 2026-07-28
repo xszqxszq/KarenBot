@@ -37,10 +37,25 @@ class ChunithmImage(
 
         val chars = collectTemplateChars() + chunithmData.musics.values.flatMap { it.name.asIterable() }
         manager.registerCharset("chunithm-data", chars.joinToString(""))
+        manager.warmUpCharset("chunithm-data",
+            listOf(10f, 12f, 14f, 18f, 22f, 24f, 27f, 30f),
+            collectFontFamilies())
 
         scope.launch {
             generateThumb()
         }
+    }
+
+    private fun collectFontFamilies(): List<String> {
+        val cssDir = File("./data/chunithm/assets")
+        if (!cssDir.exists()) return emptyList()
+        val families = mutableListOf<String>()
+        cssDir.listFiles()?.filter { it.name.endsWith(".css") }?.forEach { file ->
+            Regex("@font-face\\s*\\{[^}]*font-family\\s*:\\s*'([^']+)'")
+                .findAll(file.readText())
+                .forEach { families.add(it.groupValues[1]) }
+        }
+        return families.distinct()
     }
 
     private fun collectTemplateChars(): Set<Char> {
