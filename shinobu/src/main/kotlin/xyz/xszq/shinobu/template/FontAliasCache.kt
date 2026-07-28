@@ -9,6 +9,8 @@ import java.io.File
 class FontAliasCache(
     private val cacheDir: File
 ) {
+    /** 持有已注册 Typeface 的强引用，防止 GC 回收原生对象 */
+    private val heldTypefaces = mutableListOf<Typeface>()
     @Serializable
     data class FontEntry(
         val weight: Int,
@@ -77,6 +79,7 @@ class FontAliasCache(
                 val aliases = generateAliases(typeface, familyName, styleName)
 
                 if (aliases.isNotEmpty()) {
+                    heldTypefaces.add(typeface)
                     for (alias in aliases) {
                         fontProvider.registerTypeface(typeface, alias)
                     }
@@ -96,6 +99,7 @@ class FontAliasCache(
             val typeface = findSystemTypeface(fontMgr, familyName, styleName, entry.weight)
                 ?: continue
 
+            heldTypefaces.add(typeface)
             for (alias in entry.aliases) {
                 fontProvider.registerTypeface(typeface, alias)
             }

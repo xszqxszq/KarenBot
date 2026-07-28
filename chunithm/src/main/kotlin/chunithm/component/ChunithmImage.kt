@@ -12,7 +12,6 @@ import xyz.xszq.bot.chunithm.music.ChartInfo
 import xyz.xszq.bot.chunithm.music.MusicDifficulty
 import xyz.xszq.shinobu.parse.StyleParser.rgbColor
 import xyz.xszq.shinobu.template.TemplateManager
-import java.io.File
 
 class ChunithmImage(
     val chunithmData: ChunithmData,
@@ -26,7 +25,7 @@ class ChunithmImage(
     fun init() {
         manager = TemplateManager("./data/chunithm/")
 
-        rating = RatingTemplate(manager, resourcePath)
+        rating = RatingTemplate(manager, resourcePath, chunithmData.newestVersion)
         level = LevelTemplate(manager, resourcePath)
     }
     /**
@@ -34,40 +33,9 @@ class ChunithmImage(
      */
     fun load(scope: CoroutineScope) {
         manager.init()
-
-        val chars = collectTemplateChars() + chunithmData.musics.values.flatMap { it.name.asIterable() }
-        manager.registerCharset("chunithm-data", chars.joinToString(""))
-        manager.warmUpCharset("chunithm-data",
-            listOf(10f, 12f, 14f, 18f, 22f, 24f, 27f, 30f),
-            collectFontFamilies())
-
         scope.launch {
             generateThumb()
         }
-    }
-
-    private fun collectFontFamilies(): List<String> {
-        val cssDir = File("./data/chunithm/assets")
-        if (!cssDir.exists()) return emptyList()
-        val families = mutableListOf<String>()
-        cssDir.listFiles()?.filter { it.name.endsWith(".css") }?.forEach { file ->
-            Regex("@font-face\\s*\\{[^}]*font-family\\s*:\\s*'([^']+)'")
-                .findAll(file.readText())
-                .forEach { families.add(it.groupValues[1]) }
-        }
-        return families.distinct()
-    }
-
-    private fun collectTemplateChars(): Set<Char> {
-        val base = "0123456789.#%→+-".toSet()
-        val dir = File("./data/chunithm/templates")
-        if (!dir.exists()) return base
-        return base + dir.walkTopDown()
-            .filter { it.name == "template.html" }
-            .flatMap { file ->
-                Regex(">([^<]+)<").findAll(file.readText())
-                    .flatMap { it.groupValues[1].trim().asIterable() }
-            }.toSet()
     }
 
     private suspend fun generateThumb() = coroutineScope {

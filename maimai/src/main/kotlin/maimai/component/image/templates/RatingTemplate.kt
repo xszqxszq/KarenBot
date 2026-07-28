@@ -236,7 +236,6 @@ class RatingTemplate(
                 header(params)
                 text("name-title") {
                     text = params.title
-                    style.fontCharset = "maimai-data"
                 }
             }
 
@@ -316,23 +315,18 @@ class RatingTemplate(
         }
         text("index-id") {
             text = "#${index + 1} ${record.music.id}"
-            style.fontCharset = "maimai-data"
         }
         text("title") {
             text = record.music.name
-            style.fontCharset = "maimai-data"
         }
         text("achievement-integer") {
             text = "${record.achievement / 10000}"
-            style.fontCharset = "maimai-data"
         }
         text("achievement-decimal") {
             text = "." + (record.achievement % 10000).toString().padStart(4, '0')
-            style.fontCharset = "maimai-data"
         }
         text("achievement-percent") {
             text = "%"
-            style.fontCharset = "maimai-data"
         }
         text("level-rating") {
             val levelValue = if (params.filter ?.isFitLevelValue == true)
@@ -340,7 +334,6 @@ class RatingTemplate(
             else
                 record.chart.levelValue.toStringDecimal(1)
             text = "$levelValue→${record.rating}"
-            style.fontCharset = "maimai-data"
             style.textColor = when (record.chart.difficulty) {
                 MusicDifficulty.Basic -> "#45c124".rgbColor()
                 MusicDifficulty.Advanced -> "#f8b709".rgbColor()

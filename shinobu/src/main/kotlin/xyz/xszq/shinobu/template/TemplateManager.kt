@@ -14,7 +14,6 @@ class TemplateManager(val basePath: String) {
 
     lateinit var globalResourceManager: ResourceManager
     lateinit var fontCollection: FontCollection
-    lateinit var bitmapFontManager: BitmapFontManager
 
     fun init(cacheDir: String = "../.fonts/") {
         val fontProvider = TypefaceFontProvider()
@@ -26,14 +25,11 @@ class TemplateManager(val basePath: String) {
 
         FontAliasCache(File(basePath, cacheDir)).loadAndRegister(fontProvider)
 
-        bitmapFontManager = BitmapFontManager(fontCollection)
-
         globalResourceManager = ResourceManager(
             basePath = File(basePath),
             parent = null,
             preloadLocal = false,
-            fontCollection = fontCollection,
-            bitmapFontManager = bitmapFontManager
+            fontCollection = fontCollection
         )
 
         var templates: File? = File(basePath, "templates")
@@ -51,8 +47,7 @@ class TemplateManager(val basePath: String) {
                     basePath = folder,
                     parent = globalResourceManager,
                     preloadLocal = true,
-                    fontCollection = fontCollection,
-                    bitmapFontManager = bitmapFontManager
+                    fontCollection = fontCollection
                 )
 
                 loadedTemplates[templateName] = RawData(topLevelElements, localRM)
@@ -63,13 +58,5 @@ class TemplateManager(val basePath: String) {
     operator fun get(name: String): Template? {
         val data = loadedTemplates[name] ?: return null
         return Template(data.elements, data.localRM)
-    }
-
-    fun registerCharset(id: String, chars: String) {
-        bitmapFontManager.registerCharset(id, chars)
-    }
-
-    fun warmUpCharset(id: String, fontSizes: List<Float>, fontFamilies: List<String>) {
-        bitmapFontManager.warmUp(id, fontSizes, fontFamilies)
     }
 }
