@@ -49,6 +49,7 @@ class FiveThousandChoyen {
         drawString(top, x + 4, y + 4, font, p)
 
         p.color = Color.BLACK
+        p.shader?.close()
         p.shader = Shader.makeLinearGradient(0f, 24f, 0f, 122f,
             intArrayOf(
                 Color.makeRGB(0, 15, 36), Color.makeRGB(255, 255, 255),
@@ -68,6 +69,7 @@ class FiveThousandChoyen {
         p.mode = PaintMode.STROKE
         drawString(top, x, y, font, p)
 
+        p.shader?.close()
         p.shader = Shader.makeLinearGradient(0f, 20f, 0f, 100f,
             intArrayOf(
                 Color.makeRGB(253, 241, 0), Color.makeRGB(245, 253, 187),
@@ -90,6 +92,7 @@ class FiveThousandChoyen {
         p.mode = PaintMode.STROKE
         drawString(top, x, y - 3, font, p)
 
+        p.shader?.close()
         p.shader = Shader.makeLinearGradient(0f, 20f, 0f, 100f,
             intArrayOf(
                 Color.makeRGB(255, 100, 0), Color.makeRGB(123, 0, 0),
@@ -101,6 +104,7 @@ class FiveThousandChoyen {
         p.mode = PaintMode.STROKE
         drawString(top, x, y - 3, font, p)
 
+        p.shader?.close()
         p.shader = Shader.makeLinearGradient(0f, 20f, 0f, 100f,
             intArrayOf(
                 Color.makeRGB(230, 0, 0), Color.makeRGB(123, 0, 0),
@@ -138,6 +142,7 @@ class FiveThousandChoyen {
         p.shader = null
         drawString(bottom, x + 5, y + 2, font, p)
 
+        p.shader?.close()
         p.shader = Shader.makeLinearGradient(0f, y - 80, 0f, y + 18,
             intArrayOf(
                 Color.makeRGB(0, 15, 36), Color.makeRGB(250, 250, 250),
@@ -162,6 +167,7 @@ class FiveThousandChoyen {
         p.mode = PaintMode.STROKE
         drawString(bottom, x, y, font, p)
 
+        p.shader?.close()
         p.shader = Shader.makeLinearGradient(0f, y - 80, 0f, y,
             intArrayOf(
                 Color.makeRGB(16, 25, 58), Color.makeRGB(255, 255, 255),
@@ -174,6 +180,7 @@ class FiveThousandChoyen {
         p.mode = PaintMode.STROKE
         drawString(bottom, x, y, font, p)
 
+        p.shader?.close()
         p.shader = Shader.makeLinearGradient(0f, y - 80, 0f, y,
             intArrayOf(
                 Color.makeRGB(245, 246, 248), Color.makeRGB(255, 255, 255),

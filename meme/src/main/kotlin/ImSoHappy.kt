@@ -45,11 +45,11 @@ class ImSoHappy {
     ) {
         val (a, b) = flip(input.readSkikoImage())
         useTempFile { first ->
-            first.writeBytes(a.toSkiaImage().encodePNG())
+            a.toSkiaImage().use { img -> first.writeBytes(img.encodePNG()) }
             event.reply(Image(first))
         }
         useTempFile { second ->
-            second.writeBytes(b.toSkiaImage().encodePNG())
+            b.toSkiaImage().use { img -> second.writeBytes(img.encodePNG()) }
             event.reply(Image(second))
         }
     }

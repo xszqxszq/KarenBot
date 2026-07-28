@@ -306,7 +306,7 @@ class Meme: Plugin() {
             return
         }
         text ?: throw ArgsNotEnoughException("请在点击图片编号后输入文本！\n使用方法：/pjsk 角色名+编号 要生成的文本")
-        sekai.draw(config, text).encodePNG().send(this)
+        sekai.draw(config, text).use { it.encodePNG().send(this) }
     }
     private suspend fun MessageEvent.ba(
         raw: String
@@ -321,12 +321,12 @@ class Meme: Plugin() {
                 args = raw.trim().split("\n", limit = 2)
                 val textL = args[0].trim()
                 val textR = args.getOrNull(1)?.trim() ?: throw ArgsNotEnoughException()
-                ba.draw(textL, textR).encodePNG().send(this)
+                ba.draw(textL, textR).use { it.encodePNG().send(this) }
             }
             args.size == 2 -> {
                 val textL = args[0].trim()
                 val textR = args[1].trim()
-                ba.draw(textL, textR).encodePNG().send(this)
+                ba.draw(textL, textR).use { it.encodePNG().send(this) }
             }
             else -> {
                 throw ArgsNotEnoughException()
@@ -344,12 +344,12 @@ class Meme: Plugin() {
                 }
                 val top = args.getOrNull(0)?.trim() ?: throw ArgsNotEnoughException()
                 val bottom = args.getOrNull(1)?.trim()
-                fiveThousand.draw(top, bottom).encodePNG().send(this)
+                fiveThousand.draw(top, bottom).use { it.encodePNG().send(this) }
             }
             args.isNotEmpty() -> {
                 val top = args[0].trim()
                 val bottom = args.getOrNull(1)?.trim()
-                fiveThousand.draw(top, bottom).encodePNG().send(this)
+                fiveThousand.draw(top, bottom).use { it.encodePNG().send(this) }
             }
             else -> {
                 if (message.text.trim() == "/5k")
@@ -509,10 +509,11 @@ class Meme: Plugin() {
         height: Double = 50.0
     ): Int = withContext(Dispatchers.IO) {
         runCatching {
-            val image = SkiaImage.makeFromEncoded(File(sekai.imgDir, path).readBytes())
-            (image.width * height / image.height)
-                .toInt()
-                .coerceAtLeast(1)
+            SkiaImage.makeFromEncoded(File(sekai.imgDir, path).readBytes()).use { image ->
+                (image.width * height / image.height)
+                    .toInt()
+                    .coerceAtLeast(1)
+            }
         }.getOrDefault(height.toInt())
     }
 

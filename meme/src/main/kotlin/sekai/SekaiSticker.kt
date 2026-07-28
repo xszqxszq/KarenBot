@@ -27,37 +27,42 @@ class SekaiSticker {
         character: SekaiCharacter,
         text: String,
     ): Image {
-        val sticker = Surface.makeRasterN32Premul(296, 256)
         val template = Image.makeFromEncoded(File(imgDir, character.img).readBytes())
-        val ratio = min(296f / template.width, 256f / template.height)
-        val width = template.width * ratio
-        val height = template.height * ratio
-        val x = (296f - width) / 2f
-        val y = (256f - height) / 2f
-
-        sticker.canvas.drawImageRect(
-            template,
-            Rect.makeWH(template.width.toFloat(), template.height.toFloat()),
-            Rect.makeXYWH(x, y, width, height)
-        )
-
         val rendered = drawText(character, text)
-        val angle = character.defaultText.r / 10f * 57.29578f
+        val result = Surface.makeRasterN32Premul(296, 256).use { sticker ->
+            val ratio = min(296f / template.width, 256f / template.height)
+            val width = template.width * ratio
+            val height = template.height * ratio
+            val x = (296f - width) / 2f
+            val y = (256f - height) / 2f
 
-        sticker.canvas.save()
-        sticker.canvas.translate(character.defaultText.x.toFloat(), character.defaultText.y.toFloat())
-        sticker.canvas.rotate(angle)
-        val (textX, textY) = calcTextPosition(
-            rendered = rendered,
-            anchorX = character.defaultText.x.toFloat(),
-            anchorY = character.defaultText.y.toFloat(),
-            angle = angle
-        )
-        rendered.stroke.paint(sticker.canvas, textX, textY)
-        rendered.fill.paint(sticker.canvas, textX, textY)
-        sticker.canvas.restore()
+            sticker.canvas.drawImageRect(
+                template,
+                Rect.makeWH(template.width.toFloat(), template.height.toFloat()),
+                Rect.makeXYWH(x, y, width, height)
+            )
 
-        return sticker.makeImageSnapshot()
+            val angle = character.defaultText.r / 10f * 57.29578f
+
+            sticker.canvas.save()
+            sticker.canvas.translate(character.defaultText.x.toFloat(), character.defaultText.y.toFloat())
+            sticker.canvas.rotate(angle)
+            val (textX, textY) = calcTextPosition(
+                rendered = rendered,
+                anchorX = character.defaultText.x.toFloat(),
+                anchorY = character.defaultText.y.toFloat(),
+                angle = angle
+            )
+            rendered.stroke.paint(sticker.canvas, textX, textY)
+            rendered.fill.paint(sticker.canvas, textX, textY)
+            sticker.canvas.restore()
+
+            sticker.makeImageSnapshot()
+        }
+        rendered.stroke.close()
+        rendered.fill.close()
+        template.close()
+        return result
     }
 
     private fun drawText(
@@ -75,6 +80,8 @@ class SekaiSticker {
                 val totalHeight = fill.lineMetrics.sumOf { it.height }.toFloat().takeIf { it > 0f } ?: fill.height
                 return RenderedText(stroke, fill, firstLineHeight, totalHeight)
             }
+            stroke.close()
+            fill.close()
             size = (size * 0.92f).coerceAtLeast(16f)
         }
 
@@ -109,10 +116,11 @@ class SekaiSticker {
             }
         }
 
-        val builder = ParagraphBuilder(style, fontCollection)
-        builder.pushStyle(textStyle)
-        builder.addText(text)
-        return builder.build().also { it.layout(220f) }
+        return ParagraphBuilder(style, fontCollection).use { builder ->
+            builder.pushStyle(textStyle)
+            builder.addText(text)
+            builder.build().also { it.layout(220f) }
+        }
     }
 
     private fun calcTextPosition(

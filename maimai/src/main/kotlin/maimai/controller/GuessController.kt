@@ -540,23 +540,23 @@ class GuessController(
         "${if (song.charts.size == 4) "没有" else "有"}白谱"
     )
     private suspend fun VfsFile.randomSlice(size: Int = 66): ByteArray? = withContext(Dispatchers.IO) {
-        val image = org.jetbrains.skia.Image.makeFromEncoded(readBytes())
+        val bytes = org.jetbrains.skia.Image.makeFromEncoded(readBytes()).use { image ->
+            val maxX = (image.width - size).coerceAtLeast(0)
+            val maxY = (image.height - size).coerceAtLeast(0)
 
-        val maxX = (image.width - size).coerceAtLeast(0)
-        val maxY = (image.height - size).coerceAtLeast(0)
+            val x = if (maxX > 0) (0..maxX).random(Random(System.currentTimeMillis())) else 0
+            val y = if (maxY > 0) (0..maxY).random(Random(System.currentTimeMillis())) else 0
 
-        val x = if (maxX > 0) (0..maxX).random(Random(System.currentTimeMillis())) else 0
-        val y = if (maxY > 0) (0..maxY).random(Random(System.currentTimeMillis())) else 0
-
-        val surface = Surface.makeRasterN32Premul(size, size)
-
-        val srcRect = Rect.makeXYWH(x.toFloat(), y.toFloat(), size.toFloat(), size.toFloat())
-        val dstRect = Rect.makeXYWH(0f, 0f, size.toFloat(), size.toFloat())
-
-        surface.canvas.drawImageRect(image, srcRect, dstRect)
-
-        val croppedImage = surface.makeImageSnapshot()
-        croppedImage.encodeToData(EncodedImageFormat.JPEG, 90) ?.bytes
+            Surface.makeRasterN32Premul(size, size).use { surface ->
+                val srcRect = Rect.makeXYWH(x.toFloat(), y.toFloat(), size.toFloat(), size.toFloat())
+                val dstRect = Rect.makeXYWH(0f, 0f, size.toFloat(), size.toFloat())
+                surface.canvas.drawImageRect(image, srcRect, dstRect)
+                surface.makeImageSnapshot().use { croppedImage ->
+                    croppedImage.encodeToData(EncodedImageFormat.JPEG, 90)?.bytes
+                }
+            }
+        }
+        bytes
     }
     private val MessageEvent.contextId
         get() = when(this) {

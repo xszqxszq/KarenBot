@@ -212,7 +212,8 @@ class ImageController(
     ) = event.run {
         this@sendResultImage ?: return@run
         if (textMode()) {
-            send(this, text)
+            this@sendResultImage.send(event, text)
+            this@sendResultImage.close()
             return
         }
         upload(event) { url ->

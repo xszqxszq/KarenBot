@@ -71,6 +71,7 @@ object LayoutEngine {
         when (element) {
             is Span -> {
                 if (element.text.isNotEmpty() && element.fontCollection != null) {
+                    @Suppress("UNUSED_VALUE")
                     fun buildPara(fontSize: Float): Paragraph {
                         val textStyle = TextStyle().apply {
                             this.fontSize = fontSize
@@ -99,6 +100,9 @@ object LayoutEngine {
                             builder.pushStyle(textStyle)
                             builder.addText(element.text)
                             builder.build()
+                        }.also {
+                            textStyle.close()
+                            paragraphStyle.close()
                         }
                     }
 
