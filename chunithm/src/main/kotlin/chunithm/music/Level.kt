@@ -3,6 +3,7 @@ package xyz.xszq.bot.chunithm.music
 import kotlin.math.max
 import kotlin.math.roundToInt
 
+@Suppress("unused")
 object Level {
     var levelRange = 1..15
     var plusRange = 7..15

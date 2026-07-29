@@ -4,6 +4,7 @@ import xyz.xszq.bot.maimai.music.*
 import kotlin.random.Random
 
 @ComboQueryDsl
+@Suppress("unused")
 class ComboQueryBuilder {
     val entries = mutableListOf<Pair<List<String>, Filter>>()
     val regexes = mutableListOf<Pair<String, (String) -> Filter>>()

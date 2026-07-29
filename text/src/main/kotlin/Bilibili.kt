@@ -11,6 +11,7 @@ import kotlinx.serialization.json.Json
 import xyz.xszq.bot.payload.BilibiliHtmlResponse
 import xyz.xszq.bot.payload.BilibiliVideoInfo
 
+@Suppress("unused")
 object Bilibili {
     const val UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36"
     const val MARK_AVAILABLE = "<script>window.__playinfo__="

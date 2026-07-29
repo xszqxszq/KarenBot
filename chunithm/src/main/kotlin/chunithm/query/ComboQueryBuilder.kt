@@ -3,6 +3,7 @@ package xyz.xszq.bot.chunithm.query
 import xyz.xszq.bot.chunithm.music.*
 
 @ComboQueryDsl
+@Suppress("unused")
 class ComboQueryBuilder {
     val entries = mutableListOf<Pair<List<String>, Filter>>()
     val regexes = mutableListOf<Pair<String, (String) -> Filter>>()

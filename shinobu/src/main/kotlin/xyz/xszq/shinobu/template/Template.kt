@@ -11,7 +11,7 @@ class Template(
     val resourceManager: ResourceManager
 ) {
     operator fun get(id: String) = children[id] ?.clone()
-    suspend fun render(
+    fun render(
         element: Element
     ): Image {
         element.resolveResources(resourceManager)

@@ -59,7 +59,7 @@ class RadarTemplate(val basePath: String) {
         charts: List<ChartInfo>,
         size: Int = 500,
         transparent: Boolean = true
-    ): Image? {
+    ): Image {
         val data = charts.mapNotNull { chart -> data[chart.music.id.toString()]?.get(chart.difficulty.value) }
         return generate(RadarValue(
             notes = data.sumOf { it.notes } / data.size,
