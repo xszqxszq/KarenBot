@@ -49,6 +49,8 @@ class Touhou(
             val duration = file.duration() ?: run {
                 return@startsWith
             }
+            if (duration <= RANDOM_DURATION)
+                return@startsWith
             file.crop(
                 Random(System.currentTimeMillis()).nextDouble(0.0, duration - RANDOM_DURATION),
                 RANDOM_DURATION
@@ -122,8 +124,12 @@ class Touhou(
             started.remove(id)
             return
         }
-        val slice = difficulty.duration()
-        musicFile.crop(
+            val slice = difficulty.duration()
+            if (duration <= slice) {
+                started.remove(id)
+                return
+            }
+            musicFile.crop(
             Random(System.currentTimeMillis()).nextDouble(0.0, duration - slice),
             slice
         ) { cropped ->
