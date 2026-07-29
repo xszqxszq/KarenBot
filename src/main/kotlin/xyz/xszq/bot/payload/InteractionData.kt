@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class InteractionData(
     val resolved: InteractionResolved,
-    val type: Int
+    val type: Int = 0
 )

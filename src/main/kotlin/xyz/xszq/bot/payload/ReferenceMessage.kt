@@ -13,7 +13,7 @@ data class ReferenceMessage(
     val author: MessageAuthor ?= null,
     @SerialName("message_type")
     val messageType: Int ?= null,
-    val content: String,
+    val content: String = "",
     val attachments: List<Attachment> = listOf(),
 ) {
     fun toMessageChain(): MessageChain {
