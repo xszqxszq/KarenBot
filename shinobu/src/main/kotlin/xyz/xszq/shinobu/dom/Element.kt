@@ -1,9 +1,5 @@
 package xyz.xszq.shinobu.dom
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import org.jetbrains.skia.Canvas
 import org.jetbrains.skia.Picture
 import org.jetbrains.skia.PictureRecorder
@@ -93,16 +89,10 @@ sealed class Element(
         this.children.forEach { it.resolveResources(rm) }
     }
 
-    suspend fun prepareRenderTree(): Unit = coroutineScope {
-        if (children.isNotEmpty()) {
-            val deferredChildren = children.map { child ->
-                async(Dispatchers.Default) {
-                    child.prepareRenderTree()
-                }
-            }
-            deferredChildren.awaitAll()
+    fun prepareRenderTree() {
+        children.forEach { child ->
+            child.prepareRenderTree()
         }
-
         recordPicture()
     }
 
@@ -115,7 +105,7 @@ sealed class Element(
         }
     }
 
-    protected abstract fun draw(canvas: Canvas)
+    abstract fun draw(canvas: Canvas)
 
     abstract fun clone(): Element
 

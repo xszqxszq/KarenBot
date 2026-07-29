@@ -12,9 +12,25 @@ class Span(
 ) : Element(id) {
     var fontCollection: FontCollection ?= null
     var computedFontSize: Float ?= null
+    internal var measuredParagraph: Paragraph? = null
     override fun draw(canvas: Canvas) {
         if (text.isEmpty() || fontCollection == null)
             return
+
+        if (measuredParagraph != null && style.textStroke == null && style.textShadow == null) {
+            val para = measuredParagraph!!
+            val metrics = para.lineMetrics.firstOrNull()
+            val yOffset = if (metrics != null) {
+                if (para.lineMetrics.size > 1) (contentRect.height - para.height) / 2f
+                else (contentRect.height / 2f) - (metrics.baseline.toFloat() + (metrics.descent.toFloat() - metrics.ascent.toFloat()) / 2f)
+            } else 0f
+
+            canvas.save()
+            canvas.clipRect(contentRect)
+            para.paint(canvas, contentRect.left, contentRect.top + yOffset)
+            canvas.restore()
+            return
+        }
 
         val paragraphStyle = ParagraphStyle().apply {
             if (style.whiteSpace == WhiteSpace.NOWRAP)
@@ -33,6 +49,7 @@ class Span(
                 style.fontFamilies ?.let {
                     fontFamilies = it.toTypedArray()
                 }
+                fontStyle = FontStyle(style.fontWeight, FontWidth.NORMAL, FontSlant.UPRIGHT)
 
                 styleConfig()
             }

@@ -74,6 +74,7 @@ object LayoutEngine {
                     @Suppress("UNUSED_VALUE")
                     fun buildPara(fontSize: Float): Paragraph {
                         val textStyle = TextStyle().apply {
+                            color = element.style.textColor
                             this.fontSize = fontSize
                             element.style.fontFamilies ?.let {
                                 fontFamilies = it.toTypedArray()
@@ -134,7 +135,8 @@ object LayoutEngine {
                     val linesCount = paragraph.lineMetrics.size.coerceAtLeast(1)
                     intrinsicContentW = minOf(paragraph.maxIntrinsicWidth, layoutWidth)
                     intrinsicContentH = minOf(paragraph.height, currentSize * 1.4f * linesCount)
-                    paragraph.close()
+                    element.measuredParagraph?.close()
+                    element.measuredParagraph = paragraph
                 }
             }
             is Img -> {

@@ -106,12 +106,16 @@ class Div(
         }
 
         children.forEach { child ->
+            canvas.save()
+            canvas.translate(child.layoutX, child.layoutY)
+
             child.renderPicture ?.let { childPic ->
-                canvas.save()
-                canvas.translate(child.layoutX, child.layoutY)
                 canvas.drawPicture(childPic)
-                canvas.restore()
+            } ?: run {
+                child.draw(canvas)
             }
+
+            canvas.restore()
         }
     }
 
