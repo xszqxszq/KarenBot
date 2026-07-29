@@ -47,3 +47,4 @@ todo.txt
 plugins/
 
 *.log
+.omo/
