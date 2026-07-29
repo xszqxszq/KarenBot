@@ -309,14 +309,19 @@ class MaimaiQuery(
         )
     }.sortedByDescending { it.rating }
 
+    private data class RatingSummary(val old: List<Record>, val new: List<Record>, val rating: Int)
+
+    private fun summarizeRating(scores: List<Record>): RatingSummary {
+        val old = scores.filter { !it.music.isNew }.take(35)
+        val new = scores.filter { it.music.isNew }.take(15)
+        return RatingSummary(old, new, old.sumOf { it.rating } + new.sumOf { it.rating })
+    }
+
     private fun maxScoreRecordsResponse(musics: List<MusicInfo>): RecordsResponse {
         val records = maxScoreRecords(musics)
-        val all = maxScoreRecords()
-        val old = all.filter { !it.music.isNew }.take(35)
-        val new = all.filter { it.music.isNew }.take(15)
-        val rating = old.sumOf { it.rating } + new.sumOf { it.rating }
+        val summary = summarizeRating(maxScoreRecords())
         return RecordsResponse(
-            player = PlayerInfo("理论值", rating, 23),
+            player = PlayerInfo("理论值", summary.rating, 23),
             records = records
         )
     }
@@ -337,14 +342,11 @@ class MaimaiQuery(
         }
 
     private fun maxScoreRating(): RatingResponse {
-        val scores = maxScoreRecords()
-        val old = scores.filter { !it.music.isNew }.take(35)
-        val new = scores.filter { it.music.isNew }.take(15)
-        val rating = old.sumOf { it.rating } + new.sumOf { it.rating }
+        val summary = summarizeRating(maxScoreRecords())
         return RatingResponse(
-            player = PlayerInfo("理论值", rating, 23),
-            oldRatingList = old,
-            newRatingList = new,
+            player = PlayerInfo("理论值", summary.rating, 23),
+            oldRatingList = summary.old,
+            newRatingList = summary.new,
         )
     }
 }
