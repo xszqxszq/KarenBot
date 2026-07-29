@@ -44,7 +44,7 @@ class MusicInfo(
         appendLine("版本：${version.name}${if (isNew) " (计入b15)" else ""}")
         appendLine("BPM：${bpm}")
         appendLine("定数：${charts.joinToString("/") { it.levelValue.toString() }}")
-        appendLine("拟合定数：${charts.joinToString("/") { 
+        appendLine("拟合定数：${charts.joinToString("/") {
             val value = it.fitLevelValue.toStringDecimal(1)
             if (value == "0.0") "-" else value
         }}")

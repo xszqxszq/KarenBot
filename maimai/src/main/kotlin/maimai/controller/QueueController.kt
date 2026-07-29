@@ -280,7 +280,7 @@ class QueueController(
         appendLine("修改机厅：@可怜BOT 排卡管理 添加机厅/删除机厅 机厅名称")
         appendLine("机厅别名：@可怜BOT 排卡管理 查看别名/添加别名/删除别名 机厅名称 (别名)")
     }.trim().newLine()
-    
+
     private fun queue(
         title: String,
         body: String,

@@ -497,7 +497,7 @@ class Meme: Plugin() {
                 append("[#${id}](mqqapi://aio/inlinecmd?command=${command}&enter=false&reply=false)")
             }
         }.chunked(4)
-        
+
         reply(Markdown(MarkdownData(buildString {
             appendLine("请点击要选择的图片编号并输入文本：")
             buildTable(rows, 4)
