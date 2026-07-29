@@ -56,8 +56,12 @@ class LXNS(
     override suspend fun load() {
     }
 
-    suspend fun getMusicList(): Map<Int, MusicInfo> {
-        val data = client.get("$apiServer/song/list?notes=true").body<LXNSSongs>()
+    suspend fun fetchSongs(): LXNSSongs = client.get("$apiServer/song/list?notes=true").body()
+
+    suspend fun fetchTrophies(): LXNSTrophyList = client.get("$apiServer/trophy/list").body()
+
+    suspend fun getMusicList(cached: LXNSSongs? = null): Map<Int, MusicInfo> {
+        val data = cached ?: client.get("$apiServer/song/list?notes=true").body<LXNSSongs>()
         val newest = data.versions.sortedByDescending { it.version }.map { it.version }.take(2)
         val versions = data.versions.associate { version ->
             version.version to GameVersion(
@@ -115,11 +119,13 @@ class LXNS(
             alias.songId to alias.aliases.toSet()
         }
 
-    suspend fun getTrophyList(): Map<Int, LXNSTrophyInfo> = client.get("$apiServer/trophy/list")
-        .body<LXNSTrophyList>()
-        .trophies
-        .filter { it.color == "image" && it.required != null }
-        .associateBy { it.id }
+    suspend fun getTrophyList(cached: LXNSTrophyList? = null): Map<Int, LXNSTrophyInfo> {
+        val data = cached ?: client.get("$apiServer/trophy/list")
+            .body<LXNSTrophyList>()
+        return data.trophies
+            .filter { it.color == "image" && it.required != null }
+            .associateBy { it.id }
+    }
 
     override suspend fun getPlayerRating(
         user: UserQueryParams
