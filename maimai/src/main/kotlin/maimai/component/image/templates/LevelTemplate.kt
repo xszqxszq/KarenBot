@@ -22,7 +22,7 @@ class LevelTemplate(
      * @param title 完成表标题
      * @param filterParams 条件过滤参数
      */
-    suspend fun level(
+    fun level(
         charts: List<ChartInfo>,
         records: List<Record>? = null,
         title: String,
@@ -71,7 +71,7 @@ class LevelTemplate(
      * 生成模板
      * @param params 渲染参数
      */
-    private suspend fun template(
+    private fun template(
         params: LevelRenderParams
     ): Image {
         val template = manager["level"]!!

@@ -33,7 +33,7 @@ class RatingTemplate(
      * @param info 查询信息
      * @param backend 数据源名称
      */
-    suspend fun bests(
+    fun bests(
         info: RatingResponse,
         backend: String
     ): Image {
@@ -74,7 +74,7 @@ class RatingTemplate(
      * @param filterParams 条件过滤参数
      * @param api 数据源名称
      */
-    suspend fun comboBests(
+    fun comboBests(
         player: PlayerInfo,
         settings: PlayerSettings?= null,
         allRecords: List<Record>,
@@ -135,7 +135,7 @@ class RatingTemplate(
      * @param filterParams 条件过滤参数
      * @param page 查询页数
      */
-    suspend fun scoreList(
+    fun scoreList(
         player: PlayerInfo,
         settings: PlayerSettings?= null,
         allRecords: List<Record>,

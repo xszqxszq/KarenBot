@@ -20,7 +20,7 @@ class LevelTemplate(
      * @param title 完成表标题
      * @param filterParams 条件过滤参数
      */
-    suspend fun level(
+    fun level(
         charts: List<ChartInfo>,
         records: List<Record> ?= null,
         title: String,
