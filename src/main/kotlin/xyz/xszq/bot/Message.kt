@@ -1,3 +1,4 @@
+@file:Suppress("unused")
 package xyz.xszq.bot
 
 import korlibs.image.format.readNativeImage

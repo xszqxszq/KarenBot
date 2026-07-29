@@ -10,7 +10,8 @@ data class DivingFishMusicInfo(
     val type: String,
     val ds: List<Double>,
     val level: List<String>,
-    val cids: List<String>,
+    @SerialName("cids")
+    val cidList: List<String>,
     val charts: List<DivingFishMusicChart>,
     @SerialName("basic_info")
     val basicInfo: DivingFishMusicBasicInfo

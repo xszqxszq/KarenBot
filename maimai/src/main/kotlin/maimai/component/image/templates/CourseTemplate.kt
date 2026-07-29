@@ -21,7 +21,7 @@ class CourseTemplate(
      * @param course 段位信息
      * @param scores 成绩信息
      */
-    suspend fun template(
+    fun template(
         course: LocalCourseInfo,
         scores: List<Pair<ChartInfo, Record?>>
     ): Image {

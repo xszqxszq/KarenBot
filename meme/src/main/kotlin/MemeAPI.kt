@@ -14,6 +14,7 @@ import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.payload.*
 import java.io.File
 
+@Suppress("unused")
 class MemeAPI(
     val server: String
 ) {

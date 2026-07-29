@@ -17,7 +17,7 @@ class UserMessageBuilder {
         parts.add(
             ContentPart(
                 type = "image_url",
-                image_url = ImageUrl(url = url, detail = detail)
+                imageUrl = ImageUrl(url = url, detail = detail)
             )
         )
     }

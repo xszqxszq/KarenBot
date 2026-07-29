@@ -181,7 +181,7 @@ class RatingTemplate(
      * 生成模板
      * @param params 渲染参数
      */
-    private suspend fun template(
+    private fun template(
         params: RatingRenderParams
     ): Image {
         val template = manager["rating"]!!

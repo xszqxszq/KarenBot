@@ -53,7 +53,7 @@ class LevelTemplate(
      * 生成模板
      * @param params 渲染参数
      */
-    private suspend fun template(
+    private fun template(
         params: LevelRenderParams
     ): Image {
         val template = manager["level"]!!

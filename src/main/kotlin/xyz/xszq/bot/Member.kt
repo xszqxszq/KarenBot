@@ -1,5 +1,6 @@
 package xyz.xszq.bot
 
+@Suppress("unused")
 class Member(
     bot: Bot,
     id: String,

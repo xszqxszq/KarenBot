@@ -17,7 +17,7 @@ class ScoreTemplate(
      * @param music 曲目信息
      * @param records 各难度成绩记录
      */
-    suspend fun template(
+    fun template(
         music: MusicInfo,
         records: List<Record>? = null
     ): Image {

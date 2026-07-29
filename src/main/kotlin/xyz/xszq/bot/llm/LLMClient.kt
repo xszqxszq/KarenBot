@@ -41,7 +41,7 @@ class LLMClient(
                     messages = builder.messages,
                     temperature = config.temperature,
                     thinking = builder.thinking,
-                    response_format = builder.responseFormat,
+                    responseFormat = builder.responseFormat,
                 )
             )
         }

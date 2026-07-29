@@ -26,8 +26,7 @@ object MessageContentSerializer : KSerializer<MessageContent> {
 
     override fun deserialize(decoder: Decoder): MessageContent {
         val jsonDecoder = decoder as JsonDecoder
-        val element = jsonDecoder.decodeJsonElement()
-        return when (element) {
+        return when (val element = jsonDecoder.decodeJsonElement()) {
             is JsonPrimitive -> MessageContentSingle(element.content)
             is JsonArray -> MessageContentMulti(
                 element.map { Json.decodeFromJsonElement<ContentPart>(it) }

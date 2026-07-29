@@ -38,8 +38,7 @@ class UpdateController(
                 return@startsWith
             }
             if (reference ?.any { it is RemoteImage } == true || message.any { it is Image }) {
-                val llmClient = bot.pluginLoader.llmClient
-                if (llmClient == null) return@startsWith
+                val llmClient = bot.pluginLoader.llmClient ?: return@startsWith
                 val images = (message.filterIsInstance<Image>().mapNotNull {
                     it.url.ifBlank { null }
                 }) + (reference ?.filterIsInstance<RemoteImage>() ?.let {

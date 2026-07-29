@@ -1,7 +1,7 @@
 package xyz.xszq.bot
 
 class WordFilter(
-    val words: List<String>
+    words: List<String>
 ) {
     private val regex = if (words.isNotEmpty()) {
         val pattern = words.filter {

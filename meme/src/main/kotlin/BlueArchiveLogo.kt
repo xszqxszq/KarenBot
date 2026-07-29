@@ -87,14 +87,14 @@ class BlueArchiveLogo {
 
         val graphX = canvasWidthL - CANVAS_HEIGHT / 2f + GRAPH_OFFSET_X
         val graphY = GRAPH_OFFSET_Y
-        val verts = floatArrayOf(
+        val vertexes = floatArrayOf(
             graphX + (HOLLOW_PATH[0].first / 500f) * CANVAS_HEIGHT, graphY + (HOLLOW_PATH[0].second / 500f) * CANVAS_HEIGHT,
             graphX + (HOLLOW_PATH[1].first / 500f) * CANVAS_HEIGHT, graphY + (HOLLOW_PATH[1].second / 500f) * CANVAS_HEIGHT,
             graphX + (HOLLOW_PATH[2].first / 500f) * CANVAS_HEIGHT, graphY + (HOLLOW_PATH[2].second / 500f) * CANVAS_HEIGHT,
             graphX + (HOLLOW_PATH[3].first / 500f) * CANVAS_HEIGHT, graphY + (HOLLOW_PATH[3].second / 500f) * CANVAS_HEIGHT
         )
         Paint().apply { color = Color.WHITE }.use { hollowFill ->
-            canvas.drawVertices(VertexMode.TRIANGLE_STRIP, verts, null, null, null, BlendMode.SRC_OVER, hollowFill)
+            canvas.drawVertices(VertexMode.TRIANGLE_STRIP, vertexes, null, null, null, BlendMode.SRC_OVER, hollowFill)
         }
 
         canvas.drawImageRect(

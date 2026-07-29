@@ -293,9 +293,7 @@ sealed class Controller(
         when {
             text.isNotBlank() -> action(text.trim())
             reference != null || message.any { it is Image } -> {
-                val client = bot.pluginLoader.llmClient
-                if (client == null)
-                    return
+                val client = bot.pluginLoader.llmClient ?: return
                 val images = (message.filterIsInstance<Image>().mapNotNull {
                     it.url.ifBlank { null }
                 }) + (reference ?.filterIsInstance<RemoteImage>() ?.let {
