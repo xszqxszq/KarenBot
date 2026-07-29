@@ -81,7 +81,8 @@ class LXNS(
             is UserQueryParams.Username -> "$apiServer/player/${user.username}"
         }) {
             setDeveloper()
-        }.body<LXNSResponse<LXNSPlayer>>()
+        }
+        .body<LXNSResponse<LXNSPlayer>>()
         when (response.code) {
             401 -> throw AuthorizationException(response.message)
             404 -> throw UserNotFoundException(response.message)
@@ -268,7 +269,8 @@ class LXNS(
                 code = code,
                 redirectUri = oauthCallback
             ))
-        }.body<LXNSResponse<LXNSOATokenResponse>>()
+        }
+        .body<LXNSResponse<LXNSOATokenResponse>>()
         response.data ?: return false
         MaimaiSettingsTable[event.sender.id, "lxns-oa-refresh"] = response.data.refreshToken
         return true
@@ -286,9 +288,25 @@ class LXNS(
                 grantType = "refresh_token",
                 refreshToken = refresh
             ))
-        }.body<LXNSResponse<LXNSOATokenResponse>>()
+        }
+        .body<LXNSResponse<LXNSOATokenResponse>>()
         response.data ?: return null
         MaimaiSettingsTable[event.sender.id, "lxns-oa-refresh"] = response.data.refreshToken
         return response.data.accessToken
     }
+    suspend fun refresh(token: String): String? {
+        val response = runCatching {
+            client.post("$apiOauth/token") {
+                contentType(ContentType.Application.Json)
+                setBody(LXNSOAToken(
+                    clientId = oauthId,
+                    clientSecret = oauthSecret,
+                    grantType = "refresh_token",
+                    refreshToken = token
+                ))
+            }.body<LXNSOATokenResponse>()
+        }.getOrNull() ?: return null
+        return response.refreshToken
+    }
+    private fun now() = System.currentTimeMillis() / 1000
 }

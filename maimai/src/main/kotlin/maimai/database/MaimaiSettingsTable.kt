@@ -58,4 +58,9 @@ object MaimaiSettingsTable: Table() {
     ) {
         MaimaiSettingsTable[openId, "game-prior"] = game
     }
+
+    suspend fun idsForKey(key: String): List<String> = suspendedTransactionAsync {
+        selectAll().where { MaimaiSettingsTable.key eq key }
+            .map { it[MaimaiSettingsTable.id] }.distinct()
+    }.await()
 }

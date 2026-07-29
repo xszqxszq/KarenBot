@@ -220,8 +220,15 @@ class LXNS(
     suspend fun getPlayerInfo(
         user: UserQueryParams
     ): LXNSPlayer? {
+        val openId = user.event.sender.id
+        val cached = MaimaiSettingsTable[openId, "lxns-friend-code"]
         val response = client.get(when (user) {
-            is UserQueryParams.QQ -> "$apiServer/player/qq/${user.qq}"
+            is UserQueryParams.QQ -> {
+                if (cached != null)
+                    "$apiServer/player/$cached"
+                else
+                    "$apiServer/player/qq/${user.qq}"
+            }
             is UserQueryParams.Username -> "$apiServer/player/${user.username}"
         }) {
             setDeveloper()
@@ -230,7 +237,12 @@ class LXNS(
             401 -> throw AuthorizationException(response.message)
             404 -> throw UserNotFoundException(response.message)
             400 -> throw UserNotFoundException(response.message)
-            200 -> return response.data
+            200 -> {
+                val player = response.data ?: return null
+                if (player.friendCode != 0L)
+                    MaimaiSettingsTable[openId, "lxns-friend-code"] = player.friendCode.toString()
+                return player
+            }
             else -> throw UnknownException(response.message)
         }
     }
@@ -290,6 +302,11 @@ class LXNS(
         event: MessageEvent
     ): String? {
         // TODO: 不要在查分器端引入任何直接查表
+        val cached = MaimaiSettingsTable[event.sender.id, "lxns-oa-access"]
+        val expires = MaimaiSettingsTable[event.sender.id, "lxns-oa-expires"]?.toLongOrNull()
+        if (cached != null && expires != null && now() < expires - 300)
+            return cached
+
         val refresh = MaimaiSettingsTable[event.sender.id, "lxns-oa-refresh"] ?: return null
         val response = client.post("$apiOauth/token") {
             contentType(ContentType.Application.Json)
@@ -299,9 +316,11 @@ class LXNS(
                 grantType = "refresh_token",
                 refreshToken = refresh
             ))
-        }.body<LXNSResponse<LXNSOATokenResponse>>()
-        response.data ?: return null
-        MaimaiSettingsTable[event.sender.id, "lxns-oa-refresh"] = response.data.refreshToken
-        return response.data.accessToken
+        }.body<LXNSOATokenResponse>()
+        MaimaiSettingsTable[event.sender.id, "lxns-oa-refresh"] = response.refreshToken
+        MaimaiSettingsTable[event.sender.id, "lxns-oa-access"] = response.accessToken
+        MaimaiSettingsTable[event.sender.id, "lxns-oa-expires"] = (now() + response.expiresIn).toString()
+        return response.accessToken
     }
+    private fun now() = System.currentTimeMillis() / 1000
 }

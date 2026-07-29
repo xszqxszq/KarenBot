@@ -18,8 +18,10 @@ import xyz.xszq.bot.maimai.api.DivingFish
 import xyz.xszq.bot.maimai.api.LXNS
 import xyz.xszq.bot.maimai.component.WaitingEventData
 import xyz.xszq.bot.maimai.database.DivingFishBindTable
+import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.reply
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.random.Random
 
 class ApiController(
     val maimai: Maimai
@@ -135,6 +137,39 @@ class ApiController(
                     call.respondText("BOT正在更新中，您可以关闭此页面了。")
                     data.event.reply("正在爬取数据中……")
                 }
+            }
+            get("/_cron/refresh-lxns") {
+                val addr = call.request.local.remoteAddress
+                if (addr != "127.0.0.1" && addr != "0:0:0:0:0:0:0:1") {
+                    call.respondText("forbidden", status = HttpStatusCode.Forbidden)
+                    return@get
+                }
+                val force = call.request.queryParameters["force"] == "true"
+                val now = System.currentTimeMillis() / 1000
+                val lxns = maimai.backend("lxns") as LXNS
+                val ids = MaimaiSettingsTable.idsForKey("lxns-oa-refresh")
+                var ok = 0
+                var skip = 0
+                var fail = 0
+                for (id in ids) {
+                    if (!force) {
+                        val expires = MaimaiSettingsTable[id, "lxns-oa-expires"]?.toLongOrNull()
+                        if (expires != null && now < expires - 3600) {
+                            skip++
+                            continue
+                        }
+                    }
+                    val token = MaimaiSettingsTable[id, "lxns-oa-refresh"] ?: continue
+                    val newToken = runCatching { lxns.refresh(token) }.getOrNull()
+                    if (newToken != null) {
+                        MaimaiSettingsTable[id, "lxns-oa-refresh"] = newToken
+                        ok++
+                    } else {
+                        fail++
+                    }
+                    delay(Random.nextLong(1000, 30000))
+                }
+                call.respondText("ok=$ok skip=$skip fail=$fail")
             }
         }
     }.start(wait = false).also { server = it }
