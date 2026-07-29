@@ -18,8 +18,8 @@ class Template(
         LayoutEngine.performLayout(element)
         element.prepareRenderTree()
 
-        val w = element.measuredWidth.toInt()
-        val h = element.measuredHeight.toInt()
+        val w = element.measuredWidth.toInt().coerceAtMost(65500)
+        val h = element.measuredHeight.toInt().coerceAtMost(65500)
 
         return Surface.makeRasterN32Premul(w, h).use { surface ->
             element.renderPicture?.let { surface.canvas.drawPicture(it) }
