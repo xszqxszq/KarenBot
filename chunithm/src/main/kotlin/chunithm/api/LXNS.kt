@@ -9,6 +9,8 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
+import okhttp3.ConnectionPool
+import okhttp3.Protocol
 import xyz.xszq.bot.chunithm.component.ChunithmData
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
 import xyz.xszq.bot.chunithm.exception.AuthorizationException
@@ -20,12 +22,14 @@ import xyz.xszq.bot.chunithm.music.Level.levelClean
 import xyz.xszq.bot.chunithm.payload.*
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.toDBC
+import java.util.concurrent.TimeUnit
 
 class LXNS(
     val token: String,
     val oauthId: String,
     val oauthSecret: String,
-    val chunithmData: ChunithmData
+    val chunithmData: ChunithmData,
+    private val client: HttpClient = createClient()
 ) : ChunithmAPI {
     override val id = "lxns"
     override val name = "落雪"
@@ -38,19 +42,6 @@ class LXNS(
 
     private val json = Json {
         ignoreUnknownKeys = true
-    }
-    private val client = HttpClient(OkHttp) {
-        install(ContentNegotiation) {
-            json(json)
-        }
-        install(HttpRequestRetry) {
-            retryOnExceptionOrServerErrors(maxRetries = 5)
-        }
-        install(HttpTimeout) {
-            requestTimeoutMillis = 60_000
-            connectTimeoutMillis = 60_000
-            socketTimeoutMillis = 60_000
-        }
     }
 
     override suspend fun load() {
@@ -323,4 +314,33 @@ class LXNS(
         return response.accessToken
     }
     private fun now() = System.currentTimeMillis() / 1000
+
+    companion object {
+        fun createClient() = HttpClient(OkHttp) {
+            engine {
+                config {
+                    connectionPool(ConnectionPool(
+                        maxIdleConnections = 5,
+                        keepAliveDuration = 5,
+                        timeUnit = TimeUnit.MINUTES
+                    ))
+                    protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
+                    connectTimeout(30, TimeUnit.SECONDS)
+                    readTimeout(30, TimeUnit.SECONDS)
+                    writeTimeout(30, TimeUnit.SECONDS)
+                }
+            }
+            install(ContentNegotiation) {
+                json(Json { ignoreUnknownKeys = true })
+            }
+            install(HttpRequestRetry) {
+                retryOnExceptionOrServerErrors(maxRetries = 5)
+            }
+            install(HttpTimeout) {
+                requestTimeoutMillis = 60_000
+                connectTimeoutMillis = 60_000
+                socketTimeoutMillis = 60_000
+            }
+        }
+    }
 }

@@ -9,6 +9,8 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.*
+import okhttp3.ConnectionPool
+import okhttp3.Protocol
 import xyz.xszq.bot.chunithm.component.ChunithmData
 import xyz.xszq.bot.chunithm.exception.UnknownException
 import xyz.xszq.bot.chunithm.exception.UserDeniedException
@@ -18,10 +20,12 @@ import xyz.xszq.bot.chunithm.payload.DivingFishRatingResponse
 import xyz.xszq.bot.chunithm.payload.DivingFishRecord
 import xyz.xszq.bot.chunithm.payload.DivingFishRecordsResponse
 import xyz.xszq.bot.toDBC
+import java.util.concurrent.TimeUnit
 
 class DivingFish(
     val token: String,
-    val chunithmData: ChunithmData
+    val chunithmData: ChunithmData,
+    private val client: HttpClient = createClient()
 ): ChunithmAPI {
     override val id: String = "diving-fish"
     override val name: String = "水鱼"
@@ -32,22 +36,6 @@ class DivingFish(
 
     private val json = Json {
         ignoreUnknownKeys = true
-    }
-    private val client = HttpClient(OkHttp) {
-        install(ContentNegotiation) {
-            json(json)
-        }
-        install(HttpRequestRetry) {
-            retryOnExceptionOrServerErrors(maxRetries = 5)
-            retryOnExceptionIf { request, response ->
-                request.method == HttpMethod.Post
-            }
-        }
-        install(HttpTimeout) {
-            requestTimeoutMillis = 60_000
-            connectTimeoutMillis = 60_000
-            socketTimeoutMillis = 60_000
-        }
     }
 
     override suspend fun load() {
@@ -179,5 +167,37 @@ class DivingFish(
             comboStatus = ComboStatus.of(fc),
             rating = Rating.calc(chart, score)
         )
+    }
+
+    companion object {
+        fun createClient() = HttpClient(OkHttp) {
+            engine {
+                config {
+                    connectionPool(ConnectionPool(
+                        maxIdleConnections = 5,
+                        keepAliveDuration = 5,
+                        timeUnit = TimeUnit.MINUTES
+                    ))
+                    protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
+                    connectTimeout(30, TimeUnit.SECONDS)
+                    readTimeout(30, TimeUnit.SECONDS)
+                    writeTimeout(30, TimeUnit.SECONDS)
+                }
+            }
+            install(ContentNegotiation) {
+                json(Json { ignoreUnknownKeys = true })
+            }
+            install(HttpRequestRetry) {
+                retryOnExceptionOrServerErrors(maxRetries = 5)
+                retryOnExceptionIf { request, response ->
+                    request.method == HttpMethod.Post
+                }
+            }
+            install(HttpTimeout) {
+                requestTimeoutMillis = 60_000
+                connectTimeoutMillis = 60_000
+                socketTimeoutMillis = 60_000
+            }
+        }
     }
 }

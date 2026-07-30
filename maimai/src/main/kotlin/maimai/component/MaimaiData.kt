@@ -11,8 +11,9 @@ import xyz.xszq.bot.maimai.payload.LocalMusicInfo
 import xyz.xszq.bot.maimai.payload.LocalPlateInfo
 import java.io.File
 
-class MaimaiData {
-    val dataDirPath = "./data/maimai"
+class MaimaiData(
+    val dataDirPath: String = "./data/maimai"
+) {
 
     val versions = mutableMapOf<String, GameVersion>()
     val musics = mutableMapOf<Int, MusicInfo>()

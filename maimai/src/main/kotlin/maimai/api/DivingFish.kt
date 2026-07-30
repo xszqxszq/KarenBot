@@ -28,7 +28,8 @@ import java.util.concurrent.TimeUnit
 
 class DivingFish(
     val token: String,
-    val maimaiData: MaimaiData
+    val maimaiData: MaimaiData,
+    val client: HttpClient = createClient()
 ) : MaimaiAPI {
     override val id: String = "diving-fish"
     override val name: String = "水鱼"
@@ -39,35 +40,6 @@ class DivingFish(
 
     val json = Json {
         ignoreUnknownKeys = true
-    }
-    val client = HttpClient(OkHttp) {
-        engine {
-            config {
-                connectionPool(ConnectionPool(
-                    maxIdleConnections = 5,
-                    keepAliveDuration = 5,
-                    timeUnit = TimeUnit.MINUTES
-                ))
-                protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
-                connectTimeout(30, TimeUnit.SECONDS)
-                readTimeout(30, TimeUnit.SECONDS)
-                writeTimeout(30, TimeUnit.SECONDS)
-            }
-        }
-        install(ContentNegotiation) {
-            json(json)
-        }
-        install(HttpRequestRetry) {
-            retryOnExceptionOrServerErrors(maxRetries = 5)
-            retryOnExceptionIf { request, response ->
-                request.method == HttpMethod.Post
-            }
-        }
-        install(HttpTimeout) {
-            requestTimeoutMillis = 60_000
-            connectTimeoutMillis = 60_000
-            socketTimeoutMillis = 60_000
-        }
     }
     private val redirectClient = HttpClient {
         followRedirects = false
@@ -384,5 +356,35 @@ class DivingFish(
         private const val USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) " +
                 "Chrome/132.0.0.0 Safari/537.36 NetType/WIFI MicroMessenger/7.0.20.1781(0x6700143B) " +
                 "WindowsWechat(0x63090a13) UnifiedPCWindowsWechat(0xf254162e) XWEB/18163 Flue"
+
+        fun createClient() = HttpClient(OkHttp) {
+            engine {
+                config {
+                    connectionPool(ConnectionPool(
+                        maxIdleConnections = 5,
+                        keepAliveDuration = 5,
+                        timeUnit = TimeUnit.MINUTES
+                    ))
+                    protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
+                    connectTimeout(30, TimeUnit.SECONDS)
+                    readTimeout(30, TimeUnit.SECONDS)
+                    writeTimeout(30, TimeUnit.SECONDS)
+                }
+            }
+            install(ContentNegotiation) {
+                json(Json { ignoreUnknownKeys = true })
+            }
+            install(HttpRequestRetry) {
+                retryOnExceptionOrServerErrors(maxRetries = 5)
+                retryOnExceptionIf { request, response ->
+                    request.method == HttpMethod.Post
+                }
+            }
+            install(HttpTimeout) {
+                requestTimeoutMillis = 60_000
+                connectTimeoutMillis = 60_000
+                socketTimeoutMillis = 60_000
+            }
+        }
     }
 }

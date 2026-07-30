@@ -12,7 +12,9 @@ import xyz.xszq.bot.chunithm.music.MusicInfo
 import xyz.xszq.bot.chunithm.payload.LXNSTrophyInfo
 import xyz.xszq.bot.json
 
-class ChunithmData {
+class ChunithmData(
+    val dataDirPath: String = "./data/chunithm"
+) {
     val versions = mutableMapOf<String, GameVersion>()
     val musics = mutableMapOf<Int, MusicInfo>()
     val trophies = mutableMapOf<Int, LXNSTrophyInfo>()
@@ -25,14 +27,14 @@ class ChunithmData {
         musics.clear()
 
         designer = ConfigLoaderBuilder.default()
-            .addFileSource("./data/chunithm/designer.yml")
+            .addFileSource("$dataDirPath/designer.yml")
             .withExplicitSealedTypes()
             .build()
             .loadConfigOrThrow<DesignerConfig>()
 
         val songsRaw = loadFromCacheOrFetch(
             fetch = { api.fetchSongs() },
-            path = "./data/chunithm/lxns-songs.json"
+            path = "$dataDirPath/lxns-songs.json"
         )
         musics.putAll(if (songsRaw != null) api.getMusicList(cached = songsRaw) else api.getMusicList())
 
@@ -48,7 +50,7 @@ class ChunithmData {
 
         val trophiesRaw = loadFromCacheOrFetch(
             fetch = { api.fetchTrophies() },
-            path = "./data/chunithm/lxns-trophies.json"
+            path = "$dataDirPath/lxns-trophies.json"
         )
         trophies.putAll(if (trophiesRaw != null) api.getTrophyList(cached = trophiesRaw) else api.getTrophyList())
     }

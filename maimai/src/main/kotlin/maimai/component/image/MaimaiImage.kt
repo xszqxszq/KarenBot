@@ -18,9 +18,9 @@ import xyz.xszq.shinobu.template.TemplateManager
  */
 class MaimaiImage(
     val maimaiData: MaimaiData,
+    val dataPath: String = "./data/maimai/",
     val resourcePath: String = "../.."
 ) {
-    private val dataPath = "./data/maimai/"
     lateinit var manager: TemplateManager
 
     lateinit var rating: RatingTemplate

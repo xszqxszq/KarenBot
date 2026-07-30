@@ -11,22 +11,53 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-
-      - name: Set up JDK 22
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '22'
           cache: gradle
+      - run: chmod +x gradlew
+      - run: ./gradlew test
 
-      - name: Make Gradle wrapper executable
-        run: chmod +x gradlew
-
-      - name: Run tests
-        run: ./gradlew test
+  integration:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '22'
+          cache: gradle
+      - run: chmod +x gradlew
+      - name: Generate config files from Secrets
+        run: |
+          mkdir -p config
+          cat > config/maimai.yml << 'YAML'
+          tokens:
+            diving-fish: "${{ secrets.DIVING_FISH_TOKEN }}"
+            lxns: "${{ secrets.LXNS_TOKEN }}"
+            lxns-oa-id: "${{ secrets.LXNS_OA_ID }}"
+            lxns-oa-secret: "${{ secrets.LXNS_OA_SECRET }}"
+            lxns-oa-callback: "http://localhost:18100/lxns/callback"
+            proxy-ip: "127.0.0.1"
+            proxy-server: "127.0.0.1"
+            proxy-port: "18100"
+          tips: []
+          YAML
+          cat > config/chunithm.yml << 'YAML'
+          tokens:
+            diving-fish: "${{ secrets.DIVING_FISH_TOKEN }}"
+            lxns: "${{ secrets.LXNS_TOKEN }}"
+            lxns-oa-id: "${{ secrets.LXNS_OA_ID }}"
+            lxns-oa-secret: "${{ secrets.LXNS_OA_SECRET }}"
+            lxns-oa-callback: "http://localhost:18100/lxns/callback"
+            assets-jacket: "https://example.com/chunithm/jacket"
+          YAML
+      - run: ./gradlew test

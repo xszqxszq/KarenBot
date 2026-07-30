@@ -28,7 +28,8 @@ class LXNS(
     val oauthId: String,
     val oauthSecret: String,
     val oauthCallback: String,
-    val maimaiData: MaimaiData
+    val maimaiData: MaimaiData,
+    val client: HttpClient = createClient()
 ): MaimaiAPI {
     override val id: String = "lxns"
     override val name: String = "落雪"
@@ -40,32 +41,6 @@ class LXNS(
 
     val json = Json {
         ignoreUnknownKeys = true
-    }
-    val client = HttpClient(OkHttp) {
-        engine {
-            config {
-                connectionPool(ConnectionPool(
-                    maxIdleConnections = 5,
-                    keepAliveDuration = 5,
-                    timeUnit = TimeUnit.MINUTES
-                ))
-                protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
-                connectTimeout(30, TimeUnit.SECONDS)
-                readTimeout(30, TimeUnit.SECONDS)
-                writeTimeout(30, TimeUnit.SECONDS)
-            }
-        }
-        install(ContentNegotiation) {
-            json(json)
-        }
-        install(HttpRequestRetry) {
-            retryOnExceptionOrServerErrors(maxRetries = 5)
-        }
-        install(HttpTimeout) {
-            requestTimeoutMillis = 60_000
-            connectTimeoutMillis = 60_000
-            socketTimeoutMillis = 60_000
-        }
     }
     fun HttpRequestBuilder.setDeveloper() {
         headers["Authorization"] = token
@@ -309,4 +284,33 @@ class LXNS(
         return response.refreshToken
     }
     private fun now() = System.currentTimeMillis() / 1000
+
+    companion object {
+        fun createClient() = HttpClient(OkHttp) {
+            engine {
+                config {
+                    connectionPool(ConnectionPool(
+                        maxIdleConnections = 5,
+                        keepAliveDuration = 5,
+                        timeUnit = TimeUnit.MINUTES
+                    ))
+                    protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
+                    connectTimeout(30, TimeUnit.SECONDS)
+                    readTimeout(30, TimeUnit.SECONDS)
+                    writeTimeout(30, TimeUnit.SECONDS)
+                }
+            }
+            install(ContentNegotiation) {
+                json(Json { ignoreUnknownKeys = true })
+            }
+            install(HttpRequestRetry) {
+                retryOnExceptionOrServerErrors(maxRetries = 5)
+            }
+            install(HttpTimeout) {
+                requestTimeoutMillis = 60_000
+                connectTimeoutMillis = 60_000
+                socketTimeoutMillis = 60_000
+            }
+        }
+    }
 }

@@ -2,6 +2,7 @@ val hopliteVersion: String by rootProject.extra
 val korlibsVersion: String by rootProject.extra
 val ktorVersion: String by rootProject.extra
 val skikoVersion: String by rootProject.extra
+val exposedVersion: String by rootProject.extra
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
@@ -16,6 +17,7 @@ repositories {
 
 dependencies {
     compileOnly(project(":"))
+    implementation("org.jetbrains.exposed:exposed-core:${exposedVersion}")
     implementation("com.sksamuel.hoplite:hoplite-core:${hopliteVersion}")
     implementation("com.sksamuel.hoplite:hoplite-yaml:${hopliteVersion}")
     implementation("com.soywiz.korge:korge-core:$korlibsVersion")

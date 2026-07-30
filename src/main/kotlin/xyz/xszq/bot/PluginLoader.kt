@@ -22,9 +22,9 @@ class PluginLoader(
     cos: TencentCos,
     val database: Database,
     val llmClient: LLMClient? = null,
+    val subscribes: SubscribeManager = SubscribeManager(),
 ) {
     val bot = Bot(api, cos, this)
-    val subscribes = SubscribeManager()
     val files = FileManager()
 
     val pluginDirectory = "plugins/"

@@ -15,6 +15,7 @@ import xyz.xszq.shinobu.template.TemplateManager
 
 class ChunithmImage(
     val chunithmData: ChunithmData,
+    val dataPath: String = "./data/chunithm/",
     val resourcePath: String = "../.."
 ) {
     lateinit var manager: TemplateManager
@@ -23,7 +24,7 @@ class ChunithmImage(
     lateinit var level: LevelTemplate
 
     fun init() {
-        manager = TemplateManager("./data/chunithm/")
+        manager = TemplateManager(dataPath)
 
         rating = RatingTemplate(manager, resourcePath, chunithmData.newestVersion)
         level = LevelTemplate(manager, resourcePath)
@@ -39,7 +40,7 @@ class ChunithmImage(
     }
 
     private suspend fun generateThumb() = coroutineScope {
-        val covers = localCurrentDirVfs["./data/chunithm/covers"]
+        val covers = localCurrentDirVfs["${dataPath}covers"]
         covers.listSimple().filter {
             it.baseNameWithoutExtension.toIntOrNull() != null
         }.forEach { cover ->
