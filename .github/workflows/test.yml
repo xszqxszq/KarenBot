@@ -29,6 +29,7 @@ jobs:
           git checkout
           cd -
           ln -s ../KarenBot-Resources/data data
+          mkdir -p data/maimai/covers data/maimai/plates data/maimai/avatars data/chunithm/covers
       - name: Generate config files
         run: |
           mkdir -p config
