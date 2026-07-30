@@ -54,3 +54,8 @@ jobs:
             assets-jacket: "https://example.com/chunithm/jacket"
           YAML
       - run: ./gradlew test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-reports
+          path: '**/build/reports/tests/'
