@@ -26,13 +26,18 @@ class RatingRenderTest : MaimaiDatabaseTest() {
             configPath = "../config/maimai.yml"
             dataPath = "../data/maimai"
         }
-        maimai.load()
-        Thread.sleep(3000)
+        try {
+            maimai.load()
+            Thread.sleep(3000)
 
-        val msg = sandbox.user() says "/b50 maxscore"
+            val msg = sandbox.user() says "/b50 maxscore"
 
-        assertNotNull(sandbox.replyFor(msg)) {
-            "Reply is null, replies.size=${sandbox.replies.size}"
+            assertNotNull(sandbox.replyFor(msg)) {
+                "Reply is null, replies.size=${sandbox.replies.size}"
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw e
         }
     }
 }

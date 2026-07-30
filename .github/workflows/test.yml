@@ -23,7 +23,11 @@ jobs:
       - run: chmod +x gradlew
       - name: Clone KarenBot-Resources
         run: |
-          git clone --depth 1 https://github.com/xszqxszq/KarenBot-Resources.git ../KarenBot-Resources
+          git clone --depth 1 --filter=blob:none --no-checkout https://github.com/xszqxszq/KarenBot-Resources.git ../KarenBot-Resources
+          cd ../KarenBot-Resources
+          git sparse-checkout set data/maimai data/chunithm
+          git checkout
+          cd -
           ln -s ../KarenBot-Resources/data data
       - name: Generate config files
         run: |
