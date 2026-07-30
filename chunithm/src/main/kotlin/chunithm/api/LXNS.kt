@@ -276,12 +276,6 @@ class LXNS(
     suspend fun refreshToken(
         event: MessageEvent
     ): String? {
-        // TODO: 不要在查分器端引入任何直接查表
-        val cached = MaimaiSettingsTable[event.sender.id, "lxns-oa-access"]
-        val expires = MaimaiSettingsTable[event.sender.id, "lxns-oa-expires"]?.toLongOrNull()
-        if (cached != null && expires != null && now() < expires - 300)
-            return cached
-
         val refresh = MaimaiSettingsTable[event.sender.id, "lxns-oa-refresh"] ?: return null
         val response = client.post("$apiOauth/token") {
             contentType(ContentType.Application.Json)
@@ -293,11 +287,8 @@ class LXNS(
             ))
         }.body<LXNSOATokenResponse>()
         MaimaiSettingsTable[event.sender.id, "lxns-oa-refresh"] = response.refreshToken
-        MaimaiSettingsTable[event.sender.id, "lxns-oa-access"] = response.accessToken
-        MaimaiSettingsTable[event.sender.id, "lxns-oa-expires"] = (now() + response.expiresIn).toString()
         return response.accessToken
     }
-    private fun now() = System.currentTimeMillis() / 1000
 
     companion object {
         fun createClient() = HttpClient(OkHttp) {
