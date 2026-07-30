@@ -21,22 +21,11 @@ jobs:
           java-version: '22'
           cache: gradle
       - run: chmod +x gradlew
-      - run: ./gradlew test
-
-  integration:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '22'
-          cache: gradle
-      - run: chmod +x gradlew
-      - name: Generate config files from Secrets
+      - name: Clone KarenBot-Resources
+        run: |
+          git clone --depth 1 https://github.com/xszqxszq/KarenBot-Resources.git ../KarenBot-Resources
+          ln -s ../KarenBot-Resources/data data
+      - name: Generate config files
         run: |
           mkdir -p config
           cat > config/maimai.yml << 'YAML'
