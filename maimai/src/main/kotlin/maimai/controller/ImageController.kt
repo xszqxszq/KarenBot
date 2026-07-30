@@ -221,7 +221,11 @@ class ImageController(
                 line()
                 line(image(url, "img #${width}px #${height}px"))
                 line()
-                line(text ?: "")
+                line(text ?.let {
+                    text.split("\n").joinToString("\n") { line ->
+                        "> $line"
+                    }
+                } ?: "")
                 keyboard {
                     row {
                         at("💯我也要查", "/mai " + command.trim())

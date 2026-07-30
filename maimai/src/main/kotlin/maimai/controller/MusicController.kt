@@ -32,6 +32,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import xyz.xszq.bot.maimai.component.CosineSimilarity
+import xyz.xszq.bot.maimai.component.CoverDescData
 import xyz.xszq.bot.maimai.component.CoverEmbeddingGenerator
 import kotlin.random.Random
 
@@ -49,7 +50,9 @@ class MusicController(
     private val jacketUrl = maimai.config.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")
 
     private var coverEmbeddings: Map<Int, List<Float>>? = null
+    private var coverDescriptions: Map<Int, CoverDescData>? = null
     private val coverEmbeddingsPath = "${maimai.dataPath}/cover-embeddings.json"
+    private val coverDescriptionsPath = "${maimai.dataPath}/cover-descriptions.json"
     private val embeddingEndpoint = maimai.config.tokens["doubao-embedding"]
     private val llmJson = Json { ignoreUnknownKeys = true }
 
@@ -405,6 +408,26 @@ class MusicController(
             }
         }
 
+        startsWith("生成封面描述") {
+            if (!isAdmin() || embeddingEndpoint == null) {
+                return@startsWith
+            }
+            val client = bot.pluginLoader.llmClient ?: return@startsWith
+            maimai.scope.launch {
+                try {
+                    CoverEmbeddingGenerator.generateDescriptions(
+                        client = client,
+                        coversDir = MusicInfo.coverDir,
+                        outputPath = coverDescriptionsPath,
+                        embeddingEndpoint = embeddingEndpoint,
+                    )
+                    coverDescriptions = CoverEmbeddingGenerator.loadDescriptions(coverDescriptionsPath)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+
         startsWith("帮我找") { query ->
             if (query.isBlank()) {
                 reply("使用方法：帮我找 [封面描述]\n例：帮我找像素小人")
@@ -420,41 +443,77 @@ class MusicController(
             if (coverEmbeddings.isNullOrEmpty()) {
                 return@startsWith
             }
+            if (coverDescriptions == null) {
+                coverDescriptions = CoverEmbeddingGenerator.loadDescriptions(coverDescriptionsPath)
+            }
             try {
-                val queryVector = client.embed(
-                    input = query,
-                    model = embeddingEndpoint,
-                )
-                if (queryVector.isEmpty()) {
-                    reply("查询失败，请重试")
-                    return@startsWith
+                reply("正在搜索中……")
+                // 1. Break down description
+                val decomposition = client.chat {
+                    responseFormat("json_object")
+                    system("你是一个舞萌DX封面搜索助手。用户的描述可能包含多个视觉特征，请拆成独立的短查询。每个短查询只描述一个视觉特征。\n以JSON格式返回：{\"queries\": [\"特征1\", \"特征2\"]}\n例：\"黄色背景戴帽子的男的粉蓝色头发比了一个圆\" → {\"queries\": [\"黄色背景\", \"戴帽子的男角色\", \"粉蓝色头发\", \"比了一个圆\"]}\n不要遗漏任何特征。")
+                    user(query)
                 }
-                val top20 = CosineSimilarity.topK(queryVector, coverEmbeddings!!, 20)
-                if (top20.isEmpty()) {
+                val subQueries = try {
+                    llmJson.decodeFromString<CoverQueriesResult>(decomposition).queries
+                } catch (_: Exception) {
+                    emptyList()
+                }
+                val allQueries = listOf(query) + (subQueries.take(5))
+                // 2. Query each
+                val votes = mutableMapOf<Int, Int>()
+                val maxSim = mutableMapOf<Int, Double>()
+                for (subQuery in allQueries) {
+                    if (subQuery.isBlank()) continue
+                    val qv = client.embed(input = subQuery, model = embeddingEndpoint)
+                    if (qv.isEmpty()) continue
+                    val fused = coverEmbeddings!!.mapValues { (resourceId, imgVec) ->
+                        val descVec = coverDescriptions?.get(resourceId)?.vec
+                        val imgSim = CosineSimilarity.compute(qv, imgVec)
+                        val descSim = if (descVec != null) CosineSimilarity.compute(qv, descVec) else imgSim
+                        imgSim * 0.6 + descSim * 0.4
+                    }
+                    fused.entries.sortedByDescending { it.value }.take(20).forEach { (rid, score) ->
+                        votes[rid] = (votes[rid] ?: 0) + 1
+                        val prev = maxSim[rid] ?: -1.0
+                        if (score > prev) maxSim[rid] = score
+                    }
+                }
+                // 3. Sort by similarity
+                val ranked = votes.entries.sortedByDescending { (rid) ->
+                    votes[rid]!! * 10000 + (maxSim[rid] ?: 0.0).toLong()
+                }.take(30)
+                if (ranked.isEmpty()) {
                     reply("没有找到匹配的歌曲")
                     return@startsWith
                 }
-                val candidates = top20.mapNotNull { (resourceId, score) ->
+                val candidates = ranked.mapNotNull { (resourceId, _) ->
                     val music = maimai.musics().firstOrNull { it.resourceId == resourceId }
-                    music?.let { it to score }
+                    music?.let { it to (votes[resourceId] ?: 0) }
                 }
                 if (candidates.isEmpty()) {
                     reply("没有找到匹配的歌曲")
                     return@startsWith
                 }
-                val candidateInfo = candidates.joinToString("\n") { (music, score) ->
-                    "${music.id}. ${music.name} (${music.artist}) [封面ID:${music.resourceId}] 相似度:${"%.3f".format(score)}"
+                val candidateInfo = candidates.joinToString("\n") { (music, voteCount) ->
+                    val desc = coverDescriptions?.get(music.resourceId)?.desc?.take(200) ?: ""
+                    buildString {
+                        appendLine("${music.id}. ${music.name}")
+                        appendLine("   艺术家: ${music.artist} | 分类: ${music.genre.genreName} | 版本: ${music.version.name} | 类型: ${music.type.full}")
+                        if (desc.isNotBlank()) appendLine("   封面描述: $desc")
+                        appendLine("   命中子查询: $voteCount/${allQueries.size}")
+                    }
                 }
                 val systemPrompt = buildString {
                     appendLine("你是一个舞萌DX歌曲搜索助手。")
                     appendLine("用户用自然语言描述了他记忆中的歌曲封面特征。")
-                    appendLine("以下是按向量相似度排序的候选歌曲列表：")
+                    appendLine("以下是候选歌曲及其详细信息：")
                     appendLine(candidateInfo)
                     appendLine()
-                    appendLine("请根据用户的描述，从以上候选中选出最匹配的歌曲ID。")
+                    appendLine("请根据用户的描述，综合封面描述、歌曲信息（艺术家、分类、版本、类型等）选出最匹配的歌曲ID。")
                     appendLine("如果某个封面明显匹配，只返回1首。如果多个候选都类似，最多返回5首。")
                     appendLine("完全不匹配则返回空数组。只返回JSON，不要其他内容：")
-                    appendLine("{\"ids\": [数字]} // 多个: {\"ids\": [299, 300, 301]}")
+                    appendLine("{\"ids\": [数字]} // 举例: {\"ids\": [299]} 或 {\"ids\": [299, 300, 301]}")
                 }
                 val rankingResult = client.chat {
                     responseFormat("json_object")
@@ -467,7 +526,7 @@ class MusicController(
                     reply("没有找到匹配的歌曲")
                     return@startsWith
                 }
-                showMusics("maimai-cover-search", query, musics, query, 1, 1)
+                showMusics("maimai-cover-search", query, musics, "", 1, 1)
             } catch (e: Exception) {
                 e.printStackTrace()
                 reply("搜索失败：${e.message}")
@@ -478,6 +537,11 @@ class MusicController(
     @Serializable
     data class CoverIdsResult(
         val ids: List<Int> = emptyList(),
+    )
+
+    @Serializable
+    data class CoverQueriesResult(
+        val queries: List<String> = emptyList(),
     )
 
     val dailyOps = listOf(

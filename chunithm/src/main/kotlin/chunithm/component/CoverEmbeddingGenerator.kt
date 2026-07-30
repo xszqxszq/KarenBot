@@ -1,4 +1,4 @@
-package xyz.xszq.bot.maimai.component
+package xyz.xszq.bot.chunithm.component
 
 import io.ktor.http.*
 import kotlinx.coroutines.async
@@ -52,7 +52,7 @@ object CoverEmbeddingGenerator {
         val existingIds = existing.keys.toSet()
         val allFiles = coverDir.toFile().listFiles()
         if (allFiles == null) {
-            println("[CoverEmbedding] 无法读取封面目录：$coverDir")
+            println("[ChuCoverEmbedding] 无法读取封面目录：$coverDir")
             return
         }
         val files = allFiles.filter { it.name.endsWith(".png") && it.isFile }
@@ -60,11 +60,11 @@ object CoverEmbeddingGenerator {
             .filter { it.nameWithoutExtension.toIntOrNull() !in existingIds }
 
         if (files.isEmpty()) {
-            println("[CoverEmbedding] 所有封面已有向量，无需生成。")
+            println("[ChuCoverEmbedding] 所有封面已有向量，无需生成。")
             return
         }
 
-        println("[CoverEmbedding] 已有 ${existing.size} 张，还需生成 ${files.size} 张的向量...")
+        println("[ChuCoverEmbedding] 已有 ${existing.size} 张，还需生成 ${files.size} 张的向量...")
 
         val result = existing.toMutableMap()
         var success = 0
@@ -73,7 +73,7 @@ object CoverEmbeddingGenerator {
         files.forEachIndexed { index, file ->
             val resourceId = file.nameWithoutExtension.toIntOrNull()
             if (resourceId == null) {
-                println("[CoverEmbedding] 跳过非数字文件名：${file.name}")
+                println("[ChuCoverEmbedding] 跳过非数字文件名：${file.name}")
                 return@forEachIndexed
             }
 
@@ -88,17 +88,17 @@ object CoverEmbeddingGenerator {
                     result[resourceId] = vector
                     success++
                 } else {
-                    println("[CoverEmbedding] 警告：${file.name} 返回空向量")
+                    println("[ChuCoverEmbedding] 警告：${file.name} 返回空向量")
                     failed++
                 }
             } catch (e: Exception) {
-                println("[CoverEmbedding] 失败：${file.name} - ${e.message}")
+                println("[ChuCoverEmbedding] 失败：${file.name} - ${e.message}")
                 failed++
             }
 
             val total = existing.size + (index + 1)
             if (total % 50 == 0 || index == files.size - 1) {
-                println("[CoverEmbedding] 进度：${total}/${existing.size + files.size}（本次成功 $success，失败 $failed）")
+                println("[ChuCoverEmbedding] 进度：${total}/${existing.size + files.size}（本次成功 $success，失败 $failed）")
             }
         }
 
@@ -106,8 +106,8 @@ object CoverEmbeddingGenerator {
         outputFile.parentFile.mkdirs()
         outputFile.writeText(json.encodeToString(result), Charsets.UTF_8)
 
-        println("[CoverEmbedding] 完成！本次成功 $success 张，失败 $failed 张，累计共 ${result.size} 张。")
-        println("[CoverEmbedding] 结果已保存至：$outputFile")
+        println("[ChuCoverEmbedding] 完成！本次成功 $success 张，失败 $failed 张，累计共 ${result.size} 张。")
+        println("[ChuCoverEmbedding] 结果已保存至：$outputFile")
     }
 
     suspend fun generateDescriptions(
@@ -117,22 +117,23 @@ object CoverEmbeddingGenerator {
         embeddingEndpoint: String,
     ) {
         val coverDir = Paths.get(coversDir).toAbsolutePath().normalize()
-        val allFiles = coverDir.toFile().listFiles()
-        if (allFiles == null) {
-            println("[CoverDesc] 无法读取封面目录：$coverDir")
-            return
-        }
         val existing = loadDescriptions(outputPath)
         val existingIds = existing.keys.toSet()
-        var files = allFiles.filter { it.name.endsWith(".png") && it.isFile }
+        val allFiles = coverDir.toFile().listFiles()
+        if (allFiles == null) {
+            println("[ChuCoverDesc] 无法读取封面目录：$coverDir")
+            return
+        }
+        val files = allFiles.filter { it.name.endsWith(".png") && it.isFile }
             .sortedBy { it.nameWithoutExtension.toIntOrNull() ?: Int.MAX_VALUE }
-        files = files.filter { file -> file.nameWithoutExtension.toIntOrNull() !in existingIds }
+            .filter { file -> file.nameWithoutExtension.toIntOrNull() !in existingIds }
+
         if (files.isEmpty()) {
-            println("[CoverDesc] 所有封面已有描述，无需生成。")
+            println("[ChuCoverDesc] 所有封面已有描述，无需生成。")
             return
         }
 
-        println("[CoverDesc] 已有 ${existing.size} 张，还需生成 ${files.size} 张的描述并向量化...")
+        println("[ChuCoverDesc] 已有 ${existing.size} 张，还需生成 ${files.size} 张的描述并向量化...")
 
         val result = existing.toMutableMap()
         val success = AtomicInteger(0)
@@ -143,7 +144,7 @@ object CoverEmbeddingGenerator {
             val deferred = files.mapIndexedNotNull { index, file ->
                 val resourceId = file.nameWithoutExtension.toIntOrNull()
                 if (resourceId == null) {
-                    println("[CoverDesc] 跳过非数字文件名：${file.name}")
+                    println("[ChuCoverDesc] 跳过非数字文件名：${file.name}")
                     return@mapIndexedNotNull null
                 }
                 async {
@@ -151,13 +152,13 @@ object CoverEmbeddingGenerator {
                         try {
                             val bytes = compressImage(file)
                             val desc = client.chat {
-                                system("你是一个舞萌DX封面描述专家。请用100-150字详细描述这张封面的视觉特征：人物、动作、服装颜色、表情、背景场景、色调、构图风格、整体氛围。如果画面有文字也描述文字。用中文。只返回描述文本，不要任何前缀。")
+                                system("你是一个中二节奏封面描述专家。请用100-150字详细描述这张封面的视觉特征：人物、动作、服装颜色、表情、背景场景、色调、构图风格、整体氛围。如果画面有文字也描述文字。用中文。只返回描述文本，不要任何前缀。")
                                 user {
                                     image(bytes, ContentType.Image.JPEG)
                                 }
                             }
                             if (desc.isBlank()) {
-                                println("[CoverDesc] 警告：${file.name} 返回空描述")
+                                println("[ChuCoverDesc] 警告：${file.name} 返回空描述")
                                 failed.incrementAndGet()
                                 return@withPermit
                             }
@@ -170,17 +171,17 @@ object CoverEmbeddingGenerator {
                                     result[resourceId] = CoverDescData(desc = desc, vec = vec)
                                     success.incrementAndGet()
                                 } else {
-                                    println("[CoverDesc] 警告：${file.name} 描述向量为空")
+                                    println("[ChuCoverDesc] 警告：${file.name} 描述向量为空")
                                     failed.incrementAndGet()
                                 }
                             }
                         } catch (e: Exception) {
-                            println("[CoverDesc] 失败：${file.name} - ${e.message}")
+                            println("[ChuCoverDesc] 失败：${file.name} - ${e.message}")
                             failed.incrementAndGet()
                         }
                         val total = existing.size + (index + 1)
                         if (total % 50 == 0 || index == files.size - 1) {
-                            println("[CoverDesc] 进度：${total}/${existing.size + files.size}（本次成功 ${success.get()}，失败 ${failed.get()}）")
+                            println("[ChuCoverDesc] 进度：${total}/${existing.size + files.size}（本次成功 ${success.get()}，失败 ${failed.get()}）")
                         }
                     }
                 }
@@ -192,8 +193,8 @@ object CoverEmbeddingGenerator {
         outputFile.parentFile.mkdirs()
         outputFile.writeText(json.encodeToString(result), Charsets.UTF_8)
 
-        println("[CoverDesc] 完成！本次成功 $success 张，失败 $failed 张，累计共 ${result.size} 张。")
-        println("[CoverDesc] 结果已保存至：$outputFile。")
+        println("[ChuCoverDesc] 完成！本次成功 $success 张，失败 $failed 张，累计共 ${result.size} 张。")
+        println("[ChuCoverDesc] 结果已保存至：$outputFile。")
     }
 
     fun load(path: String): Map<Int, List<Float>> {
