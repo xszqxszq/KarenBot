@@ -42,6 +42,7 @@ nbdist/
 .nb-gradle/
 
 # Local secrets and runtime leftovers inside the code repo
+config
 keystore.jks
 todo.txt
 plugins/
