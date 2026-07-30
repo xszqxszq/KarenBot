@@ -28,9 +28,9 @@ class MusicInfo(
     val resourceId: Int
         get() = id % 10000
     suspend fun cover(): VfsFile {
-        val cover = localCurrentDirVfs["$BASEDIR/$resourceId.png"]
+        val cover = localCurrentDirVfs["$coverDir/$resourceId.png"]
         if (!cover.exists() || !cover.isFile()) {
-            return localCurrentDirVfs["$BASEDIR/0.png"]
+            return localCurrentDirVfs["$coverDir/0.png"]
         }
         return cover
     }
@@ -109,7 +109,7 @@ class MusicInfo(
     })
 
     companion object {
-        private const val BASEDIR = "./data/maimai/covers"
+        var coverDir = "./data/maimai/covers"
         private val MusicDifficulty.emoji: String
             get() = when(this) {
                 MusicDifficulty.Basic -> "\uD83D\uDFE9"

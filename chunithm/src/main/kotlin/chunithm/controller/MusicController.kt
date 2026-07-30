@@ -31,7 +31,7 @@ import kotlin.random.Random
 class MusicController(
     override val chunithm: Chunithm
 ): Controller(chunithm) {
-    private val previewDir = "./data/chunithm/preview/"
+    private val previewDir = "${chunithm.dataPath}/preview/"
     private val notFound = "未查找到相关的歌曲，请检查拼写是否有误。"
     private val maxResults = 10
 

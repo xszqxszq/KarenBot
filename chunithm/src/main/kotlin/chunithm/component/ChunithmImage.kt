@@ -15,7 +15,7 @@ import xyz.xszq.shinobu.template.TemplateManager
 
 class ChunithmImage(
     val chunithmData: ChunithmData,
-    val dataPath: String = "./data/chunithm/",
+    val dataPath: String = "./data/chunithm",
     val resourcePath: String = "../.."
 ) {
     lateinit var manager: TemplateManager
@@ -40,7 +40,7 @@ class ChunithmImage(
     }
 
     private suspend fun generateThumb() = coroutineScope {
-        val covers = localCurrentDirVfs["${dataPath}covers"]
+        val covers = localCurrentDirVfs["${dataPath}/covers"]
         covers.listSimple().filter {
             it.baseNameWithoutExtension.toIntOrNull() != null
         }.forEach { cover ->

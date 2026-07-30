@@ -219,7 +219,7 @@ object ComboQuery {
     @OptIn(ExperimentalHoplite::class)
     fun init(data: MaimaiData) {
         designerConfig = ConfigLoaderBuilder.default()
-            .addFileSource("./data/maimai/designer.yml")
+            .addFileSource("${data.dataPath}/designer.yml")
             .withExplicitSealedTypes()
             .build()
             .loadConfigOrThrow<DesignerConfig>()

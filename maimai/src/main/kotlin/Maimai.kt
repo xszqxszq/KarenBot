@@ -29,6 +29,9 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.full.primaryConstructor
 
 class Maimai: Plugin() {
+    var configPath = "./config/maimai.yml"
+    var dataPath = "./data/maimai"
+
     // 配置文件
     lateinit var config: MaimaiConfig
     // 后端
@@ -55,12 +58,12 @@ class Maimai: Plugin() {
     override suspend fun load() {
         // 载入配置
         config = ConfigLoaderBuilder.default()
-            .addFileSource("./config/maimai.yml")
+            .addFileSource(configPath)
             .withExplicitSealedTypes()
             .build()
             .loadConfigOrThrow<MaimaiConfig>()
 
-        maimaiData = MaimaiData()
+        maimaiData = MaimaiData(dataPath = dataPath)
         maimaiData.load()
 
         backends = listOf(
@@ -75,7 +78,7 @@ class Maimai: Plugin() {
         )
 
         // 各组件初始化
-        image = MaimaiImage(maimaiData)
+        image = MaimaiImage(maimaiData, dataPath = dataPath)
         query = MaimaiQuery(this)
         aliases = AliasesSearch(this)
         api = ApiController(this)
@@ -156,7 +159,7 @@ class Maimai: Plugin() {
     }
 
     suspend fun loadFitLevelValues() {
-        val local = localCurrentDirVfs["./data/maimai/diving-fish-stats.json"]
+        val local = localCurrentDirVfs["$dataPath/diving-fish-stats.json"]
         val stats = runCatching {
             (backend("diving-fish") as DivingFish).getStats()
         }.onFailure {

@@ -12,7 +12,7 @@ import xyz.xszq.bot.maimai.payload.LocalPlateInfo
 import java.io.File
 
 class MaimaiData(
-    val dataDirPath: String = "./data/maimai"
+    val dataPath: String = "./data/maimai"
 ) {
 
     val versions = mutableMapOf<String, GameVersion>()
@@ -34,7 +34,7 @@ class MaimaiData(
 
     @OptIn(ExperimentalHoplite::class)
     fun load() {
-        dataDir = localCurrentDirVfs[dataDirPath]
+        dataDir = localCurrentDirVfs[dataPath]
         getGameVersions()
         getMusicList()
         getPlateList()

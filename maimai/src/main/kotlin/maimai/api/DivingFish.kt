@@ -186,7 +186,7 @@ class DivingFish(
     }
 
     suspend fun loadMusicData() {
-        val cacheFile = File("./data/maimai/diving-fish.json")
+        val cacheFile = File("${maimaiData.dataPath}/diving-fish.json")
         val cached = runCatching {
             if (cacheFile.exists())
                 json.decodeFromString<List<DivingFishMusicInfo>>(cacheFile.readText(Charsets.UTF_8))

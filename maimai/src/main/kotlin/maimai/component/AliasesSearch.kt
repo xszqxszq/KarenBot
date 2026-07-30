@@ -26,7 +26,7 @@ class AliasesSearch(
     val maimai: Maimai
 ) {
     private val index = "maimai_music_name"
-    private val indexPath: Path = Path.of("database/lucene/$index")
+    private val indexPath: Path = Path.of("${maimai.dataPath}/../database/lucene/$index")
     private val directory = FSDirectory.open(indexPath)
     private val analyzer: Analyzer = SmartChineseAnalyzer()
     private val writer: IndexWriter = IndexWriter(

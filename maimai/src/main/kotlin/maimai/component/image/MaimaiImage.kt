@@ -18,7 +18,7 @@ import xyz.xszq.shinobu.template.TemplateManager
  */
 class MaimaiImage(
     val maimaiData: MaimaiData,
-    val dataPath: String = "./data/maimai/",
+    val dataPath: String = "./data/maimai",
     val resourcePath: String = "../.."
 ) {
     lateinit var manager: TemplateManager
@@ -54,7 +54,7 @@ class MaimaiImage(
     }
 
     private suspend fun generateThumb() = coroutineScope {
-        val covers = localCurrentDirVfs["./data/maimai/covers"]
+        val covers = localCurrentDirVfs["${dataPath}/covers"]
         covers.listSimple().filter {
             it.baseNameWithoutExtension.toIntOrNull() != null
         }.forEach { cover ->

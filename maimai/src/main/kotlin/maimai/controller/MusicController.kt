@@ -35,7 +35,7 @@ class MusicController(
     override val maimai: Maimai
 ): Controller(maimai) {
     private lateinit var aliasAudit: AliasAudit
-    private val previewDir = "./data/maimai/preview/"
+    private val previewDir = "${maimai.dataPath}/preview/"
     private val notFound = "未查找到相关的歌曲，请检查拼写是否有误。"
 
     private val maxResults = 10

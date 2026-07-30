@@ -44,9 +44,9 @@ class MusicInfo(
     val isWordsEnd
         get() = charts.all { it.difficulty == MusicDifficulty.WorldsEnd }
     suspend fun cover(): VfsFile {
-        val cover = localCurrentDirVfs["$BASEDIR/$resourceId.png"]
+        val cover = localCurrentDirVfs["$coverDir/$resourceId.png"]
         if (!cover.exists() || !cover.isFile()) {
-            return localCurrentDirVfs["$BASEDIR/0.png"]
+            return localCurrentDirVfs["$coverDir/0.png"]
         }
         return cover
     }
@@ -104,7 +104,7 @@ class MusicInfo(
     })
 
     companion object {
-        private const val BASEDIR = "./data/chunithm/covers"
+        var coverDir = "./data/chunithm/covers"
 
         private val MusicDifficulty.emoji: String
             get() = when(this) {

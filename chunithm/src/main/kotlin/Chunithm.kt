@@ -27,6 +27,9 @@ import kotlin.reflect.full.primaryConstructor
 
 @Suppress("unused")
 class Chunithm: Plugin() {
+    var configPath = "./config/chunithm.yml"
+    var dataPath = "./data/chunithm"
+
     lateinit var config: ChunithmConfig
     lateinit var backends: List<ChunithmAPI>
     lateinit var chunithmData: ChunithmData
@@ -45,12 +48,12 @@ class Chunithm: Plugin() {
     @OptIn(ExperimentalHoplite::class)
     override suspend fun load() {
         config = ConfigLoaderBuilder.default()
-            .addFileSource("./config/chunithm.yml")
+            .addFileSource(configPath)
             .withExplicitSealedTypes()
             .build()
             .loadConfigOrThrow<ChunithmConfig>()
 
-        chunithmData = ChunithmData()
+        chunithmData = ChunithmData(dataPath = dataPath)
         lxns = LXNS(
             config.tokens["lxns"].toString(),
             config.tokens["lxns-oa-id"].toString(),

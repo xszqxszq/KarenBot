@@ -26,7 +26,7 @@ class AliasesSearch(
     val chunithm: Chunithm
 ) {
     private val index = "chunithm_music_name"
-    private val indexPath: Path = Path.of("database/lucene/$index")
+    private val indexPath: Path = Path.of("${chunithm.dataPath}/../database/lucene/$index")
     private val directory = FSDirectory.open(indexPath)
     private val analyzer: Analyzer = SmartChineseAnalyzer()
     private val writer: IndexWriter = IndexWriter(

@@ -6,6 +6,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
+import org.jetbrains.exposed.sql.Database
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.message.MessageChain
@@ -15,6 +16,8 @@ import xyz.xszq.bot.subscribe.SubscribeManager
 @OptIn(ExperimentalCoroutinesApi::class)
 class BotSandbox(
     private val scope: TestScope,
+    cos: TencentCos = mockk(relaxed = true),
+    database: Database = mockk(relaxed = true),
 ) {
     val replies = mutableListOf<MessageEvent>()
     private val replyMap = mutableMapOf<String, MessageEvent>()
@@ -55,8 +58,8 @@ class BotSandbox(
             }
         }
         pluginLoader = PluginLoader(api,
-            mockk(relaxed = true),
-            mockk(relaxed = true),
+            cos,
+            database,
             subscribes = SubscribeManager(dispatcher))
     }
 
