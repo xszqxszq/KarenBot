@@ -1,38 +1,32 @@
 package xyz.xszq.bot.maimai
 
-import io.mockk.coEvery
-import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import xyz.xszq.bot.*
 import xyz.xszq.bot.maimai.database.MaimaiDatabaseTest
-import xyz.xszq.bot.payload.UploadResult
 import kotlin.test.Test
-import kotlin.test.assertNotNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RatingRenderTest : MaimaiDatabaseTest() {
 
     @Test
-    fun testB50MaxScore() = runTest {
-        val cos = mockk<TencentCos>(relaxed = true)
-        coEvery { cos.uploadBinary(any(), any()) } returns UploadResult("https://example.com/b50.jpg", "b50.jpg")
+    fun runAll() = runTest {
+        val sandbox = setMaimai(this, database)
 
-        val sandbox = BotSandbox(this, cos, database)
+        testBind(sandbox)
+        testB50(sandbox)
+    }
 
-        val maimai = Maimai().apply {
-            plugin = "maimai"
-            pluginLoader = sandbox.pluginLoader
-            configPath = "../config/maimai.yml"
-            dataPath = "../data/maimai"
-        }
-        maimai.load()
-        Thread.sleep(3000)
+    private suspend fun testBind(sandbox: BotSandbox) {
+        sandbox.clear()
+        val msg = sandbox.user() says "/bind 943551369"
+        assertReplied(sandbox, msg, "绑定成功")
+    }
 
+    private suspend fun testB50(sandbox: BotSandbox) {
+        sandbox.clear()
         val msg = sandbox.user() says "/b50 maxscore"
-
-        assertNotNull(sandbox.replyFor(msg)) {
-            "Reply is null, replies.size=${sandbox.replies.size}"
-        }
+        Thread.sleep(3000)
+        assertRepliedWithImage(sandbox, msg)
     }
 }

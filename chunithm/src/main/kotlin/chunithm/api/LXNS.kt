@@ -40,10 +40,6 @@ class LXNS(
     private val musics
         get() = chunithmData.musics
 
-    private val json = Json {
-        ignoreUnknownKeys = true
-    }
-
     override suspend fun load() {
     }
 

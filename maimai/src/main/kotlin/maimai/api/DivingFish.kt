@@ -376,7 +376,7 @@ class DivingFish(
             }
             install(HttpRequestRetry) {
                 retryOnExceptionOrServerErrors(maxRetries = 5)
-                retryOnExceptionIf { request, response ->
+                retryOnExceptionIf { request, _ ->
                     request.method == HttpMethod.Post
                 }
             }

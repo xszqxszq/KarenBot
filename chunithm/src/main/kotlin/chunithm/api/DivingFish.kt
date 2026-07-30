@@ -34,10 +34,6 @@ class DivingFish(
     private val musics
         get() = chunithmData.musics
 
-    private val json = Json {
-        ignoreUnknownKeys = true
-    }
-
     override suspend fun load() {
     }
 
@@ -189,7 +185,7 @@ class DivingFish(
             }
             install(HttpRequestRetry) {
                 retryOnExceptionOrServerErrors(maxRetries = 5)
-                retryOnExceptionIf { request, response ->
+                retryOnExceptionIf { request, _ ->
                     request.method == HttpMethod.Post
                 }
             }

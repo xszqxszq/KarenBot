@@ -11,6 +11,7 @@ import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.message.PlainText
+import xyz.xszq.bot.payload.markdown.MarkdownData
 import xyz.xszq.bot.subscribe.SubscribeManager
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -32,9 +33,10 @@ class BotSandbox(
             } coAnswers {
                 val eid = arg<String?>(5) ?: ""
                 val mid = arg<String?>(6) ?: ""
+                val text = arg<MarkdownData?>(3)?.let { it.content ?: secondArg<String>() } ?: secondArg<String>()
                 val msg = MessageEvent(
                     bot = pluginLoader.bot, eventId = eid, id = mid,
-                    message = MessageChain(PlainText(secondArg())),
+                    message = MessageChain(PlainText(text)),
                     sender = User(pluginLoader.bot, firstArg()),
                 )
                 replies += msg
@@ -64,6 +66,11 @@ class BotSandbox(
     }
 
     fun replyFor(event: MessageEvent) = replyMap[event.eventId]
+
+    fun clear() {
+        replies.clear()
+        replyMap.clear()
+    }
 
     suspend fun advanceIdle() = scope.advanceUntilIdle()
 

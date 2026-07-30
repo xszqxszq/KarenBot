@@ -2,6 +2,7 @@ package xyz.xszq.bot.maimai.component
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.io.Closeable
 import org.apache.lucene.analysis.Analyzer
 import org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
@@ -24,7 +25,7 @@ import java.security.MessageDigest
 
 class AliasesSearch(
     val maimai: Maimai
-) {
+) : Closeable {
     private val index = "maimai_music_name"
     private val indexPath: Path = Path.of("${maimai.dataPath}/../database/lucene/$index")
     private val directory = FSDirectory.open(indexPath)
@@ -42,7 +43,7 @@ class AliasesSearch(
     suspend fun init() {
         refreshIndex()
     }
-    fun close() {
+    override fun close() {
         writer.commit()
         writer.close()
         directory.close()
