@@ -27,6 +27,7 @@ class RatingRenderTest : MaimaiDatabaseTest() {
             dataPath = "../data/maimai"
         }
         maimai.load()
+        Thread.sleep(3000)
 
         val msg = sandbox.user() says "/b50 maxscore"
 
