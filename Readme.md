@@ -43,6 +43,6 @@ Bug或功能建议请在[Issues](https://github.com/xszqxszq/KarenBot/issues)中
 
 贡献者：[@algorithm1832](https://github.com/algorithm1832)
 
-鸣谢：617、北京大的、浪涛I2A、唐辫小二、Qrsinko、MSC丶凌烟、慕湫风、MAYBOT、米若
+鸣谢：617、北京大的、浪涛I2A、唐辫小二、Qrsinko、MSC丶凌烟、慕湫风、MAYBOT、米若、山威音游群、国科大音游群
 
 致敬：[mirai](https://github.com/mamoe/mirai)，在第三方机器人时期可怜BOT主要基于mirai开发，目前的开发风格仍深受其影响
