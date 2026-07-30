@@ -36,8 +36,7 @@ class RatingRenderTest : MaimaiDatabaseTest() {
                 "Reply is null, replies.size=${sandbox.replies.size}"
             }
         } catch (e: Exception) {
-            e.printStackTrace()
-            throw e
+            throw RuntimeException(e)
         }
     }
 }
