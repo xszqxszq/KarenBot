@@ -207,15 +207,8 @@ class LXNS(
     suspend fun getPlayerInfo(
         user: UserQueryParams
     ): LXNSPlayer? {
-        val openId = user.event.sender.id
-        val cached = MaimaiSettingsTable[openId, "lxns-friend-code"]
         val response = client.get(when (user) {
-            is UserQueryParams.QQ -> {
-                if (cached != null)
-                    "$apiServer/player/$cached"
-                else
-                    "$apiServer/player/qq/${user.qq}"
-            }
+            is UserQueryParams.QQ -> "$apiServer/player/qq/${user.qq}"
             is UserQueryParams.Username -> "$apiServer/player/${user.username}"
         }) {
             setDeveloper()
@@ -224,12 +217,7 @@ class LXNS(
             401 -> throw AuthorizationException(response.message)
             404 -> throw UserNotFoundException(response.message)
             400 -> throw UserNotFoundException(response.message)
-            200 -> {
-                val player = response.data ?: return null
-                if (player.friendCode != 0L)
-                    MaimaiSettingsTable[openId, "lxns-friend-code"] = player.friendCode.toString()
-                return player
-            }
+            200 -> return response.data
             else -> throw UnknownException(response.message)
         }
     }
