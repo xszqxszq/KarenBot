@@ -26,23 +26,13 @@ class RatingRenderTest : MaimaiDatabaseTest() {
             configPath = "../config/maimai.yml"
             dataPath = "../data/maimai"
         }
-        step("load") { maimai.load() }
+        maimai.load()
         Thread.sleep(3000)
 
-        val msg = step("says") { sandbox.user() says "/b50 maxscore" }
+        val msg = sandbox.user() says "/b50 maxscore"
 
-        assertNotNull(step("replyFor") { sandbox.replyFor(msg) }) {
+        assertNotNull(sandbox.replyFor(msg)) {
             "Reply is null, replies.size=${sandbox.replies.size}"
-        }
-    }
-
-    private suspend fun <T> step(name: String, block: suspend () -> T): T {
-        try {
-            return block()
-        } catch (e: Exception) {
-            System.err.println("FAILED at step [$name]: ${e.javaClass.name}: ${e.message}")
-            e.printStackTrace(System.err)
-            throw RuntimeException("step [$name] failed: ${e.message}", e)
         }
     }
 }
