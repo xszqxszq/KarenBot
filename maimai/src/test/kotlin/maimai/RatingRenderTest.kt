@@ -13,6 +13,8 @@ class RatingRenderTest : MaimaiDatabaseTest() {
     fun runAll() = runTest {
         val sandbox = setMaimai(this, database)
 
+        testB50(sandbox, "maxscore")
+
         testBind(sandbox)
         testB50(sandbox)
     }
@@ -23,10 +25,13 @@ class RatingRenderTest : MaimaiDatabaseTest() {
         assertReplied(sandbox, msg, "绑定成功")
     }
 
-    private suspend fun testB50(sandbox: BotSandbox) {
+    private suspend fun testB50(sandbox: BotSandbox, args: String ?= null) {
         sandbox.clear()
-        val msg = sandbox.user() says "/b50 maxscore"
-        Thread.sleep(3000)
+        val content = args ?.let {
+            "/b50 $args"
+        } ?: "/b50"
+        val msg = sandbox.user() says content
+        Thread.sleep(5000)
         assertRepliedWithImage(sandbox, msg)
     }
 }
