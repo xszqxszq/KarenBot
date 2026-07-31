@@ -31,7 +31,7 @@ class RatingRenderTest : MaimaiDatabaseTest() {
             "/b50 $args"
         } ?: "/b50"
         val msg = sandbox.user() says content
-        Thread.sleep(5000)
+        Thread.sleep(3000)
         assertRepliedWithImage(sandbox, msg)
     }
 }
