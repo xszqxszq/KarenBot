@@ -56,9 +56,9 @@ jobs:
             assets-jacket: "https://example.com/chunithm/jacket"
           YAML
       - run: ./gradlew test
-#        continue-on-error: true
-#      - uses: actions/upload-artifact@v4
-#        with:
-#          name: test-reports
-#          path: '**/build/reports/tests/'
-#          retention-days: 1
+        continue-on-error: true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: '**/build/reports/tests/'
+          retention-days: 1
