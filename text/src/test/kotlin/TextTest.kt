@@ -20,7 +20,7 @@ class TextTest {
     @Test
     fun testAudit() = runTest {
         val text = textWithClient(
-            MockEngine { request ->
+            MockEngine {
                 respond(
                     content = """{"id":"1","created":1,"model":"test","choices":[{"index":0,"message":{"role":"assistant","content":"false"},"finish_reason":"stop"}]}""",
                     status = HttpStatusCode.OK,

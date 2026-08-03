@@ -29,6 +29,7 @@ import xyz.xszq.bot.payload.markdown.MarkdownData
 import xyz.xszq.bot.payload.markdown.RenderData
 import java.awt.Color
 import kotlin.random.Random
+import kotlin.time.Duration.Companion.milliseconds
 
 @Suppress("unused")
 class Text: Plugin() {
@@ -160,7 +161,7 @@ class Text: Plugin() {
                     video = data
                     return@repeat
                 }
-                delay(500L)
+                delay(500L.milliseconds)
             }
             video ?: run {
                 reply("咦，获取失败了(ó﹏ò｡)")
