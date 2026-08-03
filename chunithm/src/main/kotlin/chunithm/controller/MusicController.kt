@@ -47,7 +47,6 @@ class MusicController(
     private var coverDescriptions: Map<Int, CoverDescData>? = null
     private val coverEmbeddingsPath = "${chunithm.dataPath}/cover-embeddings.json"
     private val coverDescriptionsPath = "${chunithm.dataPath}/cover-descriptions.json"
-    private val embeddingEndpoint = chunithm.config.tokens["doubao-embedding"]
     private val llmJson = Json { ignoreUnknownKeys = true }
 
     override suspend fun setRoute() = rhythm {
@@ -282,7 +281,7 @@ class MusicController(
         }
 
         startsWith("生成封面embedding") {
-            if (!isAdmin() || embeddingEndpoint == null) {
+            if (!isAdmin()) {
                 return@startsWith
             }
             val client = bot.pluginLoader.llmClient ?: return@startsWith
@@ -292,7 +291,6 @@ class MusicController(
                         client = client,
                         coversDir = MusicInfo.coverDir,
                         outputPath = coverEmbeddingsPath,
-                        endpoint = embeddingEndpoint,
                     )
                     coverEmbeddings = CoverEmbeddingGenerator.load(coverEmbeddingsPath)
                 } catch (e: Exception) {
@@ -302,7 +300,7 @@ class MusicController(
         }
 
         startsWith("生成封面描述") {
-            if (!isAdmin() || embeddingEndpoint == null) {
+            if (!isAdmin()) {
                 return@startsWith
             }
             val client = bot.pluginLoader.llmClient ?: return@startsWith
@@ -312,7 +310,6 @@ class MusicController(
                         client = client,
                         coversDir = MusicInfo.coverDir,
                         outputPath = coverDescriptionsPath,
-                        embeddingEndpoint = embeddingEndpoint,
                     )
                     coverDescriptions = CoverEmbeddingGenerator.loadDescriptions(coverDescriptionsPath)
                 } catch (e: Exception) {
@@ -324,9 +321,6 @@ class MusicController(
         startsWith("帮我找") { query ->
             if (query.isBlank()) {
                 reply("使用方法：帮我找 [封面描述]\n例：帮我找像素小人")
-                return@startsWith
-            }
-            if (embeddingEndpoint == null) {
                 return@startsWith
             }
             val client = bot.pluginLoader.llmClient ?: return@startsWith
@@ -341,7 +335,7 @@ class MusicController(
             }
             try {
                 reply("正在搜索中……")
-                val decomposition = client.chat {
+                val decomposition = client.chat(scene = "rhythm-game") {
                     responseFormat("json_object")
                     system("你是一个中二节奏封面搜索助手。用户的描述可能包含多个视觉特征，请拆成独立的短查询。每个短查询只描述一个视觉特征。\n以JSON格式返回：{\"queries\": [\"特征1\", \"特征2\"]}\n例：\"黄色背景戴帽子的男的粉蓝色头发比了一个圆\" → {\"queries\": [\"黄色背景\", \"戴帽子的男角色\", \"粉蓝色头发\", \"比了一个圆\"]}\n不要遗漏任何特征。")
                     user(query)
@@ -356,7 +350,7 @@ class MusicController(
                 val maxSim = mutableMapOf<Int, Double>()
                 for (subQuery in allQueries) {
                     if (subQuery.isBlank()) continue
-                    val qv = client.embed(input = subQuery, model = embeddingEndpoint)
+                    val qv = client.embed(scene = "embedding", input = subQuery)
                     if (qv.isEmpty()) continue
                     val fused = coverEmbeddings!!.mapValues { (resourceId, imgVec) ->
                         val descVec = coverDescriptions?.get(resourceId)?.vec
@@ -405,7 +399,7 @@ class MusicController(
                     appendLine("完全不匹配则返回空数组。只返回JSON，不要其他内容：")
                     appendLine("{\"ids\": [数字]} // 举例: {\"ids\": [299]} 或 {\"ids\": [299, 300, 301]}")
                 }
-                val rankingResult = client.chat {
+                val rankingResult = client.chat(scene = "rhythm-game") {
                     responseFormat("json_object")
                     system(systemPrompt)
                     user(query)

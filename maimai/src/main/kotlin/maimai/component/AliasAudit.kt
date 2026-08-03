@@ -45,7 +45,7 @@ class AliasAudit(
             appendLine("   - 未命中上述任何规则，返回 type=ok")
         }
 
-        val content = llmClient.chat {
+        val content = llmClient.chat(scene = "audit") {
             system(systemPrompt)
             user(buildUserPrompt(music, alias))
             responseFormat("json_object")

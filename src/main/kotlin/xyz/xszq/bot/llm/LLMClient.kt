@@ -32,18 +32,22 @@ class LLMClient(
         }
     }
 
-    suspend fun chat(block: ChatBuilder.() -> Unit): String {
+    private fun modelConfig(scene: String): LLMModelConfig =
+        config.models[scene] ?: throw IllegalArgumentException("未配置 LLM 场景: $scene")
+
+    suspend fun chat(scene: String, block: ChatBuilder.() -> Unit): String {
+        val modelConfig = modelConfig(scene)
         val builder = ChatBuilder().apply(block)
-        val response = client.post("${config.url}/chat/completions") {
+        val response = client.post("${modelConfig.url}/chat/completions") {
             contentType(ContentType.Application.Json)
             headers {
-                append(HttpHeaders.Authorization, "Bearer ${config.apikey}")
+                append(HttpHeaders.Authorization, "Bearer ${modelConfig.apikey}")
             }
             setBody(
                 LLMRequest(
-                    model = config.model,
+                    model = modelConfig.model,
                     messages = builder.messages,
-                    temperature = config.temperature,
+                    temperature = modelConfig.temperature,
                     thinking = builder.thinking,
                     responseFormat = builder.responseFormat,
                 )
@@ -59,23 +63,22 @@ class LLMClient(
             .firstOrNull()?.message?.contentAsText() ?: ""
     }
 
-    suspend fun embed(
-        input: String,
-        model: String? = null,
-    ): List<Float> = embed(input, null, null, model)
+    suspend fun embed(scene: String, input: String): List<Float> =
+        embed(scene, text = input, data = null, mediaType = null)
 
     suspend fun embed(
+        scene: String,
         data: ByteArray,
         mediaType: String = "image/png",
-        model: String? = null,
-    ): List<Float> = embed(null, data, mediaType, model)
+    ): List<Float> = embed(scene, text = null, data = data, mediaType = mediaType)
 
     private suspend fun embed(
+        scene: String,
         text: String?,
         data: ByteArray?,
         mediaType: String?,
-        model: String?,
     ): List<Float> {
+        val modelConfig = modelConfig(scene)
         val parts = mutableListOf<EmbeddingContentPart>()
         if (text != null) {
             parts.add(EmbeddingContentPart(type = "text", text = text))
@@ -87,14 +90,14 @@ class LLMClient(
                 imageUrl = EmbeddingImageUrl(url = "data:$mediaType;base64,$base64"),
             ))
         }
-        val response = client.post("${config.url}/embeddings/multimodal") {
+        val response = client.post("${modelConfig.url}/embeddings/multimodal") {
             contentType(ContentType.Application.Json)
             headers {
-                append(HttpHeaders.Authorization, "Bearer ${config.apikey}")
+                append(HttpHeaders.Authorization, "Bearer ${modelConfig.apikey}")
             }
             setBody(
                 EmbeddingRequest(
-                    model = model ?: config.model,
+                    model = modelConfig.model,
                     input = parts,
                 )
             )

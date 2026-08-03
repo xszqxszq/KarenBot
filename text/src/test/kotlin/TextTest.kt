@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.runTest
 import xyz.xszq.bot.config.TextConfig
 import xyz.xszq.bot.llm.LLMClient
 import xyz.xszq.bot.llm.LLMConfig
+import xyz.xszq.bot.llm.LLMModelConfig
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -65,10 +66,14 @@ class TextTest {
     private fun textWithClient(engine: MockEngine): Text {
         val llmClient = LLMClient(
             LLMConfig(
-                apikey = "apikey",
-                url = "https://example.com",
-                model = "test",
-                temperature = 0.1,
+                models = mapOf(
+                    "audit" to LLMModelConfig(
+                        apikey = "apikey",
+                        url = "https://example.com",
+                        model = "test",
+                        temperature = 0.1,
+                    )
+                )
             ),
             HttpClient(engine) {
                 install(ContentNegotiation) {
@@ -79,7 +84,7 @@ class TextTest {
         val mockPluginLoader = mockk<PluginLoader>()
         every { mockPluginLoader.llmClient } returns llmClient
         return Text().also {
-            it.textConfig = TextConfig(system = "prompt", presets = emptyMap(), remoteKey = "")
+            it.textConfig = TextConfig(system = "prompt", presets = emptyMap())
             it.pluginLoader = mockPluginLoader
         }
     }

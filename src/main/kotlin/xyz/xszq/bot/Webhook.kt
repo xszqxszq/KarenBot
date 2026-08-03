@@ -16,6 +16,7 @@ import xyz.xszq.bot.config.ForwardConfig
 import xyz.xszq.bot.event.*
 import xyz.xszq.bot.message.FileManager
 import xyz.xszq.bot.message.MessageChain
+import xyz.xszq.bot.message.RemoteImage
 import xyz.xszq.bot.payload.*
 import xyz.xszq.bot.payload.event.*
 import java.security.SecureRandom
@@ -91,7 +92,19 @@ suspend fun Application.downloadFiles(
     fileManager: FileManager,
     logger: KLogger
 ) = attachments.mapNotNull { attachment ->
-    downloadFile(attachment.url, attachment.filename, logger)?.let { attachment.url to it }
+    downloadFile(attachment.url, attachment.filename, logger)?.let { file ->
+        Triple(
+            attachment.url,
+            file,
+            RemoteImage(
+                url = attachment.url,
+                filename = attachment.filename,
+                contentType = attachment.contentType,
+                width = attachment.width ?: 0,
+                height = attachment.height ?: 0,
+            )
+        )
+    }
 }.also { pairs ->
     launch(Dispatchers.IO) {
         fileManager.addFiles(pairs.map { it.second })

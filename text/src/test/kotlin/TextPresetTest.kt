@@ -67,7 +67,6 @@ class TextPresetTest {
             textConfig = TextConfig(
                 system = "",
                 presets = presets.toMap(),
-                remoteKey = "",
             )
         }.setRoute()
         sandbox.advanceIdle()

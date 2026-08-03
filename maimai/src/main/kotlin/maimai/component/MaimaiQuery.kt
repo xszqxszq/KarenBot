@@ -164,7 +164,7 @@ class MaimaiQuery(
 
         val json = Json { ignoreUnknownKeys = true }
         return runCatching {
-            val content = client.chat {
+            val content = client.chat(scene = "rhythm-game") {
                 responseFormat("json_object")
                 system(buildString {
                     appendLine("你的职责是解析每张图片并以json格式返回结果。")
@@ -192,7 +192,7 @@ class MaimaiQuery(
 
         val json = Json { ignoreUnknownKeys = true }
         return runCatching {
-            val content = client.chat {
+            val content = client.chat(scene = "rhythm-game") {
                 responseFormat("json_object")
                 system(buildString {
                     appendLine("你的职责是解析每张图片并以json格式返回结果。")

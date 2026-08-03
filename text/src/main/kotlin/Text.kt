@@ -8,15 +8,8 @@ import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
-import io.ktor.client.request.forms.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
 import korlibs.io.util.UUID
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
@@ -42,8 +35,6 @@ class Text: Plugin() {
     lateinit var textConfig: TextConfig
     lateinit var stereotypes: StereotypesPresets
     val randomImage = RandomImage()
-    var blondeHairDetector: BlondeHairDetector? = null
-    private var apiServer: EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration>? = null
 
     internal var client = createHttpClient()
 
@@ -73,19 +64,6 @@ class Text: Plugin() {
             .loadConfigOrThrow<TextConfig>()
 
         randomImage.init()
-
-        textConfig.remoteApi ?.let {
-            logger.info { "[文本] 使用远程API: ${textConfig.remoteApi}" }
-        } ?: run {
-            BlondeHairDetector(
-                "models/wd-v1-4-moat-tagger-v2/wd-v1-4-moat-tagger-v2.onnx",
-                "models/wd-v1-4-moat-tagger-v2/selected_tags.csv"
-            ).also { detector ->
-                detector.init()
-                blondeHairDetector = detector
-            }
-            startApiServer()
-        }
 
         setRoute()
         logger.info { "[文本] 插件加载完成。" }
@@ -139,8 +117,7 @@ class Text: Plugin() {
             }
             if (message.any { it is Image }) {
                 val detected = message.filterIsInstance<Image>().any { img ->
-                    blondeHairDetector ?.recognize(img.file)
-                        ?: remoteDetect(img.url)
+                    llmDetect(img)
                 }
                 if (detected)
                     reply(Image(randomImage.random()))
@@ -236,7 +213,7 @@ class Text: Plugin() {
     suspend fun audit(text: String): Boolean {
         val client = pluginLoader.llmClient ?: return true
         return try {
-            val content = client.chat {
+            val content = client.chat(scene = "audit") {
                 system(textConfig.system)
                 user(text)
             }
@@ -248,48 +225,22 @@ class Text: Plugin() {
         }
     }
 
-    private fun startApiServer() {
-        val key = textConfig.remoteKey
-        apiServer = embeddedServer(Netty, host = "0.0.0.0", port = 18101) {
-            routing {
-                post("/blonde") {
-                    val auth = call.request.header(HttpHeaders.Authorization)
-                    if (auth != "Bearer $key") {
-                        call.respond(HttpStatusCode.Unauthorized)
-                        return@post
-                    }
-                    val imageUrl = call.receiveParameters()["url"] ?: run {
-                        call.respond(HttpStatusCode.BadRequest)
-                        return@post
-                    }
-                    val detector = blondeHairDetector ?: run {
-                        call.respond(HttpStatusCode.InternalServerError)
-                        return@post
-                    }
-                    val imageBytes = client.get(imageUrl).bodyAsBytes()
-                    useTempFile(suffix = ".jpg") { file ->
-                        file.writeBytes(imageBytes)
-                        val result = detector.recognize(file)
-                        call.respondText(if (result) "true" else "false")
-                    }
-                }
-            }
-        }.start(wait = false)
-    }
-
-    private suspend fun remoteDetect(imageUrl: String): Boolean {
-        val api = textConfig.remoteApi ?: return false
-        val key = textConfig.remoteKey
+    private suspend fun llmDetect(img: Image): Boolean {
+        val client = pluginLoader.llmClient ?: return false
+        val remote = img.remote ?: return false
+        val longEdge = maxOf(remote.width, remote.height)
+        val shortEdge = minOf(remote.width, remote.height)
+        if (longEdge > 1600 || shortEdge > 900)
+            return false
         return runCatching {
-            val response = client.submitForm(
-                url = "$api/blonde",
-                formParameters = Parameters.build {
-                    append("url", imageUrl)
+            val content = client.chat(scene = "blonde") {
+                thinking(false)
+                system("你是一名动漫角色金发识别助手。请判断图中的角色是否为金发（blonde hair，金黄色/淡金色/金色头发），同时角色应为女性或性别不明显的角色。只回答true或false，不要输出任何其他内容。")
+                user {
+                    image(img.url)
                 }
-            ) {
-                header(HttpHeaders.Authorization, "Bearer $key")
             }
-            response.bodyAsText().toBooleanStrictOrNull() ?: false
+            content.toBooleanStrictOrNull() ?: false
         }.getOrElse { false }
     }
 }

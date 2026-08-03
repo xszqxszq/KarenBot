@@ -5,7 +5,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import xyz.xszq.bot.llm.LLMClient
 import java.awt.RenderingHints
@@ -45,7 +44,6 @@ object CoverEmbeddingGenerator {
         client: LLMClient,
         coversDir: String,
         outputPath: String = "${coversDir}/../cover-embeddings.json",
-        endpoint: String,
     ) {
         val coverDir = Paths.get(coversDir).toAbsolutePath().normalize()
         val existing = load(outputPath)
@@ -80,9 +78,9 @@ object CoverEmbeddingGenerator {
             try {
                 val bytes = compressImage(file)
                 val vector = client.embed(
+                    scene = "embedding",
                     data = bytes,
                     mediaType = "image/jpeg",
-                    model = endpoint,
                 )
                 if (vector.isNotEmpty()) {
                     result[resourceId] = vector
@@ -114,7 +112,6 @@ object CoverEmbeddingGenerator {
         client: LLMClient,
         coversDir: String,
         outputPath: String = "${coversDir}/../cover-descriptions.json",
-        embeddingEndpoint: String,
     ) {
         val coverDir = Paths.get(coversDir).toAbsolutePath().normalize()
         val existing = loadDescriptions(outputPath)
@@ -151,7 +148,7 @@ object CoverEmbeddingGenerator {
                     semaphore.withPermit {
                         try {
                             val bytes = compressImage(file)
-                            val desc = client.chat {
+                            val desc = client.chat(scene = "rhythm-game") {
                                 system("你是一个中二节奏封面描述专家。请用100-150字详细描述这张封面的视觉特征：人物、动作、服装颜色、表情、背景场景、色调、构图风格、整体氛围。如果画面有文字也描述文字。用中文。只返回描述文本，不要任何前缀。")
                                 user {
                                     image(bytes, ContentType.Image.JPEG)
@@ -163,8 +160,8 @@ object CoverEmbeddingGenerator {
                                 return@withPermit
                             }
                             val vec = client.embed(
+                                scene = "embedding",
                                 input = desc,
-                                model = embeddingEndpoint,
                             )
                             synchronized(result) {
                                 if (vec.isNotEmpty()) {
@@ -215,9 +212,3 @@ object CoverEmbeddingGenerator {
         }.getOrDefault(emptyMap())
     }
 }
-
-@Serializable
-data class CoverDescData(
-    val desc: String,
-    val vec: List<Float>,
-)

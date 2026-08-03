@@ -7,6 +7,4 @@ data class TextConfig(
     val system: String = "",
     val presets: Map<String, String> = emptyMap(),
     val userSpecifiedPresets: List<UserSpecifiedPreset> = emptyList(),
-    val remoteApi: String? = null,
-    val remoteKey: String,
 )

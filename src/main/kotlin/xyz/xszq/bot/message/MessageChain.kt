@@ -19,13 +19,12 @@ class MessageChain() {
         list.addAll(elements)
     }
 
-    @OptIn(ExperimentalEncodingApi::class)
-    constructor(raw: String, images: List<Pair<String, VfsFile>> = emptyList(),
+    constructor(raw: String, images: List<Triple<String, VfsFile, RemoteImage?>> = emptyList(),
                 bot: Bot? = null, mentions: List<Member>? = null,
                 ark: ArkData? = null,
                 attachments: List<Attachment> = emptyList()) : this() {
         list.addAll(raw.parseMessageElements(bot, mentions))
-        list.addAll(images.map { Image(it.second, it.first) })
+        list.addAll(images.map { Image(it.second, it.first, it.third) })
         list.addAll(attachments.mapNotNull { it.toMessageElement() })
         ark ?.let { list.add(Ark(it)) }
     }
