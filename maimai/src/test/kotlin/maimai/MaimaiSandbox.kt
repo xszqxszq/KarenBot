@@ -14,12 +14,14 @@ suspend fun setMaimai(scope: TestScope, database: org.jetbrains.exposed.sql.Data
     coEvery { cos.uploadBinary(any(), any()) } returns UploadResult("https://example.com/b50.jpg", "b50.jpg")
 
     val sandbox = BotSandbox(scope, cos, database)
-    Maimai().apply {
+    val maimai = Maimai().apply {
         plugin = "maimai"
         pluginLoader = sandbox.pluginLoader
         configPath = "../config/maimai.yml"
         dataPath = "../data/maimai"
-    }.load()
+    }
+    maimai.load()
+    maimai.image.manager.init()
     return sandbox
 }
 

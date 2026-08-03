@@ -3,7 +3,11 @@ package xyz.xszq.bot.chunithm.component
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.apache.lucene.analysis.Analyzer
-import org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer
+import org.apache.lucene.analysis.TokenStream
+import org.apache.lucene.analysis.Tokenizer
+import org.apache.lucene.analysis.core.LowerCaseFilter
+import org.apache.lucene.analysis.ngram.NGramTokenFilter
+import org.apache.lucene.analysis.standard.StandardTokenizer
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
 import org.apache.lucene.document.Document
 import org.apache.lucene.document.Field
@@ -28,7 +32,14 @@ class AliasesSearch(
     private val index = "chunithm_music_name"
     private val indexPath: Path = Path.of("${chunithm.dataPath}/../database/lucene/$index")
     private val directory = FSDirectory.open(indexPath)
-    private val analyzer: Analyzer = SmartChineseAnalyzer()
+    private val analyzer: Analyzer = object : Analyzer() {
+        override fun createComponents(fieldName: String): Analyzer.TokenStreamComponents {
+            val tokenizer: Tokenizer = StandardTokenizer()
+            var stream: TokenStream = LowerCaseFilter(tokenizer)
+            stream = NGramTokenFilter(stream, 1, 2, false)
+            return Analyzer.TokenStreamComponents(tokenizer, stream)
+        }
+    }
     private val writer: IndexWriter = IndexWriter(
         directory,
         IndexWriterConfig(analyzer).apply {
@@ -160,31 +171,15 @@ class AliasesSearch(
             .map { it.trim().lowercase() }
             .filter { it.isNotEmpty() }
             .distinct()
-            .sortedByDescending { it.length }
-            .take(6)
             .toList()
         if (terms.isEmpty())
             return emptyList()
 
         val bool = BooleanQuery.Builder().apply {
-            setMinimumNumberShouldMatch(
-                when {
-                    terms.size >= 4 -> 2
-                    else -> 1
-                }
-            )
+            setMinimumNumberShouldMatch(maxOf(1, (terms.size * 0.4).toInt()))
         }
         terms.forEach { value ->
-            val term = Term("alias", value)
-            bool.add(TermQuery(term), BooleanClause.Occur.SHOULD)
-            if (value.length >= 2) {
-                val fuzzyQuery = when {
-                    value.length <= 2 -> FuzzyQuery(term, 1, 0, 10, true)
-                    value.length <= 4 -> FuzzyQuery(term, 1, 0, 20, true)
-                    else -> FuzzyQuery(term, 1, 1, 50, true)
-                }
-                bool.add(fuzzyQuery, BooleanClause.Occur.SHOULD)
-            }
+            bool.add(TermQuery(Term("alias", value)), BooleanClause.Occur.SHOULD)
         }
         val luceneQuery = bool.build()
 
@@ -208,9 +203,46 @@ class AliasesSearch(
                     else
                         MusicNameAlias(musicId, alias)
                 }
+                .filter { fuzzyMatch(query, it.alias) }
                 .distinctBy { it.musicId }
                 .toList()
         }
+    }
+    private fun fuzzyMatch(query: String, alias: String): Boolean {
+        if (similarity(query, alias) >= 0.5) return true
+        val x = query.lowercase()
+        val y = alias.lowercase()
+        if (x.length < 3 || y.length < 3) return false
+        val window = y.length
+        for (i in 0..x.length - window) {
+            if (similarity(x.substring(i, i + window), y) >= 0.75) return true
+        }
+        return false
+    }
+    private fun similarity(a: String, b: String): Double {
+        val x = a.lowercase()
+        val y = b.lowercase()
+        if (x == y) return 1.0
+        if (x.isEmpty() || y.isEmpty()) return 0.0
+        val n = x.length
+        val m = y.length
+        val dp = Array(n + 1) { IntArray(m + 1) }
+        for (i in 0..n) dp[i][0] = i
+        for (j in 0..m) dp[0][j] = j
+        for (i in 1..n) {
+            for (j in 1..m) {
+                val cost = if (x[i - 1] == y[j - 1]) 0 else 1
+                dp[i][j] = minOf(
+                    dp[i - 1][j] + 1,
+                    dp[i][j - 1] + 1,
+                    dp[i - 1][j - 1] + cost,
+                )
+                if (i > 1 && j > 1 && x[i - 1] == y[j - 2] && x[i - 2] == y[j - 1]) {
+                    dp[i][j] = minOf(dp[i][j], dp[i - 2][j - 2] + 1)
+                }
+            }
+        }
+        return 1.0 - dp[n][m].toDouble() / maxOf(n, m)
     }
 
     suspend fun search(

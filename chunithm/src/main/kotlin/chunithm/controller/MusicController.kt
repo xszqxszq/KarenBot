@@ -323,98 +323,8 @@ class MusicController(
                 reply("使用方法：帮我找 [封面描述]\n例：帮我找像素小人")
                 return@startsWith
             }
-            val client = bot.pluginLoader.llmClient ?: return@startsWith
-            if (coverEmbeddings == null) {
-                coverEmbeddings = CoverEmbeddingGenerator.load(coverEmbeddingsPath)
-            }
-            if (coverEmbeddings.isNullOrEmpty()) {
-                return@startsWith
-            }
-            if (coverDescriptions == null) {
-                coverDescriptions = CoverEmbeddingGenerator.loadDescriptions(coverDescriptionsPath)
-            }
-            try {
-                reply("正在搜索中……")
-                val decomposition = client.chat(scene = "rhythm-game") {
-                    responseFormat("json_object")
-                    system("你是一个中二节奏封面搜索助手。用户的描述可能包含多个视觉特征，请拆成独立的短查询。每个短查询只描述一个视觉特征。\n以JSON格式返回：{\"queries\": [\"特征1\", \"特征2\"]}\n例：\"黄色背景戴帽子的男的粉蓝色头发比了一个圆\" → {\"queries\": [\"黄色背景\", \"戴帽子的男角色\", \"粉蓝色头发\", \"比了一个圆\"]}\n不要遗漏任何特征。")
-                    user(query)
-                }
-                val subQueries = try {
-                    llmJson.decodeFromString<CoverQueriesResult>(decomposition).queries
-                } catch (_: Exception) {
-                    emptyList()
-                }
-                val allQueries = listOf(query) + (subQueries.take(5))
-                val votes = mutableMapOf<Int, Int>()
-                val maxSim = mutableMapOf<Int, Double>()
-                for (subQuery in allQueries) {
-                    if (subQuery.isBlank()) continue
-                    val qv = client.embed(scene = "embedding", input = subQuery)
-                    if (qv.isEmpty()) continue
-                    val fused = coverEmbeddings!!.mapValues { (resourceId, imgVec) ->
-                        val descVec = coverDescriptions?.get(resourceId)?.vec
-                        val imgSim = CosineSimilarity.compute(qv, imgVec)
-                        val descSim = if (descVec != null) CosineSimilarity.compute(qv, descVec) else imgSim
-                        imgSim * 0.6 + descSim * 0.4
-                    }
-                    fused.entries.sortedByDescending { it.value }.take(20).forEach { (rid, score) ->
-                        votes[rid] = (votes[rid] ?: 0) + 1
-                        val prev = maxSim[rid] ?: -1.0
-                        if (score > prev) maxSim[rid] = score
-                    }
-                }
-                val ranked = votes.entries.sortedByDescending { (rid) ->
-                    votes[rid]!! * 10000 + (maxSim[rid] ?: 0.0).toLong()
-                }.take(30)
-                if (ranked.isEmpty()) {
-                    reply("没有找到匹配的歌曲")
-                    return@startsWith
-                }
-                val candidates = ranked.mapNotNull { (resourceId, _) ->
-                    val music = chunithm.musics().firstOrNull { it.resourceId == resourceId }
-                    music?.let { it to (votes[resourceId] ?: 0) }
-                }
-                if (candidates.isEmpty()) {
-                    reply("没有找到匹配的歌曲")
-                    return@startsWith
-                }
-                val candidateInfo = candidates.joinToString("\n") { (music, voteCount) ->
-                    val desc = coverDescriptions?.get(music.resourceId)?.desc?.take(200) ?: ""
-                    buildString {
-                        appendLine("${music.id}. ${music.name}")
-                        appendLine("   艺术家: ${music.artist} | 分类: ${music.genre.genreName} | 版本: ${music.version.name}")
-                        if (desc.isNotBlank()) appendLine("   封面描述: $desc")
-                        appendLine("   命中子查询: $voteCount/${allQueries.size}")
-                    }
-                }
-                val systemPrompt = buildString {
-                    appendLine("你是一个中二节奏歌曲搜索助手。")
-                    appendLine("用户用自然语言描述了他记忆中的歌曲封面特征。")
-                    appendLine("以下是候选歌曲及其详细信息：")
-                    appendLine(candidateInfo)
-                    appendLine()
-                    appendLine("请根据用户的描述，综合封面描述、歌曲信息（艺术家、分类、版本等）选出最匹配的歌曲ID。")
-                    appendLine("如果某个封面明显匹配，只返回1首。如果多个候选都类似，最多返回5首。")
-                    appendLine("完全不匹配则返回空数组。只返回JSON，不要其他内容：")
-                    appendLine("{\"ids\": [数字]} // 举例: {\"ids\": [299]} 或 {\"ids\": [299, 300, 301]}")
-                }
-                val rankingResult = client.chat(scene = "rhythm-game") {
-                    responseFormat("json_object")
-                    system(systemPrompt)
-                    user(query)
-                }
-                val resultIds = llmJson.decodeFromString<CoverIdsResult>(rankingResult).ids
-                val musics = resultIds.mapNotNull { chunithm.music(it) }
-                if (musics.isEmpty()) {
-                    reply("没有找到匹配的歌曲")
-                    return@startsWith
-                }
-                showMusics("chunithm-cover-search", query, musics, "", 1, 1)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                reply("搜索失败：${e.message}")
-            }
+            reply("正在搜索中……")
+            searchByCover(query)
         }
     }
 
@@ -427,6 +337,99 @@ class MusicController(
     data class CoverQueriesResult(
         val queries: List<String> = emptyList(),
     )
+
+    private suspend fun ReplyAble.searchByCover(query: String) {
+        val client = bot.pluginLoader.llmClient ?: return
+        if (coverEmbeddings == null) {
+            coverEmbeddings = CoverEmbeddingGenerator.load(coverEmbeddingsPath)
+        }
+        if (coverEmbeddings.isNullOrEmpty()) {
+            return
+        }
+        if (coverDescriptions == null) {
+            coverDescriptions = CoverEmbeddingGenerator.loadDescriptions(coverDescriptionsPath)
+        }
+        try {
+            val decomposition = client.chat(scene = "rhythm-game") {
+                responseFormat("json_object")
+                system("你是一个中二节奏封面搜索助手。用户的描述可能包含多个视觉特征，请拆成独立的短查询。每个短查询只描述一个视觉特征。\n以JSON格式返回：{\"queries\": [\"特征1\", \"特征2\"]}\n例：\"黄色背景戴帽子的男的粉蓝色头发比了一个圆\" → {\"queries\": [\"黄色背景\", \"戴帽子的男角色\", \"粉蓝色头发\", \"比了一个圆\"]}\n不要遗漏任何特征。")
+                user(query)
+            }
+            val subQueries = try {
+                llmJson.decodeFromString<CoverQueriesResult>(decomposition).queries
+            } catch (_: Exception) {
+                emptyList()
+            }
+            val allQueries = listOf(query) + (subQueries.take(5))
+            val votes = mutableMapOf<Int, Int>()
+            val maxSim = mutableMapOf<Int, Double>()
+            for (subQuery in allQueries) {
+                if (subQuery.isBlank()) continue
+                val qv = client.embed(scene = "embedding", input = subQuery)
+                if (qv.isEmpty()) continue
+                val fused = coverEmbeddings!!.mapValues { (resourceId, imgVec) ->
+                    val descVec = coverDescriptions?.get(resourceId)?.vec
+                    val imgSim = CosineSimilarity.compute(qv, imgVec)
+                    val descSim = if (descVec != null) CosineSimilarity.compute(qv, descVec) else imgSim
+                    imgSim * 0.6 + descSim * 0.4
+                }
+                fused.entries.sortedByDescending { it.value }.take(20).forEach { (rid, score) ->
+                    votes[rid] = (votes[rid] ?: 0) + 1
+                    val prev = maxSim[rid] ?: -1.0
+                    if (score > prev) maxSim[rid] = score
+                }
+            }
+            val ranked = votes.entries.sortedByDescending { (rid) ->
+                votes[rid]!! * 10000 + (maxSim[rid] ?: 0.0).toLong()
+            }.take(30)
+            if (ranked.isEmpty()) {
+                reply("没有找到匹配的歌曲")
+                return
+            }
+            val candidates = ranked.mapNotNull { (resourceId, _) ->
+                val music = chunithm.musics().firstOrNull { it.resourceId == resourceId }
+                music?.let { it to (votes[resourceId] ?: 0) }
+            }
+            if (candidates.isEmpty()) {
+                reply("没有找到匹配的歌曲")
+                return
+            }
+            val candidateInfo = candidates.joinToString("\n") { (music, voteCount) ->
+                val desc = coverDescriptions?.get(music.resourceId)?.desc?.take(200) ?: ""
+                buildString {
+                    appendLine("${music.id}. ${music.name}")
+                    appendLine("   艺术家: ${music.artist} | 分类: ${music.genre.genreName} | 版本: ${music.version.name}")
+                    if (desc.isNotBlank()) appendLine("   封面描述: $desc")
+                    appendLine("   命中子查询: $voteCount/${allQueries.size}")
+                }
+            }
+            val systemPrompt = buildString {
+                appendLine("你是一个中二节奏歌曲搜索助手。")
+                appendLine("用户用自然语言描述了他记忆中的歌曲封面特征。")
+                appendLine("以下是候选歌曲及其详细信息：")
+                appendLine(candidateInfo)
+                appendLine()
+                appendLine("请根据用户的描述，综合封面描述、歌曲信息（艺术家、分类、版本等）选出最匹配的歌曲ID。")
+                appendLine("如果某个封面明显匹配，只返回1首。如果多个候选都类似，最多返回5首。")
+                appendLine("完全不匹配则返回空数组。只返回JSON，不要其他内容：")
+                appendLine("{\"ids\": [数字]} // 举例: {\"ids\": [299]} 或 {\"ids\": [299, 300, 301]}")
+            }
+            val rankingResult = client.chat(scene = "rhythm-game") {
+                responseFormat("json_object")
+                system(systemPrompt)
+                user(query)
+            }
+            val resultIds = llmJson.decodeFromString<CoverIdsResult>(rankingResult).ids
+            val musics = resultIds.mapNotNull { chunithm.music(it) }
+            if (musics.isEmpty()) {
+                reply("没有找到匹配的歌曲")
+                return
+            }
+            showMusics("chunithm-cover-search", query, musics, "", 1, 1)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 
     private suspend fun searchMusic(
         name: String
@@ -519,6 +522,16 @@ class MusicController(
         page: Int = 1
     ) {
         val (result, nowPage, totalPages) = searchMusic(name).pagination(page, maxResults)
+        if (result.isEmpty()) {
+            reply("未找到结果，正在根据封面特征查找……\n\nTIPS：使用\"帮我找\"命令可以直接根据封面特征查找") {
+                line("**中二节奏**")
+                line("未找到结果，正在根据封面特征查找……")
+                line()
+                line("> TIPS：使用\"帮我找\"命令可以直接根据封面特征查找")
+            }
+            searchByCover(name)
+            return
+        }
         showMusics(
             "chunithm-search-word",
             name,
