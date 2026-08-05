@@ -1,7 +1,7 @@
 package xyz.xszq.bot.maimai.component
 
 object CosineSimilarity {
-    fun compute(a: List<Float>, b: List<Float>): Double {
+    fun compute(a: FloatArray, b: FloatArray): Double {
         if (a.size != b.size || a.isEmpty()) return 0.0
         var dot = 0.0
         var normA = 0.0
@@ -15,7 +15,7 @@ object CosineSimilarity {
         return if (denom == 0.0) 0.0 else dot / denom
     }
 
-    fun topK(query: List<Float>, candidates: Map<Int, List<Float>>, k: Int): List<Pair<Int, Double>> {
+    fun topK(query: FloatArray, candidates: Map<Int, FloatArray>, k: Int): List<Pair<Int, Double>> {
         return candidates.mapValues { (_, vec) -> compute(query, vec) }
             .entries
             .sortedByDescending { it.value }

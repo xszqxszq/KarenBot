@@ -1,7 +1,7 @@
 package xyz.xszq.bot.chunithm.component
 
 object CosineSimilarity {
-    fun compute(a: List<Float>, b: List<Float>): Double {
+    fun compute(a: FloatArray, b: FloatArray): Double {
         if (a.size != b.size || a.isEmpty()) return 0.0
         var dot = 0.0
         var normA = 0.0

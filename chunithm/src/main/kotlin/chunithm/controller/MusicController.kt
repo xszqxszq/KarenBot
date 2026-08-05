@@ -43,7 +43,7 @@ class MusicController(
 
     private val jacketUrl = chunithm.config.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")
 
-    private var coverEmbeddings: Map<Int, List<Float>>? = null
+    private var coverEmbeddings: Map<Int, FloatArray>? = null
     private var coverDescriptions: Map<Int, CoverDescData>? = null
     private val coverEmbeddingsPath = "${chunithm.dataPath}/cover-embeddings.json"
     private val coverDescriptionsPath = "${chunithm.dataPath}/cover-descriptions.json"
@@ -367,10 +367,11 @@ class MusicController(
                 if (subQuery.isBlank()) continue
                 val qv = client.embed(scene = "embedding", input = subQuery)
                 if (qv.isEmpty()) continue
+                val qvArray = qv.toFloatArray()
                 val fused = coverEmbeddings!!.mapValues { (resourceId, imgVec) ->
                     val descVec = coverDescriptions?.get(resourceId)?.vec
-                    val imgSim = CosineSimilarity.compute(qv, imgVec)
-                    val descSim = if (descVec != null) CosineSimilarity.compute(qv, descVec) else imgSim
+                    val imgSim = CosineSimilarity.compute(qvArray, imgVec)
+                    val descSim = if (descVec != null) CosineSimilarity.compute(qvArray, descVec) else imgSim
                     imgSim * 0.6 + descSim * 0.4
                 }
                 fused.entries.sortedByDescending { it.value }.take(20).forEach { (rid, score) ->

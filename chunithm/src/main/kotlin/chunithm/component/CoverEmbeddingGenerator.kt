@@ -83,7 +83,7 @@ object CoverEmbeddingGenerator {
                     mediaType = "image/jpeg",
                 )
                 if (vector.isNotEmpty()) {
-                    result[resourceId] = vector
+                    result[resourceId] = vector.toFloatArray()
                     success++
                 } else {
                     println("[ChuCoverEmbedding] 警告：${file.name} 返回空向量")
@@ -165,7 +165,7 @@ object CoverEmbeddingGenerator {
                             )
                             synchronized(result) {
                                 if (vec.isNotEmpty()) {
-                                    result[resourceId] = CoverDescData(desc = desc, vec = vec)
+                                    result[resourceId] = CoverDescData(desc = desc, vec = vec.toFloatArray())
                                     success.incrementAndGet()
                                 } else {
                                     println("[ChuCoverDesc] 警告：${file.name} 描述向量为空")
@@ -194,11 +194,11 @@ object CoverEmbeddingGenerator {
         println("[ChuCoverDesc] 结果已保存至：$outputFile。")
     }
 
-    fun load(path: String): Map<Int, List<Float>> {
+    fun load(path: String): Map<Int, FloatArray> {
         val file = File(path)
         if (!file.exists()) return emptyMap()
         return runCatching {
-            val map = json.decodeFromString<Map<String, List<Float>>>(file.readText(Charsets.UTF_8))
+            val map = json.decodeFromString<Map<String, FloatArray>>(file.readText(Charsets.UTF_8))
             map.entries.associate { (key, value) -> key.toInt() to value }
         }.getOrDefault(emptyMap())
     }
