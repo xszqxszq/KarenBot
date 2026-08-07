@@ -4,10 +4,10 @@ import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
-object BlondeDetectionCache : Table("blonde_detection_cache") {
+object BlondeDetectionCache : Table() {
     val md5 = varchar("md5", 32)
     val result = bool("result")
-    val detectedAt = long("detected_at")
+    val detected = long("detected")
     override val primaryKey = PrimaryKey(md5)
 
     suspend fun get(md5: String): Boolean? = newSuspendedTransaction {
@@ -19,7 +19,7 @@ object BlondeDetectionCache : Table("blonde_detection_cache") {
         insert {
             it[this.md5] = md5
             it[this.result] = result
-            it[this.detectedAt] = detectedAt
+            it[this.detected] = detectedAt
         }
     }
 }
