@@ -12,13 +12,19 @@ import io.ktor.server.routing.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.*
 import xyz.xszq.bot.Maimai
+import xyz.xszq.bot.User
+import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.maimai.api.DivingFish
 import xyz.xszq.bot.maimai.api.LXNS
 import xyz.xszq.bot.maimai.component.WaitingEventData
 import xyz.xszq.bot.maimai.database.DivingFishBindTable
 import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
+import xyz.xszq.bot.maimai.music.UserQueryParams
+import xyz.xszq.bot.maimai.payload.LXNSResponse
+import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.reply
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
@@ -60,6 +66,105 @@ class ApiController(
             }
         }
         routing {
+            get("/query/b50") {
+                val auth = call.request.headers[HttpHeaders.Authorization]
+                val expected = maimai.config.tokens["api-key"] ?: run {
+                    call.respondText("server not configured", status = HttpStatusCode.InternalServerError)
+                    return@get
+                }
+                if (auth != "Bearer $expected") {
+                    call.respondText("unauthorized", status = HttpStatusCode.Unauthorized)
+                    return@get
+                }
+                val query = call.request.queryParameters
+                val qq = query["qq"] ?: run {
+                    call.respondText("missing qq", status = HttpStatusCode.BadRequest)
+                    return@get
+                }
+                val api = query["api"]
+                val qqNumber = qq.toLongOrNull() ?: run {
+                    call.respondText("invalid qq", status = HttpStatusCode.BadRequest)
+                    return@get
+                }
+                val user = UserQueryParams.QQ(
+                    qq = qqNumber,
+                    event = MessageEvent(
+                        bot = maimai.pluginLoader.bot,
+                        eventId = "",
+                        id = "",
+                        message = MessageChain(),
+                        sender = User(maimai.pluginLoader.bot, ""),
+                    ),
+                    isSelf = false,
+                )
+                val (response, usedApi) = when (api) {
+                    null -> runCatching {
+                        maimai.query.rating(user)
+                    }.getOrElse {
+                        call.respondText("query failed: ${it.message}", status = HttpStatusCode.BadGateway)
+                        return@get
+                    }
+                    else -> {
+                        val backend = runCatching {
+                            maimai.backend(api)
+                        }.getOrElse {
+                            call.respondText("unknown api", status = HttpStatusCode.BadRequest)
+                            return@get
+                        }
+                        val data = backend.getPlayerRating(user)
+                        if (data == null) {
+                            call.respondText("query failed", status = HttpStatusCode.BadGateway)
+                            return@get
+                        }
+                        Pair(data, backend)
+                    }
+                }
+                val data = buildJsonObject {
+                    put("player", buildJsonObject {
+                        put("name", response.player.nickname)
+                        put("rating", response.player.rating)
+                        put("course_rank", response.player.course)
+                    })
+                    put("standard", buildJsonArray {
+                        response.oldRatingList.forEach { add(Json.encodeToJsonElement(with(LXNS) { it.toLxnsScore() })) }
+                    })
+                    put("dx", buildJsonArray {
+                        response.newRatingList.forEach { add(Json.encodeToJsonElement(with(LXNS) { it.toLxnsScore() })) }
+                    })
+                }
+                call.respondText(
+                    contentType = ContentType.Application.Json,
+                ) {
+                    Json.encodeToString(
+                        LXNSResponse(
+                            success = true,
+                            code = 0,
+                            message = "ok",
+                            data = data,
+                        )
+                    )
+                }
+            }
+            get("/query/musics") {
+                val auth = call.request.headers[HttpHeaders.Authorization]
+                val expected = maimai.config.tokens["api-key"] ?: run {
+                    call.respondText("server not configured", status = HttpStatusCode.InternalServerError)
+                    return@get
+                }
+                if (auth != "Bearer $expected") {
+                    call.respondText("unauthorized", status = HttpStatusCode.Unauthorized)
+                    return@get
+                }
+                if (maimai.maimaiData.localMusics.isEmpty()) {
+                    call.respondText("music data not loaded", status = HttpStatusCode.InternalServerError)
+                    return@get
+                }
+                call.respondText(
+                    contentType = ContentType.Application.Json,
+                ) {
+                    Json.encodeToString(maimai.maimaiData.localMusics)
+                }
+            }
             get("/lxns/callback") {
                 val query = call.request.queryParameters
                 val code = query["code"] ?: return@get

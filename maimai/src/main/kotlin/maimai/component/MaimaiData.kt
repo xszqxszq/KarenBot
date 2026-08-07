@@ -17,6 +17,7 @@ class MaimaiData(
 
     val versions = mutableMapOf<String, GameVersion>()
     val musics = mutableMapOf<Int, MusicInfo>()
+    var localMusics: List<LocalMusicInfo> = emptyList()
     val plates = mutableMapOf<Int, LocalPlateInfo>()
     val icons = mutableMapOf<Int, LocalIconInfo>()
     val courses = mutableMapOf<Int, LocalCourseInfo>()
@@ -45,9 +46,11 @@ class MaimaiData(
 
     fun getMusicList(): Map<Int, MusicInfo> {
         musics.clear()
-        musics.putAll(json.decodeFromString<List<LocalMusicInfo>>(
+        val decoded = json.decodeFromString<List<LocalMusicInfo>>(
             File(dataDir.absolutePath + "/music.json").readText(Charsets.UTF_8)
-        ).map { localMusicInfo ->
+        )
+        localMusics = decoded
+        musics.putAll(decoded.map { localMusicInfo ->
             MusicInfo(
                 id = localMusicInfo.id,
                 name = localMusicInfo.name,
