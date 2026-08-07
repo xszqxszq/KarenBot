@@ -13,6 +13,9 @@ import io.ktor.serialization.kotlinx.json.*
 import korlibs.io.util.UUID
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.exists
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.scilab.forge.jlatexmath.TeXConstants
 import org.scilab.forge.jlatexmath.TeXFormula
 import xyz.xszq.bot.config.TextConfig
@@ -28,6 +31,8 @@ import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.payload.markdown.MarkdownData
 import xyz.xszq.bot.payload.markdown.RenderData
 import java.awt.Color
+import java.security.MessageDigest
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -38,6 +43,8 @@ class Text: Plugin() {
     val randomImage = RandomImage()
 
     internal var client = createHttpClient()
+
+    private val lastDetect = ConcurrentHashMap<String, Long>()
 
     companion object {
         fun createHttpClient() = HttpClient {
@@ -65,6 +72,13 @@ class Text: Plugin() {
             .loadConfigOrThrow<TextConfig>()
 
         randomImage.init()
+
+        transaction(database) {
+            listOf(BlondeDetectionCache).forEach { table ->
+                if (!table.exists())
+                    SchemaUtils.create(table)
+            }
+        }
 
         setRoute()
         logger.info { "[文本] 插件加载完成。" }
@@ -117,11 +131,16 @@ class Text: Plugin() {
                 return@always
             }
             if (message.any { it is Image }) {
-                val detected = message.filterIsInstance<Image>().any { img ->
-                    llmDetect(img)
+                val images = message.filterIsInstance<Image>()
+                val detected = images.any { img -> llmDetect(img) }
+                if (detected) {
+                    val now = System.currentTimeMillis()
+                    val allowed = lastDetect.compute(sender.id) { _, last ->
+                        if (last == null || now - last >= 5000) now else last
+                    } == now
+                    if (allowed)
+                        reply(Image(randomImage.random()))
                 }
-                if (detected)
-                    reply(Image(randomImage.random()))
             }
         }
         startsWith(listOf("来点金发", "来点金毛", "来点黄毛", "随机金发", "随机黄毛")) {
@@ -227,13 +246,17 @@ class Text: Plugin() {
     }
 
     private suspend fun llmDetect(img: Image): Boolean {
-        val client = pluginLoader.llmClient ?: return false
         val remote = img.remote ?: return false
         val longEdge = maxOf(remote.width, remote.height)
         val shortEdge = minOf(remote.width, remote.height)
         if (longEdge > 1600 || shortEdge > 900)
             return false
-        return runCatching {
+        val bytes = img.file.readAll()
+        val md5 = MessageDigest.getInstance("MD5").digest(bytes)
+            .joinToString("") { "%02x".format(it) }
+        BlondeDetectionCache.get(md5)?.let { return it }
+        val client = pluginLoader.llmClient ?: return false
+        val result = runCatching {
             val content = client.chat(scene = "blonde") {
                 thinking(false)
                 system("你是一名动漫角色金发识别助手。请判断图中的角色是否为金发（blonde hair，金黄色/淡金色/金色头发），同时角色应为女性或性别不明显的角色。只回答true或false，不要输出任何其他内容。")
@@ -243,5 +266,7 @@ class Text: Plugin() {
             }
             content.toBooleanStrictOrNull() ?: false
         }.getOrElse { false }
+        BlondeDetectionCache.put(md5, result, System.currentTimeMillis())
+        return result
     }
 }
