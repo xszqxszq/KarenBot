@@ -67,6 +67,17 @@ class BotSandbox(
 
     fun replyFor(event: MessageEvent) = replyMap[event.eventId]
 
+    fun awaitReply(event: MessageEvent, timeoutMs: Long = 30_000): MessageEvent? {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        var reply: MessageEvent? = null
+        while (reply == null && System.currentTimeMillis() < deadline) {
+            reply = replyFor(event)
+            if (reply == null)
+                Thread.sleep(100)
+        }
+        return reply
+    }
+
     fun clear() {
         replies.clear()
         replyMap.clear()

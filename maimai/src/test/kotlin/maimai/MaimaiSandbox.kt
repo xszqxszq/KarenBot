@@ -26,13 +26,13 @@ suspend fun setMaimai(scope: TestScope, database: org.jetbrains.exposed.sql.Data
 }
 
 fun assertReplied(sandbox: BotSandbox, msg: MessageEvent, containsText: String) {
-    val reply = sandbox.replyFor(msg)
+    val reply = sandbox.awaitReply(msg)
     assertNotNull(reply) { "No reply for message" }
     assertTrue(reply.text.contains(containsText), "Expected '$containsText', got: ${reply.text}")
 }
 
 fun assertRepliedWithImage(sandbox: BotSandbox, msg: MessageEvent) {
-    val reply = sandbox.replyFor(msg)
+    val reply = sandbox.awaitReply(msg)
     assertNotNull(reply) { "No image reply" }
     assertTrue(
         reply.text.contains("![img]") || reply.text.contains("img #"),
