@@ -3,6 +3,7 @@ package xyz.xszq.bot
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
+import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.message.MessageChain
@@ -10,10 +11,14 @@ import xyz.xszq.bot.payload.AdminCheckRequest
 import xyz.xszq.bot.payload.MsgType
 import xyz.xszq.bot.payload.markdown.MarkdownData
 import java.io.File
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 @Suppress("unused")
 class Admin: Plugin() {
     lateinit var config: AdminConfig
+    private val pendingSubscribes = ConcurrentHashMap<String, String>()
+    private val pendingMessages = ConcurrentHashMap<String, MutableList<MessageChain>>()
     @OptIn(ExperimentalHoplite::class)
     override suspend fun load() {
         config = ConfigLoaderBuilder.default()
@@ -25,7 +30,27 @@ class Admin: Plugin() {
 
         logger.info { "[管理] 插件加载完成。" }
     }
+    override suspend fun unload() {
+        pendingSubscribes.values.forEach { id ->
+            pluginLoader.subscribes.stop(id)
+        }
+    }
     fun MessageEvent.isAdmin() = sender.id in config.admins
+    private fun queuePending(openid: String, chain: MessageChain) {
+        pendingMessages.getOrPut(openid) { mutableListOf() }.add(chain)
+        val subscribesAt = UUID.randomUUID().toString()
+        pendingSubscribes[openid] = subscribesAt
+        pluginLoader.subscribes.always(subscribesAt) {
+            if (this is GroupMessageEvent && group.id == openid) {
+                seq = 99
+                pendingMessages.remove(openid) ?.forEach { msg ->
+                    reply(msg)
+                }
+                pluginLoader.subscribes.stop(subscribesAt)
+                pendingSubscribes.remove(openid)
+            }
+        }
+    }
     suspend fun setRoute() = route {
         channel<AdminCheckRequest>("admin-check") { data ->
             data.deferred.complete(data.userId in config.admins)
@@ -41,15 +66,37 @@ class Admin: Plugin() {
                 handleReload(name)
             }
         }
+        startsWith("msgmd") { raw ->
+            if (isAdmin()) {
+                val (openid, content) = raw.split(" ", limit = 2)
+                val sent = bot.api.sendGroupMessage(
+                    group = openid,
+                    content = " ",
+                    msgType = MsgType.MARKDOWN,
+                    markdown = MarkdownData(content.trim()),
+                    msgSeq = 99
+                )
+                if (sent) {
+                    log(MessageChain(content))
+                } else {
+                    queuePending(openid, MessageChain(Markdown(MarkdownData(content.trim()))))
+                }
+            }
+        }
         startsWith("msg") { raw ->
             if (isAdmin()) {
                 val (openid, content) = raw.split(" ", limit = 2)
-                bot.api.sendGroupMessage(
+                val sent = bot.api.sendGroupMessage(
                     group = openid,
                     content = content,
-                    msgType = MsgType.TEXT
+                    msgType = MsgType.TEXT,
+                    msgSeq = 99
                 )
-                log(MessageChain(content))
+                if (sent) {
+                    log(MessageChain(content))
+                } else {
+                    queuePending(openid, MessageChain(content))
+                }
             }
         }
         startsWith("markdown") { content ->
