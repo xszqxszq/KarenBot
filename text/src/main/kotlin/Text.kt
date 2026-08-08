@@ -259,7 +259,7 @@ class Text: Plugin() {
         val result = runCatching {
             val content = client.chat(scene = "blonde") {
                 thinking(false)
-                system("你是一名动漫角色金发识别助手。请判断图中的角色是否为金发（blonde hair，金黄色/淡金色/金色头发），同时角色应为女性或性别不明显的角色。只回答true或false，不要输出任何其他内容。")
+                system("你是一名动漫角色金发识别助手。请判断图中的角色是否为金发（blonde hair，金黄色/淡金色/金色头发），同时角色应为女性或性别不明显的角色。只识别彩色图片，禁止识别黑白/灰度图片（黑白图片请回答false）。只回答true或false，不要输出任何其他内容。")
                 user {
                     image(img.url)
                 }
