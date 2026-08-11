@@ -209,6 +209,15 @@ object LayoutEngine {
 
         element.measuredWidth = finalW
         element.measuredHeight = finalH
+
+        if (element is Span && element.style.textAlign != TextAlign.LEFT &&
+            element.style.whiteSpace == WhiteSpace.NORMAL
+        ) {
+            element.measuredParagraph?.let { para ->
+                val contentW = maxOf(0f, finalW - element.style.padding.left - element.style.padding.right)
+                para.layout(contentW)
+            }
+        }
     }
 
     private fun measureChildSize(
