@@ -7,6 +7,8 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import org.jetbrains.exposed.sql.update
@@ -23,19 +25,22 @@ class ArcadeGroupBind(id: EntityID<String>): Entity<String>(id) {
             ArcadeGroup.findById(it.group)
         }
 
-        private fun groupOrCreate(openId: String) = findGroup(openId) ?: ArcadeGroup.new {
-            name = openId
-        }.also { newGroup ->
-            new(openId) {
-                group = newGroup.id
+        private suspend fun groupOrCreate(openId: String) = findGroup(openId) ?: run {
+            val groupId = ArcadeGroupTable.insert {
+                it[name] = openId
+            }[ArcadeGroupTable.id]
+            ArcadeGroupBindTable.insert {
+                it[id] = openId
+                it[ArcadeGroupBindTable.group] = groupId
             }
+            ArcadeGroup.findById(groupId)!!
         }
 
         suspend fun group(
             openId: String
-        ) = suspendedTransactionAsync {
+        ) = newSuspendedTransaction {
             groupOrCreate(openId)
-        }.await()
+        }
 
         suspend fun find(
             openId: String
@@ -44,32 +49,40 @@ class ArcadeGroupBind(id: EntityID<String>): Entity<String>(id) {
         }.await()
 
         suspend fun bind(openId: String, group: ArcadeGroup) = newSuspendedTransaction {
-            findById(openId) ?.let {
-                it.group = group.id
-            } ?: new(openId) {
-                this.group = group.id
-            }
+            if (ArcadeGroupBindTable.selectAll().where { ArcadeGroupBindTable.id eq openId }.count() != 0L)
+                ArcadeGroupBindTable.update({ ArcadeGroupBindTable.id eq openId }) {
+                    it[ArcadeGroupBindTable.group] = group.id
+                }
+            else
+                ArcadeGroupBindTable.insert {
+                    it[id] = openId
+                    it[ArcadeGroupBindTable.group] = group.id
+                }
         }
 
         suspend fun bind(openId: String, groupName: String) = newSuspendedTransaction {
             val target = ArcadeGroup.find { ArcadeGroupTable.name eq groupName }.firstOrNull()
                 ?: throw IllegalArgsException("该分组不存在。")
-            findById(openId) ?.let {
-                it.group = target.id
-            } ?: new(openId) {
-                group = target.id
-            }
+            if (ArcadeGroupBindTable.selectAll().where { ArcadeGroupBindTable.id eq openId }.count() != 0L)
+                ArcadeGroupBindTable.update({ ArcadeGroupBindTable.id eq openId }) {
+                    it[ArcadeGroupBindTable.group] = target.id
+                }
+            else
+                ArcadeGroupBindTable.insert {
+                    it[id] = openId
+                    it[ArcadeGroupBindTable.group] = target.id
+                }
         }
 
         suspend fun addArcade(openId: String, name: String) = newSuspendedTransaction {
             val group = groupOrCreate(openId)
             if (group.find(name) != null)
                 throw IllegalArgsException("机厅已存在！")
-            Arcade.new {
-                this.group = group.id
-                this.name = name
-                aliases = name
-                value = 0
+            ArcadeTable.insert {
+                it[ArcadeTable.group] = group.id
+                it[ArcadeTable.name] = name
+                it[ArcadeTable.aliases] = name
+                it[ArcadeTable.value] = 0
             }
         }
 
@@ -86,7 +99,9 @@ class ArcadeGroupBind(id: EntityID<String>): Entity<String>(id) {
             if (group.find(alias) != null || aliases.any { it.equals(alias, ignoreCase = true) })
                 throw IllegalArgsException("别名已存在！")
             aliases.add(alias)
-            arcade.aliases = aliases.joinToString(",")
+            ArcadeTable.update({ ArcadeTable.id eq arcade.id }) {
+                it[ArcadeTable.aliases] = aliases.joinToString(",")
+            }
         }
 
         suspend fun deleteAlias(openId: String, name: String, alias: String) = newSuspendedTransaction {
@@ -94,7 +109,9 @@ class ArcadeGroupBind(id: EntityID<String>): Entity<String>(id) {
             val arcade = group.find(name) ?: throw NotFoundException("机厅不存在！")
             val aliases = arcade.aliases.split(",").filter { it.isNotBlank() }.toMutableList()
             aliases.removeAll { it == alias }
-            arcade.aliases = aliases.joinToString(",")
+            ArcadeTable.update({ ArcadeTable.id eq arcade.id }) {
+                it[ArcadeTable.aliases] = aliases.joinToString(",")
+            }
         }
 
         suspend fun aliases(openId: String, name: String) = newSuspendedTransaction {
