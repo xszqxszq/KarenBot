@@ -37,10 +37,11 @@ class ResourceManager(
 
     fun getImage(src: String): Image? {
         val fileName = src.substringAfterLast("/")
+        val cacheKey = src.trimStart('.', '/')
 
         imageCache[fileName]?.let { return it }
-        externalCache[fileName]?.let { return it }
-        lruCache[fileName]?.let { return it }
+        externalCache[cacheKey]?.let { return it }
+        lruCache[cacheKey]?.let { return it }
 
         val file = File(basePath, src)
         if (file.exists() && file.isFile) {
@@ -49,9 +50,9 @@ class ResourceManager(
                 val w = img.width
                 val h = img.height
                 if (w <= THUMBNAIL_MAX_DIM && h <= THUMBNAIL_MAX_DIM)
-                    externalCache[fileName] = img
+                    externalCache[cacheKey] = img
                 else if (w <= LRU_MAX_DIM && h <= LRU_MAX_DIM)
-                    lruCache[fileName] = img
+                    lruCache[cacheKey] = img
                 return img
             }
         }
