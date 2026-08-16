@@ -21,6 +21,8 @@ jobs:
           java-version: '22'
           cache: gradle
       - run: chmod +x gradlew
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - name: Clone KarenBot-Resources
         run: |
           git clone --depth 1 --filter=blob:none --no-checkout https://github.com/xszqxszq/KarenBot-Resources.git ../KarenBot-Resources
@@ -41,10 +43,17 @@ jobs:
             -e "s|__LXNS_OA_ID__|${{ secrets.LXNS_OA_ID }}|g" \
             -e "s|__LXNS_OA_SECRET__|${{ secrets.LXNS_OA_SECRET }}|g" \
             config/maimai.yml config/chunithm.yml
-      - run: ./gradlew test
-#        continue-on-error: true
-#      - uses: actions/upload-artifact@v4
-#        with:
-#          name: test-reports
-#          path: '**/build/reports/tests/'
-#          retention-days: 1
+      - name: Run tests
+        id: run-tests
+        run: ./gradlew test
+        continue-on-error: true
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: '**/build/reports/tests/'
+          retention-days: 1
+      - name: Fail if tests failed
+        if: steps.run-tests.outcome == 'failure'
+        run: exit 1
