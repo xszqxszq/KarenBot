@@ -1,0 +1,236 @@
+package xyz.xszq.bot.maimai
+
+import kotlinx.coroutines.test.runTest
+import xyz.xszq.bot.*
+import xyz.xszq.bot.maimai.database.MaimaiDatabaseTest
+import kotlin.test.Test
+
+class MaimaiTest : MaimaiDatabaseTest() {
+
+    @Test
+    fun runAll() = runTest {
+        val sandbox = setMaimai(this, database)
+        try {
+            testBind(sandbox)
+
+            testB50(sandbox, "maxscore")
+            testB50(sandbox)
+            testB40(sandbox)
+
+            testScoreList(sandbox)
+
+            testLevelList(sandbox)
+            testLevelComplete(sandbox)
+            testLevelIncomplete(sandbox)
+
+            testInfo(sandbox)
+
+            testCourse(sandbox)
+
+            testProgress(sandbox)
+
+            testMusicId(sandbox)
+            testMusicRandom(sandbox)
+            testMusicSearch(sandbox)
+
+            testMusicLevelSearch(sandbox)
+            testMusicDesignerSearch(sandbox)
+            testMusicVersionSearch(sandbox)
+            testMusicArtistSearch(sandbox)
+            testMusicRegexSearch(sandbox)
+            testMusicBpmSearch(sandbox)
+            testMusicComboSearch(sandbox)
+
+            testMusicAliasesList(sandbox)
+            testMusicAddAlias(sandbox)
+            testMusicToday(sandbox)
+
+            testCalc(sandbox)
+
+            testSettingsProber(sandbox)
+            testSettingsCollections(sandbox)
+            testSettingsHelp(sandbox)
+            testCompatibility(sandbox)
+
+            testUpdate(sandbox)
+
+            testHelp(sandbox)
+
+            testQueue(sandbox)
+
+            testGuess(sandbox)
+        } finally {
+            sandbox.cleanup()
+        }
+    }
+
+    private suspend fun testBind(sandbox: BotSandbox) {
+        sandbox.clear()
+        val msg = sandbox.user() says "/bind 943551369"
+        assertReplied(sandbox, msg, "绑定成功")
+    }
+
+    private suspend fun testSettingsProber(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertReplied(sandbox, sandbox.user() says "设置查分器 水鱼", "设置查分器成功")
+        assertReplied(sandbox, sandbox.user() says "设置查分器 落雪", "设置查分器成功")
+        assertReplied(sandbox, sandbox.user() says "设置查分器 自动", "设置查分器成功")
+    }
+
+    private suspend fun testSettingsCollections(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertReplied(sandbox, sandbox.user() says "设置头像 1", "设置头像成功")
+        assertReplied(sandbox, sandbox.user() says "设置牌子 1", "设置牌子成功")
+    }
+
+    private suspend fun testSettingsHelp(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "设置mai")
+    }
+
+    private suspend fun testCompatibility(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertReplied(sandbox, sandbox.user() says "兼容模式", "兼容模式启用成功")
+        assertReplied(sandbox, sandbox.user() says "兼容模式 关闭", "兼容模式禁用成功")
+    }
+
+    private suspend fun testB50(sandbox: BotSandbox, args: String? = null) {
+        sandbox.clear()
+        val content = args?.let { "/b50 $it" } ?: "/b50"
+        assertRepliedWithImage(sandbox, sandbox.user() says content)
+    }
+
+    private suspend fun testB40(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedWithImage(sandbox, sandbox.user() says "/b40")
+    }
+
+    private suspend fun testLevelList(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedWithImage(sandbox, sandbox.user() says "13定数表")
+    }
+
+    private suspend fun testScoreList(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedWithImage(sandbox, sandbox.user() says "13分数列表")
+    }
+
+    private suspend fun testLevelComplete(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedWithImage(sandbox, sandbox.user() says "13完成表")
+    }
+
+    private suspend fun testLevelIncomplete(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "13未完成表")
+    }
+
+    private suspend fun testInfo(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedWithImage(sandbox, sandbox.user() says "info 852")
+    }
+
+    private suspend fun testCourse(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "段位表 初段")
+    }
+
+    private suspend fun testProgress(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "13进度")
+    }
+
+    private suspend fun testMusicId(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "id 852")
+    }
+
+    private suspend fun testMusicRandom(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "随个")
+    }
+
+    private suspend fun testMusicSearch(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "查歌 TiamaT")
+    }
+
+    private suspend fun testMusicLevelSearch(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "定数查歌 12.0")
+    }
+
+    private suspend fun testMusicDesignerSearch(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "谱师查歌 ニャイン")
+    }
+
+    private suspend fun testMusicVersionSearch(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "版本查歌 DX")
+    }
+
+    private suspend fun testMusicArtistSearch(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "曲师查歌 Team Grimoire")
+    }
+
+    private suspend fun testMusicRegexSearch(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "正则查歌 .*")
+    }
+
+    private suspend fun testMusicBpmSearch(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "BPM查歌 180")
+    }
+
+    private suspend fun testMusicComboSearch(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "搜索 东方")
+    }
+
+    private suspend fun testMusicAliasesList(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "852有什么别名")
+    }
+
+    private suspend fun testMusicAddAlias(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "添加别名 852 测试别名")
+    }
+
+    private suspend fun testMusicToday(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "今日舞萌")
+    }
+
+    private suspend fun testCalc(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertReplied(sandbox, sandbox.user() says "分数线 紫852 100.5", "分数线")
+    }
+
+    private suspend fun testUpdate(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertReplied(sandbox, sandbox.user() says "绑定水鱼 testtoken", "绑定成功")
+        assertRepliedAny(sandbox, sandbox.user() says "更新")
+    }
+
+    private suspend fun testHelp(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "/mai")
+    }
+
+    private suspend fun testQueue(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertReplied(sandbox, sandbox.group() says "排卡管理 添加机厅 测试", "添加机厅成功")
+        assertReplied(sandbox, sandbox.group() says "测试3", "更新成功")
+        assertRepliedAny(sandbox, sandbox.group() says "几")
+    }
+
+    private suspend fun testGuess(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "猜歌")
+        assertRepliedAny(sandbox, sandbox.user() says "不玩了")
+    }
+}
