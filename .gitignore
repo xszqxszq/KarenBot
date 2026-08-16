@@ -48,6 +48,7 @@ database
 keystore.jks
 todo.txt
 plugins/
+TEST_ROADMAP.md
 
 *.log
 .omo/

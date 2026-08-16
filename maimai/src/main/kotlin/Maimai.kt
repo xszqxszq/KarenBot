@@ -91,7 +91,8 @@ class Maimai: Plugin() {
         transaction(database) {
             listOf(
                 QQBindTable, MaimaiMusicAliasesTable, MaimaiMusicAliasesVoteTable,
-                MaimaiSettingsTable, ArcadeTable, ArcadeGroupTable, ArcadeGroupBindTable, GuessGameTable
+                MaimaiSettingsTable, ArcadeTable, ArcadeGroupTable, ArcadeGroupBindTable,
+                GuessGameTable, DivingFishBindTable
             ).forEach { table ->
                 if (!table.exists())
                     SchemaUtils.create(table)

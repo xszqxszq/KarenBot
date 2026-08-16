@@ -20,16 +20,24 @@ class BotSandbox(
     cos: TencentCos = mockk(relaxed = true),
     database: Database = mockk(relaxed = true),
 ) {
-    val replies = mutableListOf<MessageEvent>()
-    private val replyMap = mutableMapOf<String, MessageEvent>()
+    val replies = java.util.Collections.synchronizedList(mutableListOf<MessageEvent>())
+    private val replyMap = java.util.concurrent.ConcurrentHashMap<String, MessageEvent>()
 
     private val dispatcher = StandardTestDispatcher(scope.testScheduler)
     lateinit var pluginLoader: PluginLoader
 
+    var cleanup: suspend () -> Unit = {}
+
     init {
         val api = mockk<OpenAPI>(relaxed = true).apply {
             coEvery {
-                sendC2CMessage(any(), any<String>(), any(), any(), any(), any(), any(), any())
+                uploadC2CFile(any(), any(), any(), any())
+            } returns xyz.xszq.bot.payload.FileResponse("file-uuid", "file-info", 0)
+            coEvery {
+                uploadGroupFile(any(), any(), any(), any())
+            } returns xyz.xszq.bot.payload.FileResponse("file-uuid", "file-info", 0)
+            coEvery {
+                sendC2CMessage(any(), any<String>(), any(), any(), any(), any(), any(), any(), any())
             } coAnswers {
                 val eid = arg<String?>(5) ?: ""
                 val mid = arg<String?>(6) ?: ""
@@ -44,13 +52,14 @@ class BotSandbox(
                 true
             }
             coEvery {
-                sendGroupMessage(any(), any<String>(), any(), any(), any(), any(), any(), any())
+                sendGroupMessage(any(), any<String>(), any(), any(), any(), any(), any(), any(), any())
             } coAnswers {
                 val eid = arg<String?>(5) ?: ""
                 val mid = arg<String?>(6) ?: ""
+                val text = arg<MarkdownData?>(3)?.let { it.content ?: secondArg<String>() } ?: secondArg<String>()
                 val msg = GroupMessageEvent(
                     bot = pluginLoader.bot, eventId = eid, id = mid,
-                    message = MessageChain(PlainText(secondArg())),
+                    message = MessageChain(PlainText(text)),
                     sender = Member(pluginLoader.bot, ""),
                     group = Group(pluginLoader.bot, firstArg()),
                 )
@@ -68,9 +77,9 @@ class BotSandbox(
     fun replyFor(event: MessageEvent) = replyMap[event.eventId]
 
     fun awaitReply(event: MessageEvent, timeoutMs: Long = 30_000): MessageEvent? {
-        val deadline = System.currentTimeMillis() + timeoutMs
+        val deadline = System.nanoTime() + timeoutMs * 1_000_000L
         var reply: MessageEvent? = null
-        while (reply == null && System.currentTimeMillis() < deadline) {
+        while (reply == null && System.nanoTime() < deadline) {
             reply = replyFor(event)
             if (reply == null)
                 Thread.sleep(100)
@@ -87,6 +96,8 @@ class BotSandbox(
 
     fun user(id: String = "test-user") = UserActor(id)
 
+    fun group(id: String = "test-group") = GroupActor(id)
+
     inner class UserActor(private val id: String) {
         private var seq = 0
 
@@ -98,6 +109,25 @@ class BotSandbox(
                 id = "$id-m-$globalSeq",
                 message = MessageChain(PlainText(text)),
                 sender = User(pluginLoader.bot, id),
+            )
+            pluginLoader.manualTrigger(event)
+            scope.advanceUntilIdle()
+            return event
+        }
+    }
+
+    inner class GroupActor(private val id: String) {
+        private var seq = 0
+
+        suspend infix fun says(text: String): MessageEvent {
+            val globalSeq = replySeq++
+            val event = GroupMessageEvent(
+                bot = pluginLoader.bot,
+                eventId = "$id-$globalSeq",
+                id = "$id-m-$globalSeq",
+                message = MessageChain(PlainText(text)),
+                sender = Member(pluginLoader.bot, "test-user"),
+                group = Group(pluginLoader.bot, id),
             )
             pluginLoader.manualTrigger(event)
             scope.advanceUntilIdle()
