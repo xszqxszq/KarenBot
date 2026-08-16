@@ -48,9 +48,9 @@ class OttoVoice: Plugin() {
 
             // TODO: 加入文本审查
             launch(Dispatchers.IO) {
-                tts.generate(text).use { pcm ->
-                    reply(Audio(pcm))
-                }
+                tts.generate(text) ?.let { pcm ->
+                    pcm.use { reply(Audio(pcm)) }
+                } ?: reply("输入的文本貌似未包含有效内容，请重试")
             }
         }
         startsWith(listOf("倒放", "逆再生")) {

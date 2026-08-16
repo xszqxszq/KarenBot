@@ -276,10 +276,11 @@ class TTSParser(
      * Generate TTS file for the text.
      * @param text The text to read.
      */
-    suspend fun generate(text: String): VfsFile {
+    suspend fun generate(text: String): VfsFile? {
         val files = parse(text)
             .take(120)
             .map { it.file }
+            .takeIf { it.isNotEmpty() } ?: return null
         return newTempFile(suffix = ".pcm").also {
             AudioHandler.mergeWaveFiles(files, it, true, 24000)
         }
