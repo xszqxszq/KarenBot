@@ -199,7 +199,7 @@ class ImageController(
     }
     fun randomTips(): String? {
         if (Random(System.currentTimeMillis() * 2).nextDouble() < 0.5)
-            return "TIPS: " + tips.random(Random(System.currentTimeMillis() * 5))
+            return tips.randomOrNull(Random(System.currentTimeMillis() * 5)) ?.let { "TIPS: $it" }
         return null
     }
 
