@@ -44,6 +44,7 @@ class MaimaiTest : MaimaiDatabaseTest() {
             testMusicAliasesList(sandbox)
             testMusicAddAlias(sandbox)
             testMusicToday(sandbox)
+            testMusicButtons(sandbox)
 
             testCalc(sandbox)
 
@@ -59,6 +60,7 @@ class MaimaiTest : MaimaiDatabaseTest() {
             testQueue(sandbox)
 
             testGuess(sandbox)
+            testGuessOpening(sandbox)
         } finally {
             sandbox.cleanup()
         }
@@ -205,6 +207,13 @@ class MaimaiTest : MaimaiDatabaseTest() {
         assertRepliedAny(sandbox, sandbox.user() says "今日舞萌")
     }
 
+    private suspend fun testMusicButtons(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertReplied(sandbox, sandbox.tapButton("maimai-id", "852"), "TiamaT")
+        assertRepliedAny(sandbox, sandbox.tapButton("maimai-search-word", "TiamaT\n1"))
+        assertRepliedAny(sandbox, sandbox.tapButton("maimai-search-level", "12.0:12.0\n1"))
+    }
+
     private suspend fun testCalc(sandbox: BotSandbox) {
         sandbox.clear()
         assertReplied(sandbox, sandbox.user() says "分数线 紫852 100.5", "分数线")
@@ -231,6 +240,14 @@ class MaimaiTest : MaimaiDatabaseTest() {
     private suspend fun testGuess(sandbox: BotSandbox) {
         sandbox.clear()
         assertRepliedAny(sandbox, sandbox.user() says "猜歌")
+        assertRepliedAny(sandbox, sandbox.user() says "不玩了")
+    }
+
+    private suspend fun testGuessOpening(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "舞萌开字母")
+        assertRepliedAny(sandbox, sandbox.user() says "开字母 s")
+        assertRepliedAny(sandbox, sandbox.user() says "开歌 852")
         assertRepliedAny(sandbox, sandbox.user() says "不玩了")
     }
 }

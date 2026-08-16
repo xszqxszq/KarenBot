@@ -7,7 +7,9 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import org.jetbrains.exposed.sql.Database
+import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.GroupMessageEvent
+import xyz.xszq.bot.event.InteractionEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.message.PlainText
@@ -74,9 +76,9 @@ class BotSandbox(
             subscribes = SubscribeManager(dispatcher))
     }
 
-    fun replyFor(event: MessageEvent) = replyMap[event.eventId]
+    fun replyFor(event: Event) = replyMap[event.eventId]
 
-    fun awaitReply(event: MessageEvent, timeoutMs: Long = 30_000): MessageEvent? {
+    fun awaitReply(event: Event, timeoutMs: Long = 30_000): MessageEvent? {
         val deadline = System.nanoTime() + timeoutMs * 1_000_000L
         var reply: MessageEvent? = null
         while (reply == null && System.nanoTime() < deadline) {
@@ -97,6 +99,21 @@ class BotSandbox(
     fun user(id: String = "test-user") = UserActor(id)
 
     fun group(id: String = "test-group") = GroupActor(id)
+
+    suspend fun tapButton(button: String, data: String = "", id: String = "test-user"): InteractionEvent {
+        val globalSeq = replySeq++
+        val event = InteractionEvent(
+            bot = pluginLoader.bot,
+            eventId = "$id-$globalSeq",
+            id = "$id-i-$globalSeq",
+            data = data,
+            button = button,
+            sender = User(pluginLoader.bot, id),
+        )
+        pluginLoader.manualTrigger(event)
+        scope.advanceUntilIdle()
+        return event
+    }
 
     inner class UserActor(private val id: String) {
         private var seq = 0

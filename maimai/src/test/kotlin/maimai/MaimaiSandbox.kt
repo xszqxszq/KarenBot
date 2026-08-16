@@ -6,7 +6,7 @@ import io.mockk.mockk
 import korlibs.io.file.VfsFile
 import kotlinx.coroutines.test.TestScope
 import xyz.xszq.bot.*
-import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.payload.UploadResult
 import java.io.File
 import kotlin.test.assertNotNull
@@ -31,17 +31,17 @@ suspend fun setMaimai(scope: TestScope, database: org.jetbrains.exposed.sql.Data
     return sandbox
 }
 
-fun assertReplied(sandbox: BotSandbox, msg: MessageEvent, containsText: String) {
+fun assertReplied(sandbox: BotSandbox, msg: Event, containsText: String) {
     val reply = sandbox.awaitReply(msg)
     assertNotNull(reply) { "No reply for message" }
     assertTrue(reply.text.contains(containsText), "Expected '$containsText', got: ${reply.text}")
 }
 
-fun assertRepliedAny(sandbox: BotSandbox, msg: MessageEvent) {
-    assertNotNull(sandbox.awaitReply(msg)) { "No reply for message: ${msg.text}" }
+fun assertRepliedAny(sandbox: BotSandbox, msg: Event) {
+    assertNotNull(sandbox.awaitReply(msg)) { "No reply for message" }
 }
 
-fun assertRepliedWithImage(sandbox: BotSandbox, msg: MessageEvent) {
+fun assertRepliedWithImage(sandbox: BotSandbox, msg: Event) {
     val reply = sandbox.awaitReply(msg)
     assertNotNull(reply) { "No image reply" }
     assertTrue(
