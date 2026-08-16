@@ -25,36 +25,22 @@ jobs:
         run: |
           git clone --depth 1 --filter=blob:none --no-checkout https://github.com/xszqxszq/KarenBot-Resources.git ../KarenBot-Resources
           cd ../KarenBot-Resources
-          git sparse-checkout set --no-cone data/maimai/ data/chunithm/ data/audio/touhou/musics.json data/audio/otto/
+          git sparse-checkout set --no-cone data/maimai/ data/chunithm/ data/audio/touhou/test.ogg data/audio/otto/ test/data/ test/config/
           git checkout
           cd -
           ln -s ../KarenBot-Resources/data data
           mkdir -p data/maimai/covers data/maimai/plates data/maimai/avatars data/chunithm/covers
-      - name: Generate config files
+      - name: Set up test config and data
         run: |
           mkdir -p config
-          cat > config/maimai.yml << 'YAML'
-          tokens:
-            diving-fish: "${{ secrets.DIVING_FISH_TOKEN }}"
-            lxns: "${{ secrets.LXNS_TOKEN }}"
-            lxns-oa-id: "${{ secrets.LXNS_OA_ID }}"
-            lxns-oa-secret: "${{ secrets.LXNS_OA_SECRET }}"
-            lxns-oa-callback: "http://localhost:18100/lxns/callback"
-            assets-jacket: "https://example.com/maimai/jacket"
-            proxy-ip: "127.0.0.1"
-            proxy-server: "127.0.0.1"
-            proxy-port: "18100"
-          tips: []
-          YAML
-          cat > config/chunithm.yml << 'YAML'
-          tokens:
-            diving-fish: "${{ secrets.DIVING_FISH_TOKEN }}"
-            lxns: "${{ secrets.LXNS_TOKEN }}"
-            lxns-oa-id: "${{ secrets.LXNS_OA_ID }}"
-            lxns-oa-secret: "${{ secrets.LXNS_OA_SECRET }}"
-            lxns-oa-callback: "http://localhost:18100/lxns/callback"
-            assets-jacket: "https://example.com/chunithm/jacket"
-          YAML
+          cp -r ../KarenBot-Resources/test/data/. data/
+          cp -r ../KarenBot-Resources/test/config/. config/
+          sed -i \
+            -e "s|__DIVING_FISH_TOKEN__|${{ secrets.DIVING_FISH_TOKEN }}|g" \
+            -e "s|__LXNS_TOKEN__|${{ secrets.LXNS_TOKEN }}|g" \
+            -e "s|__LXNS_OA_ID__|${{ secrets.LXNS_OA_ID }}|g" \
+            -e "s|__LXNS_OA_SECRET__|${{ secrets.LXNS_OA_SECRET }}|g" \
+            config/maimai.yml config/chunithm.yml
       - run: ./gradlew test
 #        continue-on-error: true
 #      - uses: actions/upload-artifact@v4

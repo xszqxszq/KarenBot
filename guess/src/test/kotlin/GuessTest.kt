@@ -14,6 +14,8 @@ class GuessTest {
         try {
             testQuizHelp(sandbox)
             testQuizInvalid(sandbox)
+            testRandomMusic(sandbox)
+            testQuiz(sandbox)
         } finally {
             sandbox.cleanup()
         }
@@ -30,6 +32,18 @@ class GuessTest {
         val reply = sandbox.awaitReply(sandbox.user() says "原曲认知测验 无效")
         assertNotNull(reply) { "No reply" }
         assertTrue(reply.text.contains("该难度不存在"), "Expected error, got: ${reply.text}")
+    }
+
+    private suspend fun testRandomMusic(sandbox: BotSandbox) {
+        sandbox.clear()
+        val msg = sandbox.user() says "随机东方原曲"
+        assertNotNull(sandbox.awaitReply(msg)) { "No reply for random music" }
+    }
+
+    private suspend fun testQuiz(sandbox: BotSandbox) {
+        sandbox.clear()
+        val msg = sandbox.user() says "原曲认知测验 normal 新作"
+        assertNotNull(sandbox.awaitReply(msg)) { "No reply for quiz" }
     }
 }
 

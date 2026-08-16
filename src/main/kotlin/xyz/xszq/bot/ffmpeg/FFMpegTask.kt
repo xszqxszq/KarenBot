@@ -65,7 +65,7 @@ class FFMpegTask(
         return output
     }
     companion object {
-        var ffmpegBin: String = "/root/bin/ffmpeg"
+        var ffmpegBin: String = "ffmpeg"
         var ffmpegPath = ""
     }
 }

@@ -14,6 +14,7 @@ class ProgramExecutor(
     class Builder {
         var env = emptyArray<String>()
         var timeout: Long? = null
+        var outputFile: File? = null
         fun environment(builder: EnvironmentBuilder.() -> Unit) {
             env = EnvironmentBuilder().apply(builder).env.toTypedArray()
         }
@@ -25,25 +26,31 @@ class ProgramExecutor(
         fun append(str: String?) = str?.let { if (it.isNotBlank()) env.add(it) }
     }
 
-    private val nullFile = File("/dev/null")
     suspend fun start() = withContext(Dispatchers.IO) {
         Builder().apply(builder).run {
-            val procBuilder = ProcessBuilder()
+            val procBuilder = ProcessBuilder(command)
             env.forEach {
-                val args = it.split("=")
-                val name = args.first()
-                val value = args.last()
-                procBuilder.environment().putIfAbsent(name, value)
+                procBuilder.environment().putIfAbsent(it.substringBefore("="), it.substringAfter("="))
             }
-            val realCommand = listOf("/bin/bash", "-c", command.joinToString(" "))
-            val proc =
-                if (showOutput) procBuilder.inheritIO().command(realCommand).start()
-                else procBuilder.inheritIO().redirectOutput(nullFile).redirectError(nullFile).command(realCommand).start()
-            timeout ?.let {
-                proc.waitFor(it, TimeUnit.MILLISECONDS)
-            } ?: run {
-                proc.waitFor()
+            if (showOutput) {
+                procBuilder.inheritIO()
+            } else {
+                procBuilder.redirectOutput(
+                    outputFile?.let { ProcessBuilder.Redirect.to(it) } ?: ProcessBuilder.Redirect.DISCARD
+                )
+                procBuilder.redirectError(ProcessBuilder.Redirect.DISCARD)
+            }
+            val proc = procBuilder.start()
+            val finished = proc.waitFor(timeout ?: DEFAULT_TIMEOUT_MS, TimeUnit.MILLISECONDS)
+            if (!finished) {
+                proc.destroy()
+                proc.waitFor(5, TimeUnit.SECONDS)
+                proc.destroyForcibly()
             }
         }
+    }
+
+    companion object {
+        const val DEFAULT_TIMEOUT_MS = 60_000L
     }
 }

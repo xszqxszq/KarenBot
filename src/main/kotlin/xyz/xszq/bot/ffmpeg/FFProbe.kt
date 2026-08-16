@@ -11,16 +11,18 @@ class FFProbe(
 ) {
     suspend fun getResult(): FFProbeResult {
         return createTempFile(suffix = ".json").toFile().let { file ->
-            ProgramExecutor(buildList {
+            val command = buildList {
                 add(ffprobeBin)
-                add("\"${target.absolutePath}\"")
-                add("-print_format json")
+                add(target.absolutePath)
+                add("-print_format")
+                add("json")
                 if (showStreams)
                     add("-show_streams")
                 if (showFormat)
                     add("-show_format")
-                add("> \"${file.absolutePath}\"")
-            }, showOutput = false) {
+            }
+            ProgramExecutor(command, false) {
+                outputFile = file
                 environment {
                     append(ffprobePath)
                 }
@@ -31,7 +33,7 @@ class FFProbe(
         }
     }
     companion object {
-        var ffprobeBin: String = "/root/bin/ffprobe"
+        var ffprobeBin: String = "ffprobe"
         var ffprobePath = ""
         val json = Json {
             ignoreUnknownKeys = true
