@@ -1,0 +1,105 @@
+package xyz.xszq.bot.chunithm
+
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runTest
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import xyz.xszq.bot.*
+import xyz.xszq.bot.chunithm.database.QQBindTable
+import kotlin.test.Test
+
+class ChunithmTest : ChunithmDatabaseTest() {
+
+    @Test
+    fun runAll() = runTest {
+        val sandbox = setChunithm(this, database)
+        try {
+            testBind(sandbox)
+            testB50Maxscore(sandbox)
+            testB50(sandbox)
+            testLevelList(sandbox)
+            testScoreList(sandbox)
+            testMusic(sandbox)
+            testAliases(sandbox)
+            testButtons(sandbox)
+            testHelp(sandbox)
+            testDefault(sandbox)
+        } finally {
+            sandbox.cleanup()
+        }
+    }
+
+    private suspend fun testBind(sandbox: BotSandbox) {
+        newSuspendedTransaction(db = database) {
+            QQBindTable.insert {
+                it[QQBindTable.id] = "test-user"
+                it[QQBindTable.qq] = 943551369L
+            }
+        }
+    }
+
+    private suspend fun testB50Maxscore(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedWithImage(sandbox, sandbox.user() says "/b50 maxscore")
+    }
+
+    private suspend fun testB50(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "/b50")
+    }
+
+    private suspend fun testLevelList(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedWithImage(sandbox, sandbox.user() says "14定数表")
+    }
+
+    private suspend fun testScoreList(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "14分数列表")
+    }
+
+    private suspend fun testMusic(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "id 3")
+        assertRepliedAny(sandbox, sandbox.user() says "查歌 B.B.K.K.B.K.K.")
+        assertRepliedAny(sandbox, sandbox.user() says "定数查歌 14.0")
+        assertRepliedAny(sandbox, sandbox.user() says "随个")
+        assertRepliedAny(sandbox, sandbox.user() says "3是什么歌")
+    }
+
+    private suspend fun testAliases(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "3有什么别名")
+        assertRepliedAny(sandbox, sandbox.user() says "添加别名 3 测试别名")
+    }
+
+    private suspend fun testButtons(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.tapButton("chunithm-search-word", "B.B.K.K.B.K.K.\n1"))
+        assertRepliedAny(sandbox, sandbox.tapButton("chunithm-search-level", "14.0:14.0\n1"))
+    }
+
+    private suspend fun testHelp(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "/chu")
+    }
+
+    private suspend fun testDefault(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertReplied(sandbox, sandbox.user() says "/chu 默认", "设置成功")
+    }
+}
+
+suspend fun setChunithm(scope: TestScope, database: org.jetbrains.exposed.sql.Database): BotSandbox {
+    val sandbox = BotSandbox(scope, mockTencentCos(), database)
+    val chunithm = Chunithm().apply {
+        plugin = "chunithm"
+        pluginLoader = sandbox.pluginLoader
+        configPath = "../config/chunithm.yml"
+        dataPath = "../data/chunithm"
+    }
+    chunithm.load()
+    chunithm.image.manager.init()
+    sandbox.cleanup = { chunithm.unload() }
+    return sandbox
+}

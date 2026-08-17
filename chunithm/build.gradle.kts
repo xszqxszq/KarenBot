@@ -42,6 +42,9 @@ dependencies {
     testImplementation("com.soywiz.korge:korge-core:${korlibsVersion}")
     testImplementation("xyz.xszq:shinobu:2.0.1")
     testImplementation(kotlin("test"))
+    testImplementation(project(":"))
+    testImplementation("io.mockk:mockk:1.14.3")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 }
 
 tasks.test {

@@ -85,7 +85,7 @@ class Chunithm: Plugin() {
         chunithmData.load(lxns)
         logger.info { "[中二] 中二数据加载完成。" }
 
-        image = ChunithmImage(chunithmData)
+        image = ChunithmImage(chunithmData, dataPath = dataPath)
         image.init()
         ComboQuery.init(chunithmData)
 

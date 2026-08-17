@@ -1,11 +1,15 @@
-package xyz.xszq.bot.maimai.database
+package xyz.xszq.bot.chunithm
 
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
+import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesTable
+import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesVoteTable
+import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
+import xyz.xszq.bot.chunithm.database.QQBindTable
 import kotlin.test.BeforeTest
 
-abstract class MaimaiDatabaseTest {
+abstract class ChunithmDatabaseTest {
     companion object {
         private var connected = false
         private lateinit var connectedDatabase: Database
@@ -14,7 +18,7 @@ abstract class MaimaiDatabaseTest {
             if (connected)
                 return connectedDatabase
             connectedDatabase = Database.connect(
-                url = "jdbc:h2:mem:maimai;MODE=MySQL;DB_CLOSE_DELAY=-1",
+                url = "jdbc:h2:mem:chunithm;MODE=MySQL;DB_CLOSE_DELAY=-1",
                 driver = "org.h2.Driver",
             )
             connected = true
@@ -29,8 +33,8 @@ abstract class MaimaiDatabaseTest {
     fun resetDatabase() {
         connectIfNeeded()
         transaction {
-            SchemaUtils.drop(GuessGameTable, MaimaiMusicAliasesVoteTable, ArcadeTable, ArcadeGroupBindTable, ArcadeGroupTable, QQBindTable, MaimaiSettingsTable, MaimaiMusicAliasesTable, DivingFishBindTable)
-            SchemaUtils.create(ArcadeGroupTable, ArcadeGroupBindTable, ArcadeTable, QQBindTable, MaimaiSettingsTable, MaimaiMusicAliasesTable, MaimaiMusicAliasesVoteTable, GuessGameTable, DivingFishBindTable)
+            SchemaUtils.drop(QQBindTable, MaimaiSettingsTable, ChunithmMusicAliasesTable, ChunithmMusicAliasesVoteTable)
+            SchemaUtils.create(QQBindTable, MaimaiSettingsTable, ChunithmMusicAliasesTable, ChunithmMusicAliasesVoteTable)
         }
     }
 }

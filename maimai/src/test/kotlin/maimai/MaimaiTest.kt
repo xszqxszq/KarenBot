@@ -2,7 +2,6 @@ package xyz.xszq.bot.maimai
 
 import kotlinx.coroutines.test.runTest
 import xyz.xszq.bot.*
-import xyz.xszq.bot.maimai.database.MaimaiDatabaseTest
 import kotlin.test.Test
 
 class MaimaiTest : MaimaiDatabaseTest() {
@@ -27,6 +26,10 @@ class MaimaiTest : MaimaiDatabaseTest() {
 
             testCourse(sandbox)
 
+            testCombo(sandbox)
+            testSongRating(sandbox)
+            testRecent(sandbox)
+
             testProgress(sandbox)
 
             testMusicId(sandbox)
@@ -45,6 +48,12 @@ class MaimaiTest : MaimaiDatabaseTest() {
             testMusicAddAlias(sandbox)
             testMusicToday(sandbox)
             testMusicButtons(sandbox)
+            testMusicButtonsExtra(sandbox)
+            testMusicDifficultyId(sandbox)
+            testMusicWhatSong(sandbox)
+            testMusicFitLevel(sandbox)
+            testMusicGenreSongs(sandbox)
+            testPreview(sandbox)
 
             testCalc(sandbox)
 
@@ -52,6 +61,10 @@ class MaimaiTest : MaimaiDatabaseTest() {
             testSettingsCollections(sandbox)
             testSettingsHelp(sandbox)
             testCompatibility(sandbox)
+            testSettingsQuickProber(sandbox)
+            testCompatibilityExtra(sandbox)
+            testSettingsNameplate(sandbox)
+            testSettingsDefault(sandbox)
 
             testUpdate(sandbox)
 
@@ -96,6 +109,32 @@ class MaimaiTest : MaimaiDatabaseTest() {
         assertReplied(sandbox, sandbox.user() says "兼容模式 关闭", "兼容模式禁用成功")
     }
 
+    private suspend fun testSettingsQuickProber(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertReplied(sandbox, sandbox.user() says "设置水鱼", "设置查分器成功")
+        assertReplied(sandbox, sandbox.user() says "水鱼", "设置查分器成功")
+        assertReplied(sandbox, sandbox.user() says "设置落雪", "设置查分器成功")
+        assertReplied(sandbox, sandbox.user() says "落雪", "设置查分器成功")
+    }
+
+    private suspend fun testCompatibilityExtra(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertReplied(sandbox, sandbox.user() says "取消兼容模式", "兼容模式禁用成功")
+        assertReplied(sandbox, sandbox.user() says "打开兼容模式", "兼容模式启用成功")
+        assertReplied(sandbox, sandbox.user() says "启用兼容模式", "兼容模式启用成功")
+        assertReplied(sandbox, sandbox.user() says "禁用兼容模式", "兼容模式禁用成功")
+    }
+
+    private suspend fun testSettingsNameplate(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertReplied(sandbox, sandbox.user() says "设置姓名框 1", "设置牌子成功")
+    }
+
+    private suspend fun testSettingsDefault(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertReplied(sandbox, sandbox.user() says "/mai 默认", "设置成功")
+    }
+
     private suspend fun testB50(sandbox: BotSandbox, args: String? = null) {
         sandbox.clear()
         val content = args?.let { "/b50 $it" } ?: "/b50"
@@ -135,6 +174,23 @@ class MaimaiTest : MaimaiDatabaseTest() {
     private suspend fun testCourse(sandbox: BotSandbox) {
         sandbox.clear()
         assertRepliedAny(sandbox, sandbox.user() says "段位表 初段")
+    }
+
+    private suspend fun testCombo(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "东方50")
+        assertRepliedAny(sandbox, sandbox.user() says "寸50")
+        assertRepliedAny(sandbox, sandbox.user() says "13ap50")
+    }
+
+    private suspend fun testSongRating(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "歌50 852")
+    }
+
+    private suspend fun testRecent(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "r50")
     }
 
     private suspend fun testProgress(sandbox: BotSandbox) {
@@ -214,6 +270,41 @@ class MaimaiTest : MaimaiDatabaseTest() {
         assertRepliedAny(sandbox, sandbox.tapButton("maimai-search-level", "12.0:12.0\n1"))
     }
 
+    private suspend fun testMusicButtonsExtra(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.tapButton("maimai-search-level-fit", "12.0:12.0\n1"))
+        assertRepliedAny(sandbox, sandbox.tapButton("maimai-search-designer", "ニャイン\n1"))
+        assertRepliedAny(sandbox, sandbox.tapButton("maimai-search-version", "DX\n1"))
+        assertRepliedAny(sandbox, sandbox.tapButton("maimai-search-artist", "Team Grimoire\n1"))
+        assertRepliedAny(sandbox, sandbox.tapButton("maimai-search-bpm", "180\n1"))
+        assertRepliedAny(sandbox, sandbox.tapButton("maimai-search-combo", "东方\n1"))
+    }
+
+    private suspend fun testMusicDifficultyId(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "紫id852")
+    }
+
+    private suspend fun testMusicWhatSong(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "852是什么歌")
+    }
+
+    private suspend fun testMusicFitLevel(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "拟合定数查歌 13.0")
+    }
+
+    private suspend fun testMusicGenreSongs(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "东方有什么歌")
+    }
+
+    private suspend fun testPreview(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "预览 189")
+    }
+
     private suspend fun testCalc(sandbox: BotSandbox) {
         sandbox.clear()
         assertReplied(sandbox, sandbox.user() says "分数线 紫852 100.5", "分数线")
@@ -233,8 +324,13 @@ class MaimaiTest : MaimaiDatabaseTest() {
     private suspend fun testQueue(sandbox: BotSandbox) {
         sandbox.clear()
         assertReplied(sandbox, sandbox.group() says "排卡管理 添加机厅 测试", "添加机厅成功")
+        assertReplied(sandbox, sandbox.group() says "排卡管理 添加别名 测试 test", "添加机厅别名成功")
+        assertReplied(sandbox, sandbox.group() says "排卡管理 查看别名 测试", "机厅别名如下")
+        assertReplied(sandbox, sandbox.group() says "排卡管理 删除别名 测试 test", "删除机厅别名成功")
         assertReplied(sandbox, sandbox.group() says "测试3", "更新成功")
         assertRepliedAny(sandbox, sandbox.group() says "几")
+        assertReplied(sandbox, sandbox.group() says "排卡管理 删除机厅 测试", "删除机厅成功")
+        assertReplied(sandbox, sandbox.group() says "排卡管理 添加分组 不存在", "该分组不存在")
     }
 
     private suspend fun testGuess(sandbox: BotSandbox) {

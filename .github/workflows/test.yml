@@ -27,7 +27,7 @@ jobs:
         run: |
           git clone --depth 1 --filter=blob:none --no-checkout https://github.com/xszqxszq/KarenBot-Resources.git ../KarenBot-Resources
           cd ../KarenBot-Resources
-          git sparse-checkout set --no-cone data/maimai/ data/chunithm/ data/audio/touhou/test.ogg data/audio/otto/ test/data/ test/config/
+          git sparse-checkout set --no-cone data/maimai/ data/chunithm/ data/audio/otto/ test/data/ test/config/
           git checkout
           cd -
           ln -s ../KarenBot-Resources/data data
