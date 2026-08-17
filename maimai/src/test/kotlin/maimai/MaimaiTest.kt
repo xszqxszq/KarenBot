@@ -3,6 +3,7 @@ package xyz.xszq.bot.maimai
 import kotlinx.coroutines.test.runTest
 import xyz.xszq.bot.*
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class MaimaiTest : MaimaiDatabaseTest() {
 
@@ -46,6 +47,7 @@ class MaimaiTest : MaimaiDatabaseTest() {
 
             testMusicAliasesList(sandbox)
             testMusicAddAlias(sandbox)
+            testMusicDeleteAlias(sandbox)
             testMusicToday(sandbox)
             testMusicButtons(sandbox)
             testMusicButtonsExtra(sandbox)
@@ -74,6 +76,7 @@ class MaimaiTest : MaimaiDatabaseTest() {
 
             testGuess(sandbox)
             testGuessOpening(sandbox)
+            testGuessAdmin(sandbox)
         } finally {
             sandbox.cleanup()
         }
@@ -258,6 +261,18 @@ class MaimaiTest : MaimaiDatabaseTest() {
         assertRepliedAny(sandbox, sandbox.user() says "添加别名 852 测试别名")
     }
 
+    private suspend fun testMusicDeleteAlias(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "添加别名 852 testdel")
+        assertReplied(sandbox, sandbox.user() says "删除别名 852 testdel", "别名删除成功")
+        assertReplied(sandbox, sandbox.user() says "删除别名", "使用方法")
+        assertReplied(sandbox, sandbox.user() says "删除别名 852 不存在的别名", "该别名不存在")
+        assertReplied(sandbox, sandbox.user() says "删除别名 不存在的歌曲 任意", "未找到该歌曲")
+        sandbox.clear()
+        sandbox.user("not-admin") says "删除别名 852 testdel"
+        assertEquals(0, sandbox.replies.size)
+    }
+
     private suspend fun testMusicToday(sandbox: BotSandbox) {
         sandbox.clear()
         assertRepliedAny(sandbox, sandbox.user() says "今日舞萌")
@@ -345,5 +360,16 @@ class MaimaiTest : MaimaiDatabaseTest() {
         assertRepliedAny(sandbox, sandbox.user() says "开字母 s")
         assertRepliedAny(sandbox, sandbox.user() says "开歌 852")
         assertRepliedAny(sandbox, sandbox.user() says "不玩了")
+    }
+
+    private suspend fun testGuessAdmin(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertReplied(sandbox, sandbox.group() says "禁用猜歌", "猜歌设置")
+        assertReplied(sandbox, sandbox.tapButton("admin/guess", "0,test-group"), "禁用猜歌成功")
+        assertReplied(sandbox, sandbox.group() says "猜歌", "当前群猜歌已被禁用")
+        assertReplied(sandbox, sandbox.group() says "启用猜歌", "猜歌设置")
+        assertReplied(sandbox, sandbox.tapButton("admin/guess", "1,test-group"), "启用猜歌成功")
+        assertRepliedAny(sandbox, sandbox.group() says "猜歌")
+        assertRepliedAny(sandbox, sandbox.group() says "不玩了")
     }
 }

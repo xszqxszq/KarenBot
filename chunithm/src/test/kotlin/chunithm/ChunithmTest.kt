@@ -6,7 +6,10 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import xyz.xszq.bot.*
 import xyz.xszq.bot.chunithm.database.QQBindTable
+import xyz.xszq.bot.payload.AdminCheckRequest
+import xyz.xszq.bot.subscribe.Channel
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class ChunithmTest : ChunithmDatabaseTest() {
 
@@ -21,6 +24,8 @@ class ChunithmTest : ChunithmDatabaseTest() {
             testScoreList(sandbox)
             testMusic(sandbox)
             testAliases(sandbox)
+            testDeleteAlias(sandbox)
+            testPreview(sandbox)
             testButtons(sandbox)
             testHelp(sandbox)
             testDefault(sandbox)
@@ -73,6 +78,23 @@ class ChunithmTest : ChunithmDatabaseTest() {
         assertRepliedAny(sandbox, sandbox.user() says "添加别名 3 测试别名")
     }
 
+    private suspend fun testDeleteAlias(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "添加别名 3 testdel")
+        assertReplied(sandbox, sandbox.user() says "删除别名 3 testdel", "别名已删除")
+        assertReplied(sandbox, sandbox.user() says "删除别名", "使用方法")
+        assertReplied(sandbox, sandbox.user() says "删除别名 3 不存在的别名", "该别名不存在")
+        assertReplied(sandbox, sandbox.user() says "删除别名 不存在的歌曲 任意", "未找到该歌曲")
+        sandbox.clear()
+        sandbox.user("not-admin") says "删除别名 3 testdel"
+        assertEquals(0, sandbox.replies.size)
+    }
+
+    private suspend fun testPreview(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "预览 B.B.K.K.B.K.K.")
+    }
+
     private suspend fun testButtons(sandbox: BotSandbox) {
         sandbox.clear()
         assertRepliedAny(sandbox, sandbox.tapButton("chunithm-search-word", "B.B.K.K.B.K.K.\n1"))
@@ -92,6 +114,11 @@ class ChunithmTest : ChunithmDatabaseTest() {
 
 suspend fun setChunithm(scope: TestScope, database: org.jetbrains.exposed.sql.Database): BotSandbox {
     val sandbox = BotSandbox(scope, mockTencentCos(), database)
+    sandbox.pluginLoader.subscribes.subscribe(
+        "admin", Channel<AdminCheckRequest>("admin-check") { data ->
+            data.deferred.complete(data.userId == "test-user")
+        }
+    )
     val chunithm = Chunithm().apply {
         plugin = "chunithm"
         pluginLoader = sandbox.pluginLoader

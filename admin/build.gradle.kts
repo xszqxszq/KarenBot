@@ -18,10 +18,14 @@ dependencies {
     implementation("com.soywiz.korge:korge-core:$korlibsVersion")
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.7")
     testImplementation(kotlin("test"))
+    testImplementation(project(":"))
+    testImplementation("io.mockk:mockk:1.14.3")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 }
 
 tasks.test {
     useJUnitPlatform()
+    workingDir = rootDir
 }
 tasks.jar {
     archiveBaseName.set("admin")
