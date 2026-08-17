@@ -35,6 +35,7 @@ class AdminTest {
             testReloadUnknown(sandbox)
             testMsg(sandbox)
             testMsgmd(sandbox)
+            testMsgQueue(sandbox)
             testRecall(sandbox)
             testNonAdmin(sandbox)
             testAdminCheck(sandbox)
@@ -81,6 +82,18 @@ class AdminTest {
         sandbox.user(adminId) says "msgmd test-group markdown内容"
         check(sandbox.replies.any { it is GroupMessageEvent && it.message.content.contains("markdown内容") }) {
             "Expected group markdown message, got: ${sandbox.replies.map { it.message.content }}"
+        }
+    }
+
+    private suspend fun testMsgQueue(sandbox: BotSandbox) {
+        sandbox.clear()
+        coEvery {
+            sandbox.pluginLoader.api.sendGroupMessage(any(), "待补发内容", any(), any(), any(), null, any(), any(), any())
+        } returns false
+        sandbox.user(adminId) says "msg test-group 待补发内容"
+        sandbox.group() says "随便一句话"
+        check(sandbox.replies.any { it is GroupMessageEvent && it.message.content.contains("待补发内容") }) {
+            "Expected queued message flushed, got: ${sandbox.replies.map { it.message.content }}"
         }
     }
 

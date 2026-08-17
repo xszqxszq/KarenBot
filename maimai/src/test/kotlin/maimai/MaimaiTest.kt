@@ -12,6 +12,8 @@ class MaimaiTest : MaimaiDatabaseTest() {
         val sandbox = setMaimai(this, database)
         try {
             testBind(sandbox)
+            testUnboundQQ(sandbox)
+            testUnboundProber(sandbox)
 
             testB50(sandbox, "maxscore")
             testB50(sandbox)
@@ -86,6 +88,16 @@ class MaimaiTest : MaimaiDatabaseTest() {
         sandbox.clear()
         val msg = sandbox.user() says "/bind 943551369"
         assertReplied(sandbox, msg, "绑定成功")
+    }
+
+    private suspend fun testUnboundQQ(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertReplied(sandbox, sandbox.user("unbound-user") says "/b50", "请输入您的QQ号")
+    }
+
+    private suspend fun testUnboundProber(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertReplied(sandbox, sandbox.user("u2") says "/bind 1145148101919893", "还未在查分器上绑定QQ号")
     }
 
     private suspend fun testSettingsProber(sandbox: BotSandbox) {

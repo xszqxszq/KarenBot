@@ -23,6 +23,7 @@ class ChunithmTest : ChunithmDatabaseTest() {
             testLevelList(sandbox)
             testScoreList(sandbox)
             testMusic(sandbox)
+            testSearchFamily(sandbox)
             testAliases(sandbox)
             testDeleteAlias(sandbox)
             testPreview(sandbox)
@@ -70,6 +71,21 @@ class ChunithmTest : ChunithmDatabaseTest() {
         assertRepliedAny(sandbox, sandbox.user() says "定数查歌 14.0")
         assertRepliedAny(sandbox, sandbox.user() says "随个")
         assertRepliedAny(sandbox, sandbox.user() says "3是什么歌")
+    }
+
+    private suspend fun testSearchFamily(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedAny(sandbox, sandbox.user() says "谱师查歌 Jack")
+        assertRepliedAny(sandbox, sandbox.user() says "版本查歌 CHUNITHM")
+        assertRepliedAny(sandbox, sandbox.user() says "曲师查歌 nora2r")
+        assertRepliedAny(sandbox, sandbox.user() says "正则查歌 B\\.B\\.K\\.K")
+        assertRepliedAny(sandbox, sandbox.user() says "BPM查歌 170")
+        assertRepliedAny(sandbox, sandbox.user() says "搜索 其他游戏")
+        assertRepliedAny(sandbox, sandbox.tapButton("chunithm-search-designer", "Jack\n1"))
+        assertRepliedAny(sandbox, sandbox.tapButton("chunithm-search-version", "CHUNITHM\n1"))
+        assertRepliedAny(sandbox, sandbox.tapButton("chunithm-search-artist", "nora2r\n1"))
+        assertRepliedAny(sandbox, sandbox.tapButton("chunithm-search-bpm", "170\n1"))
+        assertRepliedAny(sandbox, sandbox.tapButton("chunithm-search-combo", "其他游戏\n1"))
     }
 
     private suspend fun testAliases(sandbox: BotSandbox) {
