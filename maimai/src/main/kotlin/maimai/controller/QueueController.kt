@@ -3,7 +3,8 @@ package xyz.xszq.bot.maimai.controller
 import kotlinx.coroutines.supervisorScope
 import kotlinx.datetime.toJavaLocalDateTime
 import xyz.xszq.bot.*
-import xyz.xszq.bot.Maimai.Companion.textMode
+import xyz.xszq.bot.maimai.Maimai
+import xyz.xszq.bot.maimai.Maimai.Companion.textMode
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.exception.IllegalArgsException
 import xyz.xszq.bot.exception.NeedHelpException

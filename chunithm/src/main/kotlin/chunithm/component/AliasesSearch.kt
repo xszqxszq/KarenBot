@@ -19,7 +19,7 @@ import org.apache.lucene.index.IndexWriterConfig
 import org.apache.lucene.index.Term
 import org.apache.lucene.search.*
 import org.apache.lucene.store.FSDirectory
-import xyz.xszq.bot.Chunithm
+import xyz.xszq.bot.chunithm.Chunithm
 import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesTable
 import xyz.xszq.bot.chunithm.music.MusicInfo
 import xyz.xszq.bot.chunithm.music.MusicNameAlias

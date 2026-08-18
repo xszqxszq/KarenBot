@@ -10,7 +10,7 @@ import org.xm.Similarity
 import xyz.xszq.bot.AudioHandler.crop
 import xyz.xszq.bot.AudioHandler.duration
 import xyz.xszq.bot.ErrorHandler
-import xyz.xszq.bot.Guess
+import xyz.xszq.bot.guess.Guess
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.IllegalArgsException

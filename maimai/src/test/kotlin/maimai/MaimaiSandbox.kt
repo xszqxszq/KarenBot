@@ -16,8 +16,8 @@ suspend fun setMaimai(scope: TestScope, database: Database): BotSandbox {
     val maimai = Maimai().apply {
         plugin = "maimai"
         pluginLoader = sandbox.pluginLoader
-        configPath = "../config/maimai.yml"
-        dataPath = "../data/maimai"
+        configPath = "./config/maimai.yml"
+        dataPath = "./data/maimai"
     }
     maimai.load()
     maimai.image.manager.init()

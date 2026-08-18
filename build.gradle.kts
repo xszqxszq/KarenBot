@@ -5,8 +5,9 @@ val ktorVersion: String by project
 
 plugins {
     application
-    kotlin("jvm") version "2.2.0"
-    kotlin("plugin.serialization") version "2.2.0"
+    `java-test-fixtures`
+    kotlin("jvm")
+    kotlin("plugin.serialization")
     id("com.github.johnrengelman.shadow") version "8.0.0"
 }
 
@@ -53,6 +54,8 @@ dependencies {
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     testImplementation("io.mockk:mockk:1.14.3")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    testFixturesImplementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    testFixturesImplementation("com.soywiz.korge:korge-core:$korlibsVersion")
 }
 
 tasks.test {
@@ -116,13 +119,17 @@ allprojects {
             val resolvedArtifacts = runtimeClasspath.incoming.artifactView { }.artifacts.artifacts
 
             val dependenciesList = resolvedArtifacts.mapNotNull { artifact ->
-                val componentId = artifact.id.componentIdentifier
-                if (componentId is ModuleComponentIdentifier) {
-                    "${componentId.group}:${componentId.module}:${componentId.version}"
-                } else {
-                    null
+                when (val componentId = artifact.id.componentIdentifier) {
+                    is ModuleComponentIdentifier -> {
+                        "${componentId.group}:${componentId.module}:${componentId.version}"
+                    }
+                    is ProjectComponentIdentifier -> {
+                        rootProject.allprojects.find { it.path == componentId.projectPath }
+                            ?.let { "${it.group}:${it.name}:${it.version}" }
+                    }
+                    else -> null
                 }
-            }
+            }.distinct().sorted()
 
             val output = outputFile.get().asFile
             output.parentFile.mkdirs()

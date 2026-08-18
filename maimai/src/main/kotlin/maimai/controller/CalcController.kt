@@ -1,7 +1,7 @@
 package xyz.xszq.bot.maimai.controller
 
 import xyz.xszq.bot.ErrorHandler
-import xyz.xszq.bot.Maimai
+import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.ArgsNotEnoughException
 import xyz.xszq.bot.exception.IllegalArgsException

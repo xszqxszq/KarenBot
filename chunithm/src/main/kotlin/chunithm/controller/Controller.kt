@@ -2,8 +2,8 @@ package xyz.xszq.bot.chunithm.controller
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withTimeout
-import xyz.xszq.bot.Chunithm
-import xyz.xszq.bot.Chunithm.Companion.textMode
+import xyz.xszq.bot.chunithm.Chunithm
+import xyz.xszq.bot.chunithm.Chunithm.Companion.textMode
 import xyz.xszq.bot.chunithm.api.ChunithmAPI
 import xyz.xszq.bot.chunithm.api.DivingFish
 import xyz.xszq.bot.chunithm.api.LXNS

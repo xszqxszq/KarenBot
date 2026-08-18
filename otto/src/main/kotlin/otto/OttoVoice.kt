@@ -1,4 +1,4 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.otto
 
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
@@ -7,10 +7,13 @@ import korlibs.io.async.launch
 import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import xyz.xszq.bot.Plugin
 import xyz.xszq.bot.ffmpeg.FFMpegFileType
 import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.bot.message.Audio
 import xyz.xszq.bot.message.RemoteVoice
+import xyz.xszq.bot.reply
+import xyz.xszq.bot.use
 import xyz.xszq.bot.voice.TTSParser
 import xyz.xszq.bot.voice.VoicePresets
 import java.io.File

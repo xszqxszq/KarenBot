@@ -3,20 +3,14 @@ val hopliteVersion: String by rootProject.extra
 val korlibsVersion: String by rootProject.extra
 val ktorVersion: String by rootProject.extra
 plugins {
-    kotlin("jvm")
-    kotlin("plugin.serialization")
+    id("bot-plugin")
 }
-
-group = "xyz.xszq.bot"
-version = "9.1"
 
 repositories {
     mavenLocal()
-    mavenCentral()
 }
 
 dependencies {
-    compileOnly(project(":"))
     implementation("com.github.houbb:opencc4j:1.13.1")
     implementation("com.fleeksoft.ksoup:ksoup:0.2.6")
     implementation("com.h2database:h2:2.3.232")
@@ -44,28 +38,15 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-money:${exposedVersion}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.5.3")
-    implementation("xyz.xszq:shinobu:2.0.1")
-    testImplementation(kotlin("test"))
-    testImplementation(project(":"))
-    testImplementation("io.mockk:mockk:1.14.3")
+    implementation(project(":shinobu"))
     testImplementation("com.soywiz.korge:korge-core:$korlibsVersion")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
-    testImplementation("xyz.xszq:shinobu:2.0.1")
+    testImplementation(project(":shinobu"))
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
 tasks.jar {
-    archiveBaseName.set("maimai")
-    archiveClassifier.set("")
-
     manifest {
         attributes(
-            "Plugin-Class" to "xyz.xszq.bot.Maimai"
+            "Plugin-Class" to "xyz.xszq.bot.maimai.Maimai"
         )
     }
-}
-kotlin {
-    jvmToolchain(22)
 }

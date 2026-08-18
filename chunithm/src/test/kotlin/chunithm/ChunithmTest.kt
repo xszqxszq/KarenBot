@@ -138,8 +138,8 @@ suspend fun setChunithm(scope: TestScope, database: org.jetbrains.exposed.sql.Da
     val chunithm = Chunithm().apply {
         plugin = "chunithm"
         pluginLoader = sandbox.pluginLoader
-        configPath = "../config/chunithm.yml"
-        dataPath = "../data/chunithm"
+        configPath = "./config/chunithm.yml"
+        dataPath = "./data/chunithm"
     }
     chunithm.load()
     chunithm.image.manager.init()

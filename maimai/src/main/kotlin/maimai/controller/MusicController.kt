@@ -3,7 +3,8 @@ package xyz.xszq.bot.maimai.controller
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.localCurrentDirVfs
 import xyz.xszq.bot.*
-import xyz.xszq.bot.Maimai.Companion.textMode
+import xyz.xszq.bot.maimai.Maimai
+import xyz.xszq.bot.maimai.Maimai.Companion.textMode
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.event.ReplyAble
 import xyz.xszq.bot.exception.IllegalArgsException

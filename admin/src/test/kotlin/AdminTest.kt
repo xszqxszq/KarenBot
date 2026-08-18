@@ -4,6 +4,7 @@ import io.mockk.coEvery
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import xyz.xszq.bot.admin.Admin
 import xyz.xszq.bot.event.ChannelEvent
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.payload.AdminCheckRequest

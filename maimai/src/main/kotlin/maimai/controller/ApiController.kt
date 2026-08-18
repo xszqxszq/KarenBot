@@ -13,7 +13,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.*
-import xyz.xszq.bot.Maimai
+import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.User
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.NotFoundException

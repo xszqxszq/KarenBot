@@ -4,19 +4,10 @@ val ktorVersion: String by rootProject.extra
 val skikoVersion: String by rootProject.extra
 val exposedVersion: String by rootProject.extra
 plugins {
-    kotlin("jvm")
-    kotlin("plugin.serialization")
-}
-
-group = "xyz.xszq.bot"
-version = "9.1"
-
-repositories {
-    mavenCentral()
+    id("bot-plugin")
 }
 
 dependencies {
-    compileOnly(project(":"))
     implementation("org.jetbrains.exposed:exposed-core:${exposedVersion}")
     implementation("com.sksamuel.hoplite:hoplite-core:${hopliteVersion}")
     implementation("com.sksamuel.hoplite:hoplite-yaml:${hopliteVersion}")
@@ -34,26 +25,13 @@ dependencies {
     implementation("org.jetbrains.skiko:skiko-awt-runtime-macos-arm64:${skikoVersion}")
     implementation("io.ktor:ktor-server-core:${ktorVersion}")
     implementation("io.ktor:ktor-server-netty:${ktorVersion}")
-    testImplementation(kotlin("test"))
-    testImplementation(project(":"))
     testImplementation("io.ktor:ktor-client-mock:${ktorVersion}")
-    testImplementation("io.mockk:mockk:1.14.3")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
 tasks.jar {
-    archiveBaseName.set("text")
-    archiveClassifier.set("")
-
     manifest {
         attributes(
-            "Plugin-Class" to "xyz.xszq.bot.Text"
+            "Plugin-Class" to "xyz.xszq.bot.text.Text"
         )
     }
-}
-kotlin {
-    jvmToolchain(22)
 }

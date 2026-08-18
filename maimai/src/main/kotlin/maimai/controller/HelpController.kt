@@ -1,6 +1,6 @@
 package xyz.xszq.bot.maimai.controller
 
-import xyz.xszq.bot.Maimai
+import xyz.xszq.bot.maimai.Maimai
 
 @Suppress("unused")
 class HelpController(

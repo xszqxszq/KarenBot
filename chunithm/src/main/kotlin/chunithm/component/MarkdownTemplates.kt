@@ -1,7 +1,7 @@
 package xyz.xszq.bot.chunithm.component
 
 import io.ktor.http.*
-import xyz.xszq.bot.Chunithm
+import xyz.xszq.bot.chunithm.Chunithm
 import xyz.xszq.bot.chunithm.music.ChartInfo
 import xyz.xszq.bot.chunithm.music.MusicDifficulty
 import xyz.xszq.bot.chunithm.music.MusicInfo

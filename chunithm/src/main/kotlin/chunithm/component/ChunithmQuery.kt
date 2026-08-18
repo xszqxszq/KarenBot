@@ -1,7 +1,7 @@
 package xyz.xszq.bot.chunithm.component
 
 import kotlinx.coroutines.CancellationException
-import xyz.xszq.bot.Chunithm
+import xyz.xszq.bot.chunithm.Chunithm
 import xyz.xszq.bot.chunithm.api.ChunithmAPI
 import xyz.xszq.bot.chunithm.api.LXNS
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable

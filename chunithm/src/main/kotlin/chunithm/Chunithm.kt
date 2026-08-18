@@ -1,4 +1,4 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.chunithm
 
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.exists
 import org.jetbrains.exposed.sql.transactions.transaction
+import xyz.xszq.bot.Plugin
 import xyz.xszq.bot.chunithm.api.ChunithmAPI
 import xyz.xszq.bot.chunithm.api.DivingFish
 import xyz.xszq.bot.chunithm.api.LXNS
@@ -22,6 +23,7 @@ import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
 import xyz.xszq.bot.chunithm.query.ComboQuery
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.reply
 import xyz.xszq.bot.subscribe.SubscribeBuilder
 import kotlin.reflect.full.primaryConstructor
 

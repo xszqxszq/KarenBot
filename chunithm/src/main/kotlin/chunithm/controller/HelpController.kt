@@ -1,6 +1,6 @@
 package xyz.xszq.bot.chunithm.controller
 
-import xyz.xszq.bot.Chunithm
+import xyz.xszq.bot.chunithm.Chunithm
 
 @Suppress("unused")
 class HelpController(

@@ -1,4 +1,4 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.maimai
 
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
@@ -9,8 +9,10 @@ import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.exists
 import org.jetbrains.exposed.sql.transactions.transaction
+import xyz.xszq.bot.Plugin
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.json
 import xyz.xszq.bot.maimai.api.DivingFish
 import xyz.xszq.bot.maimai.api.LXNS
 import xyz.xszq.bot.maimai.api.MaimaiAPI

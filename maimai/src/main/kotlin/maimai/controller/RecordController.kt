@@ -1,7 +1,7 @@
 package xyz.xszq.bot.maimai.controller
 
 import korlibs.math.toIntCeil
-import xyz.xszq.bot.Maimai
+import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.maimai.component.MaimaiQuery
 import xyz.xszq.bot.maimai.music.MusicDifficulty

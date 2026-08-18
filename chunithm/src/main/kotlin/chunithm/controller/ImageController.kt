@@ -6,7 +6,8 @@ import kotlinx.coroutines.launch
 import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.Image
 import xyz.xszq.bot.*
-import xyz.xszq.bot.Chunithm.Companion.textMode
+import xyz.xszq.bot.chunithm.Chunithm
+import xyz.xszq.bot.chunithm.Chunithm.Companion.textMode
 import xyz.xszq.bot.chunithm.component.image.FilterParams
 import xyz.xszq.bot.chunithm.exception.FilterNoResultException
 import xyz.xszq.bot.chunithm.exception.NoDataException

@@ -7,7 +7,8 @@ import kotlinx.coroutines.launch
 import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.Image
 import xyz.xszq.bot.*
-import xyz.xszq.bot.Maimai.Companion.textMode
+import xyz.xszq.bot.maimai.Maimai
+import xyz.xszq.bot.maimai.Maimai.Companion.textMode
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.maimai.component.image.FilterParams

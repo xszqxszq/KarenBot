@@ -3,6 +3,7 @@ package xyz.xszq.bot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import xyz.xszq.bot.config.TextConfig
+import xyz.xszq.bot.text.Text
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

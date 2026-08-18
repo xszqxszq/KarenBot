@@ -3,20 +3,14 @@ val hopliteVersion: String by rootProject.extra
 val korlibsVersion: String by rootProject.extra
 val ktorVersion: String by rootProject.extra
 plugins {
-    kotlin("jvm")
-    kotlin("plugin.serialization")
+    id("bot-plugin")
 }
-
-group = "xyz.xszq.bot"
-version = "9.0"
 
 repositories {
     mavenLocal()
-    mavenCentral()
 }
 
 dependencies {
-    compileOnly(project(":"))
     implementation("com.sksamuel.hoplite:hoplite-core:${hopliteVersion}")
     implementation("com.sksamuel.hoplite:hoplite-yaml:${hopliteVersion}")
     implementation("com.soywiz.korge:korge-core:${korlibsVersion}")
@@ -38,28 +32,15 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-money:${exposedVersion}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.5.3")
-    implementation("xyz.xszq:shinobu:2.0.1")
+    implementation(project(":shinobu"))
     testImplementation("com.soywiz.korge:korge-core:${korlibsVersion}")
-    testImplementation("xyz.xszq:shinobu:2.0.1")
-    testImplementation(kotlin("test"))
-    testImplementation(project(":"))
-    testImplementation("io.mockk:mockk:1.14.3")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    testImplementation(project(":shinobu"))
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
 tasks.jar {
-    archiveBaseName.set("chunithm")
-    archiveClassifier.set("")
-
     manifest {
         attributes(
-            "Plugin-Class" to "xyz.xszq.bot.Chunithm"
+            "Plugin-Class" to "xyz.xszq.bot.chunithm.Chunithm"
         )
     }
-}
-kotlin {
-    jvmToolchain(22)
 }

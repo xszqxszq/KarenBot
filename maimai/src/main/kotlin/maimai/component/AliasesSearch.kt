@@ -20,7 +20,7 @@ import org.apache.lucene.index.IndexWriterConfig
 import org.apache.lucene.index.Term
 import org.apache.lucene.search.*
 import org.apache.lucene.store.FSDirectory
-import xyz.xszq.bot.Maimai
+import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.database.MaimaiMusicAliasesTable
 import xyz.xszq.bot.maimai.music.MusicInfo
 import xyz.xszq.bot.maimai.music.MusicNameAlias

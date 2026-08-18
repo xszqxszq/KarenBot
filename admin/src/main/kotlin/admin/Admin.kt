@@ -1,8 +1,9 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.admin
 
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
+import xyz.xszq.bot.*
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.message.Markdown

@@ -1,4 +1,4 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.text
 
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
@@ -18,6 +18,7 @@ import org.jetbrains.exposed.sql.exists
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.scilab.forge.jlatexmath.TeXConstants
 import org.scilab.forge.jlatexmath.TeXFormula
+import xyz.xszq.bot.*
 import xyz.xszq.bot.config.TextConfig
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.message.At

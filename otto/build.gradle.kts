@@ -1,16 +1,10 @@
 val hopliteVersion: String by rootProject.extra
 val korlibsVersion: String by rootProject.extra
 plugins {
-    kotlin("jvm")
-    kotlin("plugin.serialization")
+    id("bot-plugin")
 }
 
-group = "xyz.xszq.bot"
-version = "9.0"
-
 repositories {
-    mavenCentral()
-    maven { url = uri("https://jitpack.io") }
     maven { url = uri("https://raw.githubusercontent.com/DFKI-MLT/Maven-Repository/main") }
     maven { url = uri("https://nrgxnat.jfrog.io/artifactory/libs-release/") }
     maven { url = uri("https://nexus.terrestris.de/repository/public/") }
@@ -19,7 +13,6 @@ configurations.all {
     exclude(group = "gov.nist.math", module = "Jampack")
 }
 dependencies {
-    compileOnly(project(":"))
     implementation("com.hankcs:hanlp:portable-1.8.6")
     implementation("com.sksamuel.hoplite:hoplite-core:${hopliteVersion}")
     implementation("com.sksamuel.hoplite:hoplite-yaml:${hopliteVersion}")
@@ -28,26 +21,12 @@ dependencies {
     implementation("de.dfki.mary:marytts-lang-en:5.2.1")
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.7")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
-    testImplementation(kotlin("test"))
-    testImplementation(project(":"))
-    testImplementation("io.mockk:mockk:1.14.3")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 }
 
-tasks.test {
-    useJUnitPlatform()
-    workingDir = rootDir
-}
 tasks.jar {
-    archiveBaseName.set("otto")
-    archiveClassifier.set("")
-
     manifest {
         attributes(
-            "Plugin-Class" to "xyz.xszq.bot.OttoVoice"
+            "Plugin-Class" to "xyz.xszq.bot.otto.OttoVoice"
         )
     }
-}
-kotlin {
-    jvmToolchain(22)
 }

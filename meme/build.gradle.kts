@@ -3,19 +3,10 @@ val korlibsVersion: String by rootProject.extra
 val ktorVersion: String by rootProject.extra
 val skikoVersion: String by rootProject.extra
 plugins {
-    kotlin("jvm")
-    kotlin("plugin.serialization")
-}
-
-group = "xyz.xszq.bot"
-version = "9.0"
-
-repositories {
-    mavenCentral()
+    id("bot-plugin")
 }
 
 dependencies {
-    compileOnly(project(":"))
     implementation("com.sksamuel.hoplite:hoplite-core:${hopliteVersion}")
     implementation("com.sksamuel.hoplite:hoplite-yaml:${hopliteVersion}")
     implementation("com.soywiz.korge:korge-core:$korlibsVersion")
@@ -28,22 +19,12 @@ dependencies {
     implementation("org.jetbrains.skiko:skiko-awt-runtime-windows-x64:${skikoVersion}")
     implementation("org.jetbrains.skiko:skiko-awt-runtime-linux-x64:${skikoVersion}")
     implementation("org.jetbrains.skiko:skiko-awt-runtime-macos-arm64:${skikoVersion}")
-    testImplementation(kotlin("test"))
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
 tasks.jar {
-    archiveBaseName.set("meme")
-    archiveClassifier.set("")
-
     manifest {
         attributes(
-            "Plugin-Class" to "xyz.xszq.bot.Meme"
+            "Plugin-Class" to "xyz.xszq.bot.meme.Meme"
         )
     }
-}
-kotlin {
-    jvmToolchain(22)
 }

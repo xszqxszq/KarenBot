@@ -2,7 +2,7 @@ package xyz.xszq.bot.maimai.component
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import xyz.xszq.bot.Maimai
+import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.music.MusicInfo
 
 class AliasAudit(

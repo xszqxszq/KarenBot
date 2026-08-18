@@ -1,5 +1,6 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.guess
 
+import xyz.xszq.bot.Plugin
 import xyz.xszq.bot.touhou.Touhou
 
 @Suppress("unused")

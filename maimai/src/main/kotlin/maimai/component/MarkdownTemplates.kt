@@ -1,7 +1,7 @@
 package xyz.xszq.bot.maimai.component
 
 import io.ktor.http.*
-import xyz.xszq.bot.Maimai
+import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.music.ChartInfo
 import xyz.xszq.bot.maimai.music.MusicDifficulty
 import xyz.xszq.bot.maimai.music.MusicInfo

@@ -1,4 +1,4 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.meme
 
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
@@ -8,6 +8,7 @@ import korlibs.io.util.isDigit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonPrimitive
+import xyz.xszq.bot.*
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.ArgsNotEnoughException
