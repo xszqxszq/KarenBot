@@ -15,5 +15,3 @@ data class FFProbeStream(
     @SerialName("avg_frame_rate")
     val avgFrameRate: String? = null,
 )
-
-
