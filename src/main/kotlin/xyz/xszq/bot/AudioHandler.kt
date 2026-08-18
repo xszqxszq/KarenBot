@@ -1,6 +1,7 @@
 package xyz.xszq.bot
 
 import io.github.kasukusakura.silkcodec.SilkCoder
+import io.github.oshai.kotlinlogging.KotlinLogging
 import korlibs.io.async.use
 import korlibs.io.file.VfsFile
 import korlibs.io.file.VfsOpenMode
@@ -15,6 +16,7 @@ import java.io.File
  * Process wave files.
  */
 object AudioHandler {
+    private val logger = KotlinLogging.logger {}
     /**
      * Read PCM part from wave file.
      * @param file Wave file.
@@ -123,5 +125,9 @@ object AudioHandler {
             cropped.delete()
         }
     }
-    suspend fun VfsFile.duration() = FFProbe(File(this.absolutePath)).getResult().format?.duration?.toDouble()
+    suspend fun VfsFile.duration() = runCatching {
+        FFProbe(File(this.absolutePath)).getResult().format?.duration?.toDouble()
+    }.onFailure {
+        logger.warn { "ffprobe 获取音频时长失败: ${it.message}" }
+    }.getOrNull()
 }
