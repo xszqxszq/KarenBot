@@ -3,7 +3,6 @@ package xyz.xszq.shinobu.template
 import org.jetbrains.skia.Image
 import org.jetbrains.skia.paragraph.FontCollection
 import java.io.File
-import java.util.LinkedHashMap
 
 class ResourceManager(
     val basePath: File,

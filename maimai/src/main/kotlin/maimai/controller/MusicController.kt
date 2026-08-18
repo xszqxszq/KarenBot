@@ -2,9 +2,10 @@ package xyz.xszq.bot.maimai.controller
 
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.localCurrentDirVfs
+import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import xyz.xszq.bot.*
-import xyz.xszq.bot.maimai.Maimai
-import xyz.xszq.bot.maimai.Maimai.Companion.textMode
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.event.ReplyAble
 import xyz.xszq.bot.exception.IllegalArgsException
@@ -13,8 +14,9 @@ import xyz.xszq.bot.exception.NeedHelpException
 import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.ffmpeg.FFMpegFileType
 import xyz.xszq.bot.ffmpeg.FFMpegTask
-import xyz.xszq.bot.maimai.component.AliasAudit
-import xyz.xszq.bot.maimai.component.MarkdownTemplates
+import xyz.xszq.bot.maimai.Maimai
+import xyz.xszq.bot.maimai.Maimai.Companion.textMode
+import xyz.xszq.bot.maimai.component.*
 import xyz.xszq.bot.maimai.component.MarkdownTemplates.Templates.selectMusic
 import xyz.xszq.bot.maimai.database.MaimaiMusicAliasesTable
 import xyz.xszq.bot.maimai.database.MaimaiMusicAliasesVoteTable
@@ -29,12 +31,6 @@ import xyz.xszq.bot.message.Audio
 import xyz.xszq.bot.subscribe.CommandNotMatchedException
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import xyz.xszq.bot.maimai.component.CosineSimilarity
-import xyz.xszq.bot.maimai.component.CoverDescData
-import xyz.xszq.bot.maimai.component.CoverEmbeddingGenerator
 import kotlin.random.Random
 
 @Suppress("unused")

@@ -4,12 +4,12 @@ import korlibs.io.util.UUID
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.withTimeout
-import xyz.xszq.bot.maimai.Maimai
-import xyz.xszq.bot.maimai.Maimai.Companion.textMode
 import xyz.xszq.bot.event.ChannelEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.event.ReplyAble
 import xyz.xszq.bot.exception.NotFoundException
+import xyz.xszq.bot.maimai.Maimai
+import xyz.xszq.bot.maimai.Maimai.Companion.textMode
 import xyz.xszq.bot.maimai.api.DivingFish
 import xyz.xszq.bot.maimai.api.LXNS
 import xyz.xszq.bot.maimai.api.MaimaiAPI

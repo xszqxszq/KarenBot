@@ -7,8 +7,8 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import korlibs.io.util.UUID
-import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.api.DivingFish
 import xyz.xszq.bot.maimai.component.WaitingEventData
 import xyz.xszq.bot.maimai.database.DivingFishBindTable

@@ -1,7 +1,7 @@
 package xyz.xszq.bot.guess
 
 import xyz.xszq.bot.Plugin
-import xyz.xszq.bot.touhou.Touhou
+import xyz.xszq.bot.guess.touhou.Touhou
 
 @Suppress("unused")
 class Guess: Plugin() {

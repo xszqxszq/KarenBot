@@ -42,13 +42,14 @@ nbdist/
 .nb-gradle/
 
 # Local secrets and runtime leftovers inside the code repo
-config
-data
-database
-keystore.jks
-todo.txt
-plugins/
-TEST_ROADMAP.md
+/config
+/data
+/database
+/keystore.jks
+/todo.txt
+/plugins/
+/TEST_ROADMAP.md
+.fonts/
 
 *.log
 .omo/

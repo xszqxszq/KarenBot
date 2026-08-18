@@ -9,12 +9,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
-import xyz.xszq.bot.payload.llm.EmbeddingContentPart
-import xyz.xszq.bot.payload.llm.EmbeddingImageUrl
-import xyz.xszq.bot.payload.llm.EmbeddingRequest
-import xyz.xszq.bot.payload.llm.EmbeddingResponse
-import xyz.xszq.bot.payload.llm.LLMRequest
-import xyz.xszq.bot.payload.llm.LLMResponse
+import xyz.xszq.bot.payload.llm.*
 
 class LLMClient(
     private val config: LLMConfig,

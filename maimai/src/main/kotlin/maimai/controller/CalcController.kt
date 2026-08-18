@@ -1,12 +1,12 @@
 package xyz.xszq.bot.maimai.controller
 
 import xyz.xszq.bot.ErrorHandler
-import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.ArgsNotEnoughException
 import xyz.xszq.bot.exception.IllegalArgsException
 import xyz.xszq.bot.exception.NeedHelpException
 import xyz.xszq.bot.exception.NotFoundException
+import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.music.MusicDifficulty
 import xyz.xszq.bot.newLine
 import xyz.xszq.bot.reply

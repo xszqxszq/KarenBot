@@ -16,8 +16,8 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(project(":"))
     testImplementation(testFixtures(project(":")))
-    testImplementation("io.mockk:mockk:1.14.3")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    testImplementation("io.mockk:mockk:${project.findProperty("mockkVersion")}")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${project.findProperty("coroutinesVersion")}")
 }
 
 tasks.test {

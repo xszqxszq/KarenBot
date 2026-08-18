@@ -2,6 +2,15 @@ val exposedVersion: String by project
 val hopliteVersion: String by project
 val korlibsVersion: String by project
 val ktorVersion: String by project
+val luceneVersion: String by project
+val xmlutilVersion: String by project
+val serializationVersion: String by project
+val h2Version: String by project
+val mariadbVersion: String by project
+val ksoupVersion: String by project
+val opencc4jVersion: String by project
+val mockkVersion: String by project
+val coroutinesVersion: String by project
 
 plugins {
     application
@@ -25,10 +34,10 @@ repositories {
 }
 
 dependencies {
-    api("io.mockk:mockk:1.14.3")
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    api("io.mockk:mockk:$mockkVersion")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
     implementation("ch.qos.logback:logback-classic:1.5.18")
-    implementation("com.h2database:h2:2.3.232")
+    implementation("com.h2database:h2:$h2Version")
     implementation("com.mysql:mysql-connector-j:9.3.0")
     implementation("com.qcloud:cos_api:5.6.247")
     implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
@@ -49,11 +58,11 @@ dependencies {
     implementation("org.bouncycastle:bcprov-jdk18on:1.80")
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
-    implementation("org.mariadb.jdbc:mariadb-java-client:3.5.3")
+    implementation("org.mariadb.jdbc:mariadb-java-client:$mariadbVersion")
     testImplementation(kotlin("test"))
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
-    testImplementation("io.mockk:mockk:1.14.3")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    testImplementation("io.mockk:mockk:$mockkVersion")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
     testFixturesImplementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     testFixturesImplementation("com.soywiz.korge:korge-core:$korlibsVersion")
 }
@@ -108,6 +117,15 @@ allprojects {
     extra["hopliteVersion"] = hopliteVersion
     extra["korlibsVersion"] = korlibsVersion
     extra["ktorVersion"] = ktorVersion
+    extra["luceneVersion"] = luceneVersion
+    extra["xmlutilVersion"] = xmlutilVersion
+    extra["serializationVersion"] = serializationVersion
+    extra["h2Version"] = h2Version
+    extra["mariadbVersion"] = mariadbVersion
+    extra["ksoupVersion"] = ksoupVersion
+    extra["opencc4jVersion"] = opencc4jVersion
+    extra["mockkVersion"] = mockkVersion
+    extra["coroutinesVersion"] = coroutinesVersion
     tasks.register("generatePluginDependencies") {
         val outputFile = layout.buildDirectory.file("generated/plugin-dependencies.txt")
         inputs.file(layout.projectDirectory.file("build.gradle.kts"))

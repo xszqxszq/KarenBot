@@ -1,9 +1,9 @@
 package xyz.xszq.bot.maimai.controller
 
-import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.chain
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.database.QQBindTable
 import xyz.xszq.bot.maimai.music.Item

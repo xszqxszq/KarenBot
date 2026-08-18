@@ -2,10 +2,10 @@ package xyz.xszq.bot
 
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import xyz.xszq.bot.otto.OttoVoice
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import xyz.xszq.bot.otto.OttoVoice
 
 class OttoVoiceTest {
 

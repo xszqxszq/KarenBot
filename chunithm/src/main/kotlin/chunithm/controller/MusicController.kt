@@ -2,10 +2,10 @@ package xyz.xszq.bot.chunithm.controller
 
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.localCurrentDirVfs
-import xyz.xszq.bot.chunithm.Chunithm
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import xyz.xszq.bot.chunithm.Chunithm
 import xyz.xszq.bot.chunithm.component.CosineSimilarity
 import xyz.xszq.bot.chunithm.component.CoverDescData
 import xyz.xszq.bot.chunithm.component.CoverEmbeddingGenerator

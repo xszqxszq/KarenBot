@@ -2,10 +2,10 @@ package xyz.xszq.bot.maimai.component
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.json.Json
-import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.llm.LLMClient
+import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.api.LXNS
 import xyz.xszq.bot.maimai.api.MaimaiAPI
 import xyz.xszq.bot.maimai.database.MaimaiSettingsTable

@@ -3,15 +3,7 @@ package xyz.xszq.bot.maimai
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
-import xyz.xszq.bot.maimai.database.ArcadeGroupBindTable
-import xyz.xszq.bot.maimai.database.ArcadeGroupTable
-import xyz.xszq.bot.maimai.database.ArcadeTable
-import xyz.xszq.bot.maimai.database.DivingFishBindTable
-import xyz.xszq.bot.maimai.database.GuessGameTable
-import xyz.xszq.bot.maimai.database.MaimaiMusicAliasesTable
-import xyz.xszq.bot.maimai.database.MaimaiMusicAliasesVoteTable
-import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
-import xyz.xszq.bot.maimai.database.QQBindTable
+import xyz.xszq.bot.maimai.database.*
 import kotlin.test.BeforeTest
 
 abstract class MaimaiDatabaseTest {

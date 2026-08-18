@@ -8,11 +8,11 @@ import io.ktor.serialization.kotlinx.json.*
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import xyz.xszq.bot.config.TextConfig
 import xyz.xszq.bot.llm.LLMClient
 import xyz.xszq.bot.llm.LLMConfig
 import xyz.xszq.bot.llm.LLMModelConfig
 import xyz.xszq.bot.text.Text
+import xyz.xszq.bot.text.config.TextConfig
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue

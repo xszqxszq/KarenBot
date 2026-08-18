@@ -6,11 +6,7 @@ import xyz.xszq.shinobu.dom.Span
 import xyz.xszq.shinobu.parse.StyleParser
 import xyz.xszq.shinobu.parse.TemplateParser
 import xyz.xszq.shinobu.style.*
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class ShinobuTest {
 

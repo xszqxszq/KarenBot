@@ -2,7 +2,6 @@ package xyz.xszq.bot.maimai.component
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.io.Closeable
 import org.apache.lucene.analysis.Analyzer
 import org.apache.lucene.analysis.TokenStream
 import org.apache.lucene.analysis.Tokenizer
@@ -18,12 +17,16 @@ import org.apache.lucene.index.DirectoryReader
 import org.apache.lucene.index.IndexWriter
 import org.apache.lucene.index.IndexWriterConfig
 import org.apache.lucene.index.Term
-import org.apache.lucene.search.*
+import org.apache.lucene.search.BooleanClause
+import org.apache.lucene.search.BooleanQuery
+import org.apache.lucene.search.IndexSearcher
+import org.apache.lucene.search.TermQuery
 import org.apache.lucene.store.FSDirectory
 import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.database.MaimaiMusicAliasesTable
 import xyz.xszq.bot.maimai.music.MusicInfo
 import xyz.xszq.bot.maimai.music.MusicNameAlias
+import java.io.Closeable
 import java.nio.file.Path
 import java.security.MessageDigest
 

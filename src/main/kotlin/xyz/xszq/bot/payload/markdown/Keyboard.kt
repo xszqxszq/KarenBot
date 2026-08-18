@@ -1,7 +1,7 @@
 package xyz.xszq.bot.payload.markdown
 
-import java.util.UUID
 import kotlinx.serialization.Serializable
+import java.util.*
 
 @Serializable
 data class Keyboard(

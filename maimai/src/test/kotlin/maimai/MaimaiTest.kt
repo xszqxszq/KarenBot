@@ -1,7 +1,10 @@
 package xyz.xszq.bot.maimai
 
 import kotlinx.coroutines.test.runTest
-import xyz.xszq.bot.*
+import xyz.xszq.bot.BotSandbox
+import xyz.xszq.bot.assertReplied
+import xyz.xszq.bot.assertRepliedAny
+import xyz.xszq.bot.assertRepliedWithImage
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

@@ -3,6 +3,7 @@ package xyz.xszq.bot
 import korlibs.io.file.extensionLC
 import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.coroutines.runBlocking
+import xyz.xszq.bot.text.BlondeHairDetector
 
 fun main() = runBlocking {
     val recognizer = BlondeHairDetector(

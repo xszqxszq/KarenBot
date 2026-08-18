@@ -3,6 +3,7 @@ val korlibsVersion: String by rootProject.extra
 val ktorVersion: String by rootProject.extra
 val skikoVersion: String by rootProject.extra
 val exposedVersion: String by rootProject.extra
+val serializationVersion: String by rootProject.extra
 plugins {
     id("bot-plugin")
 }

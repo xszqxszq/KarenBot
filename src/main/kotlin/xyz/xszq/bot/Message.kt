@@ -5,11 +5,7 @@ import korlibs.image.format.readNativeImage
 import korlibs.image.format.showImageAndWait
 import korlibs.io.file.extensionLC
 import kotlinx.coroutines.DelicateCoroutinesApi
-import xyz.xszq.bot.event.GroupMessageEvent
-import xyz.xszq.bot.event.GroupReplyAbleEvent
-import xyz.xszq.bot.event.MessageEvent
-import xyz.xszq.bot.event.ReplyAble
-import xyz.xszq.bot.event.UserReplyAbleEvent
+import xyz.xszq.bot.event.*
 import xyz.xszq.bot.message.*
 import xyz.xszq.bot.payload.FileResponse
 import xyz.xszq.bot.payload.FileType

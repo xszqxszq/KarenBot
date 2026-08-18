@@ -2,13 +2,13 @@ package xyz.xszq.bot.maimai.controller
 
 import kotlinx.coroutines.supervisorScope
 import kotlinx.datetime.toJavaLocalDateTime
-import xyz.xszq.bot.*
-import xyz.xszq.bot.maimai.Maimai
-import xyz.xszq.bot.maimai.Maimai.Companion.textMode
+import xyz.xszq.bot.ErrorHandler
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.exception.IllegalArgsException
 import xyz.xszq.bot.exception.NeedHelpException
 import xyz.xszq.bot.exception.NotFoundException
+import xyz.xszq.bot.maimai.Maimai
+import xyz.xszq.bot.maimai.Maimai.Companion.textMode
 import xyz.xszq.bot.maimai.component.MarkdownTemplates
 import xyz.xszq.bot.maimai.database.Arcade
 import xyz.xszq.bot.maimai.database.ArcadeGroupBind
@@ -16,6 +16,9 @@ import xyz.xszq.bot.maimai.endsWith
 import xyz.xszq.bot.maimai.substringBefore
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.message.MessageElement
+import xyz.xszq.bot.newLine
+import xyz.xszq.bot.reply
+import xyz.xszq.bot.toPlainText
 import java.time.Duration
 
 @Suppress("unused")

@@ -2,7 +2,8 @@ package xyz.xszq.bot.maimai
 
 import kotlinx.coroutines.test.TestScope
 import org.jetbrains.exposed.sql.Database
-import xyz.xszq.bot.*
+import xyz.xszq.bot.BotSandbox
+import xyz.xszq.bot.mockTencentCos
 import xyz.xszq.bot.payload.AdminCheckRequest
 import xyz.xszq.bot.subscribe.Channel
 
