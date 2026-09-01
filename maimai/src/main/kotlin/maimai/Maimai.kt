@@ -103,6 +103,7 @@ class Maimai: Plugin() {
                     SchemaUtils.create(table)
             }
         }
+        api.start()
         scope.launch(Dispatchers.IO) {
             logger.info { "[舞萌] 正在加载图片中……" }
             image.load(scope)

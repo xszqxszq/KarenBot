@@ -51,6 +51,9 @@ class ApiController(
         proxyIP = maimai.config.tokens["proxy-ip"] ?: throw NotFoundException()
         proxyServer = maimai.config.tokens["proxy-server"] ?: throw NotFoundException()
         proxyPort = maimai.config.tokens["proxy-port"] ?.toInt() ?: throw NotFoundException()
+    }
+
+    fun start() {
         maimai.scope.launch {
             restoreOAuthBindTokens()
             while (isActive) {
