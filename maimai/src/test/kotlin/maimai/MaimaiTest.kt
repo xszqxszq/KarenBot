@@ -1,23 +1,27 @@
 package xyz.xszq.bot.maimai
 
 import kotlinx.coroutines.test.runTest
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import xyz.xszq.bot.BotSandbox
 import xyz.xszq.bot.assertReplied
 import xyz.xszq.bot.assertRepliedAny
 import xyz.xszq.bot.assertRepliedWithImage
+import xyz.xszq.bot.maimai.database.ProberBindTable
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class MaimaiTest : MaimaiDatabaseTest() {
 
+    private val username = "xszqxszq"
+
     @Test
     fun runAll() = runTest {
         val sandbox = setMaimai(this, database)
         try {
-            testBind(sandbox)
-            testUnboundQQ(sandbox)
-            testUnboundProber(sandbox)
-
+            newSuspendedTransaction(db = database) {
+                ProberBindTable["test-user", "diving-fish", "username"] = username
+                ProberBindTable["test-user", "diving-fish", "id"] = "5457"
+            }
             testB50(sandbox, "maxscore")
             testB50(sandbox)
             testB40(sandbox)
@@ -85,22 +89,6 @@ class MaimaiTest : MaimaiDatabaseTest() {
         } finally {
             sandbox.cleanup()
         }
-    }
-
-    private suspend fun testBind(sandbox: BotSandbox) {
-        sandbox.clear()
-        val msg = sandbox.user() says "/bind 943551369"
-        assertReplied(sandbox, msg, "绑定成功")
-    }
-
-    private suspend fun testUnboundQQ(sandbox: BotSandbox) {
-        sandbox.clear()
-        assertReplied(sandbox, sandbox.user("unbound-user") says "/b50", "请输入您的QQ号")
-    }
-
-    private suspend fun testUnboundProber(sandbox: BotSandbox) {
-        sandbox.clear()
-        assertReplied(sandbox, sandbox.user("u2") says "/bind 1145148101919893", "还未在查分器上绑定QQ号")
     }
 
     private suspend fun testSettingsProber(sandbox: BotSandbox) {

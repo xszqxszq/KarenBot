@@ -5,7 +5,8 @@ import kotlinx.coroutines.test.runTest
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import xyz.xszq.bot.*
-import xyz.xszq.bot.chunithm.database.QQBindTable
+import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
+import xyz.xszq.bot.chunithm.database.ProberBindTable
 import xyz.xszq.bot.payload.AdminCheckRequest
 import xyz.xszq.bot.subscribe.Channel
 import kotlin.test.Test
@@ -13,11 +14,17 @@ import kotlin.test.assertEquals
 
 class ChunithmTest : ChunithmDatabaseTest() {
 
+    private val username = "xszqxszq"
+
     @Test
     fun runAll() = runTest {
         val sandbox = setChunithm(this, database)
         try {
-            testBind(sandbox)
+            newSuspendedTransaction(db = database) {
+                ProberBindTable["test-user", "diving-fish", "username"] = username
+                ProberBindTable["test-user", "diving-fish", "id"] = "5457"
+                MaimaiSettingsTable["test-user", "prober"] = "diving-fish"
+            }
             testB50Maxscore(sandbox)
             testB50(sandbox)
             testLevelList(sandbox)
@@ -32,15 +39,6 @@ class ChunithmTest : ChunithmDatabaseTest() {
             testDefault(sandbox)
         } finally {
             sandbox.cleanup()
-        }
-    }
-
-    private suspend fun testBind(sandbox: BotSandbox) {
-        newSuspendedTransaction(db = database) {
-            QQBindTable.insert {
-                it[QQBindTable.id] = "test-user"
-                it[QQBindTable.qq] = 943551369L
-            }
         }
     }
 

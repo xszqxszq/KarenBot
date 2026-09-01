@@ -42,6 +42,8 @@ jobs:
             -e "s|__LXNS_TOKEN__|${{ secrets.LXNS_TOKEN }}|g" \
             -e "s|__LXNS_OA_ID__|${{ secrets.LXNS_OA_ID }}|g" \
             -e "s|__LXNS_OA_SECRET__|${{ secrets.LXNS_OA_SECRET }}|g" \
+            -e "s|__DIVING_FISH_OA_ID__|${{ secrets.DIVING_FISH_OA_ID }}|g" \
+            -e "s|__DIVING_FISH_OA_SECRET__|${{ secrets.DIVING_FISH_OA_SECRET }}|g" \
             config/maimai.yml config/chunithm.yml
       - name: Run tests
         id: run-tests
