@@ -20,6 +20,7 @@ import xyz.xszq.bot.chunithm.controller.Controller
 import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesTable
 import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesVoteTable
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
+import xyz.xszq.bot.chunithm.database.ProberBindTable
 import xyz.xszq.bot.chunithm.query.ComboQuery
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
@@ -63,7 +64,11 @@ class Chunithm: Plugin() {
             chunithmData
         )
         backends = listOf(
-            DivingFish(config.tokens["diving-fish"].toString(), chunithmData),
+            DivingFish(
+                config.tokens["diving-fish-oa-id"].toString(),
+                config.tokens["diving-fish-oa-secret"].toString(),
+                chunithmData
+            ),
             lxns
         )
 
@@ -75,7 +80,8 @@ class Chunithm: Plugin() {
 
         transaction(database) {
             listOf(
-                MaimaiSettingsTable, ChunithmMusicAliasesTable, ChunithmMusicAliasesVoteTable
+                MaimaiSettingsTable, ChunithmMusicAliasesTable, ChunithmMusicAliasesVoteTable,
+                ProberBindTable
             ).forEach { table ->
                 if (!table.exists())
                     SchemaUtils.create(table)

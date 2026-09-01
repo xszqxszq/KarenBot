@@ -11,6 +11,6 @@ data class DivingFishRecordsResponse(
     @SerialName("additional_rating")
     val additionalRating: Int,
     val nickname: String,
-    val plate: String,
+    val plate: String ?= null,
     val records: List<DivingFishRecord>
 )

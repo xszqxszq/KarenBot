@@ -49,7 +49,6 @@ class Maimai: Plugin() {
     // 其他
     var pluginStopped: Boolean = false
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    val messageToReplay = ConcurrentHashMap<String, String>()
 
     fun backend(name: String) = backends.first { it.id == name }
 
@@ -69,13 +68,17 @@ class Maimai: Plugin() {
         maimaiData.load()
 
         backends = listOf(
-            DivingFish(config.tokens["diving-fish"].toString(), maimaiData),
+            DivingFish(
+                oauthId = config.tokens["diving-fish-oa-id"].toString(),
+                oauthSecret = config.tokens["diving-fish-oa-secret"].toString(),
+                maimaiData = maimaiData
+            ),
             LXNS(
-                config.tokens["lxns"].toString(),
-                config.tokens["lxns-oa-id"].toString(),
-                config.tokens["lxns-oa-secret"].toString(),
-                config.tokens["lxns-oa-callback"].toString(),
-                maimaiData
+                token = config.tokens["lxns"].toString(),
+                oauthId = config.tokens["lxns-oa-id"].toString(),
+                oauthSecret = config.tokens["lxns-oa-secret"].toString(),
+                oauthCallback = config.tokens["lxns-oa-callback"].toString(),
+                maimaiData = maimaiData
             )
         )
 
@@ -92,9 +95,9 @@ class Maimai: Plugin() {
         // 数据库初始化
         transaction(database) {
             listOf(
-                QQBindTable, MaimaiMusicAliasesTable, MaimaiMusicAliasesVoteTable,
+                QQBindTable, ProberBindTable, MaimaiMusicAliasesTable, MaimaiMusicAliasesVoteTable,
                 MaimaiSettingsTable, ArcadeTable, ArcadeGroupTable, ArcadeGroupBindTable,
-                GuessGameTable, DivingFishBindTable
+                GuessGameTable, DivingFishBindTable, RhythmGameTokens
             ).forEach { table ->
                 if (!table.exists())
                     SchemaUtils.create(table)
