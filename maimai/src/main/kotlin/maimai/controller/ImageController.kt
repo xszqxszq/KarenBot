@@ -131,8 +131,11 @@ class ImageController(
         // 歌曲信息+成绩
         startsWith(listOf("info", "minfo")) { text ->
             val args = text.trim().split(" ").filter { it.isNotBlank() }
-            val musicQuery = args.firstOrNull() ?: ""
-            val userArg = args.getOrNull(1)
+            val userArg = args.getOrNull(1) ?.takeIf { it.all { char -> char.isDigit() } }
+            val musicQuery = if (userArg != null)
+                args.firstOrNull() ?: ""
+            else
+                text.trim()
             queryByTextOrImage(musicQuery) { query ->
                 var user: UserQueryParams? = null
                 runCatching {
