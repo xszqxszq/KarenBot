@@ -8,18 +8,19 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 import okhttp3.ConnectionPool
 import okhttp3.Protocol
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.maimai.component.MaimaiData
 import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
-import xyz.xszq.bot.maimai.exception.AuthorizationException
-import xyz.xszq.bot.maimai.exception.UnknownException
-import xyz.xszq.bot.maimai.exception.UserNotFoundException
-import xyz.xszq.bot.maimai.exception.UserOARequiredException
+import xyz.xszq.bot.maimai.database.ProberBindTable
+import xyz.xszq.bot.maimai.exception.*
 import xyz.xszq.bot.maimai.music.*
 import xyz.xszq.bot.maimai.payload.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import kotlin.math.min
 
@@ -42,134 +43,289 @@ class LXNS(
     val json = Json {
         ignoreUnknownKeys = true
     }
+
+    private val tokenCache = ConcurrentHashMap<String, Pair<String, Long>>()
+    private val refreshLocks = ConcurrentHashMap<String, Mutex>()
+
     fun HttpRequestBuilder.setDeveloper() {
         headers["Authorization"] = token
     }
+
     fun HttpRequestBuilder.setOAuth(accessToken: String) {
         headers["Authorization"] = "Bearer $accessToken"
     }
-    suspend fun getPlayerInfo(
-        user: UserQueryParams
-    ): LXNSPlayer? {
-        val response = client.get(when (user) {
-            is UserQueryParams.QQ -> "$apiServer/player/qq/${user.qq}"
-            is UserQueryParams.Username -> "$apiServer/player/${user.username}"
-        }) {
-            setDeveloper()
+
+    suspend fun initOAuth(
+        code: String,
+        event: MessageEvent
+    ): Boolean {
+        val response = runCatching {
+            client.post("$apiOauth/token") {
+                contentType(ContentType.Application.Json)
+                setBody(LXNSOAToken(
+                    clientId = oauthId,
+                    clientSecret = oauthSecret,
+                    grantType = "authorization_code",
+                    code = code,
+                    redirectUri = oauthCallback
+                ))
+            }.body<LXNSResponse<LXNSOATokenResponse>>()
+        }.getOrNull() ?: return false
+        val tokens = response.data ?: return false
+        ProberBindTable[event.sender.id, "lxns", "refresh"] = tokens.refreshToken
+        MaimaiSettingsTable[event.sender.id, "lxns-oa-refresh"] = tokens.refreshToken
+        runCatching {
+            val info = client.get("$apiOauth/userinfo") { setOAuth(tokens.accessToken) }
+                .body<LXNSResponse<LXNSUserInfo>>().data ?: return@runCatching
+            info.sub ?.let { sub ->
+                ProberBindTable[event.sender.id, "lxns", "id"] = sub
+            }
+            (info.preferredUsername ?: info.name) ?.let { username ->
+                ProberBindTable[event.sender.id, "lxns", "username"] = username
+            }
         }
-        .body<LXNSResponse<LXNSPlayer>>()
-        when (response.code) {
+        runCatching {
+            val player = client.get("$apiUser/maimai/player") { setOAuth(tokens.accessToken) }
+                .body<LXNSResponse<LXNSPlayer>>().data ?: return@runCatching
+            ProberBindTable[event.sender.id, "lxns", "friend-code"] = player.friendCode.toString()
+        }
+        return true
+    }
+
+    fun clearTokenCache(id: String) {
+        tokenCache.remove(id)
+    }
+
+    suspend fun accessToken(id: String): String? {
+        tokenCache[id] ?.let { (token, expiresAt) ->
+            if (expiresAt > System.currentTimeMillis() + 30_000L)
+                return token
+        }
+        val mutex = refreshLocks.computeIfAbsent(id) { Mutex() }
+        return mutex.withLock {
+            tokenCache[id] ?.let { (token, expiresAt) ->
+                if (expiresAt > System.currentTimeMillis() + 30_000L)
+                    return@withLock token
+            }
+            // TODO: 不要在查分器端引入任何直接查表
+            val refresh = ProberBindTable[id, "lxns", "refresh"] ?: return@withLock null
+            val response = runCatching {
+                client.post("$apiOauth/token") {
+                    contentType(ContentType.Application.Json)
+                    setBody(LXNSOAToken(
+                        clientId = oauthId,
+                        clientSecret = oauthSecret,
+                        grantType = "refresh_token",
+                        refreshToken = refresh
+                    ))
+                }.body<LXNSResponse<LXNSOATokenResponse>>()
+            }.getOrNull() ?: return@withLock null
+            val tokens = response.data ?: return@withLock null
+            ProberBindTable[id, "lxns", "refresh"] = tokens.refreshToken
+            MaimaiSettingsTable[id, "lxns-oa-refresh"] = tokens.refreshToken
+            tokenCache[id] = Pair(
+                tokens.accessToken,
+                System.currentTimeMillis() + tokens.expiresIn * 1000L
+            )
+            tokens.accessToken
+        }
+    }
+
+    suspend fun refreshToken(id: String): Boolean =
+        runCatching { accessToken(id) != null }.getOrDefault(false)
+
+    suspend fun migrateLegacyBindings(): Pair<Int, Int> {
+        var ok = 0
+        var skip = 0
+        for (id in MaimaiSettingsTable.idsForKey("lxns-oa-refresh")) {
+            if (ProberBindTable[id, "lxns", "refresh"] != null) {
+                skip++
+                continue
+            }
+            val refresh = MaimaiSettingsTable[id, "lxns-oa-refresh"] ?: continue
+            ProberBindTable[id, "lxns", "refresh"] = refresh
+            MaimaiSettingsTable[id, "lxns-friend-code"] ?.let { friendCode ->
+                ProberBindTable[id, "lxns", "friend-code"] = friendCode
+            }
+            ok++
+        }
+        return Pair(ok, skip)
+    }
+
+    override suspend fun load() {
+    }
+
+    private suspend fun resolveOpenid(user: UserQueryParams): String? = when (user) {
+        is UserQueryParams.Self -> user.event.sender.id
+        is UserQueryParams.FriendCode ->
+            ProberBindTable.findIdByValue("lxns", "friend-code", user.friendCode)
+        is UserQueryParams.Username -> null
+    }
+
+    private fun notBoundException(user: UserQueryParams) = when (user) {
+        is UserQueryParams.FriendCode ->
+            UserBindRequiredException("未找到绑定该好友码的用户，请该用户先绑定查分器")
+        else -> UserBindRequiredException()
+    }
+
+    private suspend fun <T> withAccessToken(
+        user: UserQueryParams,
+        block: suspend (String) -> T
+    ): T {
+        val openid = resolveOpenid(user) ?: throw notBoundException(user)
+        val token = accessToken(openid) ?: throw notBoundException(user)
+        return runCatching { block(token) }.getOrElse { e ->
+            if (e !is AuthorizationException)
+                throw e
+            tokenCache.remove(openid)
+            val fresh = accessToken(openid) ?: throw UserBindRequiredException()
+            if (fresh == token)
+                throw e
+            block(fresh)
+        }
+    }
+
+    private suspend fun playerAndScores(
+        token: String
+    ): Pair<LXNSPlayer, List<LXNSScore>>? {
+        val player = client.get("$apiUser/maimai/player") { setOAuth(token) }
+            .body<LXNSResponse<LXNSPlayer>>().data ?: return null
+        val scores = client.get("$apiUser/maimai/player/scores") { setOAuth(token) }
+            .body<LXNSResponse<List<LXNSScore>>>().data ?: return null
+        return Pair(player, scores)
+    }
+
+    private suspend fun resolveFriendCode(user: UserQueryParams): String? = when (user) {
+        is UserQueryParams.Self -> ProberBindTable[user.event.sender.id, "lxns", "friend-code"]
+        is UserQueryParams.FriendCode -> user.friendCode
+        is UserQueryParams.Username -> null
+    }
+
+    private suspend fun getPlayerInfo(friendCode: String): LXNSPlayer? {
+        val response = client.get("$apiServer/player/$friendCode") {
+            setDeveloper()
+        }.body<LXNSResponse<LXNSPlayer>>()
+        return when (response.code) {
             401 -> throw AuthorizationException(response.message)
             404 -> throw UserNotFoundException(response.message)
             400 -> throw UserNotFoundException(response.message)
-            200 -> return response.data
-            else -> {
-                println(response)
-                throw UnknownException(response.message)
-            }
+            200 -> response.data
+            else -> throw UnknownException(response.message)
         }
-    }
-    override suspend fun load() {
     }
 
     override suspend fun getPlayerRating(
         user: UserQueryParams
-    ): RatingResponse? {
-        val player = getPlayerInfo(user) ?: return null
-
-        val response = client.get("$apiServer/player/${player.friendCode}/bests") {
-            setDeveloper()
-        }.body<LXNSResponse<LXNSRatingResponse>>().data ?: return null
-        return RatingResponse(
-            player = PlayerInfo(
-                nickname = player.name,
-                rating = player.rating,
-                course = player.courseRank
-            ),
-            settings = PlayerSettings(
-                avatar = player.icon ?.id,
-                plate = player.namePlate ?.id
-            ),
-            oldRatingList = response.standard.mapNotNull { record ->
-                record.toRecord()
-            },
-            newRatingList = response.dx.mapNotNull { record ->
-                record.toRecord()
-            }
-        )
-    }
-
-    private suspend fun getSingleRecord(
-        player: LXNSPlayer,
-        music: MusicInfo
-    ): List<Record>? {
-        val realId = when {
-            music.genre == MusicGenre.Utage -> music.id
-            music.type == MusicType.Deluxe -> music.resourceId
-            else -> music.id
-        }
-        val realType = when {
-            music.genre == MusicGenre.Utage -> "utage"
-            else -> music.type.full
-        }
-        val response = client.get("$apiServer/player/${player.friendCode}/bests" +
-                "?song_id=$realId&song_type=$realType") {
-            setDeveloper()
-        }.body<LXNSResponse<List<LXNSScore>>>().data ?: return null
-        return response.mapNotNull {
-            it.toRecord()
+    ): RatingResponse? = when (user) {
+        is UserQueryParams.Username -> null
+        else -> {
+            val friendCode = resolveFriendCode(user)
+                ?: if (user is UserQueryParams.Self) throw UserBindRequiredException() else return null
+            val player = runCatching {
+                getPlayerInfo(friendCode)
+            }.getOrElse { e ->
+                if (user is UserQueryParams.Self && e is UserNotFoundException)
+                    throw UserBindRequiredException()
+                throw e
+            } ?: return null
+            val response = client.get("$apiServer/player/$friendCode/bests") {
+                setDeveloper()
+            }.body<LXNSResponse<LXNSRatingResponse>>().data ?: return null
+            RatingResponse(
+                player = PlayerInfo(
+                    nickname = player.name,
+                    rating = player.rating,
+                    course = player.courseRank
+                ),
+                settings = PlayerSettings(
+                    avatar = player.icon ?.id,
+                    plate = player.namePlate ?.id
+                ),
+                oldRatingList = response.standard.mapNotNull { record ->
+                    record.toRecord()
+                },
+                newRatingList = response.dx.mapNotNull { record ->
+                    record.toRecord()
+                }
+            )
         }
     }
 
     override suspend fun getPlayerRecord(
         user: UserQueryParams,
         music: MusicInfo
-    ): List<Record>? {
-        val player = getPlayerInfo(user) ?: return null
-
-        return getSingleRecord(player, music)
-    }
-
-    fun <T> List<T>.group(size: Int = 15): List<List<T>> {
-        val result = mutableListOf<List<T>>()
-        var now = toMutableList()
-        while (now.isNotEmpty()) {
-            val num = min(size, now.size)
-            val take = now.subList(0, num)
-            result.add(take)
-            if (num == now.size)
-                break
-            now = now.subList(num, now.size)
+    ): List<Record>? = when (user) {
+        is UserQueryParams.Username -> null
+        else -> {
+            val friendCode = resolveFriendCode(user) ?: return null
+            val realId = if (music.genre == MusicGenre.Utage) music.id else music.resourceId
+            val realType = if (music.genre == MusicGenre.Utage) "utage" else music.type.full
+            val response = client.get("$apiServer/player/$friendCode/bests") {
+                parameter("song_id", realId)
+                parameter("song_type", realType)
+                setDeveloper()
+            }.body<LXNSResponse<List<LXNSScore>>>().data ?: return null
+            response.mapNotNull { score ->
+                score.toRecord()
+            }
         }
-        return result
     }
 
     override suspend fun getPlayerRecords(
         user: UserQueryParams,
         musics: List<MusicInfo>
-    ): RecordsResponse? {
-        // 玩家信息获取一定要在token获取前
-        val player = getPlayerInfo(user) ?: return null
-        val accessToken = refreshToken(user.event) ?: throw UserOARequiredException()
-
-        val response = client.get("$apiUser/maimai/player/scores") {
-            setOAuth(accessToken)
-        }.body<LXNSResponse<List<LXNSScore>>>().data ?: return null
-        return RecordsResponse(
-            player = PlayerInfo(
-                nickname = player.name,
-                rating = player.rating,
-                course = player.courseRank
-            ),
-            settings = PlayerSettings(
-                avatar = player.icon ?.id,
-                plate = player.namePlate ?.id
-            ),
-            records = response.mapNotNull { record ->
-                record.toRecord()
-            }
-        )
+    ): RecordsResponse? = when (user) {
+        is UserQueryParams.Username -> null
+        else -> withAccessToken(user) { token ->
+            // 玩家信息获取一定要在token获取前
+            val (player, scores) = playerAndScores(token) ?: return@withAccessToken null
+            val needed = musics.map { it.id }.toSet()
+            RecordsResponse(
+                player = PlayerInfo(
+                    nickname = player.name,
+                    rating = player.rating,
+                    course = player.courseRank
+                ),
+                settings = PlayerSettings(
+                    avatar = player.icon ?.id,
+                    plate = player.namePlate ?.id
+                ),
+                records = scores.mapNotNull { score ->
+                    score.toRecord()
+                }.filter { record ->
+                    record.music.id in needed
+                }
+            )
+        }
     }
+
+    suspend fun getPlayerRecent(
+        user: UserQueryParams
+    ): RecordsResponse? = when (user) {
+        is UserQueryParams.Username -> null
+        else -> {
+            val friendCode = resolveFriendCode(user) ?: return null
+            val player = getPlayerInfo(friendCode) ?: return null
+            val response = client.get("$apiServer/player/$friendCode/recents") {
+                setDeveloper()
+            }.body<LXNSResponse<List<LXNSScore>>>().data ?: return null
+            RecordsResponse(
+                player = PlayerInfo(
+                    nickname = player.name,
+                    rating = player.rating,
+                    course = player.courseRank
+                ),
+                settings = PlayerSettings(
+                    avatar = player.icon ?.id,
+                    plate = player.namePlate ?.id
+                ),
+                records = response.mapNotNull { record ->
+                    record.toRecord()
+                }
+            )
+        }
+    }
+
     fun LXNSScore.toRecord(): Record? {
         val realId = when {
             type == "dx" && id < 10000 -> id + 10000
@@ -202,88 +358,19 @@ class LXNS(
         )
     }
 
-    private suspend fun getRecent(
-        player: LXNSPlayer
-    ): List<Record>? {
-        val response = client.get("$apiServer/player/${player.friendCode}/recents") {
-            setDeveloper()
-        }.body<LXNSResponse<List<LXNSScore>>>().data ?: return null
-        return response.mapNotNull {
-            it.toRecord()
+    fun <T> List<T>.group(size: Int = 15): List<List<T>> {
+        val result = mutableListOf<List<T>>()
+        var now = toMutableList()
+        while (now.isNotEmpty()) {
+            val num = min(size, now.size)
+            val take = now.subList(0, num)
+            result.add(take)
+            if (num == now.size)
+                break
+            now = now.subList(num, now.size)
         }
+        return result
     }
-    suspend fun getPlayerRecent(
-        user: UserQueryParams
-    ): RecordsResponse? {
-        val player = getPlayerInfo(user) ?: return null
-        val response = getRecent(player) ?: return null
-        return RecordsResponse(
-            player = PlayerInfo(
-                nickname = player.name,
-                rating = player.rating,
-                course = player.courseRank
-            ),
-            settings = PlayerSettings(
-                avatar = player.icon ?.id,
-                plate = player.namePlate ?.id
-            ),
-            records = response
-        )
-    }
-
-    suspend fun initOAuth(
-        code: String,
-        event: MessageEvent
-    ): Boolean {
-        val response = client.post("$apiOauth/token") {
-            contentType(ContentType.Application.Json)
-            setBody(LXNSOAToken(
-                clientId = oauthId,
-                clientSecret = oauthSecret,
-                grantType = "authorization_code",
-                code = code,
-                redirectUri = oauthCallback
-            ))
-        }
-        .body<LXNSResponse<LXNSOATokenResponse>>()
-        response.data ?: return false
-        MaimaiSettingsTable[event.sender.id, "lxns-oa-refresh"] = response.data.refreshToken
-        return true
-    }
-    suspend fun refreshToken(
-        event: MessageEvent
-    ): String? {
-        // TODO: 不要在查分器端引入任何直接查表
-        val refresh = MaimaiSettingsTable[event.sender.id, "lxns-oa-refresh"] ?: return null
-        val response = client.post("$apiOauth/token") {
-            contentType(ContentType.Application.Json)
-            setBody(LXNSOAToken(
-                clientId = oauthId,
-                clientSecret = oauthSecret,
-                grantType = "refresh_token",
-                refreshToken = refresh
-            ))
-        }
-        .body<LXNSResponse<LXNSOATokenResponse>>()
-        response.data ?: return null
-        MaimaiSettingsTable[event.sender.id, "lxns-oa-refresh"] = response.data.refreshToken
-        return response.data.accessToken
-    }
-    suspend fun refresh(token: String): String? {
-        val response = runCatching {
-            client.post("$apiOauth/token") {
-                contentType(ContentType.Application.Json)
-                setBody(LXNSOAToken(
-                    clientId = oauthId,
-                    clientSecret = oauthSecret,
-                    grantType = "refresh_token",
-                    refreshToken = token
-                ))
-            }.body<LXNSOATokenResponse>()
-        }.getOrNull() ?: return null
-        return response.refreshToken
-    }
-    private fun now() = System.currentTimeMillis() / 1000
 
     companion object {
         fun Record.toLxnsScore() = LXNSScore(
