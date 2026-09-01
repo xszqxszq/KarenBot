@@ -12,6 +12,11 @@ import xyz.xszq.bot.payload.FileType
 import xyz.xszq.bot.payload.MsgType
 import xyz.xszq.bot.payload.markdown.MarkdownDsl
 
+class MediaUpload(
+    val response: FileResponse,
+    val filename: String
+)
+
 /**
  * Retry the block for specified times.
  * @param times Max times to retry.
@@ -31,7 +36,7 @@ inline fun <T> retry(times: Int, block: () -> T): T? {
  * @param media The Media to upload.
  */
 @OptIn(DelicateCoroutinesApi::class)
-suspend fun ReplyAble.uploadMedia(media: Media): FileResponse? {
+suspend fun ReplyAble.uploadMedia(media: Media): MediaUpload? {
     if (eventId.isBlank()) {
         if (media is Image) media.file.readNativeImage().showImageAndWait()
         return null
@@ -65,14 +70,14 @@ suspend fun ReplyAble.uploadMedia(media: Media): FileResponse? {
         }
     } ?: run {
         errorLogger.error { "图片上传失败" }
-        null
+        bot.cos.deleteFromCos(remoteFile.filename)
+        return null
     }
 
     if (media.file.extensionLC == "silk")
         media.file.delete()
 
-    bot.cos.deleteFromCos(remoteFile.filename)
-    return response
+    return MediaUpload(response, remoteFile.filename)
 }
 
 fun ReplyAble.log(message: MessageChain) {
@@ -90,7 +95,6 @@ suspend fun ReplyAble.reply(message: MessageChain) {
     val mediaList = message.filterIsInstance<Media>().mapNotNull {
         uploadMedia(it)
     }
-    // Debug
     if (this is MessageEvent && eventId.isBlank()) {
         log(message)
         return
@@ -106,58 +110,38 @@ suspend fun ReplyAble.reply(message: MessageChain) {
         MsgType.TEXT -> message.textToSend()
         else -> " "
     }
-    when (this) {
-        is GroupReplyAbleEvent -> bot.api.sendGroupMessage(
-            group = group.id,
-            content = content,
-            msgType = msgType,
-            markdown = markdown ?.markdown,
-            keyboard = markdown ?.keyboard,
-            eventId = this.eventId,
-            msgId = id,
-            msgSeq = seq,
-            media = mediaList.firstOrNull()
-        )
-        is UserReplyAbleEvent -> bot.api.sendC2CMessage(
-            user = user.id,
-            content = content,
-            msgType = msgType,
-            markdown = markdown ?.markdown,
-            keyboard = markdown ?.keyboard,
-            eventId = this.eventId,
-            msgId = id,
-            msgSeq = seq,
-            media = mediaList.firstOrNull()
-        )
-    }
-    log(message)
-    seq += 1
-
-    if (mediaList.size <= 1)
-        return
-    mediaList.subList(1, mediaList.size).forEachIndexed { i, media ->
+    val total = mediaList.size.coerceAtLeast(1)
+    repeat(total) { index ->
+        val media = mediaList.getOrNull(index)
+        val first = index == 0
         when (this) {
             is GroupReplyAbleEvent -> bot.api.sendGroupMessage(
                 group = group.id,
-                content = " ",
-                msgType = MsgType.MEDIA,
+                content = if (first) content else " ",
+                msgType = if (first) msgType else MsgType.MEDIA,
+                markdown = if (first) markdown?.markdown else null,
+                keyboard = if (first) markdown?.keyboard else null,
                 eventId = this.eventId,
                 msgId = id,
                 msgSeq = seq,
-                media = media
+                media = media?.response
             )
             is UserReplyAbleEvent -> bot.api.sendC2CMessage(
                 user = user.id,
-                content = " ",
-                msgType = MsgType.MEDIA,
+                content = if (first) content else " ",
+                msgType = if (first) msgType else MsgType.MEDIA,
+                markdown = if (first) markdown?.markdown else null,
+                keyboard = if (first) markdown?.keyboard else null,
                 eventId = this.eventId,
                 msgId = id,
                 msgSeq = seq,
-                media = media
+                media = media?.response
             )
         }
         seq += 1
     }
+    log(message)
+    mediaList.forEach { bot.cos.deleteFromCos(it.filename) }
 }
 suspend fun ReplyAble.reply(message: String) = reply(PlainText(message))
 suspend fun ReplyAble.reply(message: MessageElement) = reply(MessageChain(message))
