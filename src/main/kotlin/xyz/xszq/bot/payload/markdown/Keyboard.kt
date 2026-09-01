@@ -51,7 +51,7 @@ data class Keyboard(
             )
         )
 
-        fun KeyboardRowBuilder.callBack(
+        fun KeyboardRowBuilder.callback(
             label: String,
             data: String,
             style: Int = RenderData.BLUE,
