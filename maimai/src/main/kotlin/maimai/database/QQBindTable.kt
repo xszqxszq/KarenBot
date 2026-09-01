@@ -29,4 +29,9 @@ object QQBindTable: Table() {
             QQBindTable.id eq openId
         }.map { it[qq] }.firstOrNull()
     }.await()
+    suspend fun allBindings(): List<Pair<String, Long>> = suspendedTransactionAsync {
+        selectAll().map { row ->
+            Pair(row[QQBindTable.id], row[qq])
+        }
+    }.await()
 }

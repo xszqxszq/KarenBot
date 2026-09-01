@@ -37,6 +37,7 @@ abstract class MaimaiDatabaseTest {
                 ArcadeGroupBindTable,
                 ArcadeGroupTable,
                 QQBindTable,
+                ProberBindTable,
                 MaimaiSettingsTable,
                 MaimaiMusicAliasesTable,
                 DivingFishBindTable
@@ -46,6 +47,7 @@ abstract class MaimaiDatabaseTest {
                 ArcadeGroupBindTable,
                 ArcadeTable,
                 QQBindTable,
+                ProberBindTable,
                 MaimaiSettingsTable,
                 MaimaiMusicAliasesTable,
                 MaimaiMusicAliasesVoteTable,
