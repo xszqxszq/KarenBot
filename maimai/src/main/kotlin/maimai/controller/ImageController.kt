@@ -697,8 +697,9 @@ class ImageController(
 
     private fun UserQueryParams.cacheKey(command: String): String {
         val target = when (this) {
-            is UserQueryParams.QQ -> "qq:$qq"
+            is UserQueryParams.Self -> "openid:${event.sender.id}"
             is UserQueryParams.Username -> "username:${username.lowercase()}"
+            is UserQueryParams.FriendCode -> "friend:$friendCode"
         }
         return "${event.sender.id}:$target:$command"
     }

@@ -5,7 +5,7 @@ import xyz.xszq.bot.chunithm.Chunithm
 import xyz.xszq.bot.chunithm.api.ChunithmAPI
 import xyz.xszq.bot.chunithm.api.LXNS
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
-import xyz.xszq.bot.chunithm.database.QQBindTable
+import xyz.xszq.bot.chunithm.database.ProberBindTable
 import xyz.xszq.bot.chunithm.exception.*
 import xyz.xszq.bot.chunithm.music.*
 import xyz.xszq.bot.chunithm.music.Rating.ratingFloor
@@ -16,8 +16,6 @@ class ChunithmQuery(
     val chunithm: Chunithm
 ) {
     companion object {
-        const val NO_BACKEND_BINDINGS = "您还未在查分器上绑定QQ号，请前往水鱼/落雪查分器设置您的QQ号。"
-        const val NO_QQ_BINDINGS = "为了继续后续查询，请输入\"/bind qq号\"绑定您的QQ号："
         const val NO_RECORDS = "在当前筛选条件下未查询到歌曲记录。"
         const val TOO_MANY_RECORDS = "在当前条件下查询到的曲目过多，请缩小范围。"
         const val USER_NOT_FOUND = "您查询的用户不存在。"
@@ -29,13 +27,11 @@ class ChunithmQuery(
         private val queryExceptionOrder = listOf(
             FilterNoResultException::class.java,
             FilterTooManyException::class.java,
-            QQBindRequiredException::class.java,
             UserDeniedException::class.java,
             AuthorizationException::class.java,
-            UserOARequiredException::class.java,
             NoDataException::class.java,
-            UserNotFoundException::class.java,
             UserBindRequiredException::class.java,
+            UserNotFoundException::class.java,
             NotSupportedException::class.java,
             UnknownException::class.java,
         )
@@ -45,28 +41,20 @@ class ChunithmQuery(
     suspend fun getQueryParams(
         event: MessageEvent,
         queryArgs: String ?= null
-    ): UserQueryParams = when {
-        event is GroupMessageEvent && event.mentions.isNotEmpty() && event.mentions.none { it.isBot || it.isSelf } -> {
-            val mentioned = event.mentions.first()
-            val qq = QQBindTable[mentioned.id] ?: throw IgnoreException()
-            val settings = MaimaiSettingsTable.settings(mentioned.id)
-            UserQueryParams.QQ(qq, event, true, settings)
+    ): UserQueryParams {
+        val mention = (event as? GroupMessageEvent)?.mentions?.firstOrNull { !it.isBot }
+        if (mention != null) {
+            val username = ProberBindTable[mention.id, "diving-fish", "username"]
+                ?: throw UserQueriedNoBindingException()
+            return UserQueryParams.Username(username, event)
         }
-        queryArgs.isNullOrBlank() -> {
-            val qq = QQBindTable[event.sender.id] ?: throw QQBindRequiredException()
-            val settings = MaimaiSettingsTable.settings(event.sender.id)
-            UserQueryParams.QQ(qq, event, true, settings)
-        }
-        queryArgs.startsWith("qq") -> {
-            val qq = queryArgs.substringAfter("qq").toLongOrNull()
-            qq ?.let {
-                UserQueryParams.QQ(qq, event, false)
-            } ?: run {
-                UserQueryParams.Username(queryArgs, event, false)
-            }
-        }
-        else -> {
-            UserQueryParams.Username(queryArgs, event, false)
+        return when {
+            queryArgs.isNullOrBlank() ->
+                UserQueryParams.Self(event, MaimaiSettingsTable.settings(event.sender.id))
+            queryArgs.all { it.isDigit() } ->
+                UserQueryParams.FriendCode(queryArgs, event)
+            else ->
+                UserQueryParams.Username(queryArgs, event)
         }
     }
 
@@ -171,10 +159,10 @@ class ChunithmQuery(
                 if (e is CancellationException)
                     throw e
                 if (e is Exception)
-                    failures.add(QueryFailure(backend, e.asQueryException(user)))
+                    failures.add(QueryFailure(backend, e))
             }
         }
-        throw failures.takeIf { it.isNotEmpty() } ?.selectException(user) ?: UnknownException()
+        throw failures.takeIf { it.isNotEmpty() } ?.selectException() ?: UnknownException()
     }
 
     private data class QueryFailure(
@@ -182,31 +170,10 @@ class ChunithmQuery(
         val exception: Exception
     )
 
-    private fun Exception.asQueryException(user: UserQueryParams) = when {
-        user is UserQueryParams.QQ && this is UserNotFoundException -> UserBindRequiredException(message)
-        else -> this
-    }
-
-    private fun List<QueryFailure>.selectException(user: UserQueryParams): Exception {
-        val failures = filter { failure ->
-            failure.exception !is UserOARequiredException || shouldHandleUserOARequired(user)
-        }.ifEmpty { this }
-        return queryExceptionOrder.firstNotNullOfOrNull { type ->
-            failures.firstOrNull { type.isInstance(it.exception) } ?.exception
-        } ?: failures.first().exception
-    }
-
-    private fun List<QueryFailure>.shouldHandleUserOARequired(user: UserQueryParams): Boolean {
-        if (user.isSelf && firstOrNull() ?.backend is LXNS)
-            return true
-        return any { failure ->
-            failure.backend.id == "diving-fish" && when (failure.exception) {
-                is NoDataException -> true
-                is UserBindRequiredException -> true
-                else -> false
-            }
-        }
-    }
+    private fun List<QueryFailure>.selectException(): Exception =
+        queryExceptionOrder.firstNotNullOfOrNull { type ->
+            firstOrNull { type.isInstance(it.exception) } ?.exception
+        } ?: first().exception
 
     private fun UserQueryParams.isMaxScore(): Boolean {
         if (this !is UserQueryParams.Username)
