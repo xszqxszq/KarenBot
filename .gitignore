@@ -51,5 +51,7 @@ nbdist/
 /TEST_ROADMAP.md
 .fonts/
 
+/AGENTS.md
+
 *.log
 .omo/
