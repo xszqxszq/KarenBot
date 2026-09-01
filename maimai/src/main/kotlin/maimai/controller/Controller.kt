@@ -18,6 +18,7 @@ import xyz.xszq.bot.maimai.component.MarkdownTemplates
 import xyz.xszq.bot.maimai.component.WaitingEventData
 import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.database.ProberBindTable
+import xyz.xszq.bot.maimai.database.QQBindTable
 import xyz.xszq.bot.maimai.database.RhythmGameTokens
 import xyz.xszq.bot.maimai.exception.*
 import xyz.xszq.bot.maimai.music.MusicDifficulty
@@ -115,14 +116,36 @@ sealed class Controller(
         else reply(markdown)
     }
 
+    suspend fun MessageEvent.messageQueryFailed() {
+        reply(MaimaiQuery.QUERY_FAILED) {
+            brief("查询失败", MaimaiQuery.QUERY_FAILED)
+            keyboard {
+                row {
+                    at("🔄重试", text, enter = true)
+                }
+            }
+        }
+    }
     suspend fun handleError(event: MessageEvent, e: Throwable, user: UserQueryParams?) {
         with(event) {
             when (e) {
                 is UserBindRequiredException -> {
                     val message = e.message
-                    if (message.isNullOrBlank())
-                        messageUserNeedBind(true)
-                    else
+                    if (message.isNullOrBlank()) {
+                        val prefer = MaimaiSettingsTable[sender.id, "prober"]
+                        val bound = when (prefer) {
+                            "diving-fish" -> ProberBindTable[sender.id, "diving-fish", "id"] != null
+                            "lxns" -> ProberBindTable[sender.id, "lxns", "refresh"] != null ||
+                                    ProberBindTable[sender.id, "lxns", "friend-code"] != null
+                            else -> ProberBindTable[sender.id, "diving-fish", "id"] != null ||
+                                    ProberBindTable[sender.id, "lxns", "refresh"] != null ||
+                                    ProberBindTable[sender.id, "lxns", "friend-code"] != null
+                        }
+                        if (bound)
+                            messageQueryFailed()
+                        else
+                            messageUserNeedBind(true)
+                    } else
                         reply(message)
                 }
                 is UserQueriedNoBindingException -> reply(e.message ?: "您查询的用户未绑定水鱼账户，无法查询")
@@ -137,7 +160,7 @@ sealed class Controller(
                 is IgnoreException -> {}
                 else -> {
                     e.printStackTrace()
-                    reply(MaimaiQuery.QUERY_FAILED)
+                    messageQueryFailed()
                 }
             }
         }
@@ -154,8 +177,13 @@ sealed class Controller(
         return Pair(divingFishUrl, lxnsUrl)
     }
     suspend fun MessageEvent.messageUserNeedBind(
-        replay: Boolean = false
+        replay: Boolean = false,
+        fromBind: Boolean = false
     ) {
+        val prefer = MaimaiSettingsTable[sender.id, "prober"]
+        println("[绑定提示] $sender.id 查分器偏好=${prefer?.ifBlank { "自动" } ?: "自动"} QQ=${QQBindTable[sender.id] ?: "无"}")
+        println("[绑定提示] 水鱼 id=${ProberBindTable[sender.id, "diving-fish", "id"] ?: "无"} username=${ProberBindTable[sender.id, "diving-fish", "username"] ?: "无"}")
+        println("[绑定提示] 落雪 refresh=${ProberBindTable[sender.id, "lxns", "refresh"] ?: "无"} 好友码=${ProberBindTable[sender.id, "lxns", "friend-code"] ?: "无"}")
         val (divingFishUrl, lxnsUrl) = bindLinks(replay = replay)
         reply(buildString {
             appendLine("请根据您所使用的查分器，点击下面链接来绑定：")
@@ -164,14 +192,30 @@ sealed class Controller(
             appendLine("落雪查分器：$lxnsUrl")
             appendLine("如果您不知道什么是查分器，可以查看：https://bot-docs.otmdb.cn/maimai/prober")
         }.trim()) {
-            brief("绑定查分器", "请选择您要绑定的舞萌中二查分器：")
+            brief("绑定查分器", when (fromBind) {
+                true -> "使用前，请您点击下方来绑定您的舞萌/中二查分器账号："
+                else -> "请选择您要使用的舞萌/中二查分器："
+            })
             keyboard {
-                row {
-                    link("🐟水鱼", divingFishUrl)
-                    link("❄落雪", lxnsUrl)
+                when {
+                    fromBind || prefer.isNullOrBlank() -> row {
+                        link("🐟水鱼", divingFishUrl)
+                        link("❄落雪", lxnsUrl)
+                    }
+                    prefer == "diving-fish" -> row {
+                        link("🐟水鱼", divingFishUrl)
+                    }
+                    else -> row {
+                        link("❄落雪", lxnsUrl)
+                    }
+                }
+                if (!fromBind && !prefer.isNullOrBlank()) {
+                    row {
+                        at("🔄切换查分器", "/bind", enter = true)
+                    }
                 }
                 row {
-                    link("查分器是什么？", "https://bot-docs.otmdb.cn/maimai/prober")
+                    link("查分器是什么？", "https://bot-docs.otmdb.cn/maimai/prober", style = RenderData.GRAY)
                 }
             }
         }
@@ -218,7 +262,7 @@ sealed class Controller(
                     }
                 }
                 row {
-                    link("🤖Bakapiano", "https://www.bilibili.com/video/BV1QdhM6REGX")
+                    link("\uD83E\uDDCABakapiano", "https://www.bilibili.com/video/BV1QdhM6REGX")
                     link("🐇UsagiPass", "https://otmdb.cn/jump/maimai_prober_mobile")
                 }
                 row {

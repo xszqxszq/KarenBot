@@ -11,6 +11,7 @@ import xyz.xszq.bot.chunithm.component.ChunithmQuery
 import xyz.xszq.bot.chunithm.component.ImageParseResult
 import xyz.xszq.bot.chunithm.component.MarkdownTemplates
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
+import xyz.xszq.bot.chunithm.database.ProberBindTable
 import xyz.xszq.bot.chunithm.exception.*
 import xyz.xszq.bot.chunithm.music.MusicDifficulty
 import xyz.xszq.bot.chunithm.music.MusicInfo
@@ -114,6 +115,16 @@ sealed class Controller(
         else reply(markdown)
     }
 
+    suspend fun MessageEvent.messageQueryFailed() {
+        reply(ChunithmQuery.QUERY_FAILED) {
+            brief("查询失败", ChunithmQuery.QUERY_FAILED)
+            keyboard {
+                row {
+                    at("🔄重试", text, enter = true)
+                }
+            }
+        }
+    }
     suspend fun handleError(
         event: MessageEvent,
         e: Throwable,
@@ -121,7 +132,25 @@ sealed class Controller(
     ) {
         with(event) {
             when (e) {
-                is UserBindRequiredException -> messageUserNeedBind()
+                is UserBindRequiredException -> {
+                    val message = e.message
+                    if (message.isNullOrBlank()) {
+                        val prefer = MaimaiSettingsTable[sender.id, "prober"]
+                        val bound = when (prefer) {
+                            "diving-fish" -> ProberBindTable[sender.id, "diving-fish", "id"] != null
+                            "lxns" -> ProberBindTable[sender.id, "lxns", "refresh"] != null ||
+                                    ProberBindTable[sender.id, "lxns", "friend-code"] != null
+                            else -> ProberBindTable[sender.id, "diving-fish", "id"] != null ||
+                                    ProberBindTable[sender.id, "lxns", "refresh"] != null ||
+                                    ProberBindTable[sender.id, "lxns", "friend-code"] != null
+                        }
+                        if (bound)
+                            messageQueryFailed()
+                        else
+                            messageUserNeedBind()
+                    } else
+                        reply(message)
+                }
                 is UserQueriedNoBindingException -> reply(e.message ?: "您查询的用户未绑定水鱼账户，无法查询")
                 is UserNotFoundException -> messageUserNotFound()
                 is UserDeniedException -> user?.let { messageUserDenied(it) }
@@ -132,7 +161,10 @@ sealed class Controller(
                 is NotFoundException -> messageNotFound(e.message.orEmpty())
                 is AuthorizationException -> messageNeedAuthorization()
                 is IgnoreException -> {}
-                else -> reply(ChunithmQuery.QUERY_FAILED)
+                else -> {
+                    e.printStackTrace()
+                    messageQueryFailed()
+                }
             }
         }
     }

@@ -22,6 +22,7 @@ import xyz.xszq.bot.maimai.api.DivingFish
 import xyz.xszq.bot.maimai.api.LXNS
 import xyz.xszq.bot.maimai.component.WaitingEventData
 import xyz.xszq.bot.maimai.database.DivingFishBindTable
+import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.database.ProberBindTable
 import xyz.xszq.bot.maimai.database.RhythmGameTokens
 import xyz.xszq.bot.maimai.music.UserQueryParams
@@ -138,7 +139,9 @@ class ApiController(
                         runCatching {
                             divingFish.bindByRef(openid)
                         }
-                        data.event.reply("绑定成功。")
+                        if (MaimaiSettingsTable[openid, "prober"]?.isNotBlank() == true)
+                            MaimaiSettingsTable[openid, "prober"] = "diving-fish"
+                        data.event.reply("绑定成功，您可正常使用舞萌/中二各功能了。")
                         if (data.replay)
                             data.event.bot.pluginLoader.subscribes.handle(data.event)
                     }
@@ -158,7 +161,9 @@ class ApiController(
                     return@get
                 }
                 if ((maimai.backend("lxns") as LXNS).initOAuth(code, data.event)) {
-                    data.event.reply("绑定成功。")
+                    if (MaimaiSettingsTable[data.event.sender.id, "prober"]?.isNotBlank() == true)
+                        MaimaiSettingsTable[data.event.sender.id, "prober"] = "lxns"
+                    data.event.reply("绑定成功，您可正常使用舞萌/中二各功能了。")
                     if (data.replay)
                         data.event.bot.pluginLoader.subscribes.handle(data.event)
                     call.respondText("绑定成功，您可以返回继续使用相关功能了。")

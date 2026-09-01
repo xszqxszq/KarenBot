@@ -8,6 +8,7 @@ import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.database.ProberBindTable
 import xyz.xszq.bot.maimai.music.Item
 import xyz.xszq.bot.maimai.music.MusicDifficulty
+import xyz.xszq.bot.maimai.music.UserQueryParams
 import xyz.xszq.bot.maimai.query.ComboQuery
 import xyz.xszq.bot.maimai.query.ComboQuery.filterCharts
 import xyz.xszq.bot.maimai.query.ComboQuery.filterMusics
@@ -28,7 +29,7 @@ class SettingsController(
             reply("解绑成功。")
         }
         startsWith(listOf("bind", "绑定")) { _ ->
-            messageUserNeedBind(false)
+            messageUserNeedBind(false, fromBind = true)
         }
         startsWith("设置查分器") { name ->
             when {
@@ -160,19 +161,25 @@ class SettingsController(
                 return@startsWith
             }
             if (plateFile.genre == "実績" && plateFile.requires.isNotEmpty()) {
-                val user = maimai.query.getQueryParams(this)
-                val filters = ComboQuery.filters(Item.toSimplified(plateFile.name))
-                val musics = filters.filterMusics(maimai.musics())
-                val charts = filters.filterCharts(maimai.musics()).filter {
-                    it.difficulty.value >= MusicDifficulty.Master.value
-                }
-                val (response, _) = maimai.query.records(user, musics)
-                val records = filters.filterRecords(
-                    response.records.filter { it.chart.difficulty.value >= MusicDifficulty.Master.value },
-                    true
-                ) ?: return@startsWith
-                if (records.size < charts.size) {
-                    reply("您未达成该牌子的获得条件。")
+                var user: UserQueryParams? = null
+                runCatching {
+                    user = maimai.query.getQueryParams(this)
+                    val filters = ComboQuery.filters(Item.toSimplified(plateFile.name))
+                    val musics = filters.filterMusics(maimai.musics())
+                    val charts = filters.filterCharts(maimai.musics()).filter {
+                        it.difficulty.value >= MusicDifficulty.Master.value
+                    }
+                    val (response, _) = maimai.query.records(user, musics)
+                    val records = filters.filterRecords(
+                        response.records.filter { it.chart.difficulty.value >= MusicDifficulty.Master.value },
+                        true
+                    ) ?: return@startsWith
+                    if (records.size < charts.size) {
+                        reply("您未达成该牌子的获得条件。")
+                        return@startsWith
+                    }
+                }.onFailure { e ->
+                    handleError(this, e, user)
                     return@startsWith
                 }
             }
