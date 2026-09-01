@@ -53,4 +53,10 @@ object ProberBindTable: Table() {
                     (ProberBindTable.value eq bindValue)
         }.map { it[ProberBindTable.id] }.firstOrNull()
     }.await()
+    suspend fun delete(
+        id: String,
+        prober: String
+    ) = newSuspendedTransaction {
+        deleteWhere { (ProberBindTable.id eq id) and (ProberBindTable.prober eq prober) }
+    }
 }

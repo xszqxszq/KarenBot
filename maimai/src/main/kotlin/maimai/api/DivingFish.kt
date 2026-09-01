@@ -129,10 +129,22 @@ class DivingFish(
     }
 
     suspend fun bindByRef(openid: String): String? {
+        println("[水鱼调试] bindByRef openid=$openid")
         val tokens = runCatching {
             onBehalfOf("ref:${subjectRef(openid)}")
-        }.getOrNull() ?: return null
-        val sub = decodeSub(tokens.accessToken) ?: return null
+        }.getOrNull() ?: runCatching {
+            val qq = QQBindTable[openid] ?: throw UnknownException()
+            println("[水鱼调试] bindByRef 改用qq=$qq openid=$openid")
+            onBehalfOf("ref:${subjectRef(qq.toString())}")
+        }.getOrNull() ?: run {
+            println("[水鱼调试] bindByRef 换票失败 openid=$openid")
+            return null
+        }
+        val sub = decodeSub(tokens.accessToken) ?: run {
+            println("[水鱼调试] bindByRef decodeSub null openid=$openid")
+            return null
+        }
+        println("[水鱼调试] bindByRef sub=$sub openid=$openid")
         ProberBindTable[openid, "diving-fish", "id"] = sub
         runCatching {
             val data = recordsRequest(tokens.accessToken)
@@ -150,19 +162,29 @@ class DivingFish(
     }
 
     suspend fun accessToken(openid: String): String? {
+        println("[水鱼调试] accessToken openid=$openid")
         tokenCache[openid] ?.let { (token, expiresAt) ->
-            if (expiresAt > System.currentTimeMillis() + 30_000L)
+            if (expiresAt > System.currentTimeMillis() + 30_000L) {
+                println("[水鱼调试] accessToken 缓存命中 $openid")
                 return token
+            }
         }
         val mutex = refreshLocks.computeIfAbsent(openid) { Mutex() }
         return mutex.withLock {
             tokenCache[openid] ?.let { (token, expiresAt) ->
-                if (expiresAt > System.currentTimeMillis() + 30_000L)
+                if (expiresAt > System.currentTimeMillis() + 30_000L) {
+                    println("[水鱼调试] accessToken 缓存命中(锁内) $openid")
                     return@withLock token
+                }
             }
             val sub = ProberBindTable[openid, "diving-fish", "id"]
-                ?: return@withLock null
+                ?: run {
+                    println("[水鱼调试] accessToken 无sub $openid")
+                    return@withLock null
+                }
+            println("[水鱼调试] accessToken sub=$sub $openid")
             val tokens = onBehalfOf("sub:$sub")
+            println("[水鱼调试] accessToken 换票成功 $openid expiresIn=${tokens.expiresIn}")
             tokenCache[openid] = Pair(
                 tokens.accessToken,
                 System.currentTimeMillis() + tokens.expiresIn * 1000L
@@ -172,20 +194,30 @@ class DivingFish(
     }
 
     private suspend fun onBehalfOf(subject: String): DivingFishOAuthTokenResponse {
-        val response = client.post("$authServer/oauth/token") {
-            contentType(ContentType.Application.FormUrlEncoded)
-            setBody(formUrlEncode(
-                "grant_type" to "urn:diving-fish:params:oauth:grant-type:on-behalf-of",
-                "client_id" to oauthId,
-                "client_secret" to oauthSecret,
-                "subject" to subject
-            ))
+        println("[水鱼调试] onBehalfOf subject=$subject")
+        var retry = 0
+        while (true) {
+            val response = client.post("$authServer/oauth/token") {
+                contentType(ContentType.Application.FormUrlEncoded)
+                setBody(formUrlEncode(
+                    "grant_type" to "urn:diving-fish:params:oauth:grant-type:on-behalf-of",
+                    "client_id" to oauthId,
+                    "client_secret" to oauthSecret,
+                    "subject" to subject
+                ))
+            }
+            println("[水鱼调试] onBehalfOf subject=$subject status=${response.status}")
+            if (response.status != HttpStatusCode.TooManyRequests || retry >= 3) {
+                if (response.status == HttpStatusCode.BadRequest)
+                    throw UserBindRequiredException()
+                if (!response.status.isSuccess())
+                    throw UnknownException()
+                return response.body<DivingFishOAuthTokenResponse>()
+            }
+            retry++
+            println("[水鱼调试] onBehalfOf 429限流重试 $retry subject=$subject")
+            delay(retry * 2000L)
         }
-        if (response.status == HttpStatusCode.BadRequest)
-            throw UserBindRequiredException()
-        if (!response.status.isSuccess())
-            throw UnknownException()
-        return response.body<DivingFishOAuthTokenResponse>()
     }
 
     suspend fun migrateQQBindings(limit: Int = 2000): Pair<Int, Int> {
@@ -256,7 +288,7 @@ class DivingFish(
         headers["Authorization"] = "Bearer $accessToken"
     }
 
-    private suspend fun resolveOpenid(user: UserQueryParams): String? = when (user) {
+    private suspend fun resolveBindId(user: UserQueryParams): String? = when (user) {
         is UserQueryParams.Self -> {
             val openid = user.event.sender.id
             if (ProberBindTable[openid, "diving-fish", "id"] == null)
@@ -278,16 +310,36 @@ class DivingFish(
         user: UserQueryParams,
         block: suspend (String) -> T
     ): T {
-        val openid = resolveOpenid(user) ?: throw notBoundException(user)
-        val token = accessToken(openid) ?: throw notBoundException(user)
-        return runCatching { block(token) }.getOrElse { e ->
-            if (e !is AuthorizationException)
-                throw e
-            tokenCache.remove(openid)
-            val fresh = accessToken(openid) ?: throw UserBindRequiredException()
-            if (fresh == token)
-                throw e
-            block(fresh)
+        println("[水鱼调试] withAccessToken user=$user")
+        val openid = resolveBindId(user) ?: run {
+            println("[水鱼调试] withAccessToken resolveBindId null user=$user")
+            throw notBoundException(user)
+        }
+        println("[水鱼调试] withAccessToken openid=$openid")
+        val token = accessToken(openid) ?: run {
+            println("[水鱼调试] withAccessToken accessToken null openid=$openid")
+            throw notBoundException(user)
+        }
+        var retry = 0
+        while (true) {
+            val result = runCatching { block(token) }
+            val e = result.exceptionOrNull()
+            if (e == null)
+                return result.getOrThrow()
+            println("[水鱼调试] withAccessToken block失败 $e retry=$retry")
+            if (e is AuthorizationException) {
+                tokenCache.remove(openid)
+                val fresh = accessToken(openid) ?: throw UserBindRequiredException()
+                if (fresh == token)
+                    throw e
+                return block(fresh)
+            }
+            if (e is UnknownException && retry < 3) {
+                retry++
+                delay(retry * 2000L)
+                continue
+            }
+            throw e
         }
     }
 
@@ -295,18 +347,33 @@ class DivingFish(
         token: String,
         ids: List<Int> = emptyList()
     ): DivingFishRecordsResponse {
-        val response = client.get("$server/player/records") {
-            if (ids.isNotEmpty())
-                parameter("song_id", ids.joinToString(","))
-            setOAuth(token)
-        }
-        return when (response.status) {
-            HttpStatusCode.OK -> response.body<DivingFishRecordsResponse>()
-            HttpStatusCode.Unauthorized -> throw AuthorizationException()
-            HttpStatusCode.Forbidden -> throw UserDeniedException()
-            HttpStatusCode.BadRequest -> throw UserNotFoundException()
-            HttpStatusCode.TooManyRequests -> throw UnknownException("已超出今日请求上限")
-            else -> throw UnknownException()
+        var requestIds = ids
+        var retry = 0
+        while (true) {
+            val response = client.get("$server/player/records") {
+                if (requestIds.isNotEmpty() && requestIds.size < 1000)
+                    parameter("song_id", requestIds.joinToString(","))
+                setOAuth(token)
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> return response.body<DivingFishRecordsResponse>()
+                HttpStatusCode.Unauthorized -> throw AuthorizationException()
+                HttpStatusCode.Forbidden -> throw UserDeniedException()
+                HttpStatusCode.BadRequest -> throw UserNotFoundException()
+                HttpStatusCode.TooManyRequests -> {
+                    if (retry >= 3)
+                        throw UnknownException("已超出今日请求上限")
+                    retry++
+                    delay(retry * 2000L)
+                }
+                HttpStatusCode.RequestURITooLong -> {
+                    if (requestIds.isEmpty() || retry >= 1)
+                        throw UnknownException("HTTP 414")
+                    retry++
+                    requestIds = emptyList()
+                }
+                else -> throw UnknownException("HTTP ${response.status.value}")
+            }
         }
     }
 
@@ -320,6 +387,7 @@ class DivingFish(
         val newRatingList: List<Record>
         when (user) {
             is UserQueryParams.Self -> {
+                println("[水鱼调试] getPlayerRating Self sender=${user.event.sender.id}")
                 val data = withAccessToken(user) { token ->
                     // val data = ratingRequest(buildJsonObject {
                     //     put("b50", JsonPrimitive(true))
@@ -383,15 +451,18 @@ class DivingFish(
         music: MusicInfo
     ): List<Record>? = when (user) {
         is UserQueryParams.FriendCode -> null
-        else -> withAccessToken(user) { token ->
-            runCatching {
-                recordsRequest(token, listOf(music.id)).records.mapNotNull { record ->
-                    record.toRecord()
+        else -> {
+            println("[水鱼调试] getPlayerRecord user=$user")
+            withAccessToken(user) { token ->
+                runCatching {
+                    recordsRequest(token, listOf(music.id)).records.mapNotNull { record ->
+                        record.toRecord()
+                    }
+                }.getOrElse { e ->
+                    if (user is UserQueryParams.Self && e is UserNotFoundException)
+                        throw UserBindRequiredException()
+                    throw e
                 }
-            }.getOrElse { e ->
-                if (user is UserQueryParams.Self && e is UserNotFoundException)
-                    throw UserBindRequiredException()
-                throw e
             }
         }
     }
@@ -401,24 +472,27 @@ class DivingFish(
         musics: List<MusicInfo>
     ): RecordsResponse? = when (user) {
         is UserQueryParams.FriendCode -> null
-        else -> withAccessToken(user) { token ->
-            val data = runCatching {
-                recordsRequest(token, musics.map { it.id })
-            }.getOrElse { e ->
-                if (user is UserQueryParams.Self && e is UserNotFoundException)
-                    throw UserBindRequiredException()
-                throw e
-            }
-            RecordsResponse(
-                player = PlayerInfo(
-                    nickname = data.nickname,
-                    rating = data.rating,
-                    course = data.additionalRating + if (data.additionalRating > 10) 1 else 0
-                ),
-                records = data.records.mapNotNull { record ->
-                    record.toRecord()
+        else -> {
+            println("[水鱼调试] getPlayerRecords user=$user")
+            withAccessToken(user) { token ->
+                val data = runCatching {
+                    recordsRequest(token, musics.map { it.id })
+                }.getOrElse { e ->
+                    if (user is UserQueryParams.Self && e is UserNotFoundException)
+                        throw UserBindRequiredException()
+                    throw e
                 }
-            )
+                RecordsResponse(
+                    player = PlayerInfo(
+                        nickname = data.nickname,
+                        rating = data.rating,
+                        course = data.additionalRating + if (data.additionalRating > 10) 1 else 0
+                    ),
+                    records = data.records.mapNotNull { record ->
+                        record.toRecord()
+                    }
+                )
+            }
         }
     }
 
@@ -426,18 +500,26 @@ class DivingFish(
         request: JsonObject,
         token: String ?= null
     ): DivingFishRatingResponse? {
-        val response = client.post("$server/query/player") {
-            contentType(ContentType.Application.Json)
-            setBody(request)
-            token ?.let { setOAuth(it) }
-        }
-        return when (response.status) {
-            HttpStatusCode.Unauthorized -> throw AuthorizationException()
-            HttpStatusCode.BadRequest -> throw UserNotFoundException()
-            HttpStatusCode.Forbidden -> throw UserDeniedException()
-            HttpStatusCode.TooManyRequests -> throw UnknownException("已超出今日请求上限")
-            HttpStatusCode.OK -> response.body<DivingFishRatingResponse>()
-            else -> throw UnknownException()
+        var retry = 0
+        while (true) {
+            val response = client.post("$server/query/player") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+                token ?.let { setOAuth(it) }
+            }
+            when (response.status) {
+                HttpStatusCode.Unauthorized -> throw AuthorizationException()
+                HttpStatusCode.BadRequest -> throw UserNotFoundException()
+                HttpStatusCode.Forbidden -> throw UserDeniedException()
+                HttpStatusCode.TooManyRequests -> {
+                    if (retry >= 3)
+                        throw UnknownException("已超出今日请求上限")
+                    retry++
+                    delay(retry * 2000L)
+                }
+                HttpStatusCode.OK -> return response.body<DivingFishRatingResponse>()
+                else -> throw UnknownException("HTTP ${response.status.value}")
+            }
         }
     }
 
