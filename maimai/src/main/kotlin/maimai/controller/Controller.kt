@@ -17,6 +17,8 @@ import xyz.xszq.bot.maimai.component.MaimaiQuery
 import xyz.xszq.bot.maimai.component.MarkdownTemplates
 import xyz.xszq.bot.maimai.component.WaitingEventData
 import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
+import xyz.xszq.bot.maimai.database.ProberBindTable
+import xyz.xszq.bot.maimai.database.RhythmGameTokens
 import xyz.xszq.bot.maimai.exception.*
 import xyz.xszq.bot.maimai.music.MusicDifficulty
 import xyz.xszq.bot.maimai.music.MusicInfo
@@ -116,8 +118,14 @@ sealed class Controller(
     suspend fun handleError(event: MessageEvent, e: Throwable, user: UserQueryParams?) {
         with(event) {
             when (e) {
-                is QQBindRequiredException -> messageUserNeedQQBind()
-                is UserBindRequiredException -> messageUserNeedBind()
+                is UserBindRequiredException -> {
+                    val message = e.message
+                    if (message.isNullOrBlank())
+                        messageUserNeedBind(true)
+                    else
+                        reply(message)
+                }
+                is UserQueriedNoBindingException -> reply(e.message ?: "您查询的用户未绑定水鱼账户，无法查询")
                 is UserNotFoundException -> messageUserNotFound()
                 is UserDeniedException -> user?.let { messageUserDenied(it) }
                 is FilterNoResultException -> messageFilterNoResult()
@@ -126,7 +134,6 @@ sealed class Controller(
                 is NotSupportedException -> messageNotSupported(e.message.orEmpty())
                 is NotFoundException -> messageNotFound(e.message.orEmpty())
                 is AuthorizationException -> messageNeedAuthorization()
-                is UserOARequiredException -> requestOA()
                 is IgnoreException -> {}
                 else -> {
                     e.printStackTrace()
@@ -136,32 +143,35 @@ sealed class Controller(
         }
     }
 
-    suspend fun MessageEvent.messageUserNeedQQBind() {
-        maimai.messageToReplay[sender.id] = message.text.trim()
-        reply(MaimaiQuery.NO_QQ_BINDINGS) {
-            brief("舞萌DX", "为了继续后续查询，请输入您的QQ号来绑定：")
-            keyboard {
-                row {
-                    at("⬇点我输入", "/bind ")
-                }
-            }
-        }
-    }
     // TODO: Move URL to config
-    suspend fun MessageEvent.messageUserNeedBind() {
-        reply(MaimaiQuery.NO_BACKEND_BINDINGS) {
-            brief("舞萌DX", buildString {
-                appendLine("您还未在查分器上绑定QQ号。请选择一个并到查分器网页上绑定您的QQ号：")
-                appendLine("![preview #400px #274px](https://static-1254441046.cos.ap-guangzhou.myqcloud.com/maimai/bind-guide-diving-fish.png)")
-                appendLine("![preview #400px #233px](https://static-1254441046.cos.ap-guangzhou.myqcloud.com/maimai/bind-guide-lxns.png)")
-            })
+    suspend fun MessageEvent.bindLinks(replay: Boolean = false): Pair<String, String> {
+        val token = UUID.randomUUID().toString()
+        val data = WaitingEventData(this, replay = replay)
+        maimai.api.oauthBindTokens[token] = data
+        RhythmGameTokens.save(token, this, replay, data.expireAt)
+        val divingFishUrl = "https://bot-api.otmdb.cn/jump/diving-fish-oa/$token"
+        val lxnsUrl = "https://bot-api.otmdb.cn/jump/lxns-oa/$token"
+        return Pair(divingFishUrl, lxnsUrl)
+    }
+    suspend fun MessageEvent.messageUserNeedBind(
+        replay: Boolean = false
+    ) {
+        val (divingFishUrl, lxnsUrl) = bindLinks(replay = replay)
+        reply(buildString {
+            appendLine("请根据您所使用的查分器，点击下面链接来绑定：")
+            appendLine()
+            appendLine("水鱼查分器：$divingFishUrl")
+            appendLine("落雪查分器：$lxnsUrl")
+            appendLine("如果您不知道什么是查分器，可以查看：https://bot-docs.otmdb.cn/maimai/prober")
+        }.trim()) {
+            brief("绑定查分器", "请选择您要绑定的舞萌中二查分器：")
             keyboard {
                 row {
-                    link("水鱼查分器", "https://otmdb.cn/jump/maimaidxprober")
-                    link("落雪查分器", "https://otmdb.cn/jump/lxnsprober")
+                    link("🐟水鱼", divingFishUrl)
+                    link("❄落雪", lxnsUrl)
                 }
                 row {
-                    at("点我重试", this@messageUserNeedBind.text.trim(), enter = true, style = RenderData.FILLED_BLUE)
+                    link("查分器是什么？", "https://bot-docs.otmdb.cn/maimai/prober")
                 }
             }
         }
@@ -208,7 +218,7 @@ sealed class Controller(
                     }
                 }
                 row {
-                    link("🤖Bakapiano", "https://www.bilibili.com/video/BV1La576LEWT")
+                    link("🤖Bakapiano", "https://www.bilibili.com/video/BV1QdhM6REGX")
                     link("🐇UsagiPass", "https://otmdb.cn/jump/maimai_prober_mobile")
                 }
                 row {
@@ -233,23 +243,6 @@ sealed class Controller(
     }
     suspend fun MessageEvent.messageNeedAuthorization() {
         reply(MaimaiQuery.NEED_AUTHORIZATION)
-    }
-
-    @OptIn(DelicateCoroutinesApi::class)
-    suspend fun MessageEvent.requestOA() {
-        val token = UUID.randomUUID().toString()
-        maimai.api.lxnsBindTokens[token] = WaitingEventData(this)
-        val authUrl = "https://bot-api.otmdb.cn/jump/lxns-oa/$token"
-
-        reply(buildString {
-            appendLine("使用该功能时，需要您授权BOT访问您在落雪查分器的全部成绩信息。请您点击链接授权：")
-            appendLine(authUrl)
-        }.trim().newLine()) {
-            brief("请求授权", "使用该功能时，需要您授权BOT访问您在落雪查分器的全部成绩信息，请点击下方登录并授权：")
-            keyboard {
-                row { link("点我授权", authUrl) }
-            }
-        }
     }
 
     suspend fun MessageEvent.selectMusic(

@@ -121,8 +121,8 @@ sealed class Controller(
     ) {
         with(event) {
             when (e) {
-                is QQBindRequiredException -> messageUserNeedQQBind()
                 is UserBindRequiredException -> messageUserNeedBind()
+                is UserQueriedNoBindingException -> reply(e.message ?: "您查询的用户未绑定水鱼账户，无法查询")
                 is UserNotFoundException -> messageUserNotFound()
                 is UserDeniedException -> user?.let { messageUserDenied(it) }
                 is FilterNoResultException -> messageFilterNoResult()
@@ -131,36 +131,13 @@ sealed class Controller(
                 is NotSupportedException -> messageNotSupported(e.message.orEmpty())
                 is NotFoundException -> messageNotFound(e.message.orEmpty())
                 is AuthorizationException -> messageNeedAuthorization()
-                is UserOARequiredException -> requestOA()
                 is IgnoreException -> {}
                 else -> reply(ChunithmQuery.QUERY_FAILED)
             }
         }
     }
-    suspend fun MessageEvent.messageUserNeedQQBind() {
-        reply(ChunithmQuery.NO_QQ_BINDINGS) {
-            brief("中二节奏", "为了继续后续查询，请输入您的QQ号来绑定：")
-            keyboard {
-                row {
-                    at("⬇点我输入", "/bind ")
-                }
-            }
-        }
-    }
     suspend fun MessageEvent.messageUserNeedBind() {
-        val msg = this.text
-        reply(ChunithmQuery.NO_BACKEND_BINDINGS) {
-            brief("中二节奏", "您还未在查分器上绑定QQ号。请选择一个查分器来绑定您的QQ号：")
-            keyboard {
-                row {
-                    link("水鱼查分器", "https://otmdb.cn/jump/maimaidxprober")
-                    link("落雪查分器", "https://otmdb.cn/jump/lxnsprober")
-                }
-                row {
-                    at("点我重试", msg, enter = true, style = RenderData.FILLED_BLUE)
-                }
-            }
-        }
+        requestOA()
     }
     suspend fun MessageEvent.messageUserNotFound() {
         reply(ChunithmQuery.USER_NOT_FOUND)
@@ -228,7 +205,7 @@ sealed class Controller(
     }
 
     suspend fun MessageEvent.requestOA() {
-        bot.pluginLoader.subscribes.handle(ChannelEvent(bot, channelName = "lxns-oa", data = this))
+        bot.pluginLoader.subscribes.handle(ChannelEvent(bot, channelName = "rhythm-game-bind", data = this))
     }
 
     suspend fun MessageEvent.queryByTextOrImage(

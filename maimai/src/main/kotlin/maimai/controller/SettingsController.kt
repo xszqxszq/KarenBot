@@ -1,19 +1,17 @@
 package xyz.xszq.bot.maimai.controller
 
-import xyz.xszq.bot.chain
-import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.maimai.Maimai
+import xyz.xszq.bot.maimai.api.DivingFish
+import xyz.xszq.bot.maimai.api.LXNS
 import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
-import xyz.xszq.bot.maimai.database.QQBindTable
+import xyz.xszq.bot.maimai.database.ProberBindTable
 import xyz.xszq.bot.maimai.music.Item
 import xyz.xszq.bot.maimai.music.MusicDifficulty
-import xyz.xszq.bot.maimai.music.UserQueryParams
 import xyz.xszq.bot.maimai.query.ComboQuery
 import xyz.xszq.bot.maimai.query.ComboQuery.filterCharts
 import xyz.xszq.bot.maimai.query.ComboQuery.filterMusics
 import xyz.xszq.bot.maimai.query.ComboQuery.filterRecords
-import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.newLine
 import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.reply
@@ -23,44 +21,14 @@ class SettingsController(
     override val maimai: Maimai
 ): Controller(maimai) {
     private suspend fun route() = rhythm {
-        startsWith(listOf("bind", "绑定")) { args ->
-            val qq = args.toLongOrNull()
-            when {
-                "水鱼" in args -> return@startsWith
-                args.startsWith("SGWCMAID") -> {
-                    reply("输入错误，使用方法：/bind qq号\n请不要随意泄露自己的账号二维码") {
-                        brief("可怜BOT", "输入错误，请不要随意泄露自己的账号二维码\n\n请点击下方按钮输入您的QQ号：")
-                        keyboard {
-                            row {
-                                at("⬇点我输入", "/bind ")
-                            }
-                        }
-                    }
-                    return@startsWith
-                }
-                qq == null -> {
-                    reply("使用方法：/bind qq号") {
-                        brief("可怜BOT", "请点击下方按钮输入您的QQ号：")
-                        keyboard {
-                            row {
-                                at("⬇点我输入", "/bind ")
-                            }
-                        }
-                    }
-                    return@startsWith
-                }
-            }
-            QQBindTable.update(this.sender.id, qq)
-            val user = maimai.query.getQueryParams(this)
-            if (noAPIBindFound(user)) {
-                messageUserNeedBind()
-            } else {
-                reply("绑定成功。")
-                maimai.messageToReplay[sender.id] ?.let { text ->
-                    replayMessage(text.chain())
-                    maimai.messageToReplay.remove(sender.id)
-                }
-            }
+        startsWith(listOf("unbind", "解绑")) { _ ->
+            ProberBindTable.delete(sender.id)
+            (maimai.backend("diving-fish") as DivingFish).clearTokenCache(sender.id)
+            (maimai.backend("lxns") as LXNS).clearTokenCache(sender.id)
+            reply("解绑成功。")
+        }
+        startsWith(listOf("bind", "绑定")) { _ ->
+            messageUserNeedBind(false)
         }
         startsWith("设置查分器") { name ->
             when {
@@ -248,8 +216,8 @@ class SettingsController(
                 }
             }
         }
-        channel<MessageEvent>("lxns-oa") { target ->
-            target.requestOA()
+        channel<MessageEvent>("rhythm-game-bind") { target ->
+            target.messageUserNeedBind(false)
         }
     }
 
@@ -268,43 +236,6 @@ class SettingsController(
             link("选择$type", "https://otmdb.cn/bot/maimai/$id", id = "1")
             at("⚙ 设置$type", "/mai 设置$type ", id = "2")
         }
-    }
-
-    private suspend fun noAPIBindFound(
-        user: UserQueryParams
-    ): Boolean {
-        maimai.query.listBackends(user).forEach { backend ->
-            runCatching {
-                backend.getPlayerRating(user)
-            }.onSuccess { response ->
-                return false
-            }
-        }
-        return true
-    }
-
-    private suspend fun MessageEvent.replayMessage(
-        message: MessageChain,
-    ) {
-        bot.pluginLoader.subscribes.handle(when (this) {
-            is GroupMessageEvent -> GroupMessageEvent(
-                bot = bot,
-                eventId = eventId,
-                id = id,
-                message = message,
-                sender = sender,
-                group = group,
-                seq = seq + 1
-            )
-            else -> MessageEvent(
-                bot = bot,
-                eventId = eventId,
-                id = id,
-                message = message,
-                sender = sender,
-                seq = seq + 1
-            )
-        })
     }
 
 }

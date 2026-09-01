@@ -14,6 +14,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.*
 import xyz.xszq.bot.User
+import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.maimai.Maimai
@@ -21,11 +22,14 @@ import xyz.xszq.bot.maimai.api.DivingFish
 import xyz.xszq.bot.maimai.api.LXNS
 import xyz.xszq.bot.maimai.component.WaitingEventData
 import xyz.xszq.bot.maimai.database.DivingFishBindTable
-import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
+import xyz.xszq.bot.maimai.database.ProberBindTable
+import xyz.xszq.bot.maimai.database.RhythmGameTokens
 import xyz.xszq.bot.maimai.music.UserQueryParams
 import xyz.xszq.bot.maimai.payload.LXNSResponse
 import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.reply
+import xyz.xszq.bot.Group
+import xyz.xszq.bot.Member
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 
@@ -33,7 +37,7 @@ class ApiController(
     val maimai: Maimai
 ) {
     lateinit var server: EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration>
-    val lxnsBindTokens = ConcurrentHashMap<String, WaitingEventData>()
+    val oauthBindTokens = ConcurrentHashMap<String, WaitingEventData>()
     val updateTokens = ConcurrentHashMap<String, WaitingEventData>()
     var proxyIP: String = ""
     var proxyServer: String = ""
@@ -48,12 +52,49 @@ class ApiController(
         proxyServer = maimai.config.tokens["proxy-server"] ?: throw NotFoundException()
         proxyPort = maimai.config.tokens["proxy-port"] ?.toInt() ?: throw NotFoundException()
         maimai.scope.launch {
+            restoreOAuthBindTokens()
             while (isActive) {
                 delay(60_000L)
                 val now = System.currentTimeMillis()
-                lxnsBindTokens.entries.removeIf { it.value.expireAt < now }
+                oauthBindTokens.entries.removeIf { it.value.expireAt < now }
                 updateTokens.entries.removeIf { it.value.expireAt < now }
+                RhythmGameTokens.load().forEach { token ->
+                    if (token.expiresAt < now)
+                        RhythmGameTokens.remove(token.id)
+                }
             }
+        }
+    }
+
+    private suspend fun restoreOAuthBindTokens() {
+        val now = System.currentTimeMillis()
+        RhythmGameTokens.load().forEach { token ->
+            if (token.expiresAt < now) {
+                RhythmGameTokens.remove(token.id)
+                return@forEach
+            }
+            val bot = maimai.pluginLoader.bot
+            val message = MessageChain(token.message)
+            val event = when (token.eventType) {
+                "group" -> GroupMessageEvent(
+                    bot = bot,
+                    eventId = token.eventId,
+                    id = token.messageId,
+                    message = message,
+                    sender = Member(bot, token.senderId),
+                    group = Group(bot, token.groupId ?: return@forEach),
+                    seq = token.seq
+                )
+                else -> MessageEvent(
+                    bot = bot,
+                    eventId = token.eventId,
+                    id = token.messageId,
+                    message = message,
+                    sender = User(bot, token.senderId),
+                    seq = token.seq
+                )
+            }
+            oauthBindTokens[token.id] = WaitingEventData(event, token.replay, token.expiresAt)
         }
     }
 
@@ -66,117 +107,61 @@ class ApiController(
             }
         }
         routing {
-            get("/query/b50") {
-                val auth = call.request.headers[HttpHeaders.Authorization]
-                val expected = maimai.config.tokens["api-key"] ?: run {
-                    call.respondText("server not configured", status = HttpStatusCode.InternalServerError)
+            get("/diving-fish/device-bind/{token}") {
+                val token = call.parameters["token"] ?: run {
+                    call.respondText("Token不存在", status = HttpStatusCode.BadRequest)
                     return@get
                 }
-                if (auth != "Bearer $expected") {
-                    call.respondText("unauthorized", status = HttpStatusCode.Unauthorized)
+                val data = oauthBindTokens[token] ?: run {
+                    call.respondText("绑定已过期，请重新发起绑定。", status = HttpStatusCode.BadRequest)
                     return@get
                 }
-                val query = call.request.queryParameters
-                val qq = query["qq"] ?: run {
-                    call.respondText("missing qq", status = HttpStatusCode.BadRequest)
+                RhythmGameTokens.remove(token)
+                val divingFish = maimai.backend("diving-fish") as DivingFish
+                val openid = data.event.sender.id
+                val auth = runCatching {
+                    divingFish.deviceAuthorization(openid, openid)
+                }.getOrElse {
+                    call.respondText("发起绑定失败，请重试。", status = HttpStatusCode.BadGateway)
                     return@get
                 }
-                val api = query["api"]
-                val qqNumber = qq.toLongOrNull() ?: run {
-                    call.respondText("invalid qq", status = HttpStatusCode.BadRequest)
-                    return@get
-                }
-                val user = UserQueryParams.QQ(
-                    qq = qqNumber,
-                    event = MessageEvent(
-                        bot = maimai.pluginLoader.bot,
-                        eventId = "",
-                        id = "",
-                        message = MessageChain(),
-                        sender = User(maimai.pluginLoader.bot, ""),
-                    ),
-                    isSelf = false,
-                )
-                val (response, usedApi) = when (api) {
-                    null -> runCatching {
-                        maimai.query.rating(user)
-                    }.getOrElse {
-                        call.respondText("query failed: ${it.message}", status = HttpStatusCode.BadGateway)
-                        return@get
-                    }
-                    else -> {
-                        val backend = runCatching {
-                            maimai.backend(api)
-                        }.getOrElse {
-                            call.respondText("unknown api", status = HttpStatusCode.BadRequest)
-                            return@get
-                        }
-                        val data = backend.getPlayerRating(user)
-                        if (data == null) {
-                            call.respondText("query failed", status = HttpStatusCode.BadGateway)
-                            return@get
-                        }
-                        Pair(data, backend)
-                    }
-                }
-                val data = buildJsonObject {
-                    put("player", buildJsonObject {
-                        put("name", response.player.nickname)
-                        put("rating", response.player.rating)
-                        put("course_rank", response.player.course)
-                    })
-                    put("standard", buildJsonArray {
-                        response.oldRatingList.forEach { add(Json.encodeToJsonElement(with(LXNS) { it.toLxnsScore() })) }
-                    })
-                    put("dx", buildJsonArray {
-                        response.newRatingList.forEach { add(Json.encodeToJsonElement(with(LXNS) { it.toLxnsScore() })) }
-                    })
-                }
-                call.respondText(
-                    contentType = ContentType.Application.Json,
-                ) {
-                    Json.encodeToString(
-                        LXNSResponse(
-                            success = true,
-                            code = 0,
-                            message = "ok",
-                            data = data,
-                        )
+                maimai.scope.launch {
+                    val ok = divingFish.awaitDeviceBinding(
+                        auth.deviceCode,
+                        auth.interval,
+                        auth.expiresIn
                     )
+                    if (ok) {
+                        runCatching {
+                            divingFish.bindByRef(openid)
+                        }
+                        data.event.reply("绑定成功。")
+                        if (data.replay)
+                            data.event.bot.pluginLoader.subscribes.handle(data.event)
+                    }
                 }
-            }
-            get("/query/musics") {
-                val auth = call.request.headers[HttpHeaders.Authorization]
-                val expected = maimai.config.tokens["api-key"] ?: run {
-                    call.respondText("server not configured", status = HttpStatusCode.InternalServerError)
-                    return@get
-                }
-                if (auth != "Bearer $expected") {
-                    call.respondText("unauthorized", status = HttpStatusCode.Unauthorized)
-                    return@get
-                }
-                if (maimai.maimaiData.localMusics.isEmpty()) {
-                    call.respondText("music data not loaded", status = HttpStatusCode.InternalServerError)
-                    return@get
-                }
-                call.respondText(
-                    contentType = ContentType.Application.Json,
-                ) {
-                    Json.encodeToString(maimai.maimaiData.localMusics)
-                }
+                call.respondRedirect(auth.verificationUriComplete)
             }
             get("/lxns/callback") {
                 val query = call.request.queryParameters
                 val code = query["code"] ?: return@get
                 val state = query["state"] ?: return@get
-                val event = lxnsBindTokens[state] ?.event ?: return@get
-                lxnsBindTokens.remove(state)
-                if ((maimai.backend("lxns") as LXNS).initOAuth(code, event)) {
-                    event.reply("绑定成功。")
-                    event.bot.pluginLoader.subscribes.handle(event)
+                val data = oauthBindTokens[state] ?: return@get
+                oauthBindTokens.remove(state)
+                RhythmGameTokens.remove(state)
+                if (query["error"] != null || code.isBlank()) {
+                    data.event.reply("绑定失败，请重试。")
+                    call.respondText("绑定失败，请重试。")
+                    return@get
+                }
+                if ((maimai.backend("lxns") as LXNS).initOAuth(code, data.event)) {
+                    data.event.reply("绑定成功。")
+                    if (data.replay)
+                        data.event.bot.pluginLoader.subscribes.handle(data.event)
                     call.respondText("绑定成功，您可以返回继续使用相关功能了。")
                 } else {
-                    event.reply("绑定失败，请重试。")
+                    data.event.reply("绑定失败，请重试。")
+                    call.respondText("绑定失败，请重试。")
                 }
             }
             get("/update") {
@@ -249,32 +234,39 @@ class ApiController(
                     call.respondText("forbidden", status = HttpStatusCode.Forbidden)
                     return@get
                 }
-                val force = call.request.queryParameters["force"] == "true"
-                val now = System.currentTimeMillis() / 1000
                 val lxns = maimai.backend("lxns") as LXNS
-                val ids = MaimaiSettingsTable.idsForKey("lxns-oa-refresh")
+                val ids = ProberBindTable.idsForKey("lxns", "refresh")
                 var ok = 0
-                var skip = 0
                 var fail = 0
                 for (id in ids) {
-                    if (!force) {
-                        val expires = MaimaiSettingsTable[id, "lxns-oa-expires"]?.toLongOrNull()
-                        if (expires != null && now < expires - 3600) {
-                            skip++
-                            continue
-                        }
-                    }
-                    val token = MaimaiSettingsTable[id, "lxns-oa-refresh"] ?: continue
-                    val newToken = runCatching { lxns.refresh(token) }.getOrNull()
-                    if (newToken != null) {
-                        MaimaiSettingsTable[id, "lxns-oa-refresh"] = newToken
+                    if (runCatching { lxns.refreshToken(id) }.getOrDefault(false))
                         ok++
-                    } else {
+                    else
                         fail++
-                    }
                     delay(Random.nextLong(1000, 30000))
                 }
-                call.respondText("ok=$ok skip=$skip fail=$fail")
+                call.respondText("ok=$ok fail=$fail")
+            }
+            get("/_cron/migrate-diving-fish") {
+                val addr = call.request.local.remoteAddress
+                if (addr != "127.0.0.1" && addr != "0:0:0:0:0:0:0:1") {
+                    call.respondText("forbidden", status = HttpStatusCode.Forbidden)
+                    return@get
+                }
+                val limit = call.request.queryParameters["limit"] ?.toIntOrNull() ?: 2000
+                val divingFish = maimai.backend("diving-fish") as DivingFish
+                val (ok, fail) = divingFish.migrateQQBindings(limit)
+                call.respondText("ok=$ok fail=$fail")
+            }
+            get("/_cron/migrate-lxns") {
+                val addr = call.request.local.remoteAddress
+                if (addr != "127.0.0.1" && addr != "0:0:0:0:0:0:0:1") {
+                    call.respondText("forbidden", status = HttpStatusCode.Forbidden)
+                    return@get
+                }
+                val lxns = maimai.backend("lxns") as LXNS
+                val (ok, skip) = lxns.migrateLegacyBindings()
+                call.respondText("ok=$ok skip=$skip")
             }
         }
     }.start(wait = false).also { server = it }

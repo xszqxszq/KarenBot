@@ -4,5 +4,6 @@ import xyz.xszq.bot.event.MessageEvent
 
 data class WaitingEventData(
     val event: MessageEvent,
-    val expireAt: Long = System.currentTimeMillis() + 5 * 60 * 1000L
+    val replay: Boolean = false,
+    val expireAt: Long = System.currentTimeMillis() + 20 * 60 * 1000L
 )
