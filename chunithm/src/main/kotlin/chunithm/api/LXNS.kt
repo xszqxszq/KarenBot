@@ -168,9 +168,15 @@ class LXNS(
                 ),
                 oldRatingList = data.bests.mapNotNull { score ->
                     score.toRecord()
+                }.filter { record ->
+                    // B50 不展示 WORLD'S END(WORLDS END 难度不计入 Rating)
+                    record.chart.difficulty != MusicDifficulty.WorldsEnd
                 },
                 newRatingList = data.newBests.mapNotNull { score ->
                     score.toRecord()
+                }.filter { record ->
+                    // B50 不展示 WORLD'S END(WORLDS END 难度不计入 Rating)
+                    record.chart.difficulty != MusicDifficulty.WorldsEnd
                 }
             )
         }

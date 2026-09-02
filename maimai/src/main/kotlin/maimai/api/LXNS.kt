@@ -319,9 +319,15 @@ class LXNS(
                 ),
                 oldRatingList = data.standard.mapNotNull { record ->
                     record.toRecord()
+                }.filter { record ->
+                    // B50 不展示宴谱(宴会场难度不计入 Rating)
+                    record.chart.difficulty != MusicDifficulty.Utage
                 },
                 newRatingList = data.dx.mapNotNull { record ->
                     record.toRecord()
+                }.filter { record ->
+                    // B50 不展示宴谱(宴会场难度不计入 Rating)
+                    record.chart.difficulty != MusicDifficulty.Utage
                 }
             )
         }
