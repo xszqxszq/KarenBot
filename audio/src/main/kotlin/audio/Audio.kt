@@ -1,4 +1,4 @@
-package xyz.xszq.bot.otto
+package xyz.xszq.bot.audio
 
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
@@ -8,20 +8,28 @@ import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import xyz.xszq.bot.Plugin
+import xyz.xszq.bot.audio.touhou.Touhou
+import xyz.xszq.bot.audio.voice.TTSParser
+import xyz.xszq.bot.audio.voice.VoicePresets
 import xyz.xszq.bot.ffmpeg.FFMpegFileType
 import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.bot.message.Audio
 import xyz.xszq.bot.message.RemoteVoice
-import xyz.xszq.bot.otto.voice.TTSParser
-import xyz.xszq.bot.otto.voice.VoicePresets
 import xyz.xszq.bot.reply
 import xyz.xszq.bot.use
 import java.io.File
 
+/**
+ * 音频插件
+ *
+ * 活字印刷相关，以及东方原曲相关功能，音频位置位于 data/audio
+ */
 @Suppress("unused")
-class OttoVoice: Plugin() {
+class Audio: Plugin() {
     lateinit var presets: VoicePresets
     lateinit var tts: TTSParser
+    val touhou = Touhou(this)
+
     @OptIn(ExperimentalHoplite::class)
     override suspend fun load() {
         presets = ConfigLoaderBuilder.default()
@@ -32,13 +40,17 @@ class OttoVoice: Plugin() {
 
         tts = TTSParser(presets, localCurrentDirVfs["data/audio/otto"])
         tts.init()
+        touhou.init()
 
         setRoute()
-        logger.info { "[活字印刷] 插件加载完成。" }
+        touhou.setRoute()
+        logger.info { "[活字印刷] 插件加载完成" }
+        logger.info { "[猜谜] 插件加载完成" }
     }
 
     @OptIn(DelicateCoroutinesApi::class)
     suspend fun setRoute() = route {
+        // 活字印刷
         startsWith("活字印刷") { text ->
             if (text.isBlank() || text.length >= 120) {
                 reply(buildString {
@@ -51,11 +63,17 @@ class OttoVoice: Plugin() {
 
             // TODO: 加入文本审查
             launch(Dispatchers.IO) {
-                tts.generate(text) ?.let { pcm ->
-                    pcm.use { reply(Audio(pcm)) }
-                } ?: reply("输入的文本貌似未包含有效内容，请重试")
+                runCatching {
+                    tts.generate(text) ?.let { pcm ->
+                        pcm.use { reply(Audio(pcm)) }
+                    } ?: reply("输入的文本貌似未包含有效内容，请重试")
+                }.onFailure { e ->
+                    logger.error(e) { "TTS 生成失败" }
+                    reply("语音生成失败，请稍后再试")
+                }
             }
         }
+        // 倒放语音
         startsWith(listOf("倒放", "逆再生")) {
             reference ?.filterIsInstance<RemoteVoice>() ?.firstOrNull() ?.use { voice ->
                 // TODO: 加入TTS/多模态审查
@@ -69,7 +87,6 @@ class OttoVoice: Plugin() {
                     audioRate("24k")
                     audioChannels(1)
                 }.result()
-                println(pcm)
                 reply(Audio(pcm))
                 pcm.delete()
             }
@@ -77,6 +94,6 @@ class OttoVoice: Plugin() {
     }
 
     override suspend fun unload() {
-        logger.info { "Module OttoVoice unloaded." }
+        logger.info { "[活字印刷] 插件卸载完成" }
     }
 }

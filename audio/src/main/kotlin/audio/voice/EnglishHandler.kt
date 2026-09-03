@@ -1,4 +1,4 @@
-package xyz.xszq.bot.otto.voice
+package xyz.xszq.bot.audio.voice
 
 import marytts.MaryInterface
 import org.w3c.dom.Element
@@ -101,7 +101,7 @@ class EnglishHandler(
         while (i < raw.size) {
             val cur = raw[i]
             val nxt = raw.getOrNull(i + 1)
-            if (cur == "j" && (nxt == "O" || nxt == "oU" || nxt == "U" || nxt == "@" || nxt == "3`")) {
+            if (cur == "j" && nxt in listOf("O", "oU", "U", "@", "3`")) {
                 out += "YOU"
                 i += 2
                 continue
@@ -145,7 +145,8 @@ class EnglishHandler(
         }
 
     private fun isVowel(tok: String): Boolean =
-        (tok.length == 1 && tok[0] in vowels) || tok in setOf("ai", "ei", "ao", "ou", "ui", "er", "you", "ng")
+        (tok.length == 1 && tok[0] in vowels) ||
+            tok in setOf("ai", "ei", "ao", "ou", "ui", "er", "you", "ng")
 
     private fun isConsonant(tok: String): Boolean =
         (tok.length == 1 && tok[0] in consonants)

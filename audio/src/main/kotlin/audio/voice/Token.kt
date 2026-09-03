@@ -1,4 +1,4 @@
-package xyz.xszq.bot.otto.voice
+package xyz.xszq.bot.audio.voice
 
 import korlibs.io.file.VfsFile
 

@@ -1,18 +1,18 @@
-package xyz.xszq.bot.otto.voice
+package xyz.xszq.bot.audio.voice
 
 import kotlinx.serialization.Serializable
 
 /**
- * TTS Voice Presets.
+ * 活字印刷预设
  */
 @Serializable
 data class VoicePresets(
     /**
-     * Presets for words that could be read directly.
+     * 中文预设
      */
     val presets: Map<String, List<String>>,
     /**
-     * Presets for English words that could be read directly. Higher priority.
+     * 英文预设
      */
     val englishPresets: Map<String, List<String>>
 )

@@ -1,4 +1,4 @@
-package xyz.xszq.bot.guess.touhou
+package xyz.xszq.bot.audio.touhou
 
 import kotlinx.serialization.Serializable
 

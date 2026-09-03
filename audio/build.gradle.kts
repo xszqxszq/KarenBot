@@ -1,5 +1,6 @@
 val hopliteVersion: String by rootProject.extra
 val korlibsVersion: String by rootProject.extra
+val opencc4jVersion: String by rootProject.extra
 val serializationVersion: String by rootProject.extra
 plugins {
     id("bot-plugin")
@@ -22,12 +23,15 @@ dependencies {
     implementation("de.dfki.mary:marytts-lang-en:5.2.1")
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.7")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${serializationVersion}")
+    implementation("com.github.houbb:pinyin:0.4.0")
+    implementation("com.github.houbb:opencc4j:${opencc4jVersion}")
+    implementation("com.github.shibing624:similarity:1.1.6")
 }
 
 tasks.jar {
     manifest {
         attributes(
-            "Plugin-Class" to "xyz.xszq.bot.otto.OttoVoice"
+            "Plugin-Class" to "xyz.xszq.bot.audio.Audio"
         )
     }
 }

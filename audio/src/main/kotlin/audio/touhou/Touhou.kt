@@ -1,4 +1,4 @@
-package xyz.xszq.bot.guess.touhou
+package xyz.xszq.bot.audio.touhou
 
 import com.github.houbb.opencc4j.util.ZhConverterUtil
 import com.github.houbb.pinyin.constant.enums.PinyinStyleEnum
@@ -10,23 +10,27 @@ import org.xm.Similarity
 import xyz.xszq.bot.AudioHandler.crop
 import xyz.xszq.bot.AudioHandler.duration
 import xyz.xszq.bot.ErrorHandler
+import xyz.xszq.bot.Plugin
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.IllegalArgsException
 import xyz.xszq.bot.exception.NeedHelpException
-import xyz.xszq.bot.guess.Guess
 import xyz.xszq.bot.message.Audio
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.payload.markdown.Keyboard
-import xyz.xszq.bot.payload.markdown.MarkdownData
 import xyz.xszq.bot.payload.markdown.RenderData
 import xyz.xszq.bot.reply
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 
+/**
+ * 东方原曲测验
+ *
+ * 随机截取东方原曲片段并让玩家猜出原曲名/所属原作及出现位置，原曲位于 data/audio/touhou
+ */
 class Touhou(
-    val guess: Guess
+    val audio: Plugin
 ) {
     val baseDir = localCurrentDirVfs["data/audio/touhou"]
     lateinit var musics: TouhouMusics
@@ -36,7 +40,11 @@ class Touhou(
         musics = Json.decodeFromString(baseDir["musics.json"].readString())
     }
 
-    suspend fun setRoute() = guess.route {
+    /**
+     * 注册猜歌相关路由
+     */
+    suspend fun setRoute() = audio.route {
+        // 获取一首随机东方原曲
         startsWith("随机东方原曲") {
             val (game, target) = musics.categories.flatMap { category ->
                 category.games.flatMap { game ->
@@ -53,22 +61,30 @@ class Touhou(
             }
             if (duration <= RANDOM_DURATION)
                 return@startsWith
-            file.crop(
-                Random(System.currentTimeMillis()).nextDouble(0.0, duration - RANDOM_DURATION),
-                RANDOM_DURATION
-            ) { cropped ->
+            val offset = Random(System.currentTimeMillis())
+                .nextDouble(0.0, duration - RANDOM_DURATION)
+            file.crop(offset, RANDOM_DURATION) { cropped ->
                 reply(Audio(cropped))
-                reply(Markdown(MarkdownData(buildString {
-                    appendLine("**随机东方原曲**")
-                    appendLine()
-                    appendLine("${target.name}\n来自${game.id}. ${game.name}")
-                }), Keyboard.create {
-                    row {
-                        at("再来一抽", "随机东方原曲", enter = true, style = RenderData.FILLED_BLUE, id = "1")
+                reply(Markdown.create {
+                    line(bold("随机东方原曲"))
+                    line()
+                    line("${target.name}")
+                    line("来自${game.id}. ${game.name}")
+                    keyboard {
+                        row {
+                            at(
+                                label = "再来一抽",
+                                data = "随机东方原曲",
+                                enter = true,
+                                style = RenderData.FILLED_BLUE,
+                                id = "1"
+                            )
+                        }
                     }
-                }))
+                })
             }
         }
+        // 启动原曲认知测验
         startsWith(listOf("原曲认知测验", "猜东方原曲")) { raw ->
             runCatching {
                 guess(raw)
@@ -76,6 +92,7 @@ class Touhou(
                 guessErrorHandler(e)
             }
         }
+        // 终止猜歌并清理
         startsWith("不玩了") {
             val id = if (this is GroupMessageEvent) group.id else sender.id
             if (started.containsKey(id))
@@ -113,28 +130,28 @@ class Touhou(
                 when (range) {
                     Range.New -> category.name == "整数新作"
                     Range.Old -> category.name == "旧作"
-                    Range.Int -> category.name == "整数新作" || category.name == "旧作"
+                    Range.Int -> category.name == "整数新作" ||
+                        category.name == "旧作"
                 }
             }.flatMap { game ->
                 game.tracks.map { Pair(game.name, it) }
             }
         }.random(Random(System.currentTimeMillis()))
-        println(music.name)
+        audio.logger.debug { "题目曲目：${music.name}" }
 
         val musicFile = baseDir[music.file]
         val duration = musicFile.duration() ?: run {
             started.remove(id)
             return
         }
-            val slice = difficulty.duration()
-            if (duration <= slice) {
-                started.remove(id)
-                return
-            }
-            musicFile.crop(
-            Random(System.currentTimeMillis()).nextDouble(0.0, duration - slice),
-            slice
-        ) { cropped ->
+        val slice = difficulty.duration()
+        if (duration <= slice) {
+            started.remove(id)
+            return
+        }
+        val offset = Random(System.currentTimeMillis())
+            .nextDouble(0.0, duration - slice)
+        musicFile.crop(offset, slice) { cropped ->
             var answers = music.aliases.toMutableList()
             answers.filter { "～" in it }.forEach { before ->
                 before.split("～").map { it.trim() }.forEach {
@@ -142,61 +159,84 @@ class Touhou(
                 }
             }
             val gamePrefix = game.substringAfter("东方")
-            val gameSimplified = gamePrefix.map {
-                PinyinHelper.toPinyin(it.toString(), PinyinStyleEnum.NORMAL).first()
-            }.joinToString("")
+            val gameSimplified = gamePrefix
+                .map { it.toString() }
+                .map { PinyinHelper.toPinyin(it, PinyinStyleEnum.NORMAL).first() }
+                .joinToString("")
             answers.filter { true }.forEach { before ->
                 answers.add(game + before)
                 answers.add(gamePrefix + before)
                 answers.add(gameSimplified + before)
             }
-            answers.filter { "面道中" in it || "面boss" in it || "面主题曲" in it }.forEach { before ->
-                val levelName = before.replace("面道中", "面").replace("面boss", "面").replace("面主题曲", "面")
+            answers.filter {
+                "面道中" in it || "面boss" in it || "面主题曲" in it
+            }.forEach { before ->
+                val levelName = before
+                    .replace("面道中", "面")
+                    .replace("面boss", "面")
+                    .replace("面主题曲", "面")
                 answers.add(game + levelName)
                 answers.add(gamePrefix + levelName)
                 answers.add(gameSimplified + levelName)
             }
-            answers = answers.map { it.toSimple().lowercase() }.toSet().toMutableList()
-            println(answers)
+            answers = answers
+                .map { it.toSimple().lowercase() }
+                .toSet()
+                .toMutableList()
+            audio.logger.debug { "可接受答案：$answers" }
             var finished = false
 
             reply(Audio(cropped))
-            reply(Markdown(MarkdownData(buildString {
-                appendLine("**原曲认知测验**")
-                appendLine()
-                appendLine("请回答该原曲的名称，一分钟后揭晓答案~")
-            }), Keyboard.create {
-                row {
-                    at("回答", " ", id = "")
-                    at("不玩了", "不玩了", enter = true, style = RenderData.GRAY, id = "")
+            reply(Markdown.create {
+                line(bold("原曲认知测验"))
+                line()
+                line("请回答该原曲的名称，一分钟后揭晓答案~")
+                keyboard {
+                    row {
+                        at(
+                            label = "回答",
+                            data = " ",
+                            id = ""
+                        )
+                        at(
+                            label = "不玩了",
+                            data = "不玩了",
+                            enter = true,
+                            style = RenderData.GRAY,
+                            id = ""
+                        )
+                    }
                 }
-            }))
+            })
 
             val subscribeId = UUID.randomUUID().toString()
             bot.pluginLoader.subscribes.always(subscribeId) {
 
-                val nowId = if (this is GroupMessageEvent) group.id else sender.id
+                val nowId =
+                    if (this is GroupMessageEvent) group.id else sender.id
                 if (id != nowId) {
                     return@always
                 }
                 if (text.trim().startsWith("不玩了")) {
                     finished = true
-                    reply(Markdown(MarkdownData(buildString {
-                        appendLine("**原曲认知测验**")
-                        appendLine()
-                        appendLine("游戏已结束。答案是${music.answer()}")
-                    }), againKeyboard(difficulty, range)))
+                    reply(Markdown.create {
+                        line(bold("原曲认知测验"))
+                        line()
+                        line("游戏已结束。答案是${music.answer()}")
+                        keyboard(againKeyboard(difficulty, range))
+                    })
                     bot.pluginLoader.subscribes.stop(subscribeId)
                     return@always
                 }
 
                 if (answers.isAnswer(text.trim())) {
                     finished = true
-                    reply(Markdown(MarkdownData(buildString {
-                        appendLine("**原曲认知测验**")
-                        appendLine()
-                        appendLine("恭喜你猜中了哦~答案是${music.answer()}")
-                    }), againKeyboard(difficulty, range)))
+                    reply(Markdown.create {
+                        line(bold("原曲认知测验"))
+                        line()
+                        line("恭喜你猜中了哦~答案是${music.answer()}")
+                        keyboard(againKeyboard(difficulty, range))
+                    })
                     bot.pluginLoader.subscribes.stop(subscribeId)
                     started.remove(id)
                     return@always
@@ -206,11 +246,12 @@ class Touhou(
             delay(TIMESUP)
             if (finished)
                 return@guess
-            reply(Markdown(MarkdownData(buildString {
-                appendLine("**原曲认知测验**")
-                appendLine()
-                appendLine("很遗憾，没有人猜中哦，答案是${music.answer()}")
-            }), againKeyboard(difficulty, range)))
+            reply(Markdown.create {
+                line(bold("原曲认知测验"))
+                line()
+                line("很遗憾，没有人猜中哦，答案是${music.answer()}")
+                keyboard(againKeyboard(difficulty, range))
+            })
             bot.pluginLoader.subscribes.stop(subscribeId)
             started.remove(id)
         }
@@ -220,8 +261,16 @@ class Touhou(
         range: Range
     ) = Keyboard.create {
         row {
-            at("再来一局", "/原曲认知测验 ${difficulty.name}" +
-                    if (range != defaultRange) " ${range.value}" else "", id = "")
+            val base = "/原曲认知测验 ${difficulty.name}"
+            val command = if (range != defaultRange)
+                "$base ${range.value}"
+            else
+                base
+            at(
+                label = "再来一局",
+                data = command,
+                id = ""
+            )
         }
     }
 
@@ -230,15 +279,19 @@ class Touhou(
         b: String
     ): Boolean {
         return Similarity.cilinSimilarity(a, b) > SIMILAR_THRESHOLD ||
-                Similarity.pinyinSimilarity(a, b) > SIMILAR_THRESHOLD ||
-                Similarity.charBasedSimilarity(a, b) > SIMILAR_THRESHOLD ||
-                Similarity.editDistanceSimilarity(a, b) > SIMILAR_THRESHOLD ||
-                Similarity.standardEditDistanceSimilarity(a, b) > SIMILAR_THRESHOLD ||
-                Similarity.gregorEditDistanceSimilarity(a, b) > SIMILAR_THRESHOLD
+            Similarity.pinyinSimilarity(a, b) > SIMILAR_THRESHOLD ||
+            Similarity.charBasedSimilarity(a, b) > SIMILAR_THRESHOLD ||
+            Similarity.editDistanceSimilarity(a, b) > SIMILAR_THRESHOLD ||
+            Similarity.standardEditDistanceSimilarity(a, b) > SIMILAR_THRESHOLD ||
+            Similarity.gregorEditDistanceSimilarity(a, b) > SIMILAR_THRESHOLD
     }
     fun List<String>.isAnswer(reply: String): Boolean {
         val answer = reply.lowercase().toSimple().trim()
-        if (answer in this || any { ((it.length < 3 || answer.length >= 3) && answer in it) || it in answer })
+        val matched = any {
+            ((it.length < 3 || answer.length >= 3) && answer in it) ||
+                it in answer
+        }
+        if (answer in this || matched)
             return true
         return any { isSimilar(it, answer) }
     }
@@ -248,7 +301,8 @@ class Touhou(
         return "$name ($jpn)"
     }
     private suspend fun MessageEvent.playable(): Boolean {
-        val id = if (this is GroupMessageEvent) group.id else sender.id
+        val id =
+            if (this is GroupMessageEvent) group.id else sender.id
         if (started.containsKey(id)) {
             reply("当前还有猜题游戏正在进行中，回复机器人“不玩了”结束游戏")
             return false
@@ -259,22 +313,44 @@ class Touhou(
     val guessErrorHandler: ErrorHandler = { e ->
         when (e) {
             is NeedHelpException ->
-                reply(Markdown(MarkdownData(buildString {
-                    appendLine("**原曲认知测验**")
-                    appendLine()
-                    appendLine("请选择要进行的难度和模式：")
-                }), Keyboard.create {
-                row {
-                    Difficulty.entries.forEach { difficulty ->
-                        at(difficulty.name, "/原曲认知测验 ${difficulty.name.lowercase()}", enter = true, id = "")
+                reply(Markdown.create {
+                    line(bold("原曲认知测验"))
+                    line()
+                    line("请选择要进行的难度和模式：")
+                    keyboard {
+                        row {
+                            Difficulty.entries.forEach { difficulty ->
+                                at(
+                                    label = difficulty.name,
+                                    data = "/原曲认知测验 " +
+                                        difficulty.name.lowercase(),
+                                    enter = true,
+                                    id = ""
+                                )
+                            }
+                        }
+                        row {
+                            at(
+                                label = "猜新作",
+                                data = "/原曲认知测验 normal 新作",
+                                enter = true,
+                                id = ""
+                            )
+                            at(
+                                label = "猜旧作",
+                                data = "/原曲认知测验 normal 旧作",
+                                enter = true,
+                                id = ""
+                            )
+                            at(
+                                label = "猜全部",
+                                data = "/原曲认知测验 normal 全部",
+                                enter = true,
+                                id = ""
+                            )
+                        }
                     }
-                }
-                row {
-                    at("猜新作", "/原曲认知测验 normal 新作", enter = true, id = "")
-                    at("猜旧作", "/原曲认知测验 normal 旧作", enter = true, id = "")
-                    at("猜全部", "/原曲认知测验 normal 全部", enter = true, id = "")
-                }
-            }))
+                })
             is IllegalArgsException -> reply(e.message ?: "")
             else -> e.printStackTrace()
         }
@@ -295,7 +371,7 @@ class Touhou(
             Difficulty.Normal -> 5.0
             Difficulty.Hard -> 2.0
             Difficulty.Lunatic -> 1.0
-//            Difficulty.Extra -> 2.0
+            // TODO: 支持 Extra 难度
         }
         fun String.toSimple() = ZhConverterUtil.toSimple(this) ?: this
     }

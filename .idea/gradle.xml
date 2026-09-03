@@ -21,12 +21,11 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/admin" />
+            <option value="$PROJECT_DIR$/audio" />
             <option value="$PROJECT_DIR$/buildSrc" />
             <option value="$PROJECT_DIR$/chunithm" />
-            <option value="$PROJECT_DIR$/guess" />
             <option value="$PROJECT_DIR$/maimai" />
             <option value="$PROJECT_DIR$/meme" />
-            <option value="$PROJECT_DIR$/otto" />
             <option value="$PROJECT_DIR$/random" />
             <option value="$PROJECT_DIR$/shinobu" />
             <option value="$PROJECT_DIR$/text" />

@@ -1,4 +1,4 @@
-package xyz.xszq.bot.otto.voice
+package xyz.xszq.bot.audio.voice
 
 import com.hankcs.hanlp.HanLP
 import korlibs.io.file.VfsFile
@@ -10,7 +10,7 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.core.config.Configurator
 import xyz.xszq.bot.AudioHandler
 import xyz.xszq.bot.newTempFile
-import java.util.*
+import java.util.Locale
 
 class TTSParser(
     val config: VoicePresets,
@@ -81,14 +81,14 @@ class TTSParser(
         val t = Thread.currentThread()
         val prev = t.contextClassLoader
         t.contextClassLoader = pluginCl
-        mary = try {
+        mary = runCatching {
             LocalMaryInterface().apply {
                 locale = Locale.US
                 outputType = "ALLOPHONES"
             }
-        } finally {
+        }.also {
             t.contextClassLoader = prev
-        }
+        }.getOrThrow()
         org.apache.log4j.LogManager.getLogger("marytts").apply {
             removeAllAppenders()
             level = org.apache.log4j.Level.OFF
@@ -159,7 +159,10 @@ class TTSParser(
                     result.add(token)
                 }
                 is Token.Raw.Chinese -> {
-                    val pinyin = if (token.text.first() == '[') token.text else token.text.toPinyin()
+                    val pinyin = if (token.text.first() == '[')
+                        token.text
+                    else
+                        token.text.toPinyin()
                     val found = pinyinPresets.entries.firstOrNull {
                         pinyin.indexOf(it.key) >= 0
                     } ?: run {
@@ -185,20 +188,22 @@ class TTSParser(
                         result.add(Token.Raw.Chinese(right))
                 }
                 is Token.Raw.English -> {
-                    val found = config.englishPresets.entries.firstNotNullOfOrNull { (filename, aliases) ->
-                        aliases.firstOrNull {
-                            token.text.indexOf(it) >= 0
-                        } ?.let { alias ->
-                            Pair(alias, filename)
-                        }
-                    } ?: run {
-                        english.convertWord(token.text.lowercase()).forEach { char ->
-                            tokens[char] ?.let { file ->
-                                result.add(Token.Final.Char(file))
+                    val found = config.englishPresets.entries
+                        .firstNotNullOfOrNull { (filename, aliases) ->
+                            aliases.firstOrNull {
+                                token.text.indexOf(it) >= 0
+                            } ?.let { alias ->
+                                Pair(alias, filename)
                             }
+                        } ?: run {
+                            english.convertWord(token.text.lowercase())
+                                .forEach { char ->
+                                    tokens[char] ?.let { file ->
+                                        result.add(Token.Final.Char(file))
+                                    }
+                                }
+                            return@forEach
                         }
-                        return@forEach
-                    }
 
                     val (matched, filename) = found
                     val index = token.text.indexOf(matched)
@@ -211,7 +216,9 @@ class TTSParser(
                         result.add(Token.Final.Preset(file))
                     }
 
-                    val right = token.text.substring(index + matched.length).trim()
+                    val right = token.text
+                        .substring(index + matched.length)
+                        .trim()
                     if (right.isNotEmpty())
                         result.add(Token.Raw.English(right))
                 }
@@ -222,15 +229,18 @@ class TTSParser(
         }
         return result
     }
-    // TODO: Improve this temporary solution
+    // TODO: 优化这段临时实现
     fun prepare(text: String): List<Token> {
         var texts: List<Token> = listOf(Token.Raw.Chinese(
             text.replace("\r", "").replace("\n", "").trim()
         ))
         while (true) {
             texts.filterIsInstance<Token.Raw.Chinese>()
-                .firstOrNull { t -> originalPresets.any { it.key in t.text } } ?.let { t ->
-                    val (name, file) = originalPresets.entries.first { it.key in t.text }
+                .firstOrNull { t -> originalPresets.any { it.key in t.text } }
+                ?.let { t ->
+                    val (name, file) = originalPresets.entries.first {
+                        it.key in t.text
+                    }
 
                     val index = texts.indexOf(t)
 
@@ -252,7 +262,9 @@ class TTSParser(
                     ) + after + texts.subList(index + 1, texts.size)
                 } ?: break
         }
-        return texts.flatMap { if (it is Token.Raw) tokenize(it.text) else listOf(it) }
+        return texts.flatMap {
+            if (it is Token.Raw) tokenize(it.text) else listOf(it)
+        }
     }
     fun parse(text: String): List<Token.Final> {
         var result = prepare(text)
@@ -282,8 +294,10 @@ class TTSParser(
 
 
     /**
-     * Generate TTS file for the text.
-     * @param text The text to read.
+     * 对文本进行活字印刷
+     *
+     * @param text 要活字印刷的文本
+     * @return 生成的 PCM 文件；音频为空时返回 null
      */
     suspend fun generate(text: String): VfsFile? {
         val files = parse(text)
