@@ -129,16 +129,8 @@ class LXNS(
         is UserQueryParams.Username -> null
         else -> {
             println("[落雪调试] getPlayerRating user=$user")
-            val friendCode = resolveFriendCode(user)
-                ?: if (user is UserQueryParams.Self) throw UserBindRequiredException() else return null
+            val (player, friendCode) = resolvePlayer(user) ?: return null
             println("[落雪调试] getPlayerRating friendCode=$friendCode")
-            val player = runCatching {
-                getPlayerInfo(friendCode)
-            }.getOrElse { e ->
-                if (user is UserQueryParams.Self && e is UserNotFoundException)
-                    throw UserBindRequiredException()
-                throw e
-            } ?: return null
             var retry = 0
             var response = client.get("$apiServer/player/$friendCode/bests") {
                 setDeveloper()
@@ -259,16 +251,8 @@ class LXNS(
         is UserQueryParams.Username -> null
         else -> {
             println("[落雪调试] getPlayerRecent user=$user")
-            val friendCode = resolveFriendCode(user)
-                ?: if (user is UserQueryParams.Self) throw UserBindRequiredException() else return null
+            val (player, friendCode) = resolvePlayer(user) ?: return null
             println("[落雪调试] getPlayerRecent friendCode=$friendCode")
-            val player = runCatching {
-                getPlayerInfo(friendCode)
-            }.getOrElse { e ->
-                if (user is UserQueryParams.Self && e is UserNotFoundException)
-                    throw UserBindRequiredException()
-                throw e
-            } ?: return null
             var retry = 0
             var response = client.get("$apiServer/player/$friendCode/recents") {
                 setDeveloper()
@@ -413,24 +397,59 @@ class LXNS(
     private suspend fun resolveFriendCode(user: UserQueryParams): String? = when (user) {
         is UserQueryParams.Self -> {
             ProberBindTable[user.event.sender.id, "lxns", "chunithm-friend-code"] ?: run {
-                val qq = QQBindTable[user.event.sender.id] ?: return@run null
-                println("[落雪调试] resolveFriendCode 无中二好友码, 用qq=$qq 拉取 sender=${user.event.sender.id}")
-                val response = client.get("$apiServer/player/qq/$qq") {
-                    setDeveloper()
-                }.body<LXNSResponse<LXNSPlayer>>()
-                when (response.code) {
-                    200 -> response.data ?.let { player ->
-                        println("[落雪调试] resolveFriendCode 拉到中二好友码=${player.friendCode} sender=${user.event.sender.id}")
-                        ProberBindTable[user.event.sender.id, "lxns", "chunithm-friend-code"] =
-                            player.friendCode.toString()
-                        player.friendCode.toString()
-                    }
-                    else -> null
-                }
+                println("[落雪调试] resolveFriendCode 无中二好友码 sender=${user.event.sender.id}")
+                fetchFriendCodeByQQ(user.event.sender.id)
             }
         }
         is UserQueryParams.FriendCode -> user.friendCode
         is UserQueryParams.Username -> null
+    }
+
+    private suspend fun fetchFriendCodeByQQ(openid: String): String? {
+        val qq = QQBindTable[openid] ?: return null
+        println("[落雪调试] 用qq=$qq 拉取中二好友码 sender=$openid")
+        val response = client.get("$apiServer/player/qq/$qq") {
+            setDeveloper()
+        }.body<LXNSResponse<LXNSPlayer>>()
+        return when (response.code) {
+            200 -> response.data ?.let { player ->
+                println("[落雪调试] 拉到中二好友码=${player.friendCode} sender=$openid")
+                ProberBindTable[openid, "lxns", "chunithm-friend-code"] =
+                    player.friendCode.toString()
+                player.friendCode.toString()
+            }
+            else -> null
+        }
+    }
+
+    private suspend fun resolvePlayer(
+        user: UserQueryParams
+    ): Pair<LXNSPlayer, String>? {
+        val friendCode = resolveFriendCode(user)
+            ?: if (user is UserQueryParams.Self) throw UserBindRequiredException() else return null
+        val result = runCatching {
+            getPlayerInfo(friendCode)
+        }
+        val e = result.exceptionOrNull()
+        if (e == null) {
+            val player = result.getOrThrow() ?: return null
+            return Pair(player, friendCode)
+        }
+        if (user !is UserQueryParams.Self || e !is UserNotFoundException)
+            throw e
+        val openid = user.event.sender.id
+        if (QQBindTable[openid] == null) {
+            println("[落雪调试] 好友码失效且无QQ可反查 sender=$openid")
+            throw UserBindRequiredException()
+        }
+        println("[落雪调试] 好友码失效, 用QQ反查 sender=$openid")
+        val refreshed = fetchFriendCodeByQQ(openid)
+        if (refreshed == null) {
+            println("[落雪调试] QQ反查也失败 sender=$openid")
+            throw UserBindRequiredException()
+        }
+        val player = getPlayerInfo(refreshed) ?: return null
+        return Pair(player, refreshed)
     }
 
     private suspend fun getPlayerInfo(friendCode: String): LXNSPlayer? {
