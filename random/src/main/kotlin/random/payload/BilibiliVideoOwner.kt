@@ -1,4 +1,4 @@
-package xyz.xszq.bot.text.payload
+package xyz.xszq.bot.random.payload
 
 import kotlinx.serialization.Serializable
 

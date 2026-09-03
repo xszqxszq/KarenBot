@@ -3,62 +3,29 @@ package xyz.xszq.bot.text
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
-import io.ktor.client.*
-import io.ktor.client.call.*
 import io.ktor.client.plugins.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.request.*
-import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
-import korlibs.io.util.UUID
-import kotlinx.coroutines.delay
-import kotlinx.serialization.json.Json
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.exists
-import org.jetbrains.exposed.sql.transactions.transaction
-import org.scilab.forge.jlatexmath.TeXConstants
-import org.scilab.forge.jlatexmath.TeXFormula
 import xyz.xszq.bot.Plugin
 import xyz.xszq.bot.event.GroupMessageEvent
-import xyz.xszq.bot.message.At
 import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.message.Markdown
-import xyz.xszq.bot.message.PlainText
 import xyz.xszq.bot.newLine
-import xyz.xszq.bot.payload.markdown.Keyboard
-import xyz.xszq.bot.payload.markdown.MarkdownData
-import xyz.xszq.bot.payload.markdown.RenderData
 import xyz.xszq.bot.reply
 import xyz.xszq.bot.text.config.TextConfig
-import xyz.xszq.bot.text.payload.BilibiliResponse
-import xyz.xszq.bot.text.payload.BilibiliVideoInfo
-import xyz.xszq.bot.text.payload.RandomOtomads
 import xyz.xszq.bot.useTempFile
 import java.awt.Color
-import java.security.MessageDigest
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
-import kotlin.time.Duration.Companion.milliseconds
+import org.scilab.forge.jlatexmath.TeXConstants
+import org.scilab.forge.jlatexmath.TeXFormula
 
+/**
+ * 文本插件
+ *
+ * 词条回复、发病文案、LaTeX 渲染与调试等文本功能
+ */
 @Suppress("unused")
 class Text: Plugin() {
     lateinit var textConfig: TextConfig
     lateinit var stereotypes: StereotypesPresets
-    val randomImage = RandomImage()
-
-    internal var client = createHttpClient()
-
-    private val lastDetect = ConcurrentHashMap<String, Long>()
-
-    companion object {
-        fun createHttpClient() = HttpClient {
-            install(ContentNegotiation) {
-                json(Json {
-                    ignoreUnknownKeys = true
-                })
-            }
-        }
-    }
 
     @OptIn(ExperimentalHoplite::class)
     override suspend fun load() {
@@ -75,30 +42,24 @@ class Text: Plugin() {
             .build()
             .loadConfigOrThrow<TextConfig>()
 
-        randomImage.init()
-
-        transaction(database) {
-            listOf(BlondeDetectionCache).forEach { table ->
-                if (!table.exists())
-                    SchemaUtils.create(table)
-            }
-        }
-
         setRoute()
         logger.info { "[文本] 插件加载完成。" }
     }
     suspend fun setRoute() = route {
+        // 获取帮助
         equalsTo(listOf("帮助", "help")) {
-            reply(Markdown(MarkdownData(buildString {
-                appendLine("**可怜BOT**")
-                appendLine()
-                appendLine("请点击下方查看帮助：")
-            }), Keyboard.create {
-                row {
-                    link("查看帮助", "https://otmdb.cn/bot/features", id = "1")
+            reply(Markdown.create {
+                line(bold("可怜BOT"))
+                line()
+                line("请点击下方查看帮助：")
+                keyboard {
+                    row {
+                        link("查看帮助", "https://otmdb.cn/bot/features", id = "1")
+                    }
                 }
-            }))
+            })
         }
+        // 内置文本回复预设
         equalsTo("在") {
             reply("bot在")
         }
@@ -106,6 +67,7 @@ class Text: Plugin() {
             if (this !is GroupMessageEvent || mentions.any { it.isSelf })
                 reply("问我干嘛")
         }
+        // 配置文本回复预设
         always {
             textConfig.presets[message.text.trim()] ?.let { text ->
                 reply(text)
@@ -116,99 +78,24 @@ class Text: Plugin() {
                 reply(it.reply)
             }
         }
+        // 发病小作文
         startsWith("发病") { target ->
             if (target.isBlank()) {
-                reply("使用方法：/发病 名字\n例：/发病 小冰")
+                reply(buildString {
+                    appendLine("使用方法：/发病 名字")
+                    appendLine("例：/发病 小冰")
+                }.trim())
                 return@startsWith
             }
-            val result = stereotypes.texts.random(Random(System.currentTimeMillis())).replace("{target_name}", target)
+            val result = stereotypes.texts.random(
+                Random(System.currentTimeMillis())
+            ).replace("{target_name}", target)
             if (audit(result))
                 reply(result)
             else
                 reply("检测到疑似违规内容，请检查输入")
         }
-        always {
-            val isBlank = message.text.isBlank() && message.filter { it !is PlainText && it !is At }.isEmpty()
-            val hasAt = this !is GroupMessageEvent || (mentions.isNotEmpty() && mentions.all { it.isSelf })
-            if (isBlank && hasAt) {
-                reply(Image(randomImage.random()))
-                return@always
-            }
-            if (message.any { it is Image }) {
-                val images = message.filterIsInstance<Image>()
-                val detected = images.any { img -> llmDetect(img) }
-                if (detected) {
-                    val now = System.currentTimeMillis()
-                    val allowed = lastDetect.compute(sender.id) { _, last ->
-                        if (last == null || now - last >= 5000) now else last
-                    } == now
-                    if (allowed)
-                        reply(Image(randomImage.random()))
-                }
-            }
-        }
-        startsWith(listOf("来点金发", "来点金毛", "来点黄毛", "随机金发", "随机黄毛")) {
-            reply(Image(randomImage.random()))
-        }
-        equalsTo("随机uuid") {
-            reply(UUID.randomUUID().toString())
-        }
-        startsWith("随机数字") { raw ->
-            val args = raw.split(" ").filter { it.isNotBlank() }
-            reply(
-                when (args.size) {
-                    0 -> Random.nextInt().toString()
-                    1 -> Random.nextLong(args.first().toLong()).toString()
-                    2 -> Random.nextLong(args.first().toLong(), args.last().toLong()).toString()
-                    else -> buildString {
-                        appendLine("随机数字将生成 {x|下界<=x<上界} 内的数字。使用方法：")
-                        appendLine("\t随机数字")
-                        appendLine("\t随机数字 上界")
-                        appendLine("\t随机数字 下界 上界")
-                    }.trim().newLine()
-                }
-            )
-        }
-        startsWith(listOf("随机音mad", "随机音骂", "otamad")) {
-            val list = client.get("https://otmdb.cn/otomad/otamad_random.json").body<RandomOtomads>()
-
-            var video: BilibiliVideoInfo? = null
-            repeat(10) {
-                val url = list.randomSites.random()
-                val bvid = url.substringAfter("video/")
-                val info = client.get("https://api.bilibili.com/x/web-interface/view?bvid=$bvid") {
-                    headers[HttpHeaders.UserAgent] =
-                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36"
-                }.body<BilibiliResponse<BilibiliVideoInfo>>()
-                info.data?.let { data ->
-                    video = data
-                    return@repeat
-                }
-                delay(500L.milliseconds)
-            }
-            video ?: run {
-                reply("咦，获取失败了(ó﹏ò｡)")
-                return@startsWith
-            }
-            reply(Markdown(MarkdownData(buildString {
-                appendLine("**${video.title}**")
-                appendLine()
-                appendLine("![img #672px #378px](${video.pic + "@672w_378h_1c.webp"})")
-                appendLine()
-                appendLine(buildString {
-                    appendLine("UP主：${video.owner.name}")
-                    appendLine("数据来自otaMAD⋅top")
-                }.trim().replace("\n", "\r"))
-            }), Keyboard.create {
-                row {
-                    link("查看音MAD", "https://bilibili.com/video/${video.bvid}", style = RenderData.FILLED_BLUE, id = "1")
-                }
-                row {
-                    at("再抽一个", "随机音mad", enter = true, id = "2")
-                    link("otaMAD⋅top", "https://otmdb.cn/jump/otamad_top", id = "3")
-                }
-            }))
-        }
+        // 渲染 LaTeX 图片
         startsWith("latex") { latex ->
             useTempFile { result ->
                 TeXFormula(latex).createPNG(
@@ -218,20 +105,13 @@ class Text: Plugin() {
                 reply(Image(result))
             }
         }
+        // 获取 ID
         startsWith("debug") {
             reply(buildString {
                 appendLine("用户ID: ${sender.id}")
                 if (this@startsWith is GroupMessageEvent)
                     appendLine("群组ID: ${group.id}")
             }.trim().newLine())
-        }
-    }
-    @Suppress("unused")
-    suspend fun <T> timer(comment: String = "", block: suspend () -> T): T {
-        val start = System.currentTimeMillis()
-        return block().also {
-            print("$comment: ")
-            println(System.currentTimeMillis() - start)
         }
     }
     suspend fun audit(text: String): Boolean {
@@ -247,30 +127,5 @@ class Text: Plugin() {
         } catch (e: Exception) {
             true
         }
-    }
-
-    private suspend fun llmDetect(img: Image): Boolean {
-        val remote = img.remote ?: return false
-        val longEdge = maxOf(remote.width, remote.height)
-        val shortEdge = minOf(remote.width, remote.height)
-        if (longEdge > 1600 || shortEdge > 900)
-            return false
-        val bytes = img.file.readAll()
-        val md5 = MessageDigest.getInstance("MD5").digest(bytes)
-            .joinToString("") { "%02x".format(it) }
-        BlondeDetectionCache.get(md5)?.let { return it }
-        val client = pluginLoader.llmClient ?: return false
-        val result = runCatching {
-            val content = client.chat(scene = "blonde") {
-                thinking(false)
-                system("你是一名动漫角色金发识别助手。请判断图中的角色是否为金发（blonde hair，金黄色/淡金色/金色头发），同时角色应为女性或性别不明显的角色。只识别彩色图片，禁止识别黑白/灰度图片（黑白图片请回答false）。只回答true或false，不要输出任何其他内容。")
-                user {
-                    image(img.url)
-                }
-            }
-            content.toBooleanStrictOrNull() ?: false
-        }.getOrElse { false }
-        BlondeDetectionCache.put(md5, result, System.currentTimeMillis())
-        return result
     }
 }
