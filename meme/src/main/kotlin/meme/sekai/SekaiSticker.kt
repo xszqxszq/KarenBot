@@ -6,6 +6,9 @@ import org.jetbrains.skia.paragraph.*
 import java.io.File
 import kotlin.math.*
 
+/**
+ * PJSK 角色表情生成
+ */
 class SekaiSticker {
     val imgDir = File(ASSETS_DIR)
     lateinit var fontCollection: FontCollection
@@ -14,6 +17,9 @@ class SekaiSticker {
         File(imgDir, "characters.json").readText()
     )
 
+    /**
+     * 加载字体
+     */
     fun init() {
         val provider = TypefaceFontProvider()
         fontCollection = FontCollection().apply {
@@ -23,9 +29,16 @@ class SekaiSticker {
         registerSystemFonts(provider)
     }
 
+    /**
+     * 生成对应角色和文本的表情
+     *
+     * @param character 角色数据
+     * @param text 要绘制的文本
+     * @return 生成结果
+     */
     fun draw(
         character: SekaiCharacter,
-        text: String,
+        text: String
     ): Image {
         val template = Image.makeFromEncoded(File(imgDir, character.img).readBytes())
         val rendered = drawText(character, text)
@@ -45,7 +58,10 @@ class SekaiSticker {
             val angle = character.defaultText.r / 10f * 57.29578f
 
             sticker.canvas.save()
-            sticker.canvas.translate(character.defaultText.x.toFloat(), character.defaultText.y.toFloat())
+            sticker.canvas.translate(
+                character.defaultText.x.toFloat(),
+                character.defaultText.y.toFloat()
+            )
             sticker.canvas.rotate(angle)
             val (textX, textY) = calcTextPosition(
                 rendered = rendered,
@@ -76,8 +92,10 @@ class SekaiSticker {
             val stroke = drawLine(content, size, true, parseColor(character.color))
             val fill = drawLine(content, size, false, parseColor(character.color))
             if (fill.lineMetrics.size <= 4 && fill.height <= 140f) {
-                val firstLineHeight = fill.lineMetrics.firstOrNull()?.height?.toFloat() ?: fill.height
-                val totalHeight = fill.lineMetrics.sumOf { it.height }.toFloat().takeIf { it > 0f } ?: fill.height
+                val firstLineHeight = fill.lineMetrics.firstOrNull()
+                    ?.height?.toFloat() ?: fill.height
+                val totalHeight = fill.lineMetrics.sumOf { it.height }.toFloat()
+                    .takeIf { it > 0f } ?: fill.height
                 return RenderedText(stroke, fill, firstLineHeight, totalHeight)
             }
             stroke.close()
@@ -87,8 +105,10 @@ class SekaiSticker {
 
         val stroke = drawLine(content, size, true, parseColor(character.color))
         val fill = drawLine(content, size, false, parseColor(character.color))
-        val firstLineHeight = fill.lineMetrics.firstOrNull()?.height?.toFloat() ?: fill.height
-        val totalHeight = fill.lineMetrics.sumOf { it.height }.toFloat().takeIf { it > 0f } ?: fill.height
+        val firstLineHeight = fill.lineMetrics.firstOrNull()
+            ?.height?.toFloat() ?: fill.height
+        val totalHeight = fill.lineMetrics.sumOf { it.height }.toFloat()
+            .takeIf { it > 0f } ?: fill.height
         return RenderedText(stroke, fill, firstLineHeight, totalHeight)
     }
 
@@ -255,10 +275,18 @@ class SekaiSticker {
             "Alibaba-PuHuiTi-B"
         )
         private val fontAliases = mapOf(
-            "FOT-Yuruka Std UB" to listOf("FOT-Yuruka Std UB", "FOT-Yuruka Std", "YurukaStd", "Yuruka Std"),
-            "SSFangTangTi" to listOf("SSFangTangTi", "ShangShouFangTangTi", "Shang Shou Fang Tang Ti"),
-            "Alibaba-PuHuiTi-H" to listOf("Alibaba-PuHuiTi-H", "Alibaba PuHuiTi", "Alibaba PuHuiTi Heavy"),
-            "Alibaba-PuHuiTi-B" to listOf("Alibaba-PuHuiTi-B", "Alibaba PuHuiTi", "Alibaba PuHuiTi Bold")
+            "FOT-Yuruka Std UB" to listOf(
+                "FOT-Yuruka Std UB", "FOT-Yuruka Std", "YurukaStd", "Yuruka Std"
+            ),
+            "SSFangTangTi" to listOf(
+                "SSFangTangTi", "ShangShouFangTangTi", "Shang Shou Fang Tang Ti"
+            ),
+            "Alibaba-PuHuiTi-H" to listOf(
+                "Alibaba-PuHuiTi-H", "Alibaba PuHuiTi", "Alibaba PuHuiTi Heavy"
+            ),
+            "Alibaba-PuHuiTi-B" to listOf(
+                "Alibaba-PuHuiTi-B", "Alibaba PuHuiTi", "Alibaba PuHuiTi Bold"
+            )
         )
         private val fontStyles = mapOf(
             "FOT-Yuruka Std UB" to listOf("UB", "Ultra", "Heavy", "Bold", "Black"),
@@ -267,24 +295,35 @@ class SekaiSticker {
             "Alibaba-PuHuiTi-B" to listOf("B", "Bold", "Medium")
         )
 
+        /**
+         * 角色的别名列表
+         */
         val aliases = buildMap {
             put("airi", listOf("airi", "桃井爱莉", "桃井", "爱莉", "桃井愛莉", "愛莉", "momoi"))
             put("akito", listOf("akito", "东云彰人", "東雲彰人", "彰人", "彰人", "akt"))
             put("an", listOf("an", "白石杏", "白石", "杏"))
-            put("emu", listOf("emu", "凤绘梦", "鳳えむ", "鳳", "えむ", "凤", "绘梦", "凤笑梦", "笑梦"))
+            put("emu", listOf(
+                "emu", "凤绘梦", "鳳えむ", "鳳", "えむ", "凤", "绘梦", "凤笑梦", "笑梦"
+            ))
             put("ena", listOf("ena", "东云绘名", "東雲絵名", "絵名", "绘名"))
             put("Haruka", listOf("haruka", "桐谷遥", "桐谷", "遥", "hrk"))
             put("Honami", listOf("honami", "望月穂波", "望月", "穂波", "穗波", "望月穗波", "hnm"))
             put("Ichika", listOf("ichika", "星乃一歌", "星乃", "一歌", "ick"))
             put("KAITO", listOf("kaito", "KAITO", "かいと", "カイト"))
             put("Kanade", listOf("kanade", "宵崎奏", "宵崎", "奏", "knd"))
-            put("Kohane", listOf("kohane", "小豆沢心羽", "小豆沢こはね", "小豆沢", "こはね", "小豆泽", "心羽", "khn"))
+            put("Kohane", listOf(
+                "kohane", "小豆沢心羽", "小豆沢こはね", "小豆沢", "こはね", "小豆泽", "心羽", "khn"
+            ))
             put("Len", listOf("len", "镜音连", "鏡音レン", "レン", "连"))
             put("Luka", listOf("luka", "巡音流歌", "巡音ルカ", "巡音", "ルカ", "流歌"))
-            put("Mafuyu", listOf("mafuyu", "朝比奈真冬", "朝比奈まふゆ", "朝比奈", "まふゆ", "真冬", "mfy"))
+            put("Mafuyu", listOf(
+                "mafuyu", "朝比奈真冬", "朝比奈まふゆ", "朝比奈", "まふゆ", "真冬", "mfy"
+            ))
             put("Meiko", listOf("meiko", "MEIKO", "めいこ", "メイコ", "起音"))
             put("Miku", listOf("miku", "初音未来", "初音", "初音ミク", "ミク"))
-            put("Minori", listOf("minori", "花里实乃里", "花里みのり", "花里", "みのり", "实乃里", "mnr"))
+            put("Minori", listOf(
+                "minori", "花里实乃里", "花里みのり", "花里", "みのり", "实乃里", "mnr"
+            ))
             put("Mizuki", listOf("mizuki", "晓山瑞希", "暁山瑞希", "暁山", "瑞希", "晓山", "mzk"))
             put("Nene", listOf("nene", "草薙宁宁", "草薙寧々", "草薙", "寧々", "宁宁"))
             put("Rin", listOf("rin", "镜音铃", "鏡音リン", "リン", "铃"))

@@ -3,6 +3,9 @@ package xyz.xszq.bot.meme
 import korlibs.io.file.VfsFile
 import org.jetbrains.skia.*
 
+/**
+ * RGBA 像素位图数据，内容比较基于像素而非引用
+ */
 data class SkikoImageData(
     val width: Int,
     val height: Int,
@@ -29,25 +32,48 @@ data class SkikoImageData(
     }
 }
 
+/**
+ * 从编码图片文件解码为像素位图数据
+ *
+ * @return 解码出的 RGBA 位图
+ */
 suspend fun VfsFile.readSkikoImage(): SkikoImageData {
     return Image.makeFromEncoded(readBytes()).use { image ->
         Bitmap.makeFromImage(image).use { bitmap ->
-            val info = ImageInfo(image.width, image.height, ColorType.RGBA_8888, ColorAlphaType.UNPREMUL)
+            val info = ImageInfo(
+                image.width,
+                image.height,
+                ColorType.RGBA_8888,
+                ColorAlphaType.UNPREMUL
+            )
             SkikoImageData(image.width, image.height, bitmap.readPixels(info)!!)
         }
     }
 }
 
+/**
+ * 包装回可绘制的 Skia 图片
+ */
 fun SkikoImageData.toSkiaImage(): Image = Image.makeRaster(
     imageInfo = ImageInfo(width, height, ColorType.RGBA_8888, ColorAlphaType.UNPREMUL),
     bytes = pixels,
     rowBytes = width * 4
 )
 
+/**
+ * 编码为 PNG 字节
+ */
 fun Image.encodePNG(): ByteArray = encodeToData(EncodedImageFormat.PNG).use { it!!.bytes }
 
 private fun norm(s: String) = s.lowercase().replace(" ", "").replace("-", "").replace("_", "")
 
+/**
+ * 按字体名与字重匹配系统字体，名称比较忽略大小写与空格、连字符、下划线
+ *
+ * @param names 按序尝试的候选字体名
+ * @param weight 目标字重
+ * @return 匹配到的字体，未找到时返回 null
+ */
 fun matchFamily(vararg names: String, weight: Int = 400): Typeface? {
     names.forEach { name ->
         FontMgr.default.matchFamilyStyle(

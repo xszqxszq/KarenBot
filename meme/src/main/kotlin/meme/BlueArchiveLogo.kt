@@ -3,12 +3,18 @@ package xyz.xszq.bot.meme
 import org.jetbrains.skia.*
 import java.io.File
 
+/**
+ * 碧蓝档案风格文本图生成
+ */
 class BlueArchiveLogo {
     val imgDir = File(ASSETS_DIR)
     lateinit var halo: Image
     lateinit var cross: Image
     private var defaultTypeface: Typeface? = null
     private var fallbackTypeface: Typeface? = null
+    /**
+     * 加载素材和字体
+     */
     fun init() {
         halo = Image.makeFromEncoded(File(imgDir, "halo.png").readBytes())
         cross = Image.makeFromEncoded(File(imgDir, "cross.png").readBytes())
@@ -26,6 +32,13 @@ class BlueArchiveLogo {
         }
         return typeface
     }
+    /**
+     * 生成碧蓝档案风格文本图
+     *
+     * @param textL 左侧文字
+     * @param textR 右侧文字
+     * @return 生成结果
+     */
     fun draw(textL: String, textR: String): Image {
         val typefaceL = getTypeface(textL)
         val typefaceR = getTypeface(textR)
@@ -88,13 +101,25 @@ class BlueArchiveLogo {
         val graphX = canvasWidthL - CANVAS_HEIGHT / 2f + GRAPH_OFFSET_X
         val graphY = GRAPH_OFFSET_Y
         val vertexes = floatArrayOf(
-            graphX + (HOLLOW_PATH[0].first / 500f) * CANVAS_HEIGHT, graphY + (HOLLOW_PATH[0].second / 500f) * CANVAS_HEIGHT,
-            graphX + (HOLLOW_PATH[1].first / 500f) * CANVAS_HEIGHT, graphY + (HOLLOW_PATH[1].second / 500f) * CANVAS_HEIGHT,
-            graphX + (HOLLOW_PATH[2].first / 500f) * CANVAS_HEIGHT, graphY + (HOLLOW_PATH[2].second / 500f) * CANVAS_HEIGHT,
-            graphX + (HOLLOW_PATH[3].first / 500f) * CANVAS_HEIGHT, graphY + (HOLLOW_PATH[3].second / 500f) * CANVAS_HEIGHT
+            graphX + (HOLLOW_PATH[0].first / 500f) * CANVAS_HEIGHT,
+            graphY + (HOLLOW_PATH[0].second / 500f) * CANVAS_HEIGHT,
+            graphX + (HOLLOW_PATH[1].first / 500f) * CANVAS_HEIGHT,
+            graphY + (HOLLOW_PATH[1].second / 500f) * CANVAS_HEIGHT,
+            graphX + (HOLLOW_PATH[2].first / 500f) * CANVAS_HEIGHT,
+            graphY + (HOLLOW_PATH[2].second / 500f) * CANVAS_HEIGHT,
+            graphX + (HOLLOW_PATH[3].first / 500f) * CANVAS_HEIGHT,
+            graphY + (HOLLOW_PATH[3].second / 500f) * CANVAS_HEIGHT
         )
         Paint().apply { color = Color.WHITE }.use { hollowFill ->
-            canvas.drawVertices(VertexMode.TRIANGLE_STRIP, vertexes, null, null, null, BlendMode.SRC_OVER, hollowFill)
+            canvas.drawVertices(
+                VertexMode.TRIANGLE_STRIP,
+                vertexes,
+                null,
+                null,
+                null,
+                BlendMode.SRC_OVER,
+                hollowFill
+            )
         }
 
         canvas.drawImageRect(

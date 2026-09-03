@@ -14,6 +14,11 @@ import xyz.xszq.bot.meme.payload.*
 import xyz.xszq.bot.message.Image
 import java.io.File
 
+/**
+ * 与 [meme-generator-rs](https://github.com/MemeCrafters/meme-generator-rs) 通信
+ *
+ * @param server API 地址
+ */
 @Suppress("unused")
 class MemeAPI(
     val server: String
@@ -73,6 +78,15 @@ class MemeAPI(
             setBody(request)
         }
 
+    /**
+     * 上传并请求生成表情
+     *
+     * @param key 模板名
+     * @param images 模板所需的图片
+     * @param texts 模板所需的文字
+     * @param options 模板的附加选项
+     * @return 生成结果
+     */
     suspend fun generate(
         key: String,
         images: List<Image>,
@@ -85,6 +99,9 @@ class MemeAPI(
         return download(id)
     }
 
+    /**
+     * 拉取全部表情包模板
+     */
     suspend fun init() {
         memes = infos().associateBy { it.key }
     }

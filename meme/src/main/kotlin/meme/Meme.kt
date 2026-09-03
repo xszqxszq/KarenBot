@@ -24,6 +24,9 @@ import xyz.xszq.bot.payload.markdown.MarkdownData
 import java.io.File
 import org.jetbrains.skia.Image as SkiaImage
 
+/**
+ * 表情包插件
+ */
 @Suppress("unused")
 class Meme: Plugin() {
     lateinit var config: MemeConfig
@@ -66,6 +69,7 @@ class Meme: Plugin() {
             .toList()
     }
     suspend fun setRoute() = route {
+        // 生成表情包
         startsWith("生成") { raw ->
             runCatching {
                 meme(raw)
@@ -73,6 +77,7 @@ class Meme: Plugin() {
                 memeErrorHandler(e)
             }
         }
+        // PJSK 表情包生成
         startsWith("pjsk") { raw ->
             runCatching {
                 sekai(raw)
@@ -80,6 +85,7 @@ class Meme: Plugin() {
                 sekaiErrorHandler(e)
             }
         }
+        // 蔚蓝档案表情包生成
         startsWith("ba") { raw ->
             runCatching {
                 ba(raw)
@@ -87,6 +93,7 @@ class Meme: Plugin() {
                 baErrorHandler(e)
             }
         }
+        // 5000choyen 表情包生成
         startsWith("5k") { raw ->
             runCatching {
                 fiveThousand(raw)
@@ -94,6 +101,7 @@ class Meme: Plugin() {
                 fiveThousandErrorHandler(e)
             }
         }
+        // 球面化生成
         startsWith("球面化") {
             runCatching {
                 spherize()
@@ -101,6 +109,7 @@ class Meme: Plugin() {
                 spherizeErrorHandler(e)
             }
         }
+        // 左右对称生成
         startsWith("我巨爽") {
             runCatching {
                 imSoHappy()
@@ -108,6 +117,7 @@ class Meme: Plugin() {
                 imSoHappyErrorHandler(e)
             }
         }
+        // Emoji 表情合成
         startsWith("表情合成") { raw ->
             emojiKitchen(raw)
         }
@@ -162,7 +172,10 @@ class Meme: Plugin() {
     }
     val spherizeErrorHandler: ErrorHandler = { e ->
         val hint = when (this) {
-            is GroupMessageEvent -> "手机端如想发送图片，请长按输入框，并点击“全屏输入”，再去相册选择图片即可。"
+            is GroupMessageEvent -> buildString {
+                append("手机端如想发送图片，请长按输入框，")
+                append("并点击“全屏输入”，再去相册选择图片即可。")
+            }
             else -> null
         }
         val help = buildString {
@@ -181,7 +194,10 @@ class Meme: Plugin() {
     }
     val imSoHappyErrorHandler: ErrorHandler = { e ->
         val hint = when (this) {
-            is GroupMessageEvent -> "手机端如想发送图片，请长按输入框，并点击“全屏输入”，再去相册选择图片即可。"
+            is GroupMessageEvent -> buildString {
+                append("手机端如想发送图片，请长按输入框，")
+                append("并点击“全屏输入”，再去相册选择图片即可。")
+            }
             else -> null
         }
         val help = buildString {
@@ -246,9 +262,10 @@ class Meme: Plugin() {
                 rawArgs.parseOptions(option, options)
             }
             texts = rawArgs.take(matched.params.maxTexts).toMutableList()
+            val defaultTexts = matched.params.defaultTexts
             if (texts.size < matched.params.minTexts &&
-                matched.params.defaultTexts.size >= matched.params.minTexts) {
-                texts += matched.params.defaultTexts.subList(texts.size, matched.params.defaultTexts.size)
+                defaultTexts.size >= matched.params.minTexts) {
+                texts += defaultTexts.subList(texts.size, defaultTexts.size)
             }
             images = message.filterIsInstance<Image>().take(matched.params.maxImages)
             matched
@@ -271,10 +288,12 @@ class Meme: Plugin() {
             options = shortcut.options.mapValues { JsonPrimitive(it.value) }.toMutableMap()
             matched
         } ?: throw NotFoundException()
-        if (texts.size < matched.params.minTexts)
-            throw ArgsNotEnoughException("文本参数不足，需要${matched.params.minTexts}段文本作为参数")
-        if (images.size < matched.params.minImages)
-            throw ArgsNotEnoughException("图片数量不足，需要${matched.params.minImages}张图片")
+        val minTexts = matched.params.minTexts
+        if (texts.size < minTexts)
+            throw ArgsNotEnoughException("文本参数不足，需要${minTexts}段文本作为参数")
+        val minImages = matched.params.minImages
+        if (images.size < minImages)
+            throw ArgsNotEnoughException("图片数量不足，需要${minImages}张图片")
         api.generate(
             key = matched.key,
             images = images,
@@ -290,11 +309,12 @@ class Meme: Plugin() {
             throw ArgsNotEnoughException()
         val name = args.first()
         val text = args.getOrNull(1)
-        val (character, alias) = SekaiSticker.aliases.entries.firstNotNullOfOrNull { (character, aliases) ->
-            aliases.firstOrNull { alias ->
-                name.lowercase().startsWith(alias)
-            } ?.let { Pair(character, it) }
-        } ?: throw NotFoundException()
+        val (character, alias) = SekaiSticker.aliases.entries
+            .firstNotNullOfOrNull { (character, aliases) ->
+                aliases.firstOrNull { alias ->
+                    name.lowercase().startsWith(alias)
+                } ?.let { Pair(character, it) }
+            } ?: throw NotFoundException()
         val id = name.substringAfter(alias).filter { it.isDigit() }.toIntOrNull()
         val config = id ?.let {
             sekai.characters.firstOrNull {
@@ -307,7 +327,10 @@ class Meme: Plugin() {
             selectSekaiImageId(character, options)
             return
         }
-        text ?: throw ArgsNotEnoughException("请在点击图片编号后输入文本！\n使用方法：/pjsk 角色名+编号 要生成的文本")
+        text ?: throw ArgsNotEnoughException(buildString {
+            appendLine("请在点击图片编号后输入文本！")
+            appendLine("使用方法：/pjsk 角色名+编号 要生成的文本")
+        }.trim())
         sekai.draw(config, text).use { it.encodePNG().send(this) }
     }
     private suspend fun MessageEvent.ba(
@@ -315,7 +338,10 @@ class Meme: Plugin() {
     ) {
         if (message.text.trim() == "/ba")
             throw NeedHelpException()
-        if (message.text.trim().removePrefix("/").substringAfter("ba").firstOrNull()?.isWhitespace() == false)
+        val afterBa = message.text.trim()
+            .removePrefix("/")
+            .substringAfter("ba")
+        if (afterBa.firstOrNull()?.isWhitespace() == false)
             return
         var args = raw.trim().split(" ", limit = 2)
         when {
@@ -465,13 +491,17 @@ class Meme: Plugin() {
         val rows = SekaiSticker.aliases.map { (characterId, aliases) ->
             val displayName = aliases[1]
             val example = sekai.characters.first { it.character == characterId }
-            val url = "https://static-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/${example.img.replace("png", "webp")}"
+            val url = buildString {
+                append("https://static-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/")
+                append(example.img.replace("png", "webp"))
+            }
             val width = getImageWidth(example.img, 16.0)
             buildString {
                 append("![preview #${width}px #16px]($url)")
                 append(' ')
                 val command = "/pjsk $characterId".encodeURLParameter()
-                append("[$displayName](mqqapi://aio/inlinecmd?command=${command}&enter=true&reply=false)")
+                append("[$displayName]")
+                append("(mqqapi://aio/inlinecmd?command=${command}&enter=true&reply=false)")
             }
         }.chunked(2)
 
@@ -490,13 +520,17 @@ class Meme: Plugin() {
     ) {
         val rows = options.map { option ->
             val id = option.name.split(" ").last().toInt()
-            val url = "https://static-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/${option.img.replace("png", "webp")}"
+            val url = buildString {
+                append("https://static-1254441046.cos.ap-guangzhou.myqcloud.com/pjsk/")
+                append(option.img.replace("png", "webp"))
+            }
             val width = getImageWidth(option.img, 26.0)
             buildString {
                 append("![preview #${width}px #26px]($url)")
                 append(' ')
                 val command = "/pjsk ${character}${id} ".encodeURLParameter()
-                append("[#${id}](mqqapi://aio/inlinecmd?command=${command}&enter=false&reply=false)")
+                append("[#${id}]")
+                append("(mqqapi://aio/inlinecmd?command=${command}&enter=false&reply=false)")
             }
         }.chunked(4)
 

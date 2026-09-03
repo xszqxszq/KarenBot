@@ -35,7 +35,7 @@ class AdminTest {
             testReloadConfig(sandbox)
             testReloadUnknown(sandbox)
             testMsg(sandbox)
-            testMsgmd(sandbox)
+            testMsgMD(sandbox)
             testMsgQueue(sandbox)
             testRecall(sandbox)
             testNonAdmin(sandbox)
@@ -73,28 +73,37 @@ class AdminTest {
     private suspend fun testMsg(sandbox: BotSandbox) {
         sandbox.clear()
         sandbox.user(adminId) says "msg test-group 群消息内容"
-        check(sandbox.replies.any { it is GroupMessageEvent && it.message.content.contains("群消息内容") }) {
-            "Expected group message, got: ${sandbox.replies.map { it.message.content }}"
+        check(sandbox.replies.any {
+            it is GroupMessageEvent && it.message.content.contains("群消息内容")
+        }) {
+            "预期群消息，实际：${sandbox.replies.map { it.message.content }}"
         }
     }
 
-    private suspend fun testMsgmd(sandbox: BotSandbox) {
+    private suspend fun testMsgMD(sandbox: BotSandbox) {
         sandbox.clear()
         sandbox.user(adminId) says "msgmd test-group markdown内容"
-        check(sandbox.replies.any { it is GroupMessageEvent && it.message.content.contains("markdown内容") }) {
-            "Expected group markdown message, got: ${sandbox.replies.map { it.message.content }}"
+        check(sandbox.replies.any {
+            it is GroupMessageEvent && it.message.content.contains("markdown内容")
+        }) {
+            "预期群 markdown 消息，实际：${sandbox.replies.map { it.message.content }}"
         }
     }
 
     private suspend fun testMsgQueue(sandbox: BotSandbox) {
         sandbox.clear()
         coEvery {
-            sandbox.pluginLoader.api.sendGroupMessage(any(), "待补发内容", any(), any(), any(), null, any(), any(), any())
+            sandbox.pluginLoader.api.sendGroupMessage(
+                any(), "待补发内容", any(), any(), any(),
+                null, any(), any(), any()
+            )
         } returns false
         sandbox.user(adminId) says "msg test-group 待补发内容"
         sandbox.group() says "随便一句话"
-        check(sandbox.replies.any { it is GroupMessageEvent && it.message.content.contains("待补发内容") }) {
-            "Expected queued message flushed, got: ${sandbox.replies.map { it.message.content }}"
+        check(sandbox.replies.any {
+            it is GroupMessageEvent && it.message.content.contains("待补发内容")
+        }) {
+            "预期补发消息，实际：${sandbox.replies.map { it.message.content }}"
         }
     }
 
@@ -115,13 +124,21 @@ class AdminTest {
     private suspend fun testAdminCheck(sandbox: BotSandbox) {
         val ok = CompletableDeferred<Boolean>()
         sandbox.pluginLoader.manualTrigger(
-            ChannelEvent(sandbox.pluginLoader.bot, channelName = "admin-check", data = AdminCheckRequest(adminId, ok))
+            ChannelEvent(
+                bot = sandbox.pluginLoader.bot,
+                channelName = "admin-check",
+                data = AdminCheckRequest(adminId, ok)
+            )
         )
         sandbox.advanceIdle()
         assertEquals(true, ok.await())
         val no = CompletableDeferred<Boolean>()
         sandbox.pluginLoader.manualTrigger(
-            ChannelEvent(sandbox.pluginLoader.bot, channelName = "admin-check", data = AdminCheckRequest("random-user", no))
+            ChannelEvent(
+                bot = sandbox.pluginLoader.bot,
+                channelName = "admin-check",
+                data = AdminCheckRequest("random-user", no)
+            )
         )
         sandbox.advanceIdle()
         assertEquals(false, no.await())

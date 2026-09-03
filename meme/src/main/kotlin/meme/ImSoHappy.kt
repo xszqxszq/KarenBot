@@ -6,9 +6,17 @@ import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.reply
 import xyz.xszq.bot.useTempFile
 
+/**
+ * 生成我巨爽左右对称图片
+ */
 class ImSoHappy {
+    /**
+     * 生成两种类型的左右对称
+     *
+     * @return 生成的两张结果图
+     */
     fun flip(
-        input: SkikoImageData,
+        input: SkikoImageData
     ): Pair<SkikoImageData, SkikoImageData> {
         val width = input.width
         val height = input.height
@@ -41,6 +49,9 @@ class ImSoHappy {
         )
     }
 
+    /**
+     * 生成并回复用户
+     */
     suspend fun handle(
         event: MessageEvent,
         input: VfsFile

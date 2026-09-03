@@ -3,13 +3,26 @@ package xyz.xszq.bot.meme
 import org.jetbrains.skia.*
 import kotlin.math.max
 
+/**
+ * 将上下两行文字渲染成 5000 兆円风格图
+ */
 class FiveThousandChoyen {
     private var topTypeface: Typeface? = null
     private var botTypeface: Typeface? = null
+    /**
+     * 加载字体
+     */
     fun init() {
         topTypeface = matchFamily(TOP_FONT, "Source Han Sans", weight = 700)
         botTypeface = matchFamily(BOTTOM_FONT, "Source Han Serif CN", weight = 700)
     }
+    /**
+     * 绘制 5000 兆円风格图
+     *
+     * @param top 上行文字
+     * @param bottom 下行文字，为 null 时只绘制上行
+     * @return 生成结果
+     */
     fun draw(top: String, bottom: String ?= null): Image {
         var rightBorder = 0f
         return Surface.makeRasterN32Premul(1500, 270).use { surface ->
@@ -28,7 +41,8 @@ class FiveThousandChoyen {
             surface.makeImageSnapshot(IRect.makeXYWH(0, 0, rightBorder.toInt(), 270))!!
         }
     }
-    fun Canvas.drawTop(
+
+    private fun Canvas.drawTop(
         top: String,
         x: Float = TOP_X,
         y: Float = TOP_Y
@@ -122,7 +136,7 @@ class FiveThousandChoyen {
         return width
     }
 
-    fun Canvas.drawBottom(
+    private fun Canvas.drawBottom(
         bottom: String,
         x: Float = BOTTOM_X,
         y: Float = BOTTOM_Y

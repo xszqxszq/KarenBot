@@ -15,9 +15,14 @@ import xyz.xszq.bot.payload.MsgType
 import xyz.xszq.bot.payload.markdown.MarkdownData
 import xyz.xszq.bot.reply
 import java.io.File
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
+/**
+ * 管理插件
+ *
+ * 提供管理员命令（日志开关、插件/配置重载、消息发送与撤回）与管理员校验通道
+ */
 @Suppress("unused")
 class Admin: Plugin() {
     lateinit var config: AdminConfig
@@ -40,6 +45,10 @@ class Admin: Plugin() {
         }
     }
     fun MessageEvent.isAdmin() = sender.id in config.admins
+
+    /**
+     * 缓存发送失败的消息，在该群下一条消息到来时补发
+     */
     private fun queuePending(openid: String, chain: MessageChain) {
         pendingMessages.getOrPut(openid) { mutableListOf() }.add(chain)
         val subscribesAt = UUID.randomUUID().toString()
@@ -56,20 +65,24 @@ class Admin: Plugin() {
         }
     }
     suspend fun setRoute() = route {
+        // 其他插件校验管理员
         channel<AdminCheckRequest>("admin-check") { data ->
             data.deferred.complete(data.userId in config.admins)
         }
+        // 调试日志开关
         startsWith("log") {
             if (isAdmin()) {
                 KarenBotApplication.debugLog = !KarenBotApplication.debugLog
                 reply("调试日志已${if (KarenBotApplication.debugLog) "开启" else "关闭"}。")
             }
         }
+        // 重载所有插件
         startsWith("reload") { name ->
             if (isAdmin()) {
                 handleReload(name)
             }
         }
+        // 向指定群发送 Markdown 消息
         startsWith("msgmd") { raw ->
             if (isAdmin()) {
                 val (openid, content) = raw.split(" ", limit = 2)
@@ -80,13 +93,17 @@ class Admin: Plugin() {
                     markdown = MarkdownData(content.trim()),
                     msgSeq = 99
                 )
+                val markdown = content.trim()
                 if (sent) {
                     log(MessageChain(content))
                 } else {
-                    queuePending(openid, MessageChain(Markdown(MarkdownData(content.trim()))))
+                    queuePending(openid, MessageChain(Markdown.create {
+                        this.content = markdown
+                    }))
                 }
             }
         }
+        // 向指定群发送文本消息
         startsWith("msg") { raw ->
             if (isAdmin()) {
                 val (openid, content) = raw.split(" ", limit = 2)
@@ -103,11 +120,16 @@ class Admin: Plugin() {
                 }
             }
         }
+        // 调试 Markdown 消息发送
         startsWith("markdown") { content ->
             if (isAdmin()) {
-                reply(Markdown(MarkdownData(content)))
+                val markdown = content.trim()
+                reply(Markdown.create {
+                    this.content = markdown
+                })
             }
         }
+        // 撤回指定群指定消息 ID 的消息
         startsWith("recall") { raw ->
             if (isAdmin()) {
                 val (groupId, messageId) = raw.split(" ", limit = 2)

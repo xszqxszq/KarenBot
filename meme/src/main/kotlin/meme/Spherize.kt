@@ -7,7 +7,16 @@ import xyz.xszq.bot.reply
 import xyz.xszq.bot.useTempFile
 import kotlin.math.*
 
+/**
+ * 球面化生成
+ */
 class Spherize {
+    /**
+     * 生成球面化的图片
+     *
+     * @param reverse 是否反向球面化
+     * @return 生成结果
+     */
     fun spherize(
         input: SkikoImageData,
         reverse: Boolean = false
@@ -46,6 +55,9 @@ class Spherize {
         return SkikoImageData(width, height, out)
     }
 
+    /**
+     * 生成球面化并回复用户
+     */
     suspend fun handle(
         event: MessageEvent,
         input: VfsFile
