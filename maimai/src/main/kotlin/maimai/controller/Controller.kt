@@ -181,6 +181,9 @@ sealed class Controller(
         fromBind: Boolean = false
     ) {
         val prefer = MaimaiSettingsTable[sender.id, "prober"]
+        val migrateFailed = ProberBindTable[sender.id, "diving-fish", "migrate-failed"] != null
+        val needReBind = !fromBind && migrateFailed &&
+            (prefer.isNullOrBlank() || prefer == "diving-fish")
         println("[绑定提示] $sender.id 查分器偏好=${prefer?.ifBlank { "自动" } ?: "自动"} QQ=${QQBindTable[sender.id] ?: "无"}")
         println("[绑定提示] 水鱼 id=${ProberBindTable[sender.id, "diving-fish", "id"] ?: "无"} username=${ProberBindTable[sender.id, "diving-fish", "username"] ?: "无"}")
         println("[绑定提示] 落雪 refresh=${ProberBindTable[sender.id, "lxns", "refresh"] ?: "无"} 好友码=${ProberBindTable[sender.id, "lxns", "friend-code"] ?: "无"}")
@@ -192,8 +195,9 @@ sealed class Controller(
             appendLine("落雪查分器：$lxnsUrl")
             appendLine("如果您不知道什么是查分器，可以查看：https://bot-docs.otmdb.cn/maimai/prober")
         }.trim()) {
-            brief("绑定查分器", when (fromBind) {
-                true -> "使用前，请您点击下方来绑定您的舞萌/中二查分器账号："
+            brief("绑定查分器", when {
+                needReBind -> "因水鱼查分器要求，需要您点击下方重新绑定账号，为此带来的不便十分抱歉"
+                fromBind -> "使用前，请您点击下方来绑定您的舞萌/中二查分器账号："
                 else -> "请选择您要使用的舞萌/中二查分器："
             })
             keyboard {

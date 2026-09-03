@@ -376,6 +376,12 @@ class LXNS(
         else -> withAccessToken(user) { token ->
             // 玩家信息获取一定要在token获取前
             val (player, scores) = playerAndScores(token) ?: return@withAccessToken null
+            if (user is UserQueryParams.Self &&
+                ProberBindTable[user.event.sender.id, "lxns", "friend-code"] == null)
+                player.friendCode.toString().let { friendCode ->
+                    println("[落雪调试] getPlayerRecords 补好友码=$friendCode sender=${user.event.sender.id}")
+                    ProberBindTable[user.event.sender.id, "lxns", "friend-code"] = friendCode
+                }
             val needed = musics.map { it.id }.toSet()
             RecordsResponse(
                 player = PlayerInfo(
