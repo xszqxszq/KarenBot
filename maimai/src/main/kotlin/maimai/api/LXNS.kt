@@ -62,7 +62,7 @@ class LXNS(
         event: MessageEvent
     ): Boolean {
         println("[落雪调试] initOAuth sender=${event.sender.id}")
-        val response = runCatching {
+        val tokens = runCatching {
             client.post("$apiOauth/token") {
                 contentType(ContentType.Application.Json)
                 setBody(LXNSOAToken(
@@ -72,13 +72,9 @@ class LXNS(
                     code = code,
                     redirectUri = oauthCallback
                 ))
-            }.body<LXNSResponse<LXNSOATokenResponse>>()
+            }.body<LXNSOATokenResponse>()
         }.getOrNull() ?: run {
             println("[落雪调试] initOAuth 换token失败 sender=${event.sender.id}")
-            return false
-        }
-        val tokens = response.data ?: run {
-            println("[落雪调试] initOAuth data为null sender=${event.sender.id}")
             return false
         }
         println("[落雪调试] initOAuth 换token成功 sender=${event.sender.id}")
@@ -142,12 +138,11 @@ class LXNS(
                 println("[落雪调试] accessToken 刷新429 $id")
                 return@withLock null
             }
-            val body = runCatching {
-                response.body<LXNSResponse<LXNSOATokenResponse>>()
+            val parsed = runCatching {
+                response.body<LXNSOATokenResponse>()
             }.getOrNull()
-            val tokens = body ?.data
-            if (tokens == null) {
-                if (body != null && (body.code == 400 || body.code == 401)) {
+            if (parsed == null) {
+                if (response.status == HttpStatusCode.BadRequest || response.status == HttpStatusCode.Unauthorized) {
                     println("[落雪调试] accessToken refresh失效删除 $id")
                     ProberBindTable.delete(id, "lxns")
                     MaimaiSettingsTable[id, "lxns-oa-refresh"] = ""
@@ -156,13 +151,13 @@ class LXNS(
                 return@withLock null
             }
             println("[落雪调试] accessToken 刷新成功 $id")
-            ProberBindTable[id, "lxns", "refresh"] = tokens.refreshToken
-            MaimaiSettingsTable[id, "lxns-oa-refresh"] = tokens.refreshToken
+            ProberBindTable[id, "lxns", "refresh"] = parsed.refreshToken
+            MaimaiSettingsTable[id, "lxns-oa-refresh"] = parsed.refreshToken
             tokenCache[id] = Pair(
-                tokens.accessToken,
-                System.currentTimeMillis() + tokens.expiresIn * 1000L
+                parsed.accessToken,
+                System.currentTimeMillis() + parsed.expiresIn * 1000L
             )
-            tokens.accessToken
+            parsed.accessToken
         }
     }
 
