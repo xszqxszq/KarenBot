@@ -57,57 +57,32 @@ class DivingFish(
     ): RatingResponse? = when (user) {
         is UserQueryParams.Self -> {
             println("[水鱼调试] getPlayerRating Self sender=${user.event.sender.id}")
-            val token = accessToken(user.event.sender.id)
-                ?: throw UserBindRequiredException()
-            val data = runCatching {
-                recordsRequest(token)
-            }.getOrElse { e ->
-                if (e is UserNotFoundException)
-                    throw UserBindRequiredException()
-                throw e
-            }
-            val records = data.records.best.mapNotNull { record ->
-                record.toRecord()
-            }
-            RatingResponse(
-                player = PlayerInfo(
-                    nickname = data.nickname.toDBC(),
-                    rating = data.rating
-                ),
-                oldRatingList = records.filter { record ->
-                    !record.music.isNew
-                }.sortedByDescending { record ->
-                    record.rating
-                }.take(30),
-                newRatingList = records.filter { record ->
-                    record.music.isNew
-                }.sortedByDescending { record ->
-                    record.rating
-                }.take(20)
-            )
+            val data = withUserToken(user) { token ->
+                ratingRequest(buildJsonObject { }, token)
+            } ?: return null
+            data.toRatingResponse()
         }
-        is UserQueryParams.Username -> ratingResponseByUsername(user.username)
+        is UserQueryParams.Username -> {
+            val data = ratingRequest(buildJsonObject {
+                put("username", JsonPrimitive(user.username))
+            }) ?: return null
+            data.toRatingResponse()
+        }
         is UserQueryParams.FriendCode -> null
     }
 
-    private suspend fun ratingResponseByUsername(username: String): RatingResponse? {
-        val request = buildJsonObject {
-            put("username", JsonPrimitive(username))
+    private fun DivingFishRatingResponse.toRatingResponse(): RatingResponse = RatingResponse(
+        player = PlayerInfo(
+            nickname = nickname.toDBC(),
+            rating = rating
+        ),
+        oldRatingList = records.b30.mapNotNull { record ->
+            record.toRecord()
+        },
+        newRatingList = records.n20.mapNotNull { record ->
+            record.toRecord()
         }
-        val data = ratingRequest(request) ?: return null
-        return RatingResponse(
-            player = PlayerInfo(
-                nickname = data.nickname.toDBC(),
-                rating = data.rating
-            ),
-            oldRatingList = data.records.b30.mapNotNull { record ->
-                record.toRecord()
-            },
-            newRatingList = data.records.n20.mapNotNull { record ->
-                record.toRecord()
-            }
-        )
-    }
+    )
 
     override suspend fun getPlayerRecord(
         user: UserQueryParams,
@@ -116,15 +91,10 @@ class DivingFish(
         is UserQueryParams.FriendCode -> null
         else -> {
             println("[水鱼调试] getPlayerRecord user=$user")
-            val token = accessTokenFor(user) ?: throw UserBindRequiredException()
-            runCatching {
+            withUserToken(user) { token ->
                 recordsRequest(token, listOf(music.id)).records.best.mapNotNull { record ->
                     record.toRecord()
                 }
-            }.getOrElse { e ->
-                if (e is UserNotFoundException)
-                    throw UserBindRequiredException()
-                throw e
             }
         }
     }
@@ -136,14 +106,9 @@ class DivingFish(
         is UserQueryParams.FriendCode -> null
         else -> {
             println("[水鱼调试] getPlayerRecords user=$user")
-            val token = accessTokenFor(user) ?: throw UserBindRequiredException()
             val ids = musics.map { it.id }
-            val data = runCatching {
+            val data = withUserToken(user) { token ->
                 recordsRequest(token, ids)
-            }.getOrElse { e ->
-                if (e is UserNotFoundException)
-                    throw UserBindRequiredException()
-                throw e
             }
             RecordsResponse(
                 player = PlayerInfo(
@@ -169,16 +134,42 @@ class DivingFish(
         is UserQueryParams.FriendCode -> null
     }
 
-    suspend fun ratingRequest(request: JsonObject): DivingFishRatingResponse? {
-        val response = client.post("$server/query/player") {
-            contentType(ContentType.Application.Json)
-            setBody(request)
+    private suspend fun <T> withUserToken(
+        user: UserQueryParams,
+        block: suspend (String) -> T
+    ): T {
+        val token = accessTokenFor(user) ?: throw UserBindRequiredException()
+        return runCatching { block(token) }.getOrElse { e ->
+            if (e is UserNotFoundException)
+                throw UserBindRequiredException()
+            throw e
         }
-        return when (response.status) {
-            HttpStatusCode.BadRequest -> throw UserNotFoundException()
-            HttpStatusCode.Forbidden -> throw UserDeniedException()
-            HttpStatusCode.OK -> response.body<DivingFishRatingResponse>()
-            else -> throw UnknownException()
+    }
+
+    suspend fun ratingRequest(
+        request: JsonObject,
+        token: String ?= null
+    ): DivingFishRatingResponse? {
+        var retry = 0
+        while (true) {
+            val response = client.post("$server/query/player") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+                token ?.let { setOAuth(it) }
+            }
+            when (response.status) {
+                HttpStatusCode.Unauthorized -> throw AuthorizationException()
+                HttpStatusCode.BadRequest -> throw UserNotFoundException()
+                HttpStatusCode.Forbidden -> throw UserDeniedException()
+                HttpStatusCode.TooManyRequests -> {
+                    if (retry >= 3)
+                        throw UnknownException("已超出今日请求上限")
+                    retry++
+                    delay(retry * 2000L)
+                }
+                HttpStatusCode.OK -> return response.body<DivingFishRatingResponse>()
+                else -> throw UnknownException("HTTP ${response.status.value}")
+            }
         }
     }
 

@@ -377,74 +377,52 @@ class DivingFish(
         }
     }
 
+    private suspend fun <T> withUserToken(
+        user: UserQueryParams,
+        block: suspend (String) -> T
+    ): T = withAccessToken(user) { token ->
+        runCatching { block(token) }.getOrElse { e ->
+            if (user is UserQueryParams.Self && e is UserNotFoundException)
+                throw UserBindRequiredException()
+            throw e
+        }
+    }
+
     override suspend fun getPlayerRating(
         user: UserQueryParams
-    ): RatingResponse? {
-        val nickname: String
-        val rating: Int
-        val course: Int
-        val oldRatingList: List<Record>
-        val newRatingList: List<Record>
-        when (user) {
-            is UserQueryParams.Self -> {
-                println("[水鱼调试] getPlayerRating Self sender=${user.event.sender.id}")
-                val data = withAccessToken(user) { token ->
-                    // val data = ratingRequest(buildJsonObject {
-                    //     put("b50", JsonPrimitive(true))
-                    // }, token) ?: return@withAccessToken null
-                    runCatching {
-                        recordsRequest(token)
-                    }.getOrElse { e ->
-                        if (e is UserNotFoundException)
-                            throw UserBindRequiredException()
-                        throw e
-                    }
-                }
-                val records = data.records.mapNotNull { record ->
-                    record.toRecord()
-                }
-                nickname = data.nickname
-                rating = data.rating
-                course = data.additionalRating + if (data.additionalRating > 10) 1 else 0
-                oldRatingList = records.filter { record ->
-                    !record.music.isNew
-                }.sortedByDescending { record ->
-                    record.rating
-                }.take(35)
-                newRatingList = records.filter { record ->
-                    record.music.isNew
-                }.sortedByDescending { record ->
-                    record.rating
-                }.take(15)
-            }
-            is UserQueryParams.Username -> {
-                val request = buildJsonObject {
+    ): RatingResponse? = when (user) {
+        is UserQueryParams.Self -> {
+            println("[水鱼调试] getPlayerRating Self sender=${user.event.sender.id}")
+            val data = withUserToken(user) { token ->
+                ratingRequest(buildJsonObject {
                     put("b50", JsonPrimitive(true))
-                    put("username", JsonPrimitive(user.username))
-                }
-                val data = ratingRequest(request) ?: return null
-                nickname = data.nickname
-                rating = data.rating
-                course = data.additionalRating + if (data.additionalRating > 10) 1 else 0
-                oldRatingList = data.charts.sd.mapNotNull { record ->
-                    record.toRecord()
-                }
-                newRatingList = data.charts.dx.mapNotNull { record ->
-                    record.toRecord()
-                }
-            }
-            is UserQueryParams.FriendCode -> return null
+                }, token)
+            } ?: return null
+            data.toRatingResponse()
         }
-        return RatingResponse(
-            player = PlayerInfo(
-                nickname = nickname,
-                rating = rating,
-                course = course
-            ),
-            oldRatingList = oldRatingList,
-            newRatingList = newRatingList
-        )
+        is UserQueryParams.Username -> {
+            val data = ratingRequest(buildJsonObject {
+                put("b50", JsonPrimitive(true))
+                put("username", JsonPrimitive(user.username))
+            }) ?: return null
+            data.toRatingResponse()
+        }
+        is UserQueryParams.FriendCode -> null
     }
+
+    private fun DivingFishRatingResponse.toRatingResponse(): RatingResponse = RatingResponse(
+        player = PlayerInfo(
+            nickname = nickname,
+            rating = rating,
+            course = additionalRating + if (additionalRating > 10) 1 else 0
+        ),
+        oldRatingList = charts.sd.mapNotNull { record ->
+            record.toRecord()
+        },
+        newRatingList = charts.dx.mapNotNull { record ->
+            record.toRecord()
+        }
+    )
 
     override suspend fun getPlayerRecord(
         user: UserQueryParams,
@@ -453,15 +431,9 @@ class DivingFish(
         is UserQueryParams.FriendCode -> null
         else -> {
             println("[水鱼调试] getPlayerRecord user=$user")
-            withAccessToken(user) { token ->
-                runCatching {
-                    recordsRequest(token, listOf(music.id)).records.mapNotNull { record ->
-                        record.toRecord()
-                    }
-                }.getOrElse { e ->
-                    if (user is UserQueryParams.Self && e is UserNotFoundException)
-                        throw UserBindRequiredException()
-                    throw e
+            withUserToken(user) { token ->
+                recordsRequest(token, listOf(music.id)).records.mapNotNull { record ->
+                    record.toRecord()
                 }
             }
         }
@@ -474,14 +446,8 @@ class DivingFish(
         is UserQueryParams.FriendCode -> null
         else -> {
             println("[水鱼调试] getPlayerRecords user=$user")
-            withAccessToken(user) { token ->
-                val data = runCatching {
-                    recordsRequest(token, musics.map { it.id })
-                }.getOrElse { e ->
-                    if (user is UserQueryParams.Self && e is UserNotFoundException)
-                        throw UserBindRequiredException()
-                    throw e
-                }
+            withUserToken(user) { token ->
+                val data = recordsRequest(token, musics.map { it.id })
                 RecordsResponse(
                     player = PlayerInfo(
                         nickname = data.nickname,
