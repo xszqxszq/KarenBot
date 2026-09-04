@@ -6,6 +6,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesTable
 import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesVoteTable
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
+import xyz.xszq.bot.chunithm.database.ProberBindTable
 import xyz.xszq.bot.chunithm.database.QQBindTable
 import kotlin.test.BeforeTest
 
@@ -33,8 +34,14 @@ abstract class ChunithmDatabaseTest {
     fun resetDatabase() {
         connectIfNeeded()
         transaction {
-            SchemaUtils.drop(QQBindTable, MaimaiSettingsTable, ChunithmMusicAliasesTable, ChunithmMusicAliasesVoteTable)
-            SchemaUtils.create(QQBindTable, MaimaiSettingsTable, ChunithmMusicAliasesTable, ChunithmMusicAliasesVoteTable)
+            SchemaUtils.drop(
+                QQBindTable, ProberBindTable, MaimaiSettingsTable,
+                ChunithmMusicAliasesTable, ChunithmMusicAliasesVoteTable
+            )
+            SchemaUtils.create(
+                QQBindTable, ProberBindTable, MaimaiSettingsTable,
+                ChunithmMusicAliasesTable, ChunithmMusicAliasesVoteTable
+            )
         }
     }
 }
