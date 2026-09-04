@@ -20,6 +20,7 @@ import xyz.xszq.bot.llm.LLMClient
 import xyz.xszq.bot.llm.LLMConfig
 import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.message.PlainText
+import xyz.xszq.bot.webhook.WebhookRouter
 import java.io.File
 
 /**
@@ -39,7 +40,7 @@ object KarenBotApplication {
     private val appLogger = org.slf4j.LoggerFactory.getLogger("xyz.xszq") as ch.qos.logback.classic.Logger
 
     /**
-     * 调试日志开关。开启后 xyz.xszq 包下 logger 级别为 DEBUG，可输出原始 payload 等调试信息。
+     * 调试日志开关
      */
     var debugLog: Boolean
         get() = appLogger.level == ch.qos.logback.classic.Level.DEBUG
@@ -134,7 +135,7 @@ object KarenBotApplication {
             install(ContentNegotiation) {
                 json(json)
             }
-            configureRouting(logger, pluginLoader, filter)
+            WebhookRouter(logger, pluginLoader, filter).configure(this)
         }.start(wait = true)
     }
     @OptIn(DelicateCoroutinesApi::class)

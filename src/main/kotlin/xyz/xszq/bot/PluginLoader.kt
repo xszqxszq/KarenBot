@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.util.collections.*
 import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.Database
+import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.llm.LLMClient
 import xyz.xszq.bot.message.FileManager
 import xyz.xszq.bot.subscribe.SubscribeManager
@@ -26,6 +27,13 @@ class PluginLoader(
 ) {
     val bot = Bot(api, cos, this)
     val files = FileManager()
+
+    /**
+     * 手动触发事件
+     *
+     * CLI / 测试环境使用
+     */
+    suspend fun manualTrigger(event: Event) = subscribes.handle(event)
 
     val pluginDirectory = "plugins/"
     val libsDirectory = File("libs")
