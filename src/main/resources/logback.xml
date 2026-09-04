@@ -1,5 +1,5 @@
 <configuration>
-    <conversionRule conversionWord="botclr" class="xyz.xszq.bot.LogColorConverter" />
+    <conversionRule conversionWord="botclr" class="xyz.xszq.bot.util.LogColorConverter" />
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
 <!--            <pattern>%highlight(%d{yyyy-MM-dd HH:mm:ss} %-5level %msg%n)</pattern>-->
