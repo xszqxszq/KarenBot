@@ -3,6 +3,9 @@ package xyz.xszq.bot.payload
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * 上传媒体文件的响应
+ */
 @Serializable
 data class FileResponse(
     @SerialName("file_uuid")

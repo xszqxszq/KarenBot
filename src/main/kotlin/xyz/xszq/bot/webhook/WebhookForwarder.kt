@@ -41,9 +41,9 @@ class WebhookForwarder(
     /**
      * 判断事件应当转发给哪一目标
      *
-     * @param subject 私聊 ID，仅私聊类事件传入
-     * @param group 群 ID，仅群聊类事件传入
-     * @return 转发目标地址，未命中时返回 null
+     * @param subject 私聊 ID，私聊事件需传入
+     * @param group 群 ID，群聊事件需传入
+     * @return 转发目标地址
      */
     fun forwardTarget(
         subject: String ?= null,
@@ -60,7 +60,7 @@ class WebhookForwarder(
     /**
      * 原样转发请求到目标处
      *
-     * @param body 原始请求体
+     * @param body 原始请求
      * @param call 收到的请求
      * @param to 目标地址
      */

@@ -21,7 +21,8 @@ import java.util.concurrent.TimeUnit
 
 
 /**
- * QQ 开放平台 HTTP 客户端
+ * 连接 QQ 服务器的客户端
+ *
  * @property config 机器人配置
  */
 class OpenAPI(
@@ -37,6 +38,11 @@ class OpenAPI(
     private var accessToken: String? = null
     private var accessTokenExpiresAt: Long? = null
 
+    /**
+     * 重载 Bot 配置
+     *
+     * @param config Bot 配置
+     */
     fun reloadConfig(config: BotConfig) {
         this.config = config
         accessToken = null
@@ -131,6 +137,21 @@ class OpenAPI(
         }.getOrNull()
         return result != null
     }
+
+    /**
+     * 发送私聊消息
+     *
+     * @param user 目标用户 ID
+     * @param content 文本内容
+     * @param msgType 消息类型
+     * @param markdown Markdown 消息
+     * @param keyboard 键盘按钮
+     * @param eventId 事件 ID
+     * @param msgId 被回复的消息 ID
+     * @param msgSeq 消息序号，用于同一条消息的幂等
+     * @param media 已上传的媒体文件
+     * @return 是否发送成功
+     */
     suspend fun sendC2CMessage(
         user: String,
         content: String,
@@ -152,6 +173,20 @@ class OpenAPI(
         media = media
     ))
 
+    /**
+     * 发送群聊消息
+     *
+     * @param group 目标群 ID
+     * @param content 文本内容
+     * @param msgType 消息类型
+     * @param markdown Markdown 消息
+     * @param keyboard 键盘按钮
+     * @param eventId 事件 ID
+     * @param msgId 被回复的消息 ID
+     * @param msgSeq 消息序号，用于同一条消息的幂等
+     * @param media 已上传的媒体文件
+     * @return 是否发送成功
+     */
     suspend fun sendGroupMessage(
         group: String,
         content: String,
@@ -173,6 +208,14 @@ class OpenAPI(
         media = media
     ))
 
+    /**
+     * 上传文件到私聊对话
+     *
+     * @param user 目标用户 ID
+     * @param fileType 文件类型
+     * @param url 文件 URL
+     * @param srvSendMsg 是否直接发出
+     */
     suspend fun uploadC2CFile(
         user: String,
         fileType: Int,
@@ -188,6 +231,14 @@ class OpenAPI(
         setToken()
     }.result<FileResponse>()
 
+    /**
+     * 上传文件到群聊
+     *
+     * @param group 目标群 ID
+     * @param fileType 文件类型
+     * @param url 文件 URL
+     * @param srvSendMsg 是否直接发出
+     */
     suspend fun uploadGroupFile(
         group: String,
         fileType: Int,
@@ -203,6 +254,13 @@ class OpenAPI(
         setToken()
     }.result<FileResponse>()
 
+    /**
+     * 撤回私聊消息
+     *
+     * @param user 目标用户 ID
+     * @param messageId 要撤回的消息 ID
+     * @return 是否撤回成功
+     */
     suspend fun recallC2CMessage(
         user: String,
         messageId: String
@@ -210,6 +268,13 @@ class OpenAPI(
         setToken()
     }.status == HttpStatusCode.OK
 
+    /**
+     * 撤回群聊消息
+     *
+     * @param group 目标群 ID
+     * @param messageId 要撤回的消息 ID
+     * @return 是否撤回成功
+     */
     suspend fun recallGroupMessage(
         group: String,
         messageId: String

@@ -7,7 +7,7 @@ import xyz.xszq.bot.event.MessageEvent
  * @param parent 父级命令前缀
  * @param forceParent 是否一定要父级前缀
  * @param prefix 命令前缀
- * @param handler 匹配后的处理逻辑
+ * @param matchHandler 匹配后的处理逻辑
  */
 class StartsWith(
     parent: String? = null,

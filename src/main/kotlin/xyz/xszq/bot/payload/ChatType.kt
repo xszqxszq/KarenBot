@@ -1,5 +1,8 @@
 package xyz.xszq.bot.payload
 
+/**
+ * 会话场景
+ */
 @Suppress("unused")
 object ChatType {
     const val GUILD = 0

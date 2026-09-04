@@ -1,5 +1,8 @@
 package xyz.xszq.bot.message
 
+/**
+ * 远程图片消息
+ */
 class RemoteImage(
     url: String,
     filename: String = "",

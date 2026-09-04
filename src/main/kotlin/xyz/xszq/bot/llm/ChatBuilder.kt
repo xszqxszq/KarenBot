@@ -2,6 +2,11 @@ package xyz.xszq.bot.llm
 
 import xyz.xszq.bot.payload.llm.*
 
+/**
+ * LLM 对话的 DSL Builder
+ *
+ * 指定系统、用户消息等，且可设置思考模式与响应格式
+ */
 @Suppress("unused")
 class ChatBuilder {
     internal val messages = mutableListOf<LLMMessage>()

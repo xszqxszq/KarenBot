@@ -6,6 +6,9 @@ import xyz.xszq.bot.Member
 import xyz.xszq.bot.User
 import xyz.xszq.bot.message.MessageChain
 
+/**
+ * 群消息事件
+ */
 class GroupMessageEvent(
     override val bot: Bot,
     override val eventId: String,

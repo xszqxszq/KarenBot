@@ -11,6 +11,9 @@ import xyz.xszq.bot.util.json
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
+/**
+ * 消息链
+ */
 @Suppress("unused")
 class MessageChain() {
     private val list = mutableListOf<MessageElement>()
@@ -19,6 +22,9 @@ class MessageChain() {
         list.addAll(elements)
     }
 
+    /**
+     * 从原始文本与附带媒体构造消息链
+     */
     constructor(raw: String, images: List<Triple<String, VfsFile, RemoteImage?>> = emptyList(),
                 bot: Bot? = null, mentions: List<Member>? = null,
                 ark: ArkData? = null,
@@ -63,12 +69,24 @@ class MessageChain() {
     fun isEmpty() = list.isEmpty()
 
     fun clear() = list.clear()
+
+    /**
+     * 用于日志显示的纯文本内容
+     */
     val content: String get() {
         return list.joinToString(separator = "") { it.content }
     }
+
+    /**
+     * 仅由纯文本消息拼接出的文本
+     */
     val text: String get() {
         return list.filterIsInstance<PlainText>().joinToString(separator = "") { it.content }
     }
+
+    /**
+     * 转换为发送给 QQ 服务器的文本内容
+     */
     fun textToSend() = list.filter { it is PlainText || it is Face }.joinToString("") { it.toString() }
 
     @OptIn(ExperimentalEncodingApi::class)

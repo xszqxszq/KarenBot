@@ -4,6 +4,7 @@ import korlibs.io.file.VfsFile
 
 /**
  * 媒体消息
+ *
  * @param file 文件
  */
 open class Media(

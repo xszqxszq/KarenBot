@@ -50,7 +50,7 @@ class WebhookRouter(
             val timestamp = call.request.headers["X-Signature-Timestamp"]
                 ?: return@post call.respond(HttpStatusCode.BadRequest)
 
-            // 校验请求体签名
+            // 校验请求签名
             val body = call.receiveText()
             if (!verifyBody(pluginLoader.api.config.clientSecret, signature, timestamp, body))
                 return@post call.respond(HttpStatusCode.Unauthorized)
@@ -65,7 +65,7 @@ class WebhookRouter(
      *
      * @param application 应用实例，用于事件分发
      * @param call 收到的请求
-     * @param body 原始请求体
+     * @param body 原始请求
      */
     private suspend fun handleWebhook(
         application: Application,

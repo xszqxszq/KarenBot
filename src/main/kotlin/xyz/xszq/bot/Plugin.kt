@@ -30,6 +30,7 @@ abstract class Plugin {
 
     /**
      * 注册全部命令路由
+     *
      * @param prefix 父级命令前缀
      * @param force 是否一定要父级前缀
      * @param block 订阅路由的代码块

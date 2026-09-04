@@ -4,6 +4,9 @@ import xyz.xszq.bot.Bot
 import xyz.xszq.bot.Group
 import xyz.xszq.bot.Member
 
+/**
+ * 群聊中的按钮互动事件
+ */
 class GroupInteractionEvent(
     override val bot: Bot,
     override val eventId: String,

@@ -3,9 +3,9 @@ package xyz.xszq.bot.payload.llm
 import kotlinx.serialization.Serializable
 
 /**
- * LLM 输出格式约束
+ * 向量化结果
  */
 @Serializable
-data class ResponseFormat(
-    val type: String,
+data class EmbeddingData(
+    val embedding: List<Float> = emptyList()
 )

@@ -10,6 +10,7 @@ import kotlin.text.Charsets.UTF_8
 
 /**
  * 构造 Ed25519 种子
+ *
  * @param secret 机器人客户端密钥
  */
 fun buildSeed(secret: String): ByteArray {
@@ -23,6 +24,7 @@ fun buildSeed(secret: String): ByteArray {
 
 /**
  * 签名消息以响应验证
+ *
  * @param privateKeyParams 私钥
  * @param message 待签名的消息
  */
@@ -35,6 +37,7 @@ fun signMessage(privateKeyParams: Ed25519PrivateKeyParameters, message: ByteArra
 
 /**
  * 校验腾讯服务器发来的 Webhook 签名
+ *
  * @param publicKeyParams 公钥
  * @param message 被签名的消息
  * @param signature 签名
@@ -48,7 +51,9 @@ fun verifySignature(publicKeyParams: Ed25519PublicKeyParameters, message: ByteAr
 
 /**
  * 处理 Webhook 地址验证请求
- * @param data 请求体
+ *
+ * @param secret 机器人客户端密钥
+ * @param data 请求
  */
 fun handleValidation(
     secret: String,
@@ -73,9 +78,11 @@ fun handleValidation(
 
 /**
  * 校验 Webhook 请求头签名
- * @param signatureHeader X-Signature-Ed25519
- * @param timestampHeader X-Signature-Timestamp
- * @param body HTTP 请求体
+ *
+ * @param secret 机器人客户端密钥
+ * @param signatureHeader X-Signature-Ed25519 请求头
+ * @param timestampHeader X-Signature-Timestamp 请求头
+ * @param body HTTP 请求
  */
 fun verifyBody(
     secret: String,

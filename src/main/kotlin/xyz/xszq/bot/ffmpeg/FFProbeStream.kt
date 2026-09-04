@@ -3,6 +3,9 @@ package xyz.xszq.bot.ffmpeg
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * FFProbe 输出的媒体流信息
+ */
 @Serializable
 data class FFProbeStream(
     val index: Int,

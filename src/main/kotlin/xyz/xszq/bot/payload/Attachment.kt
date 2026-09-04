@@ -3,6 +3,9 @@ package xyz.xszq.bot.payload
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * 消息附件（如图片、语音、视频、文件等）
+ */
 @Serializable
 data class Attachment(
     val url: String,

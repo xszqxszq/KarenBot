@@ -3,15 +3,25 @@ package xyz.xszq.bot.payload.markdown
 import kotlinx.serialization.Serializable
 import java.util.*
 
+/**
+ * Markdown 按钮
+ */
 @Serializable
 data class Keyboard(
     val content: InlineKeyboard
 ) {
+    /**
+     * 纯文本格式，用于显示日志
+     */
     fun text() = content.rows.joinToString(", ") {
         "[" + it.buttons.joinToString(", ") { button ->
             button.renderData.label
         } + "]"
     }
+
+    /**
+     * 构建按钮的 DSL Builder
+     */
     class KeyboardRowBuilder {
         val data = mutableListOf<Button>()
         fun button(id: String, renderData: RenderData, action: Action) =
@@ -66,6 +76,10 @@ data class Keyboard(
             )
         )
     }
+
+    /**
+     * 构建键盘的 DSL Builder
+     */
     class KeyboardBuilder {
         val data = mutableListOf<InlineKeyboardRow>()
         fun row(block: KeyboardRowBuilder.() -> Unit) =

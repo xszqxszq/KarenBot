@@ -5,6 +5,9 @@ import kotlinx.serialization.Serializable
 import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.payload.markdown.MarkdownData
 
+/**
+ * 向用户/群发送消息的请求
+ */
 @Serializable
 data class MessagePayload(
     var content: String,

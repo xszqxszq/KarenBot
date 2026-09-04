@@ -7,7 +7,11 @@ import kotlinx.coroutines.sync.withLock
 
 /**
  * 管理所有已下载的消息文件
+ *
  * 文件在 expiresAfter 之后被延迟删除
+ *
+ * @param expiresAfter 文件保留时长（毫秒）
+ * @param now 当前时间函数
  */
 class FileManager(
     private val expiresAfter: Long = 5 * 60 * 1000L,
@@ -32,6 +36,9 @@ class FileManager(
         }
     }
 
+    /**
+     * 启动清理协程，定期删除已过期的文件
+     */
     fun start() {
         scope.launch {
             while (isActive) {
@@ -43,14 +50,27 @@ class FileManager(
         }
     }
 
+    /**
+     * 停止清理协程
+     */
     fun stop() {
         scope.cancel()
     }
 
+    /**
+     * 添加一个文件
+     *
+     * @param file 文件
+     */
     suspend fun addFile(file: VfsFile) {
         register(listOf(file))
     }
 
+    /**
+     * 添加列表中的文件
+     *
+     * @param files 文件列表
+     */
     suspend fun addFiles(files: List<VfsFile>) {
         register(files)
     }

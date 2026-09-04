@@ -3,6 +3,9 @@ package xyz.xszq.bot.payload
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * 小程序卡片消息
+ */
 @Serializable
 data class ArkMiniApp(
     val preview: String = "",

@@ -3,6 +3,9 @@ package xyz.xszq.bot.payload.llm
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * LLM 请求
+ */
 @Serializable
 data class LLMRequest(
     val model: String,

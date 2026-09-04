@@ -6,6 +6,9 @@ import xyz.xszq.bot.message.Markdown
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
+/**
+ * Markdown 消息数据
+ */
 @Serializable
 data class MarkdownData(
     var content: String ?= null,
@@ -14,6 +17,10 @@ data class MarkdownData(
     val params: List<MarkdownParam> ?= null
 ) {
     fun toMessage(keyboard: Keyboard ?= null) = Markdown(this, keyboard)
+
+    /**
+     * 纯文本格式，用于显示日志
+     */
     fun text() = content?.formatContentForDisplay() ?: params ?.joinToString(", ") {
         "${it.key}=${it.values.first().replace("\r", "\n")}"
     }
@@ -86,6 +93,9 @@ data class MarkdownData(
         return decodeUrlComponent(command)
     }
 
+    /**
+     * 模板消息的 DSL Builder
+     */
     class MarkdownBuilder(
         val id: String
     ) {

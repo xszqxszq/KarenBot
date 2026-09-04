@@ -1,5 +1,8 @@
 package xyz.xszq.bot.message
 
+/**
+ * 远程视频消息
+ */
 class RemoteVideo(
     url: String,
     filename: String = "",

@@ -11,6 +11,7 @@ import java.util.*
 
 /**
  * 创建临时文件
+ *
  * @param prefix 文件名前缀
  * @param suffix 文件名后缀
  */
@@ -21,6 +22,7 @@ fun newTempFile(
 
 /**
  * 使用文件并自动删除
+ *
  * @param block 使用文件的代码块
  */
 suspend fun <T> VfsFile.use(block: suspend (VfsFile) -> T): T {
@@ -33,6 +35,7 @@ suspend fun <T> VfsFile.use(block: suspend (VfsFile) -> T): T {
 
 /**
  * 创建临时文件并在使用后删除
+ *
  * @param prefix 文件名前缀
  * @param suffix 文件名后缀
  * @param block 使用代码块
@@ -49,6 +52,7 @@ fun createDownloadClient() = HttpClient(OkHttp)
 
 /**
  * 从 URL 下载文件
+ *
  * @param url 下载地址
  * @param filename 文件名
  * @param logger 日志器
@@ -62,6 +66,7 @@ suspend fun downloadFile(url: String, filename: String, logger: KLogger): VfsFil
 
 /**
  * 从 URL 下载文件
+ *
  * @param url 下载地址
  * @param filename 文件名
  * @param logger 日志器

@@ -17,6 +17,11 @@ val errorLogger = KotlinLogging.logger("bot.error")
 private const val ESC = '\u001B'
 private const val ANSI_RESET = "$ESC[0m"
 
+/**
+ * 日志颜色转换
+ *
+ * 根据日志类型输出不同颜色的日志
+ */
 class LogColorConverter : ClassicConverter() {
     override fun convert(event: ILoggingEvent): String {
         val text = "%-5s %s".format(event.level.levelStr, event.formattedMessage)

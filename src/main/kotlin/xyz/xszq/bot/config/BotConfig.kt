@@ -2,6 +2,9 @@ package xyz.xszq.bot.config
 
 import kotlinx.serialization.Serializable
 
+/**
+ * Bot 配置
+ */
 @Serializable
 data class BotConfig(
     val qq: Long = 0,

@@ -2,6 +2,11 @@ package xyz.xszq.bot.message
 
 import xyz.xszq.bot.payload.ArkData
 
+/**
+ * 卡片消息
+ *
+ * @param data 卡片数据
+ */
 class Ark(
     val data: ArkData
 ): MessageElement {

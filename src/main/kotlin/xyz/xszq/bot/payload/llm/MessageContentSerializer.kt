@@ -8,6 +8,9 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.*
 
+/**
+ * 解析/序列话 LLM 消息内容的序列化器
+ */
 object MessageContentSerializer : KSerializer<MessageContent> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("MessageContent", PrimitiveKind.STRING)

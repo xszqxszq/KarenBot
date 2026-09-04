@@ -3,6 +3,14 @@ package xyz.xszq.bot.payload.markdown
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * 键盘按钮的点击动作
+ *
+ * type 决定动作类型（跳转链接、回调或 AT 等），data 承载动作对应的数据
+ *
+ * @property atBotShowChannelList 点击时是否展示频道选择列表
+ * @property unsupportTips 场景不支持该按钮时的兜底提示文本
+ */
 @Serializable
 data class Action(
     val type: Int,

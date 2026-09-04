@@ -3,11 +3,15 @@ package xyz.xszq.bot.subscribe
 import xyz.xszq.bot.event.MessageEvent
 
 /**
- * 订阅指定后缀结尾的消息
+ * 订阅指定命令后缀结尾的消息
+ *
+ * 与 EndsWith 的区别在于，匹配的是诸如“/parent arg1 toMatch arg2”的形式
+ * 同时也可匹配“arg1 toMatch”、“toMatch arg2”、“toMatch”的情形
+ *
  * @param parent 父级命令前缀
  * @param forceParent 是否一定要父级前缀
  * @param suffix 命令后缀
- * @param handler 匹配后的处理逻辑
+ * @param matchHandler 匹配后的处理逻辑
  */
 class CommandEndsWith(
     parent: String? = null,

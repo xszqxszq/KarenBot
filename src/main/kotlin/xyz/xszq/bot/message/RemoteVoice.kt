@@ -1,5 +1,10 @@
 package xyz.xszq.bot.message
 
+/**
+ * 远程语音消息
+ *
+ * @param wavUrl WAV 格式的 URL
+ */
 class RemoteVoice(
     url: String,
     filename: String = "",

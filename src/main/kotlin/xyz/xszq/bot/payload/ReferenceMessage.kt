@@ -6,6 +6,9 @@ import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.message.RemoteImage
 import xyz.xszq.bot.message.RemoteVoice
 
+/**
+ * 群消息中被引用的消息
+ */
 @Serializable
 data class ReferenceMessage(
     @SerialName("msg_idx")
@@ -16,6 +19,9 @@ data class ReferenceMessage(
     val content: String = "",
     val attachments: List<Attachment> = listOf(),
 ) {
+    /**
+     * 转为消息链
+     */
     fun toMessageChain(): MessageChain {
         val chain = MessageChain(content)
         attachments.forEach { attachment ->

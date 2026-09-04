@@ -1,5 +1,11 @@
 package xyz.xszq.bot.ffmpeg
 
+/**
+ * FFMpeg 命令行参数
+ *
+ * @param key 参数名
+ * @param value 参数值
+ */
 data class Argument(val key: String, val value: String = "") {
     override fun toString(): String {
         if (key.isBlank())

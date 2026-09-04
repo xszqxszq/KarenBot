@@ -21,6 +21,10 @@ const val DBC_CHAR_END = 126
 const val SBC_CHAR_START = 65281
 const val SBC_CHAR_END = 65374
 const val CONVERT_STEP = 65248
+
+/**
+ * 将字符串中的全角字符转为半角
+ */
 fun String.toDBC(): String {
     val buf = StringBuilder(length)
     this.toCharArray().forEach {
@@ -34,6 +38,10 @@ fun String.toDBC(): String {
     }
     return buf.toString()
 }
+
+/**
+ * 将字符串中的半角字符转为全角
+ */
 fun String.toSBC(): String {
     val buf = StringBuilder(length)
     this.toCharArray().forEach {
@@ -59,8 +67,21 @@ operator fun Char.times(times: Int): String = buildString {
     }
 }
 
+/**
+ * 判断字符串是否包含英文字母
+ */
 fun String.hasAlpha() = any { it.category in listOf(CharCategory.LOWERCASE_LETTER, CharCategory.UPPERCASE_LETTER) }
 
+/**
+ * 清理消息文本
+ *
+ * 去除首尾空白、父前缀及开头的“/”
+ *
+ * @param event 待处理事件
+ * @param parent 消息前缀
+ * @param forceParent 消息是否需以 parent 开头
+ * @return 结果文本
+ */
 fun normalizeMessage(
     event: Event,
     parent: String? = null,

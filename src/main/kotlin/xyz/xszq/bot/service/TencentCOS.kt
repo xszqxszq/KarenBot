@@ -36,6 +36,11 @@ class TencentCOS(
         })
     private val transferManager = TransferManager(cosClient, Executors.newFixedThreadPool(4))
 
+    /**
+     * 从对象存储中删除文件
+     *
+     * @param filename 要删除的文件名
+     */
     suspend fun deleteFromCOS(filename: String) {
         when (config.lightMode) {
             true -> withContext(Dispatchers.IO) {
@@ -47,6 +52,12 @@ class TencentCOS(
         }
     }
 
+    /**
+     * 上传本地文件
+     *
+     * @param file 要上传的文件
+     * @return 上传结果
+     */
     suspend fun upload(file: File): UploadResult {
         val filename = UUID.randomUUID().toString() + "." + file.extension
         if (config.lightMode)
@@ -57,6 +68,13 @@ class TencentCOS(
         return uploadToCOS(filename, file.length(), PutObjectRequest(config.appId, filename, file))
     }
 
+    /**
+     * 上传二进制数据
+     *
+     * @param binary 要上传的二进制内容
+     * @param suffix 文件扩展名
+     * @return 上传结果
+     */
     suspend fun uploadBinary(binary: ByteArray, suffix: String = ""): UploadResult {
         val extensionStr = if (suffix.isNotBlank()) ".$suffix" else ""
         val filename = UUID.randomUUID().toString() + extensionStr
@@ -89,5 +107,11 @@ class TencentCOS(
         return UploadResult("https://${config.appId}.cos.${config.region}.myqcloud.com/$filename", filename)
     }
 
+    /**
+     * 上传 VfsFile
+     *
+     * @param file 要上传的 VfsFile
+     * @return 上传结果
+     */
     suspend fun upload(file: VfsFile) = upload(File(file.absolutePath))
 }

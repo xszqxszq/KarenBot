@@ -2,6 +2,9 @@ package xyz.xszq.bot.config
 
 import kotlinx.serialization.Serializable
 
+/**
+ * Webhook 事件转发配置
+ */
 @Serializable
 data class ForwardConfig(
     val whitelist: String = "",

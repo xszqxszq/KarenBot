@@ -136,6 +136,13 @@ object RuntimeDependencyResolver {
         }.getOrThrow()
     }
 
+    /**
+     * Maven 依赖
+     *
+     * @param groupId 依赖的组 ID
+     * @param artifactId 依赖的构件 ID
+     * @param version 依赖版本
+     */
     data class DependencyCoordinate(
         val groupId: String,
         val artifactId: String,

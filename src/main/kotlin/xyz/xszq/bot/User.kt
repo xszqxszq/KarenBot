@@ -1,5 +1,11 @@
 package xyz.xszq.bot
 
+/**
+ * QQ 用户
+ *
+ * @property isBot 是否为 Bot 而非普通用户
+ * @property isSelf 是否为 Bot 自身
+ */
 open class User(
     val bot: Bot,
     val id: String,

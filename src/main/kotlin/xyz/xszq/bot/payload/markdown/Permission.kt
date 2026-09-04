@@ -2,6 +2,9 @@ package xyz.xszq.bot.payload.markdown
 
 import kotlinx.serialization.Serializable
 
+/**
+ * 按钮权限
+ */
 @Suppress("unused")
 @Serializable
 data class Permission(

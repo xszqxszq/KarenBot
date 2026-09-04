@@ -11,6 +11,11 @@ import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 import xyz.xszq.bot.payload.llm.*
 
+/**
+ * LLM 客户端
+ *
+ * @property config LLM 配置
+ */
 class LLMClient(
     private val config: LLMConfig,
     private val client: HttpClient = createDefaultClient(),
@@ -30,6 +35,13 @@ class LLMClient(
     private fun modelConfig(scene: String): LLMModelConfig =
         config.models[scene] ?: throw IllegalArgumentException("未配置 LLM 场景: $scene")
 
+    /**
+     * 进行 LLM 对话
+     *
+     * @param scene 该对话的场景名
+     * @param block 构建对话的 DSL
+     * @return 文本结果
+     */
     suspend fun chat(scene: String, block: ChatBuilder.() -> Unit): String {
         val modelConfig = modelConfig(scene)
         val builder = ChatBuilder().apply(block)
@@ -58,9 +70,24 @@ class LLMClient(
             .firstOrNull()?.message?.contentAsText() ?: ""
     }
 
+    /**
+     * 计算文本的向量表示
+     *
+     * @param scene 该对话的场景名
+     * @param input 要向量化的文本
+     * @return 文本向量
+     */
     suspend fun embed(scene: String, input: String): List<Float> =
         embed(scene, text = input, data = null, mediaType = null)
 
+    /**
+     * 计算图片数据的向量表示
+     *
+     * @param scene 该对话的场景名
+     * @param data 图片数据
+     * @param mediaType 图片媒体类型
+     * @return 图片向量
+     */
     suspend fun embed(
         scene: String,
         data: ByteArray,

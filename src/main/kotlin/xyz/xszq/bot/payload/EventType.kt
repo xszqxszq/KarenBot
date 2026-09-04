@@ -1,5 +1,8 @@
 package xyz.xszq.bot.payload
 
+/**
+ * 事件类型
+ */
 @Suppress("ConstPropertyName")
 object EventType {
     object C2C {

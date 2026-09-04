@@ -3,6 +3,9 @@ package xyz.xszq.bot.payload.markdown
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * 按钮样式
+ */
 @Serializable
 data class RenderData(
     val label: String,

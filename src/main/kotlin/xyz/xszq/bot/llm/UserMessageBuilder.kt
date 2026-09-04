@@ -5,6 +5,9 @@ import xyz.xszq.bot.payload.llm.ContentPart
 import xyz.xszq.bot.payload.llm.ImageUrl
 import kotlin.io.encoding.Base64
 
+/**
+ * LLM 用户消息内容的 DSL Builder
+ */
 @Suppress("unused")
 class UserMessageBuilder {
     internal val parts = mutableListOf<ContentPart>()

@@ -6,6 +6,13 @@ import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
 
+/**
+ * 对列表进行分页
+ *
+ * @param page 页码
+ * @param pageSize 每页元素数量
+ * @return 当前页元素+实际页码+总页数
+ */
 fun <T> List<T>.pagination(page: Int, pageSize: Int): Triple<List<T>, Int, Int> {
     if (isEmpty())
         return Triple(this, 0, 0)

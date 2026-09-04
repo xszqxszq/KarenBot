@@ -5,6 +5,9 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.concurrent.TimeUnit
 
+/**
+ * 执行外部命令任务
+ */
 @Suppress("unused")
 class ProgramExecutor(
     private val command: List<String>,
@@ -26,6 +29,9 @@ class ProgramExecutor(
         fun append(str: String?) = str?.let { if (it.isNotBlank()) env.add(it) }
     }
 
+    /**
+     * 运行外部命令
+     */
     suspend fun start() = withContext(Dispatchers.IO) {
         Builder().apply(builder).run {
             val procBuilder = ProcessBuilder(command)

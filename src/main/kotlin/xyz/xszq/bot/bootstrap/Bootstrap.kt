@@ -4,9 +4,17 @@ import java.io.File
 import java.net.URLClassLoader
 import java.util.jar.JarFile
 
+/**
+ * 应用启动入口
+ *
+ * 启动时先解析运行时依赖，再进行类加载
+ */
 object Bootstrap {
     private const val MAIN_CLASS = "xyz.xszq.bot.KarenBotApplication"
 
+    /**
+     * 入口点
+     */
     @JvmStatic
     fun main(args: Array<String>) {
         RuntimePaths.relaunchIfNeeded(Bootstrap::class.java.name, args)

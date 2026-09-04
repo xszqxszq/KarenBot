@@ -2,6 +2,9 @@ package xyz.xszq.bot.payload.markdown
 
 import xyz.xszq.bot.message.Markdown
 
+/**
+ * Markdown 消息构建 DSL
+ */
 @Suppress("unused")
 class MarkdownDsl {
     private val builder = StringBuilder()

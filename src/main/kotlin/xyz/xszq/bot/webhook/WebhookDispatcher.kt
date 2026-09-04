@@ -374,7 +374,7 @@ class WebhookDispatcher(
      *
      * @param subject 私聊 ID，仅私聊类事件传入
      * @param group 群 ID，仅群聊类事件传入
-     * @param body 原始请求体
+     * @param body 原始请求
      * @param call 收到的请求
      * @return 是否成功转发
      */

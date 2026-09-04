@@ -5,6 +5,7 @@ import xyz.xszq.bot.event.MessageEvent
 
 /**
  * 订阅全部消息，无条件匹配
+ *
  * @param handler 匹配后的处理逻辑
  */
 class Always(

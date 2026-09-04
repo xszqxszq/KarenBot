@@ -5,6 +5,13 @@ import korlibs.io.file.std.toVfs
 import java.io.File
 import kotlin.io.path.createTempFile
 
+/**
+ * FFMpeg 任务
+ *
+ * 支持通过 DSL 配置各项编码参数
+ *
+ * @param outputFormat 输出格式类型
+ */
 @Suppress("unused")
 class FFMpegTask(
     private val outputFormat: FFMpegFileType,
@@ -46,6 +53,13 @@ class FFMpegTask(
             add(result)
         }
     }
+
+    /**
+     * 执行转码并得到结果
+     *
+     * @param output 指定输出文件
+     * @return 转码后的文件
+     */
     suspend fun getResult(output: File = createTempFile(suffix = ".${outputFormat.ext}").toFile()): File {
         val command = buildCommand(output.absolutePath)
         ProgramExecutor(command, false) {
@@ -55,6 +69,13 @@ class FFMpegTask(
         }.start()
         return output
     }
+
+    /**
+     * 执行转码并返回 VfsFile
+     *
+     * @param output 指定输出文件
+     * @return 转码后的 VfsFile
+     */
     suspend fun result(output: VfsFile = createTempFile(suffix = ".${outputFormat.ext}").toFile().toVfs()): VfsFile {
         val command = buildCommand(output.absolutePath)
         ProgramExecutor(command, false) {

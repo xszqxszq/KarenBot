@@ -4,6 +4,7 @@ import korlibs.io.file.VfsFile
 
 /**
  * 图片消息
+ *
  * @param file 文件
  * @param remote 图片信息
  */

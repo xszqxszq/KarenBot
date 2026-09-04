@@ -7,6 +7,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 
 /**
  * QQ 表情
+ *
  * @param type 表情类型
  * @param id 表情 ID
  * @param name 表情名

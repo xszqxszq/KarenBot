@@ -4,6 +4,9 @@ import xyz.xszq.bot.Bot
 import xyz.xszq.bot.Group
 import xyz.xszq.bot.Member
 
+/**
+ * 用户加入群聊事件
+ */
 class UserJoinGroupEvent(
     override val bot: Bot,
     override val eventId: String,

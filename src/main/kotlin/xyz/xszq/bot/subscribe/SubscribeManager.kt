@@ -10,6 +10,8 @@ import kotlin.coroutines.CoroutineContext
 
 /**
  * 管理插件的订阅
+ *
+ * @param dispatcher 订阅处理所在的调度器
  */
 class SubscribeManager(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
@@ -21,8 +23,12 @@ class SubscribeManager(
 
     /**
      * 添加一个订阅
+     *
      * @param plugin 插件名
      * @param subscribe 订阅
+     * @param domain 所属命令域
+     * @param value 订阅在命令域中的取值
+     * @param defaultHandler 命令域默认取值查询函数
      */
     fun <E: Event> subscribe(
         plugin: String,
@@ -46,10 +52,12 @@ class SubscribeManager(
     }
 
     // TODO: 支持全部事件
+
     /**
      * 添加临时的无条件订阅
+     *
      * @param name 名称
-     * @param subscribe 订阅
+     * @param handler 处理逻辑
      */
     fun always(name: String, handler: suspend MessageEvent.() -> Unit) {
         @Suppress("UNCHECKED_CAST")
@@ -58,6 +66,7 @@ class SubscribeManager(
 
     /**
      * 移除指定名称的临时订阅
+     *
      * @param name 名称
      */
     fun stop(name: String) {
@@ -66,6 +75,7 @@ class SubscribeManager(
 
     /**
      * 移除插件的全部订阅
+     *
      * @param plugin 插件名
      */
     fun unsubscribe(plugin: String) {

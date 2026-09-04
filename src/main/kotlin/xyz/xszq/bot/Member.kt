@@ -1,5 +1,8 @@
 package xyz.xszq.bot
 
+/**
+ * 群成员
+ */
 @Suppress("unused")
 class Member(
     bot: Bot,

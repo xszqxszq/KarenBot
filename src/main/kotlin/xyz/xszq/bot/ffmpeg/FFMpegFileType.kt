@@ -1,5 +1,11 @@
 package xyz.xszq.bot.ffmpeg
 
+/**
+ * FFMpeg 输出文件的格式类型
+ *
+ * @param ext 输出文件扩展名
+ * @param requiredArgs 必要的附加参数
+ */
 @Suppress("unused")
 data class FFMpegFileType(val ext: String, val requiredArgs: List<Argument> = emptyList()) {
     companion object {

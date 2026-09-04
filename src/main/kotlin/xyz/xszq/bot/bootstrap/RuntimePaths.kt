@@ -4,14 +4,30 @@ import java.io.File
 import java.lang.management.ManagementFactory
 import kotlin.system.exitProcess
 
+/**
+ * 运行时的路径管理
+ */
 @Suppress("unused")
 object RuntimePaths {
     private const val RUNTIME_HOME = "karenbot.path"
     private const val RELAUNCHED = "karenbot.relaunched"
 
     val home: File = detectHome()
+
+    /**
+     * 解析运行目录下的路径
+     *
+     * @param path 相对路径
+     * @return 运行目录下的对应文件
+     */
     fun resolve(path: String): File = home.resolve(path)
 
+    /**
+     * 按需以目标运行目录重启进程
+     *
+     * @param mainClass 要运行的主类
+     * @param args 传入参数
+     */
     fun relaunchIfNeeded(mainClass: String, args: Array<String>) {
         val targetHome = System.getProperty(RUNTIME_HOME)
             ?.takeIf { it.isNotBlank() }

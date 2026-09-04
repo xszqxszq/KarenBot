@@ -1,5 +1,8 @@
 package xyz.xszq.bot.payload
 
+/**
+ * 媒体文件的类型常量
+ */
 @Suppress("unused")
 object FileType {
     const val IMAGE = 1

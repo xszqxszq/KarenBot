@@ -4,6 +4,9 @@ import xyz.xszq.bot.Bot
 import xyz.xszq.bot.User
 import xyz.xszq.bot.message.MessageChain
 
+/**
+ * 消息事件
+ */
 open class MessageEvent(
     override val bot: Bot,
     override val eventId: String,

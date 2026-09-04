@@ -17,8 +17,10 @@ import java.io.File
  */
 object AudioHandler {
     private val logger = KotlinLogging.logger {}
+
     /**
      * 从 WAV 文件读取 PCM 数据
+     *
      * @param file WAV 文件
      */
     suspend fun readWaveFile(file: VfsFile): ByteArray {
@@ -36,8 +38,10 @@ object AudioHandler {
             stream.readBytesUpTo(dataSize)
         }
     }
+
     /**
      * 合并多个 WAV 文件
+     *
      * @param inputFiles 输入文件列表
      * @param outputFile 输出文件
      * @param pcm 是否输出 PCM 文件
@@ -90,6 +94,7 @@ object AudioHandler {
 
     /**
      * 将 PCM 音频转为 Silk
+     *
      * @param pcmFile 输入文件
      * @param bitRate 比特率
      * @param sampleRate 采样率
@@ -103,6 +108,14 @@ object AudioHandler {
         }
         return silkFile.toVfs()
     }
+
+    /**
+     * 截取音频片段
+     *
+     * @param start 起始时间（秒）
+     * @param duration 片段时长（秒）
+     * @param block 使用该结果的代码块
+     */
     suspend inline fun VfsFile.crop(
         start: Double,
         duration: Double,
@@ -125,6 +138,12 @@ object AudioHandler {
             cropped.delete()
         }
     }
+
+    /**
+     * 获取音频的时长
+     *
+     * @return 时长（秒）
+     */
     suspend fun VfsFile.duration() = runCatching {
         FFProbe(File(this.absolutePath)).getResult().format?.duration?.toDouble()
     }.onFailure {
