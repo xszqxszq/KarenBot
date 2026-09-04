@@ -363,7 +363,7 @@ class ImageController(
             handle.invoke(event, uploaded.url)
             chunithm.scope.launch {
                 delay(10000L)
-                event.bot.cos.deleteFromCos(uploaded.filename)
+                event.bot.cos.deleteFromCOS(uploaded.filename)
             }
         }
         this.close()

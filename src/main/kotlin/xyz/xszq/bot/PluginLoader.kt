@@ -7,6 +7,7 @@ import org.jetbrains.exposed.sql.Database
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.llm.LLMClient
 import xyz.xszq.bot.message.FileManager
+import xyz.xszq.bot.payload.UsersMeResponse
 import xyz.xszq.bot.subscribe.SubscribeManager
 import java.io.File
 import java.net.URL
@@ -15,23 +16,27 @@ import java.net.URLConnection
 import java.util.jar.JarFile
 
 /**
- * Plugin's loader.
- * @param api `OpenAPI`.
+ * 插件加载器
+ *
+ * @property api 连接 QQ 服务器的客户端
+ * @property database 数据库连接
+ * @property llmClient LLM 客户端
+ * @property subscribes 消息订阅管理器
  */
 class PluginLoader(
     val api: OpenAPI,
-    cos: TencentCos,
+    cos: TencentCOS,
     val database: Database,
     val llmClient: LLMClient? = null,
     val subscribes: SubscribeManager = SubscribeManager(),
+    private val control: RuntimeControl,
+    botInfo: UsersMeResponse ?= null
 ) {
-    val bot = Bot(api, cos, this)
+    val bot = Bot(api, cos, botInfo)
     val files = FileManager()
 
     /**
-     * 手动触发事件
-     *
-     * CLI / 测试环境使用
+     * 手动触发事件，CLI / 测试环境使用
      */
     suspend fun manualTrigger(event: Event) = subscribes.handle(event)
 
@@ -39,53 +44,51 @@ class PluginLoader(
     val libsDirectory = File("libs")
 
     private val logger = KotlinLogging.logger {}
-    private val loadedPlugins = ConcurrentMap<String, Plugin>()
-    private val pluginTimestamps = ConcurrentMap<String, Long>()
-    private val pluginClassLoaders = ConcurrentMap<String, URLClassLoader>()
+    private val plugins = ConcurrentMap<String, LoadedPlugin>()
 
     init {
+        // 禁用 Jar 缓存，保证热更新能读到新字节码
         URLConnection.setDefaultUseCaches("jar", false)
     }
 
     /**
-     * Load a plugin if not exists, or reload it if changed.
-     * @param pluginFile the `File` of plugin's jar.
+     * 加载插件，文件未变化时跳过
+     *
+     * @param pluginFile 插件文件
+     * @param force 是否强制重载
      */
     suspend fun loadOrUpdatePlugin(pluginFile: File, force: Boolean = false) {
         val pluginPath = pluginFile.absolutePath
         val lastModified = pluginFile.lastModified()
 
-        if (!force && pluginTimestamps[pluginPath] == lastModified)
+        if (!force && plugins[pluginPath]?.lastModified == lastModified)
             return
 
-        if (loadedPlugins.containsKey(pluginPath)) {
+        if (plugins.containsKey(pluginPath))
             unloadPlugin(pluginPath)
-        }
         loadPlugin(pluginPath, lastModified)
     }
 
     /**
-     * Unload a plugin.
-     * @param pluginPath Plugin's path.
+     * 卸载插件并关闭其类加载器
+     *
+     * @param pluginPath 插件路径
      */
     private suspend fun unloadPlugin(pluginPath: String) {
-        val plugin = loadedPlugins[pluginPath]
-        plugin?.unload()
-        pluginClassLoaders.remove(pluginPath)?.let { classLoader ->
-            withContext(Dispatchers.IO) {
-                classLoader.close()
-            }
+        val loaded = plugins.remove(pluginPath) ?: return
+        loaded.plugin.unload()
+        withContext(Dispatchers.IO) {
+            loaded.classLoader.close()
         }
         subscribes.unsubscribe(pluginPath)
-        loadedPlugins.remove(pluginPath)
-        pluginTimestamps.remove(pluginPath)
         logger.info { "[插件] 已卸载插件: $pluginPath" }
     }
 
     /**
-     * Load a plugin.
-     * @param pluginPath Plugin's path.
-     * @param lastModified Last modified time of the jar file.
+     * 加载插件并实例化主类
+     *
+     * @param pluginPath 插件路径
+     * @param lastModified 修改时间
      */
     private suspend fun loadPlugin(pluginPath: String, lastModified: Long) {
         val pluginFile = File(pluginPath)
@@ -123,10 +126,9 @@ class PluginLoader(
                 if (plugin != null) {
                     plugin.pluginLoader = this
                     plugin.plugin = pluginPath
+                    (plugin as? AdminPlugin)?.control = control
                     plugin.load()
-                    loadedPlugins[pluginPath] = plugin
-                    pluginTimestamps[pluginPath] = lastModified
-                    pluginClassLoaders[pluginPath] = classLoader
+                    plugins[pluginPath] = LoadedPlugin(plugin, classLoader, lastModified)
                 }
             }.exceptionOrNull()
 
@@ -140,7 +142,7 @@ class PluginLoader(
     }
 
     /**
-     * Reload All plugins.
+     * 重载全部插件
      */
     @OptIn(DelicateCoroutinesApi::class)
     suspend fun reloadAllPlugins() {
@@ -160,4 +162,13 @@ class PluginLoader(
             }
         }
     }
+
+    /**
+     * 已加载的插件
+     */
+    private data class LoadedPlugin(
+        val plugin: Plugin,
+        val classLoader: URLClassLoader,
+        val lastModified: Long
+    )
 }

@@ -16,10 +16,11 @@ class AdminTest {
     private val adminId = "BD11EC5ADAE7A0CA792984F3EC63A165"
 
     private suspend fun setAdmin(scope: TestScope): BotSandbox {
-        val sandbox = BotSandbox(scope, mockTencentCos())
+        val sandbox = BotSandbox(scope, mockTencentCOS())
         val admin = Admin().apply {
             plugin = "admin"
             pluginLoader = sandbox.pluginLoader
+            control = sandbox.control
         }
         admin.load()
         sandbox.cleanup = { admin.unload() }
@@ -51,13 +52,13 @@ class AdminTest {
     }
 
     private suspend fun testLog(sandbox: BotSandbox) {
-        val before = KarenBotApplication.debugLog
+        val before = sandbox.control.debugLog
         val on = sandbox.user(adminId) says "log"
         assertReplied(sandbox, on, if (before) "调试日志已关闭。" else "调试日志已开启。")
-        assertEquals(!before, KarenBotApplication.debugLog)
+        assertEquals(!before, sandbox.control.debugLog)
         val off = sandbox.user(adminId) says "log"
         assertReplied(sandbox, off, if (before) "调试日志已开启。" else "调试日志已关闭。")
-        assertEquals(before, KarenBotApplication.debugLog)
+        assertEquals(before, sandbox.control.debugLog)
     }
 
     private suspend fun testReloadConfig(sandbox: BotSandbox) {

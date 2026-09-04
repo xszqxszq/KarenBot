@@ -70,7 +70,7 @@ suspend fun ReplyAble.uploadMedia(media: Media): MediaUpload? {
         }
     } ?: run {
         errorLogger.error { "图片上传失败" }
-        bot.cos.deleteFromCos(remoteFile.filename)
+        bot.cos.deleteFromCOS(remoteFile.filename)
         return null
     }
 
@@ -141,7 +141,7 @@ suspend fun ReplyAble.reply(message: MessageChain) {
         seq += 1
     }
     log(message)
-    mediaList.forEach { bot.cos.deleteFromCos(it.filename) }
+    mediaList.forEach { bot.cos.deleteFromCOS(it.filename) }
 }
 suspend fun ReplyAble.reply(message: String) = reply(PlainText(message))
 suspend fun ReplyAble.reply(message: MessageElement) = reply(MessageChain(message))

@@ -3,12 +3,12 @@ package xyz.xszq.bot.maimai
 import kotlinx.coroutines.test.TestScope
 import org.jetbrains.exposed.sql.Database
 import xyz.xszq.bot.BotSandbox
-import xyz.xszq.bot.mockTencentCos
+import xyz.xszq.bot.mockTencentCOS
 import xyz.xszq.bot.payload.AdminCheckRequest
 import xyz.xszq.bot.subscribe.Channel
 
 suspend fun setMaimai(scope: TestScope, database: Database): BotSandbox {
-    val sandbox = BotSandbox(scope, mockTencentCos(), database)
+    val sandbox = BotSandbox(scope, mockTencentCOS(), database)
     sandbox.pluginLoader.subscribes.subscribe(
         "admin", Channel<AdminCheckRequest>("admin-check") { data ->
             data.deferred.complete(data.userId == "test-user")

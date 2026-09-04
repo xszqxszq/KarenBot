@@ -299,7 +299,7 @@ class GuessController(
                 ).toMessage(buttons))
                 maimai.scope.launch {
                     delay(10000L)
-                    bot.cos.deleteFromCos(uploaded.filename)
+                    bot.cos.deleteFromCOS(uploaded.filename)
                 }
             }
 

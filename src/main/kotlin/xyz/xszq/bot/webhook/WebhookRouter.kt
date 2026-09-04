@@ -7,6 +7,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import xyz.xszq.bot.*
+import xyz.xszq.bot.config.ForwardConfig
 import xyz.xszq.bot.payload.OpCode
 import xyz.xszq.bot.payload.Payload
 import xyz.xszq.bot.payload.WebhookValidation
@@ -17,13 +18,15 @@ import xyz.xszq.bot.payload.WebhookValidation
  * @property logger 日志器
  * @property pluginLoader 插件加载器
  * @property filter 敏感词过滤器
+ * @property forwardConfig 转发配置提供者
  */
 class WebhookRouter(
     private val logger: KLogger,
     private val pluginLoader: PluginLoader,
-    private val filter: WordFilter
+    private val filter: WordFilter,
+    private val forwardConfig: () -> ForwardConfig?
 ) {
-    private val forwarder = WebhookForwarder { KarenBotApplication.forwardConfig }
+    private val forwarder = WebhookForwarder(forwardConfig)
     private val dispatcher = WebhookDispatcher(forwarder)
 
     /**

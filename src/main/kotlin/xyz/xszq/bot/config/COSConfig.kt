@@ -3,7 +3,7 @@ package xyz.xszq.bot.config
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CosConfig(
+data class COSConfig(
     val appId: String = "",
     val region: String = "",
     val secretId: String = "",

@@ -8,8 +8,8 @@ import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.payload.UploadResult
 import java.io.File
 
-fun mockTencentCos(): TencentCos {
-    val cos = mockk<TencentCos>(relaxed = true)
+fun mockTencentCOS(): TencentCOS {
+    val cos = mockk<TencentCOS>(relaxed = true)
     coEvery { cos.uploadBinary(any(), any()) } returns UploadResult("https://example.com/b50.jpg", "b50.jpg")
     every { cos.upload(any<File>()) } returns UploadResult("https://example.com/upload.jpg", "upload.jpg")
     every { cos.upload(any<VfsFile>()) } returns UploadResult("https://example.com/upload.jpg", "upload.jpg")

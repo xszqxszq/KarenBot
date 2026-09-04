@@ -19,11 +19,16 @@ import xyz.xszq.bot.subscribe.SubscribeManager
 @OptIn(ExperimentalCoroutinesApi::class)
 class BotSandbox(
     private val scope: TestScope,
-    cos: TencentCos = mockk(relaxed = true),
+    cos: TencentCOS = mockk(relaxed = true),
     database: Database = mockk(relaxed = true),
 ) {
     val replies = java.util.Collections.synchronizedList(mutableListOf<MessageEvent>())
     private val replyMap = java.util.concurrent.ConcurrentHashMap<String, MessageEvent>()
+
+    val control = object : RuntimeControl {
+        override var debugLog: Boolean = false
+        override fun reloadConfig() {}
+    }
 
     private val dispatcher = StandardTestDispatcher(scope.testScheduler)
     lateinit var pluginLoader: PluginLoader
@@ -70,10 +75,13 @@ class BotSandbox(
                 true
             }
         }
-        pluginLoader = PluginLoader(api,
-            cos,
-            database,
-            subscribes = SubscribeManager(dispatcher))
+        pluginLoader = PluginLoader(
+            api = api,
+            cos = cos,
+            database = database,
+            subscribes = SubscribeManager(dispatcher),
+            control = control
+        )
     }
 
     fun replyFor(event: Event) = replyMap[event.eventId]

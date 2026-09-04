@@ -214,4 +214,11 @@ class OpenAPI(
     ) = client.delete("$server/v2/groups/$group/messages/$messageId") {
         setToken()
     }.status == HttpStatusCode.OK
+
+    /**
+     * 获取 Bot 自身详情
+     */
+    suspend fun getMe(): UsersMeResponse? = client.get("$server/users/@me") {
+        setToken()
+    }.result<UsersMeResponse>()
 }

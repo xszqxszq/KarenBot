@@ -127,7 +127,7 @@ class ChunithmTest : ChunithmDatabaseTest() {
 }
 
 suspend fun setChunithm(scope: TestScope, database: org.jetbrains.exposed.sql.Database): BotSandbox {
-    val sandbox = BotSandbox(scope, mockTencentCos(), database)
+    val sandbox = BotSandbox(scope, mockTencentCOS(), database)
     sandbox.pluginLoader.subscribes.subscribe(
         "admin", Channel<AdminCheckRequest>("admin-check") { data ->
             data.deferred.complete(data.userId == "test-user")

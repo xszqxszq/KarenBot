@@ -176,8 +176,7 @@ class WebhookDispatcher(
                 group = Group(pluginLoader.bot, data.group),
                 reference = data.messageElements.firstOrNull() ?.toMessageChain(),
                 mentions = when {
-                    // TODO: 替换为真实的机器人数据
-                    isAt -> listOf(User(pluginLoader.bot, "", "", isBot = true, isSelf = true))
+                    isAt -> listOf(pluginLoader.bot.self)
                     else -> data.mentions.filter { it.scope != "all" }.map { mention ->
                         User(pluginLoader.bot, mention.id, mention.username,
                             isBot = mention.bot, isSelf = mention.isSelf)

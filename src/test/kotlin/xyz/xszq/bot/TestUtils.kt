@@ -8,8 +8,7 @@ import xyz.xszq.bot.message.PlainText
 
 fun testBot() = Bot(
     api = mockk(relaxed = true),
-    cos = mockk(relaxed = true),
-    pluginLoader = mockk(relaxed = true)
+    cos = mockk(relaxed = true)
 )
 
 fun messageEvent(

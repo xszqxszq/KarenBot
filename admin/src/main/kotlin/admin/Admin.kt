@@ -3,8 +3,9 @@ package xyz.xszq.bot.admin
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
-import xyz.xszq.bot.KarenBotApplication
+import xyz.xszq.bot.AdminPlugin
 import xyz.xszq.bot.Plugin
+import xyz.xszq.bot.RuntimeControl
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.log
@@ -20,12 +21,11 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * 管理插件
- *
- * 提供管理员命令（日志开关、插件/配置重载、消息发送与撤回）与管理员校验通道
  */
 @Suppress("unused")
-class Admin: Plugin() {
+class Admin: Plugin(), AdminPlugin {
     lateinit var config: AdminConfig
+    override lateinit var control: RuntimeControl
     private val pendingSubscribes = ConcurrentHashMap<String, String>()
     private val pendingMessages = ConcurrentHashMap<String, MutableList<MessageChain>>()
     @OptIn(ExperimentalHoplite::class)
@@ -72,8 +72,8 @@ class Admin: Plugin() {
         // 调试日志开关
         startsWith("log") {
             if (isAdmin()) {
-                KarenBotApplication.debugLog = !KarenBotApplication.debugLog
-                reply("调试日志已${if (KarenBotApplication.debugLog) "开启" else "关闭"}。")
+                control.debugLog = !control.debugLog
+                reply("调试日志已${if (control.debugLog) "开启" else "关闭"}。")
             }
         }
         // 重载所有插件
@@ -150,7 +150,7 @@ class Admin: Plugin() {
         }
         name == "config" -> {
             kotlin.runCatching {
-                KarenBotApplication.reloadConfig(pluginLoader)
+                control.reloadConfig()
             }.onSuccess {
                 reply("重载配置完成。")
             }.onFailure {

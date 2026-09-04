@@ -9,15 +9,15 @@ import com.qcloud.cos.model.PutObjectRequest
 import com.qcloud.cos.region.Region
 import com.qcloud.cos.transfer.TransferManager
 import korlibs.io.file.VfsFile
-import xyz.xszq.bot.config.CosConfig
+import xyz.xszq.bot.config.COSConfig
 import xyz.xszq.bot.payload.UploadResult
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.util.*
 import java.util.concurrent.Executors
 
-class TencentCos(
-    val config: CosConfig
+class TencentCOS(
+    val config: COSConfig
 ) {
     private companion object {
         const val PUT_OBJECT_MAX_SIZE = 20L * 1024 * 1024
@@ -29,7 +29,7 @@ class TencentCos(
         })
     private val transferManager = TransferManager(cosClient, Executors.newFixedThreadPool(4))
 
-    fun deleteFromCos(filename: String) {
+    fun deleteFromCOS(filename: String) {
         when (config.lightMode) {
             true -> {
                 File(config.lightDir).resolve(filename).delete()
@@ -48,7 +48,7 @@ class TencentCos(
         }
         val bucket = config.appId
         val request = PutObjectRequest(bucket, filename, file)
-        return uploadToCos(filename, file.length(), request)
+        return uploadToCOS(filename, file.length(), request)
     }
 
     fun uploadBinary(binary: ByteArray, suffix: String = ""): UploadResult {
@@ -62,10 +62,10 @@ class TencentCos(
         val request = PutObjectRequest(bucket, filename,
             ByteArrayInputStream(binary),
             ObjectMetadata().apply { contentLength = binary.size.toLong() })
-        return uploadToCos(filename, binary.size.toLong(), request)
+        return uploadToCOS(filename, binary.size.toLong(), request)
     }
 
-    private fun uploadToCos(
+    private fun uploadToCOS(
         filename: String,
         size: Long,
         request: PutObjectRequest
