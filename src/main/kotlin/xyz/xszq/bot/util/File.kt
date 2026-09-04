@@ -5,9 +5,13 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.tempVfs
 import java.util.*
+
+private val downloadClient by lazy { createDownloadClient() }
 
 /**
  * 创建临时文件
@@ -57,12 +61,8 @@ fun createDownloadClient() = HttpClient(OkHttp)
  * @param filename 文件名
  * @param logger 日志器
  */
-suspend fun downloadFile(url: String, filename: String, logger: KLogger): VfsFile? {
-    val client = createDownloadClient()
-    return client.use { client ->
-        downloadFile(url, filename, logger, client)
-    }
-}
+suspend fun downloadFile(url: String, filename: String, logger: KLogger): VfsFile? =
+    downloadFile(url, filename, logger, downloadClient)
 
 /**
  * 从 URL 下载文件
@@ -72,13 +72,14 @@ suspend fun downloadFile(url: String, filename: String, logger: KLogger): VfsFil
  * @param logger 日志器
  * @param client 客户端
  */
-suspend fun downloadFile(url: String, filename: String, logger: KLogger, client: HttpClient): VfsFile? {
-    val file = tempVfs[filename]
-    return runCatching {
-        val response = client.get(url)
-        file.write(response.bodyAsBytes())
-        file
-    }.onFailure { e ->
-        logger.error { "下载文件失败: ${e.message}" }
-    }.getOrNull()
-}
+suspend fun downloadFile(url: String, filename: String, logger: KLogger, client: HttpClient): VfsFile? =
+    withContext(Dispatchers.IO) {
+        val file = tempVfs[filename]
+        runCatching {
+            val response = client.get(url)
+            file.write(response.bodyAsBytes())
+            file
+        }.onFailure { e ->
+            logger.error { "下载文件失败: ${e.message}" }
+        }.getOrNull()
+    }

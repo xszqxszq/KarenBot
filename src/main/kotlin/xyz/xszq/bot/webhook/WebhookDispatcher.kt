@@ -6,6 +6,9 @@ import io.ktor.server.routing.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import xyz.xszq.bot.*
 import xyz.xszq.bot.event.*
@@ -40,20 +43,24 @@ class WebhookDispatcher(
         attachments: List<Attachment>,
         fileManager: FileManager,
         logger: KLogger
-    ) = attachments.mapNotNull { attachment ->
-        downloadFile(attachment.url, attachment.filename, logger) ?.let { file ->
-            Triple(
-                attachment.url,
-                file,
-                RemoteImage(
-                    url = attachment.url,
-                    filename = attachment.filename,
-                    contentType = attachment.contentType,
-                    width = attachment.width ?: 0,
-                    height = attachment.height ?: 0
-                )
-            )
-        }
+    ) = coroutineScope {
+        attachments.map { attachment ->
+            async {
+                downloadFile(attachment.url, attachment.filename, logger) ?.let { file ->
+                    Triple(
+                        attachment.url,
+                        file,
+                        RemoteImage(
+                            url = attachment.url,
+                            filename = attachment.filename,
+                            contentType = attachment.contentType,
+                            width = attachment.width ?: 0,
+                            height = attachment.height ?: 0
+                        )
+                    )
+                }
+            }
+        }.awaitAll().filterNotNull()
     }.also { pairs ->
         launch(Dispatchers.IO) {
             fileManager.addFiles(pairs.map { it.second })

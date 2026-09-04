@@ -6,6 +6,8 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import xyz.xszq.bot.PluginLoader
 import xyz.xszq.bot.config.ForwardConfig
 import xyz.xszq.bot.payload.OpCode
@@ -79,15 +81,20 @@ class WebhookRouter(
             OpCode.DISPATCH -> with(dispatcher) {
                 // 确认收到
                 call.respond(Payload(OpCode.HTTP_CALLBACK_ACK))
-                // 分发事件
-                application.dispatch(
-                    payload = payload,
-                    call = call,
-                    logger = logger,
-                    filter = filter,
-                    pluginLoader = pluginLoader,
-                    body = body
-                )
+                application.launch(Dispatchers.IO) {
+                    kotlin.runCatching {
+                        application.dispatch(
+                            payload = payload,
+                            call = call,
+                            logger = logger,
+                            filter = filter,
+                            pluginLoader = pluginLoader,
+                            body = body
+                        )
+                    }.onFailure { e ->
+                        e.printStackTrace()
+                    }
+                }
             }
             // 收到 Webhook 地址验证
             OpCode.HTTP_CALLBACK_VALIDATE -> {
