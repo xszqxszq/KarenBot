@@ -4,8 +4,8 @@ import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
 
 /**
- * Subscribe of message without condition.
- * @param handler Handle after matched.
+ * 订阅全部消息，无条件匹配
+ * @param handler 匹配后的处理逻辑
  */
 class Always(
     handler: suspend MessageEvent.() -> Unit

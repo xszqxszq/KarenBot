@@ -6,8 +6,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 /**
- * Manages all image files downloaded.
- * The image files will be lazy deleted after `expiresAfter`.
+ * 管理所有已下载的消息文件
+ * 文件在 expiresAfter 之后被延迟删除
  */
 class FileManager(
     private val expiresAfter: Long = 5 * 60 * 1000L,

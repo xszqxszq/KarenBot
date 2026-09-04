@@ -11,6 +11,9 @@ import xyz.xszq.bot.payload.FileResponse
 import xyz.xszq.bot.payload.FileType
 import xyz.xszq.bot.payload.MsgType
 import xyz.xszq.bot.payload.markdown.MarkdownDsl
+import xyz.xszq.bot.util.sendGroupLogger
+import xyz.xszq.bot.util.sendC2CLogger
+import xyz.xszq.bot.util.errorLogger
 
 class MediaUpload(
     val response: FileResponse,
@@ -18,9 +21,9 @@ class MediaUpload(
 )
 
 /**
- * Retry the block for specified times.
- * @param times Max times to retry.
- * @param block The code to execute.
+ * 重试指定次数直至成功
+ * @param times 最大重试次数
+ * @param block 代码块
  */
 inline fun <T> retry(times: Int, block: () -> T): T? {
     (1..times).forEach { attempt ->
@@ -32,8 +35,8 @@ inline fun <T> retry(times: Int, block: () -> T): T? {
 }
 
 /**
- * Upload a media based on the Message context.
- * @param media The Media to upload.
+ * 在指定消息上下文上传媒体
+ * @param media 待上传的媒体
  */
 @OptIn(DelicateCoroutinesApi::class)
 suspend fun ReplyAble.uploadMedia(media: Media): MediaUpload? {
@@ -88,8 +91,8 @@ fun ReplyAble.log(message: MessageChain) {
 }
 
 /**
- * Reply a message to the sender.
- * @param message The message to reply.
+ * 向发送者回复消息
+ * @param message 回复的消息
  */
 suspend fun ReplyAble.reply(message: MessageChain) {
     val mediaList = message.filterIsInstance<Media>().mapNotNull {

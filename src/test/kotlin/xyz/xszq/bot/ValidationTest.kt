@@ -3,6 +3,10 @@ package xyz.xszq.bot
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import xyz.xszq.bot.payload.WebhookValidation
 import kotlin.test.*
+import xyz.xszq.bot.util.buildSeed
+import xyz.xszq.bot.util.signMessage
+import xyz.xszq.bot.util.handleValidation
+import xyz.xszq.bot.util.verifyBody
 
 class ValidationTest {
     @Test

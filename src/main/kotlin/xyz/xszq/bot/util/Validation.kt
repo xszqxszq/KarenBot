@@ -1,4 +1,4 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.util
 
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
@@ -9,8 +9,8 @@ import xyz.xszq.bot.payload.WebhookValidation
 import kotlin.text.Charsets.UTF_8
 
 /**
- * Build Ed25519 seed.
- * @param secret Bot's client secret.
+ * 构造 Ed25519 种子
+ * @param secret 机器人客户端密钥
  */
 fun buildSeed(secret: String): ByteArray {
     val ed25519SeedSize = 32
@@ -22,9 +22,9 @@ fun buildSeed(secret: String): ByteArray {
 }
 
 /**
- * Sign Message to respond.
- * @param privateKeyParams private key.
- * @param message The message to sign.
+ * 签名消息以响应验证
+ * @param privateKeyParams 私钥
+ * @param message 待签名的消息
  */
 fun signMessage(privateKeyParams: Ed25519PrivateKeyParameters, message: ByteArray): String {
     val signer = Ed25519Signer()
@@ -34,10 +34,10 @@ fun signMessage(privateKeyParams: Ed25519PrivateKeyParameters, message: ByteArra
 }
 
 /**
- * Verify Webhook signature from Tencent server.
- * @param publicKeyParams public key.
- * @param message The message signed.
- * @param signature Signature.
+ * 校验腾讯服务器发来的 Webhook 签名
+ * @param publicKeyParams 公钥
+ * @param message 被签名的消息
+ * @param signature 签名
  */
 fun verifySignature(publicKeyParams: Ed25519PublicKeyParameters, message: ByteArray, signature: ByteArray): Boolean {
     val signer = Ed25519Signer()
@@ -47,8 +47,8 @@ fun verifySignature(publicKeyParams: Ed25519PublicKeyParameters, message: ByteAr
 }
 
 /**
- * Handle Webhook validation request.
- * @param data Request body.
+ * 处理 Webhook 地址验证请求
+ * @param data 请求体
  */
 fun handleValidation(
     secret: String,
@@ -72,10 +72,10 @@ fun handleValidation(
 }
 
 /**
- * Verify Webhook request's headers.
+ * 校验 Webhook 请求头签名
  * @param signatureHeader X-Signature-Ed25519
  * @param timestampHeader X-Signature-Timestamp
- * @param body HTTP Body
+ * @param body HTTP 请求体
  */
 fun verifyBody(
     secret: String,

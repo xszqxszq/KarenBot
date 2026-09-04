@@ -3,9 +3,9 @@ package xyz.xszq.bot.message
 import korlibs.io.file.VfsFile
 
 /**
- * Image message.
- * @param file The actual file on disk.
- * @param remote The remote image info.
+ * 图片消息
+ * @param file 文件
+ * @param remote 图片信息
  */
 class Image(
     file: VfsFile,

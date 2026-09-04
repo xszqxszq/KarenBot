@@ -6,10 +6,10 @@ import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 /**
- * QQ Internal Face.
- * @param type Face type.
- * @param id Face ID.
- * @param name Face name.
+ * QQ 表情
+ * @param type 表情类型
+ * @param id 表情 ID
+ * @param name 表情名
  */
 class Face(
     val type: Int,

@@ -4,11 +4,11 @@ import xyz.xszq.bot.event.MessageEvent
 
 
 /**
- * Subscribe of message ends with suffix.
- * @param parent Parent prefix of command.
- * @param forceParent Force check of parent prefix.
- * @param suffix The command's suffix.
- * @param handler Handle after matched.
+ * 订阅指定后缀结尾的消息
+ * @param parent 父级命令前缀
+ * @param forceParent 是否一定要父级前缀
+ * @param suffix 命令后缀
+ * @param handler 匹配后的处理逻辑
  */
 class EndsWith(
     parent: String? = null,

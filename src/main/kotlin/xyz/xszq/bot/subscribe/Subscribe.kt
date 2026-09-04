@@ -3,7 +3,7 @@ package xyz.xszq.bot.subscribe
 import xyz.xszq.bot.event.Event
 
 /**
- * Subscribe to message.
+ * 消息订阅基类
  */
 open class Subscribe<E: Event>(
     private val defaultHandler: suspend (Event) -> Unit = {}

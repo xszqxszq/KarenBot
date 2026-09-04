@@ -2,7 +2,7 @@ package xyz.xszq.bot.payload
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import xyz.xszq.bot.JsonAsStringSerializer
+import xyz.xszq.bot.util.JsonAsStringSerializer
 import xyz.xszq.bot.json
 
 @Serializable

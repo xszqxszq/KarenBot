@@ -1,4 +1,4 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.bootstrap
 
 import java.io.File
 import java.lang.management.ManagementFactory

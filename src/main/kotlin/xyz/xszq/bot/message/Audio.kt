@@ -2,11 +2,11 @@ package xyz.xszq.bot.message
 
 import korlibs.io.file.VfsFile
 import korlibs.io.file.extensionLC
-import xyz.xszq.bot.AudioHandler
+import xyz.xszq.bot.util.AudioHandler
 
 /**
- * Voice message.
- * @param file The actual file on disk.
+ * 语音消息
+ * @param file 文件
  */
 class Audio(
     file: VfsFile

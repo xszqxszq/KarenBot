@@ -15,6 +15,8 @@ import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.message.PlainText
 import xyz.xszq.bot.payload.markdown.MarkdownData
 import xyz.xszq.bot.subscribe.SubscribeManager
+import xyz.xszq.bot.service.OpenAPI
+import xyz.xszq.bot.service.TencentCOS
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BotSandbox(

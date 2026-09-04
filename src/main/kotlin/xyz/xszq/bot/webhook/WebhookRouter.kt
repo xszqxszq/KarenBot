@@ -11,6 +11,9 @@ import xyz.xszq.bot.config.ForwardConfig
 import xyz.xszq.bot.payload.OpCode
 import xyz.xszq.bot.payload.Payload
 import xyz.xszq.bot.payload.WebhookValidation
+import xyz.xszq.bot.util.handleValidation
+import xyz.xszq.bot.util.verifyBody
+import xyz.xszq.bot.service.WordFilter
 
 /**
  * Webhook 路由处理

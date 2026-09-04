@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package xyz.xszq.bot
+package xyz.xszq.bot.util
 
 import korlibs.math.toIntCeil
 import xyz.xszq.bot.event.Event

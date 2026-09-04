@@ -5,7 +5,7 @@ import org.jetbrains.exposed.sql.Database
 import xyz.xszq.bot.subscribe.SubscribeBuilder
 
 /**
- * Base class of every Plugin.
+ * 插件基类
  */
 abstract class Plugin {
     lateinit var plugin: String
@@ -15,24 +15,24 @@ abstract class Plugin {
         get() = pluginLoader.database
 
     /**
-     * This executes when Plugin is loaded.
+     * 插件加载时执行
      */
     open suspend fun load() {
         logger.info { "[插件] 已加载插件: $plugin" }
     }
 
     /**
-     * This executes when Plugin is unloaded.
+     * 插件卸载时执行
      */
     open suspend fun unload() {
 
     }
 
     /**
-     * Create route of all commands.
-     * @param prefix Prefix of all commands.
-     * @param force Force check prefix.
-     * @param block Block of code to build Subscribes.
+     * 注册全部命令路由
+     * @param prefix 父级命令前缀
+     * @param force 是否一定要父级前缀
+     * @param block 订阅路由的代码块
      */
     suspend fun route(prefix: String? = null, force: Boolean = false, block: suspend SubscribeBuilder.() -> Unit) {
         block(SubscribeBuilder(

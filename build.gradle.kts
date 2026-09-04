@@ -21,7 +21,7 @@ plugins {
 }
 
 application {
-    mainClass.set("xyz.xszq.bot.Bootstrap")
+    mainClass.set("xyz.xszq.bot.bootstrap.Bootstrap")
 }
 
 
@@ -74,7 +74,7 @@ tasks.jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
         attributes(
-            "Main-Class" to "xyz.xszq.bot.Bootstrap"
+            "Main-Class" to "xyz.xszq.bot.bootstrap.Bootstrap"
         )
     }
     from({

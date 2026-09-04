@@ -2,7 +2,7 @@ package xyz.xszq.bot.subscribe
 
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
-import xyz.xszq.bot.normalizeMessage
+import xyz.xszq.bot.util.normalizeMessage
 
 abstract class TextSubscribe(
     val parent: String? = null,

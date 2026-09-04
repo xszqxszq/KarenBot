@@ -1,7 +1,7 @@
 package xyz.xszq.bot.payload
 
 import kotlinx.serialization.Serializable
-import xyz.xszq.bot.JsonAsStringSerializer
+import xyz.xszq.bot.util.JsonAsStringSerializer
 
 @Serializable
 data class Payload(

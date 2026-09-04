@@ -1,4 +1,4 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
@@ -15,11 +15,14 @@ import xyz.xszq.bot.payload.*
 import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.payload.markdown.MarkdownData
 import java.util.concurrent.TimeUnit
+import xyz.xszq.bot.util.errorLogger
+import xyz.xszq.bot.json
+import xyz.xszq.bot.SendException
 
 
 /**
- * API connects to QQ Server.
- * @param config Bot's config.
+ * QQ 开放平台 HTTP 客户端
+ * @property config 机器人配置
  */
 class OpenAPI(
     var config: BotConfig,

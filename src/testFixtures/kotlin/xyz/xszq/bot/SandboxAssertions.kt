@@ -7,6 +7,7 @@ import korlibs.io.file.VfsFile
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.payload.UploadResult
 import java.io.File
+import xyz.xszq.bot.service.TencentCOS
 
 fun mockTencentCOS(): TencentCOS {
     val cos = mockk<TencentCOS>(relaxed = true)

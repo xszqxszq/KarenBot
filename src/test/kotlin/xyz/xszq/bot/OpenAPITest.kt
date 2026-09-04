@@ -16,6 +16,8 @@ import xyz.xszq.bot.payload.MsgType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import xyz.xszq.bot.service.OpenAPI
+import xyz.xszq.bot.service.WordFilter
 
 class OpenAPITest {
     @Test

@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.CoroutineContext
 
 /**
- * Manage subscribe of plugins.
+ * 管理插件的订阅
  */
 class SubscribeManager(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
@@ -20,9 +20,9 @@ class SubscribeManager(
     private val orderId = AtomicLong(0)
 
     /**
-     * Add a Subscribe from the plugin.
-     * @param plugin Plugin's name.
-     * @param subscribe Subscribe.
+     * 添加一个订阅
+     * @param plugin 插件名
+     * @param subscribe 订阅
      */
     fun <E: Event> subscribe(
         plugin: String,
@@ -45,11 +45,11 @@ class SubscribeManager(
         plugins[plugin]?.add(eventSubscribe)
     }
 
-    // TODO: Support all events
+    // TODO: 支持全部事件
     /**
-     * Add a Temporary always subscribe from the plugin.
-     * @param name Name.
-     * @param subscribe Subscribe.
+     * 添加临时的无条件订阅
+     * @param name 名称
+     * @param subscribe 订阅
      */
     fun always(name: String, handler: suspend MessageEvent.() -> Unit) {
         @Suppress("UNCHECKED_CAST")
@@ -57,24 +57,24 @@ class SubscribeManager(
     }
 
     /**
-     * Remove named subscribe.
-     * @param name Name.
+     * 移除指定名称的临时订阅
+     * @param name 名称
      */
     fun stop(name: String) {
         temp.remove(name)
     }
 
     /**
-     * Remove all subscribes from the plugin.
-     * @param plugin Plugin's name.
+     * 移除插件的全部订阅
+     * @param plugin 插件名
      */
     fun unsubscribe(plugin: String) {
         plugins.remove(plugin)
     }
 
     /**
-     * Launch the handler of events.
-     * @param event Event to handle.
+     * 触发事件的订阅处理
+     * @param event 待处理事件
      */
     @OptIn(DelicateCoroutinesApi::class)
     suspend fun <E: Event> handle(event: E) = supervisorScope {

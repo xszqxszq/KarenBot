@@ -1,6 +1,7 @@
 package xyz.xszq.bot
 
 import kotlinx.coroutines.runBlocking
+import xyz.xszq.bot.bootstrap.RuntimePaths
 
 /**
  * 应用入口点

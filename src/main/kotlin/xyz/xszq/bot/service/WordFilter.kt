@@ -1,4 +1,4 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.service
 
 class WordFilter(
     words: List<String>

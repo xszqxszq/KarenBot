@@ -1,4 +1,4 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.service
 
 import com.qcloud.cos.COSClient
 import com.qcloud.cos.ClientConfig

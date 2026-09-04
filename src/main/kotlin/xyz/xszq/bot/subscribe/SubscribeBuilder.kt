@@ -5,11 +5,11 @@ import xyz.xszq.bot.event.InteractionEvent
 import xyz.xszq.bot.event.MessageEvent
 
 /**
- * Build subscribes in route().
- * @param plugin Plugin name.
- * @param prefix Plugin route prefix.
- * @param forcePrefix Should plugin force check its prefix.
- * @param manager Plugin manager.
+ * route() 中构建订阅的 DSL Builder
+ * @param plugin 插件名
+ * @param prefix 父级前缀
+ * @param forcePrefix 是否一定要父级前缀
+ * @param manager 订阅管理器
  */
 class SubscribeBuilder(
     val plugin: String,

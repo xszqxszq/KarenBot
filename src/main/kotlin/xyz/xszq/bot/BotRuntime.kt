@@ -21,6 +21,9 @@ import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.message.PlainText
 import xyz.xszq.bot.webhook.WebhookRouter
 import java.io.File
+import xyz.xszq.bot.service.OpenAPI
+import xyz.xszq.bot.service.TencentCOS
+import xyz.xszq.bot.service.WordFilter
 
 /**
  * Bot 运行装配时

@@ -1,4 +1,4 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.util
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.ktor.client.*
@@ -10,9 +10,9 @@ import korlibs.io.file.std.tempVfs
 import java.util.*
 
 /**
- * Create a new Temp file.
- * @param prefix Filename prefix
- * @param suffix Filename suffix
+ * 创建临时文件
+ * @param prefix 文件名前缀
+ * @param suffix 文件名后缀
  */
 fun newTempFile(
     prefix: String = "",
@@ -20,8 +20,8 @@ fun newTempFile(
 ) = tempVfs[prefix + UUID.randomUUID().toString() + suffix]
 
 /**
- * Use a VfsFile and delete it.
- * @param block The code to use the VfsFile.
+ * 使用文件并自动删除
+ * @param block 使用文件的代码块
  */
 suspend fun <T> VfsFile.use(block: suspend (VfsFile) -> T): T {
     return try {
@@ -32,10 +32,10 @@ suspend fun <T> VfsFile.use(block: suspend (VfsFile) -> T): T {
 }
 
 /**
- * Create a temp file and delete it after using.
- * @param prefix Filename prefix
- * @param suffix Filename suffix
- * @param block The code to use the temp file.
+ * 创建临时文件并在使用后删除
+ * @param prefix 文件名前缀
+ * @param suffix 文件名后缀
+ * @param block 使用代码块
  */
 suspend fun <R> useTempFile(
     prefix: String = "",
@@ -48,10 +48,10 @@ fun createDownloadClient() = HttpClient(OkHttp)
 
 
 /**
- * Download File from URL.
- * @param url The URL.
- * @param filename Filename.
- * @param logger Logger to log error.
+ * 从 URL 下载文件
+ * @param url 下载地址
+ * @param filename 文件名
+ * @param logger 日志器
  */
 suspend fun downloadFile(url: String, filename: String, logger: KLogger): VfsFile? {
     val client = createDownloadClient()

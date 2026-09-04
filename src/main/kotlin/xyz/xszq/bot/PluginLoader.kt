@@ -14,6 +14,9 @@ import java.net.URL
 import java.net.URLClassLoader
 import java.net.URLConnection
 import java.util.jar.JarFile
+import xyz.xszq.bot.service.OpenAPI
+import xyz.xszq.bot.service.TencentCOS
+import xyz.xszq.bot.bootstrap.RuntimeDependencyResolver
 
 /**
  * 插件加载器
@@ -109,7 +112,9 @@ class PluginLoader(
             }
 
             val dependencyFiles = withContext(Dispatchers.IO) {
-                RuntimeDependencyResolver.resolveDependencies(jarFile, libsDirectory)
+                RuntimeDependencyResolver.resolveDependencies(jarFile, libsDirectory) { message ->
+                    logger.info { message }
+                }
             }
 
             val urls = mutableListOf<URL>().apply {

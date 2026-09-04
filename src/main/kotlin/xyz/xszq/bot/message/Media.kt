@@ -3,8 +3,8 @@ package xyz.xszq.bot.message
 import korlibs.io.file.VfsFile
 
 /**
- * Media message.
- * @param file The actual file on disk.
+ * 媒体消息
+ * @param file 文件
  */
 open class Media(
     val file: VfsFile

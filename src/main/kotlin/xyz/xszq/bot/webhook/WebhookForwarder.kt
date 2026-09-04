@@ -4,7 +4,7 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.request.*
 import io.ktor.server.routing.RoutingCall
-import xyz.xszq.bot.AllTrustManager
+import xyz.xszq.bot.util.AllTrustManager
 import xyz.xszq.bot.config.ForwardConfig
 import java.security.SecureRandom
 import javax.net.ssl.SSLContext

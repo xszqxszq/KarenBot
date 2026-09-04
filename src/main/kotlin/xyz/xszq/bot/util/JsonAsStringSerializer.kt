@@ -1,4 +1,4 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.util
 
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.JsonElement

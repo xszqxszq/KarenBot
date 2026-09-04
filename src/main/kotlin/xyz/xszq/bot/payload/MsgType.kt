@@ -1,7 +1,7 @@
 package xyz.xszq.bot.payload
 
 /**
- * Supported types of message send to server.
+ * 发送到服务器的消息类型
  */
 @Suppress("unused")
 object MsgType {

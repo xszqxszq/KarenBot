@@ -1,4 +1,4 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.util
 
 import io.github.kasukusakura.silkcodec.SilkCoder
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -13,22 +13,22 @@ import xyz.xszq.bot.ffmpeg.FFProbe
 import java.io.File
 
 /**
- * Process wave files.
+ * 处理 WAV 音频
  */
 object AudioHandler {
     private val logger = KotlinLogging.logger {}
     /**
-     * Read PCM part from wave file.
-     * @param file Wave file.
+     * 从 WAV 文件读取 PCM 数据
+     * @param file WAV 文件
      */
     suspend fun readWaveFile(file: VfsFile): ByteArray {
         return file.openInputStream().use { stream ->
-            // RIFF Header part
+            // RIFF 头
             require(stream.readString(4) == "RIFF") { "Invalid RIFF file" }
             stream.skip(4)
             require(stream.readString(4) == "WAVE") { "Invalid WAVE file" }
 
-            // Skip to data part
+            // 跳到实际数据部分
             while (stream.readString(4) != "data") {
                 stream.skip(stream.readS32LE())
             }
@@ -37,13 +37,13 @@ object AudioHandler {
         }
     }
     /**
-     * Merge wave files to a new file.
-     * @param inputFiles Input Wave files.
-     * @param outputFile Output Wave file.
-     * @param pcm Whether output a PCM file or a WAV file.
-     * @param sampleRate Target sampling rate.
-     * @param numChannels Target channels.
-     * @param bit Target bits per second.
+     * 合并多个 WAV 文件
+     * @param inputFiles 输入文件列表
+     * @param outputFile 输出文件
+     * @param pcm 是否输出 PCM 文件
+     * @param sampleRate 目标采样率
+     * @param numChannels 目标声道数
+     * @param bit 目标比特率
      */
     suspend fun mergeWaveFiles(
         inputFiles: List<VfsFile>,
@@ -58,29 +58,29 @@ object AudioHandler {
 
         outputFile.open(VfsOpenMode.WRITE).use { stream ->
             if (!pcm) {
-                // RIFF Header part
+                // RIFF 头
                 stream.writeString("RIFF")
                 stream.write32LE(36 + totalSize)
                 stream.writeString("WAVE")
 
-                // Data format part
+                // 数据格式区
                 stream.writeString("fmt ")
-                // Block size
+                // 块大小
                 stream.write32LE(16)
-                // Audio format type: PCM(1)
+                // 音频格式类型：PCM(1)
                 stream.write16LE(1)
-                // Channels
+                // 声道数
                 stream.write16LE(numChannels)
-                // Sampling rate
+                // 采样率
                 stream.write32LE(sampleRate)
-                // Bytes per second
+                // 每秒字节数
                 stream.write32LE((sampleRate * numChannels * bit) / 8)
-                // Bytes per block
+                // 每块字节数
                 stream.write16LE(numChannels * bit / 8)
-                // Bits per sample
+                // 每采样位数
                 stream.write16LE(bit)
 
-                // Data part
+                // 数据区
                 stream.writeString("data")
                 stream.write32LE(totalSize)
             }
@@ -89,10 +89,10 @@ object AudioHandler {
     }
 
     /**
-     * Convert PCM to Silk.
-     * @param pcmFile The PCM file to convert.
-     * @param bitRate Bit rate.
-     * @param sampleRate Sample Rate.
+     * 将 PCM 音频转为 Silk
+     * @param pcmFile 输入文件
+     * @param bitRate 比特率
+     * @param sampleRate 采样率
      */
     fun pcmToSilk(pcmFile: VfsFile, bitRate: Int = 24000, sampleRate: Int = 24000): VfsFile {
         val silkFile = File(newTempFile(suffix=".silk").absolutePath)
