@@ -1,6 +1,6 @@
 package xyz.xszq.bot.message
 
-import xyz.xszq.bot.json
+import xyz.xszq.bot.util.json
 import xyz.xszq.bot.payload.FaceExt
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi

@@ -2,30 +2,17 @@
 
 package xyz.xszq.bot.util
 
-import korlibs.math.toIntCeil
-import kotlin.math.max
-import kotlin.math.min
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
 
-typealias ErrorHandler = suspend MessageEvent.(Throwable) -> Unit
-
-
-fun <T> List<T>.pagination(page: Int, pageSize: Int): Triple<List<T>, Int, Int> {
-    if (isEmpty())
-        return Triple(this, 0, 0)
-    val totalPages = (size.toDouble() / pageSize).toIntCeil()
-    val actualPage = if (page > totalPages) totalPages else max(1, page)
-    val beginIndex = (actualPage - 1) * pageSize
-    val endIndex = min(actualPage * pageSize, size)
-    return Triple(subList(beginIndex, endIndex), actualPage, totalPages)
+/**
+ * 全局 JSON 对象
+ */
+val json = Json {
+    isLenient = true
+    ignoreUnknownKeys = true
 }
-
-fun <A, B> MutableList<Pair<A, B>>.add(a: A, b: B) = add(Pair(a, b))
-
-fun String.hasAlpha() = any { it.category in listOf(CharCategory.LOWERCASE_LETTER, CharCategory.UPPERCASE_LETTER) }
 
 const val DBC_SPACE = 32
 const val SBC_SPACE = 12288
@@ -72,6 +59,8 @@ operator fun Char.times(times: Int): String = buildString {
     }
 }
 
+fun String.hasAlpha() = any { it.category in listOf(CharCategory.LOWERCASE_LETTER, CharCategory.UPPERCASE_LETTER) }
+
 fun normalizeMessage(
     event: Event,
     parent: String? = null,
@@ -89,19 +78,4 @@ fun normalizeMessage(
     }
     message = message.removePrefix("/").trim()
     return event to message
-}
-
-/**
- * 异步并行版 forEach
- *
- * @param block 要执行的代码块
- */
-suspend fun <T> Collection<T>.forEachParallel(
-    block: suspend (T) -> Unit
-) = coroutineScope {
-    forEach { item ->
-        launch {
-            block(item)
-        }
-    }
 }

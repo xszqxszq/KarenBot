@@ -16,8 +16,8 @@ import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.payload.markdown.MarkdownData
 import java.util.concurrent.TimeUnit
 import xyz.xszq.bot.util.errorLogger
-import xyz.xszq.bot.json
-import xyz.xszq.bot.SendException
+import xyz.xszq.bot.util.json
+import xyz.xszq.bot.exception.SendException
 
 
 /**

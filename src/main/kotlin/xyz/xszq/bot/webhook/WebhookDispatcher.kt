@@ -24,6 +24,7 @@ import xyz.xszq.bot.util.recvGroupBotLogger
 import xyz.xszq.bot.util.recvC2CLogger
 import xyz.xszq.bot.util.eventLogger
 import xyz.xszq.bot.service.WordFilter
+import xyz.xszq.bot.util.json
 
 /**
  * Webhook 事件分发

@@ -14,6 +14,7 @@ import xyz.xszq.bot.payload.WebhookValidation
 import xyz.xszq.bot.util.handleValidation
 import xyz.xszq.bot.util.verifyBody
 import xyz.xszq.bot.service.WordFilter
+import xyz.xszq.bot.util.json
 
 /**
  * Webhook 路由处理

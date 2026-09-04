@@ -1,4 +1,4 @@
-package xyz.xszq.bot
+package xyz.xszq.bot.exception
 
 import xyz.xszq.bot.payload.ErrorResponse
 

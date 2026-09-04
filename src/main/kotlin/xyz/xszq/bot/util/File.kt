@@ -60,6 +60,13 @@ suspend fun downloadFile(url: String, filename: String, logger: KLogger): VfsFil
     }
 }
 
+/**
+ * 从 URL 下载文件
+ * @param url 下载地址
+ * @param filename 文件名
+ * @param logger 日志器
+ * @param client 客户端
+ */
 suspend fun downloadFile(url: String, filename: String, logger: KLogger, client: HttpClient): VfsFile? {
     val file = tempVfs[filename]
     return runCatching {

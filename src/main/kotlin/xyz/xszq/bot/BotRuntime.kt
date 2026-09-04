@@ -24,6 +24,7 @@ import java.io.File
 import xyz.xszq.bot.service.OpenAPI
 import xyz.xszq.bot.service.TencentCOS
 import xyz.xszq.bot.service.WordFilter
+import xyz.xszq.bot.util.json
 
 /**
  * Bot 运行装配时

@@ -18,6 +18,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import xyz.xszq.bot.service.OpenAPI
 import xyz.xszq.bot.service.WordFilter
+import xyz.xszq.bot.util.json
 
 class OpenAPITest {
     @Test
