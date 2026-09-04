@@ -6,7 +6,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.Image
-import xyz.xszq.bot.*
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.maimai.Maimai
@@ -27,6 +26,12 @@ import xyz.xszq.bot.maimai.query.ComboQuery.params
 import xyz.xszq.bot.maimai.query.ComboQuery.requiresType
 import xyz.xszq.bot.maimai.query.Filter
 import xyz.xszq.bot.maimai.toSimple
+import xyz.xszq.bot.newLine
+import xyz.xszq.bot.plus
+import xyz.xszq.bot.reply
+import xyz.xszq.bot.toPlainText
+import xyz.xszq.bot.util.json
+import xyz.xszq.bot.util.useTempFile
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 

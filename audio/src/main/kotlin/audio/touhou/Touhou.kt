@@ -7,9 +7,6 @@ import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 import org.xm.Similarity
-import xyz.xszq.bot.AudioHandler.crop
-import xyz.xszq.bot.AudioHandler.duration
-import xyz.xszq.bot.ErrorHandler
 import xyz.xszq.bot.Plugin
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
@@ -20,7 +17,10 @@ import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.payload.markdown.RenderData
 import xyz.xszq.bot.reply
-import java.util.UUID
+import xyz.xszq.bot.util.AudioHandler.crop
+import xyz.xszq.bot.util.AudioHandler.duration
+import xyz.xszq.bot.util.ErrorHandler
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 
@@ -210,7 +210,7 @@ class Touhou(
             })
 
             val subscribeId = UUID.randomUUID().toString()
-            bot.pluginLoader.subscribes.always(subscribeId) {
+            audio.pluginLoader.subscribes.always(subscribeId) {
 
                 val nowId =
                     if (this is GroupMessageEvent) group.id else sender.id
@@ -225,7 +225,7 @@ class Touhou(
                         line("游戏已结束。答案是${music.answer()}")
                         keyboard(againKeyboard(difficulty, range))
                     })
-                    bot.pluginLoader.subscribes.stop(subscribeId)
+                    audio.pluginLoader.subscribes.stop(subscribeId)
                     return@always
                 }
 
@@ -237,7 +237,7 @@ class Touhou(
                         line("恭喜你猜中了哦~答案是${music.answer()}")
                         keyboard(againKeyboard(difficulty, range))
                     })
-                    bot.pluginLoader.subscribes.stop(subscribeId)
+                    audio.pluginLoader.subscribes.stop(subscribeId)
                     started.remove(id)
                     return@always
                 }
@@ -252,7 +252,7 @@ class Touhou(
                 line("很遗憾，没有人猜中哦，答案是${music.answer()}")
                 keyboard(againKeyboard(difficulty, range))
             })
-            bot.pluginLoader.subscribes.stop(subscribeId)
+            audio.pluginLoader.subscribes.stop(subscribeId)
             started.remove(id)
         }
     }

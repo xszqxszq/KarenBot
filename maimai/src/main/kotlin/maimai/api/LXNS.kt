@@ -19,7 +19,10 @@ import xyz.xszq.bot.maimai.component.MaimaiData
 import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.database.ProberBindTable
 import xyz.xszq.bot.maimai.database.QQBindTable
-import xyz.xszq.bot.maimai.exception.*
+import xyz.xszq.bot.maimai.exception.AuthorizationException
+import xyz.xszq.bot.maimai.exception.UnknownException
+import xyz.xszq.bot.maimai.exception.UserBindRequiredException
+import xyz.xszq.bot.maimai.exception.UserNotFoundException
 import xyz.xszq.bot.maimai.music.*
 import xyz.xszq.bot.maimai.payload.*
 import java.util.concurrent.ConcurrentHashMap

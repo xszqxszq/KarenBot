@@ -20,16 +20,15 @@ import xyz.xszq.bot.event.ChannelEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.event.ReplyAble
 import xyz.xszq.bot.exception.NotFoundException
-import xyz.xszq.bot.json
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.message.RemoteImage
 import xyz.xszq.bot.newLine
 import xyz.xszq.bot.payload.AdminCheckRequest
 import xyz.xszq.bot.payload.markdown.MarkdownDsl
-import xyz.xszq.bot.payload.markdown.RenderData
 import xyz.xszq.bot.reply
 import xyz.xszq.bot.subscribe.SubscribeBuilder
+import xyz.xszq.bot.util.json
 
 @Suppress("unused")
 sealed class Controller(
@@ -237,7 +236,7 @@ sealed class Controller(
     }
 
     suspend fun MessageEvent.requestOA() {
-        bot.pluginLoader.subscribes.handle(ChannelEvent(bot, channelName = "rhythm-game-bind", data = this))
+        chunithm.pluginLoader.subscribes.handle(ChannelEvent(bot, channelName = "rhythm-game-bind", data = this))
     }
 
     suspend fun MessageEvent.queryByTextOrImage(

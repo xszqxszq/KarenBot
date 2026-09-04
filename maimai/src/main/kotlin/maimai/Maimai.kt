@@ -12,7 +12,6 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import xyz.xszq.bot.Plugin
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
-import xyz.xszq.bot.json
 import xyz.xszq.bot.maimai.api.DivingFish
 import xyz.xszq.bot.maimai.api.LXNS
 import xyz.xszq.bot.maimai.api.MaimaiAPI
@@ -27,7 +26,7 @@ import xyz.xszq.bot.maimai.controller.Controller
 import xyz.xszq.bot.maimai.database.*
 import xyz.xszq.bot.maimai.payload.DivingFishStats
 import xyz.xszq.bot.maimai.query.ComboQuery
-import java.util.concurrent.ConcurrentHashMap
+import xyz.xszq.bot.util.json
 import kotlin.reflect.full.primaryConstructor
 
 class Maimai: Plugin() {

@@ -13,12 +13,12 @@ import io.ktor.utils.io.readRemaining
 import xyz.xszq.bot.config.BotConfig
 import xyz.xszq.bot.config.DatabaseConfig
 import xyz.xszq.bot.payload.MsgType
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import xyz.xszq.bot.service.OpenAPI
 import xyz.xszq.bot.service.WordFilter
 import xyz.xszq.bot.util.json
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class OpenAPITest {
     @Test

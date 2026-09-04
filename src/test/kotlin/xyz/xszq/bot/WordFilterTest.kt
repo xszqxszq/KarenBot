@@ -1,8 +1,8 @@
 package xyz.xszq.bot
 
+import xyz.xszq.bot.service.WordFilter
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import xyz.xszq.bot.service.WordFilter
 
 class WordFilterTest {
     @Test

@@ -2,11 +2,11 @@ package xyz.xszq.bot
 
 import io.mockk.coEvery
 import io.mockk.mockk
-import java.io.File
 import korlibs.io.file.VfsFile
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.payload.UploadResult
 import xyz.xszq.bot.service.TencentCOS
+import java.io.File
 
 fun mockTencentCOS(): TencentCOS {
     val cos = mockk<TencentCOS>(relaxed = true)

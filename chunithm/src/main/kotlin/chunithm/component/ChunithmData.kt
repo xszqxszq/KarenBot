@@ -10,7 +10,7 @@ import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesTable
 import xyz.xszq.bot.chunithm.music.GameVersion
 import xyz.xszq.bot.chunithm.music.MusicInfo
 import xyz.xszq.bot.chunithm.payload.LXNSTrophyInfo
-import xyz.xszq.bot.json
+import xyz.xszq.bot.util.json
 
 class ChunithmData(
     val dataPath: String = "./data/chunithm"

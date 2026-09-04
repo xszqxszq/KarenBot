@@ -4,7 +4,7 @@ import korlibs.io.file.VfsFile
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.reply
-import xyz.xszq.bot.useTempFile
+import xyz.xszq.bot.util.useTempFile
 
 /**
  * 生成我巨爽左右对称图片

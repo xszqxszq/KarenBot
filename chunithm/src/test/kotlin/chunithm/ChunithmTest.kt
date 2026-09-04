@@ -2,7 +2,6 @@ package xyz.xszq.bot.chunithm
 
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import xyz.xszq.bot.*
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable

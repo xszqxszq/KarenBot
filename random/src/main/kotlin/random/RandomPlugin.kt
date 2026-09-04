@@ -13,7 +13,6 @@ import org.jetbrains.exposed.sql.exists
 import org.jetbrains.exposed.sql.transactions.transaction
 import xyz.xszq.bot.Plugin
 import xyz.xszq.bot.event.GroupMessageEvent
-import xyz.xszq.bot.json
 import xyz.xszq.bot.message.At
 import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.message.Markdown
@@ -24,6 +23,7 @@ import xyz.xszq.bot.random.payload.BilibiliResponse
 import xyz.xszq.bot.random.payload.BilibiliVideoInfo
 import xyz.xszq.bot.random.payload.RandomOtomads
 import xyz.xszq.bot.reply
+import xyz.xszq.bot.util.json
 import java.security.MessageDigest
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random

@@ -13,6 +13,7 @@ import xyz.xszq.bot.llm.LLMConfig
 import xyz.xszq.bot.llm.LLMModelConfig
 import xyz.xszq.bot.text.Text
 import xyz.xszq.bot.text.config.TextConfig
+import xyz.xszq.bot.util.json
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue

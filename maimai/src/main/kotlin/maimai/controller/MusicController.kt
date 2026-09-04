@@ -5,7 +5,6 @@ import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import xyz.xszq.bot.*
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.event.ReplyAble
 import xyz.xszq.bot.exception.IllegalArgsException
@@ -28,7 +27,12 @@ import xyz.xszq.bot.maimai.query.ComboQuery.filterCharts
 import xyz.xszq.bot.maimai.query.ComboQuery.filterMusics
 import xyz.xszq.bot.maimai.query.ComboQuery.isSingleChartSelected
 import xyz.xszq.bot.message.Audio
+import xyz.xszq.bot.newLine
+import xyz.xszq.bot.plus
+import xyz.xszq.bot.reply
 import xyz.xszq.bot.subscribe.CommandNotMatchedException
+import xyz.xszq.bot.toPlainText
+import xyz.xszq.bot.util.pagination
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
@@ -388,7 +392,7 @@ class MusicController(
             if (!isAdmin()) {
                 return@startsWith
             }
-            val client = bot.pluginLoader.llmClient ?: return@startsWith
+            val client = maimai.pluginLoader.llmClient ?: return@startsWith
             maimai.scope.launch {
                 try {
                     CoverEmbeddingGenerator.generate(
@@ -407,7 +411,7 @@ class MusicController(
             if (!isAdmin()) {
                 return@startsWith
             }
-            val client = bot.pluginLoader.llmClient ?: return@startsWith
+            val client = maimai.pluginLoader.llmClient ?: return@startsWith
             maimai.scope.launch {
                 try {
                     CoverEmbeddingGenerator.generateDescriptions(
@@ -548,7 +552,7 @@ class MusicController(
     }
 
     private suspend fun ReplyAble.searchByCover(query: String) {
-        val client = bot.pluginLoader.llmClient ?: return
+        val client = maimai.pluginLoader.llmClient ?: return
         if (coverEmbeddings == null) {
             coverEmbeddings = CoverEmbeddingGenerator.load(coverEmbeddingsPath)
         }

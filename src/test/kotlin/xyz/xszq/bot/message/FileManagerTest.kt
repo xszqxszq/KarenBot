@@ -1,10 +1,10 @@
 package xyz.xszq.bot.message
 
 import kotlinx.coroutines.test.runTest
+import xyz.xszq.bot.util.newTempFile
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import xyz.xszq.bot.util.newTempFile
 
 class FileManagerTest {
     @Test

@@ -29,6 +29,9 @@ import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.payload.markdown.*
+import xyz.xszq.bot.util.hasAlpha
+import xyz.xszq.bot.util.toDBC
+import xyz.xszq.bot.util.useTempFile
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
@@ -122,7 +125,7 @@ class GuessController(
         subscribesAt: String? = null
     ) = newSuspendedTransaction(Dispatchers.IO) {
         subscribesAt ?.let {
-            bot.pluginLoader.subscribes.stop(subscribesAt)
+            maimai.pluginLoader.subscribes.stop(subscribesAt)
         }
         subscribeId.remove(contextId)
         eventToReply.remove(contextId)
@@ -179,7 +182,7 @@ class GuessController(
                         hintClassical(event.contextId, subscribesAt, music, descriptions)
                     }
 
-                    bot.pluginLoader.subscribes.always(subscribesAt) {
+                    maimai.pluginLoader.subscribes.always(subscribesAt) {
                         listenClassical(event.contextId, subscribesAt, music, hintJob)
                     }
                 }
@@ -196,7 +199,7 @@ class GuessController(
                     subscribeId[event.contextId] = subscribesAt
                     eventToReply[event.contextId] = event
 
-                    bot.pluginLoader.subscribes.always(subscribesAt) {
+                    maimai.pluginLoader.subscribes.always(subscribesAt) {
                         listenOpening(event.contextId, subscribesAt, musics, chars)
                     }
 
@@ -250,7 +253,7 @@ class GuessController(
             hintClassical(contextId, subscribesAt, music, descriptions)
         }
 
-        bot.pluginLoader.subscribes.always(subscribesAt) {
+        maimai.pluginLoader.subscribes.always(subscribesAt) {
             listenClassical(this@classical.contextId, subscribesAt, music, hintJob)
         }
     }
@@ -376,7 +379,7 @@ class GuessController(
 
         reply(showOpening(musics, chars))
 
-        bot.pluginLoader.subscribes.always(subscribesAt) {
+        maimai.pluginLoader.subscribes.always(subscribesAt) {
             listenOpening(this@opening.contextId, subscribesAt, musics, chars)
         }
     }

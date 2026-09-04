@@ -2,7 +2,6 @@ package xyz.xszq.bot.maimai.controller
 
 import korlibs.io.util.UUID
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.withTimeout
 import xyz.xszq.bot.event.ChannelEvent
 import xyz.xszq.bot.event.MessageEvent
@@ -334,7 +333,7 @@ sealed class Controller(
         when {
             text.isNotBlank() -> action(text.trim())
             reference != null || message.any { it is Image } -> {
-                val client = bot.pluginLoader.llmClient ?: return
+                val client = maimai.pluginLoader.llmClient ?: return
                 val images = (message.filterIsInstance<Image>().mapNotNull {
                     it.url.ifBlank { null }
                 }) + (reference ?.filterIsInstance<RemoteImage>() ?.let {

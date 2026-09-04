@@ -5,7 +5,7 @@ import org.jetbrains.skia.Image
 import xyz.xszq.bot.maimai.component.image.FilterParams
 import xyz.xszq.bot.maimai.component.image.RatingRenderParams
 import xyz.xszq.bot.maimai.music.*
-import xyz.xszq.bot.pagination
+import xyz.xszq.bot.util.pagination
 import xyz.xszq.shinobu.dom.Div
 import xyz.xszq.shinobu.dom.Img
 import xyz.xszq.shinobu.dom.Img.Companion.noScale

@@ -28,9 +28,9 @@ import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.ffmpeg.FFMpegFileType
 import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.bot.message.Audio
-import xyz.xszq.bot.pagination
 import xyz.xszq.bot.reply
 import xyz.xszq.bot.subscribe.CommandNotMatchedException
+import xyz.xszq.bot.util.pagination
 import kotlin.random.Random
 
 @Suppress("unused")
@@ -284,7 +284,7 @@ class MusicController(
             if (!isAdmin()) {
                 return@startsWith
             }
-            val client = bot.pluginLoader.llmClient ?: return@startsWith
+            val client = chunithm.pluginLoader.llmClient ?: return@startsWith
             chunithm.scope.launch {
                 try {
                     CoverEmbeddingGenerator.generate(
@@ -303,7 +303,7 @@ class MusicController(
             if (!isAdmin()) {
                 return@startsWith
             }
-            val client = bot.pluginLoader.llmClient ?: return@startsWith
+            val client = chunithm.pluginLoader.llmClient ?: return@startsWith
             chunithm.scope.launch {
                 try {
                     CoverEmbeddingGenerator.generateDescriptions(
@@ -339,7 +339,7 @@ class MusicController(
     )
 
     private suspend fun ReplyAble.searchByCover(query: String) {
-        val client = bot.pluginLoader.llmClient ?: return
+        val client = chunithm.pluginLoader.llmClient ?: return
         if (coverEmbeddings == null) {
             coverEmbeddings = CoverEmbeddingGenerator.load(coverEmbeddingsPath)
         }

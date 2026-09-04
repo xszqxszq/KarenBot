@@ -5,7 +5,7 @@ import korlibs.io.util.toStringDecimal
 import xyz.xszq.bot.chunithm.component.ChunithmData
 import xyz.xszq.bot.chunithm.component.image.FilterParams
 import xyz.xszq.bot.chunithm.music.*
-import xyz.xszq.bot.toDBC
+import xyz.xszq.bot.util.toDBC
 import kotlin.random.Random
 
 object ComboQuery {

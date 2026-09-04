@@ -16,7 +16,7 @@ import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.bot.message.Audio
 import xyz.xszq.bot.message.RemoteVoice
 import xyz.xszq.bot.reply
-import xyz.xszq.bot.use
+import xyz.xszq.bot.util.use
 import java.io.File
 
 /**

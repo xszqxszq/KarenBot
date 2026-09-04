@@ -7,11 +7,11 @@ import io.ktor.utils.io.*
 import io.mockk.mockk
 import korlibs.io.file.VfsFile
 import kotlinx.coroutines.test.runTest
-import kotlin.test.*
-import xyz.xszq.bot.util.newTempFile
-import xyz.xszq.bot.util.useTempFile
 import xyz.xszq.bot.util.downloadFile
+import xyz.xszq.bot.util.newTempFile
 import xyz.xszq.bot.util.use
+import xyz.xszq.bot.util.useTempFile
+import kotlin.test.*
 
 class FileTest {
     @Test

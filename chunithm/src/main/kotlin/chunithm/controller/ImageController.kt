@@ -5,7 +5,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.Image
-import xyz.xszq.bot.*
 import xyz.xszq.bot.chunithm.Chunithm
 import xyz.xszq.bot.chunithm.Chunithm.Companion.textMode
 import xyz.xszq.bot.chunithm.component.image.FilterParams
@@ -27,6 +26,11 @@ import xyz.xszq.bot.chunithm.query.ComboQuery.params
 import xyz.xszq.bot.chunithm.query.Filter
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.NotFoundException
+import xyz.xszq.bot.newLine
+import xyz.xszq.bot.plus
+import xyz.xszq.bot.reply
+import xyz.xszq.bot.toPlainText
+import xyz.xszq.bot.util.useTempFile
 import java.util.concurrent.ConcurrentHashMap
 
 @Suppress("unused")

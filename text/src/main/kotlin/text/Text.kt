@@ -4,6 +4,8 @@ import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
 import io.ktor.client.plugins.*
+import org.scilab.forge.jlatexmath.TeXConstants
+import org.scilab.forge.jlatexmath.TeXFormula
 import xyz.xszq.bot.Plugin
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.message.Image
@@ -11,11 +13,9 @@ import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.newLine
 import xyz.xszq.bot.reply
 import xyz.xszq.bot.text.config.TextConfig
-import xyz.xszq.bot.useTempFile
+import xyz.xszq.bot.util.useTempFile
 import java.awt.Color
 import kotlin.random.Random
-import org.scilab.forge.jlatexmath.TeXConstants
-import org.scilab.forge.jlatexmath.TeXFormula
 
 /**
  * 文本插件

@@ -12,7 +12,8 @@ import io.ktor.server.routing.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.*
+import xyz.xszq.bot.Group
+import xyz.xszq.bot.Member
 import xyz.xszq.bot.User
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
@@ -25,12 +26,8 @@ import xyz.xszq.bot.maimai.database.DivingFishBindTable
 import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.database.ProberBindTable
 import xyz.xszq.bot.maimai.database.RhythmGameTokens
-import xyz.xszq.bot.maimai.music.UserQueryParams
-import xyz.xszq.bot.maimai.payload.LXNSResponse
 import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.reply
-import xyz.xszq.bot.Group
-import xyz.xszq.bot.Member
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 
@@ -143,7 +140,7 @@ class ApiController(
                             MaimaiSettingsTable[openid, "prober"] = "diving-fish"
                         data.event.reply("绑定成功，您可正常使用舞萌/中二各功能了。")
                         if (data.replay)
-                            data.event.bot.pluginLoader.subscribes.handle(data.event)
+                            maimai.pluginLoader.subscribes.handle(data.event)
                     }
                 }
                 call.respondRedirect(auth.verificationUriComplete)
@@ -165,7 +162,7 @@ class ApiController(
                         MaimaiSettingsTable[data.event.sender.id, "prober"] = "lxns"
                     data.event.reply("绑定成功，您可正常使用舞萌/中二各功能了。")
                     if (data.replay)
-                        data.event.bot.pluginLoader.subscribes.handle(data.event)
+                        maimai.pluginLoader.subscribes.handle(data.event)
                     call.respondText("绑定成功，您可以返回继续使用相关功能了。")
                 } else {
                     data.event.reply("绑定失败，请重试。")
