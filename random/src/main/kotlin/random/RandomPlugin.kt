@@ -12,12 +12,17 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.exists
 import org.jetbrains.exposed.sql.transactions.transaction
 import xyz.xszq.bot.Plugin
+import xyz.xszq.bot.database.GroupCommandSettings
+import xyz.xszq.bot.database.whenEnabled
 import xyz.xszq.bot.event.GroupMessageEvent
+import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.message.At
 import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.message.PlainText
 import xyz.xszq.bot.newLine
+import xyz.xszq.bot.payload.markdown.Action
+import xyz.xszq.bot.payload.markdown.Permission
 import xyz.xszq.bot.payload.markdown.RenderData
 import xyz.xszq.bot.random.payload.BilibiliResponse
 import xyz.xszq.bot.random.payload.BilibiliVideoInfo
@@ -71,18 +76,34 @@ class RandomPlugin: Plugin() {
                 reply(Image(randomImage.random()))
                 return@always
             }
-            if (message.any { it is Image }) {
-                val images = message.filterIsInstance<Image>()
-                val detected = images.any { img -> llmDetect(img) }
-                if (detected) {
-                    val now = System.currentTimeMillis()
-                    val allowed = lastDetect.compute(sender.id) { _, last ->
-                        if (last == null || now - last >= 5000) now else last
-                    } == now
-                    if (allowed)
-                        reply(Image(randomImage.random()))
+            val images = message.filterIsInstance<Image>()
+            if (images.isEmpty())
+                return@always
+            when (this) {
+                is GroupMessageEvent -> whenEnabled("random.blonde.auto") {
+                    handleBlondeDetect(images)
                 }
+                else -> handleBlondeDetect(images)
             }
+        }
+        // 金发识别开关
+        startsWith(listOf("禁用黄毛识别", "禁止黄毛识别", "关闭黄毛识别", "禁用金发识别", "关闭金发识别")) {
+            if (this is GroupMessageEvent)
+                reply(showBlondePanel(disable = true))
+        }
+        startsWith(listOf("启用黄毛识别", "允许黄毛识别", "打开黄毛识别", "启用金发识别", "打开金发识别")) {
+            if (this is GroupMessageEvent)
+                reply(showBlondePanel(disable = false))
+        }
+        button("random/blonde") {
+            val args = data.split(",")
+            val disable = args[0].toInt() == 0
+            val group = args[1]
+            GroupCommandSettings.setEnabled(group, "random.blonde.auto", args[0] == "1")
+            if (disable)
+                reply("禁用金发识别成功，启用请发送“启用金发识别”。")
+            else
+                reply("启用金发识别成功，禁用请发送“禁用金发识别”。")
         }
         // 获取随机金发图片
         startsWith(listOf("来点金发", "来点金毛", "来点黄毛", "随机金发", "随机黄毛")) {
@@ -175,7 +196,58 @@ class RandomPlugin: Plugin() {
     }
 
     /**
+     * 检测消息中的图片是否为金发动漫少女
+     *
+     * @param images 消息中的图片
+     */
+    private suspend fun MessageEvent.handleBlondeDetect(
+        images: List<Image>
+    ) {
+        val detected = images.any { img -> llmDetect(img) }
+        if (!detected)
+            return
+        val now = System.currentTimeMillis()
+        val allowed = lastDetect.compute(sender.id) { _, last ->
+            if (last == null || now - last >= 5000) now else last
+        } == now
+        if (allowed)
+            reply(Image(randomImage.random()))
+    }
+
+    /**
+     * 金发识别的开关面板
+     *
+     * @param disable 是否禁用
+     */
+    private fun GroupMessageEvent.showBlondePanel(
+        disable: Boolean
+    ): Markdown = Markdown.create {
+        line(bold("金发识别设置"))
+        line()
+        line("请管理员点击下方按钮确认" + (if (disable) "禁用" else "启用") + "金发识别：")
+        keyboard {
+            row {
+                val display = if (disable) "⚠禁用金发识别" else "✅启用金发识别"
+                button(
+                    id = "random/blonde",
+                    action = Action(
+                        type = Action.CALLBACK,
+                        data = (if (disable) "0" else "1") + ",${group.id}",
+                        permission = Permission(Permission.OPERATORS)
+                    ),
+                    renderData = RenderData(
+                        label = display,
+                        visitedLabel = display,
+                        style = RenderData.BLUE
+                    )
+                )
+            }
+        }
+    }
+
+    /**
      * 检测图片是否为金发动漫女孩
+     *
      * @return 判断结果
      */
     private suspend fun llmDetect(img: Image): Boolean {
