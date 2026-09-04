@@ -44,8 +44,7 @@ class Audio: Plugin() {
 
         setRoute()
         touhou.setRoute()
-        logger.info { "[活字印刷] 插件加载完成" }
-        logger.info { "[猜谜] 插件加载完成" }
+        logger.info { "[音频] 插件加载完成。" }
     }
 
     @OptIn(DelicateCoroutinesApi::class)

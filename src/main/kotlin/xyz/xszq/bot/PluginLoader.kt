@@ -161,7 +161,7 @@ class PluginLoader(
 
         coroutineScope {
             files.map { pluginFile ->
-                launch {
+                launch(Dispatchers.IO) {
                     loadOrUpdatePlugin(pluginFile)
                 }
             }

@@ -20,7 +20,6 @@ import xyz.xszq.bot.chunithm.controller.Controller
 import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesTable
 import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesVoteTable
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
-import xyz.xszq.bot.chunithm.database.ProberBindTable
 import xyz.xszq.bot.chunithm.query.ComboQuery
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
@@ -80,8 +79,7 @@ class Chunithm: Plugin() {
 
         transaction(database) {
             listOf(
-                MaimaiSettingsTable, ChunithmMusicAliasesTable, ChunithmMusicAliasesVoteTable,
-                ProberBindTable
+                ChunithmMusicAliasesTable, ChunithmMusicAliasesVoteTable
             ).forEach { table ->
                 if (!table.exists())
                     SchemaUtils.create(table)
@@ -114,6 +112,8 @@ class Chunithm: Plugin() {
         }
 
         setRoute()
+
+        logger.info { "[中二] 插件加载完成。" }
     }
 
     override suspend fun unload() {

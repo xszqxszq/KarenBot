@@ -57,7 +57,7 @@ class RandomPlugin: Plugin() {
         }
 
         setRoute()
-        logger.info { "[随机] 插件加载完成" }
+        logger.info { "[随机] 插件加载完成。" }
     }
 
     suspend fun setRoute() = route {
