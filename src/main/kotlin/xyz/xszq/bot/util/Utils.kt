@@ -3,10 +3,12 @@
 package xyz.xszq.bot.util
 
 import korlibs.math.toIntCeil
-import xyz.xszq.bot.event.Event
-import xyz.xszq.bot.event.MessageEvent
 import kotlin.math.max
 import kotlin.math.min
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import xyz.xszq.bot.event.Event
+import xyz.xszq.bot.event.MessageEvent
 
 typealias ErrorHandler = suspend MessageEvent.(Throwable) -> Unit
 
@@ -87,4 +89,19 @@ fun normalizeMessage(
     }
     message = message.removePrefix("/").trim()
     return event to message
+}
+
+/**
+ * 异步并行版 forEach
+ *
+ * @param block 要执行的代码块
+ */
+suspend fun <T> Collection<T>.forEachParallel(
+    block: suspend (T) -> Unit
+) = coroutineScope {
+    forEach { item ->
+        launch {
+            block(item)
+        }
+    }
 }

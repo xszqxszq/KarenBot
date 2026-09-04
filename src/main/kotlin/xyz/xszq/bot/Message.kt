@@ -11,9 +11,10 @@ import xyz.xszq.bot.payload.FileResponse
 import xyz.xszq.bot.payload.FileType
 import xyz.xszq.bot.payload.MsgType
 import xyz.xszq.bot.payload.markdown.MarkdownDsl
-import xyz.xszq.bot.util.sendGroupLogger
-import xyz.xszq.bot.util.sendC2CLogger
 import xyz.xszq.bot.util.errorLogger
+import xyz.xszq.bot.util.forEachParallel
+import xyz.xszq.bot.util.sendC2CLogger
+import xyz.xszq.bot.util.sendGroupLogger
 
 class MediaUpload(
     val response: FileResponse,
@@ -144,7 +145,7 @@ suspend fun ReplyAble.reply(message: MessageChain) {
         seq += 1
     }
     log(message)
-    mediaList.forEach { bot.cos.deleteFromCOS(it.filename) }
+    mediaList.forEachParallel { bot.cos.deleteFromCOS(it.filename) }
 }
 suspend fun ReplyAble.reply(message: String) = reply(PlainText(message))
 suspend fun ReplyAble.reply(message: MessageElement) = reply(MessageChain(message))

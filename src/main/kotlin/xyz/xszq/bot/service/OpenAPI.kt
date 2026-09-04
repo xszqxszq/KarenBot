@@ -81,7 +81,7 @@ class OpenAPI(
         headers["X-Union-Appid"] = config.appId
     }
 
-    private suspend inline fun <reified T> HttpResponse.result(log: () -> Unit): T? {
+    private suspend inline fun <reified T> HttpResponse.result(log: () -> Unit = {}): T? {
         if (status.isSuccess()) {
             log()
             return body<T>()
@@ -90,7 +90,6 @@ class OpenAPI(
         errorLogger.error { "[${error.code}] ${error.message}" }
         return null
     }
-    private suspend inline fun <reified T> HttpResponse.result(): T? = result {  }
     private suspend inline fun <reified T> HttpResponse.resultOrThrow(): T? {
         if (status.isSuccess()) {
             return body<T>()

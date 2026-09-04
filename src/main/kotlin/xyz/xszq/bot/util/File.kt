@@ -62,12 +62,11 @@ suspend fun downloadFile(url: String, filename: String, logger: KLogger): VfsFil
 
 suspend fun downloadFile(url: String, filename: String, logger: KLogger, client: HttpClient): VfsFile? {
     val file = tempVfs[filename]
-    try {
+    return runCatching {
         val response = client.get(url)
         file.write(response.bodyAsBytes())
-        return file
-    } catch (e: Exception) {
-        logger.error { "Error downloading file: ${e.message}" }
-    }
-    return null
+        file
+    }.onFailure { e ->
+        logger.error { "下载文件失败: ${e.message}" }
+    }.getOrNull()
 }
