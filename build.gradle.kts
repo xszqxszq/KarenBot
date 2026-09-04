@@ -26,7 +26,7 @@ application {
 
 
 group = "xyz.xszq.bot"
-version = "9.0"
+version = "9.1"
 
 repositories {
     mavenCentral()
