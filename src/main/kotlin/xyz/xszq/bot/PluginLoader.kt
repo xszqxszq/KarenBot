@@ -4,19 +4,19 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.util.collections.*
 import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.Database
+import xyz.xszq.bot.bootstrap.RuntimeDependencyResolver
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.llm.LLMClient
 import xyz.xszq.bot.message.FileManager
 import xyz.xszq.bot.payload.UsersMeResponse
+import xyz.xszq.bot.service.OpenAPI
+import xyz.xszq.bot.service.TencentCOS
 import xyz.xszq.bot.subscribe.SubscribeManager
 import java.io.File
 import java.net.URL
 import java.net.URLClassLoader
 import java.net.URLConnection
 import java.util.jar.JarFile
-import xyz.xszq.bot.service.OpenAPI
-import xyz.xszq.bot.service.TencentCOS
-import xyz.xszq.bot.bootstrap.RuntimeDependencyResolver
 
 /**
  * 插件加载器

@@ -3,8 +3,8 @@ package xyz.xszq.bot.message
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import korlibs.io.file.VfsFile
-import xyz.xszq.bot.util.useTempFile
 import xyz.xszq.bot.util.createDownloadClient
+import xyz.xszq.bot.util.useTempFile
 
 open class RemoteMedia(
     val url: String,

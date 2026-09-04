@@ -9,7 +9,10 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.Database
 import xyz.xszq.bot.config.BotConfig
 import xyz.xszq.bot.config.COSConfig
@@ -19,12 +22,12 @@ import xyz.xszq.bot.llm.LLMClient
 import xyz.xszq.bot.llm.LLMConfig
 import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.message.PlainText
-import xyz.xszq.bot.webhook.WebhookRouter
-import java.io.File
 import xyz.xszq.bot.service.OpenAPI
 import xyz.xszq.bot.service.TencentCOS
 import xyz.xszq.bot.service.WordFilter
 import xyz.xszq.bot.util.json
+import xyz.xszq.bot.webhook.WebhookRouter
+import java.io.File
 
 /**
  * Bot 运行装配时
