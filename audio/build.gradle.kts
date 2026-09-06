@@ -15,7 +15,7 @@ configurations.all {
     exclude(group = "gov.nist.math", module = "Jampack")
 }
 dependencies {
-    implementation("com.hankcs:hanlp:portable-1.8.6")
+    implementation("com.hankcs:hanlp:portable-1.3.4")
     implementation("com.sksamuel.hoplite:hoplite-core:${hopliteVersion}")
     implementation("com.sksamuel.hoplite:hoplite-yaml:${hopliteVersion}")
     implementation("com.soywiz.korge:korge-core:$korlibsVersion")
