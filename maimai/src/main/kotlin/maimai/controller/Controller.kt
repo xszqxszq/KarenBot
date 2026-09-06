@@ -1,5 +1,6 @@
 package xyz.xszq.bot.maimai.controller
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import korlibs.io.util.UUID
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withTimeout
@@ -37,6 +38,7 @@ import xyz.xszq.bot.reply
 sealed class Controller(
     open val maimai: Maimai
 ) {
+    val logger = KotlinLogging.logger {}
     abstract suspend fun setRoute()
     open suspend fun unload() {}
 
@@ -183,9 +185,14 @@ sealed class Controller(
         val migrateFailed = ProberBindTable[sender.id, "diving-fish", "migrate-failed"] != null
         val needReBind = !fromBind && migrateFailed &&
             (prefer.isNullOrBlank() || prefer == "diving-fish")
-        println("[绑定提示] $sender.id 查分器偏好=${prefer?.ifBlank { "自动" } ?: "自动"} QQ=${QQBindTable[sender.id] ?: "无"}")
-        println("[绑定提示] 水鱼 id=${ProberBindTable[sender.id, "diving-fish", "id"] ?: "无"} username=${ProberBindTable[sender.id, "diving-fish", "username"] ?: "无"}")
-        println("[绑定提示] 落雪 refresh=${ProberBindTable[sender.id, "lxns", "refresh"] ?: "无"} 好友码=${ProberBindTable[sender.id, "lxns", "friend-code"] ?: "无"}")
+        val qq = QQBindTable[sender.id]
+        val dfId = ProberBindTable[sender.id, "diving-fish", "id"]
+        val dfUsername = ProberBindTable[sender.id, "diving-fish", "username"]
+        val lxnsRefresh = ProberBindTable[sender.id, "lxns", "refresh"]
+        val lxnsFriendCode = ProberBindTable[sender.id, "lxns", "friend-code"]
+        logger.debug { "[绑定提示] $sender.id 查分器偏好=${prefer?.ifBlank { "自动" } ?: "自动"} QQ=${qq ?: "无"}" }
+        logger.debug { "[绑定提示] 水鱼 id=${dfId ?: "无"} username=${dfUsername ?: "无"}" }
+        logger.debug { "[绑定提示] 落雪 refresh=${lxnsRefresh ?: "无"} 好友码=${lxnsFriendCode ?: "无"}" }
         val (divingFishUrl, lxnsUrl) = bindLinks(replay = replay)
         reply(buildString {
             appendLine("请根据您所使用的查分器，点击下面链接来绑定：")

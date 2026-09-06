@@ -1,5 +1,6 @@
 package xyz.xszq.bot.chunithm.api
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.okhttp.*
@@ -35,6 +36,7 @@ class DivingFish(
     val chunithmData: ChunithmData,
     private val client: HttpClient = createClient()
 ): ChunithmAPI {
+    private val logger = KotlinLogging.logger {}
     override val id: String = "diving-fish"
     override val name: String = "水鱼"
 
@@ -57,7 +59,7 @@ class DivingFish(
         user: UserQueryParams
     ): RatingResponse? = when (user) {
         is UserQueryParams.Self -> {
-            println("[水鱼调试] getPlayerRating Self sender=${user.event.sender.id}")
+            logger.debug { "[水鱼调试] getPlayerRating Self sender=${user.event.sender.id}" }
             val data = withUserToken(user) { token ->
                 ratingRequest(buildJsonObject { }, token)
             } ?: return null
@@ -91,7 +93,7 @@ class DivingFish(
     ): List<Record>? = when (user) {
         is UserQueryParams.FriendCode -> null
         else -> {
-            println("[水鱼调试] getPlayerRecord user=$user")
+            logger.debug { "[水鱼调试] getPlayerRecord user=$user" }
             withUserToken(user) { token ->
                 recordsRequest(token, listOf(music.id)).records.best.mapNotNull { record ->
                     record.toRecord()
@@ -106,7 +108,7 @@ class DivingFish(
     ): RecordsResponse? = when (user) {
         is UserQueryParams.FriendCode -> null
         else -> {
-            println("[水鱼调试] getPlayerRecords user=$user")
+            logger.debug { "[水鱼调试] getPlayerRecords user=$user" }
             val ids = musics.map { it.id }
             val data = withUserToken(user) { token ->
                 recordsRequest(token, ids)
@@ -209,10 +211,10 @@ class DivingFish(
     }
 
     suspend fun accessToken(openid: String): String? {
-        println("[水鱼调试] accessToken openid=$openid")
+        logger.debug { "[水鱼调试] accessToken openid=$openid" }
         tokenCache[openid] ?.let { (token, expiresAt) ->
             if (expiresAt > System.currentTimeMillis() + 30_000L) {
-                println("[水鱼调试] accessToken 缓存命中 $openid")
+                logger.debug { "[水鱼调试] accessToken 缓存命中 $openid" }
                 return token
             }
         }
@@ -220,18 +222,18 @@ class DivingFish(
         return mutex.withLock {
             tokenCache[openid] ?.let { (token, expiresAt) ->
                 if (expiresAt > System.currentTimeMillis() + 30_000L) {
-                    println("[水鱼调试] accessToken 缓存命中(锁内) $openid")
+                    logger.debug { "[水鱼调试] accessToken 缓存命中(锁内) $openid" }
                     return@withLock token
                 }
             }
             val sub = ProberBindTable[openid, "diving-fish", "id"]
                 ?: run {
-                    println("[水鱼调试] accessToken 无sub $openid")
+                    logger.debug { "[水鱼调试] accessToken 无sub $openid" }
                     return@withLock null
                 }
-            println("[水鱼调试] accessToken sub=$sub $openid")
+            logger.debug { "[水鱼调试] accessToken sub=$sub $openid" }
             val tokens = onBehalfOf("sub:$sub")
-            println("[水鱼调试] accessToken 换票成功 $openid expiresIn=${tokens.expiresIn}")
+            logger.debug { "[水鱼调试] accessToken 换票成功 $openid expiresIn=${tokens.expiresIn}" }
             tokenCache[openid] = Pair(
                 tokens.accessToken,
                 System.currentTimeMillis() + tokens.expiresIn * 1000L
@@ -241,7 +243,7 @@ class DivingFish(
     }
 
     private suspend fun onBehalfOf(subject: String): DivingFishOAuthTokenResponse {
-        println("[水鱼调试] onBehalfOf subject=$subject")
+        logger.debug { "[水鱼调试] onBehalfOf subject=$subject" }
         var retry = 0
         while (true) {
             val response = client.post("$authServer/oauth/token") {
@@ -253,12 +255,12 @@ class DivingFish(
                     "subject" to subject
                 ))
             }
-            println("[水鱼调试] onBehalfOf subject=$subject status=${response.status}")
+            logger.debug { "[水鱼调试] onBehalfOf subject=$subject status=${response.status}" }
             if (response.status != HttpStatusCode.TooManyRequests || retry >= 3) {
                 if (response.status == HttpStatusCode.BadRequest)
                     throw UserBindRequiredException()
                 if (!response.status.isSuccess())
-                    throw UnknownException()
+                    throw UnknownException("HTTP ${response.status.value}")
                 return response.body<DivingFishOAuthTokenResponse>()
             }
             retry++

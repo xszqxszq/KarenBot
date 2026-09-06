@@ -30,10 +30,10 @@ class ChunithmQuery(
             UserDeniedException::class.java,
             AuthorizationException::class.java,
             NoDataException::class.java,
-            UserBindRequiredException::class.java,
             UserNotFoundException::class.java,
             NotSupportedException::class.java,
             UnknownException::class.java,
+            UserBindRequiredException::class.java,
         )
     }
 

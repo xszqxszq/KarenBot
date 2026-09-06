@@ -1,5 +1,6 @@
 package xyz.xszq.bot.maimai.controller
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -59,7 +60,7 @@ class UpdateController(
                         type = record.type
                     )
                 }
-                println(records)
+                logger.debug { records }
                 if (records.isEmpty())
                     return@startsWith
 

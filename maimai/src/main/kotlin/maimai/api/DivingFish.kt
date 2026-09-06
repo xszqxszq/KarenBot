@@ -1,6 +1,7 @@
 package xyz.xszq.bot.maimai.api
 
 import com.fleeksoft.ksoup.Ksoup
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.okhttp.*
@@ -34,6 +35,7 @@ class DivingFish(
     val maimaiData: MaimaiData,
     val client: HttpClient = createClient()
 ) : MaimaiAPI {
+    private val logger = KotlinLogging.logger {}
     override val id: String = "diving-fish"
     override val name: String = "水鱼"
 
@@ -78,7 +80,7 @@ class DivingFish(
             ))
         }
         if (!response.status.isSuccess())
-            throw UnknownException()
+            throw UnknownException("HTTP ${response.status.value}")
         return response.body<DivingFishDeviceAuthorizationResponse>()
     }
 
@@ -124,22 +126,22 @@ class DivingFish(
     }
 
     suspend fun bindByRef(openid: String): String? {
-        println("[水鱼调试] bindByRef openid=$openid")
+        logger.debug { "[水鱼调试] bindByRef openid=$openid" }
         val tokens = runCatching {
             onBehalfOf("ref:${subjectRef(openid)}")
         }.getOrNull() ?: runCatching {
             val qq = QQBindTable[openid] ?: throw UnknownException()
-            println("[水鱼调试] bindByRef 改用qq=$qq openid=$openid")
+            logger.debug { "[水鱼调试] bindByRef 改用qq=$qq openid=$openid" }
             onBehalfOf("ref:${subjectRef(qq.toString())}")
         }.getOrNull() ?: run {
-            println("[水鱼调试] bindByRef 换票失败 openid=$openid")
+            logger.debug { "[水鱼调试] bindByRef 换票失败 openid=$openid" }
             return null
         }
         val sub = decodeSub(tokens.accessToken) ?: run {
-            println("[水鱼调试] bindByRef decodeSub null openid=$openid")
+            logger.debug { "[水鱼调试] bindByRef decodeSub null openid=$openid" }
             return null
         }
-        println("[水鱼调试] bindByRef sub=$sub openid=$openid")
+        logger.debug { "[水鱼调试] bindByRef sub=$sub openid=$openid" }
         ProberBindTable[openid, "diving-fish", "id"] = sub
         runCatching {
             val data = recordsRequest(tokens.accessToken)
@@ -157,10 +159,10 @@ class DivingFish(
     }
 
     suspend fun accessToken(openid: String): String? {
-        println("[水鱼调试] accessToken openid=$openid")
+        logger.debug { "[水鱼调试] accessToken openid=$openid" }
         tokenCache[openid] ?.let { (token, expiresAt) ->
             if (expiresAt > System.currentTimeMillis() + 30_000L) {
-                println("[水鱼调试] accessToken 缓存命中 $openid")
+                logger.debug { "[水鱼调试] accessToken 缓存命中 $openid" }
                 return token
             }
         }
@@ -168,18 +170,18 @@ class DivingFish(
         return mutex.withLock {
             tokenCache[openid] ?.let { (token, expiresAt) ->
                 if (expiresAt > System.currentTimeMillis() + 30_000L) {
-                    println("[水鱼调试] accessToken 缓存命中(锁内) $openid")
+                    logger.debug { "[水鱼调试] accessToken 缓存命中(锁内) $openid" }
                     return@withLock token
                 }
             }
             val sub = ProberBindTable[openid, "diving-fish", "id"]
                 ?: run {
-                    println("[水鱼调试] accessToken 无sub $openid")
+                    logger.debug { "[水鱼调试] accessToken 无sub $openid" }
                     return@withLock null
                 }
-            println("[水鱼调试] accessToken sub=$sub $openid")
+            logger.debug { "[水鱼调试] accessToken sub=$sub $openid" }
             val tokens = onBehalfOf("sub:$sub")
-            println("[水鱼调试] accessToken 换票成功 $openid expiresIn=${tokens.expiresIn}")
+            logger.debug { "[水鱼调试] accessToken 换票成功 $openid expiresIn=${tokens.expiresIn}" }
             tokenCache[openid] = Pair(
                 tokens.accessToken,
                 System.currentTimeMillis() + tokens.expiresIn * 1000L
@@ -189,7 +191,7 @@ class DivingFish(
     }
 
     private suspend fun onBehalfOf(subject: String): DivingFishOAuthTokenResponse {
-        println("[水鱼调试] onBehalfOf subject=$subject")
+        logger.debug { "[水鱼调试] onBehalfOf subject=$subject" }
         var retry = 0
         while (true) {
             val response = client.post("$authServer/oauth/token") {
@@ -201,16 +203,16 @@ class DivingFish(
                     "subject" to subject
                 ))
             }
-            println("[水鱼调试] onBehalfOf subject=$subject status=${response.status}")
+            logger.debug { "[水鱼调试] onBehalfOf subject=$subject status=${response.status}" }
             if (response.status != HttpStatusCode.TooManyRequests || retry >= 3) {
                 if (response.status == HttpStatusCode.BadRequest)
                     throw UserBindRequiredException()
                 if (!response.status.isSuccess())
-                    throw UnknownException()
+                    throw UnknownException("HTTP ${response.status.value}")
                 return response.body<DivingFishOAuthTokenResponse>()
             }
             retry++
-            println("[水鱼调试] onBehalfOf 429限流重试 $retry subject=$subject")
+            logger.debug { "[水鱼调试] onBehalfOf 429限流重试 $retry subject=$subject" }
             delay(retry * 2000L)
         }
     }
@@ -305,14 +307,14 @@ class DivingFish(
         user: UserQueryParams,
         block: suspend (String) -> T
     ): T {
-        println("[水鱼调试] withAccessToken user=$user")
+        logger.debug { "[水鱼调试] withAccessToken user=$user" }
         val openid = resolveBindId(user) ?: run {
-            println("[水鱼调试] withAccessToken resolveBindId null user=$user")
+            logger.debug { "[水鱼调试] withAccessToken resolveBindId null user=$user" }
             throw notBoundException(user)
         }
-        println("[水鱼调试] withAccessToken openid=$openid")
+        logger.debug { "[水鱼调试] withAccessToken openid=$openid" }
         val token = accessToken(openid) ?: run {
-            println("[水鱼调试] withAccessToken accessToken null openid=$openid")
+            logger.debug { "[水鱼调试] withAccessToken accessToken null openid=$openid" }
             throw notBoundException(user)
         }
         var retry = 0
@@ -321,7 +323,7 @@ class DivingFish(
             val e = result.exceptionOrNull()
             if (e == null)
                 return result.getOrThrow()
-            println("[水鱼调试] withAccessToken block失败 $e retry=$retry")
+            logger.debug { "[水鱼调试] withAccessToken block失败 $e retry=$retry" }
             if (e is AuthorizationException) {
                 tokenCache.remove(openid)
                 val fresh = accessToken(openid) ?: throw UserBindRequiredException()
@@ -387,7 +389,7 @@ class DivingFish(
         user: UserQueryParams
     ): RatingResponse? = when (user) {
         is UserQueryParams.Self -> {
-            println("[水鱼调试] getPlayerRating Self sender=${user.event.sender.id}")
+            logger.debug { "[水鱼调试] getPlayerRating Self sender=${user.event.sender.id}" }
             val data = withUserToken(user) { token ->
                 ratingRequest(buildJsonObject {
                     put("b50", JsonPrimitive(true))
@@ -425,7 +427,7 @@ class DivingFish(
     ): List<Record>? = when (user) {
         is UserQueryParams.FriendCode -> null
         else -> {
-            println("[水鱼调试] getPlayerRecord user=$user")
+            logger.debug { "[水鱼调试] getPlayerRecord user=$user" }
             withUserToken(user) { token ->
                 recordsRequest(token, listOf(music.id)).records.mapNotNull { record ->
                     record.toRecord()
@@ -440,7 +442,7 @@ class DivingFish(
     ): RecordsResponse? = when (user) {
         is UserQueryParams.FriendCode -> null
         else -> {
-            println("[水鱼调试] getPlayerRecords user=$user")
+            logger.debug { "[水鱼调试] getPlayerRecords user=$user" }
             withUserToken(user) { token ->
                 val data = recordsRequest(token, musics.map { it.id })
                 RecordsResponse(

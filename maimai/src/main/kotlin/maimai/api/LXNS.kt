@@ -1,5 +1,6 @@
 package xyz.xszq.bot.maimai.api
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.okhttp.*
@@ -37,6 +38,7 @@ class LXNS(
     val maimaiData: MaimaiData,
     val client: HttpClient = createClient()
 ): MaimaiAPI {
+    private val logger = KotlinLogging.logger {}
     override val id: String = "lxns"
     override val name: String = "落雪"
     val apiServer = "https://maimai.lxns.net/api/v0/maimai"
@@ -64,7 +66,7 @@ class LXNS(
         code: String,
         event: MessageEvent
     ): Boolean {
-        println("[落雪调试] initOAuth sender=${event.sender.id}")
+        logger.debug { "[落雪调试] initOAuth sender=${event.sender.id}" }
         val tokens = runCatching {
             client.post("$apiOauth/token") {
                 contentType(ContentType.Application.Json)
@@ -77,10 +79,10 @@ class LXNS(
                 ))
             }.body<LXNSOATokenResponse>()
         }.getOrNull() ?: run {
-            println("[落雪调试] initOAuth 换token失败 sender=${event.sender.id}")
+            logger.debug { "[落雪调试] initOAuth 换token失败 sender=${event.sender.id}" }
             return false
         }
-        println("[落雪调试] initOAuth 换token成功 sender=${event.sender.id}")
+        logger.debug { "[落雪调试] initOAuth 换token成功 sender=${event.sender.id}" }
         ProberBindTable[event.sender.id, "lxns", "refresh"] = tokens.refreshToken
         MaimaiSettingsTable[event.sender.id, "lxns-oa-refresh"] = tokens.refreshToken
         runCatching {
@@ -96,7 +98,7 @@ class LXNS(
         runCatching {
             val player = client.get("$apiUser/maimai/player") { setOAuth(tokens.accessToken) }
                 .body<LXNSResponse<LXNSPlayer>>().data ?: return@runCatching
-            println("[落雪调试] initOAuth 好友码=${player.friendCode} sender=${event.sender.id}")
+            logger.debug { "[落雪调试] initOAuth 好友码=${player.friendCode} sender=${event.sender.id}" }
             ProberBindTable[event.sender.id, "lxns", "friend-code"] = player.friendCode.toString()
         }
         return true
@@ -107,10 +109,10 @@ class LXNS(
     }
 
     suspend fun accessToken(id: String): String? {
-        println("[落雪调试] accessToken id=$id")
+        logger.debug { "[落雪调试] accessToken id=$id" }
         tokenCache[id] ?.let { (token, expiresAt) ->
             if (expiresAt > System.currentTimeMillis() + 30_000L) {
-                println("[落雪调试] accessToken 缓存命中 $id")
+                logger.debug { "[落雪调试] accessToken 缓存命中 $id" }
                 return token
             }
         }
@@ -118,16 +120,16 @@ class LXNS(
         return mutex.withLock {
             tokenCache[id] ?.let { (token, expiresAt) ->
                 if (expiresAt > System.currentTimeMillis() + 30_000L) {
-                    println("[落雪调试] accessToken 缓存命中(锁内) $id")
+                    logger.debug { "[落雪调试] accessToken 缓存命中(锁内) $id" }
                     return@withLock token
                 }
             }
             // TODO: 不要在查分器端引入任何直接查表
             val refresh = ProberBindTable[id, "lxns", "refresh"] ?: run {
-                println("[落雪调试] accessToken 无refresh $id")
+                logger.debug { "[落雪调试] accessToken 无refresh $id" }
                 return@withLock null
             }
-            println("[落雪调试] accessToken refresh=$refresh $id")
+            logger.debug { "[落雪调试] accessToken refresh=$refresh $id" }
             val response = client.post("$apiOauth/token") {
                 contentType(ContentType.Application.Json)
                 setBody(LXNSOAToken(
@@ -138,7 +140,7 @@ class LXNS(
                 ))
             }
             if (response.status == HttpStatusCode.TooManyRequests) {
-                println("[落雪调试] accessToken 刷新429 $id")
+                logger.debug { "[落雪调试] accessToken 刷新429 $id" }
                 return@withLock null
             }
             val parsed = runCatching {
@@ -146,14 +148,14 @@ class LXNS(
             }.getOrNull()
             if (parsed == null) {
                 if (response.status == HttpStatusCode.BadRequest || response.status == HttpStatusCode.Unauthorized) {
-                    println("[落雪调试] accessToken refresh失效删除 $id")
+                    logger.debug { "[落雪调试] accessToken refresh失效删除 $id" }
                     ProberBindTable.delete(id, "lxns")
                     MaimaiSettingsTable[id, "lxns-oa-refresh"] = ""
                 }
-                println("[落雪调试] accessToken 刷新失败 $id")
+                logger.debug { "[落雪调试] accessToken 刷新失败 $id" }
                 return@withLock null
             }
-            println("[落雪调试] accessToken 刷新成功 $id")
+            logger.debug { "[落雪调试] accessToken 刷新成功 $id" }
             ProberBindTable[id, "lxns", "refresh"] = parsed.refreshToken
             MaimaiSettingsTable[id, "lxns-oa-refresh"] = parsed.refreshToken
             tokenCache[id] = Pair(
@@ -231,7 +233,7 @@ class LXNS(
     private suspend fun resolveFriendCode(user: UserQueryParams): String? = when (user) {
         is UserQueryParams.Self -> {
             ProberBindTable[user.event.sender.id, "lxns", "friend-code"] ?: run {
-                println("[落雪调试] resolveFriendCode 无好友码 sender=${user.event.sender.id}")
+                logger.debug { "[落雪调试] resolveFriendCode 无好友码 sender=${user.event.sender.id}" }
                 fetchFriendCodeByQQ(user.event.sender.id)
             }
         }
@@ -241,13 +243,13 @@ class LXNS(
 
     private suspend fun fetchFriendCodeByQQ(openid: String): String? {
         val qq = QQBindTable[openid] ?: return null
-        println("[落雪调试] 用qq=$qq 拉取好友码 sender=$openid")
+        logger.debug { "[落雪调试] 用qq=$qq 拉取好友码 sender=$openid" }
         val response = client.get("$apiServer/player/qq/$qq") {
             setDeveloper()
         }.body<LXNSResponse<LXNSPlayer>>()
         return when (response.code) {
             200 -> response.data ?.let { player ->
-                println("[落雪调试] 拉到好友码=${player.friendCode} sender=$openid")
+                logger.debug { "[落雪调试] 拉到好友码=${player.friendCode} sender=$openid" }
                 ProberBindTable[openid, "lxns", "friend-code"] =
                     player.friendCode.toString()
                 player.friendCode.toString()
@@ -273,13 +275,13 @@ class LXNS(
             throw e
         val openid = user.event.sender.id
         if (QQBindTable[openid] == null) {
-            println("[落雪调试] 好友码失效且无QQ可反查 sender=$openid")
+            logger.debug { "[落雪调试] 好友码失效且无QQ可反查 sender=$openid" }
             throw UserBindRequiredException()
         }
-        println("[落雪调试] 好友码失效, 用QQ反查 sender=$openid")
+        logger.debug { "[落雪调试] 好友码失效, 用QQ反查 sender=$openid" }
         val refreshed = fetchFriendCodeByQQ(openid)
         if (refreshed == null) {
-            println("[落雪调试] QQ反查也失败 sender=$openid")
+            logger.debug { "[落雪调试] QQ反查也失败 sender=$openid" }
             throw UserBindRequiredException()
         }
         val player = getPlayerInfo(refreshed) ?: return null
@@ -303,7 +305,7 @@ class LXNS(
                 404 -> throw UserNotFoundException(body.message)
                 400 -> throw UserNotFoundException(body.message)
                 200 -> body.data
-                else -> throw UnknownException(body.message)
+                else -> throw UnknownException(body.message ?: "code ${body.code}")
             }
         }
     }
@@ -313,9 +315,9 @@ class LXNS(
     ): RatingResponse? = when (user) {
         is UserQueryParams.Username -> null
         else -> {
-            println("[落雪调试] getPlayerRating user=$user")
+            logger.debug { "[落雪调试] getPlayerRating user=$user" }
             val (player, friendCode) = resolvePlayer(user) ?: return null
-            println("[落雪调试] getPlayerRating friendCode=$friendCode")
+            logger.debug { "[落雪调试] getPlayerRating friendCode=$friendCode" }
             var retry = 0
             var response = client.get("$apiServer/player/$friendCode/bests") {
                 setDeveloper()
@@ -328,10 +330,10 @@ class LXNS(
                 }
             }
             val data = response.body<LXNSResponse<LXNSRatingResponse>>().data ?: run {
-                println("[落雪调试] getPlayerRating bests data为null friendCode=$friendCode")
+                logger.debug { "[落雪调试] getPlayerRating bests data为null friendCode=$friendCode" }
                 return null
             }
-            println("[落雪调试] getPlayerRating bests成功 friendCode=$friendCode")
+            logger.debug { "[落雪调试] getPlayerRating bests成功 friendCode=$friendCode" }
             RatingResponse(
                 player = PlayerInfo(
                     nickname = player.name,
@@ -364,10 +366,10 @@ class LXNS(
     ): List<Record>? = when (user) {
         is UserQueryParams.Username -> null
         else -> {
-            println("[落雪调试] getPlayerRecord user=$user music=${music.id}")
+            logger.debug { "[落雪调试] getPlayerRecord user=$user music=${music.id}" }
             val friendCode = resolveFriendCode(user)
                 ?: if (user is UserQueryParams.Self) throw UserBindRequiredException() else return null
-            println("[落雪调试] getPlayerRecord friendCode=$friendCode")
+            logger.debug { "[落雪调试] getPlayerRecord friendCode=$friendCode" }
             val realId = if (music.genre == MusicGenre.Utage) music.id else music.resourceId
             val realType = if (music.genre == MusicGenre.Utage) "utage" else music.type.full
             var retry = 0
@@ -386,11 +388,11 @@ class LXNS(
                 }
             }
             val body = response.body<LXNSResponse<List<LXNSScore>>>()
-            println("[落雪调试] getPlayerRecord code=${body.code} friendCode=$friendCode")
+            logger.debug { "[落雪调试] getPlayerRecord code=${body.code} friendCode=$friendCode" }
             val scores = when (body.code) {
                 200 -> body.data
                 404, 400 -> if (user is UserQueryParams.Self) throw UserBindRequiredException() else return null
-                else -> throw UnknownException(body.message)
+                else -> throw UnknownException(body.message ?: "code ${body.code}")
             } ?: return null
             scores.mapNotNull { score ->
                 score.toRecord()
@@ -409,7 +411,7 @@ class LXNS(
             if (user is UserQueryParams.Self &&
                 ProberBindTable[user.event.sender.id, "lxns", "friend-code"] == null)
                 player.friendCode.toString().let { friendCode ->
-                    println("[落雪调试] getPlayerRecords 补好友码=$friendCode sender=${user.event.sender.id}")
+                    logger.debug { "[落雪调试] getPlayerRecords 补好友码=$friendCode sender=${user.event.sender.id}" }
                     ProberBindTable[user.event.sender.id, "lxns", "friend-code"] = friendCode
                 }
             val needed = musics.map { it.id }.toSet()
@@ -437,9 +439,9 @@ class LXNS(
     ): RecordsResponse? = when (user) {
         is UserQueryParams.Username -> null
         else -> {
-            println("[落雪调试] getPlayerRecent user=$user")
+            logger.debug { "[落雪调试] getPlayerRecent user=$user" }
             val (player, friendCode) = resolvePlayer(user) ?: return null
-            println("[落雪调试] getPlayerRecent friendCode=$friendCode")
+            logger.debug { "[落雪调试] getPlayerRecent friendCode=$friendCode" }
             var retry = 0
             var response = client.get("$apiServer/player/$friendCode/recents") {
                 setDeveloper()
@@ -452,11 +454,11 @@ class LXNS(
                 }
             }
             val body = response.body<LXNSResponse<List<LXNSScore>>>()
-            println("[落雪调试] getPlayerRecent code=${body.code} friendCode=$friendCode")
+            logger.debug { "[落雪调试] getPlayerRecent code=${body.code} friendCode=$friendCode" }
             val records = when (body.code) {
                 200 -> body.data
                 404, 400 -> if (user is UserQueryParams.Self) throw UserBindRequiredException() else return null
-                else -> throw UnknownException(body.message)
+                else -> throw UnknownException(body.message ?: "code ${body.code}")
             } ?: return null
             RecordsResponse(
                 player = PlayerInfo(
