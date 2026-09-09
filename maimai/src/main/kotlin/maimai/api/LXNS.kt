@@ -250,13 +250,24 @@ class LXNS(
 
     private suspend fun resolveFriendCode(user: UserQueryParams): String? = when (user) {
         is UserQueryParams.Self -> {
-            ProberBindTable[user.event.sender.id, "lxns", "friend-code"] ?: run {
-                logger.debug { "[落雪调试] resolveFriendCode 无好友码 sender=${user.event.sender.id}" }
-                fetchFriendCodeByQQ(user.event.sender.id)
+            val openid = user.event.sender.id
+            ProberBindTable[openid, "lxns", "friend-code"] ?: run {
+                logger.debug { "[落雪调试] resolveFriendCode 无好友码 sender=$openid" }
+                fetchFriendCodeByOAuth(openid) ?: fetchFriendCodeByQQ(openid)
             }
         }
         is UserQueryParams.FriendCode -> user.friendCode
         is UserQueryParams.Username -> null
+    }
+
+    private suspend fun fetchFriendCodeByOAuth(openid: String): String? {
+        val token = accessToken(openid) ?: return null
+        val player = client.get("$apiUser/maimai/player") { setOAuth(token) }
+            .body<LXNSResponse<LXNSPlayer>>().data ?: return null
+        logger.debug { "[落雪调试] OAuth拉到好友码=${player.friendCode} sender=$openid" }
+        return player.friendCode.toString().also { friendCode ->
+            ProberBindTable[openid, "lxns", "friend-code"] = friendCode
+        }
     }
 
     private suspend fun fetchFriendCodeByQQ(openid: String): String? {
@@ -291,15 +302,11 @@ class LXNS(
         }
         if (user !is UserQueryParams.Self || e !is UserNotFoundException)
             throw e
-        val openid = user.event.sender.id
-        if (QQBindTable[openid] == null) {
-            logger.debug { "[落雪调试] 好友码失效且无QQ可反查 sender=$openid" }
-            throw UserBindRequiredException()
-        }
-        logger.debug { "[落雪调试] 好友码失效, 用QQ反查 sender=$openid" }
-        val refreshed = fetchFriendCodeByQQ(openid)
+        logger.debug { "[落雪调试] 好友码失效, 重新拉取 sender=${user.event.sender.id}" }
+        val refreshed = fetchFriendCodeByOAuth(user.event.sender.id)
+            ?: fetchFriendCodeByQQ(user.event.sender.id)
         if (refreshed == null) {
-            logger.debug { "[落雪调试] QQ反查也失败 sender=$openid" }
+            logger.debug { "[落雪调试] 好友码重拉失败 sender=${user.event.sender.id}" }
             throw UserBindRequiredException()
         }
         val player = getPlayerInfo(refreshed) ?: return null

@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import xyz.xszq.bot.Group
 import xyz.xszq.bot.Member
 import xyz.xszq.bot.User
+import xyz.xszq.bot.event.ChannelEvent
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.exception.NotFoundException
@@ -173,6 +174,12 @@ class ApiController(
                     data.event.reply("绑定成功，您可正常使用舞萌/中二各功能了。")
                     if (data.replay)
                         maimai.pluginLoader.subscribes.handle(data.event)
+                    else
+                        maimai.pluginLoader.subscribes.handle(ChannelEvent(
+                            bot = maimai.pluginLoader.bot,
+                            channelName = "chunithm-update-friend-code",
+                            data = data.event
+                        ))
                     call.respondText("绑定成功，您可以返回继续使用相关功能了。")
                 } else {
                     data.event.reply("绑定失败，请重试。")
