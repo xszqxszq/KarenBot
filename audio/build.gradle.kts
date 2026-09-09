@@ -13,6 +13,7 @@ repositories {
 }
 configurations.all {
     exclude(group = "gov.nist.math", module = "Jampack")
+    exclude(group = "com.google.collections", module = "google-collections")
 }
 dependencies {
     implementation("com.hankcs:hanlp:portable-1.3.4")

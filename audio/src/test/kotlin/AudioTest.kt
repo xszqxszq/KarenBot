@@ -2,7 +2,10 @@ package xyz.xszq.bot
 
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import marytts.LocalMaryInterface
 import xyz.xszq.bot.audio.Audio
+import xyz.xszq.bot.audio.voice.EnglishHandler
+import java.util.Locale
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -22,6 +25,23 @@ class AudioTest {
         } finally {
             sandbox.cleanup()
         }
+    }
+
+    @Test
+    fun testEnglishWordConvert() {
+        val t = Thread.currentThread()
+        val prev = t.contextClassLoader
+        t.contextClassLoader = this::class.java.classLoader
+        val mary = runCatching {
+            LocalMaryInterface().apply {
+                locale = Locale.US
+                outputType = "ALLOPHONES"
+            }
+        }.also {
+            t.contextClassLoader = prev
+        }.getOrThrow()
+        val phones = EnglishHandler(mary).convertWord("bh")
+        assertTrue(phones.isNotEmpty(), "英文词应能转为音素")
     }
 
     private suspend fun testTTSHelp(sandbox: BotSandbox) {
