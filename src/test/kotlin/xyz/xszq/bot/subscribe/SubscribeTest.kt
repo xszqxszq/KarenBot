@@ -93,7 +93,7 @@ class SubscribeTest {
 
         subscribe.handler(messageEvent("  14橙將進度     114514   "))
 
-        assertEquals("14橙將" to null, pair)
+        assertEquals("14橙將" to "114514", pair)
     }
 
     @Test
