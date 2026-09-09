@@ -16,8 +16,8 @@ import xyz.xszq.bot.message.MessageElement
 import xyz.xszq.bot.newLine
 import xyz.xszq.bot.reply
 import xyz.xszq.bot.toPlainText
-import xyz.xszq.bot.util.endsWith
 import xyz.xszq.bot.util.ErrorHandler
+import xyz.xszq.bot.util.endsWith
 import xyz.xszq.bot.util.substringBefore
 import java.time.Duration
 

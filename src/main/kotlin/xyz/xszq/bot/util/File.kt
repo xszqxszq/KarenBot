@@ -5,10 +5,10 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.tempVfs
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.*
 
 private val downloadClient by lazy { createDownloadClient() }

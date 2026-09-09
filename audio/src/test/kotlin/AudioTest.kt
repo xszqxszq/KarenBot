@@ -5,7 +5,7 @@ import kotlinx.coroutines.test.runTest
 import marytts.LocalMaryInterface
 import xyz.xszq.bot.audio.Audio
 import xyz.xszq.bot.audio.voice.EnglishHandler
-import java.util.Locale
+import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue

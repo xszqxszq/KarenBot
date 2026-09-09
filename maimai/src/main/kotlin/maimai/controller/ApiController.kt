@@ -23,11 +23,7 @@ import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.api.DivingFish
 import xyz.xszq.bot.maimai.api.LXNS
 import xyz.xszq.bot.maimai.component.WaitingEventData
-import xyz.xszq.bot.maimai.database.DivingFishBindTable
-import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
-import xyz.xszq.bot.maimai.database.ProberBindTable
-import xyz.xszq.bot.maimai.database.RhythmGameToken
-import xyz.xszq.bot.maimai.database.RhythmGameTokens
+import xyz.xszq.bot.maimai.database.*
 import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.reply
 import java.util.concurrent.ConcurrentHashMap

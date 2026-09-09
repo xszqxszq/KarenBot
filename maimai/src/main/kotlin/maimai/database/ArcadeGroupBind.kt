@@ -10,7 +10,6 @@ import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import org.jetbrains.exposed.sql.update
 import xyz.xszq.bot.exception.IllegalArgsException
 import xyz.xszq.bot.exception.NotFoundException

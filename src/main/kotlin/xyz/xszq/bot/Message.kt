@@ -11,11 +11,7 @@ import xyz.xszq.bot.payload.FileType
 import xyz.xszq.bot.payload.MediaUpload
 import xyz.xszq.bot.payload.MsgType
 import xyz.xszq.bot.payload.markdown.MarkdownDsl
-import xyz.xszq.bot.util.errorLogger
-import xyz.xszq.bot.util.forEachParallel
-import xyz.xszq.bot.util.retry
-import xyz.xszq.bot.util.sendC2CLogger
-import xyz.xszq.bot.util.sendGroupLogger
+import xyz.xszq.bot.util.*
 
 /**
  * 在当前上下文上传媒体

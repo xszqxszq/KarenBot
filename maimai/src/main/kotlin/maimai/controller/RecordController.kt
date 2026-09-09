@@ -5,15 +5,12 @@ import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.component.MaimaiQuery
 import xyz.xszq.bot.maimai.music.MusicDifficulty
-import xyz.xszq.bot.maimai.music.MusicGenre
 import xyz.xszq.bot.maimai.music.UserQueryParams
 import xyz.xszq.bot.maimai.query.ComboQuery
 import xyz.xszq.bot.maimai.query.ComboQuery.filterCharts
 import xyz.xszq.bot.maimai.query.ComboQuery.filterMusics
 import xyz.xszq.bot.maimai.query.ComboQuery.filterRecords
-import xyz.xszq.bot.newLine
 import xyz.xszq.bot.reply
-import kotlin.math.sqrt
 
 /**
  * 成绩进度功能

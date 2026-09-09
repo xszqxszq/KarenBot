@@ -3,13 +3,7 @@ package xyz.xszq.bot.webhook
 import io.github.oshai.kotlinlogging.KLogger
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import xyz.xszq.bot.*
 import xyz.xszq.bot.event.*
 import xyz.xszq.bot.message.FileManager

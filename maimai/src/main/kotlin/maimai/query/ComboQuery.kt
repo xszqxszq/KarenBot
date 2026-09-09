@@ -10,9 +10,10 @@ import xyz.xszq.bot.maimai.component.Tag
 import xyz.xszq.bot.maimai.component.image.FilterParams
 import xyz.xszq.bot.maimai.config.DesignerConfig
 import xyz.xszq.bot.maimai.music.*
-import xyz.xszq.bot.util.toSimple
+import xyz.xszq.bot.maimai.query.ComboQuery.designer
 import xyz.xszq.bot.util.json
 import xyz.xszq.bot.util.toDBC
+import xyz.xszq.bot.util.toSimple
 import java.io.File
 import kotlin.math.roundToInt
 import kotlin.random.Random

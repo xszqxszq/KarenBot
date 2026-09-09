@@ -3,11 +3,7 @@ package xyz.xszq.bot.chunithm
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
-import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesTable
-import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesVoteTable
-import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
-import xyz.xszq.bot.chunithm.database.ProberBindTable
-import xyz.xszq.bot.chunithm.database.QQBindTable
+import xyz.xszq.bot.chunithm.database.*
 import kotlin.test.BeforeTest
 
 abstract class ChunithmDatabaseTest {
