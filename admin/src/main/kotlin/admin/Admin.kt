@@ -68,6 +68,24 @@ class Admin: Plugin(), AdminPlugin {
         channel<AdminCheckRequest>("admin-check") { data ->
             data.deferred.complete(data.userId in config.admins)
         }
+        // 以指定用户身份发送消息
+        startsWith("sudo") { raw ->
+            if (this !is GroupMessageEvent || !isAdmin())
+                return@startsWith
+            val parts = raw.split(" ", limit = 2).map(String::trim)
+            if (parts.size < 2 || parts[0].isBlank() || parts[1].isBlank()) {
+                reply("使用方法：sudo 用户OpenID 消息内容")
+                return@startsWith
+            }
+            pluginLoader.subscribes.handle(GroupMessageEvent(
+                bot = pluginLoader.bot,
+                eventId = UUID.randomUUID().toString(),
+                id = this.id,
+                message = MessageChain(parts[1]),
+                sender = Member(pluginLoader.bot, parts[0]),
+                group = this.group
+            ))
+        }
         // 调试日志开关
         startsWith("log") {
             if (isAdmin()) {
