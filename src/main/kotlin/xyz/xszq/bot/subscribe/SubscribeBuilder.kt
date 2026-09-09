@@ -71,19 +71,20 @@ class SubscribeBuilder(
      * 订阅指定前缀开头的消息
      *
      * @param text 命令前缀
+     * @param matchWord 是否防误触
      * @param block 匹配后的处理逻辑
      */
-    fun startsWith(text: String, block: suspend MessageEvent.(String) -> Unit) {
+    fun startsWith(text: String, matchWord: Boolean = false, block: suspend MessageEvent.(String) -> Unit) {
         manager.subscribe(
             plugin,
-            StartsWith(prefix, forcePrefix, text, block),
+            StartsWith(prefix, forcePrefix, text, matchWord, block),
             domain,
             value,
             defaultHandler
         )
     }
-    fun startsWith(texts: Collection<String>, block: suspend MessageEvent.(String) -> Unit) = texts.forEach { text ->
-        startsWith(text, block)
+    fun startsWith(texts: Collection<String>, matchWord: Boolean = false, block: suspend MessageEvent.(String) -> Unit) = texts.forEach { text ->
+        startsWith(text, matchWord, block)
     }
 
     /**

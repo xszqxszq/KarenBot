@@ -40,6 +40,33 @@ class SubscribeTest {
     }
 
     @Test
+    fun shouldMatchWordAfterClean() = runTest {
+        var matched = false
+        val subscribe = StartsWith(prefix = "pjsk", matchWord = true) { matched = true }
+
+        subscribe.handler(messageEvent("pjsk"))
+        assertTrue(matched)
+        matched = false
+
+        subscribe.handler(messageEvent("/pjsk"))
+        assertTrue(matched)
+        matched = false
+
+        subscribe.handler(messageEvent("pjsk emu1"))
+        assertTrue(matched)
+    }
+
+    @Test
+    fun shouldNotMatchWordWhenAttachedToOtherText() = runTest {
+        var matched = false
+        val subscribe = StartsWith(prefix = "pjsk", matchWord = true) { matched = true }
+
+        subscribe.handler(messageEvent("pjsk怎么样"))
+
+        assertFalse(matched)
+    }
+
+    @Test
     fun shouldMoveSuffixToArgument() = runTest {
         var pair: Pair<String, String?>? = null
         val subscribe = CommandEndsWith(suffix = "分") { pair = it }

@@ -77,7 +77,7 @@ class Meme: Plugin() {
      */
     suspend fun setRoute() = route {
         // 生成表情包
-        startsWith("生成") { raw ->
+        startsWith("生成", matchWord = true) { raw ->
             runCatching {
                 meme(raw)
             }.onFailure { e ->
@@ -85,7 +85,7 @@ class Meme: Plugin() {
             }
         }
         // PJSK 表情包生成
-        startsWith("pjsk") { raw ->
+        startsWith("pjsk", matchWord = true) { raw ->
             runCatching {
                 sekai(raw)
             }.onFailure { e ->
@@ -93,7 +93,7 @@ class Meme: Plugin() {
             }
         }
         // 蔚蓝档案表情包生成
-        startsWith("ba") { raw ->
+        startsWith("ba", matchWord = true) { raw ->
             runCatching {
                 ba(raw)
             }.onFailure { e ->
@@ -109,7 +109,7 @@ class Meme: Plugin() {
             }
         }
         // 球面化生成
-        startsWith("球面化") {
+        startsWith("球面化", matchWord = true) {
             runCatching {
                 spherize()
             }.onFailure { e ->
@@ -117,7 +117,7 @@ class Meme: Plugin() {
             }
         }
         // 左右对称生成
-        startsWith("我巨爽") {
+        startsWith("我巨爽", matchWord = true) {
             runCatching {
                 imSoHappy()
             }.onFailure { e ->
@@ -125,7 +125,7 @@ class Meme: Plugin() {
             }
         }
         // Emoji 表情合成
-        startsWith("表情合成") { raw ->
+        startsWith("表情合成", matchWord = true) { raw ->
             emojiKitchen(raw)
         }
         always {
@@ -350,11 +350,6 @@ class Meme: Plugin() {
     ) {
         if (message.text.trim() == "/ba")
             throw NeedHelpException()
-        val afterBa = message.text.trim()
-            .removePrefix("/")
-            .substringAfter("ba")
-        if (afterBa.firstOrNull()?.isWhitespace() == false)
-            return
         var args = raw.trim().split(" ", limit = 2)
         when {
             "\n" in raw -> {

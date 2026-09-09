@@ -8,17 +8,22 @@ import xyz.xszq.bot.event.MessageEvent
  * @param forceParent 是否一定要父级前缀
  * @param prefix 命令前缀
  * @param matchHandler 匹配后的处理逻辑
+ * @param matchWord 是否防误触
  */
 class StartsWith(
     parent: String? = null,
     forceParent: Boolean = false,
     private val prefix: String,
+    private val matchWord: Boolean = false,
     private val matchHandler: suspend MessageEvent.(String) -> Unit
 ): TextSubscribe(parent, forceParent) {
     override val priority = 3
     override val length = prefix.length
 
-    override fun matchesText(message: String) = message.startsWith(prefix)
+    override fun matchesText(message: String) = when {
+        !matchWord -> message.startsWith(prefix)
+        else -> message == prefix || message.startsWith("$prefix ")
+    }
 
     override suspend fun handleText(event: MessageEvent, message: String) {
         val arg = message.substringAfter(prefix).trim()
