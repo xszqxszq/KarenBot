@@ -1,6 +1,7 @@
 package xyz.xszq.bot.subscribe
 
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.util.toSimple
 
 /**
  * 订阅指定后缀结尾的消息
@@ -16,13 +17,15 @@ class EndsWith(
     private val suffix: String,
     private val matchHandler: suspend MessageEvent.(String) -> Unit
 ): TextSubscribe(parent, forceParent) {
+    private val suffixSimple = suffix.toSimple()
     override val priority = 1
     override val length = suffix.length
 
-    override fun matchesText(message: String) = message.endsWith(suffix)
+    override fun matchesText(message: String) = message.toSimple().endsWith(suffixSimple)
 
     override suspend fun handleText(event: MessageEvent, message: String) {
-        val arg = message.substringBefore(suffix).trim()
+        // 支持匹配繁体
+        val arg = message.dropLast(suffix.length).trim()
         matchHandler(event, arg)
     }
 }

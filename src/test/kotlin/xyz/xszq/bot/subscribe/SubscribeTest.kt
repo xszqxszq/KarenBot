@@ -67,6 +67,36 @@ class SubscribeTest {
     }
 
     @Test
+    fun shouldMatchTraditionalCommandAndKeepArgument() = runTest {
+        var argument: String? = null
+        val subscribe = StartsWith(prefix = "设置头像") { argument = it }
+
+        subscribe.handler(messageEvent(" 設置頭像  高瀬 梨緒 "))
+
+        assertEquals("高瀬 梨緒", argument)
+    }
+
+    @Test
+    fun shouldMatchTraditionalSuffix() = runTest {
+        var argument: String? = null
+        val subscribe = EndsWith(suffix = "進度") { argument = it }
+
+        subscribe.handler(messageEvent("   橙將進度 "))
+
+        assertEquals("橙將", argument)
+    }
+
+    @Test
+    fun shouldMatchTraditionalCommandSuffix() = runTest {
+        var pair: Pair<String, String?>? = null
+        val subscribe = CommandEndsWith(suffix = "進度") { pair = it }
+
+        subscribe.handler(messageEvent("  14橙將進度     114514   "))
+
+        assertEquals("14橙將" to null, pair)
+    }
+
+    @Test
     fun shouldMoveSuffixToArgument() = runTest {
         var pair: Pair<String, String?>? = null
         val subscribe = CommandEndsWith(suffix = "分") { pair = it }

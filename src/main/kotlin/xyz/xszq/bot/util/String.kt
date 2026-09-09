@@ -105,7 +105,13 @@ fun normalizeMessage(
 /**
  * 繁体中文转为简体中文
  */
-fun String.toSimple(): String = ZhConverterUtil.toSimple(this)
+fun String.toSimple(): String {
+    if (none { it.isChinese() })
+        return this
+    return ZhConverterUtil.toSimple(this)
+}
+
+private fun Char.isChinese() = code in 0x3400..0x4DBF || code in 0x4E00..0x9FFF
 
 /**
  * 判断字符串是否以列表中的任一字符串为后缀

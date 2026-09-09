@@ -1,6 +1,7 @@
 package xyz.xszq.bot.subscribe
 
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.util.toSimple
 
 /**
  * 订阅指定命令后缀结尾的消息
@@ -19,6 +20,7 @@ class CommandEndsWith(
     private val suffix: String,
     private val matchHandler: suspend MessageEvent.(Pair<String, String?>) -> Unit
 ): TextSubscribe(parent, forceParent) {
+    private val suffixSimple = suffix.toSimple()
     override val priority = 2
     override val length = suffix.length
 
@@ -26,24 +28,25 @@ class CommandEndsWith(
         val args = message.split(" ")
         if (args.isEmpty())
             return false
-        return args.last().endsWith(suffix)
-                || (args.size >= 2 && args[args.size - 2].endsWith(suffix))
+        return args.last().toSimple().endsWith(suffixSimple)
+                || (args.size >= 2 && args[args.size - 2].toSimple().endsWith(suffixSimple))
     }
 
     override suspend fun handleText(event: MessageEvent, message: String) {
+        // 支持匹配繁体
         val args = message.split(" ")
         val matchingIndex = when {
-            args.last().endsWith(suffix) -> args.size - 1
-            args.size >= 2 && args[args.size - 2].endsWith(suffix) -> args.size - 2
+            args.last().toSimple().endsWith(suffixSimple) -> args.size - 1
+            args.size >= 2 && args[args.size - 2].toSimple().endsWith(suffixSimple) -> args.size - 2
             else -> return
         }
         val matchingToken = args[matchingIndex]
 
         val command = when (matchingIndex) {
-            0 -> matchingToken.removeSuffix(suffix).takeIf { it.isNotEmpty() } ?: matchingToken
+            0 -> matchingToken.dropLast(suffix.length).takeIf { it.isNotEmpty() } ?: matchingToken
             else -> {
                 val prefixPart = args.subList(0, matchingIndex).joinToString(" ")
-                val suffixPart = matchingToken.removeSuffix(suffix)
+                val suffixPart = matchingToken.dropLast(suffix.length)
                 if (suffixPart.isNotEmpty()) "$prefixPart $suffixPart" else prefixPart
             }
         }

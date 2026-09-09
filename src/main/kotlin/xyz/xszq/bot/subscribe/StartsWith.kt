@@ -1,14 +1,16 @@
 package xyz.xszq.bot.subscribe
 
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.util.toSimple
 
 /**
  * 订阅指定前缀开头的消息
+ *
  * @param parent 父级命令前缀
  * @param forceParent 是否一定要父级前缀
  * @param prefix 命令前缀
- * @param matchHandler 匹配后的处理逻辑
  * @param matchWord 是否防误触
+ * @param matchHandler 匹配后的处理逻辑
  */
 class StartsWith(
     parent: String? = null,
@@ -21,12 +23,17 @@ class StartsWith(
     override val length = prefix.length
 
     override fun matchesText(message: String) = when {
-        !matchWord -> message.startsWith(prefix)
-        else -> message == prefix || message.startsWith("$prefix ")
+        !matchWord -> message.toSimple().startsWith(prefix.toSimple())
+        else -> {
+            val normalized = message.toSimple()
+            val command = prefix.toSimple()
+            normalized == command || normalized.startsWith("$command ")
+        }
     }
 
     override suspend fun handleText(event: MessageEvent, message: String) {
-        val arg = message.substringAfter(prefix).trim()
+        // 支持匹配繁体
+        val arg = message.substring(prefix.length).trim()
         matchHandler(event, arg)
     }
 }
