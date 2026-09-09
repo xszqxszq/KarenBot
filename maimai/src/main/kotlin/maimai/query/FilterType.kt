@@ -1,5 +1,8 @@
 package xyz.xszq.bot.maimai.query
 
+/**
+ * 查询条件类型
+ */
 enum class FilterType {
     // 成绩类
     Achievement, Combo, Sync, Star,
@@ -15,5 +18,6 @@ enum class FilterType {
     // 默认过滤类
     Default;
 
+    // 过滤条件细分到谱面
     val matchesChart: Boolean get() = this in listOf(Difficulty, Level, Designer)
 }

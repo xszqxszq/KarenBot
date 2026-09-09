@@ -33,6 +33,9 @@ import xyz.xszq.bot.subscribe.CommandNotMatchedException
 import xyz.xszq.bot.util.pagination
 import kotlin.random.Random
 
+/**
+ * 曲目查询功能
+ */
 @Suppress("unused")
 class MusicController(
     override val chunithm: Chunithm
@@ -328,11 +331,21 @@ class MusicController(
         }
     }
 
+    /**
+     * 封面查找结果
+     *
+     * @property ids 歌曲 ID 列表
+     */
     @Serializable
     data class CoverIdsResult(
         val ids: List<Int> = emptyList(),
     )
 
+    /**
+     * 封面描述对应的特征查询
+     *
+     * @property queries 特征查询
+     */
     @Serializable
     data class CoverQueriesResult(
         val queries: List<String> = emptyList(),
@@ -728,6 +741,11 @@ class MusicController(
         }
     }
     companion object {
+        /**
+         * 将音频转为 PCM
+         *
+         * @param block 处理的代码块
+         */
         suspend inline fun VfsFile.toPCM(block: suspend (VfsFile) -> Unit) {
             val pcm = FFMpegTask(FFMpegFileType.PCM) {
                 input(absolutePath)

@@ -3,27 +3,42 @@ package xyz.xszq.bot.audio.voice
 import marytts.MaryInterface
 import org.w3c.dom.Element
 
+/**
+ * 英文单词转换
+ */
 class EnglishHandler(
     val mary: MaryInterface
 ) {
 
-    private val vowels = listOf('a','e','i','o','u')
+    /**
+     * 汉语元音表
+     */
+    private val vowels = arrayOf('a', 'e', 'i', 'o', 'u')
 
-    private val consonants = listOf(
-        'b','p','m','f',
-        'd','t','n','l',
-        'g','k','h','w',
-        'j','q','x',
-        'z','s','r','y',
+    /**
+     * 汉语辅音表
+     */
+    private val consonants = arrayOf(
+        'b', 'p', 'm', 'f',
+        'd', 't', 'n', 'l',
+        'g', 'k', 'h', 'w',
+        'j', 'q', 'x',
+        'z', 's', 'r', 'y',
     )
 
+    /**
+     * 单个辅音到汉语拼音对照表
+     */
     private val consonantTable = mapOf(
-        "b" to "bu","p" to "pu","m" to "mu","f" to "fu",
-        "d" to "de","t" to "te","n" to "en","l" to "er",
-        "g" to "ge","k" to "ke","h" to "he","w" to "wu",
-        "j" to "ji","q" to "qi","x" to "xi","z" to "zi",
-        "s" to "si","r" to "er","y" to "yi"
+        "b" to "bu", "p" to "pu", "m" to "mu", "f" to "fu",
+        "d" to "de", "t" to "te", "n" to "en", "l" to "er",
+        "g" to "ge", "k" to "ke", "h" to "he", "w" to "wu",
+        "j" to "ji", "q" to "qi", "x" to "xi", "z" to "zi",
+        "s" to "si", "r" to "er", "y" to "yi"
     )
+    /**
+     * 汉语无效拼音到相近音位对照表
+     */
     private val invalidTable = mapOf(
         "be" to "bei", "pe" to "pei","me" to "mei","fe" to "fei",
         "do" to "duo", "to" to "tuo","no" to "nuo","lo" to "luo",
@@ -38,33 +53,42 @@ class EnglishHandler(
         "ten" to "teng",
         "yo" to "you",
     )
+    /**
+     * 单个英文字母到汉语拼音对照表
+     */
     private val letterNamePinyin = mapOf(
-        "a" to listOf("ei"), "b" to listOf("bi"), "c" to listOf("xi"),
-        "d" to listOf("di"), "e" to listOf("yi"), "f" to listOf("ai", "fu"),
-        "g" to listOf("ji"), "h" to listOf("ai", "chi"), "i" to listOf("ai"),
-        "j" to listOf("jie"), "k" to listOf("ke", "ei"), "l" to listOf("ai", "lu"),
-        "m" to listOf("ai", "mu"), "n" to listOf("en"), "o" to listOf("ou"),
-        "p" to listOf("pi"), "q" to listOf("ke","you"), "r" to listOf("a"),
-        "s" to listOf("ai", "si"), "t" to listOf("ti"), "u" to listOf("you"),
-        "v" to listOf("wei"), "w" to listOf("da", "bu", "liu"), "x" to listOf("ai", "ke", "si"),
-        "y" to listOf("wai"), "z" to listOf("ze", "ei")
+        "a" to arrayOf("ei"), "b" to arrayOf("bi"), "c" to arrayOf("xi"),
+        "d" to arrayOf("di"), "e" to arrayOf("yi"), "f" to arrayOf("ai", "fu"),
+        "g" to arrayOf("ji"), "h" to arrayOf("ai", "chi"), "i" to arrayOf("ai"),
+        "j" to arrayOf("jie"), "k" to arrayOf("ke", "ei"), "l" to arrayOf("ai", "lu"),
+        "m" to arrayOf("ai", "mu"), "n" to arrayOf("en"), "o" to arrayOf("ou"),
+        "p" to arrayOf("pi"), "q" to arrayOf("ke","you"), "r" to arrayOf("a"),
+        "s" to arrayOf("ai", "si"), "t" to arrayOf("ti"), "u" to arrayOf("you"),
+        "v" to arrayOf("wei"), "w" to arrayOf("da", "bu", "liu"), "x" to arrayOf("ai", "ke", "si"),
+        "y" to arrayOf("wai"), "z" to arrayOf("ze", "ei")
     )
 
-    fun convertWord(wordRaw: String): List<String> {
+    /**
+     * 英文单词转为汉语拼音
+     *
+     * @param wordRaw 原始英文单词
+     * @return 汉语拼音
+     */
+    fun convertWord(wordRaw: String): Array<String> {
         val word = wordRaw.trim()
         if (word.length == 1 && word[0].isLetter()) {
-            return letterNamePinyin[word.lowercase()] ?: listOf(word.lowercase())
+            return letterNamePinyin[word.lowercase()] ?: arrayOf(word.lowercase())
         }
 
         val maryPhones = phonesForWord(word)
         val pre = preprocessPhones(maryPhones)
         val norm = mapToLatinPieces(pre)
         val syll = assembleWithTables(norm)
-        val fixed = syll.map { invalidTable[it] ?: it }
-        return mergeStandaloneNg(fixed).map { it.lowercase() }
+        val fixed = syll.map { invalidTable[it] ?: it }.toTypedArray()
+        return mergeStandaloneNg(fixed).map { it.lowercase() }.toTypedArray()
     }
 
-    private fun phonesForWord(text: String): List<String> {
+    private fun phonesForWord(text: String): Array<String> {
         val document = mary.generateXML(text)
         val phones = mutableListOf<String>()
 
@@ -92,10 +116,10 @@ class EnglishHandler(
                 }
             }
         }
-        return phones
+        return phones.toTypedArray()
     }
 
-    private fun preprocessPhones(raw: List<String>): List<String> {
+    private fun preprocessPhones(raw: Array<String>): Array<String> {
         val out = mutableListOf<String>()
         var i = 0
         while (i < raw.size) {
@@ -114,9 +138,12 @@ class EnglishHandler(
             out += cur
             i += 1
         }
-        return out
+        return out.toTypedArray()
     }
 
+    /**
+     * 英文音素到汉语拼音对照表
+     */
     private val phoneMap = mapOf(
         "aI" to "ai", "aU" to "ao", "OI" to "ui",
         "O" to "o", "oU" to "ou",
@@ -135,14 +162,14 @@ class EnglishHandler(
         "l" to "l", "m" to "m", "n" to "n", "N" to "ng",
         "r" to "r"
     )
-    private fun mapToLatinPieces(pre: List<String>): List<String> =
+    private fun mapToLatinPieces(pre: Array<String>): Array<String> =
         pre.flatMap { p ->
             when (p) {
                 "YOU" -> listOf("you")
                 "SYLL_r" -> listOf("er")
                 else -> listOf(phoneMap[p] ?: p)
             }
-        }
+        }.toTypedArray()
 
     private fun isVowel(tok: String): Boolean =
         (tok.length == 1 && tok[0] in vowels) ||
@@ -151,7 +178,7 @@ class EnglishHandler(
     private fun isConsonant(tok: String): Boolean =
         (tok.length == 1 && tok[0] in consonants)
 
-    private fun assembleWithTables(pieces: List<String>): List<String> {
+    private fun assembleWithTables(pieces: Array<String>): Array<String> {
         val out = mutableListOf<String>()
         var i = 0
         while (i < pieces.size) {
@@ -177,10 +204,10 @@ class EnglishHandler(
                 else -> { out += (invalidTable[cur] ?: cur); i += 1 }
             }
         }
-        return out
+        return out.toTypedArray()
     }
 
-    private fun mergeStandaloneNg(tokens: List<String>): List<String> {
+    private fun mergeStandaloneNg(tokens: Array<String>): Array<String> {
         if (tokens.isEmpty()) return tokens
         val out = mutableListOf<String>()
         for (t in tokens) {
@@ -188,6 +215,6 @@ class EnglishHandler(
                 out[out.lastIndex] = out.last() + "ng"
             } else out += t
         }
-        return out
+        return out.toTypedArray()
     }
 }

@@ -8,14 +8,18 @@ import xyz.xszq.shinobu.dom.Element
 import xyz.xszq.shinobu.template.Template
 import xyz.xszq.shinobu.template.TemplateManager
 
+/**
+ * 歌曲成绩详情图
+ */
 class ScoreTemplate(
     private val manager: TemplateManager,
     private val resourcePath: String
 ) {
     /**
-     * 生成歌曲及成绩信息模板
+     * 生成歌曲成绩详情图
+     *
      * @param music 曲目信息
-     * @param records 各难度成绩记录
+     * @param records 各难度谱面的成绩记录
      */
     fun template(
         music: MusicInfo,
@@ -45,10 +49,6 @@ class ScoreTemplate(
         return template.render(main)
     }
 
-    /**
-     * 展示曲目信息
-     * @param music 曲目信息
-     */
     private fun Div.musicInfo(
         music: MusicInfo
     ) {
@@ -86,11 +86,6 @@ class ScoreTemplate(
         }
     }
 
-    /**
-     * 展示单难度谱面信息及成绩记录
-     * @param chart 谱面信息
-     * @param record 成绩记录
-     */
     private fun Template.score(
         chart: ChartInfo,
         record: Record?

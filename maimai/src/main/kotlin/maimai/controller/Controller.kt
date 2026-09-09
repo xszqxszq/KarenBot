@@ -33,15 +33,30 @@ import xyz.xszq.bot.payload.AdminCheckRequest
 import xyz.xszq.bot.payload.markdown.MarkdownDsl
 import xyz.xszq.bot.payload.markdown.RenderData
 import xyz.xszq.bot.reply
+import xyz.xszq.bot.subscribe.SubscribeBuilder
 
+/**
+ * 功能基类
+ */
 @Suppress("unused")
 sealed class Controller(
     open val maimai: Maimai
 ) {
     val logger = KotlinLogging.logger {}
+    /**
+     * 注册命令路由
+     */
     abstract suspend fun setRoute()
+    /**
+     * 插件卸载时执行
+     */
     open suspend fun unload() {}
 
+    /**
+     * 消息发送者是否为管理员
+     *
+     * 这是一个远程调用，将会请求 admin 插件进行鉴权
+     */
     suspend fun MessageEvent.isAdmin(): Boolean {
         val deferred = CompletableDeferred<Boolean>()
         maimai.pluginLoader.subscribes.handle(ChannelEvent(
@@ -52,7 +67,14 @@ sealed class Controller(
         return runCatching { withTimeout(5000L) { deferred.await() } }.getOrDefault(false)
     }
 
-    suspend fun rhythm(block: suspend xyz.xszq.bot.subscribe.SubscribeBuilder.() -> Unit) {
+    /**
+     * 注册命令域
+     *
+     * 命令域下根据用户偏好选择唯一的插件处理其命令
+     *
+     * @param block 命令域路由代码块
+     */
+    suspend fun rhythm(block: suspend SubscribeBuilder.() -> Unit) {
         maimai.route("/mai") {
             domain(
                 name = "rhythm",
@@ -65,6 +87,14 @@ sealed class Controller(
         }
     }
 
+    /**
+     * 回复用户消息
+     *
+     * 默认回复 Markdown 内容，兼容模式时回复纯文本
+     *
+     * @param fallback 兼容模式时的回复
+     * @param block Markdown DSL Builder
+     */
     suspend fun MessageEvent.reply(
         fallback: String,
         block: MarkdownDsl.() -> Unit
@@ -73,11 +103,27 @@ sealed class Controller(
         else reply(block)
     }
 
+    /**
+     * 回复用户消息
+     *
+     * 默认回复 Markdown 内容，兼容模式时回复纯文本
+     *
+     * @param fallback 兼容模式时的回复
+     * @param markdown Markdown 内容
+     */
     suspend fun MessageEvent.reply(fallback: String, markdown: Markdown) {
         if (textMode()) reply(fallback)
         else reply(markdown)
     }
 
+    /**
+     * 回复用户消息
+     *
+     * 默认回复 Markdown 内容，兼容模式时回复消息链
+     *
+     * @param fallback 兼容模式时的消息链
+     * @param block Markdown DSL Builder
+     */
     suspend fun MessageEvent.reply(
         fallback: MessageChain,
         block: MarkdownDsl.() -> Unit
@@ -86,11 +132,27 @@ sealed class Controller(
         else reply(block)
     }
 
+    /**
+     * 回复用户消息
+     *
+     * 默认回复 Markdown 内容，兼容模式时回复消息链
+     *
+     * @param fallback 兼容模式时的消息链
+     * @param markdown Markdown 内容
+     */
     suspend fun MessageEvent.reply(fallback: MessageChain, markdown: Markdown) {
         if (textMode()) reply(fallback)
         else reply(markdown)
     }
 
+    /**
+     * 回复用户消息
+     *
+     * 默认回复 Markdown 内容，兼容模式时回复纯文本
+     *
+     * @param fallback 兼容模式时的回复
+     * @param block Markdown DSL Builder
+     */
     suspend fun ReplyAble.reply(
         fallback: String,
         block: MarkdownDsl.() -> Unit
@@ -99,11 +161,27 @@ sealed class Controller(
         else reply(block)
     }
 
+    /**
+     * 回复用户消息
+     *
+     * 默认回复 Markdown 内容，兼容模式时回复纯文本
+     *
+     * @param fallback 兼容模式时的回复
+     * @param markdown Markdown 内容
+     */
     suspend fun ReplyAble.reply(fallback: String, markdown: Markdown) {
         if (textMode()) reply(fallback)
         else reply(markdown)
     }
 
+    /**
+     * 回复用户消息
+     *
+     * 默认回复 Markdown 内容，兼容模式时回复消息链
+     *
+     * @param fallback 兼容模式时的消息链
+     * @param block Markdown DSL Builder
+     */
     suspend fun ReplyAble.reply(
         fallback: MessageChain,
         block: MarkdownDsl.() -> Unit
@@ -112,11 +190,22 @@ sealed class Controller(
         else reply(block)
     }
 
+    /**
+     * 回复用户消息
+     *
+     * 默认回复 Markdown 内容，兼容模式时回复消息链
+     *
+     * @param fallback 兼容模式时的消息链
+     * @param markdown Markdown 内容
+     */
     suspend fun ReplyAble.reply(fallback: MessageChain, markdown: Markdown) {
         if (textMode()) reply(fallback)
         else reply(markdown)
     }
 
+    /**
+     * 查询失败
+     */
     suspend fun MessageEvent.messageQueryFailed() {
         reply(MaimaiQuery.QUERY_FAILED) {
             brief("查询失败", MaimaiQuery.QUERY_FAILED)
@@ -127,11 +216,22 @@ sealed class Controller(
             }
         }
     }
-    suspend fun handleError(event: MessageEvent, e: Throwable, user: UserQueryParams?) {
+    /**
+     * 处理异常并回复
+     *
+     * @param event 消息事件
+     * @param exception 查询异常
+     * @param user 用户
+     */
+    suspend fun handleError(
+        event: MessageEvent,
+        exception: Throwable,
+        user: UserQueryParams?
+    ) {
         with(event) {
-            when (e) {
+            when (exception) {
                 is UserBindRequiredException -> {
-                    val message = e.message
+                    val message = exception.message
                     if (message.isNullOrBlank()) {
                         val prefer = MaimaiSettingsTable[sender.id, "prober"]
                         val bound = when (prefer) {
@@ -149,18 +249,18 @@ sealed class Controller(
                     } else
                         reply(message)
                 }
-                is UserQueriedNoBindingException -> reply(e.message ?: "您查询的用户未绑定水鱼账户，无法查询")
+                is UserQueriedNoBindingException -> reply(exception.message ?: "您查询的用户未绑定水鱼账户，无法查询")
                 is UserNotFoundException -> messageUserNotFound()
                 is UserDeniedException -> user?.let { messageUserDenied(it) }
                 is FilterNoResultException -> messageFilterNoResult()
                 is FilterTooManyException -> messageFilterTooMany()
-                is NoDataException -> messageNoData(e.api)
-                is NotSupportedException -> messageNotSupported(e.message.orEmpty())
-                is NotFoundException -> messageNotFound(e.message.orEmpty())
+                is NoDataException -> messageNoData(exception.api)
+                is NotSupportedException -> messageNotSupported(exception.message.orEmpty())
+                is NotFoundException -> messageNotFound(exception.message.orEmpty())
                 is AuthorizationException -> messageNeedAuthorization()
                 is IgnoreException -> {}
                 else -> {
-                    e.printStackTrace()
+                    exception.printStackTrace()
                     messageQueryFailed()
                 }
             }
@@ -168,7 +268,7 @@ sealed class Controller(
     }
 
     // TODO: Move URL to config
-    suspend fun MessageEvent.bindLinks(replay: Boolean = false): Pair<String, String> {
+    private suspend fun MessageEvent.bindLinks(replay: Boolean = false): Pair<String, String> {
         val token = UUID.randomUUID().toString()
         val data = WaitingEventData(this, replay = replay)
         maimai.api.oauthBindTokens[token] = data
@@ -177,6 +277,12 @@ sealed class Controller(
         val lxnsUrl = "https://bot-api.otmdb.cn/jump/lxns-oa/$token"
         return Pair(divingFishUrl, lxnsUrl)
     }
+    /**
+     * 提示用户绑定查分器账号
+     *
+     * @param replay 绑定完成后是否重放消息事件
+     * @param fromBind 是否由绑定指令触发
+     */
     suspend fun MessageEvent.messageUserNeedBind(
         replay: Boolean = false,
         fromBind: Boolean = false
@@ -230,9 +336,17 @@ sealed class Controller(
             }
         }
     }
+    /**
+     * 回复用户不存在的提示
+     */
     suspend fun MessageEvent.messageUserNotFound() {
         reply(MaimaiQuery.USER_NOT_FOUND)
     }
+    /**
+     * 回复用户拒绝授权的提示
+     *
+     * @param user 被查询的用户
+     */
     suspend fun MessageEvent.messageUserDenied(user: UserQueryParams) {
         if (user.isSelf) {
             reply(MaimaiQuery.USER_EULA) {
@@ -247,12 +361,23 @@ sealed class Controller(
             reply(MaimaiQuery.USER_DENIED)
         }
     }
+    /**
+     * 回复筛选无结果的提示
+     */
     suspend fun MessageEvent.messageFilterNoResult() {
         reply(MaimaiQuery.NO_RECORDS)
     }
+    /**
+     * 回复筛选结果过多的提示
+     */
     suspend fun MessageEvent.messageFilterTooMany() {
         reply(MaimaiQuery.TOO_MANY_RECORDS)
     }
+    /**
+     * 回复尚无成绩数据的提示并附导入教程
+     *
+     * @param backend 查分器后端
+     */
     suspend fun MessageEvent.messageNoData(backend: MaimaiAPI) {
         reply(buildString {
             appendLine("您似乎尚未导入舞萌DX分数，请查看数据导入教程：")
@@ -289,16 +414,37 @@ sealed class Controller(
             }
         }
     }
+    /**
+     * 回复不支持的操作提示
+     *
+     * @param message 提示文案
+     */
     suspend fun MessageEvent.messageNotSupported(message: String) {
         reply(message)
     }
+    /**
+     * 回复查询内容不存在的提示
+     *
+     * @param message 提示文案
+     */
     suspend fun MessageEvent.messageNotFound(message: String) {
         reply(message)
     }
+    /**
+     * 回复需查分器授权的提示
+     */
     suspend fun MessageEvent.messageNeedAuthorization() {
         reply(MaimaiQuery.NEED_AUTHORIZATION)
     }
 
+    /**
+     * 使用命令时选择歌曲的菜单
+     *
+     * @param type 命令名
+     * @param args 命令参数
+     * @param needDifficulty 查询时是否可以带难度
+     * @return 选中的曲目与难度
+     */
     suspend fun MessageEvent.selectMusic(
         type: String,
         args: String,
@@ -332,6 +478,13 @@ sealed class Controller(
         }
         return null
     }
+    /**
+     * 根据文本或者图像进行查歌
+     *
+     * @param text 查询文本
+     * @param helpText 帮助文本
+     * @param action 查询后的代码块
+     */
     suspend fun MessageEvent.queryByTextOrImage(
         text: String,
         helpText: String ?= null,

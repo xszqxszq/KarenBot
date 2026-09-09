@@ -40,7 +40,7 @@ class Admin: Plugin(), AdminPlugin {
             pluginLoader.subscribes.stop(id)
         }
     }
-    fun MessageEvent.isAdmin() = sender.id in config.admins
+    private fun MessageEvent.isAdmin() = sender.id in config.admins
 
     /**
      * 缓存发送失败的消息，在该群下一条消息到来时补发
@@ -60,6 +60,9 @@ class Admin: Plugin(), AdminPlugin {
             }
         }
     }
+    /**
+     * 注册路由
+     */
     suspend fun setRoute() = route {
         // 其他插件校验管理员
         channel<AdminCheckRequest>("admin-check") { data ->

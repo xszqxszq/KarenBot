@@ -4,7 +4,7 @@ import korlibs.io.file.VfsFile
 import org.jetbrains.skia.*
 
 /**
- * RGBA 像素位图数据，内容比较基于像素而非引用
+ * Skiko 图片数据
  */
 data class SkikoImageData(
     val width: Int,
@@ -33,9 +33,9 @@ data class SkikoImageData(
 }
 
 /**
- * 从编码图片文件解码为像素位图数据
+ * 读入 Skiko 图片
  *
- * @return 解码出的 RGBA 位图
+ * @return SkikoImageData
  */
 suspend fun VfsFile.readSkikoImage(): SkikoImageData {
     return Image.makeFromEncoded(readBytes()).use { image ->
@@ -52,7 +52,7 @@ suspend fun VfsFile.readSkikoImage(): SkikoImageData {
 }
 
 /**
- * 包装回可绘制的 Skia 图片
+ * 转为 Skia 的 Image
  */
 fun SkikoImageData.toSkiaImage(): Image = Image.makeRaster(
     imageInfo = ImageInfo(width, height, ColorType.RGBA_8888, ColorAlphaType.UNPREMUL),
@@ -61,18 +61,18 @@ fun SkikoImageData.toSkiaImage(): Image = Image.makeRaster(
 )
 
 /**
- * 编码为 PNG 字节
+ * 编码为 PNG 格式
  */
 fun Image.encodePNG(): ByteArray = encodeToData(EncodedImageFormat.PNG).use { it!!.bytes }
 
 private fun norm(s: String) = s.lowercase().replace(" ", "").replace("-", "").replace("_", "")
 
 /**
- * 按字体名与字重匹配系统字体，名称比较忽略大小写与空格、连字符、下划线
+ * 按字体名与字重匹配系统字体
  *
- * @param names 按序尝试的候选字体名
+ * @param names 候选字体名
  * @param weight 目标字重
- * @return 匹配到的字体，未找到时返回 null
+ * @return 匹配到的字体
  */
 fun matchFamily(vararg names: String, weight: Int = 400): Typeface? {
     names.forEach { name ->
@@ -100,6 +100,12 @@ fun matchFamily(vararg names: String, weight: Int = 400): Typeface? {
     return null
 }
 
+/**
+ * 逐像素拷贝
+ *
+ * @param sourceOffset 源起始字节位置
+ * @param targetOffset 目标起始字节位置
+ */
 fun copyPixel(
     source: ByteArray,
     sourceOffset: Int,

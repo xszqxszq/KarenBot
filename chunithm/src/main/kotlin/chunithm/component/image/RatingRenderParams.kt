@@ -2,6 +2,17 @@ package xyz.xszq.bot.chunithm.component.image
 
 import xyz.xszq.bot.chunithm.music.Record
 
+/**
+ * Best 50 成绩图渲染参数
+ *
+ * @property ratingColor Rating 颜色编号
+ * @property avatar 头像 ID
+ * @property level 玩家等级
+ * @property plate 牌子 ID
+ * @property filter 随心配渲染参数
+ * @property isNewDisabled 是否禁用 N20
+ * @property isScoreList 是否为分数列表
+ */
 data class RatingRenderParams(
     // 基本信息
     val nickname: String,

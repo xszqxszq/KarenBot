@@ -8,7 +8,6 @@ val serializationVersion: String by rootProject.extra
 val h2Version: String by rootProject.extra
 val mariadbVersion: String by rootProject.extra
 val ksoupVersion: String by rootProject.extra
-val opencc4jVersion: String by rootProject.extra
 plugins {
     id("bot-plugin")
 }
@@ -18,7 +17,6 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.houbb:opencc4j:${opencc4jVersion}")
     implementation("com.fleeksoft.ksoup:ksoup:${ksoupVersion}")
     implementation("com.h2database:h2:${h2Version}")
     implementation("com.sksamuel.hoplite:hoplite-core:${hopliteVersion}")

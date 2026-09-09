@@ -33,6 +33,9 @@ import xyz.xszq.bot.toPlainText
 import xyz.xszq.bot.util.useTempFile
 import java.util.concurrent.ConcurrentHashMap
 
+/**
+ * 成绩图片功能
+ */
 @Suppress("unused")
 class ImageController(
     override val chunithm: Chunithm
@@ -89,6 +92,15 @@ class ImageController(
             }
         }
     }
+    /**
+     * 发送成绩图
+     *
+     * @param command 按钮使用的命令文本
+     * @param event 消息事件
+     * @param text 说明文本
+     * @param page 页码
+     * @param totalPages 总页数
+     */
     suspend fun Image?.sendResultImage(
         command: String,
         event: MessageEvent,
@@ -129,6 +141,11 @@ class ImageController(
         }
     }
 
+    /**
+     * 处理 Best 成绩
+     *
+     * @param user 用户
+     */
     suspend fun MessageEvent.handleRating(
         user: UserQueryParams
     ) {
@@ -141,6 +158,12 @@ class ImageController(
         }
         result.sendResultImage("b50", this, "生成时间：${elapsed}ms")
     }
+    /**
+     * 处理最近成绩
+     *
+     * @param total 成绩数量
+     * @param user 用户
+     */
     suspend fun MessageEvent.handleRecent(
         total: Int,
         user: UserQueryParams
@@ -161,6 +184,13 @@ class ImageController(
         }
         result.sendResultImage("r${total}", this, "生成时间：${elapsed}ms")
     }
+    /**
+     * 处理随心配查询
+     *
+     * @param total 成绩数量
+     * @param user 用户
+     * @param combo 组合查询条件
+     */
     suspend fun MessageEvent.handleCombo(
         total: Int,
         user: UserQueryParams,
@@ -187,6 +217,13 @@ class ImageController(
         result.sendResultImage("${combo}${total}", this, "生成时间：${elapsed}ms")
     }
 
+    /**
+     * 处理歌 50 / 40 命令
+     *
+     * @param total 填充数量
+     * @param user 用户
+     * @param musicQuery 原始查询文本
+     */
     suspend fun MessageEvent.handleMusicRating(
         total: Int,
         user: UserQueryParams,
@@ -243,6 +280,13 @@ class ImageController(
         }
         result.sendResultImage("歌50", this, "生成时间：${elapsed}ms")
     }
+    /**
+     * 处理分数列表
+     *
+     * @param combo 组合查询条件
+     * @param user 用户
+     * @param page 页码
+     */
     suspend fun MessageEvent.handleScoreList(
         combo: String,
         user: UserQueryParams,
@@ -288,6 +332,11 @@ class ImageController(
         )
     }
 
+    /**
+     * 处理定数表
+     *
+     * @param combo 组合查询条件
+     */
     suspend fun MessageEvent.handleLevelList(
         combo: String
     ) {
@@ -306,6 +355,13 @@ class ImageController(
     }
 
 
+    /**
+     * 按筛选条件选取谱面
+     *
+     * @param filters 筛选条件列表
+     * @param preFiltered 预筛选谱面结果
+     * @return 谱面列表，是否详细展开
+     */
     fun filterCharts(
         filters: List<Filter>,
         preFiltered: List<ChartInfo>? = null
@@ -342,6 +398,12 @@ class ImageController(
         return Pair(charts, detailed)
     }
 
+    /**
+     * 发送图片消息
+     *
+     * @param event 消息事件
+     * @param message 提示文本
+     */
     suspend fun Image.send(
         event: MessageEvent,
         message: String ?= null
@@ -356,6 +418,12 @@ class ImageController(
             event.reply(xyz.xszq.bot.message.Image(file))
         }
     }
+    /**
+     * 上传图片到云端
+     *
+     * @param event 消息事件
+     * @param handle 处理代码块
+     */
     @OptIn(DelicateCoroutinesApi::class)
     suspend fun Image.upload(
         event: MessageEvent,
@@ -384,6 +452,12 @@ class ImageController(
             fun isExpired(now: Long = System.currentTimeMillis()) = now > expiresAt
         }
 
+        /**
+         * 统计代码块执行耗时
+         *
+         * @param block 处理的代码块
+         * @return 耗时与执行结果
+         */
         suspend fun <T> countTime(block: suspend () -> T): Pair<Long, T> {
             val start = System.currentTimeMillis()
             val result = block()

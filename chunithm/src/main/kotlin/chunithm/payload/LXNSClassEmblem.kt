@@ -2,6 +2,9 @@ package xyz.xszq.bot.chunithm.payload
 
 import kotlinx.serialization.Serializable
 
+/**
+ * 落雪查分器的 Class
+ */
 @Serializable
 data class LXNSClassEmblem(
     val base: Int,

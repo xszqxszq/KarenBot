@@ -2,6 +2,9 @@ package xyz.xszq.bot.chunithm.payload
 
 import kotlinx.serialization.Serializable
 
+/**
+ * 落雪查分器的谱面物量
+ */
 @Serializable
 data class LXNSNotes(
     val total: Int,

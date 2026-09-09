@@ -36,9 +36,6 @@ import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * 随机娱乐插件
- *
- * 聚合带随机语义的回复功能，包括随机金发图片（含自动检测）、
- * 随机数字、随机 UUID、随机音MAD，数据目录在 data/random
  */
 @Suppress("unused")
 class RandomPlugin: Plugin() {
@@ -65,6 +62,9 @@ class RandomPlugin: Plugin() {
         logger.info { "[随机] 插件加载完成。" }
     }
 
+    /**
+     * 注册路由
+     */
     suspend fun setRoute() = route {
         // @机器人或识别到金发时，随机回复一张金发图
         always {

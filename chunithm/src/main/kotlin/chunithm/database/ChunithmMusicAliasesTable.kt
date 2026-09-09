@@ -5,6 +5,9 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import xyz.xszq.bot.chunithm.music.MusicInfo
 
+/**
+ * 歌曲别名表
+ */
 object ChunithmMusicAliasesTable: Table() {
     val id = integer("id")
     val name = varchar("name", 128)
@@ -12,6 +15,14 @@ object ChunithmMusicAliasesTable: Table() {
 
     override val primaryKey = PrimaryKey(id, name)
 
+    /**
+     * 获取歌曲所有的别名
+     *
+     * 仅限已投票通过
+     *
+     * @param music 歌曲信息
+     * @return 别名列表
+     */
     suspend operator fun get(
         music: MusicInfo
     ) = suspendedTransactionAsync {
@@ -20,6 +31,13 @@ object ChunithmMusicAliasesTable: Table() {
         }.map { Pair(it[name], it[votes]) }
     }.await()
 
+    /**
+     * 获取歌曲别名的票数
+     *
+     * @param music 歌曲
+     * @param alias 别名
+     * @return 别名票数
+     */
     suspend operator fun get(
         music: MusicInfo,
         alias: String
@@ -29,12 +47,23 @@ object ChunithmMusicAliasesTable: Table() {
         }.map { it[votes] }.firstOrNull()
     }.await()
 
+    /**
+     * 获取所有歌曲的投票通过的别名
+     *
+     * @return 歌曲 ID / 别名的列表
+     */
     suspend fun all() = suspendedTransactionAsync {
         select(ChunithmMusicAliasesTable.id, name).where {
             votes greaterEq 0
         }.map { Pair(it[ChunithmMusicAliasesTable.id], it[name]) }
     }.await()
 
+    /**
+     * 根据别名查找歌曲
+     *
+     * @param alias 别名
+     * @return 匹配到的歌曲 ID
+     */
     suspend fun exact(
         alias: String
     ) = suspendedTransactionAsync {
@@ -44,6 +73,12 @@ object ChunithmMusicAliasesTable: Table() {
         }.map { it[ChunithmMusicAliasesTable.id] }
     }.await()
 
+    /**
+     * 为歌曲别名投票
+     *
+     * @param music 歌曲
+     * @param alias 别名
+     */
     suspend fun vote(
         music: MusicInfo,
         alias: String
@@ -65,6 +100,12 @@ object ChunithmMusicAliasesTable: Table() {
         }
     }.await()
 
+    /**
+     * 不经过投票直接添加歌曲别名
+     *
+     * @param music 歌曲
+     * @param alias 别名
+     */
     suspend fun add(
         music: MusicInfo,
         alias: String
@@ -84,12 +125,23 @@ object ChunithmMusicAliasesTable: Table() {
         }
     }.await()
 
+    /**
+     * 删除歌曲别名
+     *
+     * @param music 歌曲
+     * @param alias 别名
+     */
     suspend fun remove(music: MusicInfo, alias: String) = suspendedTransactionAsync {
         ChunithmMusicAliasesTable.deleteWhere {
             (ChunithmMusicAliasesTable.id eq music.id) and (ChunithmMusicAliasesTable.name eq alias)
         }
     }.await()
 
+    /**
+     * 批量添加歌曲别名
+     *
+     * @param aliases 歌曲 ID 与别名的集合
+     */
     suspend fun addAll(
         aliases: Collection<Pair<Int, String>>
     ) = suspendedTransactionAsync {

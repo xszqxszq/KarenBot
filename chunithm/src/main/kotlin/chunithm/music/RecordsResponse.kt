@@ -1,5 +1,8 @@
 package xyz.xszq.bot.chunithm.music
 
+/**
+ * 多曲成绩查询结果
+ */
 class RecordsResponse(
     override val player: PlayerInfo,
     override var settings: PlayerSettings? = null,

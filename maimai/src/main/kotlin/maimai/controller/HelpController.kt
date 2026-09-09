@@ -2,6 +2,9 @@ package xyz.xszq.bot.maimai.controller
 
 import xyz.xszq.bot.maimai.Maimai
 
+/**
+ * 帮助功能
+ */
 @Suppress("unused")
 class HelpController(
     override val maimai: Maimai

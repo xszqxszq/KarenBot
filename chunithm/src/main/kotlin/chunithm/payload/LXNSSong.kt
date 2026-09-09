@@ -2,6 +2,9 @@ package xyz.xszq.bot.chunithm.payload
 
 import kotlinx.serialization.Serializable
 
+/**
+ * 落雪查分器的歌曲信息
+ */
 @Serializable
 data class LXNSSong(
     val id: Int,

@@ -1,6 +1,16 @@
 package xyz.xszq.bot.chunithm.component
 
+/**
+ * 余弦相似度
+ */
 object CosineSimilarity {
+    /**
+     * 计算两个向量的余弦相似度
+     *
+     * @param a 向量 a
+     * @param b 向量 b
+     * @return a 与 b 的余弦相似度
+     */
     fun compute(a: FloatArray, b: FloatArray): Double {
         if (a.size != b.size || a.isEmpty()) return 0.0
         var dot = 0.0

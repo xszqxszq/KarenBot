@@ -29,6 +29,9 @@ import xyz.xszq.bot.maimai.query.ComboQuery
 import xyz.xszq.bot.util.json
 import kotlin.reflect.full.primaryConstructor
 
+/**
+ * 舞萌DX 插件
+ */
 class Maimai: Plugin() {
     var configPath = "./config/maimai.yml"
     var dataPath = "./data/maimai"
@@ -49,6 +52,12 @@ class Maimai: Plugin() {
     var pluginStopped: Boolean = false
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    /**
+     * 按 ID 获取查分器后端
+     *
+     * @param name ID，`diving-fish`/`lxns`
+     * @return 后端
+     */
     fun backend(name: String) = backends.first { it.id == name }
 
     /**
@@ -143,8 +152,22 @@ class Maimai: Plugin() {
         logger.info { "[舞萌] 插件加载完成。" }
     }
 
+    /**
+     * 获取全部歌曲
+     */
     fun musics() = maimaiData.musics.values
+
+    /**
+     * 按 ID 获取歌曲
+     *
+     * @param id 歌曲 ID
+     * @return 歌曲
+     */
     fun music(id: Int) = maimaiData.musics[id]
+
+    /**
+     * 获取全部谱面
+     */
     fun charts() = musics().flatMap { it.charts }
 
     /**
@@ -164,6 +187,9 @@ class Maimai: Plugin() {
         logger.info { "[舞萌] 插件已卸载。" }
     }
 
+    /**
+     * 拉取水鱼统计的各谱面拟合定数，失败时载入本地缓存
+     */
     suspend fun loadFitLevelValues() {
         val local = localCurrentDirVfs["$dataPath/diving-fish-stats.json"]
         val stats = runCatching {
@@ -188,6 +214,9 @@ class Maimai: Plugin() {
     }
 
     companion object {
+        /**
+         * 判断是否开启兼容模式
+         */
         suspend fun Event.textMode() = if (this is MessageEvent)
             MaimaiSettingsTable[sender.id, "text-mode"] == "1" else false
     }

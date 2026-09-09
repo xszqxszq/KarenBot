@@ -25,12 +25,16 @@ import xyz.xszq.bot.maimai.component.WaitingEventData
 import xyz.xszq.bot.maimai.database.DivingFishBindTable
 import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.database.ProberBindTable
+import xyz.xszq.bot.maimai.database.RhythmGameToken
 import xyz.xszq.bot.maimai.database.RhythmGameTokens
 import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.reply
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 
+/**
+ * API 服务
+ */
 class ApiController(
     val maimai: Maimai
 ) {
@@ -51,6 +55,9 @@ class ApiController(
         proxyPort = maimai.config.tokens["proxy-port"] ?.toInt() ?: throw NotFoundException()
     }
 
+    /**
+     * 初始化
+     */
     fun start() {
         maimai.scope.launch {
             restoreOAuthBindTokens()
@@ -59,9 +66,9 @@ class ApiController(
                 val now = System.currentTimeMillis()
                 oauthBindTokens.entries.removeIf { it.value.expireAt < now }
                 updateTokens.entries.removeIf { it.value.expireAt < now }
-                RhythmGameTokens.load().forEach { token ->
+                RhythmGameToken.load().forEach { token ->
                     if (token.expiresAt < now)
-                        RhythmGameTokens.remove(token.id)
+                        RhythmGameTokens.remove(token.id.value)
                 }
             }
         }
@@ -69,9 +76,9 @@ class ApiController(
 
     private suspend fun restoreOAuthBindTokens() {
         val now = System.currentTimeMillis()
-        RhythmGameTokens.load().forEach { token ->
+        RhythmGameToken.load().forEach { token ->
             if (token.expiresAt < now) {
-                RhythmGameTokens.remove(token.id)
+                RhythmGameTokens.remove(token.id.value)
                 return@forEach
             }
             val bot = maimai.pluginLoader.bot
@@ -95,10 +102,13 @@ class ApiController(
                     seq = token.seq
                 )
             }
-            oauthBindTokens[token.id] = WaitingEventData(event, token.replay, token.expiresAt)
+            oauthBindTokens[token.id.value] = WaitingEventData(event, token.replay, token.expiresAt)
         }
     }
 
+    /**
+     * 监听 API 服务器
+     */
     fun listen() = embeddedServer(Netty, host = "0.0.0.0", port = 18100) {
         intercept(ApplicationCallPipeline.Call) {
             if (call.request.httpMethod.value == "CONNECT") {
@@ -263,19 +273,12 @@ class ApiController(
                 val (ok, fail) = divingFish.migrateQQBindings(limit)
                 call.respondText("ok=$ok fail=$fail")
             }
-            get("/_cron/migrate-lxns") {
-                val addr = call.request.local.remoteAddress
-                if (addr != "127.0.0.1" && addr != "0:0:0:0:0:0:0:1") {
-                    call.respondText("forbidden", status = HttpStatusCode.Forbidden)
-                    return@get
-                }
-                val lxns = maimai.backend("lxns") as LXNS
-                val (ok, skip) = lxns.migrateLegacyBindings()
-                call.respondText("ok=$ok skip=$skip")
-            }
         }
     }.start(wait = false).also { server = it }
 
+    /**
+     * 停止 API 服务器
+     */
     fun close() {
         server.stop()
     }

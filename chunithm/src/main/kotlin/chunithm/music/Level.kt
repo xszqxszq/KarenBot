@@ -3,10 +3,20 @@ package xyz.xszq.bot.chunithm.music
 import kotlin.math.max
 import kotlin.math.roundToInt
 
+/**
+ * 等级及定数
+ */
 @Suppress("unused")
 object Level {
     var levelRange = 1..15
     var plusRange = 7..15
+
+    /**
+     * 根据等级名得到定数取值范围
+     *
+     * @param level 等级名
+     * @return 定数取值范围
+     */
     fun toRange(level: String): ClosedFloatingPointRange<Double> {
         val plus = level.endsWith("+")
         val num =
@@ -22,7 +32,16 @@ object Level {
             return begin .. end
         }
     }
+    /**
+     * 等级名中的数字部分
+     *
+     * @param level 等级名
+     * @return 等级数字
+     */
     fun numberPart(level: String) = level.filter { it.isDigit() }.toIntOrNull() ?: 0
+    /**
+     * 比较等级高低
+     */
     val comparator: (String, String) -> Int = { level1, level2 ->
         val a = if (level1.endsWith("?")) level1.substringBefore("?") else level1
         val b = if (level2.endsWith("?")) level2.substringBefore("?") else level2
@@ -38,6 +57,9 @@ object Level {
             else -> 1
         }
     }
+    /**
+     * 全部等级
+     */
     val levels: List<String> get() = buildList {
         levelRange.forEach { level ->
             add(level.toString())
@@ -45,6 +67,9 @@ object Level {
                 add("$level+")
         }
     }
+    /**
+     * 全部定数
+     */
     val levelValues: List<Double> get() = buildList {
         levelRange.forEach { level ->
             add(level.toDouble())
@@ -56,5 +81,8 @@ object Level {
             }
         }
     }
+    /**
+     * 清理多余小数
+     */
     fun Double.levelClean() = (max(0.0, this) * 10).roundToInt() / 10.0
 }

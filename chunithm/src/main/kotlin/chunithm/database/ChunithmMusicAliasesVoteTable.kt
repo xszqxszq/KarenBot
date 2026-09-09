@@ -7,6 +7,9 @@ import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import xyz.xszq.bot.chunithm.music.MusicInfo
 
+/**
+ * 歌曲别名投票记录表
+ */
 object ChunithmMusicAliasesVoteTable: Table() {
     val id = integer("id")
     val name = varchar("name", 128)
@@ -14,6 +17,13 @@ object ChunithmMusicAliasesVoteTable: Table() {
 
     override val primaryKey = PrimaryKey(id, name, user)
 
+    /**
+     * 记录一次投票
+     *
+     * @param music 歌曲
+     * @param alias 别名
+     * @param openId 投票用户的 OpenID
+     */
     suspend fun vote(
         music: MusicInfo,
         alias: String,
@@ -31,6 +41,14 @@ object ChunithmMusicAliasesVoteTable: Table() {
             }
     }.await()
 
+    /**
+     * 判断用户是否已为该别名投过票
+     *
+     * @param music 歌曲
+     * @param alias 别名
+     * @param openId 投票用户的 OpenID
+     * @return 是否已投票
+     */
     suspend operator fun get(
         music: MusicInfo,
         alias: String,

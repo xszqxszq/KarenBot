@@ -10,14 +10,37 @@ import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.payload.markdown.MarkdownData
 
 
+/**
+ * Markdown 模板
+ */
 object MarkdownTemplates {
+    /**
+     * 封面图路径
+     */
     lateinit var jacketUrl: String
 
+    /**
+     * 初始化
+     *
+     * @param maimai 中二插件
+     */
     fun init(chunithm: Chunithm) {
         jacketUrl = chunithm.config.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")
     }
 
+    /**
+     * Markdown 按钮
+     */
     object Keyboards {
+        /**
+         * 分页按钮
+         *
+         * @param button 按钮 ID
+         * @param keyword 关键词
+         * @param nowPage 当前页码
+         * @param totalPages 总页数
+         * @return 按钮
+         */
         fun selectPaged(button: String, keyword: String, nowPage: Int = 1, totalPages: Int = 1) = Keyboard.create {
             row {
                 if (nowPage > 1)
@@ -28,7 +51,22 @@ object MarkdownTemplates {
         }
     }
 
+    /**
+     * Markdown 模板
+     */
     object Templates {
+        /**
+         * 选择歌曲的列表
+         *
+         * @param title 列表标题
+         * @param type 命令名
+         * @param keyword 查询关键词
+         * @param difficulty 谱面难度
+         * @param result 歌曲列表
+         * @param displayName 命令前缀
+         * @param nowPage 当前页码
+         * @param totalPages 总页数
+         */
         fun selectMusic(
             title: String,
             type: String,
@@ -53,6 +91,17 @@ object MarkdownTemplates {
             return Markdown(data, keyboard)
         }
 
+        /**
+         * 选择谱面的列表
+         *
+         * @param title 列表标题
+         * @param type 命令名
+         * @param keyword 查询关键词
+         * @param result 谱面列表
+         * @param displayName 命令前缀
+         * @param nowPage 当前页码
+         * @param totalPages 总页数
+         */
         fun selectChart(
             title: String,
             type: String,
@@ -76,6 +125,14 @@ object MarkdownTemplates {
             return Markdown(data, keyboard)
         }
     }
+    /**
+     * Markdown 链接
+     *
+     * @param link 命令文本
+     * @param show 显示文本
+     * @param enter 点击后是否直接发送命令
+     * @return Markdown 文本
+     */
     fun href(
         link: String,
         show: String,

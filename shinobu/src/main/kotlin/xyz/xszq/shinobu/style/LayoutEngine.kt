@@ -9,6 +9,12 @@ import xyz.xszq.shinobu.dom.Element
 import xyz.xszq.shinobu.dom.Img
 import xyz.xszq.shinobu.dom.Span
 
+/**
+ * 弹性布局引擎
+ *
+ * 按 CSS 弹性盒语义对元素树执行尺寸测量与位置排版，一次完整布局
+ * 分为测量与定位两个阶段
+ */
 object LayoutEngine {
     private class FlexLine(
         val items: MutableList<Element> = mutableListOf(),
@@ -24,6 +30,13 @@ object LayoutEngine {
     private fun Element.mainMargin(isRow: Boolean) = if (isRow) style.margin.left else style.margin.top
     private fun Element.crossMargin(isRow: Boolean) = if (isRow) style.margin.top else style.margin.left
 
+    /**
+     * 对元素树执行完整布局
+     *
+     * 先自底向上测量各节点尺寸，再自顶向下为每个节点确定位置
+     *
+     * @param root 布局的根节点
+     */
     fun performLayout(root: Element) {
         measure(root)
         layout(root, 0f, 0f)

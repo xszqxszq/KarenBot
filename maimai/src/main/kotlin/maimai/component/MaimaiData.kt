@@ -11,6 +11,9 @@ import xyz.xszq.bot.maimai.payload.LocalMusicInfo
 import xyz.xszq.bot.maimai.payload.LocalPlateInfo
 import java.io.File
 
+/**
+ * 舞萌游戏数据
+ */
 class MaimaiData(
     val dataPath: String = "./data/maimai"
 ) {
@@ -30,9 +33,22 @@ class MaimaiData(
     lateinit var dataDir: VfsFile
     lateinit var newestVersion: GameVersion
 
+    /**
+     * 按名称获取版本
+     *
+     * @param name 版本名称
+     * @return 对应的版本
+     */
     fun toGameVersion(name: String): GameVersion = versions[name]!!
+
+    /**
+     * 本地曲目是否属于最新版本
+     */
     fun isNew(localMusicInfo: LocalMusicInfo) = localMusicInfo.version == newestVersion.name
 
+    /**
+     * 载入本地数据
+     */
     @OptIn(ExperimentalHoplite::class)
     fun load() {
         dataDir = localCurrentDirVfs[dataPath]
@@ -44,6 +60,11 @@ class MaimaiData(
     }
 
 
+    /**
+     * 载入歌曲信息
+     *
+     * @return 歌曲列表
+     */
     fun getMusicList(): Map<Int, MusicInfo> {
         musics.clear()
         val decoded = json.decodeFromString<List<LocalMusicInfo>>(
@@ -82,6 +103,11 @@ class MaimaiData(
         return musics
     }
 
+    /**
+     * 载入版本信息
+     *
+     * @return 版本列表
+     */
     fun getGameVersions(): Map<String, GameVersion> {
         versions.clear()
         versions.putAll(json.decodeFromString<List<GameVersion>>(
@@ -92,6 +118,11 @@ class MaimaiData(
         return versions
     }
 
+    /**
+     * 载入牌子信息
+     *
+     * @return 牌子列表
+     */
     fun getPlateList(): Map<Int, LocalPlateInfo> {
         plates.clear()
         plates.putAll(json.decodeFromString<List<LocalPlateInfo>>(
@@ -100,6 +131,11 @@ class MaimaiData(
         return plates
     }
 
+    /**
+     * 载入头像信息
+     *
+     * @return 头像列表
+     */
     fun getIconsList(): Map<Int, LocalIconInfo> {
         icons.clear()
         icons.putAll(json.decodeFromString<List<LocalIconInfo>>(
@@ -108,6 +144,11 @@ class MaimaiData(
         return icons
     }
 
+    /**
+     * 载入段位信息
+     *
+     * @return 段位列表
+     */
     fun getCoursesList(): Map<Int, LocalCourseInfo> {
         courses.clear()
         courses.putAll(json.decodeFromString<List<LocalCourseInfo>>(

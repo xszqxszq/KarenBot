@@ -2,6 +2,9 @@ package xyz.xszq.bot.chunithm.controller
 
 import xyz.xszq.bot.chunithm.Chunithm
 
+/**
+ * 帮助功能
+ */
 @Suppress("unused")
 class HelpController(
     override val chunithm: Chunithm

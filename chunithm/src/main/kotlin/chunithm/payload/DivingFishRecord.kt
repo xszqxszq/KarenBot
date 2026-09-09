@@ -3,6 +3,14 @@ package xyz.xszq.bot.chunithm.payload
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * 水鱼接口中的单曲游玩成绩
+ *
+ * @property fc 连击状态码
+ * @property levelIndex 谱面难度序号
+ * @property levelLabel 该难度的标签
+ * @property mid 本地曲库的歌曲 ID
+ */
 @Serializable
 data class DivingFishRecord(
     val cid: Int,

@@ -28,8 +28,12 @@ import xyz.xszq.bot.maimai.music.*
 import xyz.xszq.bot.maimai.payload.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
-import kotlin.math.min
 
+/**
+ * 落雪查分器 API
+ *
+ * 负责连接落雪查分器进行玩家授权、分数查询
+ */
 class LXNS(
     val token: String,
     val oauthId: String,
@@ -54,14 +58,29 @@ class LXNS(
     private val tokenCache = ConcurrentHashMap<String, Pair<String, Long>>()
     private val refreshLocks = ConcurrentHashMap<String, Mutex>()
 
+    /**
+     * 请求头携带开发者令牌
+     */
     fun HttpRequestBuilder.setDeveloper() {
         headers["Authorization"] = token
     }
 
+    /**
+     * 请求头携带落雪 OAuth 访问令牌
+     *
+     * @param accessToken 访问令牌
+     */
     fun HttpRequestBuilder.setOAuth(accessToken: String) {
         headers["Authorization"] = "Bearer $accessToken"
     }
 
+    /**
+     * OAuth 授权绑定
+     *
+     * @param code 落雪返回的授权码
+     * @param event 消息事件
+     * @return 是否完成绑定
+     */
     suspend fun initOAuth(
         code: String,
         event: MessageEvent
@@ -104,10 +123,21 @@ class LXNS(
         return true
     }
 
+    /**
+     * 清除指定用户的访问令牌缓存
+     *
+     * @param id 用户 OpenID
+     */
     fun clearTokenCache(id: String) {
         tokenCache.remove(id)
     }
 
+    /**
+     * 获取指定用户的访问令牌
+     *
+     * @param id 用户 OpenID
+     * @return 访问令牌
+     */
     suspend fun accessToken(id: String): String? {
         logger.debug { "[落雪调试] accessToken id=$id" }
         tokenCache[id] ?.let { (token, expiresAt) ->
@@ -166,26 +196,14 @@ class LXNS(
         }
     }
 
+    /**
+     * 刷新用户的访问令牌
+     *
+     * @param id 用户 OpenID
+     * @return 令牌是否有效
+     */
     suspend fun refreshToken(id: String): Boolean =
         runCatching { accessToken(id) != null }.getOrDefault(false)
-
-    suspend fun migrateLegacyBindings(): Pair<Int, Int> {
-        var ok = 0
-        var skip = 0
-        for (id in MaimaiSettingsTable.idsForKey("lxns-oa-refresh")) {
-            if (ProberBindTable[id, "lxns", "refresh"] != null) {
-                skip++
-                continue
-            }
-            val refresh = MaimaiSettingsTable[id, "lxns-oa-refresh"] ?: continue
-            ProberBindTable[id, "lxns", "refresh"] = refresh
-            MaimaiSettingsTable[id, "lxns-friend-code"] ?.let { friendCode ->
-                ProberBindTable[id, "lxns", "friend-code"] = friendCode
-            }
-            ok++
-        }
-        return Pair(ok, skip)
-    }
 
     override suspend fun load() {
     }
@@ -434,6 +452,12 @@ class LXNS(
         }
     }
 
+    /**
+     * 查询玩家最近的游玩记录
+     *
+     * @param user 玩家
+     * @return 最近游玩记录
+     */
     suspend fun getPlayerRecent(
         user: UserQueryParams
     ): RecordsResponse? = when (user) {
@@ -477,6 +501,11 @@ class LXNS(
         }
     }
 
+    /**
+     * 转换为成绩记录类型
+     *
+     * @return 成绩记录
+     */
     fun LXNSScore.toRecord(): Record? {
         val realId = when {
             type == "dx" && id < 10000 -> id + 10000
@@ -509,22 +538,8 @@ class LXNS(
         )
     }
 
-    fun <T> List<T>.group(size: Int = 15): List<List<T>> {
-        val result = mutableListOf<List<T>>()
-        var now = toMutableList()
-        while (now.isNotEmpty()) {
-            val num = min(size, now.size)
-            val take = now.subList(0, num)
-            result.add(take)
-            if (num == now.size)
-                break
-            now = now.subList(num, now.size)
-        }
-        return result
-    }
-
     companion object {
-        fun Record.toLxnsScore() = LXNSScore(
+        private fun Record.toLxnsScore() = LXNSScore(
             id = music.id,
             levelIndex = chart.difficulty.value,
             achievements = achievement / 10000f,

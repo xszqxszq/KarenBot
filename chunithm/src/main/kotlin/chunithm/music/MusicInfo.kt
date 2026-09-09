@@ -12,6 +12,9 @@ import xyz.xszq.bot.payload.markdown.MarkdownData
 import xyz.xszq.bot.payload.markdown.RenderData
 import xyz.xszq.bot.plus
 
+/**
+ * 歌曲信息
+ */
 @Suppress("unused")
 @Serializable
 class MusicInfo(
@@ -27,12 +30,22 @@ class MusicInfo(
     val disabled: Boolean = false,
     val map: String ?= null
 ) {
+    /**
+     * 全部谱面
+     */
     var charts: List<ChartInfo> = listOf()
+
+    /**
+     * 资源 ID
+     */
     val resourceId: Int
         get() = when {
             isWordsEnd -> charts.first().originId ?: 0
             else -> id
         }
+    /**
+     * 展示用曲名
+     */
     val name: String
         get() = when {
             isWordsEnd -> {
@@ -41,8 +54,18 @@ class MusicInfo(
             }
             else -> title
         }
+
+    /**
+     * 是否全部谱面均为 WORLD'S END 难度
+     */
     val isWordsEnd
         get() = charts.all { it.difficulty == MusicDifficulty.WorldsEnd }
+
+    /**
+     * 获取封面文件
+     *
+     * @return 封面文件
+     */
     suspend fun cover(): VfsFile {
         val cover = localCurrentDirVfs["$coverDir/$resourceId.png"]
         if (!cover.exists() || !cover.isFile()) {
@@ -51,6 +74,11 @@ class MusicInfo(
         return cover
     }
 
+    /**
+     * 文本版歌曲信息
+     *
+     * @return 歌曲信息
+     */
     suspend fun infoText() = Image(cover()) + buildString {
         appendLine("${id}. $name")
         appendLine("曲师: $artist")
@@ -63,6 +91,12 @@ class MusicInfo(
     }.trim().newLine()
 
 
+    /**
+     * Markdown 版谱面信息
+     *
+     * @param jacketUrl 封面 URL
+     * @return 歌曲信息
+     */
     fun infoMD(
         jacketUrl: String
     ) = Markdown(MarkdownData(buildString {
@@ -104,6 +138,9 @@ class MusicInfo(
     })
 
     companion object {
+        /**
+         * 封面文件存放目录
+         */
         var coverDir = "./data/chunithm/covers"
 
         private val MusicDifficulty.emoji: String

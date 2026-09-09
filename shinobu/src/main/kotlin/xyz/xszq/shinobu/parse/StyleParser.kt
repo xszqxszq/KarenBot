@@ -3,8 +3,21 @@ package xyz.xszq.shinobu.parse
 import org.jetbrains.skia.Color
 import xyz.xszq.shinobu.style.*
 
+/**
+ * CSS 样式声明解析器
+ *
+ * 把元素 `style` 属性中的声明文本解析为样式对象
+ */
 @Suppress("unused")
 object StyleParser {
+    /**
+     * 解析样式声明文本
+     *
+     * 声明以分号分隔，每条为属性键值对，未知键与非法值会被忽略
+     *
+     * @param styleString 待解析的样式声明
+     * @return 解析出的样式对象
+     */
     fun parse(styleString: String): Style {
         val style = Style()
         val declarations = styleString.split(";").map { it.trim() }.filter { it.isNotEmpty() }
@@ -100,6 +113,14 @@ object StyleParser {
         return null
     }
 
+    /**
+     * 解析 `#` 前缀的十六进制颜色文本
+     *
+     * 支持 3 位、4 位、6 位与 8 位写法，短写法逐位翻倍展开，
+     * 8 位写法的末两位为透明度
+     *
+     * @return 解析出的颜色值
+     */
     fun String.rgbColor(): Int? {
         var hex = substring(1)
 
@@ -126,6 +147,14 @@ object StyleParser {
             }
         }.getOrNull()
     }
+
+    /**
+     * 解析 `rgb()` 或 `rgba()` 函数形式的颜色文本
+     *
+     * 透明度为 0 到 1 之间的小数，省略时视为不透明
+     *
+     * @return 解析出的颜色值
+     */
     fun String.rgba(): Int? {
         val regex = Regex("""rgba?\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([0-9.]+)\s*)?\)""")
         val match = regex.find(this) ?: return null
@@ -139,6 +168,16 @@ object StyleParser {
 
         return (a shl 24) or (r shl 16) or (g shl 8) or b
     }
+
+    /**
+     * 按红绿蓝分量与透明度合成颜色值
+     *
+     * @param r 红色分量
+     * @param g 绿色分量
+     * @param b 蓝色分量
+     * @param a 透明度
+     * @return 合成出的颜色值
+     */
     fun rgba(
         r: Int,
         g: Int,

@@ -25,9 +25,7 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 
 /**
- * 东方原曲测验
- *
- * 随机截取东方原曲片段并让玩家猜出原曲名/所属原作及出现位置，原曲位于 data/audio/touhou
+ * 东方原曲认知测验
  */
 class Touhou(
     val audio: Plugin
@@ -36,12 +34,15 @@ class Touhou(
     lateinit var musics: TouhouMusics
     private val started = ConcurrentHashMap<String, Boolean>()
 
+    /**
+     * 初始化
+     */
     suspend fun init() {
         musics = Json.decodeFromString(baseDir["musics.json"].readString())
     }
 
     /**
-     * 注册猜歌相关路由
+     * 注册路由
      */
     suspend fun setRoute() = audio.route {
         // 获取一首随机东方原曲
@@ -99,7 +100,7 @@ class Touhou(
                 started.remove(id)
         }
     }
-    suspend fun MessageEvent.guess(
+    private suspend fun MessageEvent.guess(
         raw: String
     ) {
         val args = raw.trim().split(" ").filter { it.isNotBlank() }
@@ -256,7 +257,7 @@ class Touhou(
             started.remove(id)
         }
     }
-    fun againKeyboard(
+    private fun againKeyboard(
         difficulty: Difficulty,
         range: Range
     ) = Keyboard.create {
@@ -274,7 +275,7 @@ class Touhou(
         }
     }
 
-    fun isSimilar(
+    private fun isSimilar(
         a: String,
         b: String
     ): Boolean {
@@ -285,7 +286,7 @@ class Touhou(
             Similarity.standardEditDistanceSimilarity(a, b) > SIMILAR_THRESHOLD ||
             Similarity.gregorEditDistanceSimilarity(a, b) > SIMILAR_THRESHOLD
     }
-    fun List<String>.isAnswer(reply: String): Boolean {
+    private fun List<String>.isAnswer(reply: String): Boolean {
         val answer = reply.lowercase().toSimple().trim()
         val matched = any {
             ((it.length < 3 || answer.length >= 3) && answer in it) ||
@@ -295,7 +296,7 @@ class Touhou(
             return true
         return any { isSimilar(it, answer) }
     }
-    fun Music.answer(): String {
+    private fun Music.answer(): String {
         if (name == jpn)
             return name
         return "$name ($jpn)"
@@ -359,9 +360,17 @@ class Touhou(
         const val RANDOM_DURATION = 15.0
         const val TIMESUP = 60000L
         const val SIMILAR_THRESHOLD = 0.7
+        /**
+         * 原曲认知测验难度
+         */
         enum class Difficulty {
             Easy, Normal, Hard, Lunatic
         }
+        /**
+         * 原曲认知测验的题目范围
+         *
+         * @property value 范围名称
+         */
         enum class Range(val value: String) {
             Old("旧作"), New("新作"), Int("全部")
         }
@@ -373,6 +382,6 @@ class Touhou(
             Difficulty.Lunatic -> 1.0
             // TODO: 支持 Extra 难度
         }
-        fun String.toSimple() = ZhConverterUtil.toSimple(this) ?: this
+        private fun String.toSimple() = ZhConverterUtil.toSimple(this) ?: this
     }
 }

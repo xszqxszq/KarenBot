@@ -7,8 +7,22 @@ import xyz.xszq.shinobu.dom.Element
 import xyz.xszq.shinobu.dom.Img
 import xyz.xszq.shinobu.dom.Span
 
+/**
+ * XML 模板解析器
+ *
+ * 把模板的 XML 文本解析成元素树，仅识别 `div`、`span` 与 `img`
+ * 三种标签
+ */
 @Suppress("unused")
 object TemplateParser {
+    /**
+     * 解析模板的 XML 文本
+     *
+     * 顶层元素必须带有 `id`，文本内容会拼接进最近的 `span` 节点
+     *
+     * @param xmlString 待解析的 XML 文本
+     * @return 顶层元素按 `id` 索引的映射
+     */
     fun parse(xmlString: String): Map<String, Element> {
         val reader = xmlStreaming.newReader(xmlString)
         val elementStack = mutableListOf<Element>()

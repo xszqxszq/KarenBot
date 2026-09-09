@@ -1,5 +1,8 @@
 package xyz.xszq.bot.chunithm.music
 
+/**
+ * Best 50 查询结果
+ */
 class RatingResponse(
     override val player: PlayerInfo,
     override var settings: PlayerSettings? = null,

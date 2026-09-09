@@ -30,13 +30,24 @@ import xyz.xszq.bot.reply
 import xyz.xszq.bot.subscribe.SubscribeBuilder
 import xyz.xszq.bot.util.json
 
+/**
+ * 功能基类
+ */
 @Suppress("unused")
 sealed class Controller(
     open val chunithm: Chunithm
 ) {
+    /**
+     * 注册命令路由
+     */
     abstract suspend fun setRoute()
     open suspend fun unload() {}
 
+    /**
+     * 消息发送者是否为管理员
+     *
+     * 这是一个远程调用，将会请求 admin 插件进行鉴权
+     */
     suspend fun MessageEvent.isAdmin(): Boolean {
         val deferred = CompletableDeferred<Boolean>()
         chunithm.pluginLoader.subscribes.handle(ChannelEvent(
@@ -47,6 +58,13 @@ sealed class Controller(
         return runCatching { withTimeout(5000L) { deferred.await() } }.getOrDefault(false)
     }
 
+    /**
+     * 注册命令域
+     *
+     * 命令域下根据用户偏好选择唯一的插件处理其命令
+     *
+     * @param block 命令域路由代码块
+     */
     suspend fun rhythm(
         block: suspend SubscribeBuilder.() -> Unit
     ) {
@@ -62,6 +80,14 @@ sealed class Controller(
         }
     }
 
+    /**
+     * 回复用户消息
+     *
+     * 默认回复 Markdown 内容，兼容模式时回复纯文本
+     *
+     * @param fallback 兼容模式时的回复
+     * @param block Markdown DSL Builder
+     */
     suspend fun MessageEvent.reply(
         fallback: String,
         block: MarkdownDsl.() -> Unit
@@ -70,11 +96,27 @@ sealed class Controller(
         else reply(block)
     }
 
+    /**
+     * 回复用户消息
+     *
+     * 默认回复 Markdown 内容，兼容模式时回复纯文本
+     *
+     * @param fallback 兼容模式时的回复
+     * @param markdown Markdown 内容
+     */
     suspend fun MessageEvent.reply(fallback: String, markdown: Markdown) {
         if (textMode()) reply(fallback)
         else reply(markdown)
     }
 
+    /**
+     * 回复用户消息
+     *
+     * 默认回复 Markdown 内容，兼容模式时回复消息链
+     *
+     * @param fallback 兼容模式时的消息链
+     * @param block Markdown DSL Builder
+     */
     suspend fun MessageEvent.reply(
         fallback: MessageChain,
         block: MarkdownDsl.() -> Unit
@@ -83,11 +125,27 @@ sealed class Controller(
         else reply(block)
     }
 
+    /**
+     * 回复用户消息
+     *
+     * 默认回复 Markdown 内容，兼容模式时回复消息链
+     *
+     * @param fallback 兼容模式时的消息链
+     * @param markdown Markdown 内容
+     */
     suspend fun MessageEvent.reply(fallback: MessageChain, markdown: Markdown) {
         if (textMode()) reply(fallback)
         else reply(markdown)
     }
 
+    /**
+     * 回复用户消息
+     *
+     * 默认回复 Markdown 内容，兼容模式时回复纯文本
+     *
+     * @param fallback 兼容模式时的回复
+     * @param block Markdown DSL Builder
+     */
     suspend fun ReplyAble.reply(
         fallback: String,
         block: MarkdownDsl.() -> Unit
@@ -96,11 +154,27 @@ sealed class Controller(
         else reply(block)
     }
 
+    /**
+     * 回复用户消息
+     *
+     * 默认回复 Markdown 内容，兼容模式时回复纯文本
+     *
+     * @param fallback 兼容模式时的回复
+     * @param markdown Markdown 内容
+     */
     suspend fun ReplyAble.reply(fallback: String, markdown: Markdown) {
         if (textMode()) reply(fallback)
         else reply(markdown)
     }
 
+    /**
+     * 回复用户消息
+     *
+     * 默认回复 Markdown 内容，兼容模式时回复消息链
+     *
+     * @param fallback 兼容模式时的消息链
+     * @param block Markdown DSL Builder
+     */
     suspend fun ReplyAble.reply(
         fallback: MessageChain,
         block: MarkdownDsl.() -> Unit
@@ -109,11 +183,22 @@ sealed class Controller(
         else reply(block)
     }
 
+    /**
+     * 回复用户消息
+     *
+     * 默认回复 Markdown 内容，兼容模式时回复消息链
+     *
+     * @param fallback 兼容模式时的消息链
+     * @param markdown Markdown 内容
+     */
     suspend fun ReplyAble.reply(fallback: MessageChain, markdown: Markdown) {
         if (textMode()) reply(fallback)
         else reply(markdown)
     }
 
+    /**
+     * 查询失败
+     */
     suspend fun MessageEvent.messageQueryFailed() {
         reply(ChunithmQuery.QUERY_FAILED) {
             brief("查询失败", ChunithmQuery.QUERY_FAILED)
@@ -124,6 +209,13 @@ sealed class Controller(
             }
         }
     }
+    /**
+     * 处理异常并回复
+     *
+     * @param event 消息事件
+     * @param e 查询异常
+     * @param user 用户
+     */
     suspend fun handleError(
         event: MessageEvent,
         e: Throwable,
@@ -167,12 +259,23 @@ sealed class Controller(
             }
         }
     }
+    /**
+     * 提示用户绑定查分器账号
+     */
     suspend fun MessageEvent.messageUserNeedBind() {
         requestOA()
     }
+    /**
+     * 回复用户不存在的提示
+     */
     suspend fun MessageEvent.messageUserNotFound() {
         reply(ChunithmQuery.USER_NOT_FOUND)
     }
+    /**
+     * 回复用户拒绝授权的提示
+     *
+     * @param user 被查询的用户
+     */
     suspend fun MessageEvent.messageUserDenied(user: UserQueryParams) {
         if (user.isSelf) {
             reply(ChunithmQuery.USER_EULA) {
@@ -187,12 +290,23 @@ sealed class Controller(
             reply(ChunithmQuery.USER_DENIED)
         }
     }
+    /**
+     * 回复筛选无结果的提示
+     */
     suspend fun MessageEvent.messageFilterNoResult() {
         reply(ChunithmQuery.NO_RECORDS)
     }
+    /**
+     * 回复筛选结果过多的提示
+     */
     suspend fun MessageEvent.messageFilterTooMany() {
         reply(ChunithmQuery.TOO_MANY_RECORDS)
     }
+    /**
+     * 回复尚无成绩数据的提示并附导入教程
+     *
+     * @param backend 查分器后端
+     */
     suspend fun MessageEvent.messageNoData(backend: ChunithmAPI) {
         reply(buildString {
             appendLine("您似乎尚未导入中二节奏分数，请查看数据导入教程：")
@@ -225,20 +339,40 @@ sealed class Controller(
             }
         }
     }
+    /**
+     * 回复不支持的操作提示
+     *
+     * @param message 提示文案
+     */
     suspend fun MessageEvent.messageNotSupported(message: String) {
         reply(message)
     }
+    /**
+     * 回复查询内容不存在的提示
+     *
+     * @param message 提示文案
+     */
     suspend fun MessageEvent.messageNotFound(message: String) {
         reply(message)
     }
+    /**
+     * 回复需查分器授权的提示
+     */
     suspend fun MessageEvent.messageNeedAuthorization() {
         reply(ChunithmQuery.NEED_AUTHORIZATION)
     }
 
-    suspend fun MessageEvent.requestOA() {
+    private suspend fun MessageEvent.requestOA() {
         chunithm.pluginLoader.subscribes.handle(ChannelEvent(bot, channelName = "rhythm-game-bind", data = this))
     }
 
+    /**
+     * 根据文本或者图像进行查歌
+     *
+     * @param text 查询文本
+     * @param helpText 帮助文本
+     * @param action 查询后的代码块
+     */
     suspend fun MessageEvent.queryByTextOrImage(
         text: String,
         helpText: String? = null,
@@ -265,6 +399,14 @@ sealed class Controller(
         results.forEach { action(it.title) }
     }
 
+    /**
+     * 使用命令时选择歌曲的菜单
+     *
+     * @param type 命令名
+     * @param args 命令参数
+     * @param needDifficulty 查询时是否可以带难度
+     * @return 选中的歌曲与难度
+     */
     suspend fun MessageEvent.selectMusic(
         type: String,
         args: String,

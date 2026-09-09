@@ -3,6 +3,11 @@ package xyz.xszq.bot.maimai.payload
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * 落雪 OAuth 令牌响应
+ *
+ * @param expiresIn 令牌有效期（秒）
+ */
 @Serializable
 data class LXNSOATokenResponse(
     @SerialName("access_token")

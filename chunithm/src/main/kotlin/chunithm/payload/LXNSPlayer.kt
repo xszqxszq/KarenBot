@@ -3,6 +3,16 @@ package xyz.xszq.bot.chunithm.payload
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * 落雪查分器的玩家信息
+ *
+ * @property friendCode 好友码
+ * @property classEmblem 玩家的 Class
+ * @property trophy 玩家当前的称号
+ * @property character 玩家当前的角色
+ * @property namePlate 玩家当前的名牌
+ * @property mapIcon 玩家当前的地图图标
+ */
 @Serializable
 data class LXNSPlayer(
     val name: String,

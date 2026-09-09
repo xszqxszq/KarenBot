@@ -2,6 +2,9 @@ package xyz.xszq.bot.chunithm.music
 
 import kotlinx.serialization.Serializable
 
+/**
+ * 谱面物量
+ */
 @Serializable
 data class Notes(
     val total: Int = 0,

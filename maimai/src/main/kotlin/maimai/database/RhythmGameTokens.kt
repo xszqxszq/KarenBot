@@ -1,30 +1,20 @@
 package xyz.xszq.bot.maimai.database
 
+import org.jetbrains.exposed.dao.id.IdTable
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 
-object RhythmGameTokens: Table() {
-    data class Row(
-        val id: String,
-        val eventType: String,
-        val eventId: String,
-        val messageId: String,
-        val message: String,
-        val senderId: String,
-        val groupId: String ?= null,
-        val seq: Int,
-        val replay: Boolean,
-        val expiresAt: Long
-    )
-
-    val id = varchar("id", 64)
+/**
+ * 查分器进行绑定操作时的令牌表
+ *
+ * 写入与删除直接操作本表，读取经 DAO `RhythmGameToken` 进行
+ */
+object RhythmGameTokens: IdTable<String>() {
+    override val id = varchar("id", 64).entityId()
     val eventType = varchar("event_type", 5)
     val eventId = varchar("event_id", 256)
     val messageId = varchar("message_id", 256)
@@ -34,7 +24,17 @@ object RhythmGameTokens: Table() {
     val seq = integer("seq")
     val replay = bool("replay")
     val expiresAt = long("expires_at")
-    override val primaryKey = PrimaryKey(id)
+
+    /**
+     * 保存令牌及其对应的消息事件
+     *
+     * 已存在同 id 记录时先删除再写入
+     *
+     * @param id 令牌
+     * @param event 消息事件
+     * @param replay 授权完成后是否重放原消息
+     * @param expiresAt 过期时间
+     */
     suspend fun save(
         id: String,
         event: MessageEvent,
@@ -55,22 +55,12 @@ object RhythmGameTokens: Table() {
             it[RhythmGameTokens.expiresAt] = expiresAt
         }
     }
-    suspend fun load(): List<Row> = suspendedTransactionAsync {
-        selectAll().map { row ->
-            Row(
-                id = row[RhythmGameTokens.id],
-                eventType = row[RhythmGameTokens.eventType],
-                eventId = row[RhythmGameTokens.eventId],
-                messageId = row[RhythmGameTokens.messageId],
-                message = row[RhythmGameTokens.message],
-                senderId = row[RhythmGameTokens.senderId],
-                groupId = row[RhythmGameTokens.groupId],
-                seq = row[RhythmGameTokens.seq],
-                replay = row[RhythmGameTokens.replay],
-                expiresAt = row[RhythmGameTokens.expiresAt]
-            )
-        }
-    }.await()
+
+    /**
+     * 删除指定令牌记录
+     *
+     * @param id 令牌
+     */
     suspend fun remove(id: String) = newSuspendedTransaction {
         deleteWhere { RhythmGameTokens.id eq id }
     }

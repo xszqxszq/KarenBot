@@ -11,6 +11,9 @@ import xyz.xszq.bot.newLine
 import xyz.xszq.bot.reply
 import xyz.xszq.bot.util.ErrorHandler
 
+/**
+ * 分数线计算功能
+ */
 @Suppress("unused")
 class CalcController(
     override val maimai: Maimai
@@ -24,6 +27,11 @@ class CalcController(
             }
         }
     }
+    /**
+     * 回复分数线对应的容错
+     *
+     * @param raw 指令参数文本
+     */
     suspend fun MessageEvent.calc(
         raw: String
     ) {
@@ -55,6 +63,9 @@ class CalcController(
             append("(-" + String.format("%.4f", break50Reduce / totalScore * 100) + "%)")
         }.trim().newLine())
     }
+    /**
+     * 分数线指令错误处理
+     */
     val calcErrorHandler: ErrorHandler = { e ->
         val help = buildString {
             appendLine("此功能为查找某首歌分数线设计。")

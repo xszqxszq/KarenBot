@@ -2,6 +2,9 @@ package xyz.xszq.bot.chunithm.payload
 
 import kotlinx.serialization.Serializable
 
+/**
+ * 落雪收藏品
+ */
 @Serializable
 data class LXNSCollection(
     val id: Int,

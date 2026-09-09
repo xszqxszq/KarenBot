@@ -5,12 +5,23 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 
+/**
+ * 查分器绑定表
+ */
 object ProberBindTable: Table() {
     val id = varchar("id", 32)
     val prober = varchar("prober", 32)
     val key = varchar("key", 32)
     val value = text("value")
     override val primaryKey = PrimaryKey(id, prober, key)
+
+    /**
+     * 存入绑定
+     * @param id 用户 OpenID
+     * @param prober 查分器名
+     * @param key 绑定键
+     * @param value 绑定值
+     */
     suspend operator fun set(
         id: String,
         prober: String,
@@ -33,6 +44,15 @@ object ProberBindTable: Table() {
                 it[ProberBindTable.value] = value
             }
     }
+
+    /**
+     * 查询指定查分器的绑定
+     *
+     * @param id 用户 OpenID
+     * @param prober 查分器名
+     * @param key 绑定键
+     * @return 绑定值
+     */
     suspend operator fun get(
         id: String,
         prober: String,
@@ -43,6 +63,12 @@ object ProberBindTable: Table() {
                     (ProberBindTable.key eq key)
         }.map { it[value] }.firstOrNull() ?.let { it.ifBlank { null } }
     }.await()
+
+    /**
+     * 读取用户的全部绑定
+     *
+     * @param id 用户 OpenID
+     */
     suspend operator fun get(
         id: String
     ) = suspendedTransactionAsync {
@@ -50,6 +76,14 @@ object ProberBindTable: Table() {
             (ProberBindTable.id eq id)
         }
     }
+
+    /**
+     * 查询绑定了指定查分器与键的全部 OpenID
+     *
+     * @param prober 查分器名
+     * @param key 绑定键
+     * @return 用户 OpenID 列表
+     */
     suspend fun idsForKey(
         prober: String,
         key: String
@@ -58,6 +92,15 @@ object ProberBindTable: Table() {
             (ProberBindTable.prober eq prober) and (ProberBindTable.key eq key)
         }.map { it[ProberBindTable.id] }.distinct()
     }.await()
+
+    /**
+     * 根据键反查用户 OpenID
+     *
+     * @param prober 查分器名
+     * @param key 绑定键
+     * @param bindValue 绑定值
+     * @return 用户 OpenID
+     */
     suspend fun findIdByValue(
         prober: String,
         key: String,
@@ -68,6 +111,13 @@ object ProberBindTable: Table() {
                     (value eq bindValue)
         }.map { it[ProberBindTable.id] }.firstOrNull()
     }.await()
+
+    /**
+     * 删除用户的绑定
+     *
+     * @param id 用户 OpenID
+     * @param prober 查分器
+     */
     suspend fun delete(
         id: String,
         prober: String ?= null

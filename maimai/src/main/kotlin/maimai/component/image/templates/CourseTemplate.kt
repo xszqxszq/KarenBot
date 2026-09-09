@@ -12,14 +12,18 @@ import xyz.xszq.shinobu.style.Spacing
 import xyz.xszq.shinobu.template.Template
 import xyz.xszq.shinobu.template.TemplateManager
 
+/**
+ * 段位表模板
+ */
 class CourseTemplate(
     private val manager: TemplateManager,
     private val resourcePath: String
 ) {
     /**
      * 生成段位表
+     *
      * @param course 段位信息
-     * @param scores 成绩信息
+     * @param scores 谱面信息+成绩信息
      */
     fun template(
         course: LocalCourseInfo,
@@ -138,7 +142,8 @@ class CourseTemplate(
         return theme.render(main)
     }
     /**
-     * 展示单一曲目及成绩信息
+     * 段位表中的单个谱面记录
+     *
      * @param chart 谱面信息
      * @param achievement 达成率
      * @param life 生命值
@@ -229,10 +234,12 @@ class CourseTemplate(
     }
 
     /**
-     * 计算该达成率最低会扣多少血量
+     * 计算该达成率下最低扣血量
+     *
      * @param chart 谱面信息
      * @param achievement 达成率
      * @param course 段位信息
+     * @return 最低扣血量
      */
     private fun calcMinDamage(
         chart: ChartInfo,

@@ -2,6 +2,12 @@ package xyz.xszq.shinobu.style
 
 import org.jetbrains.skia.Color
 
+/**
+ * 元素样式
+ *
+ * 以 CSS 语义描述单个元素的尺寸、背景、弹性布局、文本与透明度等
+ * 属性，`null` 表示未显式设置而交由引擎推断
+ */
 data class Style(
     var width: Float ?= null,
     var minWidth: Float ?= null,
@@ -39,6 +45,13 @@ data class Style(
     var objectFit: ObjectFit = ObjectFit.FILL,
     var maskImage: String ?= null,
 ) {
+    /**
+     * 深拷贝样式
+     *
+     * 嵌套的 `Spacing`、`TextStroke` 与 `TextShadow` 一并复制
+     *
+     * @return 复制出的样式对象
+     */
     fun deepCopy(): Style {
         return this.copy(
             margin = this.margin.copy(),

@@ -12,6 +12,9 @@ import xyz.xszq.bot.util.AudioHandler
 import xyz.xszq.bot.util.newTempFile
 import java.util.*
 
+/**
+ * 活字印刷功能
+ */
 class TTSParser(
     val config: VoicePresets,
     voiceDir: VfsFile
@@ -27,6 +30,9 @@ class TTSParser(
     private lateinit var english: EnglishHandler
     private lateinit var kana: KanaHandler
 
+    /**
+     * 初始化
+     */
     suspend fun init() {
         tokens = tokensDir.list().toList().associateBy {
             it.baseNameWithoutCompoundExtension
@@ -73,7 +79,7 @@ class TTSParser(
         Configurator.setAllLevels(LogManager.getRootLogger().name, Level.ERROR)
         Configurator.setLevel("marytts", Level.ERROR)
         val log4jRoot = org.apache.log4j.LogManager.getRootLogger()
-        if (!log4jRoot.getAllAppenders().hasMoreElements()) {
+        if (!log4jRoot.allAppenders.hasMoreElements()) {
             log4jRoot.addAppender(org.apache.log4j.ConsoleAppender())
         }
         log4jRoot.level = org.apache.log4j.Level.OFF
@@ -230,7 +236,7 @@ class TTSParser(
         return result
     }
     // TODO: 优化这段临时实现
-    fun prepare(text: String): List<Token> {
+    private fun prepare(text: String): List<Token> {
         var texts: List<Token> = listOf(Token.Raw.Chinese(
             text.replace("\r", "").replace("\n", "").trim()
         ))
@@ -266,7 +272,7 @@ class TTSParser(
             if (it is Token.Raw) tokenize(it.text) else listOf(it)
         }
     }
-    fun parse(text: String): List<Token.Final> {
+    private fun parse(text: String): List<Token.Final> {
         var result = prepare(text)
         var counter = 0
         while (result.any { it is Token.Raw } && counter < 120) {
@@ -294,10 +300,10 @@ class TTSParser(
 
 
     /**
-     * 对文本进行活字印刷
+     * 生成活字印刷
      *
-     * @param text 要活字印刷的文本
-     * @return 生成的 PCM 文件；音频为空时返回 null
+     * @param text 输入文本
+     * @return 生成结果
      */
     suspend fun generate(text: String): VfsFile? {
         val files = parse(text)

@@ -3,6 +3,15 @@ package xyz.xszq.bot.chunithm.component.image
 import xyz.xszq.bot.chunithm.music.ChartInfo
 import xyz.xszq.bot.chunithm.music.MusicDifficulty
 
+/**
+ * 等级表渲染参数
+ *
+ * @property groups 组名与组内谱面
+ * @property matched 谱面匹配到的成绩记录
+ * @property completed 已完成的成绩记录
+ * @property showProgress 是否展示完成进度
+ * @property progressData 进度数据
+ */
 data class LevelRenderParams(
     // 模板参数
     val title: String,

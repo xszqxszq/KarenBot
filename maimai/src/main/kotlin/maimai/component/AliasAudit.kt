@@ -5,9 +5,17 @@ import kotlinx.serialization.json.Json
 import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.music.MusicInfo
 
+/**
+ * 歌曲别名审核
+ */
 class AliasAudit(
     private val maimai: Maimai
 ) {
+    /**
+     * 审核结论
+     *
+     * @property type 审核类别，`ok` 表示合规
+     */
     @Serializable
     data class Result(
         val type: String
@@ -15,6 +23,13 @@ class AliasAudit(
 
     private val json = Json { ignoreUnknownKeys = true }
 
+    /**
+     * 审核添加的别名是否合规
+     *
+     * @param music 要添加别名的曲目
+     * @param alias 别名
+     * @return 审核结论
+     */
     suspend fun audit(
         music: MusicInfo,
         alias: String

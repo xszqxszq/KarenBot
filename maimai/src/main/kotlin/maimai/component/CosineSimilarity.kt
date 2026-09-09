@@ -1,6 +1,16 @@
 package xyz.xszq.bot.maimai.component
 
+/**
+ * 余弦相似度
+ */
 object CosineSimilarity {
+    /**
+     * 计算两个向量的余弦相似度
+     *
+     * @param a 向量 a
+     * @param b 向量 b
+     * @return a 与 b 的余弦相似度
+     */
     fun compute(a: FloatArray, b: FloatArray): Double {
         if (a.size != b.size || a.isEmpty()) return 0.0
         var dot = 0.0
@@ -13,13 +23,5 @@ object CosineSimilarity {
         }
         val denom = kotlin.math.sqrt(normA) * kotlin.math.sqrt(normB)
         return if (denom == 0.0) 0.0 else dot / denom
-    }
-
-    fun topK(query: FloatArray, candidates: Map<Int, FloatArray>, k: Int): List<Pair<Int, Double>> {
-        return candidates.mapValues { (_, vec) -> compute(query, vec) }
-            .entries
-            .sortedByDescending { it.value }
-            .take(k)
-            .map { it.key to it.value }
     }
 }

@@ -6,6 +6,9 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 
+/**
+ * 表情包模板参数
+ */
 @Serializable
 sealed interface MemeOption {
     val name: String
@@ -13,6 +16,9 @@ sealed interface MemeOption {
     @SerialName("parser_flags")
     val parserFlags: ParserFlags
 
+    /**
+     * Boolean 参数
+     */
     @Serializable
     @SerialName("boolean")
     data class BooleanOption(
@@ -22,6 +28,9 @@ sealed interface MemeOption {
         override val parserFlags: ParserFlags,
         val default: Boolean ?= null
     ): MemeOption
+    /**
+     * String 参数
+     */
     @Serializable
     @SerialName("string")
     data class StringOption(
@@ -32,6 +41,9 @@ sealed interface MemeOption {
         val default: String ?= null,
         val choices: List<String> ?= null,
     ): MemeOption
+    /**
+     * Int 参数
+     */
     @Serializable
     @SerialName("integer")
     data class IntegerOption(
@@ -43,6 +55,9 @@ sealed interface MemeOption {
         val minimum: Int ?= null,
         val maximum: Int ?= null,
     ): MemeOption
+    /**
+     * Float 参数
+     */
     @Serializable
     @SerialName("float")
     data class FloatOption(
@@ -55,6 +70,9 @@ sealed interface MemeOption {
         val maximum: Float ?= null,
     ): MemeOption
     companion object {
+        /**
+         * 序列化各类型参数
+         */
         val module = SerializersModule {
             polymorphic(MemeOption::class) {
                 subclass(BooleanOption::class)

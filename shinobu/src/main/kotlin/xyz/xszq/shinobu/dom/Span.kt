@@ -5,6 +5,12 @@ import org.jetbrains.skia.paragraph.*
 import xyz.xszq.shinobu.style.TextAlign
 import xyz.xszq.shinobu.style.WhiteSpace
 
+/**
+ * 文本节点
+ *
+ * 借助 Skia 段落排版绘制文本，支持对齐、描边、阴影与不换行等样式，
+ * 布局时若设置了最小字号会缩小字号以适配可用宽度
+ */
 @Suppress("unused")
 class Span(
     id: String ?= null,

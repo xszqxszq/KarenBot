@@ -7,6 +7,12 @@ import org.jetbrains.skia.Rect.Companion.makeWH
 import org.jetbrains.skia.SamplingMode
 import xyz.xszq.shinobu.style.ObjectFit
 
+/**
+ * 图片节点
+ *
+ * 按 `object-fit` 样式把位图缩放绘制进内容区，支持按原始尺寸绘制
+ * 与遮罩裁剪
+ */
 @Suppress("unused")
 class Img(
     id: String ?= null,
@@ -96,6 +102,9 @@ class Img(
     }
 
     companion object {
+        /**
+         * 将图片改为按原始尺寸绘制，不做缩放适应
+         */
         fun Img.noScale() = apply { style.objectFit = ObjectFit.NONE }
     }
 }

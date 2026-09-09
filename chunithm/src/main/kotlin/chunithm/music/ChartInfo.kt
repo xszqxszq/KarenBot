@@ -8,6 +8,9 @@ import xyz.xszq.bot.newLine
 import xyz.xszq.bot.payload.markdown.MarkdownData
 import xyz.xszq.bot.plus
 
+/**
+ * 谱面信息
+ */
 @Serializable
 class ChartInfo(
     val music: MusicInfo,
@@ -20,8 +23,16 @@ class ChartInfo(
     val star: Int ?= null,
     val originId: Int ?= null
 ) {
+    /**
+     * World's End 谱面所属的原曲
+     */
     var origin: MusicInfo ?= null
 
+    /**
+     * 文本版谱面信息
+     *
+     * @return 谱面信息
+     */
     suspend fun infoText() = Image(music.cover()) + buildString {
         appendLine("${difficulty.brief}${music.id}. ${music.name}")
         appendLine("曲师: ${music.artist}")
@@ -42,6 +53,12 @@ class ChartInfo(
         appendLine("总物量: ${notes.total}")
     }.trim().newLine()
 
+    /**
+     * Markdown 版谱面信息
+     *
+     * @param jacketUrl 封面 URL
+     * @return 谱面信息
+     */
     fun infoMD(
         jacketUrl: String
     ) = Markdown(MarkdownData(buildString {

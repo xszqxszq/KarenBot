@@ -10,14 +10,19 @@ import xyz.xszq.bot.chunithm.music.Record
 import xyz.xszq.shinobu.template.Template
 import xyz.xszq.shinobu.template.TemplateManager
 
+/**
+ * 等级定数表模板
+ */
 class LevelTemplate(
     private val manager: TemplateManager,
     private val resourcePath: String
 ) {
     /**
-     * 生成等级定数表
-     * @param charts 谱面信息
-     * @param title 完成表标题
+     * 生成定数表
+     *
+     * @param charts 谱面列表
+     * @param records 成绩记录
+     * @param title 表标题
      * @param filterParams 条件过滤参数
      */
     fun level(
@@ -49,10 +54,6 @@ class LevelTemplate(
         )
     }
 
-    /**
-     * 生成模板
-     * @param params 渲染参数
-     */
     private fun template(
         params: LevelRenderParams
     ): Image {
@@ -83,7 +84,8 @@ class LevelTemplate(
     }
 
     /**
-     * 展示单个谱面信息
+     * 绘制一个谱面
+     *
      * @param chart 谱面信息
      */
     fun Template.levelChart(

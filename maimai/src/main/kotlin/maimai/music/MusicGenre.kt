@@ -3,6 +3,9 @@ package xyz.xszq.bot.maimai.music
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * 歌曲分类
+ */
 @Serializable
 enum class MusicGenre(val id: Int, val genreName: String, val value: String, val names: Array<String>) {
     @SerialName("POPSアニメ")
@@ -28,6 +31,12 @@ enum class MusicGenre(val id: Int, val genreName: String, val value: String, val
         arrayOf("宴会场"));
 
     companion object {
+        /**
+         * 根据名称匹配分类
+         *
+         * @param value 分类名
+         * @return 歌曲分类
+         */
         fun of(value: String): MusicGenre = MusicGenre.entries.first { it.value == value }
     }
 }

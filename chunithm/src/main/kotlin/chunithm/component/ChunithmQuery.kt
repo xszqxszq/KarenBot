@@ -12,12 +12,15 @@ import xyz.xszq.bot.chunithm.music.Rating.ratingFloor
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 
+/**
+ * 中二成绩查询组件
+ */
 class ChunithmQuery(
     val chunithm: Chunithm
 ) {
     companion object {
         const val NO_RECORDS = "在当前筛选条件下未查询到歌曲记录。"
-        const val TOO_MANY_RECORDS = "在当前条件下查询到的曲目过多，请缩小范围。"
+        const val TOO_MANY_RECORDS = "在当前条件下查询到的歌曲过多，请缩小范围。"
         const val USER_NOT_FOUND = "您查询的用户不存在。"
         const val USER_DENIED = "您查询的用户设置了查分器隐私或未同意查分器协议，请检查设置。"
         const val USER_EULA = "请先前往查分器同意用户协议再进行查询。"
@@ -37,7 +40,13 @@ class ChunithmQuery(
         )
     }
 
-    // 获取要查询的目标用户的参数
+    /**
+     * 获取用户查询参数
+     *
+     * @param event 消息事件
+     * @param queryArgs 查询参数
+     * @return 用户查询参数
+     */
     suspend fun getQueryParams(
         event: MessageEvent,
         queryArgs: String ?= null
@@ -58,7 +67,13 @@ class ChunithmQuery(
         }
     }
 
-    // 根据用户设置列出后端
+    /**
+     * 列出可用的查分器后端
+     *
+     * @param user 用户查询参数
+     * @param listAll 是否强制使用全部
+     * @return 查分器后端列表
+     */
     suspend fun listBackends(
         user: UserQueryParams,
         listAll: Boolean = false
@@ -76,20 +91,13 @@ class ChunithmQuery(
         return backends
     }
 
-    private fun mergeSettings(
-        existing: PlayerSettings?,
-        userSettings: PlayerSettings?
-    ): PlayerSettings? = when {
-        userSettings == null -> existing
-        existing == null ->
-            if (userSettings.avatar == null && userSettings.plate == null) null
-            else userSettings
-        else -> PlayerSettings(
-            avatar = userSettings.avatar ?: existing.avatar,
-            plate = userSettings.plate ?: existing.plate
-        )
-    }
 
+    /**
+     * 查询玩家的 Best 50
+     *
+     * @param user 用户查询参数
+     * @return 查询结果，查分器
+     */
     suspend fun rating(
         user: UserQueryParams
     ): Pair<RatingResponse, ChunithmAPI> {
@@ -107,6 +115,13 @@ class ChunithmQuery(
     }
 
 
+    /**
+     * 查询玩家一些歌曲的成绩
+     *
+     * @param user 用户查询参数
+     * @param musics 歌曲列表
+     * @return 查询结果，查分器
+     */
     suspend fun records(
         user: UserQueryParams,
         musics: List<MusicInfo>
@@ -118,6 +133,13 @@ class ChunithmQuery(
         return result
     }
 
+    /**
+     * 查询玩家一个歌曲的成绩
+     *
+     * @param user 用户查询参数
+     * @param music 歌曲信息
+     * @return 成绩列表
+     */
     suspend fun record(
         user: UserQueryParams,
         music: MusicInfo
@@ -127,6 +149,14 @@ class ChunithmQuery(
         }
         return result.first
     }
+    /**
+     * 查询最近游玩记录记录
+     *
+     * 目前仅落雪查分器支持
+     *
+     * @param user 用户查询参数
+     * @return 查询结果，查分器
+     */
     suspend fun recent(
         user: UserQueryParams,
     ): Pair<RecordsResponse, ChunithmAPI> {

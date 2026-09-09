@@ -30,6 +30,11 @@ import xyz.xszq.bot.util.toDBC
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
+/**
+ * 落雪查分器 API
+ *
+ * 负责连接落雪查分器进行玩家授权、分数查询
+ */
 class LXNS(
     val token: String,
     val oauthId: String,
@@ -53,10 +58,26 @@ class LXNS(
     override suspend fun load() {
     }
 
+    /**
+     * 拉取歌曲列表
+     *
+     * @return 含谱面物量的歌曲列表数据
+     */
     suspend fun fetchSongs(): LXNSSongs = client.get("$apiServer/song/list?notes=true").body()
 
+    /**
+     * 从落雪拉取称号列表
+     *
+     * @return 称号列表数据
+     */
     suspend fun fetchTrophies(): LXNSTrophyList = client.get("$apiServer/trophy/list").body()
 
+    /**
+     * 拉取歌曲信息列表
+     *
+     * @param cached 缓存数据
+     * @return 歌曲信息列表
+     */
     suspend fun getMusicList(cached: LXNSSongs? = null): Map<Int, MusicInfo> {
         val data = cached ?: client.get("$apiServer/song/list?notes=true").body<LXNSSongs>()
         val newest = data.versions.sortedByDescending { it.version }.map { it.version }.take(2)
@@ -109,6 +130,11 @@ class LXNS(
         }
     }
 
+    /**
+     * 拉取歌曲别名列表
+     *
+     * @return 别名列表
+     */
     suspend fun getAliases(): Map<Int, Set<String>> = client.get("$apiServer/alias/list")
         .body<LXNSAliases>()
         .aliases
@@ -116,12 +142,19 @@ class LXNS(
             alias.songId to alias.aliases.toSet()
         }
 
-    suspend fun getTrophyList(cached: LXNSTrophyList? = null): Map<Int, LXNSTrophyInfo> {
-        val data = cached ?: client.get("$apiServer/trophy/list")
-            .body<LXNSTrophyList>()
-        return data.trophies
-            .filter { it.color == "image" && it.required != null }
-            .associateBy { it.id }
+    /**
+     * 拉取称号列表
+     *
+     * @param cached 缓存数据
+     * @return 称号列表
+     */
+    suspend fun getTrophyList(
+        cached: LXNSTrophyList? = null
+    ): Map<Int, LXNSTrophyInfo> {
+        val data = cached ?: client.get("$apiServer/trophy/list").body<LXNSTrophyList>()
+        return data.trophies.filter {
+            it.color == "image" && it.required != null
+        }.associateBy { it.id }
     }
 
     override suspend fun getPlayerRating(
@@ -246,6 +279,12 @@ class LXNS(
         }
     }
 
+    /**
+     * 查询玩家最近的游玩记录
+     *
+     * @param user 玩家
+     * @return 最近游玩记录
+     */
     suspend fun getPlayerRecent(
         user: UserQueryParams
     ): RecordsResponse? = when (user) {
@@ -330,6 +369,12 @@ class LXNS(
         return Pair(player, scores)
     }
 
+    /**
+     * 获取指定用户的访问令牌
+     *
+     * @param openid 用户 OpenID
+     * @return 访问令牌
+     */
     suspend fun accessToken(openid: String): String? {
         logger.debug { "[落雪调试] accessToken id=$openid" }
         tokenCache[openid] ?.let { (token, expiresAt) ->
@@ -385,10 +430,18 @@ class LXNS(
         }
     }
 
+    /**
+     * 请求头携带开发者令牌
+     */
     fun HttpRequestBuilder.setDeveloper() {
         headers["Authorization"] = token
     }
 
+    /**
+     * 请求头携带落雪 OAuth 访问令牌
+     *
+     * @param accessToken 访问令牌
+     */
     fun HttpRequestBuilder.setOAuth(
         accessToken: String
     ) {
@@ -475,7 +528,7 @@ class LXNS(
         }
     }
 
-    fun LXNSNotes.toNotes() = Notes(
+    private fun LXNSNotes.toNotes() = Notes(
         total = total,
         tap = tap,
         hold = hold,
@@ -484,6 +537,11 @@ class LXNS(
         flick = flick
     )
 
+    /**
+     * 转换为成绩记录类型
+     *
+     * @return 成绩记录
+     */
     fun LXNSScore.toRecord(): Record? {
         val music = musics[id] ?: return null
         val chart = music.charts.getOrNull(levelIndex) ?: return null

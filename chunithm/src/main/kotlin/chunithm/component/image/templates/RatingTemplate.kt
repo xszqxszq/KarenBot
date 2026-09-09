@@ -14,11 +14,22 @@ import xyz.xszq.shinobu.template.Template
 import xyz.xszq.shinobu.template.TemplateManager
 import kotlin.math.min
 
+/**
+ * Best 50 成绩图模板
+ */
 class RatingTemplate(
     private val manager: TemplateManager,
     private val resourcePath: String,
     private val newestVersion: GameVersion
 ) {
+    /**
+     * 绘制标题
+     *
+     * @param backend 查分器名称
+     * @param oldRating 旧曲 Rating 均分
+     * @param newRating 新曲 Rating 均分
+     * @return 标题文本
+     */
     fun title(
         backend: String,
         oldRating: Double,
@@ -29,9 +40,10 @@ class RatingTemplate(
         append("N20: $newRating")
     }
     /**
-     * 最佳成绩列表模板
-     * @param info 查询信息
-     * @param backend 数据源名称
+     * 生成 Best 50
+     *
+     * @param info 查询结果
+     * @param backend 查分器名称
      */
     fun bests(
         info: RatingResponse,
@@ -67,12 +79,13 @@ class RatingTemplate(
         )
     }
     /**
-     * 随心配最佳成绩列表模板
+     * 生成随心配 Best 50
+     *
      * @param player 玩家信息
-     * @param settings 玩家设置
-     * @param allRecords 所有成绩
+     * @param settings 展示设置
+     * @param allRecords 全部成绩
      * @param filterParams 条件过滤参数
-     * @param api 数据源名称
+     * @param api 查分器名称
      */
     fun comboBests(
         player: PlayerInfo,
@@ -128,12 +141,14 @@ class RatingTemplate(
         )
     }
     /**
-     * 最佳成绩列表模板
+     * 生成随心配分数列表
+     *
      * @param player 玩家信息
-     * @param settings 玩家设置
-     * @param allRecords 所有成绩信息
+     * @param settings 展示设置
+     * @param allRecords 全部成绩
      * @param filterParams 条件过滤参数
-     * @param page 查询页数
+     * @param page 页码
+     * @return 图片，页码，总页数
      */
     fun scoreList(
         player: PlayerInfo,
@@ -177,10 +192,6 @@ class RatingTemplate(
         ), actualPage, totalPages)
     }
 
-    /**
-     * 生成模板
-     * @param params 渲染参数
-     */
     private fun template(
         params: RatingRenderParams
     ): Image {
@@ -248,10 +259,6 @@ class RatingTemplate(
         return template.render(main)
     }
 
-    /**
-     * 顶栏展示个人信息
-     * @param params 渲染模板
-     */
     private fun Div.header(
         params: RatingRenderParams
     ) {
@@ -283,11 +290,6 @@ class RatingTemplate(
         }
     }
 
-    /**
-     * 展示单个成绩
-     * @param index 序号
-     * @param record 成绩记录
-     */
     private fun Template.score(
         index: Int,
         record: Record

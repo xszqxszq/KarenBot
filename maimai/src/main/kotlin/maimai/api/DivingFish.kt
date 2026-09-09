@@ -17,18 +17,25 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.*
 import okhttp3.ConnectionPool
 import okhttp3.Protocol
+import xyz.xszq.bot.exception.RetryException
 import xyz.xszq.bot.maimai.component.MaimaiData
 import xyz.xszq.bot.maimai.database.ProberBindTable
 import xyz.xszq.bot.maimai.database.QQBindTable
 import xyz.xszq.bot.maimai.exception.*
 import xyz.xszq.bot.maimai.music.*
 import xyz.xszq.bot.maimai.payload.*
+import xyz.xszq.bot.util.retryAsync
 import java.io.File
 import java.security.MessageDigest
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
+/**
+ * 水鱼查分器 API
+ *
+ * 负责连接水鱼查分器进行玩家授权、分数查询与分数上传
+ */
 class DivingFish(
     val oauthId: String,
     val oauthSecret: String,
@@ -65,6 +72,13 @@ class DivingFish(
         }
     }
 
+    /**
+     * 拿到水鱼 OAuth 设备码授权链接
+     *
+     * @param externalId 用户标识
+     * @param label 授权页面上展示的用户标识
+     * @return 设备码授权响应
+     */
     suspend fun deviceAuthorization(
         externalId: String,
         label: String
@@ -84,6 +98,14 @@ class DivingFish(
         return response.body<DivingFishDeviceAuthorizationResponse>()
     }
 
+    /**
+     * 轮询等待用户完成授权
+     *
+     * @param deviceCode 设备授权码
+     * @param intervalSeconds 轮询间隔（秒）
+     * @param expiresInSeconds 授权码有效期（秒）
+     * @return 是否完成授权
+     */
     suspend fun awaitDeviceBinding(
         deviceCode: String,
         intervalSeconds: Int,
@@ -125,6 +147,12 @@ class DivingFish(
         return false
     }
 
+    /**
+     * 完成水鱼账号绑定
+     *
+     * @param openid 用户 OpenID
+     * @return 水鱼账号标识
+     */
     suspend fun bindByRef(openid: String): String? {
         logger.debug { "[水鱼调试] bindByRef openid=$openid" }
         val tokens = runCatching {
@@ -154,10 +182,23 @@ class DivingFish(
 
     private fun subjectRef(externalId: String): String = sha256Hex("$oauthId:$externalId")
 
+    /**
+     * 清除指定用户的访问令牌缓存
+     *
+     * @param id 用户 OpenID
+     */
     fun clearTokenCache(id: String) {
         tokenCache.remove(id)
     }
 
+    /**
+     * 获取指定用户的访问令牌
+     *
+     * 过期时重新获取
+     *
+     * @param openid 用户 OpenID
+     * @return 访问令牌
+     */
     suspend fun accessToken(openid: String): String? {
         logger.debug { "[水鱼调试] accessToken openid=$openid" }
         tokenCache[openid] ?.let { (token, expiresAt) ->
@@ -192,8 +233,7 @@ class DivingFish(
 
     private suspend fun onBehalfOf(subject: String): DivingFishOAuthTokenResponse {
         logger.debug { "[水鱼调试] onBehalfOf subject=$subject" }
-        var retry = 0
-        while (true) {
+        return retryAsync(times = 4) { attempt ->
             val response = client.post("$authServer/oauth/token") {
                 contentType(ContentType.Application.FormUrlEncoded)
                 setBody(formUrlEncode(
@@ -204,19 +244,24 @@ class DivingFish(
                 ))
             }
             logger.debug { "[水鱼调试] onBehalfOf subject=$subject status=${response.status}" }
-            if (response.status != HttpStatusCode.TooManyRequests || retry >= 3) {
+            if (response.status != HttpStatusCode.TooManyRequests || attempt >= 4) {
                 if (response.status == HttpStatusCode.BadRequest)
                     throw UserBindRequiredException()
                 if (!response.status.isSuccess())
                     throw UnknownException("HTTP ${response.status.value}")
-                return response.body<DivingFishOAuthTokenResponse>()
+                return@retryAsync response.body<DivingFishOAuthTokenResponse>()
             }
-            retry++
-            logger.debug { "[水鱼调试] onBehalfOf 429限流重试 $retry subject=$subject" }
-            delay(retry * 2000L)
+            logger.debug { "[水鱼调试] onBehalfOf 429限流重试 $attempt subject=$subject" }
+            throw RetryException()
         }
     }
 
+    /**
+     * QQ 绑定迁移到水鱼账号绑定
+     *
+     * @param limit 单次迁移的用户数上限
+     * @return 成功与失败的用户数
+     */
     suspend fun migrateQQBindings(limit: Int = 2000): Pair<Int, Int> {
         var ok = 0
         var fail = 0
@@ -247,7 +292,7 @@ class DivingFish(
                 runCatching {
                     val data = ratingRequest(buildJsonObject {
                         put("b50", JsonPrimitive(true))
-                    }, tokens.accessToken) ?: return@runCatching
+                    }, tokens.accessToken)
                     ProberBindTable[openId, "diving-fish", "username"] = data.username
                 }
                 ok++
@@ -281,6 +326,11 @@ class DivingFish(
         "${key.encodeURLParameter()}=${value.encodeURLParameter()}"
     }
 
+    /**
+     * 请求头携带水鱼 OAuth 访问令牌
+     *
+     * @param accessToken 访问令牌
+     */
     fun HttpRequestBuilder.setOAuth(accessToken: String) {
         headers["Authorization"] = "Bearer $accessToken"
     }
@@ -317,58 +367,57 @@ class DivingFish(
             logger.debug { "[水鱼调试] withAccessToken accessToken null openid=$openid" }
             throw notBoundException(user)
         }
-        var retry = 0
-        while (true) {
-            val result = runCatching { block(token) }
-            val e = result.exceptionOrNull()
-            if (e == null)
-                return result.getOrThrow()
-            logger.debug { "[水鱼调试] withAccessToken block失败 $e retry=$retry" }
-            if (e is AuthorizationException) {
-                tokenCache.remove(openid)
-                val fresh = accessToken(openid) ?: throw UserBindRequiredException()
-                if (fresh == token)
-                    throw e
-                return block(fresh)
+        return retryAsync(times = 4) { attempt ->
+            runCatching { block(token) }.getOrElse { e ->
+                logger.debug { "[水鱼调试] withAccessToken block失败 $e attempt=$attempt" }
+                if (e is AuthorizationException) {
+                    tokenCache.remove(openid)
+                    val fresh = accessToken(openid) ?: throw UserBindRequiredException()
+                    if (fresh == token)
+                        throw e
+                    return@retryAsync block(fresh)
+                }
+                if (e is UnknownException && attempt < 4)
+                    throw RetryException()
+                throw e
             }
-            if (e is UnknownException && retry < 3) {
-                retry++
-                delay(retry * 2000L)
-                continue
-            }
-            throw e
         }
     }
 
+    /**
+     * 查询玩家的某些歌曲的成绩
+     *
+     * @param token 水鱼 OAuth 访问令牌
+     * @param ids 歌曲 ID 列表
+     * @return 成绩记录
+     */
     suspend fun recordsRequest(
         token: String,
         ids: List<Int> = emptyList()
     ): DivingFishRecordsResponse {
         var requestIds = ids
-        var retry = 0
-        while (true) {
-            val response = client.get("$server/player/records") {
-                if (requestIds.isNotEmpty() && requestIds.size < 1000)
-                    parameter("song_id", requestIds.joinToString(","))
-                setOAuth(token)
+        suspend fun request() = client.get("$server/player/records") {
+            if (requestIds.isNotEmpty() && requestIds.size < 1000)
+                parameter("song_id", requestIds.joinToString(","))
+            setOAuth(token)
+        }
+        return retryAsync(times = 4) { attempt ->
+            var response = request()
+            if (response.status == HttpStatusCode.RequestURITooLong && requestIds.isNotEmpty() && attempt == 1) {
+                requestIds = emptyList()
+                response = request()
             }
             when (response.status) {
-                HttpStatusCode.OK -> return response.body<DivingFishRecordsResponse>()
+                HttpStatusCode.OK -> return@retryAsync response.body<DivingFishRecordsResponse>()
                 HttpStatusCode.Unauthorized -> throw AuthorizationException()
                 HttpStatusCode.Forbidden -> throw UserDeniedException()
                 HttpStatusCode.BadRequest -> throw UserNotFoundException()
                 HttpStatusCode.TooManyRequests -> {
-                    if (retry >= 3)
-                        throw UnknownException("已超出今日请求上限")
-                    retry++
-                    delay(retry * 2000L)
+                    if (attempt < 4)
+                        throw RetryException()
+                    throw UnknownException("已超出今日请求上限")
                 }
-                HttpStatusCode.RequestURITooLong -> {
-                    if (requestIds.isEmpty() || retry >= 1)
-                        throw UnknownException("HTTP 414")
-                    retry++
-                    requestIds = emptyList()
-                }
+                HttpStatusCode.RequestURITooLong -> throw UnknownException("HTTP 414")
                 else -> throw UnknownException("HTTP ${response.status.value}")
             }
         }
@@ -394,14 +443,14 @@ class DivingFish(
                 ratingRequest(buildJsonObject {
                     put("b50", JsonPrimitive(true))
                 }, token)
-            } ?: return null
+            }
             data.toRatingResponse()
         }
         is UserQueryParams.Username -> {
             val data = ratingRequest(buildJsonObject {
                 put("b50", JsonPrimitive(true))
                 put("username", JsonPrimitive(user.username))
-            }) ?: return null
+            })
             data.toRatingResponse()
         }
         is UserQueryParams.FriendCode -> null
@@ -459,12 +508,18 @@ class DivingFish(
         }
     }
 
+    /**
+     * 查询玩家的 Best 50
+     *
+     * @param request 查询条件
+     * @param token 访问令牌
+     * @return 查询结果
+     */
     suspend fun ratingRequest(
         request: JsonObject,
         token: String ?= null
-    ): DivingFishRatingResponse? {
-        var retry = 0
-        while (true) {
+    ): DivingFishRatingResponse {
+        return retryAsync(times = 4) { attempt ->
             val response = client.post("$server/query/player") {
                 contentType(ContentType.Application.Json)
                 setBody(request)
@@ -475,17 +530,23 @@ class DivingFish(
                 HttpStatusCode.BadRequest -> throw UserNotFoundException()
                 HttpStatusCode.Forbidden -> throw UserDeniedException()
                 HttpStatusCode.TooManyRequests -> {
-                    if (retry >= 3)
-                        throw UnknownException("已超出今日请求上限")
-                    retry++
-                    delay(retry * 2000L)
+                    if (attempt < 4)
+                        throw RetryException()
+                    throw UnknownException("已超出今日请求上限")
                 }
-                HttpStatusCode.OK -> return response.body<DivingFishRatingResponse>()
+                HttpStatusCode.OK -> return@retryAsync response.body<DivingFishRatingResponse>()
                 else -> throw UnknownException("HTTP ${response.status.value}")
             }
         }
     }
 
+    /**
+     * 抓取公众号记录并导入成绩到查分器
+     *
+     * @param uri 公众号回调地址
+     * @param importToken 更新 Token
+     * @return 导入结果
+     */
     suspend fun update(
         uri: String,
         importToken: String
@@ -505,6 +566,12 @@ class DivingFish(
         return response.body<DivingFishUpdateResponse>()
     }
 
+    /**
+     * 抓取并解析公众号记录
+     *
+     * @param uri 公众号回调地址
+     * @return 解析出的成绩记录列表
+     */
     suspend fun fetch(
         uri: String
     ): List<DivingFishRecordSimple>? {
@@ -545,6 +612,13 @@ class DivingFish(
     }
 
 
+    /**
+     * 从公众号网页解析游玩记录
+     *
+     * @param html 公众号网页
+     * @param difficulty 谱面难度 ID
+     * @return 解析出的成绩记录列表
+     */
     fun parseDivingFishRecords(
         html: String,
         difficulty: Int
@@ -588,7 +662,7 @@ class DivingFish(
             val resolvedTitle = musics.values.firstOrNull { music ->
                 music.type.value == type &&
                 title in music.name &&
-                music.charts.getOrNull(difficulty)?.maxDeluxeScore == totalDxScore
+                music.charts.getOrNull(difficulty) ?.maxDeluxeScore == totalDxScore
             } ?.let { music ->
                 divingFishTitleMap[music.id] ?: title
             } ?: title
@@ -604,6 +678,11 @@ class DivingFish(
             )
     }
 
+    /**
+     * 转换为成绩记录类型
+     *
+     * @return 成绩记录
+     */
     fun DivingFishRecord.toRecord(): Record? {
         val music = musics[songId] ?: return null
         val chart = if (music.genre == MusicGenre.Utage)
@@ -623,8 +702,18 @@ class DivingFish(
         )
     }
 
+    /**
+     * 拉取水鱼谱面统计数据
+     *
+     * @return 谱面统计数据
+     */
     suspend fun getStats(): DivingFishStats = client.get("$server/chart_stats").body<DivingFishStats>()
 
+    /**
+     * 拉取水鱼曲库数据
+     *
+     * 无法连接至水鱼服务器时读取本地缓存
+     */
     suspend fun loadMusicData() {
         val cacheFile = File("${maimaiData.dataPath}/diving-fish.json")
         val cached = runCatching {
@@ -632,6 +721,8 @@ class DivingFish(
                 json.decodeFromString<List<DivingFishMusicInfo>>(cacheFile.readText(Charsets.UTF_8))
             else null
         }.getOrNull()
+
+        // 水鱼查分器上的歌曲标题和本地歌曲标题建立映射
         if (cached != null) {
             divingFishTitleMap = cached.associate { m ->
                 m.id.toInt() to m.title
@@ -650,8 +741,14 @@ class DivingFish(
         }
     }
 
-    fun getDivingFishTitle(musicId: Int, originalTitle: String): String =
-        divingFishTitleMap[musicId] ?: originalTitle
+    /**
+     * 获取水鱼查分器上的歌曲标题
+     *
+     * @param music 歌曲
+     * @return 映射的标题
+     */
+    fun getDivingFishTitle(music: MusicInfo): String =
+        divingFishTitleMap[music.id] ?: music.name
 
     companion object {
         private const val USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) " +

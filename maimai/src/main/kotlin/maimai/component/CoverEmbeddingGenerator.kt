@@ -16,6 +16,11 @@ import java.nio.file.Paths
 import java.util.concurrent.atomic.AtomicInteger
 import javax.imageio.ImageIO
 
+/**
+ * 封面嵌入向量与描述
+ *
+ * 已有结果的封面自动跳过
+ */
 object CoverEmbeddingGenerator {
     private val logger = KotlinLogging.logger {}
     private val json = Json {
@@ -42,6 +47,13 @@ object CoverEmbeddingGenerator {
         return baos.toByteArray()
     }
 
+    /**
+     * 生成封面嵌入向量
+     *
+     * @param client LLM 客户端
+     * @param coversDir 封面目录
+     * @param outputPath 向量保存路径
+     */
     suspend fun generate(
         client: LLMClient,
         coversDir: String,
@@ -110,6 +122,13 @@ object CoverEmbeddingGenerator {
         logger.info { "[CoverEmbedding] 结果已保存至：$outputFile" }
     }
 
+    /**
+     * 生成封面描述与描述向量
+     *
+     * @param client LLM 客户端
+     * @param coversDir 封面目录
+     * @param outputPath 描述保存路径
+     */
     suspend fun generateDescriptions(
         client: LLMClient,
         coversDir: String,
@@ -195,6 +214,12 @@ object CoverEmbeddingGenerator {
         logger.info { "[CoverDesc] 结果已保存至：$outputFile。" }
     }
 
+    /**
+     * 读取封面嵌入向量文件
+     *
+     * @param path 向量保存路径
+     * @return 向量映射表
+     */
     fun load(path: String): Map<Int, FloatArray> {
         val file = File(path)
         if (!file.exists()) return emptyMap()
@@ -204,6 +229,12 @@ object CoverEmbeddingGenerator {
         }.getOrDefault(emptyMap())
     }
 
+    /**
+     * 读取封面描述文件
+     *
+     * @param path 描述保存路径
+     * @return 向量映射表
+     */
     fun loadDescriptions(path: String): Map<Int, CoverDescData> {
         val file = File(path)
         if (!file.exists()) return emptyMap()

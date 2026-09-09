@@ -1,6 +1,5 @@
 package xyz.xszq.bot.maimai.controller
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -20,6 +19,9 @@ import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.message.RemoteImage
 import xyz.xszq.bot.reply
 
+/**
+ * 成绩更新功能
+ */
 @Suppress("unused")
 class UpdateController(
     override val maimai: Maimai
@@ -51,7 +53,7 @@ class UpdateController(
                 }.map { record ->
                     val music = maimai.musics().first { record.title.lowercase() in it.name.lowercase() && record.type == it.type.value }
                     DivingFishRecordSimple(
-                        title = divingFish.getDivingFishTitle(music.id, music.name),
+                        title = divingFish.getDivingFishTitle(music),
                         achievements = record.achievement.replace("%", "").toDouble(),
                         dxScore = record.deluxeScore,
                         fc = record.combo,

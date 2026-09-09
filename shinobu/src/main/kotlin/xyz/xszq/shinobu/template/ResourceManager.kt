@@ -4,6 +4,12 @@ import org.jetbrains.skia.Image
 import org.jetbrains.skia.paragraph.FontCollection
 import java.io.File
 
+/**
+ * 图片资源管理器
+ *
+ * 以目录为根解析图片路径并分级缓存，未命中时回退到父管理器逐级
+ * 查找，`preloadLocal` 开启时会预先载入目录下的本地位图
+ */
 class ResourceManager(
     val basePath: File,
     val parent: ResourceManager? = null,
@@ -34,6 +40,15 @@ class ResourceManager(
         }
     }
 
+    /**
+     * 按图片路径解析位图
+     *
+     * 先尝试文件名与路径缓存，再读取本地文件，边长不超过阈值的
+     * 图片分别进入常驻缓存或 LRU 缓存
+     *
+     * @param src 样式或模板中声明的图片路径
+     * @return 解析出的位图
+     */
     fun getImage(src: String): Image? {
         val fileName = src.substringAfterLast("/")
         val cacheKey = src.trimStart('.', '/')

@@ -2,6 +2,9 @@ package xyz.xszq.bot.chunithm.music
 
 import kotlinx.serialization.Serializable
 
+/**
+ * 歌曲分类
+ */
 @Serializable
 enum class MusicGenre(val id: Int, val genreName: String, val names: Array<String>) {
     PopsAnime(0, "流行 & 动漫", arrayOf("流行 & 动漫", "流行&动漫", "动漫", "流行", "二次元", "pops & anime", "pops&anime")),
@@ -13,6 +16,12 @@ enum class MusicGenre(val id: Int, val genreName: String, val names: Array<Strin
     GekiMai(9, "音击舞萌", arrayOf("音击舞萌", "舞萌音击", "ゲキマイ", "gekimai", "maigeki"));
 
     companion object {
+        /**
+         * 根据名称匹配分类
+         *
+         * @param name 分类名或别名
+         * @return 歌曲分类
+         */
         fun of(name: String): MusicGenre = MusicGenre.entries.firstOrNull { genre ->
             genre.genreName == name || genre.names.any { value -> value.equals(name, true) }
         } ?: Original

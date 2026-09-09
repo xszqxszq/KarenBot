@@ -1,5 +1,8 @@
 package xyz.xszq.bot.chunithm.music
 
+/**
+ * 谱面成绩
+ */
 class Record(
     val music: MusicInfo,
     val chart: ChartInfo,

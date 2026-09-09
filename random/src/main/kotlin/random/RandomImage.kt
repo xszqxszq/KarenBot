@@ -7,9 +7,7 @@ import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
- * 金发图库
- *
- * 加载 data/random/kinpatsu 目录下的全部图片，供随机金发图回复使用
+ * 随机图片
  */
 class RandomImage {
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -22,6 +20,9 @@ class RandomImage {
         val IMAGE_EXTS = listOf("jpg", "jpeg", "png", "gif", "webp")
     }
 
+    /**
+     * 初始化载入图片
+     */
     suspend fun init() {
         files = localCurrentDirVfs[DIR].listRecursiveSimple().filter { file ->
             file.extensionLC in IMAGE_EXTS

@@ -3,7 +3,16 @@ package xyz.xszq.bot.maimai.music
 import korlibs.math.toIntFloor
 import kotlin.math.min
 
+/**
+ * Rating 分数
+ */
 object Rating {
+    /**
+     * 根据 Rating 分数获取颜色编号
+     *
+     * @param rating Rating 分数
+     * @return 颜色编号
+     */
     fun color(rating: Int) = when (rating) {
         in 0 until 1000 -> 1
         in 1000 until 2000 -> 2
@@ -19,7 +28,22 @@ object Rating {
         else -> 1
     }
 
+    /**
+     * 根据谱面信息和达成率计算单曲 Rating
+     *
+     * @param chart 谱面信息
+     * @param achievement 达成率
+     * @return 单曲 Rating
+     */
     fun calc(chart: ChartInfo, achievement: Int): Int = calc(chart.levelValue, achievement)
+
+    /**
+     * 根据定数和达成率计算单曲 Rating
+     *
+     * @param levelValue 定数
+     * @param achievement 达成率
+     * @return 单曲 Rating
+     */
     fun calc(levelValue: Double, achievement: Int): Int {
         val baseRa = when (Rate[achievement]) {
             "d" -> 7.0
@@ -41,6 +65,12 @@ object Rating {
         return (levelValue * baseRa * min(1005000, achievement) / 1000000.0).toIntFloor()
     }
 
+    /**
+     * 根据旧版 Rating 分数获取颜色编号
+     *
+     * @param rating 旧版 Rating 分数
+     * @return 颜色编号
+     */
     fun colorOld(rating: Int) = when (rating) {
         in 0 until 1000 -> 1
         in 1000 until 2000 -> 2
@@ -55,6 +85,12 @@ object Rating {
         else -> 1
     }
 
+    /**
+     * 根据旧版段位编号计算对应的段位 Rating 分数
+     *
+     * @param course 段位编号
+     * @return 段位 Rating 分数
+     */
     fun courseOld(course: Int) = when (course) {
         0 -> 0
         1 -> 1000
@@ -83,7 +119,22 @@ object Rating {
         else -> 0
     }
 
+    /**
+     * 根据谱面信息和达成率计算旧版单曲 Rating
+     *
+     * @param chart 谱面信息
+     * @param achievement 达成率
+     * @return 旧版单曲 Rating
+     */
     fun calcOld(chart: ChartInfo, achievement: Int): Int = calcOld(chart.levelValue, achievement)
+
+    /**
+     * 根据定数和达成率计算旧版单曲 Rating
+     *
+     * @param levelValue 定数
+     * @param achievement 达成率
+     * @return 旧版单曲 Rating
+     */
     fun calcOld(levelValue: Double, achievement: Int): Int {
         val baseRa = when (Rate[achievement]) {
             "d" -> 0.0

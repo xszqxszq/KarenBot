@@ -2,6 +2,12 @@ package xyz.xszq.bot.maimai.component
 
 import kotlinx.serialization.Serializable
 
+/**
+ * 封面描述与向量
+ *
+ * @property desc 封面描述文本
+ * @property vec 描述文本的嵌入向量
+ */
 @Serializable
 data class CoverDescData(
     val desc: String,

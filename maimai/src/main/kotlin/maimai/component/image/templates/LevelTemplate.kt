@@ -11,16 +11,22 @@ import xyz.xszq.shinobu.template.Template
 import xyz.xszq.shinobu.template.TemplateManager
 import kotlin.math.roundToInt
 
+/**
+ * 等级定数表 / 完成表模板
+ */
 class LevelTemplate(
     private val manager: TemplateManager,
     private val resourcePath: String
 ) {
     /**
-     * 生成等级完成表
-     * @param charts 谱面信息
-     * @param records 所有成绩信息
-     * @param title 完成表标题
+     * 生成等级表
+     *
+     * @param charts 谱面列表
+     * @param records 成绩记录
+     * @param title 表标题
      * @param filterParams 条件过滤参数
+     * @param showProgress 是否展示进度
+     * @param progressData 进度信息
      */
     fun level(
         charts: List<ChartInfo>,
@@ -67,10 +73,6 @@ class LevelTemplate(
         ))
     }
 
-    /**
-     * 生成模板
-     * @param params 渲染参数
-     */
     private fun template(
         params: LevelRenderParams
     ): Image {
@@ -175,10 +177,11 @@ class LevelTemplate(
     }
 
     /**
-     * 展示单个谱面成绩
+     * 绘制一个谱面成绩记录
+     *
      * @param chart 谱面信息
-     * @param requiresType 达成要求类型
-     * @param record 游玩成绩
+     * @param requiresType 达成条件类型
+     * @param record 成绩记录
      */
     fun Template.levelChart(
         chart: ChartInfo,

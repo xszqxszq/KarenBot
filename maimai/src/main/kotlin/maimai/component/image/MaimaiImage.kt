@@ -27,10 +27,9 @@ class MaimaiImage(
     lateinit var score: ScoreTemplate
     lateinit var level: LevelTemplate
     lateinit var course: CourseTemplate
-    lateinit var radar: RadarTemplate
 
     /**
-     * 初始化
+     * 初始化模板管理器与各图片模板
      */
     fun init() {
         manager = TemplateManager(dataPath)
@@ -39,12 +38,11 @@ class MaimaiImage(
         score = ScoreTemplate(manager, resourcePath)
         level = LevelTemplate(manager, resourcePath)
         course = CourseTemplate(manager, resourcePath)
-        radar = RadarTemplate(dataPath)
-
-        radar.init()
     }
     /**
-     * 载入模板
+     * 载入模板资源并生成封面缩略图
+     *
+     * @param scope 协程作用域
      */
     fun load(scope: CoroutineScope) {
         manager.init()
@@ -85,7 +83,7 @@ class MaimaiImage(
 
     companion object {
         /**
-         * 获得难度对应的颜色
+         * 谱面难度对应的颜色
          */
         fun ChartInfo.color() = when (difficulty) {
             MusicDifficulty.Basic -> "#45c124"
@@ -95,6 +93,7 @@ class MaimaiImage(
             MusicDifficulty.ReMaster -> "#dbaaff"
             MusicDifficulty.Utage -> "#ff6ffd"
         }.rgbColor()!!
+
         const val THUMB_SIZE = 72
     }
 }

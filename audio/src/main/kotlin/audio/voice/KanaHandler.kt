@@ -2,9 +2,18 @@ package xyz.xszq.bot.audio.voice
 
 import korlibs.io.file.VfsFile
 
+/**
+ * 日文假名转换
+ */
 class KanaHandler(
     val tokens: Map<String, VfsFile>
 ) {
+    /**
+     * 解析单个日语假名转为拼音
+     *
+     * @param token 日文 token
+     * @return 转换结果
+     */
     fun clean(token: Token.Raw.Japanese): List<Token> {
         val result = mutableListOf<Token>()
 
@@ -33,6 +42,12 @@ class KanaHandler(
 
         return result
     }
+    /**
+     * 将日文假名文本转为汉语拼音
+     *
+     * @param text 日文文本
+     * @return 转换结果
+     */
     fun parse(text: String): List<Token.Final> {
         var result = mutableListOf<Token>(Token.Raw.Japanese(text))
         var counter = 0
@@ -50,322 +65,325 @@ class KanaHandler(
         return result.filterIsInstance<Token.Final>()
     }
 
-    private val table: List<Pair<String, List<String>>> = buildList {
-        add(Pair("きゃ", listOf("ke", "ya")))
-        add(Pair("キャ", listOf("ke", "ya")))
-        add(Pair("きゅ", listOf("ke", "yu")))
-        add(Pair("キュ", listOf("ke", "yu")))
-        add(Pair("きょ", listOf("ke", "you")))
-        add(Pair("キョ", listOf("ke", "you")))
-        add(Pair("ぎゃ", listOf("ge", "ya")))
-        add(Pair("ギャ", listOf("ge", "ya")))
-        add(Pair("ぎゅ", listOf("ge", "yu")))
-        add(Pair("ギュ", listOf("ge", "yu")))
-        add(Pair("ぎょ", listOf("ge", "you")))
-        add(Pair("ギョ", listOf("ge", "you")))
-        add(Pair("しゃ", listOf("xia")))
-        add(Pair("シャ", listOf("xia")))
-        add(Pair("しゅ", listOf("xu")))
-        add(Pair("シュ", listOf("xu")))
-        add(Pair("しょ", listOf("xiu")))
-        add(Pair("ショ", listOf("xiu")))
-        add(Pair("ちゃ", listOf("qi", "ya")))
-        add(Pair("チャ", listOf("qi", "ya")))
-        add(Pair("ちゅ", listOf("qu")))
-        add(Pair("チュ", listOf("qu")))
-        add(Pair("ちょ", listOf("qiu")))
-        add(Pair("チョ", listOf("qiu")))
-        add(Pair("じゃ", listOf("jia")))
-        add(Pair("ぢゃ", listOf("jia")))
-        add(Pair("ジャ", listOf("jia")))
-        add(Pair("ヂャ", listOf("jia")))
-        add(Pair("じゅ", listOf("ji", "yu")))
-        add(Pair("ぢゅ", listOf("ji", "yu")))
-        add(Pair("ジュ", listOf("ji", "yu")))
-        add(Pair("ヂュ", listOf("ji", "yu")))
-        add(Pair("じょ", listOf("jiu")))
-        add(Pair("ぢょ", listOf("jiu")))
-        add(Pair("ジョ", listOf("jiu")))
-        add(Pair("ヂョ", listOf("jiu")))
-        add(Pair("にゃ", listOf("ni", "ya")))
-        add(Pair("ニャ", listOf("ni", "ya")))
-        add(Pair("にゅ", listOf("nv")))
-        add(Pair("ニュ", listOf("nv")))
-        add(Pair("にょ", listOf("niu")))
-        add(Pair("ニョ", listOf("niu")))
-        add(Pair("ひゃ", listOf("he", "ya")))
-        add(Pair("ヒャ", listOf("he", "ya")))
-        add(Pair("ひゅ", listOf("he", "yu")))
-        add(Pair("ヒュ", listOf("he", "yu")))
-        add(Pair("ひょ", listOf("he", "you")))
-        add(Pair("ヒョ", listOf("he", "you")))
-        add(Pair("びゃ", listOf("bi", "ya")))
-        add(Pair("ビャ", listOf("bi", "ya")))
-        add(Pair("びゅ", listOf("bi", "yu")))
-        add(Pair("ビュ", listOf("bi", "yu")))
-        add(Pair("びょ", listOf("bi", "you")))
-        add(Pair("ビョ", listOf("bi", "you")))
-        add(Pair("ぴゃ", listOf("pi", "ya")))
-        add(Pair("ピャ", listOf("pi", "ya")))
-        add(Pair("ぴゅ", listOf("pi", "yu")))
-        add(Pair("ピュ", listOf("pi", "yu")))
-        add(Pair("ぴょ", listOf("pi", "you")))
-        add(Pair("ピョ", listOf("pi", "you")))
-        add(Pair("みゃ", listOf("mi", "ya")))
-        add(Pair("ミャ", listOf("mi", "ya")))
-        add(Pair("みゅ", listOf("miu")))
-        add(Pair("ミュ", listOf("miu")))
-        add(Pair("みょ", listOf("mi", "you")))
-        add(Pair("ミョ", listOf("mi", "you")))
-        add(Pair("りゃ", listOf("li", "ya")))
-        add(Pair("リャ", listOf("li", "ya")))
-        add(Pair("りゅ", listOf("li", "yu")))
-        add(Pair("リュ", listOf("li", "yu")))
-        add(Pair("りょ", listOf("liu")))
-        add(Pair("リョ", listOf("liu")))
-        add(Pair("あん", listOf("an")))
-        add(Pair("アン", listOf("an")))
-        add(Pair("いん", listOf("yin")))
-        add(Pair("イン", listOf("yin")))
-        add(Pair("ゐん", listOf("yin")))
-        add(Pair("うん", listOf("wen")))
-        add(Pair("ウン", listOf("wen")))
-        add(Pair("かん", listOf("kan")))
-        add(Pair("カン", listOf("kan")))
-        add(Pair("くん", listOf("kun")))
-        add(Pair("クン", listOf("kun")))
-        add(Pair("こん", listOf("kong")))
-        add(Pair("コン", listOf("kong")))
-        add(Pair("さん", listOf("san")))
-        add(Pair("サン", listOf("san")))
-        add(Pair("しん", listOf("xin")))
-        add(Pair("シン", listOf("xin")))
-        add(Pair("すん", listOf("sen")))
-        add(Pair("スン", listOf("sen")))
-        add(Pair("そん", listOf("song")))
-        add(Pair("ソン", listOf("song")))
-        add(Pair("たん", listOf("tan")))
-        add(Pair("タン", listOf("tan")))
-        add(Pair("ちん", listOf("qin")))
-        add(Pair("チン", listOf("qin")))
-        add(Pair("とん", listOf("tong")))
-        add(Pair("トン", listOf("tong")))
-        add(Pair("なん", listOf("nan")))
-        add(Pair("ナン", listOf("nan")))
-        add(Pair("にん", listOf("ning")))
-        add(Pair("ニン", listOf("ning")))
-        add(Pair("のん", listOf("nong")))
-        add(Pair("ノン", listOf("nong")))
-        add(Pair("はん", listOf("han")))
-        add(Pair("ハン", listOf("han")))
-        add(Pair("ふん", listOf("hun")))
-        add(Pair("フン", listOf("hun")))
-        add(Pair("ほん", listOf("hong")))
-        add(Pair("ホン", listOf("hong")))
-        add(Pair("まん", listOf("man")))
-        add(Pair("マン", listOf("man")))
-        add(Pair("みん", listOf("min")))
-        add(Pair("ミン", listOf("min")))
-        add(Pair("もん", listOf("meng")))
-        add(Pair("モン", listOf("meng")))
-        add(Pair("やん", listOf("yang")))
-        add(Pair("ヤン", listOf("yang")))
-        add(Pair("よん", listOf("yong")))
-        add(Pair("ヨン", listOf("yong")))
-        add(Pair("らん", listOf("lan")))
-        add(Pair("ラン", listOf("lan")))
-        add(Pair("りん", listOf("lin")))
-        add(Pair("リン", listOf("lin")))
-        add(Pair("るん", listOf("lun")))
-        add(Pair("ルン", listOf("lun")))
-        add(Pair("ろん", listOf("long")))
-        add(Pair("ロン", listOf("long")))
-        add(Pair("わん", listOf("wan")))
-        add(Pair("ワン", listOf("wan")))
-        add(Pair("がん", listOf("gan")))
-        add(Pair("ガン", listOf("gan")))
-        add(Pair("ぐん", listOf("gun")))
-        add(Pair("グン", listOf("gun")))
-        add(Pair("ごん", listOf("gong")))
-        add(Pair("ゴン", listOf("gong")))
-        add(Pair("ざん", listOf("zan")))
-        add(Pair("ザン", listOf("zan")))
-        add(Pair("じん", listOf("jin")))
-        add(Pair("ぢん", listOf("jin")))
-        add(Pair("ジン", listOf("jin")))
-        add(Pair("ヂン", listOf("jin")))
-        add(Pair("ぞん", listOf("zong")))
-        add(Pair("ゾン", listOf("zong")))
-        add(Pair("だん", listOf("dan")))
-        add(Pair("ダン", listOf("dan")))
-        add(Pair("どん", listOf("dong")))
-        add(Pair("ドン", listOf("dong")))
-        add(Pair("ばん", listOf("ban")))
-        add(Pair("バン", listOf("ban")))
-        add(Pair("びん", listOf("bin")))
-        add(Pair("ビン", listOf("bin")))
-        add(Pair("ぱん", listOf("pan")))
-        add(Pair("パン", listOf("pan")))
-        add(Pair("ぴん", listOf("pin")))
-        add(Pair("ピン", listOf("pin")))
-        add(Pair("あ", listOf("a")))
-        add(Pair("ア", listOf("a")))
-        add(Pair("ぁ", listOf("a")))
-        add(Pair("ァ", listOf("a")))
-        add(Pair("い", listOf("yi")))
-        add(Pair("イ", listOf("yi")))
-        add(Pair("ぃ", listOf("yi")))
-        add(Pair("ィ", listOf("yi")))
-        add(Pair("ゐ", listOf("yi")))
-        add(Pair("う", listOf("wu")))
-        add(Pair("ウ", listOf("wu")))
-        add(Pair("ぅ", listOf("wu")))
-        add(Pair("ゥ", listOf("wu")))
-        add(Pair("え", listOf("ei")))
-        add(Pair("エ", listOf("ei")))
-        add(Pair("ぇ", listOf("ei")))
-        add(Pair("ェ", listOf("ei")))
-        add(Pair("ゑ", listOf("ei")))
-        add(Pair("お", listOf("ou")))
-        add(Pair("オ", listOf("ou")))
-        add(Pair("ぉ", listOf("ou")))
-        add(Pair("ォ", listOf("ou")))
-        add(Pair("を", listOf("ou")))
-        add(Pair("か", listOf("ka")))
-        add(Pair("カ", listOf("ka")))
-        add(Pair("き", listOf("ke", "yi")))
-        add(Pair("キ", listOf("ke", "yi")))
-        add(Pair("く", listOf("ku")))
-        add(Pair("ク", listOf("ku")))
-        add(Pair("け", listOf("ke", "ei")))
-        add(Pair("ケ", listOf("ke", "ei")))
-        add(Pair("こ", listOf("kou")))
-        add(Pair("コ", listOf("kou")))
-        add(Pair("さ", listOf("sa")))
-        add(Pair("サ", listOf("sa")))
-        add(Pair("し", listOf("xi")))
-        add(Pair("シ", listOf("xi")))
-        add(Pair("す", listOf("si")))
-        add(Pair("ス", listOf("si")))
-        add(Pair("せ", listOf("se", "ei")))
-        add(Pair("セ", listOf("se", "ei")))
-        add(Pair("そ", listOf("sou")))
-        add(Pair("ソ", listOf("sou")))
-        add(Pair("た", listOf("ta")))
-        add(Pair("タ", listOf("ta")))
-        add(Pair("ち", listOf("qi")))
-        add(Pair("チ", listOf("qi")))
-        add(Pair("つ", listOf("ci")))
-        add(Pair("ツ", listOf("ci")))
-        add(Pair("て", listOf("te", "ei")))
-        add(Pair("テ", listOf("te", "ei")))
-        add(Pair("と", listOf("tuo")))
-        add(Pair("ト", listOf("tuo")))
-        add(Pair("な", listOf("na")))
-        add(Pair("ナ", listOf("na")))
-        add(Pair("に", listOf("ni")))
-        add(Pair("ニ", listOf("ni")))
-        add(Pair("ぬ", listOf("nu")))
-        add(Pair("ヌ", listOf("nu")))
-        add(Pair("ね", listOf("nei")))
-        add(Pair("ネ", listOf("nei")))
-        add(Pair("の", listOf("nuo")))
-        add(Pair("ノ", listOf("nuo")))
-        add(Pair("は", listOf("ha")))
-        add(Pair("ハ", listOf("ha")))
-        add(Pair("ひ", listOf("he", "yi")))
-        add(Pair("ヒ", listOf("he", "yi")))
-        add(Pair("ふ", listOf("hu")))
-        add(Pair("フ", listOf("hu")))
-        add(Pair("へ", listOf("hei")))
-        add(Pair("ヘ", listOf("hei")))
-        add(Pair("ほ", listOf("hou")))
-        add(Pair("ホ", listOf("hou")))
-        add(Pair("ま", listOf("ma")))
-        add(Pair("マ", listOf("ma")))
-        add(Pair("み", listOf("mi")))
-        add(Pair("ミ", listOf("mi")))
-        add(Pair("む", listOf("mu")))
-        add(Pair("ム", listOf("mu")))
-        add(Pair("め", listOf("mei")))
-        add(Pair("メ", listOf("mei")))
-        add(Pair("も", listOf("mou")))
-        add(Pair("モ", listOf("mou")))
-        add(Pair("や", listOf("ya")))
-        add(Pair("ヤ", listOf("ya")))
-        add(Pair("ゃ", listOf("ya")))
-        add(Pair("ャ", listOf("ya")))
-        add(Pair("ゆ", listOf("yu")))
-        add(Pair("ユ", listOf("yu")))
-        add(Pair("ゅ", listOf("yu")))
-        add(Pair("ュ", listOf("yu")))
-        add(Pair("よ", listOf("you")))
-        add(Pair("ヨ", listOf("you")))
-        add(Pair("ょ", listOf("you")))
-        add(Pair("ョ", listOf("you")))
-        add(Pair("ら", listOf("la")))
-        add(Pair("ラ", listOf("la")))
-        add(Pair("り", listOf("li")))
-        add(Pair("リ", listOf("li")))
-        add(Pair("る", listOf("lu")))
-        add(Pair("ル", listOf("lu")))
-        add(Pair("れ", listOf("lei")))
-        add(Pair("レ", listOf("lei")))
-        add(Pair("ろ", listOf("lou")))
-        add(Pair("ロ", listOf("lou")))
-        add(Pair("わ", listOf("wa")))
-        add(Pair("ワ", listOf("wa")))
-        add(Pair("が", listOf("ga")))
-        add(Pair("ガ", listOf("ga")))
-        add(Pair("ぎ", listOf("ge", "yi")))
-        add(Pair("ギ", listOf("ge", "yi")))
-        add(Pair("ぐ", listOf("gu")))
-        add(Pair("グ", listOf("gu")))
-        add(Pair("げ", listOf("gei")))
-        add(Pair("ゲ", listOf("gei")))
-        add(Pair("ご", listOf("gou")))
-        add(Pair("ゴ", listOf("gou")))
-        add(Pair("ざ", listOf("za")))
-        add(Pair("ザ", listOf("za")))
-        add(Pair("じ", listOf("ji")))
-        add(Pair("ぢ", listOf("ji")))
-        add(Pair("ジ", listOf("ji")))
-        add(Pair("ヂ", listOf("ji")))
-        add(Pair("ず", listOf("zhi")))
-        add(Pair("づ", listOf("zhi")))
-        add(Pair("ズ", listOf("zhi")))
-        add(Pair("ヅ", listOf("zhi")))
-        add(Pair("ぜ", listOf("zei")))
-        add(Pair("ゼ", listOf("zei")))
-        add(Pair("ぞ", listOf("zou")))
-        add(Pair("ゾ", listOf("zou")))
-        add(Pair("だ", listOf("da")))
-        add(Pair("ダ", listOf("da")))
-        add(Pair("で", listOf("dei")))
-        add(Pair("デ", listOf("dei")))
-        add(Pair("ど", listOf("dou")))
-        add(Pair("ド", listOf("dou")))
-        add(Pair("ば", listOf("ba")))
-        add(Pair("バ", listOf("ba")))
-        add(Pair("び", listOf("bi")))
-        add(Pair("ビ", listOf("bi")))
-        add(Pair("ぶ", listOf("bu")))
-        add(Pair("ブ", listOf("bu")))
-        add(Pair("べ", listOf("bei")))
-        add(Pair("ベ", listOf("bei")))
-        add(Pair("ぼ", listOf("bo")))
-        add(Pair("ボ", listOf("bo")))
-        add(Pair("ぱ", listOf("pa")))
-        add(Pair("パ", listOf("pa")))
-        add(Pair("ぴ", listOf("pi")))
-        add(Pair("ピ", listOf("pi")))
-        add(Pair("ぷ", listOf("pu")))
-        add(Pair("プ", listOf("pu")))
-        add(Pair("ぺ", listOf("pei")))
-        add(Pair("ペ", listOf("pei")))
-        add(Pair("ぽ", listOf("po")))
-        add(Pair("ポ", listOf("po")))
-        add(Pair("ん", listOf("en")))
-        add(Pair("ン", listOf("en")))
-    }
+    /**
+     * 日语假名与拼音发音对照表
+     */
+    private val table: Array<Pair<String, Array<String>>> = arrayOf(
+        "きゃ" to arrayOf("ke", "ya"),
+        "キャ" to arrayOf("ke", "ya"),
+        "きゅ" to arrayOf("ke", "yu"),
+        "キュ" to arrayOf("ke", "yu"),
+        "きょ" to arrayOf("ke", "you"),
+        "キョ" to arrayOf("ke", "you"),
+        "ぎゃ" to arrayOf("ge", "ya"),
+        "ギャ" to arrayOf("ge", "ya"),
+        "ぎゅ" to arrayOf("ge", "yu"),
+        "ギュ" to arrayOf("ge", "yu"),
+        "ぎょ" to arrayOf("ge", "you"),
+        "ギョ" to arrayOf("ge", "you"),
+        "しゃ" to arrayOf("xia"),
+        "シャ" to arrayOf("xia"),
+        "しゅ" to arrayOf("xu"),
+        "シュ" to arrayOf("xu"),
+        "しょ" to arrayOf("xiu"),
+        "ショ" to arrayOf("xiu"),
+        "ちゃ" to arrayOf("qi", "ya"),
+        "チャ" to arrayOf("qi", "ya"),
+        "ちゅ" to arrayOf("qu"),
+        "チュ" to arrayOf("qu"),
+        "ちょ" to arrayOf("qiu"),
+        "チョ" to arrayOf("qiu"),
+        "じゃ" to arrayOf("jia"),
+        "ぢゃ" to arrayOf("jia"),
+        "ジャ" to arrayOf("jia"),
+        "ヂャ" to arrayOf("jia"),
+        "じゅ" to arrayOf("ji", "yu"),
+        "ぢゅ" to arrayOf("ji", "yu"),
+        "ジュ" to arrayOf("ji", "yu"),
+        "ヂュ" to arrayOf("ji", "yu"),
+        "じょ" to arrayOf("jiu"),
+        "ぢょ" to arrayOf("jiu"),
+        "ジョ" to arrayOf("jiu"),
+        "ヂョ" to arrayOf("jiu"),
+        "にゃ" to arrayOf("ni", "ya"),
+        "ニャ" to arrayOf("ni", "ya"),
+        "にゅ" to arrayOf("nv"),
+        "ニュ" to arrayOf("nv"),
+        "にょ" to arrayOf("niu"),
+        "ニョ" to arrayOf("niu"),
+        "ひゃ" to arrayOf("he", "ya"),
+        "ヒャ" to arrayOf("he", "ya"),
+        "ひゅ" to arrayOf("he", "yu"),
+        "ヒュ" to arrayOf("he", "yu"),
+        "ひょ" to arrayOf("he", "you"),
+        "ヒョ" to arrayOf("he", "you"),
+        "びゃ" to arrayOf("bi", "ya"),
+        "ビャ" to arrayOf("bi", "ya"),
+        "びゅ" to arrayOf("bi", "yu"),
+        "ビュ" to arrayOf("bi", "yu"),
+        "びょ" to arrayOf("bi", "you"),
+        "ビョ" to arrayOf("bi", "you"),
+        "ぴゃ" to arrayOf("pi", "ya"),
+        "ピャ" to arrayOf("pi", "ya"),
+        "ぴゅ" to arrayOf("pi", "yu"),
+        "ピュ" to arrayOf("pi", "yu"),
+        "ぴょ" to arrayOf("pi", "you"),
+        "ピョ" to arrayOf("pi", "you"),
+        "みゃ" to arrayOf("mi", "ya"),
+        "ミャ" to arrayOf("mi", "ya"),
+        "みゅ" to arrayOf("miu"),
+        "ミュ" to arrayOf("miu"),
+        "みょ" to arrayOf("mi", "you"),
+        "ミョ" to arrayOf("mi", "you"),
+        "りゃ" to arrayOf("li", "ya"),
+        "リャ" to arrayOf("li", "ya"),
+        "りゅ" to arrayOf("li", "yu"),
+        "リュ" to arrayOf("li", "yu"),
+        "りょ" to arrayOf("liu"),
+        "リョ" to arrayOf("liu"),
+        "あん" to arrayOf("an"),
+        "アン" to arrayOf("an"),
+        "いん" to arrayOf("yin"),
+        "イン" to arrayOf("yin"),
+        "ゐん" to arrayOf("yin"),
+        "うん" to arrayOf("wen"),
+        "ウン" to arrayOf("wen"),
+        "かん" to arrayOf("kan"),
+        "カン" to arrayOf("kan"),
+        "くん" to arrayOf("kun"),
+        "クン" to arrayOf("kun"),
+        "こん" to arrayOf("kong"),
+        "コン" to arrayOf("kong"),
+        "さん" to arrayOf("san"),
+        "サン" to arrayOf("san"),
+        "しん" to arrayOf("xin"),
+        "シン" to arrayOf("xin"),
+        "すん" to arrayOf("sen"),
+        "スン" to arrayOf("sen"),
+        "そん" to arrayOf("song"),
+        "ソン" to arrayOf("song"),
+        "たん" to arrayOf("tan"),
+        "タン" to arrayOf("tan"),
+        "ちん" to arrayOf("qin"),
+        "チン" to arrayOf("qin"),
+        "とん" to arrayOf("tong"),
+        "トン" to arrayOf("tong"),
+        "なん" to arrayOf("nan"),
+        "ナン" to arrayOf("nan"),
+        "にん" to arrayOf("ning"),
+        "ニン" to arrayOf("ning"),
+        "のん" to arrayOf("nong"),
+        "ノン" to arrayOf("nong"),
+        "はん" to arrayOf("han"),
+        "ハン" to arrayOf("han"),
+        "ふん" to arrayOf("hun"),
+        "フン" to arrayOf("hun"),
+        "ほん" to arrayOf("hong"),
+        "ホン" to arrayOf("hong"),
+        "まん" to arrayOf("man"),
+        "マン" to arrayOf("man"),
+        "みん" to arrayOf("min"),
+        "ミン" to arrayOf("min"),
+        "もん" to arrayOf("meng"),
+        "モン" to arrayOf("meng"),
+        "やん" to arrayOf("yang"),
+        "ヤン" to arrayOf("yang"),
+        "よん" to arrayOf("yong"),
+        "ヨン" to arrayOf("yong"),
+        "らん" to arrayOf("lan"),
+        "ラン" to arrayOf("lan"),
+        "りん" to arrayOf("lin"),
+        "リン" to arrayOf("lin"),
+        "るん" to arrayOf("lun"),
+        "ルン" to arrayOf("lun"),
+        "ろん" to arrayOf("long"),
+        "ロン" to arrayOf("long"),
+        "わん" to arrayOf("wan"),
+        "ワン" to arrayOf("wan"),
+        "がん" to arrayOf("gan"),
+        "ガン" to arrayOf("gan"),
+        "ぐん" to arrayOf("gun"),
+        "グン" to arrayOf("gun"),
+        "ごん" to arrayOf("gong"),
+        "ゴン" to arrayOf("gong"),
+        "ざん" to arrayOf("zan"),
+        "ザン" to arrayOf("zan"),
+        "じん" to arrayOf("jin"),
+        "ぢん" to arrayOf("jin"),
+        "ジン" to arrayOf("jin"),
+        "ヂン" to arrayOf("jin"),
+        "ぞん" to arrayOf("zong"),
+        "ゾン" to arrayOf("zong"),
+        "だん" to arrayOf("dan"),
+        "ダン" to arrayOf("dan"),
+        "どん" to arrayOf("dong"),
+        "ドン" to arrayOf("dong"),
+        "ばん" to arrayOf("ban"),
+        "バン" to arrayOf("ban"),
+        "びん" to arrayOf("bin"),
+        "ビン" to arrayOf("bin"),
+        "ぱん" to arrayOf("pan"),
+        "パン" to arrayOf("pan"),
+        "ぴん" to arrayOf("pin"),
+        "ピン" to arrayOf("pin"),
+        "あ" to arrayOf("a"),
+        "ア" to arrayOf("a"),
+        "ぁ" to arrayOf("a"),
+        "ァ" to arrayOf("a"),
+        "い" to arrayOf("yi"),
+        "イ" to arrayOf("yi"),
+        "ぃ" to arrayOf("yi"),
+        "ィ" to arrayOf("yi"),
+        "ゐ" to arrayOf("yi"),
+        "う" to arrayOf("wu"),
+        "ウ" to arrayOf("wu"),
+        "ぅ" to arrayOf("wu"),
+        "ゥ" to arrayOf("wu"),
+        "え" to arrayOf("ei"),
+        "エ" to arrayOf("ei"),
+        "ぇ" to arrayOf("ei"),
+        "ェ" to arrayOf("ei"),
+        "ゑ" to arrayOf("ei"),
+        "お" to arrayOf("ou"),
+        "オ" to arrayOf("ou"),
+        "ぉ" to arrayOf("ou"),
+        "ォ" to arrayOf("ou"),
+        "を" to arrayOf("ou"),
+        "か" to arrayOf("ka"),
+        "カ" to arrayOf("ka"),
+        "き" to arrayOf("ke", "yi"),
+        "キ" to arrayOf("ke", "yi"),
+        "く" to arrayOf("ku"),
+        "ク" to arrayOf("ku"),
+        "け" to arrayOf("ke", "ei"),
+        "ケ" to arrayOf("ke", "ei"),
+        "こ" to arrayOf("kou"),
+        "コ" to arrayOf("kou"),
+        "さ" to arrayOf("sa"),
+        "サ" to arrayOf("sa"),
+        "し" to arrayOf("xi"),
+        "シ" to arrayOf("xi"),
+        "す" to arrayOf("si"),
+        "ス" to arrayOf("si"),
+        "せ" to arrayOf("se", "ei"),
+        "セ" to arrayOf("se", "ei"),
+        "そ" to arrayOf("sou"),
+        "ソ" to arrayOf("sou"),
+        "た" to arrayOf("ta"),
+        "タ" to arrayOf("ta"),
+        "ち" to arrayOf("qi"),
+        "チ" to arrayOf("qi"),
+        "つ" to arrayOf("ci"),
+        "ツ" to arrayOf("ci"),
+        "て" to arrayOf("te", "ei"),
+        "テ" to arrayOf("te", "ei"),
+        "と" to arrayOf("tuo"),
+        "ト" to arrayOf("tuo"),
+        "な" to arrayOf("na"),
+        "ナ" to arrayOf("na"),
+        "に" to arrayOf("ni"),
+        "ニ" to arrayOf("ni"),
+        "ぬ" to arrayOf("nu"),
+        "ヌ" to arrayOf("nu"),
+        "ね" to arrayOf("nei"),
+        "ネ" to arrayOf("nei"),
+        "の" to arrayOf("nuo"),
+        "ノ" to arrayOf("nuo"),
+        "は" to arrayOf("ha"),
+        "ハ" to arrayOf("ha"),
+        "ひ" to arrayOf("he", "yi"),
+        "ヒ" to arrayOf("he", "yi"),
+        "ふ" to arrayOf("hu"),
+        "フ" to arrayOf("hu"),
+        "へ" to arrayOf("hei"),
+        "ヘ" to arrayOf("hei"),
+        "ほ" to arrayOf("hou"),
+        "ホ" to arrayOf("hou"),
+        "ま" to arrayOf("ma"),
+        "マ" to arrayOf("ma"),
+        "み" to arrayOf("mi"),
+        "ミ" to arrayOf("mi"),
+        "む" to arrayOf("mu"),
+        "ム" to arrayOf("mu"),
+        "め" to arrayOf("mei"),
+        "メ" to arrayOf("mei"),
+        "も" to arrayOf("mou"),
+        "モ" to arrayOf("mou"),
+        "や" to arrayOf("ya"),
+        "ヤ" to arrayOf("ya"),
+        "ゃ" to arrayOf("ya"),
+        "ャ" to arrayOf("ya"),
+        "ゆ" to arrayOf("yu"),
+        "ユ" to arrayOf("yu"),
+        "ゅ" to arrayOf("yu"),
+        "ュ" to arrayOf("yu"),
+        "よ" to arrayOf("you"),
+        "ヨ" to arrayOf("you"),
+        "ょ" to arrayOf("you"),
+        "ョ" to arrayOf("you"),
+        "ら" to arrayOf("la"),
+        "ラ" to arrayOf("la"),
+        "り" to arrayOf("li"),
+        "リ" to arrayOf("li"),
+        "る" to arrayOf("lu"),
+        "ル" to arrayOf("lu"),
+        "れ" to arrayOf("lei"),
+        "レ" to arrayOf("lei"),
+        "ろ" to arrayOf("lou"),
+        "ロ" to arrayOf("lou"),
+        "わ" to arrayOf("wa"),
+        "ワ" to arrayOf("wa"),
+        "が" to arrayOf("ga"),
+        "ガ" to arrayOf("ga"),
+        "ぎ" to arrayOf("ge", "yi"),
+        "ギ" to arrayOf("ge", "yi"),
+        "ぐ" to arrayOf("gu"),
+        "グ" to arrayOf("gu"),
+        "げ" to arrayOf("gei"),
+        "ゲ" to arrayOf("gei"),
+        "ご" to arrayOf("gou"),
+        "ゴ" to arrayOf("gou"),
+        "ざ" to arrayOf("za"),
+        "ザ" to arrayOf("za"),
+        "じ" to arrayOf("ji"),
+        "ぢ" to arrayOf("ji"),
+        "ジ" to arrayOf("ji"),
+        "ヂ" to arrayOf("ji"),
+        "ず" to arrayOf("zhi"),
+        "づ" to arrayOf("zhi"),
+        "ズ" to arrayOf("zhi"),
+        "ヅ" to arrayOf("zhi"),
+        "ぜ" to arrayOf("zei"),
+        "ゼ" to arrayOf("zei"),
+        "ぞ" to arrayOf("zou"),
+        "ゾ" to arrayOf("zou"),
+        "だ" to arrayOf("da"),
+        "ダ" to arrayOf("da"),
+        "で" to arrayOf("dei"),
+        "デ" to arrayOf("dei"),
+        "ど" to arrayOf("dou"),
+        "ド" to arrayOf("dou"),
+        "ば" to arrayOf("ba"),
+        "バ" to arrayOf("ba"),
+        "び" to arrayOf("bi"),
+        "ビ" to arrayOf("bi"),
+        "ぶ" to arrayOf("bu"),
+        "ブ" to arrayOf("bu"),
+        "べ" to arrayOf("bei"),
+        "ベ" to arrayOf("bei"),
+        "ぼ" to arrayOf("bo"),
+        "ボ" to arrayOf("bo"),
+        "ぱ" to arrayOf("pa"),
+        "パ" to arrayOf("pa"),
+        "ぴ" to arrayOf("pi"),
+        "ピ" to arrayOf("pi"),
+        "ぷ" to arrayOf("pu"),
+        "プ" to arrayOf("pu"),
+        "ぺ" to arrayOf("pei"),
+        "ペ" to arrayOf("pei"),
+        "ぽ" to arrayOf("po"),
+        "ポ" to arrayOf("po"),
+        "ん" to arrayOf("en"),
+        "ン" to arrayOf("en"),
+    )
 }

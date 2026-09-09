@@ -4,6 +4,11 @@ import org.jetbrains.skia.*
 import xyz.xszq.shinobu.style.BackgroundPosition
 import xyz.xszq.shinobu.style.BackgroundSize
 
+/**
+ * 容器节点
+ *
+ * 作为弹性布局容器承载子节点，并负责绘制背景色、背景图与遮罩
+ */
 @Suppress("unused")
 class Div(
     id: String ?= null

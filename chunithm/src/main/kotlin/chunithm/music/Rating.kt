@@ -4,7 +4,16 @@ import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.roundToInt
 
+/**
+ * Rating 分数
+ */
 object Rating {
+    /**
+     * 根据 Rating 分数获取颜色编号
+     *
+     * @param rating Rating 分数
+     * @return 颜色编号
+     */
     fun color(rating: Double) = when (rating) {
         in 0.00 .. 11.99 -> 1
         in 12.00 .. 13.24 -> 2
@@ -15,8 +24,29 @@ object Rating {
         in 17.00 .. 20.00 -> 7
         else -> 1
     }
+    /**
+     * 把 Rating 数值转为不带小数点的四位数字文本
+     *
+     * @param value Rating 数值
+     * @return 不含小数点的四位文本
+     */
     fun stringWithoutDot(value: Double): String = "%04d".format((value * 100).roundToInt())
+    /**
+     * 根据谱面信息和达成率计算单曲 Rating
+     *
+     * @param chart 谱面信息
+     * @param achievement 达成率
+     * @return 单曲 Rating
+     */
     fun calc(chart: ChartInfo, achievement: Int) = calc(chart.levelValue, achievement)
+
+    /**
+     * 根据定数和达成率计算单曲 Rating
+     *
+     * @param levelValue 定数
+     * @param achievement 达成率
+     * @return 单曲 Rating
+     */
     fun calc(levelValue: Double, achievement: Int) = when (val rate = Rate[achievement]) {
         "sssp" -> levelValue + 2.15
         "sss" -> levelValue + 2.0 + (achievement - Rate.floor(rate)) / 100 * 0.01
@@ -31,6 +61,9 @@ object Rating {
         "bb", "b", "c" -> ((achievement - Rate.floor("c")) * (levelValue - 5.0) / 6000).toInt() * 0.01
         else -> 0.0
     }.ratingClean()
-    fun Double.ratingClean() = (max(0.0, this) * 100).roundToInt() / 100.0
+    private fun Double.ratingClean() = (max(0.0, this) * 100).roundToInt() / 100.0
+    /**
+     * 将 Rating 数值向下取整到两位小数
+     */
     fun Double.ratingFloor() = floor(this * 100) / 100.0
 }

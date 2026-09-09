@@ -13,24 +13,9 @@ import xyz.xszq.bot.payload.MsgType
 import xyz.xszq.bot.payload.markdown.MarkdownDsl
 import xyz.xszq.bot.util.errorLogger
 import xyz.xszq.bot.util.forEachParallel
+import xyz.xszq.bot.util.retry
 import xyz.xszq.bot.util.sendC2CLogger
 import xyz.xszq.bot.util.sendGroupLogger
-
-/**
- * 重试指定次数直至成功
- *
- * @param times 最大重试次数
- * @param block 代码块
- * @return 首次非空结果
- */
-inline fun <T> retry(times: Int, block: () -> T): T? {
-    (1..times).forEach { attempt ->
-        block() ?.let {
-            return it
-        }
-    }
-    return null
-}
 
 /**
  * 在当前上下文上传媒体

@@ -30,6 +30,9 @@ import java.io.Closeable
 import java.nio.file.Path
 import java.security.MessageDigest
 
+/**
+ * 舞萌歌曲别名搜索
+ */
 class AliasesSearch(
     val maimai: Maimai
 ) : Closeable {
@@ -54,6 +57,9 @@ class AliasesSearch(
     private var indexedMusicSnapshot: Map<Int, String> = emptyMap()
     private var indexedMusicSignature: String? = loadIndexedMusicSignature()
 
+    /**
+     * 初始化组件
+     */
     suspend fun init() {
         refreshIndex()
     }
@@ -65,6 +71,11 @@ class AliasesSearch(
 
     private fun uid(musicId: Int, alias: String): String = "$musicId|$alias"
 
+    /**
+     * 写入一条别名到搜索索引
+     *
+     * @param data 别名记录
+     */
     fun insertDocument(data: MusicNameAlias) {
         val doc = Document().apply {
             add(StringField("uid", uid(data.musicId, data.alias), Field.Store.NO))
@@ -74,6 +85,12 @@ class AliasesSearch(
 
         writer.updateDocument(Term("uid", uid(data.musicId, data.alias)), doc)
     }
+    /**
+     * 添加歌曲别名
+     *
+     * @param id 歌曲 ID
+     * @param alias 别名
+     */
     fun insert(id: Int, alias: String) {
         val data = MusicNameAlias(
             musicId = id,
@@ -81,6 +98,12 @@ class AliasesSearch(
         )
         insertDocument(data)
     }
+    /**
+     * 删除歌曲别名
+     *
+     * @param id 歌曲 ID
+     * @param alias 别名
+     */
     fun delete(id: Int, alias: String) {
         writer.deleteDocuments(Term("uid", uid(id, alias)))
         writer.commit()
@@ -155,6 +178,12 @@ class AliasesSearch(
         return out
     }
 
+    /**
+     * 模糊搜索
+     *
+     * @param query 查询文本
+     * @return 匹配到的别名记录
+     */
     fun fuzzy(query: String): List<MusicNameAlias> {
         val terms = analyzeTerms(query)
             .asSequence()
@@ -232,6 +261,14 @@ class AliasesSearch(
         }
         return 1.0 - dp[n][m].toDouble() / maxOf(n, m)
     }
+    /**
+     * 根据用户输入查找歌曲
+     *
+     * 依次按 ID、数字 ID、曲名、别名、模糊匹配与曲名包含匹配查找
+     *
+     * @param name 查询文本
+     * @return 匹配到的歌曲
+     */
     suspend fun search(name: String): List<MusicInfo> {
         refreshIndex()
 

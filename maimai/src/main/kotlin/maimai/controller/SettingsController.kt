@@ -17,6 +17,9 @@ import xyz.xszq.bot.newLine
 import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.reply
 
+/**
+ * 个人自定义设置功能
+ */
 @Suppress("unused")
 class SettingsController(
     override val maimai: Maimai

@@ -10,13 +10,16 @@ import xyz.xszq.bot.maimai.component.Tag
 import xyz.xszq.bot.maimai.component.image.FilterParams
 import xyz.xszq.bot.maimai.config.DesignerConfig
 import xyz.xszq.bot.maimai.music.*
-import xyz.xszq.bot.maimai.toSimple
+import xyz.xszq.bot.util.toSimple
 import xyz.xszq.bot.util.json
 import xyz.xszq.bot.util.toDBC
 import java.io.File
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
+/**
+ * 随心配条件组合查询
+ */
 object ComboQuery {
     lateinit var designerConfig: DesignerConfig
     lateinit var maimaiData: MaimaiData
@@ -30,6 +33,9 @@ object ComboQuery {
         name = "excludeUtage"
     )
 
+    /**
+     * 随心配条件注册
+     */
     fun rules() = register {
         aliases("极", "全连", "fc") {
             combo(name = "fc") { it.comboStatus.isFC() }
@@ -216,6 +222,11 @@ object ComboQuery {
         }
     }
 
+    /**
+     * 初始化随心配条件查询
+     *
+     * @param data 本地数据
+     */
     @OptIn(ExperimentalHoplite::class)
     fun init(data: MaimaiData) {
         designerConfig = ConfigLoaderBuilder.default()
@@ -237,16 +248,21 @@ object ComboQuery {
         compile()
     }
 
+    /**
+     * 排序查询条件
+     */
     fun compile() {
         sortedKeywordConditions = keywordConditions.flatMap { (names, filter) ->
             names.map { name -> name.lowercase() to filter }
         }.sortedByDescending { it.first.length }
     }
 
-    private fun named(name: String) = keywordConditions
-        .firstOrNull { (_, filter) -> filter.name == name }
-        ?.second
-
+    /**
+     * 谱师名查询条件
+     *
+     * @param designer 谱师名
+     * @return Filter
+     */
     fun designer(designer: String): Filter {
         val normalized = designer.toDBC()
         val mainName = (designerConfig.aliases.entries.firstOrNull { (key, aliases) ->
@@ -288,6 +304,14 @@ object ComboQuery {
         )
     }
 
+    /**
+     * 解析命令中的查询条件
+     *
+     * 默认排除宴谱
+     *
+     * @param fullCommand 查询命令
+     * @return 查询条件
+     */
     fun filters(fullCommand: String): List<Filter>? {
         val filters = mutableListOf<Filter>()
         var command = fullCommand.lowercase()
@@ -324,6 +348,12 @@ object ComboQuery {
         return filters
     }
 
+    /**
+     * 根据查询条件过滤谱面
+     *
+     * @param musics 歌曲信息
+     * @return 过滤后的谱面
+     */
     fun List<Filter>?.filterCharts(musics: Collection<MusicInfo>): List<ChartInfo> {
         if (isNullOrEmpty())
             return musics.flatMap { it.charts }
@@ -336,10 +366,23 @@ object ComboQuery {
         }
     }
 
+    /**
+     * 根据查询条件过滤歌曲
+     *
+     * @param musics 歌曲信息
+     * @return 过滤后的歌曲
+     */
     fun List<Filter>?.filterMusics(musics: Collection<MusicInfo>): List<MusicInfo> {
         return filterCharts(musics).map { it.music }.toSet().toList()
     }
 
+    /**
+     * 根据查询条件过滤成绩
+     *
+     * @param records 成绩记录
+     * @param required 是否要求有成绩相关条件
+     * @return 过滤后的成绩记录
+     */
     fun List<Filter>?.filterRecords(
         records: List<Record>,
         required: Boolean = false
@@ -371,6 +414,11 @@ object ComboQuery {
         return filtered
     }
 
+    /**
+     * 查询条件的要求完成类型
+     *
+     * @return 要求完成类型
+     */
     fun List<Filter>?.requiresType(): RequiresType {
         this ?: return RequiresType.Achievement
         if (any { it.name in listOf("fc", "ap", "app") })
@@ -387,31 +435,60 @@ object ComboQuery {
         } ?: RequiresType.Achievement
     }
 
+    /**
+     * 指定的最新版本
+     *
+     * @return 最新版本
+     */
     fun List<Filter>.filterNowVersion(): GameVersion? =
-        lastOrNull { it.nowVersion != Filter.defaultVersion }?.nowVersion()
+        lastOrNull { it.nowVersion != Filter.defaultVersion } ?.nowVersion()
 
+    /**
+     * 是否没有成绩相关条件
+     */
     fun List<Filter>?.noRecordFilter() =
         this == null || all { it.record == Filter.defaultRecordFilter }
 
+    /**
+     * 是否要求详细展开
+     */
     fun List<Filter>?.isDetailed() = when {
         this == null -> false
         else -> any { it.name == "level" }
     }
 
+    /**
+     * 是否有牌子条件
+     */
     fun List<Filter>?.isPlate() = when {
         this == null -> false
         else -> any { it.name?.startsWith("plate") == true }
     }
 
+    /**
+     * 是否要求禁用 New 15
+     */
     fun List<Filter>?.isAllRequired() =
-        this?.any { it.disable15 } ?: false
+        this ?.any { it.disable15 } ?: false
 
+    /**
+     * 是否要求拟合定数
+     */
     fun List<Filter>?.isFitLevelValue() =
-        this?.any { it.fitLevelValue } ?: false
+        this ?.any { it.fitLevelValue } ?: false
 
+    /**
+     * 查询条件是否细分到谱面
+     */
     fun List<Filter>?.isSingleChartSelected() =
-        this?.any { it.singleChart } ?: false
+        this ?.any { it.singleChart } ?: false
 
+    /**
+     * 渲染用查询条件参数
+     *
+     * @param name 查询命令
+     * @return 渲染用查询条件参数
+     */
     fun List<Filter>.params(name: String): FilterParams = FilterParams(
         name = name,
         newestVersion = filterNowVersion() ?: maimaiData.newestVersion,

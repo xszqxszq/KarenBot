@@ -36,6 +36,9 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 
+/**
+ * 猜歌游戏功能
+ */
 @Suppress("unused")
 class GuessController(
     override val maimai: Maimai
@@ -133,7 +136,7 @@ class GuessController(
             GuessGameTable.id eq contextId
         }
     }
-    suspend fun Bot.restoreGuessGame() = newSuspendedTransaction(Dispatchers.IO) {
+    private suspend fun Bot.restoreGuessGame() = newSuspendedTransaction(Dispatchers.IO) {
         val now = Clock.System.now()
         GuessGameTable.selectAll().forEach { result ->
             if ((now - result[GuessGameTable.modified].toInstant(TimeZone.currentSystemDefault())).inWholeMinutes >= 30) {
@@ -489,6 +492,9 @@ class GuessController(
             }
         }
     }
+    /**
+     * 开字母游戏的按钮
+     */
     fun getOpeningButtons() = Keyboard.create {
         row {
             at("\uD83D\uDD24开字母", "开字母", id = "1")

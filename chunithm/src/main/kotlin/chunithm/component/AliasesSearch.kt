@@ -29,6 +29,9 @@ import xyz.xszq.bot.chunithm.music.MusicNameAlias
 import java.nio.file.Path
 import java.security.MessageDigest
 
+/**
+ * 中二歌曲别名搜索
+ */
 class AliasesSearch(
     val chunithm: Chunithm
 ) {
@@ -52,10 +55,16 @@ class AliasesSearch(
     private val refreshMutex = Mutex()
     private var indexedMusicSignature: String? = loadIndexedMusicSignature()
 
+    /**
+     * 初始化组件
+     */
     suspend fun init() {
         refreshIndex()
     }
 
+    /**
+     * 关闭组件
+     */
     fun close() {
         writer.commit()
         writer.close()
@@ -67,6 +76,11 @@ class AliasesSearch(
         alias: String
     ): String = "$musicId|$alias"
 
+    /**
+     * 插入一条别名到 Lucene 数据库
+     *
+     * @param data 别名记录
+     */
     fun insertDocument(
         data: MusicNameAlias
     ) {
@@ -78,6 +92,12 @@ class AliasesSearch(
         writer.updateDocument(Term("uid", uid(data.musicId, data.alias)), doc)
     }
 
+    /**
+     * 添加新的别名
+     *
+     * @param id 歌曲ID
+     * @param alias 别名
+     */
     fun insert(
         id: Int,
         alias: String
@@ -88,6 +108,12 @@ class AliasesSearch(
         )
         insertDocument(data)
     }
+    /**
+     * 删除指定歌曲的指定别名
+     *
+     * @param id 歌曲ID
+     * @param alias 别名
+     */
     fun delete(id: Int, alias: String) {
         writer.deleteDocuments(Term("uid", uid(id, alias)))
         writer.commit()
@@ -166,6 +192,12 @@ class AliasesSearch(
         return out
     }
 
+    /**
+     * 模糊搜索
+     *
+     * @param query 查询文本
+     * @return 匹配到的记录
+     */
     fun fuzzy(
         query: String
     ): List<MusicNameAlias> {
@@ -248,6 +280,14 @@ class AliasesSearch(
         return 1.0 - dp[n][m].toDouble() / maxOf(n, m)
     }
 
+    /**
+     * 根据用户输入查找歌曲
+     *
+     * 依次按ID/数字ID/曲名/别名/模糊搜索进行查找
+     *
+     * @param name 查询文本
+     * @return 匹配到的歌曲
+     */
     suspend fun search(
         name: String
     ): List<MusicInfo> {

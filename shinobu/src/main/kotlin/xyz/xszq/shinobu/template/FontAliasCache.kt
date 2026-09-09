@@ -6,17 +6,33 @@ import org.jetbrains.skia.*
 import org.jetbrains.skia.paragraph.TypefaceFontProvider
 import java.io.File
 
+/**
+ * 系统字体别名缓存
+ *
+ * 扫描系统字体并把各字体样式注册为带字重标识的别名，映射结果
+ * 缓存到磁盘，系统字体集合不变时可直接复用
+ */
 class FontAliasCache(
     private val cacheDir: File
 ) {
     /** 持有已注册 Typeface 的强引用，防止 GC 回收原生对象 */
     private val heldTypefaces = mutableListOf<Typeface>()
+
+    /**
+     * 字体别名缓存条目
+     */
     @Serializable
     data class FontEntry(
         val weight: Int,
         val aliases: List<String>
     )
 
+    /**
+     * 字体别名缓存快照
+     *
+     * @property familyCount 生成缓存时的系统字体族数量，用于判断
+     * 是否需要重新扫描
+     */
     @Serializable
     data class CacheData(
         val familyCount: Int = 0,
@@ -29,6 +45,14 @@ class FontAliasCache(
     private var cache: CacheData = CacheData()
     private val aliasMap = mutableMapOf<String, String>()
 
+    /**
+     * 加载缓存并把字体别名注册进字体提供者
+     *
+     * 系统字体族数量与缓存不一致时重新扫描全部字体，否则直接按
+     * 缓存恢复注册
+     *
+     * @param fontProvider 接收别名注册的字体提供者
+     */
     fun loadAndRegister(fontProvider: TypefaceFontProvider) {
         cacheDir.mkdirs()
         cache = readCache()
@@ -46,6 +70,12 @@ class FontAliasCache(
         writeCache()
     }
 
+    /**
+     * 按字体别名解析对应的系统字体键
+     *
+     * @param alias 待解析的字体别名
+     * @return 对应的字体键
+     */
     fun resolve(alias: String): String? = aliasMap[alias]
 
     private fun readCache(): CacheData = runCatching {
@@ -174,6 +204,15 @@ class FontAliasCache(
     }
 
     companion object {
+        /**
+         * 把字体样式名缩写为单字母标识
+         *
+         * 例如 `Bold` 对应 `B`，`Regular` 对应 `R`，无法识别的样式
+         * 返回空串
+         *
+         * @param styleName 字体样式名
+         * @return 单字母标识
+         */
         fun styleIdentifier(styleName: String): String = when {
             styleName.contains("Heavy", ignoreCase = true) -> "H"
             styleName.contains("Bold", ignoreCase = true) -> "B"

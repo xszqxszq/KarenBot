@@ -9,6 +9,9 @@ import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.payload.markdown.MarkdownData
 import xyz.xszq.bot.plus
 
+/**
+ * 谱面信息
+ */
 class ChartInfo(
     val music: MusicInfo,
     val difficulty: MusicDifficulty,
@@ -17,11 +20,22 @@ class ChartInfo(
     val notes: Notes,
     val notesDesigner: String
 ) {
+    /**
+     * 最高能达到的 DX 分数
+     */
     val maxDeluxeScore: Int
         get() = notes.maxDeluxeScore
 
+    /**
+     * 谱面拟合定数
+     */
     var fitLevelValue: Double = 0.0
 
+    /**
+     * 文本版谱面信息
+     *
+     * @return 谱面信息
+     */
     suspend fun infoText() = Image(music.cover()) + buildString {
         appendLine("${difficulty.names.last()}${music.id}. ${music.name}")
         appendLine("曲师: ${music.artist}")
@@ -42,6 +56,12 @@ class ChartInfo(
         appendLine("总DX分: $maxDeluxeScore")
     }.trim().newLine()
 
+    /**
+     * Markdown 版谱面信息
+     *
+     * @param jacketUrl 封面 URL
+     * @return 谱面信息
+     */
     fun infoMD(
         jacketUrl: String
     ) = Markdown(MarkdownData(buildString {

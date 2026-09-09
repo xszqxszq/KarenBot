@@ -13,6 +13,9 @@ import xyz.xszq.bot.chunithm.music.MusicDifficulty
 import xyz.xszq.shinobu.parse.StyleParser.rgbColor
 import xyz.xszq.shinobu.template.TemplateManager
 
+/**
+ * 图片生成模块
+ */
 class ChunithmImage(
     val chunithmData: ChunithmData,
     val dataPath: String = "./data/chunithm",
@@ -23,6 +26,9 @@ class ChunithmImage(
     lateinit var rating: RatingTemplate
     lateinit var level: LevelTemplate
 
+    /**
+     * 初始化模板管理器与各图片模板
+     */
     fun init() {
         manager = TemplateManager(dataPath)
 
@@ -30,7 +36,9 @@ class ChunithmImage(
         level = LevelTemplate(manager, resourcePath)
     }
     /**
-     * 载入模板
+     * 载入模板资源并生成封面缩略图
+     *
+     * @param scope 协程作用域
      */
     fun load(scope: CoroutineScope) {
         manager.init()
@@ -71,7 +79,7 @@ class ChunithmImage(
 
     companion object {
         /**
-         * 获得难度对应的颜色
+         * 谱面难度对应的颜色
          */
         fun ChartInfo.color() = when (difficulty) {
             MusicDifficulty.Basic -> "#029c73"

@@ -21,8 +21,6 @@ import java.io.File
 
 /**
  * 音频插件
- *
- * 活字印刷相关，以及东方原曲相关功能，音频位置位于 data/audio
  */
 @Suppress("unused")
 class Audio: Plugin() {
@@ -47,6 +45,9 @@ class Audio: Plugin() {
         logger.info { "[音频] 插件加载完成。" }
     }
 
+    /**
+     * 注册路由
+     */
     @OptIn(DelicateCoroutinesApi::class)
     suspend fun setRoute() = route {
         // 活字印刷

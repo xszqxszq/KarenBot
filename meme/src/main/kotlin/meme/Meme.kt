@@ -65,13 +65,16 @@ class Meme: Plugin() {
 
         logger.info { "[表情包] 插件加载完成。" }
     }
-    fun String.toKotlinRegex() = Regex(replace("(?P<", "(?<"))
-    fun String.getGroups(): List<String> {
+    private fun String.toKotlinRegex() = Regex(replace("(?P<", "(?<"))
+    private fun String.getGroups(): List<String> {
         val regex = """\(\?P<([^>]+)>""".toRegex()
         return regex.findAll(this)
             .map { it.groupValues[1] }
             .toList()
     }
+    /**
+     * 注册路由
+     */
     suspend fun setRoute() = route {
         // 生成表情包
         startsWith("生成") { raw ->
@@ -243,6 +246,11 @@ class Meme: Plugin() {
         brief("PJSK表情","该角色或图片不存在，请重新选择："),
         sekaiKeyboard
     )
+    /**
+     * 点击后填入发送框的按钮
+     *
+     * @param name 发送文本
+     */
     fun callKeyboard(
         name: String
     ) = Keyboard.create {
@@ -558,7 +566,13 @@ class Meme: Plugin() {
     }
 
     companion object {
-        fun String.splitEmojis() = Regex("\\X").findAll(this).map { it.value }.toList()
+        private fun String.splitEmojis() = Regex("\\X").findAll(this).map { it.value }.toList()
+        /**
+         * 简单的 Markdown 信息
+         *
+         * @param title 标题
+         * @param content 正文
+         */
         fun brief(
             title: String,
             content: String

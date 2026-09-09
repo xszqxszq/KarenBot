@@ -2,7 +2,17 @@ package xyz.xszq.bot.maimai.music
 
 import korlibs.math.toIntFloor
 
+/**
+ * DX 分数
+ */
 object DeluxeScore {
+    /**
+     * 计算 DX 分数对应的星级
+     *
+     * @param deluxeScore DX 分数
+     * @param maxScore 最高 DX 分数
+     * @return 星级
+     */
     fun stars(deluxeScore: Int, maxScore: Int): Int {
         if (maxScore <= 0 || deluxeScore > maxScore)
             return 0

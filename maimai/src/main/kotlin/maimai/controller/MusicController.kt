@@ -37,6 +37,9 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
 
+/**
+ * 曲目查询功能
+ */
 @Suppress("unused")
 class MusicController(
     override val maimai: Maimai
@@ -79,13 +82,6 @@ class MusicController(
                 val music = maimai.music(id) ?: throw CommandNotMatchedException()
                 val chart = music.charts.firstOrNull { it.difficulty == difficulty } ?: return@startsWith
                 reply(chart.infoText(), chart.infoMD(jacketUrl))
-//
-//                val radar = maimai.image.radar.generate(chart, 500, false) ?: return@startsWith
-//                useTempFile { file ->
-//                    val bytes = radar.encodeToData(EncodedImageFormat.JPEG, 90)!!.bytes
-//                    file.writeBytes(bytes)
-//                    reply(Image(file))
-//                }
             }
         }
 
@@ -436,11 +432,21 @@ class MusicController(
         }
     }
 
+    /**
+     * 封面查找结果
+     *
+     * @property ids 曲目 ID 列表
+     */
     @Serializable
     data class CoverIdsResult(
         val ids: List<Int> = emptyList(),
     )
 
+    /**
+     * 封面描述对应的特征查询
+     *
+     * @property queries 单独的特征查询
+     */
     @Serializable
     data class CoverQueriesResult(
         val queries: List<String> = emptyList(),
@@ -574,7 +580,7 @@ class MusicController(
                 emptyList()
             }
             val allQueries = listOf(query) + (subQueries.take(5))
-            // 2. Query each
+            // 2. 子查询投票
             val votes = mutableMapOf<Int, Int>()
             val maxSim = mutableMapOf<Int, Double>()
             for (subQuery in allQueries) {
@@ -594,7 +600,7 @@ class MusicController(
                     if (score > prev) maxSim[rid] = score
                 }
             }
-            // 3. Sort by similarity
+            // 3. 按票数与相似度排序
             val ranked = votes.entries.sortedByDescending { (rid) ->
                 votes[rid]!! * 10000 + (maxSim[rid] ?: 0.0).toLong()
             }.take(30)
@@ -867,6 +873,11 @@ class MusicController(
         return levels to page
     }
     companion object {
+        /**
+         * 将音频转为 PCM
+         *
+         * @param block 处理的代码块
+         */
         suspend inline fun VfsFile.toPCM(block: suspend (VfsFile) -> Unit) {
             val pcm = FFMpegTask(FFMpegFileType.PCM) {
                 input(absolutePath)

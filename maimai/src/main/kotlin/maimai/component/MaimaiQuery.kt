@@ -13,6 +13,9 @@ import xyz.xszq.bot.maimai.database.ProberBindTable
 import xyz.xszq.bot.maimai.exception.*
 import xyz.xszq.bot.maimai.music.*
 
+/**
+ * 舞萌成绩查询
+ */
 class MaimaiQuery(
     val maimai: Maimai
 ) {
@@ -38,7 +41,13 @@ class MaimaiQuery(
         )
     }
 
-    // 获取要查询的目标用户的参数
+    /**
+     * 获取用户查询参数
+     *
+     * @param event 消息事件
+     * @param queryArgs 查询参数
+     * @return 用户查询参数
+     */
     suspend fun getQueryParams(
         event: MessageEvent,
         queryArgs: String ?= null
@@ -59,7 +68,13 @@ class MaimaiQuery(
         }
     }
 
-    // 根据用户设置列出后端
+    /**
+     * 列出可用的查分器后端
+     *
+     * @param user 用户查询参数
+     * @param listAll 是否强制使用全部
+     * @return 查分器后端列表
+     */
     suspend fun listBackends(
         user: UserQueryParams,
         listAll: Boolean = false
@@ -91,6 +106,12 @@ class MaimaiQuery(
         )
     }
 
+    /**
+     * 查询玩家的 Best 50
+     *
+     * @param user 用户查询参数
+     * @return 查询结果，查分器
+     */
     suspend fun rating(
         user: UserQueryParams
     ): Pair<RatingResponse, MaimaiAPI> {
@@ -106,6 +127,13 @@ class MaimaiQuery(
         return result
     }
 
+    /**
+     * 查询玩家一些歌曲的成绩
+     *
+     * @param user 用户查询参数
+     * @param musics 歌曲列表
+     * @return 查询结果，查分器
+     */
     suspend fun records(
         user: UserQueryParams,
         musics: List<MusicInfo>
@@ -119,6 +147,13 @@ class MaimaiQuery(
         return result
     }
 
+    /**
+     * 查询玩家一个歌曲的成绩
+     *
+     * @param user 用户查询参数
+     * @param music 歌曲信息
+     * @return 成绩列表
+     */
     suspend fun record(
         user: UserQueryParams,
         music: MusicInfo
@@ -130,6 +165,14 @@ class MaimaiQuery(
         }
         return result.first
     }
+    /**
+     * 查询最近游玩记录记录
+     *
+     * 目前仅落雪查分器支持
+     *
+     * @param user 用户查询参数
+     * @return 查询结果，查分器
+     */
     suspend fun recent(
         user: UserQueryParams,
     ): Pair<RecordsResponse, MaimaiAPI> {
@@ -145,7 +188,17 @@ class MaimaiQuery(
         return Pair(response, backend)
     }
 
-    suspend fun parseImage(client: LLMClient, urls: List<String>): List<ImageParseResult> {
+    /**
+     * 识别图片中游戏歌曲
+     *
+     * @param client LLM 客户端
+     * @param urls 图片地址列表
+     * @return 识别到的歌曲列表
+     */
+    suspend fun parseImage(
+        client: LLMClient,
+        urls: List<String>
+    ): List<ImageParseResult> {
         if (urls.isEmpty())
             return emptyList()
 
@@ -173,6 +226,13 @@ class MaimaiQuery(
         }.getOrDefault(emptyList())
     }
 
+    /**
+     * 识别成绩图中的信息
+     *
+     * @param client LLM 客户端
+     * @param urls 图片地址列表
+     * @return 识别出的结果
+     */
     suspend fun parseScoreImage(client: LLMClient, urls: List<String>): List<ImageParseResult> {
         if (urls.isEmpty())
             return emptyList()

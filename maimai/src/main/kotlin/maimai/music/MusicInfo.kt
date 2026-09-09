@@ -12,6 +12,9 @@ import xyz.xszq.bot.payload.markdown.MarkdownData
 import xyz.xszq.bot.payload.markdown.RenderData
 import xyz.xszq.bot.plus
 
+/**
+ * 歌曲信息
+ */
 class MusicInfo(
     val id: Int,
     val name: String,
@@ -24,9 +27,22 @@ class MusicInfo(
     val version: GameVersion,
     val isNew: Boolean
 ) {
+    /**
+     * 全部谱面
+     */
     var charts: List<ChartInfo> = listOf()
+
+    /**
+     * 资源 ID
+     */
     val resourceId: Int
         get() = id % 10000
+
+    /**
+     * 获取封面文件
+     *
+     * @return 封面文件
+     */
     suspend fun cover(): VfsFile {
         val cover = localCurrentDirVfs["$coverDir/$resourceId.png"]
         if (!cover.exists() || !cover.isFile()) {
@@ -34,9 +50,25 @@ class MusicInfo(
         }
         return cover
     }
-    val fakeReMaster: ChartInfo
-        get() = ChartInfo(this, MusicDifficulty.ReMaster, "", 0.0, Notes(), "")
 
+    /**
+     * 占位用白谱
+     */
+    val fakeReMaster: ChartInfo
+        get() = ChartInfo(
+            music = this,
+            difficulty = MusicDifficulty.ReMaster,
+            level = "",
+            levelValue = 0.0,
+            notes = Notes(),
+            notesDesigner = ""
+        )
+
+    /**
+     * 文本版歌曲信息
+     *
+     * @return 歌曲信息
+     */
     suspend fun infoText() = Image(cover()) + buildString {
         appendLine("${id}. $name")
         appendLine("艺术家: $artist")
@@ -55,6 +87,12 @@ class MusicInfo(
         }}")
     }.trim().newLine()
 
+    /**
+     * Markdown 版谱面信息
+     *
+     * @param jacketUrl 封面 URL
+     * @return 歌曲信息
+     */
     fun infoMD(
         jacketUrl: String
     ) = Markdown(MarkdownData(buildString {
@@ -109,6 +147,9 @@ class MusicInfo(
     })
 
     companion object {
+        /**
+         * 封面文件存放目录
+         */
         var coverDir = "./data/maimai/covers"
         private val MusicDifficulty.emoji: String
             get() = when(this) {

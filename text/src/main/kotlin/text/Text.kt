@@ -18,9 +18,7 @@ import java.awt.Color
 import kotlin.random.Random
 
 /**
- * 文本插件
- *
- * 词条回复、发病文案、LaTeX 渲染与调试等文本功能
+ * 文本功能插件
  */
 @Suppress("unused")
 class Text: Plugin() {
@@ -45,6 +43,9 @@ class Text: Plugin() {
         setRoute()
         logger.info { "[文本] 插件加载完成。" }
     }
+    /**
+     * 注册路由
+     */
     suspend fun setRoute() = route {
         // 获取帮助
         equalsTo(listOf("帮助", "help")) {
@@ -114,6 +115,12 @@ class Text: Plugin() {
             }.trim().newLine())
         }
     }
+    /**
+     * 用 LLM 审核文本是否合规
+     *
+     * @param text 待审核文本
+     * @return 是否合规
+     */
     suspend fun audit(text: String): Boolean {
         val client = pluginLoader.llmClient ?: return true
         return try {

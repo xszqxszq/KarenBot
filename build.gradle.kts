@@ -40,6 +40,7 @@ dependencies {
     implementation("com.h2database:h2:$h2Version")
     implementation("com.mysql:mysql-connector-j:9.3.0")
     implementation("com.qcloud:cos_api:5.6.247")
+    implementation("com.github.houbb:opencc4j:${opencc4jVersion}")
     implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
     implementation("com.sksamuel.hoplite:hoplite-yaml:$hopliteVersion")
     implementation("com.soywiz.korge:korge-core:$korlibsVersion")

@@ -12,6 +12,9 @@ import xyz.xszq.bot.chunithm.music.MusicInfo
 import xyz.xszq.bot.chunithm.payload.LXNSTrophyInfo
 import xyz.xszq.bot.util.json
 
+/**
+ * 中二游戏数据
+ */
 class ChunithmData(
     val dataPath: String = "./data/chunithm"
 ) {
@@ -21,6 +24,11 @@ class ChunithmData(
     lateinit var newestVersion: GameVersion
     lateinit var designer: DesignerConfig
 
+    /**
+     * 初始化载入
+     *
+     * @param api 落雪查分器
+     */
     @OptIn(ExperimentalHoplite::class)
     suspend fun load(api: LXNS) {
         versions.clear()
@@ -32,11 +40,12 @@ class ChunithmData(
             .build()
             .loadConfigOrThrow<DesignerConfig>()
 
-        val songsRaw = loadFromCacheOrFetch(
+        // 拉取歌曲列表并组装歌曲，网络请求失败时改读本地缓存
+        val songsRaw = fetchWithCacheFallback(
             fetch = { api.fetchSongs() },
             path = "$dataPath/lxns-songs.json"
         )
-        musics.putAll(if (songsRaw != null) api.getMusicList(cached = songsRaw) else api.getMusicList())
+        musics.putAll(api.getMusicList(cached = songsRaw))
 
         versions.putAll(musics.values.map { it.version }
             .distinctBy { it.name }
@@ -48,14 +57,24 @@ class ChunithmData(
         }
         ChunithmMusicAliasesTable.addAll(aliases)
 
-        val trophiesRaw = loadFromCacheOrFetch(
+        // 拉取称号列表并组装可用称号，网络请求失败时改读本地缓存
+        val trophiesRaw = fetchWithCacheFallback(
             fetch = { api.fetchTrophies() },
             path = "$dataPath/lxns-trophies.json"
         )
-        trophies.putAll(if (trophiesRaw != null) api.getTrophyList(cached = trophiesRaw) else api.getTrophyList())
+        trophies.putAll(api.getTrophyList(cached = trophiesRaw))
     }
 
-    private suspend inline fun <reified T> loadFromCacheOrFetch(
+    /**
+     * 从落雪拉取数据
+     *
+     * 网络连接失败时从缓存中读取
+     *
+     * @param fetch 请求代码块
+     * @param path 缓存文件路径
+     * @return 结果数据
+     */
+    private suspend inline fun <reified T> fetchWithCacheFallback(
         fetch: suspend () -> T,
         path: String
     ): T? {

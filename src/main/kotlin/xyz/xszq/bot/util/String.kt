@@ -2,6 +2,7 @@
 
 package xyz.xszq.bot.util
 
+import com.github.houbb.opencc4j.util.ZhConverterUtil
 import kotlinx.serialization.json.Json
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
@@ -100,3 +101,26 @@ fun normalizeMessage(
     message = message.removePrefix("/").trim()
     return event to message
 }
+
+/**
+ * 繁体中文转为简体中文
+ */
+fun String.toSimple(): String = ZhConverterUtil.toSimple(this)
+
+/**
+ * 判断字符串是否以列表中的任一字符串为后缀
+ *
+ * @param target 后缀列表
+ * @return 是否命中
+ */
+fun String.endsWith(target: List<String>) = target.any { endsWith(it) }
+
+/**
+ * 截取字符串到首个匹配后缀之前的内容
+ *
+ * @param target 后缀列表
+ * @return 截取后的字符串
+ */
+fun String.substringBefore(target: List<String>) = target.firstOrNull {
+    endsWith(it)
+} ?.let { substringBefore(it) } ?: this

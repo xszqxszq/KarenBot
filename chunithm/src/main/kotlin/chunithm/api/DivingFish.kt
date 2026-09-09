@@ -9,7 +9,6 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
@@ -26,10 +25,17 @@ import xyz.xszq.bot.chunithm.payload.DivingFishOAuthTokenResponse
 import xyz.xszq.bot.chunithm.payload.DivingFishRatingResponse
 import xyz.xszq.bot.chunithm.payload.DivingFishRecord
 import xyz.xszq.bot.chunithm.payload.DivingFishRecordsResponse
+import xyz.xszq.bot.exception.RetryException
+import xyz.xszq.bot.util.retryAsync
 import xyz.xszq.bot.util.toDBC
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
+/**
+ * 水鱼查分器 API
+ *
+ * 负责连接水鱼查分器进行玩家授权与分数查询
+ */
 class DivingFish(
     val oauthId: String,
     val oauthSecret: String,
@@ -48,10 +54,6 @@ class DivingFish(
     private val tokenCache = ConcurrentHashMap<String, Pair<String, Long>>()
     private val refreshLocks = ConcurrentHashMap<String, Mutex>()
 
-    val json = Json {
-        ignoreUnknownKeys = true
-    }
-
     override suspend fun load() {
     }
 
@@ -62,13 +64,13 @@ class DivingFish(
             logger.debug { "[水鱼调试] getPlayerRating Self sender=${user.event.sender.id}" }
             val data = withUserToken(user) { token ->
                 ratingRequest(buildJsonObject { }, token)
-            } ?: return null
+            }
             data.toRatingResponse()
         }
         is UserQueryParams.Username -> {
             val data = ratingRequest(buildJsonObject {
                 put("username", JsonPrimitive(user.username))
-            }) ?: return null
+            })
             data.toRatingResponse()
         }
         is UserQueryParams.FriendCode -> null
@@ -149,12 +151,18 @@ class DivingFish(
         }
     }
 
+    /**
+     * 查询玩家的 Best 50
+     *
+     * @param request 查询条件
+     * @param token 访问令牌
+     * @return 查询结果
+     */
     suspend fun ratingRequest(
         request: JsonObject,
         token: String ?= null
-    ): DivingFishRatingResponse? {
-        var retry = 0
-        while (true) {
+    ): DivingFishRatingResponse {
+        return retryAsync(times = 4) { attempt ->
             val response = client.post("$server/query/player") {
                 contentType(ContentType.Application.Json)
                 setBody(request)
@@ -165,51 +173,63 @@ class DivingFish(
                 HttpStatusCode.BadRequest -> throw UserNotFoundException()
                 HttpStatusCode.Forbidden -> throw UserDeniedException()
                 HttpStatusCode.TooManyRequests -> {
-                    if (retry >= 3)
-                        throw UnknownException("已超出今日请求上限")
-                    retry++
-                    delay(retry * 2000L)
+                    if (attempt < 4)
+                        throw RetryException()
+                    throw UnknownException("已超出今日请求上限")
                 }
-                HttpStatusCode.OK -> return response.body<DivingFishRatingResponse>()
+                HttpStatusCode.OK -> return@retryAsync response.body<DivingFishRatingResponse>()
                 else -> throw UnknownException("HTTP ${response.status.value}")
             }
         }
     }
 
+    /**
+     * 查询玩家的某些歌曲的成绩
+     *
+     * @param token 水鱼 OAuth 访问令牌
+     * @param ids 歌曲 ID 列表
+     * @return 成绩记录
+     */
     suspend fun recordsRequest(
         token: String,
         ids: List<Int> = emptyList()
     ): DivingFishRecordsResponse {
         var requestIds = ids
-        var retry = 0
-        while (true) {
-            val response = client.get("$server/player/records") {
-                if (requestIds.isNotEmpty() && requestIds.size < 1000)
-                    parameter("song_id", requestIds.joinToString(","))
-                setOAuth(token)
+        suspend fun request() = client.get("$server/player/records") {
+            if (requestIds.isNotEmpty() && requestIds.size < 1000)
+                parameter("song_id", requestIds.joinToString(","))
+            setOAuth(token)
+        }
+        return retryAsync(times = 4) { attempt ->
+            var response = request()
+            if (response.status == HttpStatusCode.RequestURITooLong && requestIds.isNotEmpty() && attempt == 1) {
+                requestIds = emptyList()
+                response = request()
             }
             when (response.status) {
-                HttpStatusCode.OK -> return response.body<DivingFishRecordsResponse>()
+                HttpStatusCode.OK -> return@retryAsync response.body<DivingFishRecordsResponse>()
                 HttpStatusCode.Unauthorized -> throw AuthorizationException()
                 HttpStatusCode.BadRequest -> throw UserNotFoundException()
                 HttpStatusCode.Forbidden -> throw UserDeniedException()
                 HttpStatusCode.TooManyRequests -> {
-                    if (retry >= 3)
-                        throw UnknownException("已超出今日请求上限")
-                    retry++
-                    delay(retry * 2000L)
+                    if (attempt < 4)
+                        throw RetryException()
+                    throw UnknownException("已超出今日请求上限")
                 }
-                HttpStatusCode.RequestURITooLong -> {
-                    if (requestIds.isEmpty() || retry >= 1)
-                        throw UnknownException("HTTP 414")
-                    retry++
-                    requestIds = emptyList()
-                }
+                HttpStatusCode.RequestURITooLong -> throw UnknownException("HTTP 414")
                 else -> throw UnknownException("HTTP ${response.status.value}")
             }
         }
     }
 
+    /**
+     * 获取指定用户的访问令牌
+     *
+     * 过期时重新获取
+     *
+     * @param openid 用户 OpenID
+     * @return 访问令牌
+     */
     suspend fun accessToken(openid: String): String? {
         logger.debug { "[水鱼调试] accessToken openid=$openid" }
         tokenCache[openid] ?.let { (token, expiresAt) ->
@@ -244,8 +264,7 @@ class DivingFish(
 
     private suspend fun onBehalfOf(subject: String): DivingFishOAuthTokenResponse {
         logger.debug { "[水鱼调试] onBehalfOf subject=$subject" }
-        var retry = 0
-        while (true) {
+        return retryAsync(times = 4) { attempt ->
             val response = client.post("$authServer/oauth/token") {
                 contentType(ContentType.Application.FormUrlEncoded)
                 setBody(formUrlEncode(
@@ -256,15 +275,14 @@ class DivingFish(
                 ))
             }
             logger.debug { "[水鱼调试] onBehalfOf subject=$subject status=${response.status}" }
-            if (response.status != HttpStatusCode.TooManyRequests || retry >= 3) {
+            if (response.status != HttpStatusCode.TooManyRequests || attempt >= 4) {
                 if (response.status == HttpStatusCode.BadRequest)
                     throw UserBindRequiredException()
                 if (!response.status.isSuccess())
                     throw UnknownException("HTTP ${response.status.value}")
-                return response.body<DivingFishOAuthTokenResponse>()
+                return@retryAsync response.body<DivingFishOAuthTokenResponse>()
             }
-            retry++
-            delay(retry * 2000L)
+            throw RetryException()
         }
     }
 
@@ -274,10 +292,20 @@ class DivingFish(
         "${key.encodeURLParameter()}=${value.encodeURLParameter()}"
     }
 
+    /**
+     * 请求头携带水鱼 OAuth 访问令牌
+     *
+     * @param accessToken 访问令牌
+     */
     fun HttpRequestBuilder.setOAuth(accessToken: String) {
         headers["Authorization"] = "Bearer $accessToken"
     }
 
+    /**
+     * 转换为成绩记录类型
+     *
+     * @return 成绩记录
+     */
     fun DivingFishRecord.toRecord(): Record? {
         val music = musics[mid] ?: return null
         val chart = music.charts.getOrNull(levelIndex) ?: return null

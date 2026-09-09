@@ -16,11 +16,23 @@ import xyz.xszq.shinobu.template.Template
 import xyz.xszq.shinobu.template.TemplateManager
 import kotlin.math.min
 
+/**
+ * Best 50 / 40 模板
+ */
 class RatingTemplate(
     private val manager: TemplateManager,
     private val resourcePath: String,
     private val newestVersion: GameVersion
 ) {
+    /**
+     * 绘制标题
+     *
+     * @param backend 查分器名称
+     * @param oldRating 旧曲 Rating 总和
+     * @param newRating 新曲 Rating 总和
+     * @param courseRating 段位 Rating
+     * @param rating 总 Rating
+     */
     fun title(
         backend: String,
         oldRating: Int,
@@ -37,10 +49,11 @@ class RatingTemplate(
         append(" = $rating")
     }
     /**
-     * 最佳成绩列表模板
-     * @param total 取最佳多少项成绩进行统计
-     * @param info 查询信息
-     * @param backend 数据源名称
+     * 生成 Best 50 / 40
+     *
+     * @param total 谱面数量
+     * @param info 查询结果
+     * @param backend 查分器名称
      */
     fun bests(
         total: Int,
@@ -89,13 +102,14 @@ class RatingTemplate(
         )
     }
     /**
-     * 随心配最佳成绩列表模板
-     * @param total 取最佳多少项成绩进行统计
+     * 生成随心配 Best 50 /40
+     *
+     * @param total 谱面数量
      * @param player 玩家信息
-     * @param settings 玩家设置
-     * @param allRecords 所有成绩
+     * @param settings 展示设置
+     * @param allRecords 全部成绩
      * @param filterParams 条件过滤参数
-     * @param api 数据源名称
+     * @param api 查分器名称
      */
     fun comboBests(
         total: Int,
@@ -168,12 +182,14 @@ class RatingTemplate(
     }
 
     /**
-     * 最佳成绩列表模板
+     * 生成随心配分数列表
+     *
      * @param player 玩家信息
-     * @param settings 玩家设置
-     * @param allRecords 所有成绩信息
+     * @param settings 展示设置
+     * @param allRecords 全部成绩
      * @param filterParams 条件过滤参数
-     * @param page 查询页数
+     * @param page 页码
+     * @return 图片，页码，总页数
      */
     fun scoreList(
         player: PlayerInfo,
@@ -222,10 +238,6 @@ class RatingTemplate(
         ), actualPage, totalPages)
     }
 
-    /**
-     * 生成模板
-     * @param params 渲染参数
-     */
     private fun template(
         params: RatingRenderParams
     ): Image {
@@ -273,10 +285,6 @@ class RatingTemplate(
         return template.render(main)
     }
 
-    /**
-     * 顶栏展示个人信息
-     * @param params 渲染模板
-     */
     private fun Div.header(
         params: RatingRenderParams
     ) {
@@ -298,12 +306,6 @@ class RatingTemplate(
         }
     }
 
-    /**
-     * 展示单个成绩
-     * @param index 序号
-     * @param record 成绩记录
-     * @param params 渲染参数
-     */
     private fun Template.score(
         index: Int,
         record: Record,

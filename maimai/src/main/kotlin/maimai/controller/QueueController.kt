@@ -11,16 +11,19 @@ import xyz.xszq.bot.maimai.Maimai.Companion.textMode
 import xyz.xszq.bot.maimai.component.MarkdownTemplates
 import xyz.xszq.bot.maimai.database.Arcade
 import xyz.xszq.bot.maimai.database.ArcadeGroupBind
-import xyz.xszq.bot.maimai.endsWith
-import xyz.xszq.bot.maimai.substringBefore
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.message.MessageElement
 import xyz.xszq.bot.newLine
 import xyz.xszq.bot.reply
 import xyz.xszq.bot.toPlainText
+import xyz.xszq.bot.util.endsWith
 import xyz.xszq.bot.util.ErrorHandler
+import xyz.xszq.bot.util.substringBefore
 import java.time.Duration
 
+/**
+ * 机厅排卡功能
+ */
 @Suppress("unused")
 class QueueController(
     override val maimai: Maimai
@@ -61,6 +64,9 @@ class QueueController(
         }
     }
 
+    /**
+     * 排卡管理指令的错误处理
+     */
     val queueErrorHandler: ErrorHandler = { e ->
         when (e) {
             is NeedHelpException -> reply(helpText) {
@@ -84,6 +90,11 @@ class QueueController(
         }
     }
 
+    /**
+     * 为本群添加机厅
+     *
+     * @param name 机厅名称
+     */
     suspend fun GroupMessageEvent.add(name: String?) {
         name ?: throw IllegalArgsException("使用方法：/排卡管理 添加机厅 机厅名称")
         if (name.length > 32)
@@ -92,6 +103,11 @@ class QueueController(
         reply("添加机厅成功。", queue("排卡管理", "添加机厅成功。", name))
     }
 
+    /**
+     * 删除本群的机厅
+     *
+     * @param name 机厅名称
+     */
     suspend fun GroupMessageEvent.delete(name: String?) {
         name ?: run {
             selectArcade("/排卡管理 删除机厅", "请点击需要删除的机厅：", true)
@@ -128,6 +144,12 @@ class QueueController(
         }
     }
 
+    /**
+     * 为机厅添加别名
+     *
+     * @param name 机厅名称
+     * @param raw 别名文本
+     */
     suspend fun GroupMessageEvent.addAlias(
         name: String ?= null,
         raw: String ?= null
@@ -143,6 +165,12 @@ class QueueController(
         reply("添加机厅别名成功。", queue("排卡管理", "添加机厅别名成功。", name))
     }
 
+    /**
+     * 删除机厅别名
+     *
+     * @param name 机厅名称
+     * @param raw 别名文本
+     */
     suspend fun GroupMessageEvent.deleteAlias(
         name: String ?= null,
         raw: String ?= null
@@ -158,6 +186,11 @@ class QueueController(
         reply("删除机厅别名成功。", queue("排卡管理", "删除机厅别名成功。", name))
     }
 
+    /**
+     * 查看机厅的别名列表
+     *
+     * @param name 机厅名称
+     */
     suspend fun GroupMessageEvent.aliases(
         name: String?
     ) {
@@ -171,12 +204,18 @@ class QueueController(
         reply("机厅别名如下：$aliases", queue("排卡管理", "机厅别名如下：$aliases", name))
     }
 
-    suspend fun GroupMessageEvent.setGroup(targetName: String?) {
+    private suspend fun GroupMessageEvent.setGroup(targetName: String?) {
         targetName ?: throw NeedHelpException()
         ArcadeGroupBind.bind(group.id, targetName)
         reply("设置分组成功。", queue("排卡管理", "设置分组成功。"))
     }
 
+    /**
+     * 校验并清理别名文本
+     *
+     * @param raw 别名文本
+     * @return 清理后的别名文本
+     */
     fun validateAlias(raw: String ?= null): String {
         val alias = raw ?.replace(",", "") ?: throw IllegalArgsException("请输入别名！")
         if (alias.isBlank())
@@ -189,7 +228,7 @@ class QueueController(
     private suspend fun clear() = Arcade.clearAll()
 
     private suspend fun GroupMessageEvent.list(
-        arcades: List<Arcade.Snapshot>
+        arcades: List<Arcade>
     ): MessageElement {
         val nowTime = java.time.LocalDateTime.now()
         if (arcades.size == 1) {
@@ -222,7 +261,7 @@ class QueueController(
     }
 
     private fun status(
-        arcade: Arcade.Snapshot,
+        arcade: Arcade,
         nowTime: java.time.LocalDateTime,
     ) = buildString {
         append(MarkdownTemplates.href(arcade.name, arcade.name, enter = false))
@@ -237,6 +276,11 @@ class QueueController(
         append(")")
     }
 
+    /**
+     * 处理人数查询与更新消息
+     *
+     * 使用例：`foo几`，`bar+2`，`foo6`，`bar-1`
+     */
     suspend fun GroupMessageEvent.handle() {
         val raw = text.trim()
             .substringAfter("/mai")
@@ -266,13 +310,13 @@ class QueueController(
             }
             return
         }
-        val snapshot = ArcadeGroupBind.updateArcade(group.id, raw)
-        if (snapshot != null) {
+        val arcade = ArcadeGroupBind.updateArcade(group.id, raw)
+        if (arcade != null) {
             reply(
-                "更新成功，现在${snapshot.name}人数为${snapshot.value}人。",
+                "更新成功，现在${arcade.name}人数为${arcade.value}人。",
                 queue(
-                    "排卡管理", "更新成功，现在${snapshot.name}人数为${snapshot.value}人。",
-                    snapshot.name
+                    "排卡管理", "更新成功，现在${arcade.name}人数为${arcade.value}人。",
+                    arcade.name
                 )
             )
         }
