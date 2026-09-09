@@ -91,7 +91,7 @@ class SubscribeTest {
         var pair: Pair<String, String?>? = null
         val subscribe = CommandEndsWith(suffix = "進度") { pair = it }
 
-        subscribe.handler(messageEvent("  14橙將進度     114514   "))
+        subscribe.handler(messageEvent("  14橙將進度 114514   "))
 
         assertEquals("14橙將" to "114514", pair)
     }
