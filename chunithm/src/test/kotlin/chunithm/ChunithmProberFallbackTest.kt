@@ -30,12 +30,12 @@ class ChunithmProberFallbackTest : ChunithmDatabaseTest() {
         val data = ChunithmData(dataPath = "./data/chunithm")
         val prober = MockLxnsProber(data)
         val lxns = prober.backend()
-        data.load(lxns)
         val sandbox = setChunithm(
             scope = this,
             database = database,
             backends = listOf(mockUnboundDivingFish(), lxns)
         )
+        data.load(lxns)
         sandbox.pluginLoader.subscribes.subscribe(
             "maimai", Channel<MessageEvent>("rhythm-game-bind") { target ->
                 target.reply(BIND_PROMPT)
