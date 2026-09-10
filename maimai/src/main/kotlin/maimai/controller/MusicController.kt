@@ -460,6 +460,7 @@ class MusicController(
         type: String,
         keyword: String,
         result: List<MusicInfo>,
+        displayName: String ?= null,
         nowPage: Int = 1,
         totalPages: Int = 1,
     ) {
@@ -486,6 +487,7 @@ class MusicController(
                     keyword = keyword,
                     difficulty = null,
                     result = result,
+                    displayName = displayName,
                     nowPage = nowPage,
                     totalPages = totalPages,
                 ))
@@ -496,6 +498,7 @@ class MusicController(
         type: String,
         keyword: String,
         result: List<ChartInfo>,
+        displayName: String ?= null,
         nowPage: Int = 1,
         totalPages: Int = 1,
     ) {
@@ -521,6 +524,7 @@ class MusicController(
                     type = type,
                     keyword = keyword,
                     result = result,
+                    displayName = displayName,
                     nowPage = nowPage,
                     totalPages = totalPages,
                 ))
@@ -547,6 +551,7 @@ class MusicController(
             "maimai-search-word",
             name,
             result,
+            "",
             nowPage,
             totalPages
         )
@@ -642,7 +647,7 @@ class MusicController(
                 reply("没有找到匹配的歌曲")
                 return
             }
-            showMusics("maimai-cover-search", query, musics, 1, 1)
+            showMusics("maimai-cover-search", query, musics, "", 1, 1)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -661,6 +666,7 @@ class MusicController(
             "maimai-search-level",
             "$begin:$end",
             result,
+            "",
             nowPage,
             totalPages
         )
@@ -678,6 +684,7 @@ class MusicController(
             "maimai-search-level-fit",
             "$begin:$end",
             result,
+            "",
             nowPage,
             totalPages
         )
@@ -693,6 +700,7 @@ class MusicController(
             "maimai-search-designer",
             designer,
             result,
+            "",
             nowPage,
             totalPages
         )
@@ -708,6 +716,7 @@ class MusicController(
             "maimai-search-version",
             version,
             result,
+            "",
             nowPage,
             totalPages
         )
@@ -723,6 +732,7 @@ class MusicController(
             "maimai-search-artist",
             artist,
             result,
+            "",
             nowPage,
             totalPages
         )
@@ -737,7 +747,8 @@ class MusicController(
         showMusics(
             "maimai-search-regex",
             raw,
-            result
+            result,
+            ""
         )
     }
     private suspend fun ReplyAble.searchBPM(
@@ -751,6 +762,7 @@ class MusicController(
             "maimai-search-bpm",
             "$bpm",
             result,
+            "",
             nowPage,
             totalPages
         )
@@ -765,12 +777,12 @@ class MusicController(
             true -> {
                 val charts = filters.filterCharts(maimai.musics())
                 val (result, nowPage, totalPages) = charts.pagination(page, maxResults)
-                showCharts("maimai-search-combo", query, result, nowPage, totalPages)
+                showCharts("maimai-search-combo", query, result, "", nowPage, totalPages)
             }
             false -> {
                 val musics = filters.filterMusics(maimai.musics())
                 val (result, nowPage, totalPages) = musics.pagination(page, maxResults)
-                showMusics("maimai-search-combo", query, result, nowPage, totalPages)
+                showMusics("maimai-search-combo", query, result, "", nowPage, totalPages)
             }
         }
         return true
