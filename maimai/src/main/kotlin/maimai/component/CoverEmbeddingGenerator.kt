@@ -42,9 +42,9 @@ object CoverEmbeddingGenerator {
         g.drawImage(original, 0, 0, width, height, null)
         g.dispose()
 
-        val baos = ByteArrayOutputStream()
-        ImageIO.write(scaled, "jpeg", baos)
-        return baos.toByteArray()
+        val stream = ByteArrayOutputStream()
+        ImageIO.write(scaled, "jpeg", stream)
+        return stream.toByteArray()
     }
 
     /**

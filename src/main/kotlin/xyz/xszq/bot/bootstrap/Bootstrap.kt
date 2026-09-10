@@ -20,10 +20,9 @@ object Bootstrap {
     fun main(args: Array<String>) {
         RuntimePaths.relaunchIfNeeded(Bootstrap::class.java.name, args)
         val currentJar = File(Bootstrap::class.java.protectionDomain.codeSource.location.toURI())
-        val libsDirectory = File("libs")
 
         val dependencyFiles = JarFile(currentJar).use { jarFile ->
-            RuntimeDependencyResolver.resolveDependencies(jarFile, libsDirectory)
+            RuntimeDependencyResolver.resolveDependencies(jarFile, File("libs"))
         }
 
         val urls = buildList {

@@ -21,7 +21,7 @@ object CosineSimilarity {
             normA += a[i].toDouble() * a[i].toDouble()
             normB += b[i].toDouble() * b[i].toDouble()
         }
-        val denom = kotlin.math.sqrt(normA) * kotlin.math.sqrt(normB)
-        return if (denom == 0.0) 0.0 else dot / denom
+        val denominator = kotlin.math.sqrt(normA) * kotlin.math.sqrt(normB)
+        return if (denominator == 0.0) 0.0 else dot / denominator
     }
 }
