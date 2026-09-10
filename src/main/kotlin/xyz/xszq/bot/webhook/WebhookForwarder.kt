@@ -39,7 +39,7 @@ class WebhookForwarder(
     )
 
     /**
-     * 判断事件应当转发给哪一目标
+     * 判断事件应当转发给哪一个目标
      *
      * @param subject 私聊 ID，私聊事件需传入
      * @param group 群 ID，群聊事件需传入

@@ -18,7 +18,6 @@ dist/
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/workspace.xml
-.idea/dictionaries/
 .idea/libraries/
 *.iws
 *.iml

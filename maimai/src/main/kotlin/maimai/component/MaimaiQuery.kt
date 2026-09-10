@@ -151,7 +151,7 @@ class MaimaiQuery(
     }
 
     /**
-     * 查询玩家一个歌曲的成绩
+     * 查询玩家一首歌曲的成绩
      *
      * @param user 用户查询参数
      * @param music 歌曲信息

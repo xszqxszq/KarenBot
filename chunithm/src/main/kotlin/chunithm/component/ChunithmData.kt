@@ -40,7 +40,7 @@ class ChunithmData(
             .build()
             .loadConfigOrThrow<DesignerConfig>()
 
-        // 拉取歌曲列表并组装歌曲，网络请求失败时改读本地缓存
+        // 拉取歌曲列表并组装歌曲，网络请求失败时改读缓存
         val songsRaw = fetchWithCacheFallback(
             fetch = { api.fetchSongs() },
             path = "$dataPath/lxns-songs.json"
@@ -57,7 +57,7 @@ class ChunithmData(
         }
         ChunithmMusicAliasesTable.addAll(aliases)
 
-        // 拉取称号列表并组装可用称号，网络请求失败时改读本地缓存
+        // 拉取称号列表并组装可用称号，网络请求失败时改读缓存
         val trophiesRaw = fetchWithCacheFallback(
             fetch = { api.fetchTrophies() },
             path = "$dataPath/lxns-trophies.json"

@@ -14,7 +14,7 @@ import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 
 /**
- * 中二成绩查询组件
+ * Chunithm 查询组件
  */
 class ChunithmQuery(
     val chunithm: Chunithm
@@ -137,7 +137,7 @@ class ChunithmQuery(
     }
 
     /**
-     * 查询玩家一个歌曲的成绩
+     * 查询玩家一首歌曲的成绩
      *
      * @param user 用户查询参数
      * @param music 歌曲信息

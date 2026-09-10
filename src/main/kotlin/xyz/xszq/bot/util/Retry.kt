@@ -11,7 +11,7 @@ import xyz.xszq.bot.exception.RetryException
  * @return 首次非空结果
  */
 inline fun <T> retry(times: Int, block: () -> T): T? {
-    (1..times).forEach { attempt ->
+    (1..times).forEach { _ ->
         block() ?.let {
             return it
         }

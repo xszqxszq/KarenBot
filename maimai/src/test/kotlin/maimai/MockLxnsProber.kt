@@ -216,7 +216,7 @@ fun mockUnboundDivingFish(): MaimaiAPI = object : MaimaiAPI {
 
     override suspend fun load() {}
 
-    override suspend fun getPlayerRating(user: UserQueryParams): RatingResponse? =
+    override suspend fun getPlayerRating(user: UserQueryParams): RatingResponse =
         throw UserBindRequiredException()
 
     override suspend fun getPlayerRecord(

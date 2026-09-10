@@ -484,7 +484,7 @@ class LXNS(
     }
 
     /**
-     * 拉取并缓存中二好友码
+     * 拉取并缓存 Chunithm 好友码
      *
      * @param openid 用户 OpenID
      */

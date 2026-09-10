@@ -27,7 +27,7 @@ import xyz.xszq.bot.subscribe.SubscribeBuilder
 import kotlin.reflect.full.primaryConstructor
 
 /**
- * 中二节奏插件
+ * Chunithm 插件
  */
 @Suppress("unused")
 class Chunithm: Plugin() {

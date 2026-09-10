@@ -145,16 +145,12 @@ class MockLxnsProber(
     }
 
     private fun MockRequestHandleScope.oauthPlayer(): HttpResponseData {
-        val code = oauthFriendCode
-        if (code == null)
-            return failure(401, "unauthorized")
+        val code = oauthFriendCode ?: return failure(401, "unauthorized")
         return success(player(code))
     }
 
     private fun MockRequestHandleScope.qqPlayer(): HttpResponseData {
-        val code = qqFriendCode
-        if (code == null)
-            return failure(404, "player not found")
+        val code = qqFriendCode ?: return failure(404, "player not found")
         return success(player(code))
     }
 
@@ -228,7 +224,7 @@ fun mockUnboundDivingFish(): ChunithmAPI = object : ChunithmAPI {
 
     override suspend fun load() {}
 
-    override suspend fun getPlayerRating(user: UserQueryParams): RatingResponse? =
+    override suspend fun getPlayerRating(user: UserQueryParams): RatingResponse =
         throw UserBindRequiredException()
 
     override suspend fun getPlayerRecord(

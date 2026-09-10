@@ -114,7 +114,7 @@ fun String.toSimple(): String {
 private fun Char.isChinese() = code in 0x3400..0x4DBF || code in 0x4E00..0x9FFF
 
 /**
- * 判断字符串是否以列表中的任一字符串为后缀
+ * 判断字符串是否以列表中的任意字符串为后缀
  *
  * @param target 后缀列表
  * @return 是否命中
