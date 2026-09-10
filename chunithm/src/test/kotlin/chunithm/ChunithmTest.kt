@@ -4,6 +4,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import xyz.xszq.bot.*
+import xyz.xszq.bot.chunithm.api.ChunithmAPI
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
 import xyz.xszq.bot.chunithm.database.ProberBindTable
 import xyz.xszq.bot.payload.AdminCheckRequest
@@ -125,7 +126,19 @@ class ChunithmTest : ChunithmDatabaseTest() {
     }
 }
 
-suspend fun setChunithm(scope: TestScope, database: org.jetbrains.exposed.sql.Database): BotSandbox {
+/**
+ * 建立中二测试沙箱
+ *
+ * @param scope 测试作用域
+ * @param database 测试数据库
+ * @param backends 替换使用的查分器后端
+ * @return 测试沙箱
+ */
+suspend fun setChunithm(
+    scope: TestScope,
+    database: org.jetbrains.exposed.sql.Database,
+    backends: List<ChunithmAPI> ?= null
+): BotSandbox {
     val sandbox = BotSandbox(scope, mockTencentCOS(), database)
     sandbox.pluginLoader.subscribes.subscribe(
         "admin", Channel<AdminCheckRequest>("admin-check") { data ->
@@ -139,6 +152,7 @@ suspend fun setChunithm(scope: TestScope, database: org.jetbrains.exposed.sql.Da
         dataPath = "./data/chunithm"
     }
     chunithm.load()
+    backends ?.let { chunithm.backends = it }
     chunithm.image.manager.init()
     sandbox.cleanup = { chunithm.unload() }
     return sandbox
