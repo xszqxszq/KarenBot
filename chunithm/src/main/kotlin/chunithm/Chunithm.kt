@@ -38,6 +38,29 @@ class Chunithm: Plugin() {
     lateinit var config: ChunithmConfig
     // 后端
     lateinit var backends: List<ChunithmAPI>
+
+    // 初始化落雪查分器
+    var createLxns: (ChunithmData) -> LXNS = { data ->
+        LXNS(
+            config.tokens["lxns"].toString(),
+            config.tokens["lxns-oa-id"].toString(),
+            config.tokens["lxns-oa-secret"].toString(),
+            data
+        )
+    }
+
+    // 初始化查分器
+    var createBackends: () -> List<ChunithmAPI> = {
+        listOf(
+            DivingFish(
+                config.tokens["diving-fish-oa-id"].toString(),
+                config.tokens["diving-fish-oa-secret"].toString(),
+                chunithmData
+            ),
+            lxns
+        )
+    }
+
     // 组件
     lateinit var chunithmData: ChunithmData
     lateinit var image: ChunithmImage
@@ -72,20 +95,8 @@ class Chunithm: Plugin() {
             .loadConfigOrThrow<ChunithmConfig>()
 
         chunithmData = ChunithmData(dataPath = dataPath)
-        lxns = LXNS(
-            config.tokens["lxns"].toString(),
-            config.tokens["lxns-oa-id"].toString(),
-            config.tokens["lxns-oa-secret"].toString(),
-            chunithmData
-        )
-        backends = listOf(
-            DivingFish(
-                config.tokens["diving-fish-oa-id"].toString(),
-                config.tokens["diving-fish-oa-secret"].toString(),
-                chunithmData
-            ),
-            lxns
-        )
+        lxns = createLxns(chunithmData)
+        backends = createBackends()
 
         // 各API初始化
         backends.forEach { backend ->

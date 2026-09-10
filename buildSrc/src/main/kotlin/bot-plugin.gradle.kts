@@ -21,8 +21,27 @@ dependencies {
 }
 
 tasks.test {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        excludeTags("load")
+    }
     workingDir = rootDir
+}
+
+tasks.register<Test>("loadTest") {
+    val unitTest = tasks.named<Test>("test").get()
+    group = "verification"
+    description = "运行并发压测，不随 test 与 build 执行"
+    testClassesDirs = unitTest.testClassesDirs
+    classpath = unitTest.classpath
+    useJUnitPlatform {
+        includeTags("load")
+    }
+    workingDir = rootDir
+    jvmArgs("-Djava.security.manager=allow")
+    outputs.upToDateWhen { false }
+    testLogging {
+        showStandardStreams = true
+    }
 }
 
 tasks.jar {

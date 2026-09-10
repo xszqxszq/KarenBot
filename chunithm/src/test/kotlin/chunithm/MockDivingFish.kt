@@ -1,0 +1,232 @@
+package xyz.xszq.bot.chunithm
+
+import io.ktor.client.*
+import io.ktor.client.engine.mock.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.http.content.*
+import io.ktor.serialization.kotlinx.json.*
+import kotlinx.coroutines.delay
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import xyz.xszq.bot.chunithm.api.DivingFish
+import xyz.xszq.bot.chunithm.component.ChunithmData
+import xyz.xszq.bot.chunithm.payload.*
+import java.net.URLDecoder
+import java.security.MessageDigest
+import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.text.Charsets.UTF_8
+
+/**
+ * 模拟水鱼查分器
+ *
+ * @property data 曲目数据
+ * @property accountIds 水鱼账号标识
+ * @property refIds 外部标识
+ * @property musicId 成绩返回的曲目 ID
+ * @property latencyMs 接口延迟（毫秒）
+ */
+class MockDivingFish(
+    val data: ChunithmData,
+    val accountIds: MutableSet<String> = ConcurrentHashMap.newKeySet(),
+    val refIds: MutableSet<String> = ConcurrentHashMap.newKeySet(),
+    val musicId: Int = DEFAULT_MUSIC_ID,
+    private val latencyMs: Long = 0
+) {
+    private companion object {
+        const val DEFAULT_MUSIC_ID = 3
+        const val DEFAULT_RATING = 16.25
+        const val OAUTH_ID = "test-diving-fish-oa-id"
+        const val OAUTH_SECRET = "test-diving-fish-oa-secret"
+        const val USERNAME = "test-diving-fish"
+        val JSON_HEADERS = headersOf(HttpHeaders.ContentType, "application/json")
+        val json = Json { ignoreUnknownKeys = true }
+    }
+
+    private val oauthId = OAUTH_ID
+    private val oauthSecret = OAUTH_SECRET
+
+    /**
+     * 建立水鱼后端
+     *
+     * @return 水鱼后端
+     */
+    fun backend(): DivingFish = DivingFish(
+        oauthId = oauthId,
+        oauthSecret = oauthSecret,
+        chunithmData = data,
+        client = client()
+    )
+
+    /**
+     * 为指定用户预置账号标识
+     *
+     * @param externalId 用户 OpenID 或 QQ 号
+     * @return 账号标识
+     */
+    fun bind(externalId: String): String = "$externalId-sub".also { sub ->
+        accountIds += sub
+        refIds += externalId
+    }
+
+    private fun client() = HttpClient(MockEngine { request ->
+        delay(latencyMs)
+        val path = request.url.encodedPath
+        when {
+            path.endsWith("/oauth/token") -> token(request)
+            path.endsWith("/query/player") -> rating(request)
+            path.endsWith("/player/records") -> records(request)
+            else -> failure(HttpStatusCode.NotFound, "unknown endpoint")
+        }
+    }) {
+        install(ContentNegotiation) {
+            json(json)
+        }
+    }
+
+    private fun MockRequestHandleScope.token(request: HttpRequestData): HttpResponseData {
+        val form = parseForm(request.bodyText())
+        if (form["client_id"] != oauthId || form["client_secret"] != oauthSecret)
+            return tokenFailure(HttpStatusCode.Unauthorized, "invalid_client")
+        val subject = form["subject"]
+            ?: return tokenFailure(HttpStatusCode.BadRequest, "invalid_request")
+        val sub = resolveSub(subject)
+            ?: return tokenFailure(HttpStatusCode.BadRequest, "consent_required")
+        return respondJson(
+            json.encodeToString(
+                DivingFishOAuthTokenResponse(
+                    tokenType = "Bearer",
+                    accessToken = tokenFor(sub),
+                    expiresIn = 300,
+                    scope = "chunithm.records.read"
+                )
+            )
+        )
+    }
+
+    private fun MockRequestHandleScope.rating(request: HttpRequestData): HttpResponseData {
+        val query = runCatching {
+            json.parseToJsonElement(request.bodyText())
+                .jsonObject["username"] ?.jsonPrimitive ?.content
+        }.getOrNull()
+        if (query != null) {
+            if (query != USERNAME)
+                return respond(
+                    content = """{"message":"user not exists"}""",
+                    status = HttpStatusCode.BadRequest,
+                    headers = JSON_HEADERS
+                )
+            return respondJson(json.encodeToString(ratingResponse()))
+        }
+        if (authorized(request) == null)
+            return failure(HttpStatusCode.Unauthorized, "令牌无效或已过期")
+        return respondJson(json.encodeToString(ratingResponse()))
+    }
+
+    private fun MockRequestHandleScope.records(request: HttpRequestData): HttpResponseData {
+        if (authorized(request) == null)
+            return failure(HttpStatusCode.Unauthorized, "令牌无效或已过期")
+        val requested = request.url.parameters["song_id"]
+            ?.split(",")
+            ?.mapNotNull { it.trim().toIntOrNull() }
+        val records = listOf(record()).filter { record ->
+            requested == null || record.mid in requested
+        }
+        return respondJson(
+            json.encodeToString(
+                DivingFishRecordsResponse(
+                    username = USERNAME,
+                    nickname = "测试玩家",
+                    rating = DEFAULT_RATING,
+                    records = DivingFishRecordsBests(best = records)
+                )
+            )
+        )
+    }
+
+    private fun authorized(request: HttpRequestData): String? {
+        val header = request.headers["Authorization"] ?: return null
+        val part = header.removePrefix("Bearer ").trim().split(".").getOrNull(1) ?: return null
+        val sub = runCatching {
+            Base64.getUrlDecoder().decode(part).decodeToString()
+        }.getOrNull() ?: return null
+        val claimed = runCatching {
+            json.parseToJsonElement(sub).jsonObject["sub"]?.jsonPrimitive?.content
+        }.getOrNull() ?: return null
+        return claimed.takeIf { it in accountIds }
+    }
+
+    private fun resolveSub(subject: String): String? = when {
+        subject.startsWith("sub:") -> subject.removePrefix("sub:").takeIf { it in accountIds }
+        subject.startsWith("ref:") -> {
+            val digest = subject.removePrefix("ref:")
+            refIds.firstOrNull { sha256Hex("$oauthId:$it") == digest } ?.let { external ->
+                bind(external)
+            }
+        }
+        else -> null
+    }
+
+    private fun tokenFor(sub: String): String = listOf(
+        """{"alg":"none"}""",
+        """{"sub":"$sub"}"""
+    ).joinToString(".") { part ->
+        Base64.getUrlEncoder().withoutPadding().encodeToString(part.toByteArray(UTF_8))
+    } + ".signature"
+
+    private fun ratingResponse() = DivingFishRatingResponse(
+        username = USERNAME,
+        nickname = "测试玩家",
+        rating = DEFAULT_RATING,
+        records = DivingFishRecords(b30 = listOf(record()), n20 = listOf(record()))
+    )
+
+    private fun record() = DivingFishRecord(
+        cid = musicId,
+        ds = 14.0,
+        fc = "fc",
+        level = "14",
+        levelIndex = 3,
+        levelLabel = "Master",
+        mid = musicId,
+        ra = 10.0,
+        score = 1005000,
+        title = data.musics[musicId] ?.title ?: "测试曲目"
+    )
+
+    private fun parseForm(body: String): Map<String, String> = body.split("&").mapNotNull { pair ->
+        val key = pair.substringBefore("=", "")
+        if (key.isEmpty())
+            null
+        else
+            URLDecoder.decode(key, UTF_8) to URLDecoder.decode(pair.substringAfter("=", ""), UTF_8)
+    }.toMap()
+
+    private fun sha256Hex(input: String): String = HexFormat.of().formatHex(
+        MessageDigest.getInstance("SHA-256").digest(input.toByteArray(UTF_8))
+    )
+
+    private fun HttpRequestData.bodyText(): String =
+        (body as? OutgoingContent.ByteArrayContent)?.bytes()?.decodeToString() ?: ""
+
+    private fun MockRequestHandleScope.respondJson(content: String) = respond(
+        content = content,
+        status = HttpStatusCode.OK,
+        headers = JSON_HEADERS
+    )
+
+    private fun MockRequestHandleScope.failure(status: HttpStatusCode, message: String) = respond(
+        content = """{"status":"error","message":"$message"}""",
+        status = status,
+        headers = JSON_HEADERS
+    )
+
+    private fun MockRequestHandleScope.tokenFailure(status: HttpStatusCode, error: String) = respond(
+        content = """{"error":"$error"}""",
+        status = status,
+        headers = JSON_HEADERS
+    )
+}

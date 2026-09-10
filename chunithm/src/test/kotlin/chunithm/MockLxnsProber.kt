@@ -10,6 +10,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.buildJsonArray
@@ -24,6 +25,8 @@ import xyz.xszq.bot.chunithm.music.RatingResponse
 import xyz.xszq.bot.chunithm.music.Record
 import xyz.xszq.bot.chunithm.music.RecordsResponse
 import xyz.xszq.bot.chunithm.music.UserQueryParams
+import java.io.File
+import kotlin.text.Charsets.UTF_8
 
 /**
  * 落雪查分器 mock
@@ -35,12 +38,17 @@ import xyz.xszq.bot.chunithm.music.UserQueryParams
 class MockLxnsProber(
     val data: ChunithmData,
     val friendCode: Long = DEFAULT_FRIEND_CODE,
-    val musicId: Int = DEFAULT_MUSIC_ID
+    val musicId: Int = DEFAULT_MUSIC_ID,
+    private val latencyMs: Long = 0
 ) {
     private companion object {
         const val DEFAULT_FRIEND_CODE = 722520985289030L
         const val DEFAULT_MUSIC_ID = 3
         const val INVALID_FRIEND_CODE = "invalid friend code"
+        const val SONGS_CACHE = "lxns-songs.json"
+        const val TROPHIES_CACHE = "lxns-trophies.json"
+        const val EMPTY_SONGS = """{"songs":[],"versions":[]}"""
+        const val EMPTY_TROPHIES = """{"trophies":[]}"""
         val JSON_HEADERS = headersOf(HttpHeaders.ContentType, "application/json")
     }
 
@@ -94,6 +102,7 @@ class MockLxnsProber(
     )
 
     private fun client() = HttpClient(MockEngine { request ->
+        delay(latencyMs)
         val path = request.url.encodedPath
         val parts = path.split("/")
         val code = parts.let {
@@ -101,6 +110,8 @@ class MockLxnsProber(
         }.toLongOrNull()
         when {
             path.endsWith("/oauth/token") -> token()
+            path.endsWith("/song/list") -> cached(SONGS_CACHE, EMPTY_SONGS)
+            path.endsWith("/trophy/list") -> cached(TROPHIES_CACHE, EMPTY_TROPHIES)
             path.endsWith("/chunithm/alias/list") -> respond(
                 content = """{"aliases":[]}""",
                 status = HttpStatusCode.OK,
@@ -126,6 +137,18 @@ class MockLxnsProber(
         install(ContentNegotiation) {
             json(Json { ignoreUnknownKeys = true })
         }
+    }
+
+    private fun MockRequestHandleScope.cached(name: String, fallback: String): HttpResponseData {
+        val file = File("${data.dataPath}/$name")
+        val content = runCatching {
+            if (file.exists()) file.readText(UTF_8) else fallback
+        }.getOrDefault(fallback)
+        return respond(
+            content = content,
+            status = HttpStatusCode.OK,
+            headers = JSON_HEADERS
+        )
     }
 
     private fun MockRequestHandleScope.token(): HttpResponseData {

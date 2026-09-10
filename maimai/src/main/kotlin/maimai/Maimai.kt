@@ -41,6 +41,25 @@ class Maimai: Plugin() {
     lateinit var config: MaimaiConfig
     // 后端
     lateinit var backends: List<MaimaiAPI>
+
+    // 初始化查分器
+    var createBackends: () -> List<MaimaiAPI> = {
+        listOf(
+            DivingFish(
+                oauthId = config.tokens["diving-fish-oa-id"].toString(),
+                oauthSecret = config.tokens["diving-fish-oa-secret"].toString(),
+                maimaiData = maimaiData
+            ),
+            LXNS(
+                token = config.tokens["lxns"].toString(),
+                oauthId = config.tokens["lxns-oa-id"].toString(),
+                oauthSecret = config.tokens["lxns-oa-secret"].toString(),
+                oauthCallback = config.tokens["lxns-oa-callback"].toString(),
+                maimaiData = maimaiData
+            )
+        )
+    }
+
     // 组件
     lateinit var maimaiData: MaimaiData
     lateinit var image: MaimaiImage
@@ -76,20 +95,7 @@ class Maimai: Plugin() {
         maimaiData = MaimaiData(dataPath = dataPath)
         maimaiData.load()
 
-        backends = listOf(
-            DivingFish(
-                oauthId = config.tokens["diving-fish-oa-id"].toString(),
-                oauthSecret = config.tokens["diving-fish-oa-secret"].toString(),
-                maimaiData = maimaiData
-            ),
-            LXNS(
-                token = config.tokens["lxns"].toString(),
-                oauthId = config.tokens["lxns-oa-id"].toString(),
-                oauthSecret = config.tokens["lxns-oa-secret"].toString(),
-                oauthCallback = config.tokens["lxns-oa-callback"].toString(),
-                maimaiData = maimaiData
-            )
-        )
+        backends = createBackends()
 
         // 各组件初始化
         image = MaimaiImage(maimaiData, dataPath = dataPath)

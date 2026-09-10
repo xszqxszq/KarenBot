@@ -10,6 +10,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.buildJsonArray
@@ -35,7 +36,8 @@ import xyz.xszq.bot.maimai.music.UserQueryParams
 class MockLxnsProber(
     val data: MaimaiData,
     val friendCode: Long = DEFAULT_FRIEND_CODE,
-    val musicId: Int = DEFAULT_MUSIC_ID
+    val musicId: Int = DEFAULT_MUSIC_ID,
+    private val latencyMs: Long = 0
 ) {
     private companion object {
         const val DEFAULT_FRIEND_CODE = 722520985289030L
@@ -95,6 +97,7 @@ class MockLxnsProber(
     )
 
     private fun client() = HttpClient(MockEngine { request ->
+        delay(latencyMs)
         val path = request.url.encodedPath
         val parts = path.split("/")
         val code = parts.let {

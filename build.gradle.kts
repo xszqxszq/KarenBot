@@ -72,6 +72,15 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
     testFixturesImplementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     testFixturesImplementation("com.soywiz.korge:korge-core:$korlibsVersion")
+    testFixturesImplementation("io.github.oshai:kotlin-logging-jvm:7.0.7")
+    testFixturesImplementation("org.bouncycastle:bcprov-jdk18on:$bcprovVersion")
+    testFixturesImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
+    testFixturesApi("io.ktor:ktor-client-mock:$ktorVersion")
+    testFixturesApi("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+    testFixturesApi("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+    testFixturesApi("io.ktor:ktor-server-core:$ktorVersion")
+    testFixturesApi("io.ktor:ktor-server-content-negotiation:$ktorVersion")
+    testFixturesApi("io.ktor:ktor-server-netty:$ktorVersion")
 }
 
 tasks.test {
@@ -114,6 +123,9 @@ tasks.register("allPlugins") {
             jarFile?.copyTo(pluginsDir.resolve(jarFile.name), overwrite = true)
         }
     }
+}
+tasks.named<Delete>("clean") {
+    delete(layout.projectDirectory.dir("buildSrc/build"))
 }
 kotlin {
     jvmToolchain(22)
