@@ -1,3 +1,5 @@
+@file:Suppress("VulnerableLibrariesLocal")
+
 val exposedVersion: String by project
 val hopliteVersion: String by project
 val korlibsVersion: String by project
@@ -11,6 +13,8 @@ val ksoupVersion: String by project
 val opencc4jVersion: String by project
 val mockkVersion: String by project
 val coroutinesVersion: String by project
+val logbackVersion: String by project
+val bcprovVersion: String by project
 
 plugins {
     application
@@ -36,10 +40,12 @@ repositories {
 dependencies {
     api("io.mockk:mockk:$mockkVersion")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
-    implementation("ch.qos.logback:logback-classic:1.5.18")
+    implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("com.h2database:h2:$h2Version")
     implementation("com.mysql:mysql-connector-j:9.3.0")
-    implementation("com.qcloud:cos_api:5.6.247")
+    implementation("com.qcloud:cos_api:5.6.277") {
+        exclude(group = "org.bouncycastle", module = "bcprov-jdk15on")
+    }
     implementation("com.github.houbb:opencc4j:${opencc4jVersion}")
     implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
     implementation("com.sksamuel.hoplite:hoplite-yaml:$hopliteVersion")
@@ -56,7 +62,7 @@ dependencies {
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-host-common:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("org.bouncycastle:bcprov-jdk18on:1.80")
+    implementation("org.bouncycastle:bcprov-jdk18on:$bcprovVersion")
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     implementation("org.mariadb.jdbc:mariadb-java-client:$mariadbVersion")

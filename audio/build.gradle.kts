@@ -1,3 +1,5 @@
+@file:Suppress("VulnerableLibrariesLocal")
+
 val hopliteVersion: String by rootProject.extra
 val korlibsVersion: String by rootProject.extra
 val opencc4jVersion: String by rootProject.extra
