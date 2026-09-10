@@ -9,6 +9,7 @@ import xyz.xszq.bot.message.MessageChain
 /**
  * 群消息事件
  */
+@Suppress("unused")
 class GroupMessageEvent(
     override val bot: Bot,
     override val eventId: String,

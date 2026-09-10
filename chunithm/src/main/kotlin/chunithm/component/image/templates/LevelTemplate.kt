@@ -13,6 +13,7 @@ import xyz.xszq.shinobu.template.TemplateManager
 /**
  * 等级定数表模板
  */
+@Suppress("unused")
 class LevelTemplate(
     private val manager: TemplateManager,
     private val resourcePath: String

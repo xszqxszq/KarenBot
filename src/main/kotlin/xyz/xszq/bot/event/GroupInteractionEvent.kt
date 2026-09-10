@@ -7,6 +7,7 @@ import xyz.xszq.bot.Member
 /**
  * 群聊中的按钮互动事件
  */
+@Suppress("unused")
 class GroupInteractionEvent(
     override val bot: Bot,
     override val eventId: String,

@@ -569,16 +569,6 @@ class LXNS(
     }
 
     companion object {
-        private fun Record.toLxnsScore() = LXNSScore(
-            id = music.id,
-            levelIndex = chart.difficulty.value,
-            achievements = achievement / 10000f,
-            fc = comboStatus.value,
-            fs = syncStatus.value,
-            dxScore = deluxeScore,
-            type = music.type.value
-        )
-
         fun createClient() = HttpClient(OkHttp) {
             engine {
                 config {

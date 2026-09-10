@@ -36,9 +36,7 @@ suspend fun <T> retryAsync(
     while (true) {
         attempt++
         val result = runCatching { block(attempt) }
-        val e = result.exceptionOrNull()
-        if (e == null)
-            return result.getOrThrow()
+        val e = result.exceptionOrNull() ?: return result.getOrThrow()
         if (e !is RetryException || attempt >= times)
             throw e
         delay(attempt * 2000L)

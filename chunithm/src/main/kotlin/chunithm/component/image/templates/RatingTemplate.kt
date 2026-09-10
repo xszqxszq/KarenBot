@@ -17,6 +17,7 @@ import kotlin.math.min
 /**
  * Best 50 成绩图模板
  */
+@Suppress("unused")
 class RatingTemplate(
     private val manager: TemplateManager,
     private val resourcePath: String,

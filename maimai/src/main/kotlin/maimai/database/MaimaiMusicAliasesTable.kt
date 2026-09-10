@@ -8,6 +8,7 @@ import xyz.xszq.bot.maimai.music.MusicInfo
 /**
  * 歌曲别名表
  */
+@Suppress("unused")
 object MaimaiMusicAliasesTable: Table() {
     val id = integer("id")
     val name = varchar("name", 128)

@@ -6,6 +6,7 @@ package xyz.xszq.bot.event
  * @property id 对应的 ID
  * @property seq 消息序号
  */
+@Suppress("unused")
 sealed interface ReplyAble: Event {
     val id: String
     var seq: Int

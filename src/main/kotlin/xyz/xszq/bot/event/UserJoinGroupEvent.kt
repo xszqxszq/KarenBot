@@ -7,6 +7,7 @@ import xyz.xszq.bot.Member
 /**
  * 用户加入群聊事件
  */
+@Suppress("unused")
 class UserJoinGroupEvent(
     override val bot: Bot,
     override val eventId: String,

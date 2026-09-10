@@ -9,6 +9,7 @@ import xyz.xszq.bot.event.GroupMessageEvent
 /**
  * 群聊命令设置
  */
+@Suppress("unused")
 object GroupCommandSettings: Table() {
     val id = varchar("id", 32)
     val command = varchar("command", 64)

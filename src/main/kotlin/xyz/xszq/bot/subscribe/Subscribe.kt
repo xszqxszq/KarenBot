@@ -7,6 +7,7 @@ import xyz.xszq.bot.event.Event
  *
  * @param defaultHandler 默认事件处理
  */
+@Suppress("unused")
 open class Subscribe<E: Event>(
     private val defaultHandler: suspend (Event) -> Unit = {}
 ) {

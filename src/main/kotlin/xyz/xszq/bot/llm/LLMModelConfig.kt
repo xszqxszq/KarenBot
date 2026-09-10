@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
  * LLM 模型配置
  */
 @Serializable
+@Suppress("unused")
 data class LLMModelConfig(
     val apikey: String,
     val url: String,

@@ -8,6 +8,7 @@ import xyz.xszq.bot.chunithm.music.*
  * @property id 查分器 ID
  * @property name 查分器名称
  */
+@Suppress("EmptyMethod")
 interface ChunithmAPI {
     val id: String
     val name: String

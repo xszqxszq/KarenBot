@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
  * Webhook 地址验证请求
  */
 @Serializable
+@Suppress("unused")
 data class WebhookValidation(
     @SerialName("plain_token")
     val plainToken: String,

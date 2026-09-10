@@ -7,6 +7,7 @@ import xyz.xszq.bot.Group
  *
  * @property group 群组
  */
+@Suppress("unused")
 interface GroupEvent: Event {
     val group: Group
 }

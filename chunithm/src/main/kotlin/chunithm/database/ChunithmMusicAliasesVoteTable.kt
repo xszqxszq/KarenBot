@@ -10,6 +10,7 @@ import xyz.xszq.bot.chunithm.music.MusicInfo
 /**
  * 歌曲别名投票记录表
  */
+@Suppress("unused")
 object ChunithmMusicAliasesVoteTable: Table() {
     val id = integer("id")
     val name = varchar("name", 128)

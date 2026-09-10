@@ -12,6 +12,7 @@ import kotlin.random.Random
 /**
  * 随心配条件组合查询
  */
+@Suppress("unused")
 object ComboQuery {
     lateinit var chunithmData: ChunithmData
 
@@ -186,10 +187,6 @@ object ComboQuery {
             names.map { name -> name.lowercase() to filter }
         }.sortedByDescending { it.first.length }
     }
-
-    private fun named(name: String) = keywordConditions
-        .firstOrNull { (_, filter) -> filter.name == name }
-        ?.second
 
     /**
      * 谱师名查询条件

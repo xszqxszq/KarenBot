@@ -8,6 +8,7 @@ import xyz.xszq.bot.bootstrap.RuntimePaths
  */
 object KarenBotApplication {
     @JvmStatic
+    @Suppress("unused")
     fun main(args: Array<String>) = runBlocking {
         RuntimePaths.relaunchIfNeeded(KarenBotApplication::class.java.name, args)
         BotRuntime().start()

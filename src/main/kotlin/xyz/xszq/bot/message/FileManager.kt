@@ -13,6 +13,7 @@ import kotlinx.coroutines.sync.withLock
  * @param expiresAfter 文件保留时长（毫秒）
  * @param now 当前时间函数
  */
+@Suppress("unused")
 class FileManager(
     private val expiresAfter: Long = 5 * 60 * 1000L,
     private val now: () -> Long = System::currentTimeMillis,
@@ -48,13 +49,6 @@ class FileManager(
                 }
             }
         }
-    }
-
-    /**
-     * 停止清理协程
-     */
-    fun stop() {
-        scope.cancel()
     }
 
     /**

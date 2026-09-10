@@ -8,6 +8,7 @@ import xyz.xszq.bot.User
  *
  * @param user 操作的用户
  */
+@Suppress("unused")
 class BotRejectFriendEvent(
     override val bot: Bot,
     override val eventId: String,

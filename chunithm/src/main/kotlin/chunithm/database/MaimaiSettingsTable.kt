@@ -8,6 +8,7 @@ import xyz.xszq.bot.chunithm.music.PlayerSettings
 /**
  * 用户自定义设置表
  */
+@Suppress("unused")
 object MaimaiSettingsTable: Table() {
     val id = varchar("id", 32)
     val key = varchar("key", 32)

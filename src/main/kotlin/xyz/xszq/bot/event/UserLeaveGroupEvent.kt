@@ -7,6 +7,7 @@ import xyz.xszq.bot.Member
 /**
  * 用户离开群聊事件
  */
+@Suppress("unused")
 class UserLeaveGroupEvent(
     override val bot: Bot,
     override val eventId: String,

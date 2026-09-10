@@ -12,6 +12,7 @@ import org.jetbrains.exposed.sql.update
  *
  * 目前用户绑定已全面转向 OAuth，QQ 绑定将于未来废除
  */
+@Suppress("unused")
 object QQBindTable: Table() {
     val id = varchar("id", 32)
     val qq = long("qq")

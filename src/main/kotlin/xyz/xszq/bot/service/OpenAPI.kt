@@ -49,6 +49,7 @@ class OpenAPI(
         accessTokenExpiresAt = null
     }
 
+    @Suppress("unused")
     companion object {
         const val DEFAULT_SERVER = "https://api.sgroup.qq.com"
         const val DEFAULT_ACCESS_TOKEN_URL = "https://bots.qq.com/app/getAppAccessToken"

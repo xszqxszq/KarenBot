@@ -439,7 +439,7 @@ class MusicController(
                 reply("没有找到匹配的歌曲")
                 return
             }
-            showMusics("chunithm-cover-search", query, musics, "", 1, 1)
+            showMusics("chunithm-cover-search", query, musics, 1, 1)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -458,7 +458,6 @@ class MusicController(
         type: String,
         keyword: String,
         result: List<MusicInfo>,
-        displayName: String ?= null,
         nowPage: Int = 1,
         totalPages: Int = 1,
     ) {
@@ -485,7 +484,6 @@ class MusicController(
                         keyword = keyword,
                         difficulty = null,
                         result = result,
-                        displayName = displayName,
                         nowPage = nowPage,
                         totalPages = totalPages,
                     ))
@@ -497,7 +495,6 @@ class MusicController(
         type: String,
         keyword: String,
         result: List<ChartInfo>,
-        displayName: String ?= null,
         nowPage: Int = 1,
         totalPages: Int = 1,
     ) {
@@ -523,7 +520,6 @@ class MusicController(
                     type = type,
                     keyword = keyword,
                     result = result,
-                    displayName = displayName,
                     nowPage = nowPage,
                     totalPages = totalPages,
                 ))
@@ -550,7 +546,6 @@ class MusicController(
             "chunithm-search-word",
             name,
             result,
-            "",
             nowPage,
             totalPages
         )
@@ -569,7 +564,6 @@ class MusicController(
             "chunithm-search-level",
             "$begin:$end",
             result,
-            "",
             nowPage,
             totalPages
         )
@@ -586,7 +580,6 @@ class MusicController(
             "chunithm-search-designer",
             designer,
             result,
-            "",
             nowPage,
             totalPages
         )
@@ -603,7 +596,6 @@ class MusicController(
             "chunithm-search-version",
             version,
             result,
-            "",
             nowPage,
             totalPages
         )
@@ -620,7 +612,6 @@ class MusicController(
             "chunithm-search-artist",
             artist,
             result,
-            "",
             nowPage,
             totalPages
         )
@@ -636,8 +627,7 @@ class MusicController(
         showMusics(
             "chunithm-search-regex",
             raw,
-            result,
-            ""
+            result
         )
     }
 
@@ -652,7 +642,6 @@ class MusicController(
             "chunithm-search-bpm",
             "$bpm",
             result,
-            "",
             nowPage,
             totalPages
         )
@@ -667,12 +656,12 @@ class MusicController(
             true -> {
                 val charts = filters.filterCharts(chunithm.musics())
                 val (result, nowPage, totalPages) = charts.pagination(page, maxResults)
-                showCharts("chunithm-search-combo", query, result, "", nowPage, totalPages)
+                showCharts("chunithm-search-combo", query, result, nowPage, totalPages)
             }
             false -> {
                 val musics = filters.filterMusics(chunithm.musics())
                 val (result, nowPage, totalPages) = musics.pagination(page, maxResults)
-                showMusics("chunithm-search-combo", query, result, "", nowPage, totalPages)
+                showMusics("chunithm-search-combo", query, result, nowPage, totalPages)
             }
         }
         return true

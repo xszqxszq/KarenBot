@@ -7,6 +7,7 @@ import xyz.xszq.bot.subscribe.SubscribeBuilder
 /**
  * 插件基类
  */
+@Suppress("unused")
 abstract class Plugin {
     lateinit var plugin: String
     lateinit var pluginLoader: PluginLoader

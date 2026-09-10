@@ -3,6 +3,7 @@ package xyz.xszq.bot
 /**
  * 运行时控制，管理插件与 core 交互的界面
  */
+@Suppress("unused")
 interface RuntimeControl {
     /**
      * 调试日志开关

@@ -46,7 +46,6 @@ nbdist/
 /data
 /database
 /keystore.jks
-/todo.txt
 /plugins/
 /TEST_ROADMAP.md
 .fonts/

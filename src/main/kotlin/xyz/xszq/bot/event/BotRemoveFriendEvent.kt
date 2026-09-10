@@ -8,6 +8,7 @@ import xyz.xszq.bot.User
  *
  * @param user 移除机器人的用户
  */
+@Suppress("unused")
 class BotRemoveFriendEvent(
     override val bot: Bot,
     override val eventId: String,

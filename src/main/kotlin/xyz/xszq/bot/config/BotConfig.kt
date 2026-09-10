@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
  * Bot 配置
  */
 @Serializable
+@Suppress("unused")
 data class BotConfig(
     val qq: Long = 0,
     val appId: String = "",

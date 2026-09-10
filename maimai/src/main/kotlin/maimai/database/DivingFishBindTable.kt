@@ -12,6 +12,7 @@ import org.jetbrains.exposed.sql.update
  *
  * 保存用户的水鱼更新 Token，用于更新水鱼查分器
  */
+@Suppress("unused")
 object DivingFishBindTable: Table() {
     val id = varchar("id", 32)
     val importToken = text("importToken")

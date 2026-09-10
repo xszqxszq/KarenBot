@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
  * 支持 H2 / MySQL
  */
 @Serializable
+@Suppress("unused")
 data class DatabaseConfig(
     val url: String,
     val driver: String,

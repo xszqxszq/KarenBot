@@ -32,6 +32,7 @@ import kotlin.reflect.full.primaryConstructor
 /**
  * 舞萌DX 插件
  */
+@Suppress("unused")
 class Maimai: Plugin() {
     var configPath = "./config/maimai.yml"
     var dataPath = "./data/maimai"

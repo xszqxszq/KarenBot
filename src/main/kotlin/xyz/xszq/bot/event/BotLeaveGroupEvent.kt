@@ -10,6 +10,7 @@ import xyz.xszq.bot.Member
  * @param group 被移除的群组
  * @param operator 移除机器人操作的成员
  */
+@Suppress("unused")
 class BotLeaveGroupEvent(
     override val bot: Bot,
     override val eventId: String,

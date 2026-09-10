@@ -100,7 +100,7 @@ class QueueController(
         if (name.length > 32)
             throw IllegalArgsException("机厅名称过长！")
         ArcadeGroupBind.addArcade(group.id, name)
-        reply("添加机厅成功。", queue("排卡管理", "添加机厅成功。", name))
+        reply("添加机厅成功。", queue("添加机厅成功。", name))
     }
 
     /**
@@ -114,7 +114,7 @@ class QueueController(
             return
         }
         ArcadeGroupBind.deleteArcade(group.id, name)
-        reply("删除机厅成功。", queue("排卡管理", "删除机厅成功。", name))
+        reply("删除机厅成功。", queue("删除机厅成功。", name))
     }
 
     private suspend fun GroupMessageEvent.selectArcade(
@@ -162,7 +162,7 @@ class QueueController(
         }
         val alias = validateAlias(raw)
         ArcadeGroupBind.addAlias(group.id, name, alias)
-        reply("添加机厅别名成功。", queue("排卡管理", "添加机厅别名成功。", name))
+        reply("添加机厅别名成功。", queue("添加机厅别名成功。", name))
     }
 
     /**
@@ -183,7 +183,7 @@ class QueueController(
         }
         val alias = validateAlias(raw)
         ArcadeGroupBind.deleteAlias(group.id, name, alias)
-        reply("删除机厅别名成功。", queue("排卡管理", "删除机厅别名成功。", name))
+        reply("删除机厅别名成功。", queue("删除机厅别名成功。", name))
     }
 
     /**
@@ -201,13 +201,13 @@ class QueueController(
             return
         }
         val aliases = ArcadeGroupBind.aliases(group.id, name).joinToString("，")
-        reply("机厅别名如下：$aliases", queue("排卡管理", "机厅别名如下：$aliases", name))
+        reply("机厅别名如下：$aliases", queue("机厅别名如下：$aliases", name))
     }
 
     private suspend fun GroupMessageEvent.setGroup(targetName: String?) {
         targetName ?: throw NeedHelpException()
         ArcadeGroupBind.bind(group.id, targetName)
-        reply("设置分组成功。", queue("排卡管理", "设置分组成功。"))
+        reply("设置分组成功。", queue("设置分组成功。"))
     }
 
     /**
@@ -234,7 +234,7 @@ class QueueController(
         if (arcades.size == 1) {
             val nowInfo = status(arcades.first(), nowTime)
             return if (textMode()) nowInfo.toPlainText()
-            else queue("排卡管理", nowInfo, arcades.first().name)
+            else queue(nowInfo, arcades.first().name)
         }
         val countInfo = arcades.joinToString("\n") { arcade ->
             status(arcade, nowTime)
@@ -315,7 +315,7 @@ class QueueController(
             reply(
                 "更新成功，现在${arcade.name}人数为${arcade.value}人。",
                 queue(
-                    "排卡管理", "更新成功，现在${arcade.name}人数为${arcade.value}人。",
+                    "更新成功，现在${arcade.name}人数为${arcade.value}人。",
                     arcade.name
                 )
             )
@@ -330,11 +330,10 @@ class QueueController(
     }.trim().newLine()
 
     private fun queue(
-        title: String,
         body: String,
         now: String? = null
     ) = Markdown.create {
-        content = bold(title) + "\n\n" + body
+        content = bold("排卡管理") + "\n\n" + body
         keyboard {
             row {
                 at("查询人数", "/j", enter = true)

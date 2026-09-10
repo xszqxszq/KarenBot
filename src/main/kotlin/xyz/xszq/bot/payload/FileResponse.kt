@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
  * 上传媒体文件的响应
  */
 @Serializable
+@Suppress("unused")
 data class FileResponse(
     @SerialName("file_uuid")
     val uuid: String,

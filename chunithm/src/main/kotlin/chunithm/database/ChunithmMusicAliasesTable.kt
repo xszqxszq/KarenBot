@@ -8,6 +8,7 @@ import xyz.xszq.bot.chunithm.music.MusicInfo
 /**
  * 歌曲别名表
  */
+@Suppress("unused")
 object ChunithmMusicAliasesTable: Table() {
     val id = integer("id")
     val name = varchar("name", 128)

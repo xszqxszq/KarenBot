@@ -9,6 +9,7 @@ import xyz.xszq.bot.User
  * @param button 按钮 ID
  * @param data 按钮数据
  */
+@Suppress("unused")
 open class InteractionEvent(
     override val bot: Bot,
     override val eventId: String,

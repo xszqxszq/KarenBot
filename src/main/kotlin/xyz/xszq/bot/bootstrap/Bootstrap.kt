@@ -16,6 +16,7 @@ object Bootstrap {
      * 入口点
      */
     @JvmStatic
+    @Suppress("unused")
     fun main(args: Array<String>) {
         RuntimePaths.relaunchIfNeeded(Bootstrap::class.java.name, args)
         val currentJar = File(Bootstrap::class.java.protectionDomain.codeSource.location.toURI())

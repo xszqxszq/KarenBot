@@ -8,6 +8,7 @@ import xyz.xszq.bot.maimai.music.PlayerSettings
 /**
  * 用户自定义设置表
  */
+@Suppress("unused")
 object MaimaiSettingsTable: Table() {
     val id = varchar("id", 32)
     val key = varchar("key", 32)
@@ -95,15 +96,4 @@ object MaimaiSettingsTable: Table() {
     ) {
         MaimaiSettingsTable[openId, "game-prior"] = game
     }
-
-    /**
-     * 查询设置了指定键的全部 OpenID
-     *
-     * @param key 设置键
-     * @return 用户 OpenID 列表
-     */
-    suspend fun idsForKey(key: String): List<String> = suspendedTransactionAsync {
-        selectAll().where { MaimaiSettingsTable.key eq key }
-            .map { it[MaimaiSettingsTable.id] }.distinct()
-    }.await()
 }

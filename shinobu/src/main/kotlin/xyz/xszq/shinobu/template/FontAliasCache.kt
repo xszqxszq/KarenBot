@@ -43,7 +43,6 @@ class FontAliasCache(
     private val json = Json { ignoreUnknownKeys = true; prettyPrint = true }
 
     private var cache: CacheData = CacheData()
-    private val aliasMap = mutableMapOf<String, String>()
 
     /**
      * 加载缓存并把字体别名注册进字体提供者
@@ -66,17 +65,8 @@ class FontAliasCache(
             registerFromCache(fontMgr, fontProvider)
         }
 
-        buildAliasMap()
         writeCache()
     }
-
-    /**
-     * 按字体别名解析对应的系统字体键
-     *
-     * @param alias 待解析的字体别名
-     * @return 对应的字体键
-     */
-    fun resolve(alias: String): String? = aliasMap[alias]
 
     private fun readCache(): CacheData = runCatching {
         if (cacheFile.exists()) json.decodeFromString<CacheData>(cacheFile.readText())
@@ -192,15 +182,6 @@ class FontAliasCache(
         }
 
         return aliases.toList()
-    }
-
-    private fun buildAliasMap() {
-        aliasMap.clear()
-        cache.fonts.forEach { (key, entry) ->
-            for (alias in entry.aliases) {
-                aliasMap[alias] = key
-            }
-        }
     }
 
     companion object {

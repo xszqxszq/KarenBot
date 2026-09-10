@@ -8,6 +8,7 @@ import xyz.xszq.bot.Bot
  * @property bot 收到事件的 Bot
  * @property eventId 事件 ID
  */
+@Suppress("unused")
 interface Event {
     val bot: Bot
     val eventId: String

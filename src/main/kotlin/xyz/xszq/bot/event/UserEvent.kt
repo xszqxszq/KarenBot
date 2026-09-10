@@ -7,6 +7,7 @@ import xyz.xszq.bot.User
  *
  * @property user 相关用户
  */
+@Suppress("unused")
 interface UserEvent: Event {
     val user: User
 }

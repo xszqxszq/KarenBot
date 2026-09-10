@@ -180,11 +180,11 @@ class SekaiSticker {
         var upper = Float.POSITIVE_INFINITY
 
         corners.forEach { (x, y) ->
-            updateBounds(anchorX + x, -sin, 8f, 288f) { lo, hi ->
+            updateBounds(anchorX + x, -sin, max = 288f) { lo, hi ->
                 lower = max(lower, lo)
                 upper = min(upper, hi)
             }
-            updateBounds(anchorY + y, cos, 8f, 248f) { lo, hi ->
+            updateBounds(anchorY + y, cos, max = 248f) { lo, hi ->
                 lower = max(lower, lo)
                 upper = min(upper, hi)
             }
@@ -206,7 +206,7 @@ class SekaiSticker {
     private fun updateBounds(
         base: Float,
         coeff: Float,
-        min: Float,
+        min: Float = 8f,
         max: Float,
         onBounds: (Float, Float) -> Unit
     ) {

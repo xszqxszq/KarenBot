@@ -69,7 +69,7 @@ class Touhou(
                 reply(Markdown.create {
                     line(bold("随机东方原曲"))
                     line()
-                    line("${target.name}")
+                    line(target.name)
                     line("来自${game.id}. ${game.name}")
                     keyboard {
                         row {

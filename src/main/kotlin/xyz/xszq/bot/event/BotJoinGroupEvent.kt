@@ -10,6 +10,7 @@ import xyz.xszq.bot.Member
  * @param group 加入的群组
  * @param operator 添加机器人操作的成员
  */
+@Suppress("unused")
 class BotJoinGroupEvent(
     override val bot: Bot,
     override val eventId: String,

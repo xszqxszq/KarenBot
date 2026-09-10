@@ -8,6 +8,7 @@ import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionA
 /**
  * 查分器绑定表
  */
+@Suppress("unused")
 object ProberBindTable: Table() {
     val id = varchar("id", 32)
     val prober = varchar("prober", 32)
@@ -78,7 +79,7 @@ object ProberBindTable: Table() {
     ) = suspendedTransactionAsync {
         select(ProberBindTable.id).where {
             (ProberBindTable.prober eq prober) and (ProberBindTable.key eq key) and
-                    (ProberBindTable.value eq bindValue)
+                    (value eq bindValue)
         }.map { it[ProberBindTable.id] }.firstOrNull()
     }.await()
     /**

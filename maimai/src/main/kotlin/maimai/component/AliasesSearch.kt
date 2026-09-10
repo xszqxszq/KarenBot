@@ -40,11 +40,11 @@ class AliasesSearch(
     private val indexPath: Path = Path.of("${maimai.dataPath}/../database/lucene/$index")
     private val directory = FSDirectory.open(indexPath)
     private val analyzer: Analyzer = object : Analyzer() {
-        override fun createComponents(fieldName: String): Analyzer.TokenStreamComponents {
+        override fun createComponents(fieldName: String): TokenStreamComponents {
             val tokenizer: Tokenizer = StandardTokenizer()
             var stream: TokenStream = LowerCaseFilter(tokenizer)
             stream = NGramTokenFilter(stream, 1, 2, false)
-            return Analyzer.TokenStreamComponents(tokenizer, stream)
+            return TokenStreamComponents(tokenizer, stream)
         }
     }
     private val writer: IndexWriter = IndexWriter(

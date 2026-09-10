@@ -10,6 +10,7 @@ import xyz.xszq.bot.Member
  * @param group 授权的群组
  * @param operator 操作的用户
  */
+@Suppress("unused")
 class BotReceiveGroupEvent(
     override val bot: Bot,
     override val eventId: String,

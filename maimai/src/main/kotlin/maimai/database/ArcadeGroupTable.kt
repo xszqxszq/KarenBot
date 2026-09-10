@@ -5,6 +5,7 @@ import org.jetbrains.exposed.dao.id.IntIdTable
 /**
  * 排队管理的机厅分组表
  */
+@Suppress("unused")
 object ArcadeGroupTable: IntIdTable() {
     val name = varchar("name", 32)
 }

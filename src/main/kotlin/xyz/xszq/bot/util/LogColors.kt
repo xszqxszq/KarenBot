@@ -22,6 +22,7 @@ private const val ANSI_RESET = "$ESC[0m"
  *
  * 根据日志类型输出不同颜色的日志
  */
+@Suppress("unused")
 class LogColorConverter : ClassicConverter() {
     override fun convert(event: ILoggingEvent): String {
         val text = "%-5s %s".format(event.level.levelStr, event.formattedMessage)

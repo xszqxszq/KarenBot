@@ -7,6 +7,7 @@ import xyz.xszq.bot.message.MessageChain
 /**
  * 消息事件
  */
+@Suppress("unused")
 open class MessageEvent(
     override val bot: Bot,
     override val eventId: String,

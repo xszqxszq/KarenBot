@@ -32,7 +32,7 @@ import xyz.xszq.bot.util.json
 /**
  * 功能基类
  */
-@Suppress("unused")
+@Suppress("unused", "EmptyMethod")
 sealed class Controller(
     open val chunithm: Chunithm
 ) {

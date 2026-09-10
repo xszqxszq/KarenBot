@@ -8,6 +8,7 @@ import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionA
 /**
  * 查分器绑定表
  */
+@Suppress("unused")
 object ProberBindTable: Table() {
     val id = varchar("id", 32)
     val prober = varchar("prober", 32)

@@ -11,6 +11,7 @@ import xyz.xszq.bot.Bot
  * @param channelName 频道名
  * @param data 数据
  */
+@Suppress("unused")
 class ChannelEvent<T: Any>(
     override val bot: Bot,
     override val eventId: String = UUID.randomUUID().toString(),
