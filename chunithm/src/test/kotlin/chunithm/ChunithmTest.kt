@@ -32,10 +32,10 @@ class ChunithmTest : ChunithmDatabaseTest() {
             testSearchFamily(sandbox)
             testAliases(sandbox)
             testDeleteAlias(sandbox)
-            testPreview(sandbox)
             testButtons(sandbox)
             testHelp(sandbox)
             testDefault(sandbox)
+            testPreview(sandbox)
         } finally {
             sandbox.cleanup()
         }

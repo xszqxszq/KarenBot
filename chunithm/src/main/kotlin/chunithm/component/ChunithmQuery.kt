@@ -1,5 +1,6 @@
 package xyz.xszq.bot.chunithm.component
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CancellationException
 import xyz.xszq.bot.chunithm.Chunithm
 import xyz.xszq.bot.chunithm.api.ChunithmAPI
@@ -39,6 +40,8 @@ class ChunithmQuery(
             UserBindRequiredException::class.java,
         )
     }
+
+    private val logger = KotlinLogging.logger {}
 
     /**
      * 获取用户查询参数
@@ -192,7 +195,18 @@ class ChunithmQuery(
                     failures.add(QueryFailure(backend, e))
             }
         }
-        throw failures.takeIf { it.isNotEmpty() } ?.selectException() ?: UnknownException()
+        if (failures.isEmpty())
+            throw if (user is UserQueryParams.Self)
+                UserBindRequiredException()
+            else
+                UnknownException()
+        failures.forEach { failure ->
+            if (failure.exception is UnknownException)
+                logger.warn(failure.exception) { "[中二] ${failure.backend.name} 查询失败" }
+            else
+                logger.debug { "[中二] ${failure.backend.name} 查询失败：${failure.exception.message}" }
+        }
+        throw failures.selectException()
     }
 
     private data class QueryFailure(

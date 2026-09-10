@@ -232,21 +232,9 @@ sealed class Controller(
             when (exception) {
                 is UserBindRequiredException -> {
                     val message = exception.message
-                    if (message.isNullOrBlank()) {
-                        val prefer = MaimaiSettingsTable[sender.id, "prober"]
-                        val bound = when (prefer) {
-                            "diving-fish" -> ProberBindTable[sender.id, "diving-fish", "id"] != null
-                            "lxns" -> ProberBindTable[sender.id, "lxns", "refresh"] != null ||
-                                    ProberBindTable[sender.id, "lxns", "friend-code"] != null
-                            else -> ProberBindTable[sender.id, "diving-fish", "id"] != null ||
-                                    ProberBindTable[sender.id, "lxns", "refresh"] != null ||
-                                    ProberBindTable[sender.id, "lxns", "friend-code"] != null
-                        }
-                        if (bound)
-                            messageQueryFailed()
-                        else
-                            messageUserNeedBind(true)
-                    } else
+                    if (message.isNullOrBlank())
+                        messageUserNeedBind(true)
+                    else
                         reply(message)
                 }
                 is UserQueriedNoBindingException -> reply(exception.message ?: "您查询的用户未绑定水鱼账户，无法查询")
@@ -300,6 +288,7 @@ sealed class Controller(
         logger.debug { "[绑定提示] 水鱼 id=${dfId ?: "无"} username=${dfUsername ?: "无"}" }
         logger.debug { "[绑定提示] 落雪 refresh=${lxnsRefresh ?: "无"} 好友码=${lxnsFriendCode ?: "无"}" }
         val (divingFishUrl, lxnsUrl) = bindLinks(replay = replay)
+        val showSwitch = !fromBind && !prefer.isNullOrBlank()
         reply(buildString {
             appendLine("请根据您所使用的查分器，点击下面链接来绑定：")
             appendLine()
@@ -325,13 +314,14 @@ sealed class Controller(
                         link("❄落雪", lxnsUrl)
                     }
                 }
-                if (!fromBind && !prefer.isNullOrBlank()) {
+                if (showSwitch) {
                     row {
                         at("🔄切换查分器", "/bind", enter = true)
                     }
-                }
-                row {
-                    link("查分器是什么？", "https://bot-docs.otmdb.cn/maimai/prober", style = RenderData.GRAY)
+                } else {
+                    row {
+                        link("查分器是什么？", "https://bot-docs.otmdb.cn/maimai/prober", style = RenderData.GRAY)
+                    }
                 }
             }
         }

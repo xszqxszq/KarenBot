@@ -11,7 +11,6 @@ import xyz.xszq.bot.chunithm.component.ChunithmQuery
 import xyz.xszq.bot.chunithm.component.ImageParseResult
 import xyz.xszq.bot.chunithm.component.MarkdownTemplates
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
-import xyz.xszq.bot.chunithm.database.ProberBindTable
 import xyz.xszq.bot.chunithm.exception.*
 import xyz.xszq.bot.chunithm.music.MusicDifficulty
 import xyz.xszq.bot.chunithm.music.MusicInfo
@@ -225,21 +224,9 @@ sealed class Controller(
             when (e) {
                 is UserBindRequiredException -> {
                     val message = e.message
-                    if (message.isNullOrBlank()) {
-                        val prefer = MaimaiSettingsTable[sender.id, "prober"]
-                        val bound = when (prefer) {
-                            "diving-fish" -> ProberBindTable[sender.id, "diving-fish", "id"] != null
-                            "lxns" -> ProberBindTable[sender.id, "lxns", "refresh"] != null ||
-                                    ProberBindTable[sender.id, "lxns", "friend-code"] != null
-                            else -> ProberBindTable[sender.id, "diving-fish", "id"] != null ||
-                                    ProberBindTable[sender.id, "lxns", "refresh"] != null ||
-                                    ProberBindTable[sender.id, "lxns", "friend-code"] != null
-                        }
-                        if (bound)
-                            messageQueryFailed()
-                        else
-                            messageUserNeedBind()
-                    } else
+                    if (message.isNullOrBlank())
+                        messageUserNeedBind()
+                    else
                         reply(message)
                 }
                 is UserQueriedNoBindingException -> reply(e.message ?: "您查询的用户未绑定水鱼账户，无法查询")

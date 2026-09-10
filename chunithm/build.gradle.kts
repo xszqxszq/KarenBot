@@ -34,11 +34,11 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:${exposedVersion}")
     implementation("org.jetbrains.exposed:exposed-kotlin-datetime:${exposedVersion}")
     implementation("org.jetbrains.exposed:exposed-json:${exposedVersion}")
-    implementation("org.jetbrains.exposed:exposed-money:${exposedVersion}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${serializationVersion}")
     implementation("org.mariadb.jdbc:mariadb-java-client:${mariadbVersion}")
     implementation(project(":shinobu"))
     testImplementation("com.soywiz.korge:korge-core:${korlibsVersion}")
+    testImplementation("io.ktor:ktor-client-mock:${ktorVersion}")
     testImplementation(project(":shinobu"))
 }
 

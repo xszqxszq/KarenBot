@@ -158,7 +158,7 @@ class DivingFish(
         val tokens = runCatching {
             onBehalfOf("ref:${subjectRef(openid)}")
         }.getOrNull() ?: runCatching {
-            val qq = QQBindTable[openid] ?: throw UnknownException()
+            val qq = QQBindTable[openid] ?: return null
             logger.debug { "[水鱼调试] bindByRef 改用qq=$qq openid=$openid" }
             onBehalfOf("ref:${subjectRef(qq.toString())}")
         }.getOrNull() ?: run {

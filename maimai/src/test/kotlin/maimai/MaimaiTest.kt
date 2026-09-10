@@ -64,7 +64,6 @@ class MaimaiTest : MaimaiDatabaseTest() {
             testMusicWhatSong(sandbox)
             testMusicFitLevel(sandbox)
             testMusicGenreSongs(sandbox)
-            testPreview(sandbox)
 
             testCalc(sandbox)
 
@@ -86,6 +85,8 @@ class MaimaiTest : MaimaiDatabaseTest() {
             testGuess(sandbox)
             testGuessOpening(sandbox)
             testGuessAdmin(sandbox)
+
+            testPreview(sandbox)
         } finally {
             sandbox.cleanup()
         }

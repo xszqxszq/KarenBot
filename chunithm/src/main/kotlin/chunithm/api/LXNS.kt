@@ -215,23 +215,16 @@ class LXNS(
         is UserQueryParams.Username -> null
         else -> {
             logger.debug { "[落雪调试] getPlayerRecord user=$user music=${music.id}" }
-            val friendCode = resolveFriendCode(user)
+            var friendCode = resolveFriendCode(user)
                 ?: if (user is UserQueryParams.Self) throw UserBindRequiredException() else return null
             logger.debug { "[落雪调试] getPlayerRecord friendCode=$friendCode" }
-            var retry = 0
-            var response = client.get("$apiServer/player/$friendCode/bests") {
-                parameter("song_id", music.id)
-                setDeveloper()
+            var body = playerScores(friendCode, music)
+            // 好友码失效时重新拉取再查一次
+            if ((body.code == 404 || body.code == 400) && user is UserQueryParams.Self) {
+                friendCode = refreshFriendCode(user.event.sender.id)
+                logger.debug { "[落雪调试] getPlayerRecord 重拉好友码=$friendCode" }
+                body = playerScores(friendCode, music)
             }
-            while (response.status == HttpStatusCode.TooManyRequests && retry < 3) {
-                retry++
-                delay(retry * 2000L)
-                response = client.get("$apiServer/player/$friendCode/bests") {
-                    parameter("song_id", music.id)
-                    setDeveloper()
-                }
-            }
-            val body = response.body<LXNSResponse<List<LXNSScore>>>()
             logger.debug { "[落雪调试] getPlayerRecord code=${body.code} friendCode=$friendCode" }
             val scores = when (body.code) {
                 200 -> body.data
@@ -242,6 +235,26 @@ class LXNS(
                 score.toRecord()
             }
         }
+    }
+
+    private suspend fun playerScores(
+        friendCode: String,
+        music: MusicInfo
+    ): LXNSResponse<List<LXNSScore>> {
+        var retry = 0
+        var response = client.get("$apiServer/player/$friendCode/bests") {
+            parameter("song_id", music.id)
+            setDeveloper()
+        }
+        while (response.status == HttpStatusCode.TooManyRequests && retry < 3) {
+            retry++
+            delay(retry * 2000L)
+            response = client.get("$apiServer/player/$friendCode/bests") {
+                parameter("song_id", music.id)
+                setDeveloper()
+            }
+        }
+        return response.body()
     }
 
     override suspend fun getPlayerRecords(
@@ -498,6 +511,22 @@ class LXNS(
         }
     }
 
+    /**
+     * 好友码失效后重新拉取
+     *
+     * @param openid 用户 OpenID
+     * @return 重新拉取的好友码
+     */
+    private suspend fun refreshFriendCode(openid: String): String {
+        logger.debug { "[落雪调试] 好友码失效, 重新拉取 sender=$openid" }
+        val refreshed = fetchFriendCodeByOAuth(openid) ?: fetchFriendCodeByQQ(openid)
+        if (refreshed == null) {
+            logger.debug { "[落雪调试] 好友码重拉失败 sender=$openid" }
+            throw UserBindRequiredException()
+        }
+        return refreshed
+    }
+
     private suspend fun resolvePlayer(
         user: UserQueryParams
     ): Pair<LXNSPlayer, String>? {
@@ -513,13 +542,7 @@ class LXNS(
         }
         if (user !is UserQueryParams.Self || e !is UserNotFoundException)
             throw e
-        logger.debug { "[落雪调试] 好友码失效, 重新拉取 sender=${user.event.sender.id}" }
-        val refreshed = fetchFriendCodeByOAuth(user.event.sender.id)
-            ?: fetchFriendCodeByQQ(user.event.sender.id)
-        if (refreshed == null) {
-            logger.debug { "[落雪调试] 好友码重拉失败 sender=${user.event.sender.id}" }
-            throw UserBindRequiredException()
-        }
+        val refreshed = refreshFriendCode(user.event.sender.id)
         val player = getPlayerInfo(refreshed) ?: return null
         return Pair(player, refreshed)
     }
