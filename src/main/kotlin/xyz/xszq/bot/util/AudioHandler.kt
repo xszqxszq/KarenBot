@@ -1,7 +1,7 @@
 package xyz.xszq.bot.util
 
-import io.github.kasukusakura.silkcodec.SilkCoder
 import io.github.oshai.kotlinlogging.KotlinLogging
+import xyz.xszq.silkt.SilkCoder
 import korlibs.io.async.use
 import korlibs.io.file.VfsFile
 import korlibs.io.file.VfsOpenMode
