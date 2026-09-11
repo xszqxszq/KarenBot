@@ -24,9 +24,9 @@ KarenBot
 │
 ├── maimai/     # 舞萌DX
 ├── chunithm/   # 中二节奏
-├── audio/       # 音频功能
+├── audio/      # 音频功能
 ├── meme/       # 表情包
-├── random/      # 随机功能
+├── random/     # 随机功能
 ├── text/       # 文本回复
 ├── admin/      # 管理功能
 │
