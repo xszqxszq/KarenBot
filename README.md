@@ -24,20 +24,20 @@ KarenBot
 │
 ├── maimai/     # 舞萌DX
 ├── chunithm/   # 中二节奏
-├── otto/       # 活字印刷
+├── audio/       # 音频功能
 ├── meme/       # 表情包
-├── guess/      # 东方猜原曲
-├── text/       # 文本回复/随机表情
+├── random/      # 随机功能
+├── text/       # 文本回复
 ├── admin/      # 管理功能
 │
 ├── shinobu/    # 图片渲染模块
-│
-└── data/       # 资源文件
 ```
+
+资源文件请移步至 [KarenBot-Resources](https://github.com/xszqxszq/KarenBot-Resources)
 
 ## 问题反馈
 
-Bug或功能建议请在[Issues](https://github.com/xszqxszq/KarenBot/issues)中提出，也可提交[Pull Request](https://github.com/xszqxszq/KarenBot/pulls)。
+Bug或功能建议请在 [Issues](https://github.com/xszqxszq/KarenBot/issues) 中提出，也可提交 [Pull Request](https://github.com/xszqxszq/KarenBot/pulls)。
 
 ## 鸣谢
 
