@@ -298,7 +298,7 @@ class GuessController(
                     )
                 }
             } else {
-                val uploaded = bot.cos.uploadBinary(cropped, "jpg")
+                val uploaded = bot.cos.uploadBinary(cropped, ".jpg")
                 eventToReply[contextId] ?.reply(guessImage(
                     uploaded.url,
                     hint

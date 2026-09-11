@@ -43,9 +43,6 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("com.h2database:h2:$h2Version")
     implementation("com.mysql:mysql-connector-j:9.3.0")
-    implementation("com.qcloud:cos_api:5.6.277") {
-        exclude(group = "org.bouncycastle", module = "bcprov-jdk15on")
-    }
     implementation("com.github.houbb:opencc4j:${opencc4jVersion}")
     implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
     implementation("com.sksamuel.hoplite:hoplite-yaml:$hopliteVersion")

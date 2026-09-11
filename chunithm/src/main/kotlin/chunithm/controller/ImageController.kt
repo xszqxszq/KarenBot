@@ -408,7 +408,7 @@ class ImageController(
         event: MessageEvent,
         message: String ?= null
     ): Unit = useTempFile { file ->
-        this.encodeToData(EncodedImageFormat.JPEG, 95).use { data ->
+        this.encodeToData(EncodedImageFormat.JPEG, 90).use { data ->
             file.writeBytes(data!!.bytes)
         }
         this.close()
@@ -429,7 +429,7 @@ class ImageController(
         event: MessageEvent,
         handle: suspend MessageEvent.(String) -> Unit
     ): Unit = useTempFile(suffix = ".jpg") { file ->
-        this.encodeToData(EncodedImageFormat.JPEG, 95).use { data ->
+        this.encodeToData(EncodedImageFormat.JPEG, 90).use { data ->
             val bytes = data!!.bytes
             val uploaded = event.bot.cos.uploadBinary(bytes, suffix = ".jpg")
             handle.invoke(event, uploaded.url)
