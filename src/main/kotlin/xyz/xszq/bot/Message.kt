@@ -1,8 +1,6 @@
 @file:Suppress("unused")
 package xyz.xszq.bot
 
-import korlibs.image.format.readNativeImage
-import korlibs.image.format.showImageAndWait
 import korlibs.io.file.extensionLC
 import kotlinx.coroutines.DelicateCoroutinesApi
 import xyz.xszq.bot.event.*
@@ -22,7 +20,7 @@ import xyz.xszq.bot.util.*
 @OptIn(DelicateCoroutinesApi::class)
 suspend fun ReplyAble.uploadMedia(media: Media): MediaUpload? {
     if (eventId.isBlank()) {
-        if (media is Image) media.file.readNativeImage().showImageAndWait()
+        if (media is Image) media.file.showImageAndWait()
         return null
     }
     val remoteFile = bot.cos.upload(media.file)
