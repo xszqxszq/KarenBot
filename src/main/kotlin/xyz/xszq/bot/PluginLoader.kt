@@ -25,6 +25,7 @@ import java.util.jar.JarFile
  * @property database 数据库连接
  * @property llmClient LLM 客户端
  * @property subscribes 消息订阅管理器
+ * @property infoCache 群与用户信息缓存
  */
 class PluginLoader(
     val api: OpenAPI,
@@ -37,6 +38,7 @@ class PluginLoader(
 ) {
     val bot = Bot(api, cos, botInfo)
     val files = FileManager()
+    val infoCache = InfoCache(api, bot, database)
 
     /**
      * 手动触发事件，CLI / 测试环境使用

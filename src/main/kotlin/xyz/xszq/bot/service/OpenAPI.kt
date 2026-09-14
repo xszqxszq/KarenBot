@@ -51,8 +51,8 @@ class OpenAPI(
 
     @Suppress("unused")
     companion object {
-        const val DEFAULT_SERVER = "https://api.sgroup.qq.com"
-        const val DEFAULT_ACCESS_TOKEN_URL = "https://bots.qq.com/app/getAppAccessToken"
+        const val DEFAULT_SERVER = "https://api.bot.qq.com"
+        const val DEFAULT_ACCESS_TOKEN_URL = "https://api.bot.qq.com/app/getAppAccessToken"
 
         fun defaultHttpClient() = HttpClient(OkHttp) {
             install(ContentNegotiation) {
@@ -88,13 +88,19 @@ class OpenAPI(
         headers["X-Union-Appid"] = config.appId
     }
 
-    private suspend inline fun <reified T> HttpResponse.result(log: () -> Unit = {}): T? {
+    private suspend inline fun <reified T> HttpResponse.result(
+        quiet: Boolean = false,
+        log: () -> Unit = {}
+    ): T? {
         if (status.isSuccess()) {
             log()
             return body<T>()
         }
         val error = body<ErrorResponse>()
-        errorLogger.error { "[${error.code}] ${error.message}" }
+        if (quiet)
+            logger.debug { "[${error.code}] ${error.message}" }
+        else
+            errorLogger.error { "[${error.code}] ${error.message}" }
         return null
     }
     private suspend inline fun <reified T> HttpResponse.resultOrThrow(): T? {
@@ -289,4 +295,54 @@ class OpenAPI(
     suspend fun getMe(): UsersMeResponse? = client.get("$server/users/@me") {
         setToken()
     }.result<UsersMeResponse>()
+
+    /**
+     * 获取群基本信息
+     *
+     * @param group 目标群 ID
+     */
+    suspend fun getGroupInfo(group: String): GroupInfoResponse? =
+        client.get("$server/v2/groups/$group/info") {
+            setToken()
+        }.result<GroupInfoResponse>()
+
+    /**
+     * 获取机器人群内状态
+     *
+     * @param group 目标群 ID
+     */
+    suspend fun getBotState(group: String): BotStateResponse? =
+        client.get("$server/v2/groups/$group/bot_state") {
+            setToken()
+        }.result<BotStateResponse>(quiet = true)
+
+    /**
+     * 获取入群申请列表
+     *
+     * @param group 目标群 ID
+     * @param cursor 分页游标
+     * @param limit 单页数量
+     */
+    suspend fun getJoinRequestList(
+        group: String,
+        cursor: String = "",
+        limit: Int = 20
+    ): JoinRequestListResponse? =
+        client.get("$server/v2/groups/$group/join_request_list") {
+            setToken()
+            parameter("cursor", cursor)
+            parameter("limit", limit)
+        }.result<JoinRequestListResponse>(quiet = true)
+
+    /**
+     * 查询群禁言状态
+     *
+     * @param group 目标群 ID
+     */
+    suspend fun getRestrictChatSetting(
+        group: String
+    ): RestrictChatSettingResponse? =
+        client.get("$server/v2/groups/$group/restrict_chat_setting") {
+            setToken()
+        }.result<RestrictChatSettingResponse>(quiet = true)
 }

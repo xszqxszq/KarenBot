@@ -113,7 +113,9 @@ class WebhookDispatcher(
         // 私聊消息
         EventType.C2C.Message -> run {
             val data = json.decodeFromString<C2CMessageCreate>(payload.d!!)
-            logger.debug { "Received: [${data.author.id}]" }
+            logger.debug {
+                "Received: ${data.author.username}(${data.author.id})"
+            }
             if (forwardTo(subject = data.author.id, body = body, call = call))
                 return@run null
             val images = downloadImages(data.attachments, pluginLoader.files, logger)
@@ -133,11 +135,21 @@ class WebhookDispatcher(
         // 群聊消息与 AT 消息
         EventType.Group.AtMessage, EventType.Group.Message -> run {
             val data = json.decodeFromString<GroupMessageCreate>(payload.d!!)
-            logger.debug { "Received: [${data.group}] (${data.author.id})" }
+            logger.debug {
+                "Received: ${pluginLoader.bot.groupTag(data.group)} " +
+                    "${data.author.username}(${data.author.id})"
+            }
             if (forwardTo(group = data.group, body = body, call = call))
                 return@run null
             val images = downloadImages(data.attachments, pluginLoader.files, logger)
             val content = filter.filter(data.content)
+            val group = pluginLoader.infoCache.visit(
+                group = data.group,
+                member = data.author.id,
+                username = data.author.username,
+                isBot = data.author.bot,
+                role = MemberRole.of(data.author.role)
+            )
             val isAt = payload.t == EventType.Group.AtMessage
             val message = when {
                 isAt -> MessageChain(
@@ -155,17 +167,14 @@ class WebhookDispatcher(
                     attachments = data.attachments
                 )
             }
-            when {
-                isAt -> recvGroupAtLogger.info {
-                    "[${data.group}] ${data.author.username}(${data.author.id}) -> " +
-                            message.content.trim().replace("\n", "\\n")
-                }
-                data.author.bot -> recvGroupBotLogger.info {
-                    "[${data.group}] ${data.author.username}(${data.author.id}) -> " +
-                            message.content.trim().replace("\n", "\\n")
-                }
-                else -> recvGroupLogger.info { "[${data.group}] ${data.author.username}(${data.author.id}) -> " +
-                        message.content.trim().replace("\n", "\\n")
+            group.whenInfoReady { ready ->
+                val sender = "${data.author.username}(${data.author.id})"
+                val head = "${ready.logPrefix} $sender"
+                val text = message.content.trim().replace("\n", "\\n")
+                when {
+                    isAt -> recvGroupAtLogger.info { "$head -> $text" }
+                    data.author.bot -> recvGroupBotLogger.info { "$head -> $text" }
+                    else -> recvGroupLogger.info { "$head -> $text" }
                 }
             }
             if (!isAt && (data.author.bot || data.mentions.any { it.bot && !it.isSelf }))
@@ -176,7 +185,7 @@ class WebhookDispatcher(
                 id = data.id,
                 message = message,
                 sender = memberOf(pluginLoader.bot, data.author.id, data.author.username, data.author.role),
-                group = Group(pluginLoader.bot, data.group),
+                group = group,
                 reference = data.messageElements.firstOrNull() ?.toMessageChain(),
                 mentions = when {
                     isAt -> listOf(pluginLoader.bot.self)
@@ -190,10 +199,14 @@ class WebhookDispatcher(
         // 新增好友
         EventType.C2C.Add -> run {
             val data = json.decodeFromString<C2CBotUpdate>(payload.d!!)
-            logger.debug { "Received: Friend ${data.user} Added" }
+            logger.debug {
+                "Received: Friend ${pluginLoader.bot.userTag(data.user)} Added"
+            }
             if (forwardTo(subject = data.user, body = body, call = call))
                 return@run null
-            eventLogger.info { "添加好友: ${data.user}" }
+            eventLogger.info {
+                "添加好友: ${pluginLoader.bot.userTag(data.user)}"
+            }
             BotAddFriendEvent(
                 bot = pluginLoader.bot,
                 eventId = payload.id!!,
@@ -203,10 +216,17 @@ class WebhookDispatcher(
         // 新增群聊
         EventType.Group.Add -> run {
             val data = json.decodeFromString<GroupBotUpdate>(payload.d!!)
-            logger.debug { "Received: Joined group [${data.group}] by (${data.operator})" }
+            logger.debug {
+                "Received: Joined group " +
+                    "${pluginLoader.bot.groupTag(data.group)} by " +
+                    pluginLoader.bot.userTag(data.operator)
+            }
             if (forwardTo(group = data.group, body = body, call = call))
                 return@run null
-            eventLogger.info { "加入群聊: ${data.group} (by ${data.operator})" }
+            eventLogger.info {
+                "加入群聊: ${pluginLoader.bot.groupTag(data.group)} " +
+                    "(by ${pluginLoader.bot.userTag(data.operator)})"
+            }
             BotJoinGroupEvent(
                 bot = pluginLoader.bot,
                 eventId = payload.id!!,
@@ -217,10 +237,15 @@ class WebhookDispatcher(
         // 好友移除
         EventType.C2C.Remove -> run {
             val data = json.decodeFromString<C2CBotUpdate>(payload.d!!)
-            logger.debug { "Received: Friend ${data.user} Deleted" }
+            logger.debug {
+                "Received: Friend ${pluginLoader.bot.userTag(data.user)} " +
+                    "Deleted"
+            }
             if (forwardTo(subject = data.user, body = body, call = call))
                 return@run null
-            eventLogger.info { "删除好友: ${data.user}" }
+            eventLogger.info {
+                "删除好友: ${pluginLoader.bot.userTag(data.user)}"
+            }
             BotRemoveFriendEvent(
                 bot = pluginLoader.bot,
                 eventId = payload.id!!,
@@ -230,10 +255,17 @@ class WebhookDispatcher(
         // 群聊移除
         EventType.Group.Remove -> run {
             val data = json.decodeFromString<GroupBotUpdate>(payload.d!!)
-            logger.debug { "Received: Left group [${data.group}] by (${data.operator})" }
+            logger.debug {
+                "Received: Left group " +
+                    "${pluginLoader.bot.groupTag(data.group)} by " +
+                    pluginLoader.bot.userTag(data.operator)
+            }
             if (forwardTo(group = data.group, body = body, call = call))
                 return@run null
-            eventLogger.info { "退出群聊: ${data.group} (by ${data.operator})" }
+            eventLogger.info {
+                "退出群聊: ${pluginLoader.bot.groupTag(data.group)} " +
+                    "(by ${pluginLoader.bot.userTag(data.operator)})"
+            }
             BotLeaveGroupEvent(
                 bot = pluginLoader.bot,
                 eventId = payload.id!!,
@@ -244,10 +276,15 @@ class WebhookDispatcher(
         // 允许私聊主动消息
         EventType.C2C.Receive -> run {
             val data = json.decodeFromString<C2CBotUpdate>(payload.d!!)
-            logger.debug { "Received: User ${data.user} allowed message push" }
+            logger.debug {
+                "Received: User ${pluginLoader.bot.userTag(data.user)} " +
+                    "allowed message push"
+            }
             if (forwardTo(subject = data.user, body = body, call = call))
                 return@run null
-            eventLogger.info { "用户允许主动消息: ${data.user}" }
+            eventLogger.info {
+                "用户允许主动消息: ${pluginLoader.bot.userTag(data.user)}"
+            }
             BotReceiveFriendEvent(
                 bot = pluginLoader.bot,
                 eventId = payload.id!!,
@@ -257,10 +294,18 @@ class WebhookDispatcher(
         // 允许群组主动消息
         EventType.Group.Receive -> run {
             val data = json.decodeFromString<GroupBotUpdate>(payload.d!!)
-            logger.debug { "Received: Group [${data.group}] allowed message push by (${data.operator})" }
+            logger.debug {
+                "Received: Group ${pluginLoader.bot.groupTag(data.group)} " +
+                    "allowed message push by " +
+                    pluginLoader.bot.userTag(data.operator)
+            }
             if (forwardTo(group = data.group, body = body, call = call))
                 return@run null
-            eventLogger.info { "群聊允许主动消息: ${data.group} (by ${data.operator})" }
+            eventLogger.info {
+                "群聊允许主动消息: " +
+                    "${pluginLoader.bot.groupTag(data.group)} " +
+                    "(by ${pluginLoader.bot.userTag(data.operator)})"
+            }
             BotReceiveGroupEvent(
                 bot = pluginLoader.bot,
                 eventId = payload.id!!,
@@ -271,10 +316,15 @@ class WebhookDispatcher(
         // 拒绝私聊主动消息
         EventType.C2C.Reject -> run {
             val data = json.decodeFromString<C2CBotUpdate>(payload.d!!)
-            logger.debug { "Received: User ${data.user} denied message push" }
+            logger.debug {
+                "Received: User ${pluginLoader.bot.userTag(data.user)} " +
+                    "denied message push"
+            }
             if (forwardTo(subject = data.user, body = body, call = call))
                 return@run null
-            eventLogger.info { "用户关闭主动消息: ${data.user}" }
+            eventLogger.info {
+                "用户关闭主动消息: ${pluginLoader.bot.userTag(data.user)}"
+            }
             BotRejectFriendEvent(
                 bot = pluginLoader.bot,
                 eventId = payload.id!!,
@@ -284,10 +334,18 @@ class WebhookDispatcher(
         // 拒绝群组主动消息
         EventType.Group.Reject -> run {
             val data = json.decodeFromString<GroupBotUpdate>(payload.d!!)
-            logger.debug { "Received: Group [${data.group}] denied message push by (${data.operator})" }
+            logger.debug {
+                "Received: Group ${pluginLoader.bot.groupTag(data.group)} " +
+                    "denied message push by " +
+                    pluginLoader.bot.userTag(data.operator)
+            }
             if (forwardTo(group = data.group, body = body, call = call))
                 return@run null
-            eventLogger.info { "群聊关闭主动消息: ${data.group} (by ${data.operator})" }
+            eventLogger.info {
+                "群聊关闭主动消息: " +
+                    "${pluginLoader.bot.groupTag(data.group)} " +
+                    "(by ${pluginLoader.bot.userTag(data.operator)})"
+            }
             BotRejectGroupEvent(
                 bot = pluginLoader.bot,
                 eventId = payload.id!!,
@@ -298,9 +356,14 @@ class WebhookDispatcher(
         // 群有新成员加入
         EventType.Group.MemberAdd -> run {
             val data = json.decodeFromString<GroupMemberUpdate>(payload.d!!)
-            logger.debug { "Received: Group [${data.group}] has member (${data.member}) joined" }
+            logger.debug {
+                "Received: Group ${pluginLoader.bot.groupTag(data.group)} " +
+                    "has member " +
+                    "${pluginLoader.bot.userTag(data.member)} joined"
+            }
             if (forwardTo(group = data.group, body = body, call = call))
                 return@run null
+            pluginLoader.infoCache.join(data.group, data.member)
             UserJoinGroupEvent(
                 bot = pluginLoader.bot,
                 eventId = payload.id!!,
@@ -311,9 +374,13 @@ class WebhookDispatcher(
         // 群有成员退群
         EventType.Group.MemberRemove -> run {
             val data = json.decodeFromString<GroupMemberUpdate>(payload.d!!)
-            logger.debug { "Received: Group [${data.group}] has member (${data.member}) left" }
+            logger.debug {
+                "Received: Group ${pluginLoader.bot.groupTag(data.group)} " +
+                    "member ${pluginLoader.bot.userTag(data.member)} left"
+            }
             if (forwardTo(group = data.group, body = body, call = call))
                 return@run null
+            pluginLoader.infoCache.remove(data.group, data.member)
             UserLeaveGroupEvent(
                 bot = pluginLoader.bot,
                 eventId = payload.id!!,
@@ -324,7 +391,15 @@ class WebhookDispatcher(
         // 互动消息
         EventType.Interaction -> run {
             val data = json.decodeFromString<InteractionCreate>(payload.d!!)
-            logger.debug { "Received: Interaction [${data.groupOpenId ?: "C2C"}] (${data.userOpenId})" }
+            logger.debug {
+                val group = data.groupOpenId ?.let {
+                    pluginLoader.bot.groupTag(it) + " "
+                } ?: ""
+                val user = data.userOpenId ?.let {
+                    pluginLoader.bot.userTag(it)
+                }
+                "Received: Interaction $group$user"
+            }
             if (forwardTo(group = data.groupOpenId, body = body, call = call))
                 return@run null
             if (data.data.resolved.buttonData == null || data.data.resolved.buttonId == null) {
@@ -341,8 +416,12 @@ class WebhookDispatcher(
                     group = Group(pluginLoader.bot, data.groupOpenId!!)
                 ).also {
                     eventLogger.info {
-                        "[互动] [${data.groupOpenId}] (${data.groupMemberOpenId}) " +
-                                "<${data.data.resolved.buttonId}> ${data.data.resolved.buttonData}"
+                        "[互动] " +
+                            pluginLoader.bot.groupTag(data.groupOpenId) +
+                            " " +
+                            pluginLoader.bot.userTag(data.groupMemberOpenId) +
+                            " <${data.data.resolved.buttonId}> " +
+                            data.data.resolved.buttonData
                     }
                 }
                 ChatType.C2C -> InteractionEvent(
@@ -355,8 +434,8 @@ class WebhookDispatcher(
                 ).also {
                     eventLogger.info {
                         val value = data.data.resolved.buttonData.replace("\n", "\\n")
-                        "[互动] [${data.userOpenId}] " +
-                                "<${data.data.resolved.buttonId}> $value"
+                        "[互动] ${pluginLoader.bot.userTag(data.userOpenId)} " +
+                            "<${data.data.resolved.buttonId}> $value"
                     }
                 }
                 else -> null

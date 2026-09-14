@@ -21,6 +21,9 @@ import xyz.xszq.bot.config.BotConfig
 import xyz.xszq.bot.config.COSConfig
 import xyz.xszq.bot.config.ForwardConfig
 import xyz.xszq.bot.database.GroupCommandSettings
+import xyz.xszq.bot.database.GroupInfoTable
+import xyz.xszq.bot.database.GroupMemberTable
+import xyz.xszq.bot.database.UserInfoTable
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.llm.LLMClient
 import xyz.xszq.bot.llm.LLMConfig
@@ -88,7 +91,9 @@ class BotRuntime : RuntimeControl {
             password = botConfig.database.password
         )
         transaction(database) {
-            listOf(GroupCommandSettings).forEach { table ->
+            listOf(
+                GroupCommandSettings, GroupInfoTable, GroupMemberTable, UserInfoTable
+            ).forEach { table ->
                 if (!table.exists())
                     SchemaUtils.create(table)
             }
@@ -113,6 +118,8 @@ class BotRuntime : RuntimeControl {
             control = this,
             botInfo = me
         )
+        // 载入群与用户信息缓存
+        pluginLoader.infoCache.load()
         pluginLoader.files.start()
         pluginLoader.reloadAllPlugins()
 

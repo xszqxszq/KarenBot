@@ -69,8 +69,16 @@ suspend fun ReplyAble.uploadMedia(media: Media): MediaUpload? {
  */
 fun ReplyAble.log(message: MessageChain) {
     when (this) {
-        is GroupReplyAbleEvent -> sendGroupLogger.info { "[${group.id}] <- ${message.content.replace("\n", "\\n").replace("\r", "\\r")}" }
-        is UserReplyAbleEvent -> sendC2CLogger.info { "${user.username}(${user.id}) <- ${message.content.replace("\n", "\\n").replace("\r", "\\r")}" }
+        is GroupReplyAbleEvent -> group.whenInfoReady { ready ->
+            sendGroupLogger.info {
+                "${ready.logPrefix} <- " +
+                    message.content.replace("\n", "\\n").replace("\r", "\\r")
+            }
+        }
+        is UserReplyAbleEvent -> sendC2CLogger.info {
+            "${user.logPrefix} <- " +
+                message.content.replace("\n", "\\n").replace("\r", "\\r")
+        }
     }
 }
 

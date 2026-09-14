@@ -1,7 +1,6 @@
 package xyz.xszq.bot.util
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import xyz.xszq.silkt.SilkCoder
 import korlibs.io.async.use
 import korlibs.io.file.VfsFile
 import korlibs.io.file.VfsOpenMode
@@ -10,6 +9,7 @@ import korlibs.io.stream.*
 import xyz.xszq.bot.ffmpeg.FFMpegFileType
 import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.bot.ffmpeg.FFProbe
+import xyz.xszq.silkt.SilkCoder
 import java.io.File
 
 /**
