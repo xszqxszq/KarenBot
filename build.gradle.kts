@@ -21,7 +21,6 @@ plugins {
     `java-test-fixtures`
     kotlin("jvm")
     kotlin("plugin.serialization")
-    id("com.github.johnrengelman.shadow") version "8.0.0"
 }
 
 application {
@@ -109,7 +108,7 @@ tasks.jar {
     })
 }
 tasks.register("allPlugins") {
-    group = "shadow"
+    group = "build"
     description = "Build all Plugins."
 
     val subProjects = subprojects
