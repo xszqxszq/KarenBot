@@ -12,12 +12,12 @@ data class Attachment(
     val filename: String,
     val width: Int ?= null,
     val height: Int ?= null,
-    val size: Int,
+    val size: Long,
     @SerialName("content_type")
     val contentType: String,
     val content: String ?= null,
     @SerialName("voice_wav_url")
-    val voiceWavUrl: String? = null,
+    val voiceWavUrl: String ?= null,
     @SerialName("asr_refer_text")
-    val asrReferText: String? = null,
+    val asrReferText: String ?= null,
 )
