@@ -98,6 +98,7 @@ object ComboQuery {
         aliases("aaa") { rateGE("aaa") }
 
         aliases("完整", "全") { limit(disable15 = true) }
+        aliases("带new", "包含new", "包括new", "含new") { limit(disable15 = false) }
         aliases("拟合定数", "拟合", "nh") {
             modification(
                 fitLevelValue = true,
@@ -470,7 +471,7 @@ object ComboQuery {
      * 是否要求禁用 New 15
      */
     fun List<Filter>?.isAllRequired() =
-        this ?.any { it.disable15 } ?: false
+        this ?.firstNotNullOfOrNull { it.disable15 }
 
     /**
      * 是否要求拟合定数

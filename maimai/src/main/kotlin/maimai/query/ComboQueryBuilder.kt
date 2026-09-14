@@ -130,7 +130,7 @@ class ComboQueryBuilder {
      *
      * @param disable15 是否强制禁用 New 15
      */
-    fun limit(disable15: Boolean = false) =
+    fun limit(disable15: Boolean ?= null) =
         Filter(FilterType.Limit, disable15 = disable15)
 
     /**

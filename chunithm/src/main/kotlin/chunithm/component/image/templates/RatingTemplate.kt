@@ -101,8 +101,9 @@ class RatingTemplate(
         val bests = allRecords.take(newCount + oldCount)
         val isNewDisabled = when {
             filterParams == null -> false
-            filterParams.isAllRequired -> true
-            // TODO: 国服最新版本不止一个，暂时先屏蔽filterParams.newestVersion\
+            filterParams.isAllRequired == false -> false
+            filterParams.isAllRequired == true -> true
+            // TODO: 国服最新版本不止一个，暂时先屏蔽filterParams.newestVersion
             allRecords.none { !it.music.isNew } -> true
             else -> allRecords.filter { it.music.isNew }.size < newCount
         }
@@ -162,13 +163,13 @@ class RatingTemplate(
 
         val (records, actualPage, totalPages) = allRecords.let { filtered ->
             val records = filtered.sortedBy { -it.achievement }
-            if (filterParams.isAllRequired)
+            if (filterParams.isAllRequired == true)
                 Triple(records, 1, 1)
             else
                 records.pagination(page, pageSize)
         }
 
-        val title = if (filterParams.isAllRequired)
+        val title = if (filterParams.isAllRequired == true)
             "${filterParams.name}分数列表"
         else
             "${filterParams.name}分数列表，第 $actualPage 页 (共 $totalPages 页)"

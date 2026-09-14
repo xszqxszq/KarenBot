@@ -697,7 +697,7 @@ class ImageController(
         val raw = filters.filterCharts(maimai.musics())
         var detailed = filters.isDetailed()
 
-        if (filters.any { it.type.matchesChart } || filters.isAllRequired())
+        if (filters.any { it.type.matchesChart } || filters.isAllRequired() == true)
             return Pair(raw, detailed)
         var charts = if (filters.isPlate()) {
             raw.filter { it.difficulty >= MusicDifficulty.Master }

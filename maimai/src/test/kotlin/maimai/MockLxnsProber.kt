@@ -1,30 +1,18 @@
 package xyz.xszq.bot.maimai
 
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.mock.MockEngine
-import io.ktor.client.engine.mock.MockRequestHandleScope
-import io.ktor.client.engine.mock.respond
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.HttpResponseData
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.headersOf
-import io.ktor.serialization.kotlinx.json.json
+import io.ktor.client.*
+import io.ktor.client.engine.mock.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.delay
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.buildJsonArray
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
+import kotlinx.serialization.json.*
 import xyz.xszq.bot.maimai.api.LXNS
 import xyz.xszq.bot.maimai.api.MaimaiAPI
 import xyz.xszq.bot.maimai.component.MaimaiData
 import xyz.xszq.bot.maimai.exception.UserBindRequiredException
-import xyz.xszq.bot.maimai.music.MusicInfo
-import xyz.xszq.bot.maimai.music.RatingResponse
-import xyz.xszq.bot.maimai.music.Record
-import xyz.xszq.bot.maimai.music.RecordsResponse
-import xyz.xszq.bot.maimai.music.UserQueryParams
+import xyz.xszq.bot.maimai.music.*
 
 /**
  * 落雪查分器 mock

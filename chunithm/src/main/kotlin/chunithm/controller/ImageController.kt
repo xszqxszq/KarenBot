@@ -10,7 +10,6 @@ import xyz.xszq.bot.chunithm.Chunithm.Companion.textMode
 import xyz.xszq.bot.chunithm.component.image.FilterParams
 import xyz.xszq.bot.chunithm.exception.FilterNoResultException
 import xyz.xszq.bot.chunithm.exception.NoDataException
-import xyz.xszq.bot.chunithm.exception.NotSupportedException
 import xyz.xszq.bot.chunithm.music.ChartInfo
 import xyz.xszq.bot.chunithm.music.MusicDifficulty
 import xyz.xszq.bot.chunithm.music.RecordsResponse
@@ -309,9 +308,6 @@ class ImageController(
             )
         }
         val filtered = filters.filterRecords(response.records) ?: emptyList()
-        if (filterParams.isAllRequired && filtered.size > 1500) {
-            throw NotSupportedException("您查询的记录过多，全分数列表最多支持1500条记录")
-        }
         val (elapsed, result) = countTime {
             chunithm.image.rating.scoreList(
                 player = response.player,
@@ -371,7 +367,7 @@ class ImageController(
         val raw = filters.filterCharts(chunithm.musics())
         var detailed = filters.isDetailed()
 
-        if (filters.any { it.type.matchesChart } || filters.isAllRequired())
+        if (filters.any { it.type.matchesChart } || filters.isAllRequired() == true)
             return Pair(raw, detailed)
         var charts = if (filters.isPlate()) {
             raw.filter { it.difficulty >= MusicDifficulty.Master }

@@ -25,10 +25,10 @@ class Filter(
     val chart: (ChartInfo) -> Boolean = defaultChartFilter,
     val record: (Record) -> Boolean = defaultRecordFilter,
     val sortBy: (Record) -> Comparable<*> = defaultSort,
-    val nowVersion: () -> GameVersion? = defaultVersion,
-    val modifier: (Record.() -> Unit)? = null,
-    val disable15: Boolean = false,
-    val name: String? = null,
+    val nowVersion: () -> GameVersion ?= defaultVersion,
+    val modifier: (Record.() -> Unit) ?= null,
+    val disable15: Boolean ?= null,
+    val name: String ?= null,
     val fitLevelValue: Boolean = false,
     val singleChart: Boolean = false
 ) {

@@ -126,7 +126,7 @@ class ComboQueryBuilder {
      *
      * @param disableN20 是否强制禁用 New 20
      */
-    fun limit(disableN20: Boolean = false) =
+    fun limit(disableN20: Boolean ?= null) =
         Filter(FilterType.Limit, disableN20 = disableN20)
 
     /**

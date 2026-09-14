@@ -14,7 +14,7 @@ import xyz.xszq.bot.chunithm.music.RequiresType
 data class FilterParams(
     var name: String = "",
     var newestVersion: GameVersion,
-    var isAllRequired: Boolean,
+    var isAllRequired: Boolean ?= null,
     var isDetailed: Boolean,
     var requiresType: RequiresType = RequiresType.Achievement,
     var sortBy: List<(Record) -> Comparable<*>> = emptyList()

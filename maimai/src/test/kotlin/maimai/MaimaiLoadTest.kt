@@ -3,6 +3,7 @@ package xyz.xszq.bot.maimai
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.junit.jupiter.api.Tag
 import xyz.xszq.bot.load.FakeQQServer
 import xyz.xszq.bot.load.LoadHarness
 import xyz.xszq.bot.load.LoadScenario
@@ -12,7 +13,6 @@ import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.database.ProberBindTable
 import xyz.xszq.bot.payload.AdminCheckRequest
 import xyz.xszq.bot.subscribe.Channel
-import org.junit.jupiter.api.Tag
 import kotlin.test.Test
 
 /**

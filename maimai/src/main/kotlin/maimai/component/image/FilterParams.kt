@@ -15,7 +15,7 @@ import xyz.xszq.bot.maimai.music.RequiresType
 data class FilterParams(
     var name: String = "",
     var newestVersion: GameVersion,
-    var isAllRequired: Boolean,
+    var isAllRequired: Boolean ?= null,
     var isFitLevelValue: Boolean,
     var isDetailed: Boolean,
     var requiresType: RequiresType = RequiresType.Achievement,

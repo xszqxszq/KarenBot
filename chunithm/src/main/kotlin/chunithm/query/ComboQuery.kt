@@ -83,6 +83,7 @@ object ComboQuery {
         aliases("aaa") { rateGE("aaa") }
 
         aliases("完整", "全") { limit(disableN20 = true) }
+        aliases("带new", "包含new", "包括new", "含new") { limit(disableN20 = false) }
         aliases("理想") {
             modification(modifier = {
                 when (rate) {
@@ -392,20 +393,20 @@ object ComboQuery {
      */
     fun List<Filter>?.isPlate() = when {
         this == null -> false
-        else -> any { it.name?.startsWith("plate") == true }
+        else -> any { it.name ?.startsWith("plate") == true }
     }
 
     /**
      * 判断条件是否为全曲要求查询
      */
     fun List<Filter>?.isAllRequired() =
-        this?.any { it.disableN20 } ?: false
+        this ?.firstNotNullOfOrNull { it.disableN20 }
 
     /**
      * 查询条件是否细分到谱面
      */
     fun List<Filter>?.isSingleChartSelected() =
-        this?.any { it.singleChart } ?: false
+        this ?.any { it.singleChart } ?: false
 
     /**
      * 渲染用查询条件参数
