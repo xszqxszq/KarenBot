@@ -6,13 +6,13 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import io.ktor.util.*
 import korlibs.io.file.VfsFile
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import xyz.xszq.bot.meme.payload.*
 import xyz.xszq.bot.message.Image
 import java.io.File
+import kotlin.io.encoding.Base64
 
 /**
  * 与 [meme-generator-rs](https://github.com/MemeCrafters/meme-generator-rs) 通信
@@ -63,7 +63,7 @@ class MemeAPI(
             contentType(ContentType.Application.Json)
             setBody(MemeUpload(
                 type = "data",
-                data = data.encodeBase64()
+                data = Base64.encode(data)
             ))
         }.body<MemeImageId>()
     private suspend fun download(id: String) =
