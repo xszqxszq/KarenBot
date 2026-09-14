@@ -122,7 +122,7 @@ class InfoCache(
             scope.launch { persistUser(user) }
             return user
         }
-        if (known.username != username) {
+        if (username.isNotBlank() && known.username != username) {
             known.username = username
             scope.launch { persistUser(known) }
         }

@@ -114,22 +114,27 @@ class WebhookDispatcher(
         EventType.C2C.Message -> run {
             val data = json.decodeFromString<C2CMessageCreate>(payload.d!!)
             logger.debug {
-                "Received: ${data.author.username}(${data.author.id})"
+                "Received: ${pluginLoader.bot.userTag(data.author.id)}"
             }
             if (forwardTo(subject = data.author.id, body = body, call = call))
                 return@run null
             val images = downloadImages(data.attachments, pluginLoader.files, logger)
             val content = filter.filter(data.content)
             val message = MessageChain(content, images, attachments = data.attachments)
+            val sender = User(
+                pluginLoader.bot,
+                data.author.id,
+                data.author.username
+            )
             recvC2CLogger.info {
-                "${data.author.username}(${data.author.id}) -> ${message.content.trim().replace("\n", "\\n")}"
+                "${sender.logPrefix} -> ${message.content.trim().replace("\n", "\\n")}"
             }
             MessageEvent(
                 bot = pluginLoader.bot,
                 eventId = payload.id!!,
                 id = data.id,
                 message = message,
-                sender = User(pluginLoader.bot, data.author.id, data.author.username)
+                sender = sender
             )
         }
         // 群聊消息与 AT 消息
