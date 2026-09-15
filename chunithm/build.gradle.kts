@@ -11,10 +11,6 @@ plugins {
     id("bot-plugin")
 }
 
-repositories {
-    mavenLocal()
-}
-
 dependencies {
     implementation("com.sksamuel.hoplite:hoplite-core:${hopliteVersion}")
     implementation("com.sksamuel.hoplite:hoplite-yaml:${hopliteVersion}")

@@ -12,10 +12,6 @@ plugins {
     id("bot-plugin")
 }
 
-repositories {
-    mavenLocal()
-}
-
 dependencies {
     implementation("com.fleeksoft.ksoup:ksoup:${ksoupVersion}")
     implementation("com.h2database:h2:${h2Version}")

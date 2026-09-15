@@ -2,10 +2,10 @@
 
 package xyz.xszq.bot.util
 
-import com.github.houbb.opencc4j.util.ZhConverterUtil
 import kotlinx.serialization.json.Json
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
+import kotlin.getValue
 
 /**
  * 全局 JSON 对象
@@ -102,13 +102,15 @@ fun normalizeMessage(
     return event to message
 }
 
+private val zhConverter by lazy { ChineseConverter() }
+
 /**
  * 繁体中文转为简体中文
  */
 fun String.toSimple(): String {
     if (none { it.isChinese() })
         return this
-    return ZhConverterUtil.toSimple(this)
+    return zhConverter.toSimple(this)
 }
 
 private fun Char.isChinese() = code in 0x3400..0x4DBF || code in 0x4E00..0x9FFF

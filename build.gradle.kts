@@ -10,7 +10,6 @@ val serializationVersion: String by project
 val h2Version: String by project
 val mariadbVersion: String by project
 val ksoupVersion: String by project
-val opencc4jVersion: String by project
 val mockkVersion: String by project
 val coroutinesVersion: String by project
 val logbackVersion: String by project
@@ -33,6 +32,7 @@ version = "9.1"
 
 repositories {
     mavenCentral()
+    mavenLocal()
     maven { url = uri("https://jitpack.io") }
 }
 
@@ -42,7 +42,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("com.h2database:h2:$h2Version")
     implementation("com.mysql:mysql-connector-j:9.3.0")
-    implementation("com.github.houbb:opencc4j:${opencc4jVersion}")
+    implementation("xyz.xszq:opencc-kt:1.0.0")
     implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
     implementation("com.sksamuel.hoplite:hoplite-yaml:$hopliteVersion")
     implementation("com.soywiz:korlibs-concurrent:$korlibsVersion")
@@ -148,7 +148,6 @@ allprojects {
     extra["h2Version"] = h2Version
     extra["mariadbVersion"] = mariadbVersion
     extra["ksoupVersion"] = ksoupVersion
-    extra["opencc4jVersion"] = opencc4jVersion
     extra["mockkVersion"] = mockkVersion
     extra["coroutinesVersion"] = coroutinesVersion
     tasks.register("generatePluginDependencies") {

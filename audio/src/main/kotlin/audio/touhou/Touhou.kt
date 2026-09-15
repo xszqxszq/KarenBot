@@ -1,6 +1,5 @@
 package xyz.xszq.bot.audio.touhou
 
-import com.github.houbb.opencc4j.util.ZhConverterUtil
 import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
@@ -17,6 +16,7 @@ import xyz.xszq.bot.reply
 import xyz.xszq.bot.util.AudioHandler.crop
 import xyz.xszq.bot.util.AudioHandler.duration
 import xyz.xszq.bot.util.ErrorHandler
+import xyz.xszq.bot.util.toSimple
 import xyz.xszq.pinyin.ChinesePinyinizer
 import xyz.xszq.pinyin.initials
 import xyz.xszq.similarity.Similarity
@@ -382,6 +382,5 @@ class Touhou(
             Difficulty.Lunatic -> 1.0
             // TODO: 支持 Extra 难度
         }
-        private fun String.toSimple() = ZhConverterUtil.toSimple(this) ?: this
     }
 }
