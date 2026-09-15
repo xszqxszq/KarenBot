@@ -16,11 +16,20 @@ class MaimaiTest : MaimaiDatabaseTest() {
 
     @Test
     fun runAll() = runTest {
-        val sandbox = setMaimai(this, database)
+        lateinit var divingFish: MockDivingFish
+        val sandbox = setMaimai(
+            scope = this,
+            database = database,
+            backends = { data ->
+                val prober = MockDivingFish(data, levelIndex = 2)
+                divingFish = prober
+                listOf(prober.backend())
+            }
+        )
         try {
             newSuspendedTransaction(db = database) {
                 ProberBindTable["test-user", "diving-fish", "username"] = username
-                ProberBindTable["test-user", "diving-fish", "id"] = "5457"
+                ProberBindTable["test-user", "diving-fish", "id"] = divingFish.bind("test-user")
             }
             testB50(sandbox, "maxscore")
             testB50(sandbox)

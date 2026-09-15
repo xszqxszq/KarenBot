@@ -5,6 +5,7 @@ import kotlinx.coroutines.test.runTest
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import xyz.xszq.bot.*
 import xyz.xszq.bot.chunithm.api.ChunithmAPI
+import xyz.xszq.bot.chunithm.component.ChunithmData
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
 import xyz.xszq.bot.chunithm.database.ProberBindTable
 import xyz.xszq.bot.payload.AdminCheckRequest
@@ -18,11 +19,20 @@ class ChunithmTest : ChunithmDatabaseTest() {
 
     @Test
     fun runAll() = runTest {
-        val sandbox = setChunithm(this, database)
+        lateinit var divingFish: MockDivingFish
+        val sandbox = setChunithm(
+            scope = this,
+            database = database,
+            backends = { data ->
+                val prober = MockDivingFish(data)
+                divingFish = prober
+                listOf(prober.backend())
+            }
+        )
         try {
             newSuspendedTransaction(db = database) {
                 ProberBindTable["test-user", "diving-fish", "username"] = username
-                ProberBindTable["test-user", "diving-fish", "id"] = "5457"
+                ProberBindTable["test-user", "diving-fish", "id"] = divingFish.bind("test-user")
                 MaimaiSettingsTable["test-user", "prober"] = "diving-fish"
             }
             testB50Maxscore(sandbox)
@@ -137,7 +147,7 @@ class ChunithmTest : ChunithmDatabaseTest() {
 suspend fun setChunithm(
     scope: TestScope,
     database: org.jetbrains.exposed.sql.Database,
-    backends: List<ChunithmAPI> ?= null
+    backends: ((ChunithmData) -> List<ChunithmAPI>) ?= null
 ): BotSandbox {
     val sandbox = BotSandbox(scope, mockTencentCOS(), database)
     sandbox.pluginLoader.subscribes.subscribe(
@@ -150,9 +160,15 @@ suspend fun setChunithm(
         pluginLoader = sandbox.pluginLoader
         configPath = "./config/chunithm.yml"
         dataPath = "./data/chunithm"
+        backends?.let { factory ->
+            val defaults = createBackends
+            createBackends = {
+                val replaced = factory(chunithmData).associateBy { it.id }
+                defaults().map { backend -> replaced[backend.id] ?: backend }
+            }
+        }
     }
     chunithm.load()
-    backends ?.let { chunithm.backends = it }
     chunithm.image.manager.init()
     sandbox.cleanup = { chunithm.unload() }
     return sandbox

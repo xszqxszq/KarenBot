@@ -27,7 +27,7 @@ class MaimaiProberFallbackTest : MaimaiDatabaseTest() {
         val sandbox = setMaimai(
             scope = this,
             database = database,
-            backends = listOf(mockUnboundDivingFish(), prober.backend())
+            backends = { listOf(mockUnboundDivingFish(), prober.backend()) }
         )
         try {
             testFetchFriendCodeByRefresh(sandbox, prober)

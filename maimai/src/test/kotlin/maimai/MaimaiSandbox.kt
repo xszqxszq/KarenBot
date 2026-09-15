@@ -4,6 +4,7 @@ import kotlinx.coroutines.test.TestScope
 import org.jetbrains.exposed.sql.Database
 import xyz.xszq.bot.BotSandbox
 import xyz.xszq.bot.maimai.api.MaimaiAPI
+import xyz.xszq.bot.maimai.component.MaimaiData
 import xyz.xszq.bot.mockTencentCOS
 import xyz.xszq.bot.payload.AdminCheckRequest
 import xyz.xszq.bot.subscribe.Channel
@@ -19,7 +20,7 @@ import xyz.xszq.bot.subscribe.Channel
 suspend fun setMaimai(
     scope: TestScope,
     database: Database,
-    backends: List<MaimaiAPI> ?= null
+    backends: ((MaimaiData) -> List<MaimaiAPI>) ?= null
 ): BotSandbox {
     val sandbox = BotSandbox(scope, mockTencentCOS(), database)
     sandbox.pluginLoader.subscribes.subscribe(
@@ -32,9 +33,15 @@ suspend fun setMaimai(
         pluginLoader = sandbox.pluginLoader
         configPath = "./config/maimai.yml"
         dataPath = "./data/maimai"
+        backends?.let { factory ->
+            val defaults = createBackends
+            createBackends = {
+                val replaced = factory(maimaiData).associateBy { it.id }
+                defaults().map { backend -> replaced[backend.id] ?: backend }
+            }
+        }
     }
     maimai.load()
-    backends ?.let { maimai.backends = it }
     maimai.image.manager.init()
     sandbox.cleanup = { maimai.unload() }
     return sandbox

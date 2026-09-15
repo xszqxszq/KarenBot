@@ -33,7 +33,7 @@ class ChunithmProberFallbackTest : ChunithmDatabaseTest() {
         val sandbox = setChunithm(
             scope = this,
             database = database,
-            backends = listOf(mockUnboundDivingFish(), lxns)
+            backends = { listOf(mockUnboundDivingFish(), lxns) }
         )
         data.load(lxns)
         sandbox.pluginLoader.subscribes.subscribe(

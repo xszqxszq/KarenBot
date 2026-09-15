@@ -28,6 +28,7 @@ import kotlin.text.Charsets.UTF_8
  * @property accountIds 水鱼账号标识
  * @property refIds 外部标识
  * @property musicId 成绩返回的曲目 ID
+ * @property levelIndex 成绩返回的谱面难度编号
  * @property latencyMs 接口延迟（毫秒）
  */
 class MockDivingFish(
@@ -35,10 +36,12 @@ class MockDivingFish(
     val accountIds: MutableSet<String> = ConcurrentHashMap.newKeySet(),
     val refIds: MutableSet<String> = ConcurrentHashMap.newKeySet(),
     val musicId: Int = DEFAULT_MUSIC_ID,
+    val levelIndex: Int = DEFAULT_LEVEL_INDEX,
     private val latencyMs: Long = 0
 ) {
     private companion object {
         const val DEFAULT_MUSIC_ID = 852
+        const val DEFAULT_LEVEL_INDEX = 3
         const val DEFAULT_RATING = 13000
         const val OAUTH_ID = "test-diving-fish-oa-id"
         const val OAUTH_SECRET = "test-diving-fish-oa-secret"
@@ -199,7 +202,7 @@ class MockDivingFish(
         fc = "fc",
         fs = "fsd",
         level = "13",
-        levelIndex = 3,
+        levelIndex = levelIndex,
         levelLabel = "Master",
         ra = 300,
         rate = "sss",
