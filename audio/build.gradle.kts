@@ -1,5 +1,3 @@
-@file:Suppress("VulnerableLibrariesLocal")
-
 val hopliteVersion: String by rootProject.extra
 val korlibsVersion: String by rootProject.extra
 val serializationVersion: String by rootProject.extra

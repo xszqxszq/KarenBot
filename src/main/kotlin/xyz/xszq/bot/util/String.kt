@@ -5,6 +5,7 @@ package xyz.xszq.bot.util
 import kotlinx.serialization.json.Json
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.opencc.ChineseConverter
 import kotlin.getValue
 
 /**
@@ -110,7 +111,7 @@ private val zhConverter by lazy { ChineseConverter() }
 fun String.toSimple(): String {
     if (none { it.isChinese() })
         return this
-    return zhConverter.toSimple(this)
+    return zhConverter.toSimplified(this)
 }
 
 private fun Char.isChinese() = code in 0x3400..0x4DBF || code in 0x4E00..0x9FFF
