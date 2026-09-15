@@ -1,8 +1,7 @@
 package xyz.xszq.bot.audio.touhou
 
 import com.github.houbb.opencc4j.util.ZhConverterUtil
-import com.github.houbb.pinyin.constant.enums.PinyinStyleEnum
-import com.github.houbb.pinyin.util.PinyinHelper
+import com.hankcs.hanlp.HanLP
 import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
@@ -161,10 +160,10 @@ class Touhou(
                 }
             }
             val gamePrefix = game.substringAfter("东方")
-            val gameSimplified = gamePrefix
-                .map { it.toString() }
-                .map { PinyinHelper.toPinyin(it, PinyinStyleEnum.NORMAL).first() }
-                .joinToString("")
+            // 拼音首字母
+            val gameSimplified = gamePrefix.map {
+                HanLP.convertToPinyinString(it.toString(), "", false).first()
+            }.joinToString("")
             answers.filter { true }.forEach { before ->
                 answers.add(game + before)
                 answers.add(gamePrefix + before)
