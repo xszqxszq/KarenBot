@@ -33,7 +33,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${serializationVersion}")
     implementation("com.github.houbb:pinyin:0.4.0")
     implementation("com.github.houbb:opencc4j:${opencc4jVersion}")
-    implementation("com.github.shibing624:similarity:1.1.6")
+    implementation("xyz.xszq:similarity-kt:1.0.0")
 }
 
 tasks.jar {

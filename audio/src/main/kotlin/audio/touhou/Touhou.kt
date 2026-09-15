@@ -6,7 +6,6 @@ import com.github.houbb.pinyin.util.PinyinHelper
 import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
-import org.xm.Similarity
 import xyz.xszq.bot.Plugin
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
@@ -20,6 +19,7 @@ import xyz.xszq.bot.reply
 import xyz.xszq.bot.util.AudioHandler.crop
 import xyz.xszq.bot.util.AudioHandler.duration
 import xyz.xszq.bot.util.ErrorHandler
+import xyz.xszq.similarity.Similarity
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
@@ -33,6 +33,7 @@ class Touhou(
     val baseDir = localCurrentDirVfs["data/audio/touhou"]
     lateinit var musics: TouhouMusics
     private val started = ConcurrentHashMap<String, Boolean>()
+    private val similarity = Similarity()
 
     /**
      * 初始化
@@ -279,12 +280,12 @@ class Touhou(
         a: String,
         b: String
     ): Boolean {
-        return Similarity.cilinSimilarity(a, b) > SIMILAR_THRESHOLD ||
-            Similarity.pinyinSimilarity(a, b) > SIMILAR_THRESHOLD ||
-            Similarity.charBasedSimilarity(a, b) > SIMILAR_THRESHOLD ||
-            Similarity.editDistanceSimilarity(a, b) > SIMILAR_THRESHOLD ||
-            Similarity.standardEditDistanceSimilarity(a, b) > SIMILAR_THRESHOLD ||
-            Similarity.gregorEditDistanceSimilarity(a, b) > SIMILAR_THRESHOLD
+        return similarity.cilinSimilarity(a, b) > SIMILAR_THRESHOLD ||
+            similarity.pinyinSimilarity(a, b) > SIMILAR_THRESHOLD ||
+            similarity.charBasedSimilarity(a, b) > SIMILAR_THRESHOLD ||
+            similarity.editDistanceSimilarity(a, b) > SIMILAR_THRESHOLD ||
+            similarity.standardEditDistanceSimilarity(a, b) > SIMILAR_THRESHOLD ||
+            similarity.gregorEditDistanceSimilarity(a, b) > SIMILAR_THRESHOLD
     }
     private fun List<String>.isAnswer(reply: String): Boolean {
         val answer = reply.lowercase().toSimple().trim()
