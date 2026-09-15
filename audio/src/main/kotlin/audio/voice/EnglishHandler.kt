@@ -1,13 +1,12 @@
 package xyz.xszq.bot.audio.voice
 
-import marytts.MaryInterface
-import org.w3c.dom.Element
+import xyz.xszq.g2p.EnglishPhonemizer
 
 /**
  * 英文单词转换
  */
 class EnglishHandler(
-    val mary: MaryInterface
+    val phonemizer: EnglishPhonemizer
 ) {
 
     /**
@@ -80,44 +79,16 @@ class EnglishHandler(
             return letterNamePinyin[word.lowercase()] ?: arrayOf(word.lowercase())
         }
 
-        val maryPhones = phonesForWord(word)
-        val pre = preprocessPhones(maryPhones)
+        val phones = phonesForWord(word)
+        val pre = preprocessPhones(phones)
         val norm = mapToLatinPieces(pre)
         val syll = assembleWithTables(norm)
         val fixed = syll.map { invalidTable[it] ?: it }.toTypedArray()
         return mergeStandaloneNg(fixed).map { it.lowercase() }.toTypedArray()
     }
 
-    private fun phonesForWord(text: String): Array<String> {
-        val document = mary.generateXML(text)
-        val phones = mutableListOf<String>()
-
-        val nodes = document.getElementsByTagNameNS("*", "ph")
-        (0 until nodes.length).forEach { i ->
-            val element = nodes.item(i) as? Element ?: return@forEach
-            val p = element.getAttribute("p").ifBlank { element.textContent ?: "" }.trim()
-            if (p.isNotBlank()) {
-                p.trim().split(Regex("\\s+")).forEach {
-                    if (it.isNotBlank())
-                        phones.add(it)
-                }
-            }
-        }
-        if (phones.isEmpty()) {
-            val ts = document.getElementsByTagNameNS("*", "t")
-            (0 until ts.length).forEach { i ->
-                val element = ts.item(i) as? Element ?: return@forEach
-                val p = element.getAttribute("ph").trim()
-                if (p.isNotBlank()) {
-                    p.trim().split(Regex("\\s+")).forEach {
-                        if (it.isNotBlank())
-                            phones.add(it)
-                    }
-                }
-            }
-        }
-        return phones.toTypedArray()
-    }
+    private fun phonesForWord(text: String): Array<String> =
+        phonemizer.phonemize(text).toTypedArray()
 
     private fun preprocessPhones(raw: Array<String>): Array<String> {
         val out = mutableListOf<String>()

@@ -33,7 +33,7 @@ dependencies {
     implementation("io.ktor:ktor-client-okhttp:${ktorVersion}")
     implementation("io.ktor:ktor-serialization-kotlinx-json:${ktorVersion}")
     implementation("org.apache.lucene:lucene-core:${luceneVersion}")
-    implementation("org.apache.lucene:lucene-analysis-smartcn:${luceneVersion}")
+    implementation("org.apache.lucene:lucene-analysis-common:${luceneVersion}")
     implementation("org.jetbrains.exposed:exposed-core:${exposedVersion}")
     implementation("org.jetbrains.exposed:exposed-dao:${exposedVersion}")
     implementation("org.jetbrains.exposed:exposed-jdbc:${exposedVersion}")

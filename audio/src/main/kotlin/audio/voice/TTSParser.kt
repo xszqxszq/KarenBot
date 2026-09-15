@@ -4,13 +4,9 @@ import com.hankcs.hanlp.HanLP
 import korlibs.io.file.VfsFile
 import korlibs.io.file.baseNameWithoutCompoundExtension
 import kotlinx.coroutines.flow.toList
-import marytts.LocalMaryInterface
-import org.apache.logging.log4j.Level
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.core.config.Configurator
 import xyz.xszq.bot.util.AudioHandler
 import xyz.xszq.bot.util.newTempFile
-import java.util.*
+import xyz.xszq.g2p.EnglishPhonemizer
 
 /**
  * 活字印刷功能
@@ -26,7 +22,6 @@ class TTSParser(
     lateinit var originalPresets: Map<String, VfsFile>
     lateinit var pinyinPresets: Map<String, VfsFile>
     private lateinit var charPresets: Map<Char, VfsFile>
-    private lateinit var mary: LocalMaryInterface
     private lateinit var english: EnglishHandler
     private lateinit var kana: KanaHandler
 
@@ -75,32 +70,7 @@ class TTSParser(
             }
         }.toMap()
 
-        // MaryTTS通过插件加载器的ClassLoader会有问题
-        Configurator.setAllLevels(LogManager.getRootLogger().name, Level.ERROR)
-        Configurator.setLevel("marytts", Level.ERROR)
-        val log4jRoot = org.apache.log4j.LogManager.getRootLogger()
-        if (!log4jRoot.allAppenders.hasMoreElements()) {
-            log4jRoot.addAppender(org.apache.log4j.ConsoleAppender())
-        }
-        log4jRoot.level = org.apache.log4j.Level.OFF
-        val pluginCl = this::class.java.classLoader
-        val t = Thread.currentThread()
-        val prev = t.contextClassLoader
-        t.contextClassLoader = pluginCl
-        mary = runCatching {
-            LocalMaryInterface().apply {
-                locale = Locale.US
-                outputType = "ALLOPHONES"
-            }
-        }.also {
-            t.contextClassLoader = prev
-        }.getOrThrow()
-        org.apache.log4j.LogManager.getLogger("marytts").apply {
-            removeAllAppenders()
-            level = org.apache.log4j.Level.OFF
-        }
-
-        english = EnglishHandler(mary)
+        english = EnglishHandler(EnglishPhonemizer())
         kana = KanaHandler(tokens)
     }
 

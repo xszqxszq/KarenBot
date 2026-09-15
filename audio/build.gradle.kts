@@ -27,11 +27,10 @@ dependencies {
     implementation("com.soywiz:korlibs-io-stream:$korlibsVersion")
     implementation("com.soywiz:korlibs-io-vfs:$korlibsVersion")
     implementation("com.soywiz:korlibs-math:$korlibsVersion")
-    implementation("de.dfki.mary:marytts-runtime:5.2.1")
-    implementation("de.dfki.mary:marytts-lang-en:5.2.1")
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.7")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${serializationVersion}")
     implementation("com.github.houbb:opencc4j:${opencc4jVersion}")
+    implementation("xyz.xszq:g2p-en-kt:1.0.0")
     implementation("xyz.xszq:similarity-kt:1.0.0")
 }
 
