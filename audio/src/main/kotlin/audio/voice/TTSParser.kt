@@ -1,12 +1,12 @@
 package xyz.xszq.bot.audio.voice
 
-import com.hankcs.hanlp.HanLP
 import korlibs.io.file.VfsFile
 import korlibs.io.file.baseNameWithoutCompoundExtension
 import kotlinx.coroutines.flow.toList
 import xyz.xszq.bot.util.AudioHandler
 import xyz.xszq.bot.util.newTempFile
 import xyz.xszq.g2p.EnglishPhonemizer
+import xyz.xszq.pinyin.ChinesePinyinizer
 
 /**
  * 活字印刷功能
@@ -24,6 +24,7 @@ class TTSParser(
     private lateinit var charPresets: Map<Char, VfsFile>
     private lateinit var english: EnglishHandler
     private lateinit var kana: KanaHandler
+    private val pinyin = ChinesePinyinizer()
 
     /**
      * 初始化
@@ -263,7 +264,7 @@ class TTSParser(
             Character.UnicodeScript.HIRAGANA,
         )
     private fun String.toPinyin(): String {
-        return HanLP.convertToPinyinString(this, " ", false)
+        return pinyin.pinyinToString(this)
             .split(" ").joinToString(" ") { "[$it]" }
     }
     private fun String.unescape() = substring(1, length - 1)

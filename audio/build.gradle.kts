@@ -9,16 +9,9 @@ plugins {
 }
 
 repositories {
-    maven { url = uri("https://raw.githubusercontent.com/DFKI-MLT/Maven-Repository/main") }
-    maven { url = uri("https://nrgxnat.jfrog.io/artifactory/libs-release/") }
-    maven { url = uri("https://nexus.terrestris.de/repository/public/") }
-}
-configurations.all {
-    exclude(group = "gov.nist.math", module = "Jampack")
-    exclude(group = "com.google.collections", module = "google-collections")
+    mavenLocal()
 }
 dependencies {
-    implementation("com.hankcs:hanlp:portable-1.3.4")
     implementation("com.sksamuel.hoplite:hoplite-core:${hopliteVersion}")
     implementation("com.sksamuel.hoplite:hoplite-yaml:${hopliteVersion}")
     implementation("com.soywiz:korlibs-concurrent:$korlibsVersion")
@@ -31,6 +24,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${serializationVersion}")
     implementation("com.github.houbb:opencc4j:${opencc4jVersion}")
     implementation("xyz.xszq:g2p-en-kt:1.0.0")
+    implementation("xyz.xszq:ktpinyin:1.0.1")
     implementation("xyz.xszq:similarity-kt:1.0.0")
 }
 

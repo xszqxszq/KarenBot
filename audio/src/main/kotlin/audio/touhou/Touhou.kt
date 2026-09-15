@@ -1,7 +1,6 @@
 package xyz.xszq.bot.audio.touhou
 
 import com.github.houbb.opencc4j.util.ZhConverterUtil
-import com.hankcs.hanlp.HanLP
 import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
@@ -18,6 +17,8 @@ import xyz.xszq.bot.reply
 import xyz.xszq.bot.util.AudioHandler.crop
 import xyz.xszq.bot.util.AudioHandler.duration
 import xyz.xszq.bot.util.ErrorHandler
+import xyz.xszq.pinyin.ChinesePinyinizer
+import xyz.xszq.pinyin.initials
 import xyz.xszq.similarity.Similarity
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -33,6 +34,7 @@ class Touhou(
     lateinit var musics: TouhouMusics
     private val started = ConcurrentHashMap<String, Boolean>()
     private val similarity = Similarity()
+    private val pinyin = ChinesePinyinizer()
 
     /**
      * 初始化
@@ -161,9 +163,7 @@ class Touhou(
             }
             val gamePrefix = game.substringAfter("东方")
             // 拼音首字母
-            val gameSimplified = gamePrefix.map {
-                HanLP.convertToPinyinString(it.toString(), "", false).first()
-            }.joinToString("")
+            val gameSimplified = pinyin.initials(gamePrefix)
             answers.filter { true }.forEach { before ->
                 answers.add(game + before)
                 answers.add(gamePrefix + before)
