@@ -103,7 +103,7 @@ class FakeQQServer(
         val path = request.url.encodedPath
         when {
             path.endsWith("/getAppAccessToken") -> jsonResponse(
-                json.encodeToString(AccessTokenResponse("test-access-token", 7200))
+                json.encodeToString(AccessTokenResponse("test-access-token", "7200"))
             )
             path.endsWith("/users/@me") -> jsonResponse(
                 json.encodeToString(UsersMeResponse(id = "test-bot", username = "测试机器人"))
