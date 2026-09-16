@@ -1,17 +1,17 @@
+val coroutinesVersion: String by project
 val exposedVersion: String by project
+val h2Version: String by project
 val hikariVersion: String by project
 val hopliteVersion: String by project
 val korlibsVersion: String by project
-val ktorVersion: String by project
-val luceneVersion: String by project
-val xmlutilVersion: String by project
-val serializationVersion: String by project
-val h2Version: String by project
-val mariadbVersion: String by project
 val ksoupVersion: String by project
-val mockkVersion: String by project
-val coroutinesVersion: String by project
+val ktorVersion: String by project
 val logbackVersion: String by project
+val luceneVersion: String by project
+val mariadbVersion: String by project
+val mockkVersion: String by project
+val serializationVersion: String by project
+val xmlutilVersion: String by project
 
 plugins {
     application
@@ -39,8 +39,6 @@ dependencies {
     api("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("com.h2database:h2:$h2Version")
-    implementation("com.zaxxer:HikariCP:$hikariVersion")
-    implementation("xyz.xszq:opencc-kt:1.0.0")
     implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
     implementation("com.sksamuel.hoplite:hoplite-yaml:$hopliteVersion")
     implementation("com.soywiz:korlibs-concurrent:$korlibsVersion")
@@ -49,9 +47,10 @@ dependencies {
     implementation("com.soywiz:korlibs-io-stream:$korlibsVersion")
     implementation("com.soywiz:korlibs-io-vfs:$korlibsVersion")
     implementation("com.soywiz:korlibs-math:$korlibsVersion")
+    implementation("com.zaxxer:HikariCP:$hikariVersion")
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.7")
-    implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+    implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
     implementation("io.ktor:ktor-client-websockets:$ktorVersion")
     implementation("io.ktor:ktor-network-tls-certificates:$ktorVersion")
@@ -63,12 +62,12 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     implementation("org.mariadb.jdbc:mariadb-java-client:$mariadbVersion")
+    implementation("xyz.xszq:opencc-kt:1.0.0")
     implementation("xyz.xszq:silkt:1.0.1")
     testImplementation(kotlin("test"))
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
-    testFixturesImplementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     testFixturesImplementation("com.soywiz:korlibs-concurrent:$korlibsVersion")
     testFixturesImplementation("com.soywiz:korlibs-datastructure:$korlibsVersion")
     testFixturesImplementation("com.soywiz:korlibs-io:$korlibsVersion")
@@ -76,12 +75,13 @@ dependencies {
     testFixturesImplementation("com.soywiz:korlibs-io-vfs:$korlibsVersion")
     testFixturesImplementation("com.soywiz:korlibs-math:$korlibsVersion")
     testFixturesImplementation("io.github.oshai:kotlin-logging-jvm:7.0.7")
+    testFixturesImplementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     testFixturesImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
-    testFixturesApi("io.ktor:ktor-client-mock:$ktorVersion")
     testFixturesApi("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+    testFixturesApi("io.ktor:ktor-client-mock:$ktorVersion")
     testFixturesApi("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
-    testFixturesApi("io.ktor:ktor-server-core:$ktorVersion")
     testFixturesApi("io.ktor:ktor-server-content-negotiation:$ktorVersion")
+    testFixturesApi("io.ktor:ktor-server-core:$ktorVersion")
     testFixturesApi("io.ktor:ktor-server-netty:$ktorVersion")
 }
 

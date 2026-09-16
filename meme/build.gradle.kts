@@ -16,14 +16,14 @@ dependencies {
     implementation("com.soywiz:korlibs-io-vfs:$korlibsVersion")
     implementation("com.soywiz:korlibs-math:$korlibsVersion")
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.7")
-    implementation("io.ktor:ktor-client-core:${ktorVersion}")
     implementation("io.ktor:ktor-client-content-negotiation:${ktorVersion}")
+    implementation("io.ktor:ktor-client-core:${ktorVersion}")
     implementation("io.ktor:ktor-client-okhttp:${ktorVersion}")
     implementation("io.ktor:ktor-serialization-kotlinx-json:${ktorVersion}")
     implementation("org.jetbrains.skiko:skiko-awt:${skikoVersion}")
-    implementation("org.jetbrains.skiko:skiko-awt-runtime-windows-x64:${skikoVersion}")
     implementation("org.jetbrains.skiko:skiko-awt-runtime-linux-x64:${skikoVersion}")
     implementation("org.jetbrains.skiko:skiko-awt-runtime-macos-arm64:${skikoVersion}")
+    implementation("org.jetbrains.skiko:skiko-awt-runtime-windows-x64:${skikoVersion}")
 }
 
 tasks.jar {

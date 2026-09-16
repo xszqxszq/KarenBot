@@ -1,5 +1,5 @@
-val skikoVersion: String by rootProject.extra
 val serializationVersion: String by rootProject.extra
+val skikoVersion: String by rootProject.extra
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
@@ -24,9 +24,9 @@ dependencies {
     api("io.github.pdvrieze.xmlutil:serialization-jvm:0.91.0-RC1")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     api("org.jetbrains.skiko:skiko-awt:${skikoVersion}")
-    api("org.jetbrains.skiko:skiko-awt-runtime-windows-x64:${skikoVersion}")
     api("org.jetbrains.skiko:skiko-awt-runtime-linux-x64:${skikoVersion}")
     api("org.jetbrains.skiko:skiko-awt-runtime-macos-arm64:${skikoVersion}")
+    api("org.jetbrains.skiko:skiko-awt-runtime-windows-x64:${skikoVersion}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${serializationVersion}")
     testImplementation(kotlin("test"))
 }
