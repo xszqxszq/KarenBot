@@ -1,5 +1,3 @@
-@file:Suppress("VulnerableLibrariesLocal")
-
 val exposedVersion: String by project
 val hopliteVersion: String by project
 val korlibsVersion: String by project
@@ -13,7 +11,6 @@ val ksoupVersion: String by project
 val mockkVersion: String by project
 val coroutinesVersion: String by project
 val logbackVersion: String by project
-val bcprovVersion: String by project
 
 plugins {
     application
@@ -62,7 +59,6 @@ dependencies {
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-host-common:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("org.bouncycastle:bcprov-jdk18on:$bcprovVersion")
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     implementation("org.mariadb.jdbc:mariadb-java-client:$mariadbVersion")
@@ -79,7 +75,6 @@ dependencies {
     testFixturesImplementation("com.soywiz:korlibs-io-vfs:$korlibsVersion")
     testFixturesImplementation("com.soywiz:korlibs-math:$korlibsVersion")
     testFixturesImplementation("io.github.oshai:kotlin-logging-jvm:7.0.7")
-    testFixturesImplementation("org.bouncycastle:bcprov-jdk18on:$bcprovVersion")
     testFixturesImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
     testFixturesApi("io.ktor:ktor-client-mock:$ktorVersion")
     testFixturesApi("io.ktor:ktor-client-content-negotiation:$ktorVersion")

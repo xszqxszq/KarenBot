@@ -30,7 +30,7 @@ class OpenAPITest {
                 OpenAPI.DEFAULT_ACCESS_TOKEN_URL -> {
                     tokenRequests += 1
                     respond(
-                        content = """{"access_token":"token-1","expires_in":3600}""",
+                        content = """{"access_token":"token-1","expires_in":"3600"}""",
                         status = HttpStatusCode.OK,
                         headers = jsonHeaders
                     )
@@ -67,7 +67,7 @@ class OpenAPITest {
                 OpenAPI.DEFAULT_ACCESS_TOKEN_URL -> {
                     tokenRequests += 1
                     respond(
-                        content = """{"access_token":"token-$tokenRequests","expires_in":1}""",
+                        content = """{"access_token":"token-$tokenRequests","expires_in":"1"}""",
                         status = HttpStatusCode.OK,
                         headers = jsonHeaders
                     )
@@ -101,7 +101,7 @@ class OpenAPITest {
         val engine = MockEngine { request ->
             when (request.url.toString()) {
                 OpenAPI.DEFAULT_ACCESS_TOKEN_URL -> respond(
-                    content = """{"access_token":"token","expires_in":3600}""",
+                    content = """{"access_token":"token","expires_in":"3600"}""",
                     status = HttpStatusCode.OK,
                     headers = jsonHeaders
                 )

@@ -11,5 +11,5 @@ data class AccessTokenResponse(
     @SerialName("access_token")
     val accessToken: String,
     @SerialName("expires_in")
-    val expiresIn: Int,
+    val expiresIn: String,
 )

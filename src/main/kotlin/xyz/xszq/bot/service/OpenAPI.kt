@@ -77,7 +77,7 @@ class OpenAPI(
         if (accessToken.isNullOrEmpty() || accessTokenExpiresAt?.let { currentTime > it } == true) {
             getRawAccessToken().let { response ->
                 accessToken = response.accessToken
-                accessTokenExpiresAt = currentTime + response.expiresIn * 1000L
+                accessTokenExpiresAt = currentTime + response.expiresIn.toLong() * 1000L
             }
         }
         return checkNotNull(accessToken)

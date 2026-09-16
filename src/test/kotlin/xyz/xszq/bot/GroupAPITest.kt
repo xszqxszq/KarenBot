@@ -173,7 +173,7 @@ class GroupAPITest {
     )
 
     private companion object {
-        const val ACCESS_TOKEN = """{"access_token":"token","expires_in":3600}"""
+        const val ACCESS_TOKEN = """{"access_token":"token","expires_in":"3600"}"""
 
         const val GROUP_INFO = """{"group_openid":"group","group_name":"读书分享会","group_finger_memo":"每周共读一本好书","group_class_text":"文化","group_tags":["阅读","文学"],"group_member_num":256}"""
 

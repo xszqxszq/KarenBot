@@ -4,7 +4,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import xyz.xszq.bot.util.buildSeed
 import xyz.xszq.bot.util.signMessage
 import java.net.URI
@@ -29,7 +28,7 @@ class LoadWebhookClient(
     private val appId: String,
     private val clientSecret: String
 ) {
-    private val privateKey = Ed25519PrivateKeyParameters(buildSeed(clientSecret), 0)
+    private val seed = buildSeed(clientSecret)
     private val client: HttpClient = HttpClient.newBuilder()
         .version(HttpClient.Version.HTTP_1_1)
         .connectTimeout(Duration.ofSeconds(5))
@@ -80,7 +79,7 @@ class LoadWebhookClient(
      */
     suspend fun post(body: String): Long {
         val timestamp = (System.currentTimeMillis() / 1000).toString()
-        val signature = signMessage(privateKey, (timestamp + body).toByteArray(UTF_8))
+        val signature = signMessage(seed, (timestamp + body).toByteArray(UTF_8))
         val request = HttpRequest.newBuilder(URI.create("http://127.0.0.1:$port/webhook"))
             .header("User-Agent", "QQBot-Callback")
             .header("X-Bot-Appid", appId)

@@ -1,6 +1,5 @@
 package xyz.xszq.bot
 
-import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import xyz.xszq.bot.payload.WebhookValidation
 import xyz.xszq.bot.util.buildSeed
 import xyz.xszq.bot.util.handleValidation
@@ -32,7 +31,7 @@ class ValidationTest {
         val timestamp = "111"
         val body = "body"
         val signature = signMessage(
-            Ed25519PrivateKeyParameters(buildSeed(secret), 0),
+            buildSeed(secret),
             (timestamp + body).toByteArray()
         )
 

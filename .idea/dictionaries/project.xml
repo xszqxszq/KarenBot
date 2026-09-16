@@ -4,15 +4,19 @@
       <w>Bakapiano</w>
       <w>Choyen</w>
       <w>Chugeki</w>
+      <w>Divsteps</w>
       <w>Dorg</w>
       <w>Geki</w>
       <w>Honami</w>
       <w>Irodori</w>
       <w>Otomads</w>
+      <w>PRECOMP</w>
       <w>Qrsinko</w>
       <w>Sekai</w>
       <w>Touhou</w>
       <w>Usagi</w>
+      <w>WNAF</w>
+      <w>Wnaf</w>
       <w>Yuruka</w>
       <w>agentskill</w>
       <w>akito</w>
@@ -22,13 +26,18 @@
       <w>areverse</w>
       <w>botclr</w>
       <w>bvid</w>
+      <w>cadd</w>
       <w>choyen</w>
       <w>chugeki</w>
       <w>chunithm</w>
       <w>cids</w>
+      <w>cnegate</w>
+      <w>cnormalize</w>
       <w>coeff</w>
+      <w>czero</w>
       <w>dcba</w>
       <w>dest</w>
+      <w>divsteps</w>
       <w>dxstar</w>
       <w>endlocal</w>
       <w>errorlevel</w>
@@ -41,6 +50,7 @@
       <w>fullcombo</w>
       <w>gekichu</w>
       <w>gekimai</w>
+      <w>hddivsteps</w>
       <w>honami</w>
       <w>inlinecmd</w>
       <w>javacmd</w>
@@ -92,6 +102,7 @@
       <w>vocaloid</w>
       <w>wahlap</w>
       <w>wcaime</w>
+      <w>wnaf</w>
       <w>xszq</w>
       <w>xszqxszq</w>
       <w>ysdd</w>
