@@ -5,7 +5,6 @@ import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
 import io.ktor.http.*
 import korlibs.io.util.isDigit
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonPrimitive
 import xyz.xszq.bot.Plugin
@@ -24,6 +23,7 @@ import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.payload.markdown.MarkdownData
 import xyz.xszq.bot.reply
 import xyz.xszq.bot.util.ErrorHandler
+import xyz.xszq.bot.util.cpuDispatcher
 import xyz.xszq.bot.util.useTempFile
 import java.io.File
 import org.jetbrains.skia.Image as SkiaImage
@@ -343,7 +343,7 @@ class Meme: Plugin() {
             appendLine("请在点击图片编号后输入文本！")
             appendLine("使用方法：/pjsk 角色名+编号 要生成的文本")
         }.trim())
-        sekai.draw(config, text).use { it.encodePNG().send(this) }
+        sendImage { sekai.draw(config, text) }
     }
     private suspend fun MessageEvent.ba(
         raw: String
@@ -356,12 +356,12 @@ class Meme: Plugin() {
                 args = raw.trim().split("\n", limit = 2)
                 val textL = args[0].trim()
                 val textR = args.getOrNull(1)?.trim() ?: throw ArgsNotEnoughException()
-                ba.draw(textL, textR).use { it.encodePNG().send(this) }
+                sendImage { ba.draw(textL, textR) }
             }
             args.size == 2 -> {
                 val textL = args[0].trim()
                 val textR = args[1].trim()
-                ba.draw(textL, textR).use { it.encodePNG().send(this) }
+                sendImage { ba.draw(textL, textR) }
             }
             else -> {
                 throw ArgsNotEnoughException()
@@ -379,12 +379,12 @@ class Meme: Plugin() {
                 }
                 val top = args.getOrNull(0)?.trim() ?: throw ArgsNotEnoughException()
                 val bottom = args.getOrNull(1)?.trim()
-                fiveThousand.draw(top, bottom).use { it.encodePNG().send(this) }
+                sendImage { fiveThousand.draw(top, bottom) }
             }
             args.isNotEmpty() -> {
                 val top = args[0].trim()
                 val bottom = args.getOrNull(1)?.trim()
-                fiveThousand.draw(top, bottom).use { it.encodePNG().send(this) }
+                sendImage { fiveThousand.draw(top, bottom) }
             }
             else -> {
                 if (message.text.trim() == "/5k")
@@ -475,6 +475,12 @@ class Meme: Plugin() {
         event.reply(Image(file))
     }
 
+    private suspend fun MessageEvent.sendImage(
+        draw: () -> SkiaImage
+    ) = withContext(cpuDispatcher) {
+        draw().use { it.encodePNG() }
+    }.send(this)
+
     private fun StringBuilder.buildTable(
         rows: List<List<String>>,
         cols: Int = 2
@@ -550,7 +556,7 @@ class Meme: Plugin() {
     private suspend fun getImageWidth(
         path: String,
         height: Double = 50.0
-    ): Int = withContext(Dispatchers.IO) {
+    ): Int = withContext(cpuDispatcher) {
         runCatching {
             SkiaImage.makeFromEncoded(File(sekai.imgDir, path).readBytes()).use { image ->
                 (image.width * height / image.height)

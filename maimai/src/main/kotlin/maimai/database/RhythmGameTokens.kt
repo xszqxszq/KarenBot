@@ -4,7 +4,7 @@ import org.jetbrains.exposed.dao.id.IdTable
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import xyz.xszq.bot.database.newSuspendedTransaction
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 

@@ -6,7 +6,6 @@ import kotlinx.serialization.json.Json
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.opencc.ChineseConverter
-import kotlin.getValue
 
 /**
  * 全局 JSON 对象

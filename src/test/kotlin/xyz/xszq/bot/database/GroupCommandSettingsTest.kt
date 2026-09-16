@@ -3,7 +3,6 @@ package xyz.xszq.bot.database
 import kotlinx.coroutines.test.runTest
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import kotlin.test.*
 
 class GroupCommandSettingsTest {
@@ -16,6 +15,7 @@ class GroupCommandSettingsTest {
 
     @BeforeTest
     fun setUp() = runTest {
+        GroupCommandSettings.clearCache()
         newSuspendedTransaction(db = database) {
             SchemaUtils.create(GroupCommandSettings)
         }

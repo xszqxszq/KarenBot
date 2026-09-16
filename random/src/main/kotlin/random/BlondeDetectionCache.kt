@@ -3,7 +3,7 @@ package xyz.xszq.bot.random
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import xyz.xszq.bot.database.newSuspendedTransaction
 import java.sql.SQLIntegrityConstraintViolationException
 
 /**

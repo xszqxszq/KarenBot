@@ -2,8 +2,8 @@ package xyz.xszq.bot.maimai.database
 
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
+import xyz.xszq.bot.database.newSuspendedTransaction
+import xyz.xszq.bot.database.suspendedTransactionAsync
 
 /**
  * 查分器绑定表

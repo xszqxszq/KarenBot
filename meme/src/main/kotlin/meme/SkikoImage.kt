@@ -1,7 +1,9 @@
 package xyz.xszq.bot.meme
 
 import korlibs.io.file.VfsFile
+import kotlinx.coroutines.withContext
 import org.jetbrains.skia.*
+import xyz.xszq.bot.util.cpuDispatcher
 
 /**
  * Skiko 图片数据
@@ -37,8 +39,8 @@ data class SkikoImageData(
  *
  * @return SkikoImageData
  */
-suspend fun VfsFile.readSkikoImage(): SkikoImageData {
-    return Image.makeFromEncoded(readBytes()).use { image ->
+suspend fun VfsFile.readSkikoImage(): SkikoImageData = withContext(cpuDispatcher) {
+    Image.makeFromEncoded(readBytes()).use { image ->
         Bitmap.makeFromImage(image).use { bitmap ->
             val info = ImageInfo(
                 image.width,

@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 /**
  * 数据库连接配置
  *
- * 支持 H2 / MySQL
+ * 支持 H2 / MariaDB
  */
 @Serializable
 @Suppress("unused")

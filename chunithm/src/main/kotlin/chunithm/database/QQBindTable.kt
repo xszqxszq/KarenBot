@@ -1,7 +1,7 @@
 package xyz.xszq.bot.chunithm.database
 
 import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
+import xyz.xszq.bot.database.suspendedTransactionAsync
 
 /**
  * QQ 绑定表

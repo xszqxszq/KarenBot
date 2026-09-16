@@ -2,12 +2,12 @@ package xyz.xszq.bot.chunithm
 
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import xyz.xszq.bot.*
 import xyz.xszq.bot.chunithm.api.ChunithmAPI
 import xyz.xszq.bot.chunithm.component.ChunithmData
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
 import xyz.xszq.bot.chunithm.database.ProberBindTable
+import xyz.xszq.bot.database.newSuspendedTransaction
 import xyz.xszq.bot.payload.AdminCheckRequest
 import xyz.xszq.bot.subscribe.Channel
 import kotlin.test.Test

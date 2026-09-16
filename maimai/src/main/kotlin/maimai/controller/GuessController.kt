@@ -10,11 +10,11 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.Rect
 import org.jetbrains.skia.Surface
 import xyz.xszq.bot.*
+import xyz.xszq.bot.database.newSuspendedTransaction
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.maimai.Maimai
@@ -29,6 +29,7 @@ import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.message.MessageChain
 import xyz.xszq.bot.payload.markdown.*
+import xyz.xszq.bot.util.cpuDispatcher
 import xyz.xszq.bot.util.hasAlpha
 import xyz.xszq.bot.util.toDBC
 import xyz.xszq.bot.util.useTempFile
@@ -102,7 +103,7 @@ class GuessController(
     }
     private suspend fun MessageEvent.save(
         status: GuessGameStatus,
-    ): Unit = newSuspendedTransaction(Dispatchers.IO) {
+    ): Unit = newSuspendedTransaction {
         GuessGameTable.deleteWhere {
             GuessGameTable.id eq this@save.contextId
         }
@@ -126,7 +127,7 @@ class GuessController(
     }
     private suspend fun MessageEvent.endGame(
         subscribesAt: String? = null
-    ) = newSuspendedTransaction(Dispatchers.IO) {
+    ) = newSuspendedTransaction {
         subscribesAt ?.let {
             maimai.pluginLoader.subscribes.stop(subscribesAt)
         }
@@ -136,7 +137,7 @@ class GuessController(
             GuessGameTable.id eq contextId
         }
     }
-    private suspend fun Bot.restoreGuessGame() = newSuspendedTransaction(Dispatchers.IO) {
+    private suspend fun Bot.restoreGuessGame() = newSuspendedTransaction {
         val now = Clock.System.now()
         GuessGameTable.selectAll().forEach { result ->
             if ((now - result[GuessGameTable.modified].toInstant(TimeZone.currentSystemDefault())).inWholeMinutes >= 30) {
@@ -549,8 +550,8 @@ class GuessController(
         "的紫谱谱师为 ${song.charts[3].notesDesigner}",
         "${if (song.charts.size == 4) "没有" else "有"}白谱"
     )
-    private suspend fun VfsFile.randomSlice(size: Int = 66): ByteArray? = withContext(Dispatchers.IO) {
-        val bytes = org.jetbrains.skia.Image.makeFromEncoded(readBytes()).use { image ->
+    private suspend fun VfsFile.randomSlice(size: Int = 66): ByteArray? = withContext(cpuDispatcher) {
+        org.jetbrains.skia.Image.makeFromEncoded(readBytes()).use { image ->
             val maxX = (image.width - size).coerceAtLeast(0)
             val maxY = (image.height - size).coerceAtLeast(0)
 
@@ -566,7 +567,6 @@ class GuessController(
                 }
             }
         }
-        bytes
     }
     private val MessageEvent.contextId
         get() = when(this) {

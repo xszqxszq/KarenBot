@@ -7,8 +7,8 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.update
+import xyz.xszq.bot.database.newSuspendedTransaction
 
 /**
  * 排队管理的机厅

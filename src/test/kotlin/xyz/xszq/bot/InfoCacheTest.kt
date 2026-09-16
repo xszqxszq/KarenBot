@@ -9,11 +9,7 @@ import kotlinx.coroutines.test.runTest
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
-import xyz.xszq.bot.database.GroupInfo
-import xyz.xszq.bot.database.GroupInfoTable
-import xyz.xszq.bot.database.GroupMemberTable
-import xyz.xszq.bot.database.UserInfo
-import xyz.xszq.bot.database.UserInfoTable
+import xyz.xszq.bot.database.*
 import xyz.xszq.bot.payload.BotStateResponse
 import xyz.xszq.bot.payload.GroupInfoResponse
 import xyz.xszq.bot.service.OpenAPI

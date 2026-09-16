@@ -4,7 +4,7 @@ import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
+import xyz.xszq.bot.database.suspendedTransactionAsync
 import xyz.xszq.bot.maimai.music.MusicInfo
 
 /**

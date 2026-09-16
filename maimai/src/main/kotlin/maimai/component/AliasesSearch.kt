@@ -2,6 +2,7 @@ package xyz.xszq.bot.maimai.component
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import org.apache.lucene.analysis.Analyzer
 import org.apache.lucene.analysis.TokenStream
 import org.apache.lucene.analysis.Tokenizer
@@ -26,6 +27,7 @@ import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.database.MaimaiMusicAliasesTable
 import xyz.xszq.bot.maimai.music.MusicInfo
 import xyz.xszq.bot.maimai.music.MusicNameAlias
+import xyz.xszq.bot.util.cpuDispatcher
 import java.io.Closeable
 import java.nio.file.Path
 import java.security.MessageDigest
@@ -294,7 +296,9 @@ class AliasesSearch(
         if (exact.isNotEmpty()) {
             return exact.distinct().mapNotNull { maimai.music(it) }
         }
-        val fuzzy = fuzzy(name.lowercase()).mapNotNull { maimai.music(it.musicId) }
+        val fuzzy = withContext(cpuDispatcher) {
+            fuzzy(name.lowercase())
+        }.mapNotNull { maimai.music(it.musicId) }
         if (fuzzy.isNotEmpty()) {
             return fuzzy
         }

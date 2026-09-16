@@ -1,4 +1,5 @@
 val exposedVersion: String by project
+val hikariVersion: String by project
 val hopliteVersion: String by project
 val korlibsVersion: String by project
 val ktorVersion: String by project
@@ -38,7 +39,7 @@ dependencies {
     api("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("com.h2database:h2:$h2Version")
-    implementation("com.mysql:mysql-connector-j:9.3.0")
+    implementation("com.zaxxer:HikariCP:$hikariVersion")
     implementation("xyz.xszq:opencc-kt:1.0.0")
     implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
     implementation("com.sksamuel.hoplite:hoplite-yaml:$hopliteVersion")
@@ -134,6 +135,7 @@ kotlin {
 allprojects {
     apply(plugin = "java")
     extra["exposedVersion"] = exposedVersion
+    extra["hikariVersion"] = hikariVersion
     extra["hopliteVersion"] = hopliteVersion
     extra["korlibsVersion"] = korlibsVersion
     extra["ktorVersion"] = ktorVersion

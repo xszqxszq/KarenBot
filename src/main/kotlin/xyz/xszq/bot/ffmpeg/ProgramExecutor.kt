@@ -1,9 +1,11 @@
 package xyz.xszq.bot.ffmpeg
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.File
-import java.util.concurrent.TimeUnit
+import kotlin.coroutines.resume
 
 /**
  * 执行外部命令任务
@@ -47,16 +49,35 @@ class ProgramExecutor(
                 procBuilder.redirectError(ProcessBuilder.Redirect.DISCARD)
             }
             val proc = procBuilder.start()
-            val finished = proc.waitFor(timeout ?: DEFAULT_TIMEOUT_MS, TimeUnit.MILLISECONDS)
-            if (!finished) {
-                proc.destroy()
-                proc.waitFor(5, TimeUnit.SECONDS)
+            if (proc.awaitExit(timeout ?: DEFAULT_TIMEOUT_MS))
+                return@run
+            proc.destroy()
+            if (!proc.awaitExit(DESTROY_TIMEOUT_MS))
                 proc.destroyForcibly()
-            }
         }
     }
 
+    /**
+     * 等待进程结束
+     *
+     * 等待期间不占用线程
+     *
+     * @param timeout 超时时间（毫秒）
+     * @return 是否在超时前结束
+     */
+    private suspend fun Process.awaitExit(
+        timeout: Long
+    ): Boolean = withTimeoutOrNull(timeout) {
+        suspendCancellableCoroutine { continuation ->
+            onExit().whenComplete { _, _ ->
+                if (continuation.isActive)
+                    continuation.resume(Unit)
+            }
+        }
+    } != null
+
     companion object {
         const val DEFAULT_TIMEOUT_MS = 60_000L
+        private const val DESTROY_TIMEOUT_MS = 5_000L
     }
 }

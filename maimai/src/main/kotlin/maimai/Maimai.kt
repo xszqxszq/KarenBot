@@ -10,6 +10,7 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.exists
 import org.jetbrains.exposed.sql.transactions.transaction
 import xyz.xszq.bot.Plugin
+import xyz.xszq.bot.event.ChannelEvent
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.maimai.api.DivingFish
@@ -26,6 +27,7 @@ import xyz.xszq.bot.maimai.controller.Controller
 import xyz.xszq.bot.maimai.database.*
 import xyz.xszq.bot.maimai.payload.DivingFishStats
 import xyz.xszq.bot.maimai.query.ComboQuery
+import xyz.xszq.bot.util.cpuDispatcher
 import xyz.xszq.bot.util.json
 import kotlin.reflect.full.primaryConstructor
 
@@ -119,22 +121,22 @@ class Maimai: Plugin() {
             }
         }
         api.start()
-        scope.launch(Dispatchers.IO) {
+        scope.launch(cpuDispatcher) {
             logger.info { "[舞萌] 正在加载图片中……" }
             image.load(scope)
             logger.info { "[舞萌] 图片载入完毕。" }
         }
-        scope.launch(Dispatchers.IO) {
+        scope.launch(cpuDispatcher) {
             logger.info { "[舞萌] 别名初始化中……" }
             aliases.init()
             logger.info { "[舞萌] 别名初始化完毕。" }
         }
-        scope.launch(Dispatchers.IO) {
+        scope.launch(cpuDispatcher) {
             logger.info { "[舞萌] 载入拟合定数中……" }
             loadFitLevelValues()
             logger.info { "[舞萌] 拟合定数载入完毕。" }
         }
-        scope.launch(Dispatchers.IO) {
+        scope.launch(cpuDispatcher) {
             // Controller初始化
             Controller::class.sealedSubclasses.forEach {
                 val controller = it.primaryConstructor!!.call(this@Maimai)
@@ -151,6 +153,14 @@ class Maimai: Plugin() {
                 backend.load()
                 logger.info { "[舞萌] 数据源 ${backend.id}加载完毕。" }
             }
+        }
+
+        MaimaiSettingsTable.publisher = { openId ->
+            pluginLoader.subscribes.handle(ChannelEvent(
+                bot = pluginLoader.bot,
+                channelName = MaimaiSettingsTable.CACHE_CHANNEL,
+                data = openId
+            ))
         }
 
         // 配置路由
@@ -181,6 +191,9 @@ class Maimai: Plugin() {
      * 配置路由
      */
     suspend fun setRoute() = route("/mai") {
+        channel(MaimaiSettingsTable.CACHE_CHANNEL) { openId ->
+            MaimaiSettingsTable.clearCache(openId)
+        }
     }
 
     override suspend fun unload() {

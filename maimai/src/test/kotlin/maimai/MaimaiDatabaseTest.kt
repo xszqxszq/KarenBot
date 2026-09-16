@@ -29,6 +29,8 @@ abstract class MaimaiDatabaseTest {
     @BeforeTest
     fun resetDatabase() {
         connectIfNeeded()
+        MaimaiSettingsTable.clearCache()
+        ArcadeGroupBind.clearCache()
         transaction {
             SchemaUtils.drop(
                 GuessGameTable,

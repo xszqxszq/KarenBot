@@ -2,10 +2,12 @@ package xyz.xszq.bot.maimai.component.image.templates
 
 import korlibs.io.util.isDigit
 import korlibs.math.toIntFloor
+import kotlinx.coroutines.withContext
 import org.jetbrains.skia.Image
 import xyz.xszq.bot.maimai.music.ChartInfo
 import xyz.xszq.bot.maimai.music.Record
 import xyz.xszq.bot.maimai.payload.LocalCourseInfo
+import xyz.xszq.bot.util.cpuDispatcher
 import xyz.xszq.shinobu.dom.Img
 import xyz.xszq.shinobu.style.ObjectFit
 import xyz.xszq.shinobu.style.Spacing
@@ -25,12 +27,12 @@ class CourseTemplate(
      * @param course 段位信息
      * @param scores 谱面信息+成绩信息
      */
-    fun template(
+    suspend fun template(
         course: LocalCourseInfo,
         scores: List<Pair<ChartInfo, Record?>>
     ): Image {
         var life = course.life
-        val damages = scores.mapIndexed { index, (chart, score) ->
+        val damages = scores.map { (chart, score) ->
             if (score ?.comboStatus ?.isAP() == true)
                 0
             else
@@ -139,7 +141,7 @@ class CourseTemplate(
                 }
             }
         }
-        return theme.render(main)
+        return withContext(cpuDispatcher) { theme.render(main) }
     }
     /**
      * 段位表中的单个谱面记录

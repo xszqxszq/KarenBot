@@ -9,10 +9,11 @@ import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.update
+import xyz.xszq.bot.database.newSuspendedTransaction
 import xyz.xszq.bot.exception.IllegalArgsException
 import xyz.xszq.bot.exception.NotFoundException
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * 排队管理的机厅分组绑定
@@ -21,7 +22,46 @@ class ArcadeGroupBind(id: EntityID<String>): Entity<String>(id) {
     var group by ArcadeGroupBindTable.group
 
     companion object : EntityClass<String, ArcadeGroupBind>(ArcadeGroupBindTable) {
+        private val arcadeAliases = ConcurrentHashMap<String, List<ArcadeAlias>>()
         private fun currentTime() = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+
+        private data class ArcadeAlias(val id: Int, val names: List<String>)
+
+        /**
+         * 清除该群机厅信息缓存
+         *
+         * @param openId 群 OpenID
+         */
+        fun clearCache(openId: String) {
+            arcadeAliases.remove(openId)
+        }
+
+        /**
+         * 清空全部缓存
+         */
+        fun clearCache() {
+            arcadeAliases.clear()
+        }
+
+        /**
+         * 读取群全部机厅名称及别名
+         *
+         * @param openId 群 OpenID
+         * @return 机厅别名
+         */
+        private suspend fun aliasesOf(openId: String): List<ArcadeAlias> {
+            arcadeAliases[openId] ?.let { return it }
+            val loaded = newSuspendedTransaction {
+                findGroup(openId) ?.arcades ?.map { arcade ->
+                    ArcadeAlias(
+                        id = arcade.id.value,
+                        names = arcade.aliases.split(",").filter { it.isNotBlank() }
+                    )
+                } ?: emptyList()
+            }
+            arcadeAliases[openId] = loaded
+            return loaded
+        }
 
         private fun findGroup(openId: String) = findById(openId) ?.let {
             ArcadeGroup.findById(it.group)
@@ -68,7 +108,7 @@ class ArcadeGroupBind(id: EntityID<String>): Entity<String>(id) {
                     it[id] = openId
                     it[ArcadeGroupBindTable.group] = target.id
                 }
-        }
+        }.also { clearCache(openId) }
 
         /**
          * 在群绑定的机厅分组中添加机厅
@@ -86,7 +126,7 @@ class ArcadeGroupBind(id: EntityID<String>): Entity<String>(id) {
                 it[ArcadeTable.aliases] = name
                 it[ArcadeTable.value] = 0
             }
-        }
+        }.also { clearCache(openId) }
 
         /**
          * 删除群绑定分组中的机厅
@@ -98,7 +138,7 @@ class ArcadeGroupBind(id: EntityID<String>): Entity<String>(id) {
             val group = findGroup(openId) ?: throw NotFoundException("机厅不存在！")
             val arcade = group.find(name) ?: throw NotFoundException("机厅不存在！")
             arcade.delete()
-        }
+        }.also { clearCache(openId) }
 
         /**
          * 为分组中的机厅添加别名
@@ -117,7 +157,7 @@ class ArcadeGroupBind(id: EntityID<String>): Entity<String>(id) {
             ArcadeTable.update({ ArcadeTable.id eq arcade.id }) {
                 it[ArcadeTable.aliases] = aliases.joinToString(",")
             }
-        }
+        }.also { clearCache(openId) }
 
         /**
          * 删除机厅的别名
@@ -134,7 +174,7 @@ class ArcadeGroupBind(id: EntityID<String>): Entity<String>(id) {
             ArcadeTable.update({ ArcadeTable.id eq arcade.id }) {
                 it[ArcadeTable.aliases] = aliases.joinToString(",")
             }
-        }
+        }.also { clearCache(openId) }
 
         /**
          * 获取机厅的全部别名
@@ -203,15 +243,14 @@ class ArcadeGroupBind(id: EntityID<String>): Entity<String>(id) {
             raw: String,
             modifiedAt: LocalDateTime = currentTime()
         ): Arcade? {
+            val (candidate, alias) = aliasesOf(openId).firstNotNullOfOrNull { candidate ->
+                candidate.names.firstOrNull { name -> raw.startsWith(name) }
+                    ?.let { name -> Pair(candidate, name) }
+            } ?: return null
+
             val arcadeId = newSuspendedTransaction {
-                val group = findGroup(openId) ?: return@newSuspendedTransaction null
-                val (arcade, alias) = group.arcades.firstNotNullOfOrNull { arcade ->
-                    arcade.aliases.split(",").filter { it.isNotBlank() }.firstOrNull { alias ->
-                        raw.startsWith(alias)
-                    } ?.let { alias ->
-                        Pair(arcade, alias)
-                    }
-                } ?: return@newSuspendedTransaction null
+                val arcade = Arcade.findById(EntityID(candidate.id, ArcadeTable))
+                    ?: return@newSuspendedTransaction null
 
                 var newValue = when {
                     raw.startsWith("$alias+") -> {

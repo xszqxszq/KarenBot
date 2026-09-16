@@ -1,11 +1,13 @@
 package xyz.xszq.bot.chunithm.component.image.templates
 
 import korlibs.io.util.toStringDecimal
+import kotlinx.coroutines.withContext
 import org.jetbrains.skia.Image
 import xyz.xszq.bot.chunithm.component.image.FilterParams
 import xyz.xszq.bot.chunithm.component.image.RatingRenderParams
 import xyz.xszq.bot.chunithm.music.*
 import xyz.xszq.bot.chunithm.music.Rating.ratingFloor
+import xyz.xszq.bot.util.cpuDispatcher
 import xyz.xszq.bot.util.pagination
 import xyz.xszq.shinobu.dom.Div
 import xyz.xszq.shinobu.style.BackgroundPosition
@@ -46,7 +48,7 @@ class RatingTemplate(
      * @param info 查询结果
      * @param backend 查分器名称
      */
-    fun bests(
+    suspend fun bests(
         info: RatingResponse,
         backend: String
     ): Image {
@@ -88,7 +90,7 @@ class RatingTemplate(
      * @param filterParams 条件过滤参数
      * @param api 查分器名称
      */
-    fun comboBests(
+    suspend fun comboBests(
         player: PlayerInfo,
         settings: PlayerSettings?= null,
         allRecords: List<Record>,
@@ -152,7 +154,7 @@ class RatingTemplate(
      * @param page 页码
      * @return 图片，页码，总页数
      */
-    fun scoreList(
+    suspend fun scoreList(
         player: PlayerInfo,
         settings: PlayerSettings?= null,
         allRecords: List<Record>,
@@ -194,7 +196,7 @@ class RatingTemplate(
         ), actualPage, totalPages)
     }
 
-    private fun template(
+    private suspend fun template(
         params: RatingRenderParams
     ): Image {
         val template = manager["rating"]!!
@@ -258,7 +260,7 @@ class RatingTemplate(
             }
         }
 
-        return template.render(main)
+        return withContext(cpuDispatcher) { template.render(main) }
     }
 
     private fun Div.header(

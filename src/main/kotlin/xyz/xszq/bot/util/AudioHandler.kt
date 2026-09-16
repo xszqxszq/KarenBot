@@ -6,6 +6,7 @@ import korlibs.io.file.VfsFile
 import korlibs.io.file.VfsOpenMode
 import korlibs.io.file.std.toVfs
 import korlibs.io.stream.*
+import kotlinx.coroutines.withContext
 import xyz.xszq.bot.ffmpeg.FFMpegFileType
 import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.bot.ffmpeg.FFProbe
@@ -23,8 +24,8 @@ object AudioHandler {
      *
      * @param file WAV 文件
      */
-    suspend fun readWaveFile(file: VfsFile): ByteArray {
-        return file.openInputStream().use { stream ->
+    suspend fun readWaveFile(file: VfsFile): ByteArray = withContext(cpuDispatcher) {
+        file.openInputStream().use { stream ->
             // RIFF 头
             require(stream.readString(4) == "RIFF") { "Invalid RIFF file" }
             stream.skip(4)
@@ -56,7 +57,7 @@ object AudioHandler {
         sampleRate: Int = 24000,
         numChannels: Int = 1,
         bit: Int = 16
-    ) {
+    ) = withContext(cpuDispatcher) {
         val data = inputFiles.map { file -> readWaveFile(file) }
         val totalSize = data.sumOf { it.size }
 

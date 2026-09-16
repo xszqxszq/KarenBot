@@ -3,6 +3,7 @@ package xyz.xszq.bot.chunithm.controller
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.Image
 import xyz.xszq.bot.chunithm.Chunithm
@@ -29,6 +30,7 @@ import xyz.xszq.bot.newLine
 import xyz.xszq.bot.plus
 import xyz.xszq.bot.reply
 import xyz.xszq.bot.toPlainText
+import xyz.xszq.bot.util.cpuDispatcher
 import xyz.xszq.bot.util.useTempFile
 import java.util.concurrent.ConcurrentHashMap
 
@@ -425,14 +427,16 @@ class ImageController(
         event: MessageEvent,
         handle: suspend MessageEvent.(String) -> Unit
     ): Unit = useTempFile(suffix = ".jpg") { file ->
-        this.encodeToData(EncodedImageFormat.JPEG, 90).use { data ->
-            val bytes = data!!.bytes
-            val uploaded = event.bot.cos.uploadBinary(bytes, suffix = ".jpg")
-            handle.invoke(event, uploaded.url)
-            chunithm.scope.launch {
-                delay(10000L)
-                event.bot.cos.deleteFromCOS(uploaded.filename)
+        val bytes = withContext(cpuDispatcher) {
+            this@upload.encodeToData(EncodedImageFormat.JPEG, 90).use { data ->
+                data!!.bytes
             }
+        }
+        val uploaded = event.bot.cos.uploadBinary(bytes, suffix = ".jpg")
+        handle.invoke(event, uploaded.url)
+        chunithm.scope.launch {
+            delay(10000L)
+            event.bot.cos.deleteFromCOS(uploaded.filename)
         }
         this.close()
     }

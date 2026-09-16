@@ -13,17 +13,13 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.exists
 import org.jetbrains.exposed.sql.transactions.transaction
 import xyz.xszq.bot.config.BotConfig
 import xyz.xszq.bot.config.COSConfig
 import xyz.xszq.bot.config.ForwardConfig
-import xyz.xszq.bot.database.GroupCommandSettings
-import xyz.xszq.bot.database.GroupInfoTable
-import xyz.xszq.bot.database.GroupMemberTable
-import xyz.xszq.bot.database.UserInfoTable
+import xyz.xszq.bot.database.*
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.llm.LLMClient
 import xyz.xszq.bot.llm.LLMConfig
@@ -84,12 +80,7 @@ class BotRuntime : RuntimeControl {
         val llmConfig = loadLLMConfig()
 
         // 组装组件
-        val database = Database.connect(
-            url = botConfig.database.url,
-            driver = botConfig.database.driver,
-            user = botConfig.database.username,
-            password = botConfig.database.password
-        )
+        val database = DatabasePool.connect(botConfig.database)
         transaction(database) {
             listOf(
                 GroupCommandSettings, GroupInfoTable, GroupMemberTable, UserInfoTable

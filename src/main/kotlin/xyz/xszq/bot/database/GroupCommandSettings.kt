@@ -2,9 +2,8 @@ package xyz.xszq.bot.database
 
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import xyz.xszq.bot.event.GroupMessageEvent
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * 群聊命令设置
@@ -16,6 +15,29 @@ object GroupCommandSettings: Table() {
     val key = varchar("key", 32)
     val value = varchar("value", 512)
     override val primaryKey = PrimaryKey(id, command, key)
+
+    private val cache = ConcurrentHashMap<String, Map<String, String>>()
+    private val generations = ConcurrentHashMap<String, Long>()
+
+    /**
+     * 清空全部缓存
+     */
+    fun clearCache() {
+        cache.clear()
+        generations.clear()
+    }
+
+    /**
+     * 清除该群该命令设置的缓存
+     *
+     * @param group 群 OpenID
+     * @param command 命令名
+     */
+    private fun clearCache(group: String, command: String) {
+        val rowKey = cacheKey(group, command)
+        generations.merge(rowKey, 1L) { current, _ -> current + 1 }
+        cache.remove(rowKey)
+    }
 
     /**
      * 读取设置值
@@ -29,13 +51,7 @@ object GroupCommandSettings: Table() {
         group: String,
         command: String,
         key: String = "enabled"
-    ): String? = suspendedTransactionAsync {
-        select(value).where {
-            (GroupCommandSettings.id eq group) and
-                (GroupCommandSettings.command eq command) and
-                (GroupCommandSettings.key eq key)
-        }.map { it[value] }.firstOrNull() ?.let { it.ifBlank { null } }
-    }.await()
+    ): String? = rows(group, command)[key] ?.ifBlank { null }
 
     /**
      * 写入值
@@ -65,6 +81,8 @@ object GroupCommandSettings: Table() {
                 it[GroupCommandSettings.key] = key
                 it[GroupCommandSettings.value] = value
             }
+    }.also {
+        clearCache(group, command)
     }
 
     /**
@@ -112,4 +130,38 @@ object GroupCommandSettings: Table() {
                 block(event)
         }
     }
+
+    /**
+     * 读取该群该命令的全部设置
+     *
+     * @param group 群 OpenID
+     * @param command 命令名
+     * @return 全部设置
+     */
+    private suspend fun rows(
+        group: String,
+        command: String
+    ): Map<String, String> {
+        val rowKey = cacheKey(group, command)
+        cache[rowKey] ?.let { return it }
+        val generation = generations[rowKey] ?: 0L
+        val loaded = suspendedTransactionAsync {
+            selectAll().where {
+                (GroupCommandSettings.id eq group) and
+                    (GroupCommandSettings.command eq command)
+            }.associate { it[key] to it[value] }
+        }.await()
+        if ((generations[rowKey] ?: 0L) == generation)
+            cache[rowKey] = loaded
+        return loaded
+    }
+
+    /**
+     * 缓存键
+     *
+     * @param group 群 OpenID
+     * @param command 命令名
+     * @return 缓存键
+     */
+    private fun cacheKey(group: String, command: String) = "$group\u0000$command"
 }

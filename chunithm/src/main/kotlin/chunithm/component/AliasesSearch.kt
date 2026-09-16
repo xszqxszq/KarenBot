@@ -2,6 +2,7 @@ package xyz.xszq.bot.chunithm.component
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import org.apache.lucene.analysis.Analyzer
 import org.apache.lucene.analysis.TokenStream
 import org.apache.lucene.analysis.Tokenizer
@@ -26,6 +27,7 @@ import xyz.xszq.bot.chunithm.Chunithm
 import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesTable
 import xyz.xszq.bot.chunithm.music.MusicInfo
 import xyz.xszq.bot.chunithm.music.MusicNameAlias
+import xyz.xszq.bot.util.cpuDispatcher
 import java.nio.file.Path
 import java.security.MessageDigest
 
@@ -315,7 +317,9 @@ class AliasesSearch(
         if (exact.isNotEmpty())
             return exact.mapNotNull { chunithm.music(it) }
 
-        val fuzzy = fuzzy(name.lowercase()).mapNotNull { chunithm.music(it.musicId) }
+        val fuzzy = withContext(cpuDispatcher) {
+            fuzzy(name.lowercase())
+        }.mapNotNull { chunithm.music(it.musicId) }
         if (fuzzy.isNotEmpty())
             return fuzzy
 

@@ -3,7 +3,7 @@ package xyz.xszq.bot.util
 import xyz.xszq.bot.crypto.Ed25519
 import xyz.xszq.bot.payload.WebhookResponse
 import xyz.xszq.bot.payload.WebhookValidation
-import java.util.HexFormat
+import java.util.*
 import kotlin.text.Charsets.UTF_8
 
 /**

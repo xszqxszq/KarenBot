@@ -10,6 +10,7 @@ import xyz.xszq.bot.chunithm.component.image.templates.LevelTemplate
 import xyz.xszq.bot.chunithm.component.image.templates.RatingTemplate
 import xyz.xszq.bot.chunithm.music.ChartInfo
 import xyz.xszq.bot.chunithm.music.MusicDifficulty
+import xyz.xszq.bot.util.cpuDispatcher
 import xyz.xszq.shinobu.parse.StyleParser.rgbColor
 import xyz.xszq.shinobu.template.TemplateManager
 
@@ -42,7 +43,7 @@ class ChunithmImage(
      */
     fun load(scope: CoroutineScope) {
         manager.init()
-        scope.launch {
+        scope.launch(cpuDispatcher) {
             generateThumb()
         }
     }

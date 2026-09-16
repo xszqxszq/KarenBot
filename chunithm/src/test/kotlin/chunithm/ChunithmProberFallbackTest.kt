@@ -2,7 +2,6 @@ package xyz.xszq.bot.chunithm
 
 import kotlinx.coroutines.test.runTest
 import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import xyz.xszq.bot.BotSandbox
 import xyz.xszq.bot.assertReplied
 import xyz.xszq.bot.assertRepliedWithImage
@@ -10,6 +9,7 @@ import xyz.xszq.bot.chunithm.component.ChunithmData
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
 import xyz.xszq.bot.chunithm.database.ProberBindTable
 import xyz.xszq.bot.chunithm.database.QQBindTable
+import xyz.xszq.bot.database.newSuspendedTransaction
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.reply
 import xyz.xszq.bot.subscribe.Channel

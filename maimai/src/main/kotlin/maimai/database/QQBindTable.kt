@@ -3,9 +3,9 @@ package xyz.xszq.bot.maimai.database
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import org.jetbrains.exposed.sql.update
+import xyz.xszq.bot.database.newSuspendedTransaction
+import xyz.xszq.bot.database.suspendedTransactionAsync
 
 /**
  * QQ 绑定表

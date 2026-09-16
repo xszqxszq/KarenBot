@@ -21,9 +21,11 @@ import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesTable
 import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesVoteTable
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
 import xyz.xszq.bot.chunithm.query.ComboQuery
+import xyz.xszq.bot.event.ChannelEvent
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.subscribe.SubscribeBuilder
+import xyz.xszq.bot.util.cpuDispatcher
 import kotlin.reflect.full.primaryConstructor
 
 /**
@@ -124,7 +126,7 @@ class Chunithm: Plugin() {
         image.init()
         ComboQuery.init(chunithmData)
 
-        scope.launch(Dispatchers.IO) {
+        scope.launch(cpuDispatcher) {
             logger.info { "[中二] 正在加载图片中……" }
             image.load(scope)
             logger.info { "[中二] 图片载入完毕。" }
@@ -139,6 +141,14 @@ class Chunithm: Plugin() {
             val controller = it.primaryConstructor!!.call(this@Chunithm)
             controller.setRoute()
             controllers.add(controller)
+        }
+
+        MaimaiSettingsTable.publisher = { openId ->
+            pluginLoader.subscribes.handle(ChannelEvent(
+                bot = pluginLoader.bot,
+                channelName = MaimaiSettingsTable.CACHE_CHANNEL,
+                data = openId
+            ))
         }
 
         // 配置路由
@@ -180,6 +190,9 @@ class Chunithm: Plugin() {
      * 注册路由
      */
     suspend fun setRoute() = route("/chu") {
+        channel(MaimaiSettingsTable.CACHE_CHANNEL) { openId ->
+            MaimaiSettingsTable.clearCache(openId)
+        }
     }
 
     /**

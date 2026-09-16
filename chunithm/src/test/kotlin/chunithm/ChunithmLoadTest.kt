@@ -2,11 +2,11 @@ package xyz.xszq.bot.chunithm
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.runBlocking
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.junit.jupiter.api.Tag
 import xyz.xszq.bot.chunithm.component.ChunithmData
 import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
 import xyz.xszq.bot.chunithm.database.ProberBindTable
+import xyz.xszq.bot.database.newSuspendedTransaction
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.load.FakeQQServer
 import xyz.xszq.bot.load.LoadHarness

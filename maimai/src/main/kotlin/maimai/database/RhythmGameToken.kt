@@ -3,7 +3,7 @@ package xyz.xszq.bot.maimai.database
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import xyz.xszq.bot.database.newSuspendedTransaction
 
 /**
  * 查分器进行绑定操作时的令牌记录

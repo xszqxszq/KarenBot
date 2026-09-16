@@ -1,11 +1,13 @@
 package xyz.xszq.bot.maimai.component.image.templates
 
 import korlibs.io.util.toStringDecimal
+import kotlinx.coroutines.withContext
 import org.jetbrains.skia.Image
 import xyz.xszq.bot.maimai.component.image.FilterParams
 import xyz.xszq.bot.maimai.component.image.LevelRenderParams
 import xyz.xszq.bot.maimai.component.image.MaimaiImage.Companion.color
 import xyz.xszq.bot.maimai.music.*
+import xyz.xszq.bot.util.cpuDispatcher
 import xyz.xszq.shinobu.parse.StyleParser
 import xyz.xszq.shinobu.template.Template
 import xyz.xszq.shinobu.template.TemplateManager
@@ -28,7 +30,7 @@ class LevelTemplate(
      * @param showProgress 是否展示进度
      * @param progressData 进度信息
      */
-    fun level(
+    suspend fun level(
         charts: List<ChartInfo>,
         records: List<Record>? = null,
         title: String,
@@ -73,7 +75,7 @@ class LevelTemplate(
         ))
     }
 
-    private fun template(
+    private suspend fun template(
         params: LevelRenderParams
     ): Image {
         val template = manager["level"]!!
@@ -173,7 +175,7 @@ class LevelTemplate(
                 })}
             }
         }
-        return template.render(main)
+        return withContext(cpuDispatcher) { template.render(main) }
     }
 
     /**

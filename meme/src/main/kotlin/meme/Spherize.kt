@@ -1,9 +1,11 @@
 package xyz.xszq.bot.meme
 
 import korlibs.io.file.VfsFile
+import kotlinx.coroutines.withContext
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.reply
+import xyz.xszq.bot.util.cpuDispatcher
 import xyz.xszq.bot.util.useTempFile
 import kotlin.math.*
 
@@ -63,9 +65,15 @@ class Spherize {
         input: VfsFile
     ) = useTempFile { normal ->
         val source = input.readSkikoImage()
-        spherize(source, false).toSkiaImage().use { img -> normal.writeBytes(img.encodePNG()) }
+        val normalPng = withContext(cpuDispatcher) {
+            spherize(source, false).toSkiaImage().use { img -> img.encodePNG() }
+        }
+        normal.writeBytes(normalPng)
         useTempFile { reversed ->
-            spherize(source, true).toSkiaImage().use { img -> reversed.writeBytes(img.encodePNG()) }
+            val reversedPng = withContext(cpuDispatcher) {
+                spherize(source, true).toSkiaImage().use { img -> img.encodePNG() }
+            }
+            reversed.writeBytes(reversedPng)
             event.reply(Image(normal))
             event.reply(Image(reversed))
         }

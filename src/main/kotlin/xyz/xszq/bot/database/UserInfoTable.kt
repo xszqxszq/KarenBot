@@ -2,7 +2,6 @@ package xyz.xszq.bot.database
 
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
 /**
  * 用户信息缓存表
@@ -35,8 +34,8 @@ object UserInfoTable: Table() {
         selectAll().forEach { row ->
             block(UserInfo(
                 id = row[UserInfoTable.id],
-                username = row[UserInfoTable.username],
-                isBot = row[UserInfoTable.isBot]
+                username = row[username],
+                isBot = row[isBot]
             ))
         }
     }

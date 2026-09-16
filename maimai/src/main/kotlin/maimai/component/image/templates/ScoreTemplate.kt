@@ -1,8 +1,10 @@
 package xyz.xszq.bot.maimai.component.image.templates
 
+import kotlinx.coroutines.withContext
 import org.jetbrains.skia.Image
 import xyz.xszq.bot.maimai.component.image.MaimaiImage.Companion.color
 import xyz.xszq.bot.maimai.music.*
+import xyz.xszq.bot.util.cpuDispatcher
 import xyz.xszq.shinobu.dom.Div
 import xyz.xszq.shinobu.dom.Element
 import xyz.xszq.shinobu.template.Template
@@ -21,7 +23,7 @@ class ScoreTemplate(
      * @param music 曲目信息
      * @param records 各难度谱面的成绩记录
      */
-    fun template(
+    suspend fun template(
         music: MusicInfo,
         records: List<Record>? = null
     ): Image {
@@ -46,7 +48,7 @@ class ScoreTemplate(
                 }
             }
         }
-        return template.render(main)
+        return withContext(cpuDispatcher) { template.render(main) }
     }
 
     private fun Div.musicInfo(

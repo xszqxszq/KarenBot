@@ -2,6 +2,7 @@ package xyz.xszq.bot.audio.touhou
 
 import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import xyz.xszq.bot.Plugin
 import xyz.xszq.bot.event.GroupMessageEvent
@@ -16,6 +17,7 @@ import xyz.xszq.bot.reply
 import xyz.xszq.bot.util.AudioHandler.crop
 import xyz.xszq.bot.util.AudioHandler.duration
 import xyz.xszq.bot.util.ErrorHandler
+import xyz.xszq.bot.util.cpuDispatcher
 import xyz.xszq.bot.util.toSimple
 import xyz.xszq.pinyin.ChinesePinyinizer
 import xyz.xszq.pinyin.initials
@@ -67,7 +69,7 @@ class Touhou(
             val offset = Random(System.currentTimeMillis())
                 .nextDouble(0.0, duration - RANDOM_DURATION)
             file.crop(offset, RANDOM_DURATION) { cropped ->
-                reply(Audio(cropped))
+                reply(withContext(cpuDispatcher) { Audio(cropped) })
                 reply(Markdown.create {
                     line(bold("随机东方原曲"))
                     line()
@@ -187,7 +189,7 @@ class Touhou(
             audio.logger.debug { "可接受答案：$answers" }
             var finished = false
 
-            reply(Audio(cropped))
+            reply(withContext(cpuDispatcher) { Audio(cropped) })
             reply(Markdown.create {
                 line(bold("原曲认知测验"))
                 line()

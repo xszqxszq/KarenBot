@@ -6,7 +6,7 @@ import com.sksamuel.hoplite.addFileSource
 import korlibs.io.async.launch
 import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import xyz.xszq.bot.Plugin
 import xyz.xszq.bot.audio.touhou.Touhou
 import xyz.xszq.bot.audio.voice.TTSParser
@@ -16,6 +16,7 @@ import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.bot.message.Audio
 import xyz.xszq.bot.message.RemoteVoice
 import xyz.xszq.bot.reply
+import xyz.xszq.bot.util.cpuDispatcher
 import xyz.xszq.bot.util.use
 import java.io.File
 
@@ -62,7 +63,7 @@ class Audio: Plugin() {
             }
 
             // TODO: 加入文本审查
-            launch(Dispatchers.IO) {
+            launch(cpuDispatcher) {
                 runCatching {
                     tts.generate(text) ?.let { pcm ->
                         pcm.use { reply(Audio(pcm)) }
@@ -87,7 +88,7 @@ class Audio: Plugin() {
                     audioRate("24k")
                     audioChannels(1)
                 }.result()
-                reply(Audio(pcm))
+                reply(withContext(cpuDispatcher) { Audio(pcm) })
                 pcm.delete()
             }
         }

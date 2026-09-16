@@ -13,6 +13,7 @@ import xyz.xszq.bot.maimai.component.image.templates.RatingTemplate
 import xyz.xszq.bot.maimai.component.image.templates.ScoreTemplate
 import xyz.xszq.bot.maimai.music.ChartInfo
 import xyz.xszq.bot.maimai.music.MusicDifficulty
+import xyz.xszq.bot.util.cpuDispatcher
 import xyz.xszq.shinobu.parse.StyleParser.rgbColor
 import xyz.xszq.shinobu.template.TemplateManager
 
@@ -49,7 +50,7 @@ class MaimaiImage(
      */
     fun load(scope: CoroutineScope) {
         manager.init()
-        scope.launch {
+        scope.launch(cpuDispatcher) {
             generateThumb()
         }
     }

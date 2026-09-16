@@ -1,9 +1,11 @@
 package xyz.xszq.bot.meme
 
 import korlibs.io.file.VfsFile
+import kotlinx.coroutines.withContext
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.reply
+import xyz.xszq.bot.util.cpuDispatcher
 import xyz.xszq.bot.util.useTempFile
 
 /**
@@ -56,13 +58,21 @@ class ImSoHappy {
         event: MessageEvent,
         input: VfsFile
     ) {
-        val (a, b) = flip(input.readSkikoImage())
+        val (a, b) = withContext(cpuDispatcher) {
+            flip(input.readSkikoImage())
+        }
         useTempFile { first ->
-            a.toSkiaImage().use { img -> first.writeBytes(img.encodePNG()) }
+            val png = withContext(cpuDispatcher) {
+                a.toSkiaImage().use { img -> img.encodePNG() }
+            }
+            first.writeBytes(png)
             event.reply(Image(first))
         }
         useTempFile { second ->
-            b.toSkiaImage().use { img -> second.writeBytes(img.encodePNG()) }
+            val png = withContext(cpuDispatcher) {
+                b.toSkiaImage().use { img -> img.encodePNG() }
+            }
+            second.writeBytes(png)
             event.reply(Image(second))
         }
     }

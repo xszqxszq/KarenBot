@@ -1,11 +1,11 @@
 package xyz.xszq.bot.maimai
 
 import kotlinx.coroutines.test.runTest
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import xyz.xszq.bot.BotSandbox
 import xyz.xszq.bot.assertReplied
 import xyz.xszq.bot.assertRepliedAny
 import xyz.xszq.bot.assertRepliedWithImage
+import xyz.xszq.bot.database.newSuspendedTransaction
 import xyz.xszq.bot.maimai.database.ProberBindTable
 import kotlin.test.Test
 import kotlin.test.assertEquals

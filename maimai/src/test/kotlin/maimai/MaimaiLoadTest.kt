@@ -2,8 +2,8 @@ package xyz.xszq.bot.maimai
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.runBlocking
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.junit.jupiter.api.Tag
+import xyz.xszq.bot.database.newSuspendedTransaction
 import xyz.xszq.bot.load.FakeQQServer
 import xyz.xszq.bot.load.LoadHarness
 import xyz.xszq.bot.load.LoadScenario

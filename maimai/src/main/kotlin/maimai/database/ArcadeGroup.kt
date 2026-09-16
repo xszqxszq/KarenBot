@@ -3,7 +3,7 @@ package xyz.xszq.bot.maimai.database
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
+import xyz.xszq.bot.database.suspendedTransactionAsync
 
 /**
  * 排队管理的机厅分组
