@@ -735,11 +735,11 @@ object Ed25519 {
 
         for (i in 0 until PRECOMP_POINTS) {
             val cond = ((i xor index) - 1) shr 31
-            Field.cmov(cond, precompBaseComb, off, p.ymxH, 0)
+            Field.cMov(cond, precompBaseComb, off, p.ymxH, 0)
             off += Field.SIZE
-            Field.cmov(cond, precompBaseComb, off, p.ypxH, 0)
+            Field.cMov(cond, precompBaseComb, off, p.ypxH, 0)
             off += Field.SIZE
-            Field.cmov(cond, precompBaseComb, off, p.xyd, 0)
+            Field.cMov(cond, precompBaseComb, off, p.xyd, 0)
             off += Field.SIZE
         }
     }
@@ -1203,7 +1203,7 @@ object Ed25519 {
             z[9] = z9
         }
 
-        fun cmov(
+        fun cMov(
             cond: Int,
             x: IntArray,
             xOff: Int,

@@ -246,7 +246,7 @@ class Touhou(
                 }
             }
 
-            delay(TIMESUP)
+            delay(TIME_UP)
             if (finished)
                 return@guess
             reply(Markdown.create {
@@ -360,7 +360,7 @@ class Touhou(
     }
     companion object {
         const val RANDOM_DURATION = 15.0
-        const val TIMESUP = 60000L
+        const val TIME_UP = 60000L
         const val SIMILAR_THRESHOLD = 0.7
         /**
          * 原曲认知测验难度

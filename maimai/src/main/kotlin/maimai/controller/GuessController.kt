@@ -47,6 +47,10 @@ class GuessController(
     private val hints = 6
     private val maxOpening = 8
     private val cooldown = 10000L
+    private val hintHandler = CoroutineExceptionHandler { _, e ->
+        if (e !is CancellationException)
+            maimai.logger.error(e) { "[舞萌] 猜歌提示发送失败" }
+    }
     private val subscribeId = ConcurrentHashMap<String, String>()
     private val eventToReply = ConcurrentHashMap<String, MessageEvent>()
 
@@ -177,17 +181,13 @@ class GuessController(
                     subscribeId[event.contextId] = subscribesAt
                     eventToReply[event.contextId] = event
 
-                    val hintJob = maimai.scope.launch(
-                        CoroutineExceptionHandler { _, e ->
-                            if (e !is java.util.concurrent.CancellationException)
-                                maimai.logger.error(e) {  }
-                        }
-                    ) {
-                        hintClassical(event.contextId, subscribesAt, music, descriptions)
+                    val stop = CompletableDeferred<Unit>()
+                    maimai.scope.launch(hintHandler) {
+                        hintClassical(event.contextId, subscribesAt, music, descriptions, stop)
                     }
 
                     maimai.pluginLoader.subscribes.always(subscribesAt) {
-                        listenClassical(event.contextId, subscribesAt, music, hintJob)
+                        listenClassical(event.contextId, subscribesAt, music, stop)
                     }
                 }
                 "opening" -> event.run {
@@ -239,12 +239,8 @@ class GuessController(
 
         maimai.logger.info { "当前正在猜测: ${music.id}. ${music.name}" }
 
-        val hintJob = maimai.scope.launch(
-            CoroutineExceptionHandler { _, e ->
-                if (e !is java.util.concurrent.CancellationException)
-                    maimai.logger.error(e) {  }
-            }
-        ) {
+        val stop = CompletableDeferred<Unit>()
+        maimai.scope.launch(hintHandler) {
             reply(buildString {
                 appendLine()
                 append( "这是一个 maimai 猜歌小游戏~" )
@@ -254,18 +250,19 @@ class GuessController(
                 appendLine()
                 append( "管理员可以通过@可怜BOT发送“禁用猜歌”来关闭猜歌" )
             })
-            hintClassical(contextId, subscribesAt, music, descriptions)
+            hintClassical(contextId, subscribesAt, music, descriptions, stop)
         }
 
         maimai.pluginLoader.subscribes.always(subscribesAt) {
-            listenClassical(this@classical.contextId, subscribesAt, music, hintJob)
+            listenClassical(this@classical.contextId, subscribesAt, music, stop)
         }
     }
     private suspend fun MessageEvent.hintClassical(
         contextId: String,
         subscribesAt: String,
         music: MusicInfo,
-        descriptions: List<String>?
+        descriptions: List<String>?,
+        stop: CompletableDeferred<Unit>
     ) {
         descriptions ?.forEachIndexed { index, desc ->
             val hint = buildString {
@@ -285,9 +282,12 @@ class GuessController(
                 music.id,
                 descriptions.subList(index + 1, descriptions.size),
             ))
-            delay(cooldown)
+            if (stop.awaitStop(cooldown))
+                return
         }
 
+        if (stop.isCompleted)
+            return
         descriptions ?.runCatching {
             val hint = "这首歌的封面部分如图，30秒后将揭晓答案哦~"
             val cropped = music.cover().randomSlice() ?: return@runCatching
@@ -311,7 +311,10 @@ class GuessController(
             }
 
         }
-        delay(30000L)
+        if (stop.awaitStop(30000L))
+            return
+        if (!stop.complete(Unit))
+            return
 
         val hint = "很遗憾，没有人猜中哦".toPlainText() + music.infoText()
         val url = "$jacketUrl/${music.resourceId}.jpg"
@@ -322,7 +325,7 @@ class GuessController(
         contextId: String,
         subscribesAt: String,
         music: MusicInfo,
-        hintJob: Job
+        stop: CompletableDeferred<Unit>
     ) {
         if (contextId != this.contextId) {
             return
@@ -330,7 +333,8 @@ class GuessController(
         eventToReply[contextId] = this
         val input = text.trim()
         if (input.startsWith("不玩了")) {
-            runCatching { hintJob.cancelAndJoin() }
+            if (!stop.complete(Unit))
+                return
             endGame(subscribesAt)
 
             val hint = "游戏已结束。答案如下：".toPlainText() + music.infoText()
@@ -340,7 +344,8 @@ class GuessController(
         }
         maimai.aliases.search(input).take(10).forEach { answer ->
             if (answer.name == music.name) {
-                runCatching { hintJob.cancelAndJoin() }
+                if (!stop.complete(Unit))
+                    return
                 endGame(subscribesAt)
 
                 val hint = "恭喜你猜中了哦~".toPlainText() + music.infoText()
@@ -350,6 +355,16 @@ class GuessController(
             }
         }
     }
+
+    /**
+     * 等待游戏结束或超时
+     *
+     * @param timeoutMillis 等待时长（毫秒）
+     * @return 游戏是否已结束
+     */
+    private suspend fun CompletableDeferred<Unit>.awaitStop(
+        timeoutMillis: Long
+    ): Boolean = withTimeoutOrNull(timeoutMillis) { await() } != null
     private suspend fun MessageEvent.opening() {
         if (!playable())
             return

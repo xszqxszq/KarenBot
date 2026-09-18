@@ -115,7 +115,7 @@ class TencentCOS(
             contentType(contentTypeOf(filename))
             setBody(binary)
         }
-        ensureSuccess("上传对象", response)
+        ensureSuccess(response)
     }.onFailure { e ->
         errorLogger.error(e) { "[COS] 上传 $filename 失败" }
     }
@@ -145,12 +145,11 @@ class TencentCOS(
     )
 
     private fun ensureSuccess(
-        step: String,
         response: HttpResponse
     ) {
         val status = response.status.value
         if (status !in 200..299)
-            throw IllegalStateException("$step 失败 HTTP $status")
+            throw IllegalStateException("上传失败：HTTP $status")
     }
 
     /**

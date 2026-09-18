@@ -9,6 +9,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import kotlinx.coroutines.CancellationException
 import okhttp3.ConnectionPool
 import xyz.xszq.bot.config.BotConfig
 import xyz.xszq.bot.exception.SendException
@@ -130,6 +131,8 @@ class OpenAPI(
                 setToken()
             }.resultOrThrow<MessageResponse>()
         }.onFailure { e ->
+            if (e is CancellationException)
+                throw e
             if (e !is SendException) {
                 e.printStackTrace()
                 return false

@@ -160,7 +160,8 @@ class SubscribeManager(
             runCatching {
                 block()
             }.onFailure { e ->
-                e.printStackTrace()
+                if (e !is CancellationException)
+                    e.printStackTrace()
             }
         }
     }
