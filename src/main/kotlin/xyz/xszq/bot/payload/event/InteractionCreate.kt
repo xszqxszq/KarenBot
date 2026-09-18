@@ -19,7 +19,7 @@ data class InteractionCreate(
     val type: Int,
     val scene: String,
     @SerialName("chat_type")
-    val chatType: Int,
+    val chatType: Int ?= null,
     val timestamp: String,
     val data: InteractionData,
     @SerialName("user_openid")
