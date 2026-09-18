@@ -11,6 +11,7 @@ val luceneVersion: String by project
 val mariadbVersion: String by project
 val mockkVersion: String by project
 val serializationVersion: String by project
+val skikoVersion: String by project
 val xmlutilVersion: String by project
 
 plugins {
@@ -64,6 +65,11 @@ dependencies {
     implementation("org.mariadb.jdbc:mariadb-java-client:$mariadbVersion")
     implementation("xyz.xszq:opencc-kt:1.0.0")
     implementation("xyz.xszq:silkt:1.0.1")
+    // skiko 原生库同一进程只能加载一次，由核心统一提供
+    runtimeOnly("org.jetbrains.skiko:skiko-awt:$skikoVersion")
+    runtimeOnly("org.jetbrains.skiko:skiko-awt-runtime-linux-x64:$skikoVersion")
+    runtimeOnly("org.jetbrains.skiko:skiko-awt-runtime-macos-arm64:$skikoVersion")
+    runtimeOnly("org.jetbrains.skiko:skiko-awt-runtime-windows-x64:$skikoVersion")
     testImplementation(kotlin("test"))
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
@@ -147,6 +153,7 @@ allprojects {
     extra["ksoupVersion"] = ksoupVersion
     extra["mockkVersion"] = mockkVersion
     extra["coroutinesVersion"] = coroutinesVersion
+    extra["skikoVersion"] = skikoVersion
     tasks.register("generatePluginDependencies") {
         val outputFile = layout.buildDirectory.file("generated/plugin-dependencies.txt")
         inputs.file(layout.projectDirectory.file("build.gradle.kts"))
