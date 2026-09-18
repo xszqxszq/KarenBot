@@ -23,17 +23,11 @@ class Span(
         if (text.isEmpty() || fontCollection == null)
             return
 
-        if (measuredParagraph != null && style.textStroke == null && style.textShadow == null) {
-            val para = measuredParagraph!!
-            val metrics = para.lineMetrics.firstOrNull()
-            val yOffset = if (metrics != null) {
-                if (para.lineMetrics.size > 1) (contentRect.height - para.height) / 2f
-                else (contentRect.height / 2f) - (metrics.baseline.toFloat() + (metrics.descent.toFloat() - metrics.ascent.toFloat()) / 2f)
-            } else 0f
-
+        val measured = measuredParagraph
+        if (measured != null && style.textStroke == null && style.textShadow == null) {
             canvas.save()
             canvas.clipRect(contentRect)
-            para.paint(canvas, contentRect.left, contentRect.top + yOffset)
+            measured.paint(canvas, contentRect.left, contentRect.top + layerYOffset(measured))
             canvas.restore()
             return
         }
@@ -64,35 +58,12 @@ class Span(
                 builder.pushStyle(textStyle)
                 builder.addText(text)
                 builder.build().use { paragraph ->
-                    val layoutW = if (style.whiteSpace == WhiteSpace.NOWRAP) {
-                        Float.POSITIVE_INFINITY
-                    } else {
-                        contentRect.width
-                    }
-                    paragraph.layout(layoutW)
-
-                    val metrics = paragraph.lineMetrics.firstOrNull()
-
-                    val yOffset = if (metrics != null) {
-                        val linesCount = paragraph.lineMetrics.size
-
-                        if (linesCount > 1) {
-                            (contentRect.height - paragraph.height) / 2f
-                        } else {
-                            val ascent = metrics.ascent.toFloat()
-                            val descent = metrics.descent.toFloat()
-                            val baseline = metrics.baseline.toFloat()
-
-                            val inkCenterY = baseline + (descent - ascent) / 2f
-                            val boxCenterY = contentRect.height / 2f
-
-                            boxCenterY - inkCenterY
-                        }
-                    } else {
-                        0f
-                    }
-
-                    paragraph.paint(canvas, contentRect.left, contentRect.top + yOffset)
+                    paragraph.layout(layoutWidth())
+                    paragraph.paint(
+                        canvas,
+                        contentRect.left,
+                        contentRect.top + layerYOffset(paragraph)
+                    )
                 }
             }
         }
@@ -114,39 +85,47 @@ class Span(
         )
         canvas.clipRect(safeRect)
 
-        if (style.textStroke != null) {
-            val stroke = style.textStroke!!
+        val stroke = style.textStroke
+        val reuse = if (stroke != null) measured else null
+        val layerWidth = layoutWidth()
+        reuse ?.layout(layerWidth)
+        val layerX = contentRect.left
+        val layerY = contentRect.top + (reuse ?.let { layerYOffset(it) } ?: 0f)
 
-            style.textShadow?.let { shadow ->
+        fun strokeLayer(configure: Paint.() -> Unit) {
+            val paint = Paint().apply(configure)
+            if (reuse != null)
+                repaintLayer(canvas, reuse, paint, layerWidth, layerX, layerY)
+            else
+                paintTextLayer { foreground = paint }
+            paint.close()
+        }
+
+        if (stroke != null) {
+            style.textShadow ?.let { shadow ->
                 canvas.save()
                 canvas.translate(shadow.dx, shadow.dy)
-                paintTextLayer {
-                    foreground = Paint().apply {
-                        mode = PaintMode.STROKE_AND_FILL
-                        strokeWidth = stroke.size
-                        color = shadow.color
-                        strokeJoin = PaintStrokeJoin.ROUND
-                        strokeCap = PaintStrokeCap.ROUND
-                    }
+                strokeLayer {
+                    mode = PaintMode.STROKE_AND_FILL
+                    strokeWidth = stroke.size
+                    color = shadow.color
+                    strokeJoin = PaintStrokeJoin.ROUND
+                    strokeCap = PaintStrokeCap.ROUND
                 }
                 canvas.restore()
             }
 
-            paintTextLayer {
-                foreground = Paint().apply {
-                    mode = PaintMode.STROKE
-                    strokeWidth = stroke.size
-                    color = stroke.color
-                    strokeJoin = PaintStrokeJoin.ROUND
-                    strokeCap = PaintStrokeCap.ROUND
-                }
+            strokeLayer {
+                mode = PaintMode.STROKE
+                strokeWidth = stroke.size
+                color = stroke.color
+                strokeJoin = PaintStrokeJoin.ROUND
+                strokeCap = PaintStrokeCap.ROUND
             }
 
-            paintTextLayer {
-                foreground = Paint().apply {
-                    mode = PaintMode.FILL
-                    color = style.textColor
-                }
+            strokeLayer {
+                mode = PaintMode.FILL
+                color = style.textColor
             }
         } else {
             paintTextLayer {
@@ -158,6 +137,34 @@ class Span(
         }
 
         canvas.restore()
+    }
+
+    private fun layoutWidth(): Float =
+        if (style.whiteSpace == WhiteSpace.NOWRAP)
+            Float.POSITIVE_INFINITY
+        else contentRect.width
+
+    private fun layerYOffset(paragraph: Paragraph): Float {
+        val lines = paragraph.lineMetrics
+        val metrics = lines.firstOrNull() ?: return 0f
+        if (lines.size > 1)
+            return (contentRect.height - paragraph.height) / 2f
+        return (contentRect.height / 2f) -
+            (metrics.baseline.toFloat() +
+                (metrics.descent.toFloat() - metrics.ascent.toFloat()) / 2f)
+    }
+
+    private fun repaintLayer(
+        canvas: Canvas,
+        paragraph: Paragraph,
+        paint: Paint,
+        width: Float,
+        x: Float,
+        y: Float
+    ) {
+        paragraph.updateForegroundPaint(0, text.length, paint)
+        paragraph.layout(width)
+        paragraph.paint(canvas, x, y)
     }
 
     override fun clone(): Element {

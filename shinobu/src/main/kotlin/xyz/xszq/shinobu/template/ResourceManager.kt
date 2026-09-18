@@ -3,6 +3,8 @@ package xyz.xszq.shinobu.template
 import org.jetbrains.skia.Image
 import org.jetbrains.skia.paragraph.FontCollection
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * 图片资源管理器
@@ -16,12 +18,13 @@ class ResourceManager(
     preloadLocal: Boolean = false,
     val fontCollection: FontCollection
 ) {
-    private val imageCache = mutableMapOf<String, Image>()
-    private val externalCache = mutableMapOf<String, Image>()
+    private val imageCache: MutableMap<String, Image> = ConcurrentHashMap()
+    private val externalCache: MutableMap<String, Image> = ConcurrentHashMap()
+    private val lruLock = Any()
     private val lruCache = object : LinkedHashMap<String, Image>(8, 0.75f, true) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Image>?): Boolean {
             if (size > MAX_LRU) {
-                eldest?.value?.close()
+                eldest ?.value ?.let { retire(it) }
                 return true
             }
             return false
@@ -55,7 +58,7 @@ class ResourceManager(
 
         imageCache[fileName]?.let { return it }
         externalCache[cacheKey]?.let { return it }
-        lruCache[cacheKey]?.let { return it }
+        lruImage(cacheKey)?.let { return it }
 
         val file = File(basePath, src)
         if (file.exists() && file.isFile) {
@@ -63,19 +66,56 @@ class ResourceManager(
                 val img = Image.makeFromEncoded(file.readBytes())
                 val w = img.width
                 val h = img.height
-                if (w <= THUMBNAIL_MAX_DIM && h <= THUMBNAIL_MAX_DIM)
-                    externalCache[cacheKey] = img
-                else if (w <= LRU_MAX_DIM && h <= LRU_MAX_DIM)
-                    lruCache[cacheKey] = img
+                if (w <= THUMBNAIL_MAX_DIM && h <= THUMBNAIL_MAX_DIM) {
+                    val cached = externalCache.putIfAbsent(cacheKey, img)
+                    if (cached != null) {
+                        img.close()
+                        return cached
+                    }
+                } else if (w <= LRU_MAX_DIM && h <= LRU_MAX_DIM) {
+                    putLruImage(cacheKey, img)
+                }
                 return img
             }
         }
         return parent?.getImage(src)
     }
 
+    private fun lruImage(key: String): Image? = synchronized(lruLock) {
+        lruCache[key]
+    }
+
+    private fun putLruImage(key: String, image: Image) {
+        synchronized(lruLock) {
+            lruCache[key] = image
+        }
+    }
+
+    /**
+     * 清除被淘汰的位图
+     *
+     * @param image 被淘汰的位图
+     */
+    private fun retire(image: Image) {
+        if (activeRenders.get() == 0)
+            image.close()
+    }
+
     companion object {
         const val THUMBNAIL_MAX_DIM = 100
         const val LRU_MAX_DIM = 200
         const val MAX_LRU = 200
+
+        private val activeRenders = AtomicInteger(0)
+
+        /**
+         * 开启一次渲染会话
+         *
+         * @return 用于结束会话的句柄
+         */
+        internal fun renderSession(): AutoCloseable {
+            activeRenders.incrementAndGet()
+            return AutoCloseable { activeRenders.decrementAndGet() }
+        }
     }
 }

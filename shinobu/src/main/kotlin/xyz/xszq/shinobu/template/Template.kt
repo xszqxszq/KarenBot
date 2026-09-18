@@ -29,25 +29,25 @@ class Template(
     /**
      * 把元素树渲染为位图
      *
-     * 依次完成资源解析、布局与绘制录制后输出位图，位图边长受
-     * Skia 上限约束
+     * 依次完成资源解析、布局与绘制后输出位图，位图边长受
+     * Skia 上限约束。整个过程处于一次渲染会话中，会话期间取到的
+     * 缓存位图保证有效
      *
      * @param element 要渲染的元素树根节点
      * @return 渲染结果位图
      */
     fun render(
         element: Element
-    ): Image {
+    ): Image = ResourceManager.renderSession().use {
         element.resolveResources(resourceManager)
         LayoutEngine.performLayout(element)
-        element.prepareRenderTree()
 
         val w = element.measuredWidth.toInt().coerceAtMost(65500)
         val h = element.measuredHeight.toInt().coerceAtMost(65500)
 
-        return Surface.makeRasterN32Premul(w, h).use { surface ->
-            element.renderPicture?.let { surface.canvas.drawPicture(it) }
-            surface.makeImageSnapshot()!!
+        Surface.makeRasterN32Premul(w, h).use { surface ->
+            element.draw(surface.canvas)
+            surface.makeImageSnapshot()
         }
     }
 }

@@ -134,13 +134,40 @@ object LayoutEngine {
                     if (element.style.minTextSize != null && paragraph.maxIntrinsicWidth > availableContentW) {
                         val minSize = element.style.minTextSize!!
 
-                        while (paragraph.maxIntrinsicWidth > availableContentW && currentSize > minSize) {
-                            currentSize -= 1f
+                        // 测出最小字号
+                        val intrinsicWidth = paragraph.maxIntrinsicWidth
+                        if (intrinsicWidth > 0f) {
+                            fun fitAt(size: Float): Boolean {
+                                paragraph.updateFontSize(0, element.text.length, size)
+                                paragraph.layout(Float.POSITIVE_INFINITY)
+                                return paragraph.maxIntrinsicWidth <= availableContentW
+                            }
+
+                            var guess = currentSize * availableContentW / intrinsicWidth
+                            if (guess > currentSize - 1f)
+                                guess = currentSize - 1f
+                            if (guess < minSize)
+                                guess = minSize
+                            currentSize = kotlin.math.floor(guess)
+
+                            if (fitAt(currentSize)) {
+                                while (currentSize + 1f <= element.style.textSize - 1f &&
+                                    fitAt(currentSize + 1f)
+                                ) currentSize += 1f
+                            } else {
+                                while (currentSize > minSize) {
+                                    currentSize -= 1f
+                                    if (fitAt(currentSize))
+                                        break
+                                }
+                            }
+                        }
+
+                        if (currentSize != element.style.textSize) {
                             paragraph.close()
                             paragraph = buildPara(currentSize)
                             paragraph.layout(Float.POSITIVE_INFINITY)
                         }
-
                         element.computedFontSize = currentSize
                         paragraph.layout(layoutWidth)
                     }
