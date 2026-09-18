@@ -45,6 +45,8 @@ class MaimaiTest : MaimaiDatabaseTest() {
 
             testCourse(sandbox)
 
+            testCourseAlias(sandbox)
+
             testCombo(sandbox)
             testSongRating(sandbox)
             testRecent(sandbox)
@@ -190,6 +192,12 @@ class MaimaiTest : MaimaiDatabaseTest() {
     private suspend fun testCourse(sandbox: BotSandbox) {
         sandbox.clear()
         assertRepliedAny(sandbox, sandbox.user() says "段位表 初段")
+    }
+
+    private suspend fun testCourseAlias(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertRepliedWithImage(sandbox, sandbox.user() says "段位表 随机紫超上")
+        assertRepliedWithImage(sandbox, sandbox.user() says "随机紫超上")
     }
 
     private suspend fun testCombo(sandbox: BotSandbox) {
