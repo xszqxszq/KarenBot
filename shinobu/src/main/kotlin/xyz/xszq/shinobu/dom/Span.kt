@@ -19,6 +19,7 @@ class Span(
     var fontCollection: FontCollection ?= null
     var computedFontSize: Float ?= null
     internal var measuredParagraph: Paragraph? = null
+    internal var measuredLayerYOffset = 0f
     override fun draw(canvas: Canvas) {
         if (text.isEmpty() || fontCollection == null)
             return
@@ -27,7 +28,7 @@ class Span(
         if (measured != null && style.textStroke == null && style.textShadow == null) {
             canvas.save()
             canvas.clipRect(contentRect)
-            measured.paint(canvas, contentRect.left, contentRect.top + layerYOffset(measured))
+            measured.paint(canvas, contentRect.left, contentRect.top + measuredLayerYOffset)
             canvas.restore()
             return
         }
@@ -86,11 +87,13 @@ class Span(
         canvas.clipRect(safeRect)
 
         val stroke = style.textStroke
-        val reuse = if (stroke != null) measured else null
+        // 多行复用会有Bug
+        val singleLine = (measured ?.lineNumber ?: 0) <= 1
+        val reuse = if (stroke != null && singleLine) measured else null
         val layerWidth = layoutWidth()
         reuse ?.layout(layerWidth)
         val layerX = contentRect.left
-        val layerY = contentRect.top + (reuse ?.let { layerYOffset(it) } ?: 0f)
+        val layerY = contentRect.top + if (reuse != null) measuredLayerYOffset else 0f
 
         fun strokeLayer(configure: Paint.() -> Unit) {
             val paint = Paint().apply(configure)
@@ -143,6 +146,11 @@ class Span(
         if (style.whiteSpace == WhiteSpace.NOWRAP)
             Float.POSITIVE_INFINITY
         else contentRect.width
+
+    internal fun cacheLayerYOffset() {
+        val paragraph = measuredParagraph ?: return
+        measuredLayerYOffset = layerYOffset(paragraph)
+    }
 
     private fun layerYOffset(paragraph: Paragraph): Float {
         val lines = paragraph.lineMetrics

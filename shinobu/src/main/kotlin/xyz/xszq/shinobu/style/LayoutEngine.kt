@@ -172,7 +172,7 @@ object LayoutEngine {
                         paragraph.layout(layoutWidth)
                     }
 
-                    val linesCount = paragraph.lineMetrics.size.coerceAtLeast(1)
+                    val linesCount = paragraph.lineNumber.coerceAtLeast(1)
                     intrinsicContentW = minOf(paragraph.maxIntrinsicWidth, layoutWidth)
                     intrinsicContentH = minOf(paragraph.height, currentSize * 1.4f * linesCount)
                     element.measuredParagraph?.close()
@@ -275,6 +275,9 @@ object LayoutEngine {
     private fun layout(element: Element, startX: Float, startY: Float) {
         element.layoutX = startX
         element.layoutY = startY
+
+        if (element is Span)
+            element.cacheLayerYOffset()
 
         if (element.children.isEmpty())
             return

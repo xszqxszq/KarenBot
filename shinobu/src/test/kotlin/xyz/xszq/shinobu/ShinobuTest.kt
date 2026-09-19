@@ -1,5 +1,12 @@
 package xyz.xszq.shinobu
 
+import org.jetbrains.skia.Bitmap
+import org.jetbrains.skia.ColorAlphaType
+import org.jetbrains.skia.ColorType
+import org.jetbrains.skia.FontMgr
+import org.jetbrains.skia.ImageInfo
+import org.jetbrains.skia.Surface
+import org.jetbrains.skia.paragraph.FontCollection
 import xyz.xszq.shinobu.dom.Div
 import xyz.xszq.shinobu.dom.Img
 import xyz.xszq.shinobu.dom.Span
@@ -160,5 +167,48 @@ class ShinobuTest {
         assertEquals(style, copy)
         copy.textStroke!!.size = 10f
         assertEquals(2f, style.textStroke!!.size)
+    }
+
+    @Test
+    fun shouldRenderMultilineStrokeShadowBody() {
+        val root = Div("root")
+        val span = Span("text", "一二三四五六七八九十")
+        root.style.width = 100f
+        root.style.height = 80f
+        root.style.backgroundColor = 0xFFFFFFFF.toInt()
+        span.style.textSize = 20f
+        span.style.textColor = 0xFFFF0000.toInt()
+        span.style.textStroke = TextStroke(0xFF0000FF.toInt(), 1f)
+        span.style.textShadow = TextShadow(0xFF00FF00.toInt(), 2f, 2f)
+        root.add(span)
+
+        FontCollection().use { fonts ->
+            fonts.setDefaultFontManager(FontMgr.default)
+            span.fontCollection = fonts
+            LayoutEngine.performLayout(root)
+            assertTrue((span.measuredParagraph ?.lineNumber ?: 0) > 1)
+
+            Surface.makeRasterN32Premul(100, 80).use { surface ->
+                root.draw(surface.canvas)
+                surface.makeImageSnapshot().use { image ->
+                    Bitmap.makeFromImage(image).use { bitmap ->
+                        val info = ImageInfo(
+                            image.width,
+                            image.height,
+                            ColorType.RGBA_8888,
+                            ColorAlphaType.UNPREMUL
+                        )
+                        val pixels = bitmap.readPixels(info)!!
+                        val bodyPixels = pixels.indices.step(4).count {
+                            val red = pixels[it].toInt() and 0xFF
+                            val green = pixels[it + 1].toInt() and 0xFF
+                            val blue = pixels[it + 2].toInt() and 0xFF
+                            red > 150 && green < red / 2 && blue < red / 2
+                        }
+                        assertTrue(bodyPixels > 20)
+                    }
+                }
+            }
+        }
     }
 }
