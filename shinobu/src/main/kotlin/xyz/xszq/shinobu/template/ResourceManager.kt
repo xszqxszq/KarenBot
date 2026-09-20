@@ -30,6 +30,10 @@ class ResourceManager(
             return false
         }
     }
+    private val largeLruLock = Any()
+    private val largeLruCache =
+        LinkedHashMap<String, LargeImage>(8, 0.75f, true)
+    private var largeLruPixels = 0L
 
     init {
         if (preloadLocal && basePath.exists() && basePath.isDirectory) {
@@ -46,8 +50,8 @@ class ResourceManager(
     /**
      * 按图片路径解析位图
      *
-     * 先尝试文件名与路径缓存，再读取本地文件，边长不超过阈值的
-     * 图片分别进入常驻缓存或 LRU 缓存
+     * 先尝试各级缓存，再读取本地文件，小图进入常驻或普通
+     * LRU 缓存，大图进入按像素总量淘汰的 LRU 缓存
      *
      * @param src 样式或模板中声明的图片路径
      * @return 解析出的位图
@@ -63,6 +67,8 @@ class ResourceManager(
         val file = File(basePath, src)
         if (file.exists() && file.isFile) {
             runCatching {
+                val signature = "${file.lastModified()}:${file.length()}"
+                largeImage(cacheKey, signature) ?.let { return it }
                 val img = Image.makeFromEncoded(file.readBytes())
                 val w = img.width
                 val h = img.height
@@ -74,6 +80,8 @@ class ResourceManager(
                     }
                 } else if (w <= LRU_MAX_DIM && h <= LRU_MAX_DIM) {
                     putLruImage(cacheKey, img)
+                } else {
+                    return putLargeLruImage(cacheKey, img, signature)
                 }
                 return img
             }
@@ -91,6 +99,55 @@ class ResourceManager(
         }
     }
 
+    private fun largeImage(key: String, signature: String): Image? =
+        synchronized(largeLruLock) {
+            val cached = largeLruCache[key]
+            if (cached == null)
+                return@synchronized null
+            if (cached.signature != signature) {
+                largeLruCache.remove(key)
+                largeLruPixels -= cached.pixels
+                retire(cached.image)
+                return@synchronized null
+            }
+            cached.image
+        }
+
+    private fun putLargeLruImage(
+        key: String,
+        image: Image,
+        signature: String
+    ): Image {
+        val pixels = image.width.toLong() * image.height.toLong()
+        synchronized(largeLruLock) {
+            if (pixels > MAX_LARGE_LRU_PIXELS)
+                return image
+
+            val cached = largeLruCache[key]
+            if (cached ?.signature == signature) {
+                image.close()
+                return cached.image
+            }
+            if (cached != null) {
+                largeLruCache.remove(key)
+                largeLruPixels -= cached.pixels
+                retire(cached.image)
+            }
+
+            largeLruCache[key] = LargeImage(image, signature, pixels)
+            largeLruPixels += pixels
+            while (largeLruCache.size > MAX_LARGE_LRU ||
+                largeLruPixels > MAX_LARGE_LRU_PIXELS
+            ) {
+                val eldest = largeLruCache.entries.iterator().next()
+                largeLruCache.remove(eldest.key)
+                largeLruPixels -= eldest.value.pixels
+                retire(eldest.value.image)
+            }
+            return image
+        }
+    }
+
     /**
      * 清除被淘汰的位图
      *
@@ -105,8 +162,16 @@ class ResourceManager(
         const val THUMBNAIL_MAX_DIM = 100
         const val LRU_MAX_DIM = 200
         const val MAX_LRU = 200
+        const val MAX_LARGE_LRU = 16
+        const val MAX_LARGE_LRU_PIXELS = 8_000_000L
 
         private val activeRenders = AtomicInteger(0)
+
+        private class LargeImage(
+            val image: Image,
+            val signature: String,
+            val pixels: Long
+        )
 
         /**
          * 开启一次渲染会话

@@ -93,14 +93,15 @@ class Span(
         reuse ?.layout(layerWidth)
         val layerX = contentRect.left
         val layerY = contentRect.top + (reuse ?.let { layerYOffset(it) } ?: 0f)
+        val layerPaint = Paint()
 
         fun strokeLayer(configure: Paint.() -> Unit) {
-            val paint = Paint().apply(configure)
+            layerPaint.reset()
+            layerPaint.apply(configure)
             if (reuse != null)
-                repaintLayer(canvas, reuse, paint, layerWidth, layerX, layerY)
+                repaintLayer(canvas, reuse, layerPaint, layerWidth, layerX, layerY)
             else
-                paintTextLayer { foreground = paint }
-            paint.close()
+                paintTextLayer { foreground = layerPaint }
         }
 
         if (stroke != null) {
@@ -138,6 +139,7 @@ class Span(
             }
         }
 
+        layerPaint.close()
         canvas.restore()
     }
 

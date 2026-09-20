@@ -3,8 +3,11 @@ package xyz.xszq.shinobu
 import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.ColorAlphaType
 import org.jetbrains.skia.ColorType
+import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.FontMgr
 import org.jetbrains.skia.ImageInfo
+import org.jetbrains.skia.Paint
+import org.jetbrains.skia.Rect
 import org.jetbrains.skia.Surface
 import org.jetbrains.skia.paragraph.FontCollection
 import xyz.xszq.shinobu.dom.Div
@@ -13,6 +16,9 @@ import xyz.xszq.shinobu.dom.Span
 import xyz.xszq.shinobu.parse.StyleParser
 import xyz.xszq.shinobu.parse.TemplateParser
 import xyz.xszq.shinobu.style.*
+import xyz.xszq.shinobu.template.ResourceManager
+import java.io.File
+import kotlin.io.path.createTempDirectory
 import kotlin.test.*
 
 class ShinobuTest {
@@ -170,6 +176,29 @@ class ShinobuTest {
     }
 
     @Test
+    fun resourceManagerCachesLargeImages() {
+        val dir = createTempDirectory(prefix = "shinobu-resources").toFile()
+        try {
+            val file = File(dir, "plate.png")
+            writeLargeImage(file, 0xFFFF0000.toInt(), 201)
+            FontCollection().use { fonts ->
+                val manager = ResourceManager(dir, fontCollection = fonts)
+                val first = assertNotNull(manager.getImage("plate.png"))
+                val second = assertNotNull(manager.getImage("plate.png"))
+                assertSame(first, second)
+
+                writeLargeImage(file, 0xFF0000FF.toInt(), 202)
+                file.setLastModified(file.lastModified() + 10_000)
+                val replaced = assertNotNull(manager.getImage("plate.png"))
+                assertNotSame(first, replaced)
+                assertEquals(202, replaced.width)
+            }
+        } finally {
+            dir.deleteRecursively()
+        }
+    }
+
+    @Test
     fun shouldRenderMultilineStrokeShadowBody() {
         val root = Div("root")
         val span = Span("text", "一二三四五六七八九十")
@@ -207,6 +236,20 @@ class ShinobuTest {
                         }
                         assertTrue(bodyPixels > 20)
                     }
+                }
+            }
+        }
+    }
+
+    private fun writeLargeImage(file: File, color: Int, width: Int) {
+        Surface.makeRasterN32Premul(width, 1).use { surface ->
+            Paint().use { paint ->
+                paint.color = color
+                surface.canvas.drawRect(Rect.makeWH(width.toFloat(), 1f), paint)
+            }
+            surface.makeImageSnapshot().use { image ->
+                image.encodeToData(EncodedImageFormat.PNG).use { encoded ->
+                    file.writeBytes(encoded!!.bytes)
                 }
             }
         }
