@@ -33,7 +33,7 @@ class BotSandbox(
     }
 
     private val dispatcher = StandardTestDispatcher(scope.testScheduler)
-    lateinit var pluginLoader: PluginLoader
+    var pluginLoader: PluginLoader
 
     var cleanup: suspend () -> Unit = {}
 
@@ -104,7 +104,7 @@ class BotSandbox(
         replyMap.clear()
     }
 
-    suspend fun advanceIdle() = scope.advanceUntilIdle()
+    fun advanceIdle() = scope.advanceUntilIdle()
 
     fun user(id: String = "test-user") = UserActor(id)
 
@@ -126,7 +126,6 @@ class BotSandbox(
     }
 
     inner class UserActor(private val id: String) {
-        private var seq = 0
 
         suspend infix fun says(text: String): MessageEvent {
             val globalSeq = replySeq++
@@ -144,7 +143,6 @@ class BotSandbox(
     }
 
     inner class GroupActor(private val id: String) {
-        private var seq = 0
 
         suspend infix fun says(text: String): MessageEvent {
             val globalSeq = replySeq++

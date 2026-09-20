@@ -76,7 +76,7 @@ class InfoCacheTest {
             role = "admin"
         )
         val bot = Bot(api, mockk<TencentCOS>(relaxed = true))
-        val cache = InfoCache(api, bot, database, backgroundScope, { now })
+        val cache = InfoCache(api, bot, database, backgroundScope) { now }
 
         val group = cache.visit(
             group = "group-1",
@@ -106,7 +106,7 @@ class InfoCacheTest {
         val api = mockk<OpenAPI>(relaxed = true)
         coEvery { api.getGroupInfo("group-1") } returns null
         val bot = Bot(api, mockk<TencentCOS>(relaxed = true))
-        val cache = InfoCache(api, bot, database, backgroundScope, { now })
+        val cache = InfoCache(api, bot, database, backgroundScope) { now }
 
         val group = cache.visit(
             group = "group-1",
@@ -127,7 +127,7 @@ class InfoCacheTest {
         val now = 1_700_000_000_000L
         val api = mockk<OpenAPI>(relaxed = true)
         val bot = Bot(api, mockk<TencentCOS>(relaxed = true))
-        val cache = InfoCache(api, bot, database, backgroundScope, { now })
+        val cache = InfoCache(api, bot, database, backgroundScope) { now }
         bot.group("group-1").fetchedAt = now
 
         val group = cache.visit(
@@ -164,7 +164,7 @@ class InfoCacheTest {
         GroupMemberTable.add(database, "group-1", "member-1")
         val api = mockk<OpenAPI>(relaxed = true)
         val bot = Bot(api, mockk<TencentCOS>(relaxed = true))
-        val cache = InfoCache(api, bot, database, backgroundScope, { now })
+        val cache = InfoCache(api, bot, database, backgroundScope) { now }
 
         cache.load()
 
@@ -190,7 +190,7 @@ class InfoCacheTest {
             role = "admin"
         )
         val bot = Bot(api, mockk<TencentCOS>(relaxed = true))
-        val cache = InfoCache(api, bot, database, backgroundScope, { now })
+        val cache = InfoCache(api, bot, database, backgroundScope) { now }
 
         cache.visit(
             group = "group-1",
@@ -212,7 +212,7 @@ class InfoCacheTest {
             name = "bot测试"
         )
         val bot = Bot(api, mockk<TencentCOS>(relaxed = true))
-        val cache = InfoCache(api, bot, database, backgroundScope, { now })
+        val cache = InfoCache(api, bot, database, backgroundScope) { now }
 
         var logged: String? = null
         val group = cache.visit(
@@ -235,7 +235,7 @@ class InfoCacheTest {
         val api = mockk<OpenAPI>(relaxed = true)
         coEvery { api.getGroupInfo("group-1") } returns null
         val bot = Bot(api, mockk<TencentCOS>(relaxed = true))
-        val cache = InfoCache(api, bot, database, backgroundScope, { now })
+        val cache = InfoCache(api, bot, database, backgroundScope) { now }
 
         var logged: String? = null
         val group = cache.visit(
@@ -257,7 +257,7 @@ class InfoCacheTest {
         val now = 1_700_000_000_000L
         val api = mockk<OpenAPI>(relaxed = true)
         val bot = Bot(api, mockk<TencentCOS>(relaxed = true))
-        val cache = InfoCache(api, bot, database, backgroundScope, { now })
+        val cache = InfoCache(api, bot, database, backgroundScope) { now }
         bot.group("group-1").apply {
             name = "bot测试"
             fetchedAt = now

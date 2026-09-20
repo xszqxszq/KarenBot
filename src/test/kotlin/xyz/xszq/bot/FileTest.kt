@@ -54,8 +54,8 @@ class FileTest {
         val file = downloadFile("https://test.com/file.txt", "file.txt", mockk(relaxed = true), client)
 
         assertEquals("Test", file?.readString())
-        assertTrue(file?.exists() == true)
-        file.delete()
+        assertEquals(file?.exists(), true)
+        file?.delete()
         client.close()
     }
 

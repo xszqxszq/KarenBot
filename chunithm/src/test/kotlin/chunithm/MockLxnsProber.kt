@@ -20,7 +20,7 @@ import kotlin.text.Charsets.UTF_8
  * 落雪查分器 mock
  *
  * @property data 曲目数据
- * @property friendCode 有效的中二好友码
+ * @property friendCode 有效的中二的好友码
  * @property musicId 成绩返回的曲目 ID
  */
 class MockLxnsProber(

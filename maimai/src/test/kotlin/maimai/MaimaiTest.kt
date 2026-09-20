@@ -284,13 +284,13 @@ class MaimaiTest : MaimaiDatabaseTest() {
 
     private suspend fun testMusicDeleteAlias(sandbox: BotSandbox) {
         sandbox.clear()
-        assertRepliedAny(sandbox, sandbox.user() says "添加别名 852 testdel")
-        assertReplied(sandbox, sandbox.user() says "删除别名 852 testdel", "别名删除成功")
+        assertRepliedAny(sandbox, sandbox.user() says "添加别名 852 test-del")
+        assertReplied(sandbox, sandbox.user() says "删除别名 852 test-del", "别名删除成功")
         assertReplied(sandbox, sandbox.user() says "删除别名", "使用方法")
         assertReplied(sandbox, sandbox.user() says "删除别名 852 不存在的别名", "该别名不存在")
         assertReplied(sandbox, sandbox.user() says "删除别名 不存在的歌曲 任意", "未找到该歌曲")
         sandbox.clear()
-        sandbox.user("not-admin") says "删除别名 852 testdel"
+        sandbox.user("not-admin") says "删除别名 852 test-del"
         assertEquals(0, sandbox.replies.size)
     }
 
@@ -348,7 +348,7 @@ class MaimaiTest : MaimaiDatabaseTest() {
 
     private suspend fun testUpdate(sandbox: BotSandbox) {
         sandbox.clear()
-        assertReplied(sandbox, sandbox.user() says "绑定水鱼 testtoken", "绑定成功")
+        assertReplied(sandbox, sandbox.user() says "绑定水鱼 test-token", "绑定成功")
         assertRepliedAny(sandbox, sandbox.user() says "更新")
     }
 

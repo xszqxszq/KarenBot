@@ -45,7 +45,7 @@ fun Template.get(): Element {
     return main
 }
 
-suspend fun main() {
+fun main() {
     val manager = TemplateManager("./data/maimai")
     manager.init()
 
@@ -63,7 +63,7 @@ suspend fun main() {
 //    val main = template.get()
 //    val main = template["main"]!!
 //    File("E:/Temp/output.jpg").writeBytes(template.render(main).encodeToData(EncodedImageFormat.JPEG, 85)!!.bytes)
-    var template = manager["course"]!!
+    val template = manager["course"]!!
 //    val main = template.get()
     val main = template["main"]!!
     File("E:/Temp/output.jpg").writeBytes(template.render(main).encodeToData(EncodedImageFormat.JPEG, 85)!!.bytes)

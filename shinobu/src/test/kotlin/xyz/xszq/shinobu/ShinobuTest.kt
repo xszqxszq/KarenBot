@@ -120,9 +120,9 @@ class ShinobuTest {
     fun colorParsing() = with(StyleParser) {
         assertEquals(0xFFFFFFFF.toInt(), "#fff".rgbColor())
         assertEquals(0xFF00FF00.toInt(), "#00ff00".rgbColor())
-        assertEquals(0x0080FF00.toInt(), "#80ff0000".rgbColor())
+        assertEquals(0x0080FF00, "#80ff0000".rgbColor())
         assertEquals(0xFF00FF00.toInt(), "rgb(0, 255, 0)".rgba())
-        assertEquals(0x7FFF0000.toInt(), "rgba(255, 0, 0, 0.5)".rgba())
+        assertEquals(0x7FFF0000, "rgba(255, 0, 0, 0.5)".rgba())
         assertEquals(0x00000000, StyleParser.parse("background-color:transparent").backgroundColor)
         assertNull(StyleParser.parse("background-color:invalid").backgroundColor)
     }
@@ -144,7 +144,7 @@ class ShinobuTest {
         assertNotNull(clonedSpan)
         assertTrue(clonedSpan !== span)
         assertEquals("text", (clonedSpan as Span).text)
-        assertTrue(clonedSpan.parent?.parent === clone)
+        assertSame(clonedSpan.parent?.parent, clone)
     }
 
     @Test

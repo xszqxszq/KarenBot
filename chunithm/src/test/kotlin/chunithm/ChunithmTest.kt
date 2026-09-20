@@ -104,13 +104,13 @@ class ChunithmTest : ChunithmDatabaseTest() {
 
     private suspend fun testDeleteAlias(sandbox: BotSandbox) {
         sandbox.clear()
-        assertRepliedAny(sandbox, sandbox.user() says "添加别名 3 testdel")
-        assertReplied(sandbox, sandbox.user() says "删除别名 3 testdel", "别名已删除")
+        assertRepliedAny(sandbox, sandbox.user() says "添加别名 3 test-del")
+        assertReplied(sandbox, sandbox.user() says "删除别名 3 test-del", "别名已删除")
         assertReplied(sandbox, sandbox.user() says "删除别名", "使用方法")
         assertReplied(sandbox, sandbox.user() says "删除别名 3 不存在的别名", "该别名不存在")
         assertReplied(sandbox, sandbox.user() says "删除别名 不存在的歌曲 任意", "未找到该歌曲")
         sandbox.clear()
-        sandbox.user("not-admin") says "删除别名 3 testdel"
+        sandbox.user("not-admin") says "删除别名 3 test-del"
         assertEquals(0, sandbox.replies.size)
     }
 

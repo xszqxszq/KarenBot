@@ -94,7 +94,7 @@ class ChunithmProberFallbackTest : ChunithmDatabaseTest() {
         sandbox: BotSandbox,
         prober: MockLxnsProber
     ) {
-        val openid = "user-nobind"
+        val openid = "user-no-bind"
         setBindings(openid, prefer = "lxns")
         prober.reset()
         prober.oauthFriendCode = null

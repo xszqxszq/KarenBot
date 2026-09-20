@@ -101,9 +101,7 @@ class ResourceManager(
 
     private fun largeImage(key: String, signature: String): Image? =
         synchronized(largeLruLock) {
-            val cached = largeLruCache[key]
-            if (cached == null)
-                return@synchronized null
+            val cached = largeLruCache[key] ?: return@synchronized null
             if (cached.signature != signature) {
                 largeLruCache.remove(key)
                 largeLruPixels -= cached.pixels

@@ -7,7 +7,7 @@ import kotlin.test.assertTrue
 class RateLimiterTest {
     @Test
     fun shouldAllowUpToQuota() {
-        var now = 0L
+        val now = 0L
         val limiter = RateLimiter(3, now = { now })
         assertTrue(limiter.tryAcquire())
         assertTrue(limiter.tryAcquire())
