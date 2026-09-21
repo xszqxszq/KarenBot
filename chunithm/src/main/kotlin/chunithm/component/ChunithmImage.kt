@@ -90,6 +90,6 @@ class ChunithmImage(
             MusicDifficulty.Ultima -> "#131413"
             MusicDifficulty.WorldsEnd -> "#0d59ee"
         }.rgbColor()!!
-        const val THUMB_SIZE = 54
+        const val THUMB_SIZE = 72
     }
 }
