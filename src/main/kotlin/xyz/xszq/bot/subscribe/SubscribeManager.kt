@@ -3,6 +3,7 @@ package xyz.xszq.bot.subscribe
 import kotlinx.coroutines.*
 import xyz.xszq.bot.event.Event
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.util.Metrics
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicLong
@@ -20,6 +21,11 @@ class SubscribeManager(
     private val plugins = ConcurrentHashMap<String, CopyOnWriteArrayList<Subscribe<Event>>>()
     private val temp = ConcurrentHashMap<String, Subscribe<Event>>()
     private val orderId = AtomicLong(0)
+
+    private data class TextHandler(
+        val plugin: String,
+        val subscribe: TextSubscribe
+    )
 
     /**
      * 添加一个订阅
@@ -87,39 +93,57 @@ class SubscribeManager(
      * @param event 待处理事件
      */
     @OptIn(DelicateCoroutinesApi::class)
-    suspend fun <E: Event> handle(event: E) = supervisorScope {
-        temp.values.forEach { subscribe ->
-            launchHandle { subscribe.handle(event) }
-        }
+    suspend fun <E: Event> handle(event: E) = Metrics.time("karenbot.event.processing") {
+        supervisorScope {
+            temp.values.forEach { subscribe ->
+                launchHandle("temporary") { subscribe.handle(event) }
+            }
 
-        val prefix = explicitPrefix(event)
-        val groups = linkedMapOf<String, MutableList<TextSubscribe>>()
-        plugins.values.forEach { subscribes ->
-            subscribes.forEach { subscribe ->
-                val textSubscribe = subscribe as? TextSubscribe
-                if (textSubscribe?.domain == null) {
-                    launchHandle { subscribe.handle(event) }
-                    return@forEach
-                }
-                if (prefix != null && textSubscribe.parent != prefix)
-                    return@forEach
-                if (textSubscribe.matches(event)) {
-                    groups.getOrPut(textSubscribe.domain!!) { mutableListOf() }.add(textSubscribe)
+            val prefix = explicitPrefix(event)
+            val groups = linkedMapOf<String, MutableList<TextHandler>>()
+            plugins.forEach { (plugin, subscribes) ->
+                subscribes.forEach { subscribe ->
+                    val textSubscribe = subscribe as? TextSubscribe
+                    if (textSubscribe?.domain == null) {
+                        launchHandle(plugin) { subscribe.handle(event) }
+                        return@forEach
+                    }
+                    if (prefix != null && textSubscribe.parent != prefix)
+                        return@forEach
+                    if (textSubscribe.matches(event)) {
+                        groups.getOrPut(textSubscribe.domain!!) { mutableListOf() }
+                            .add(TextHandler(plugin, textSubscribe))
+                    }
                 }
             }
-        }
 
-        groups.values.forEach { list ->
-            launchHandle { runText(event, list) }
+            groups.values.forEach { handlers ->
+                val plugin = handlers.map { it.plugin }.distinct().singleOrNull() ?: "multi"
+                launchHandle(plugin) { runText(event, plugin, handlers.map { it.subscribe }) }
+            }
         }
     }
 
-    private suspend fun runText(event: Event, list: List<TextSubscribe>) {
+    private suspend fun runText(
+        event: Event,
+        plugin: String,
+        list: List<TextSubscribe>
+    ) {
         orderText(event, list).forEach { subscribe ->
             try {
                 subscribe.handle(event)
+                Metrics.count(
+                    "karenbot.plugin.match",
+                    "plugin" to plugin,
+                    "outcome" to "matched"
+                )
                 return
             } catch (_: CommandNotMatchedException) {
+                Metrics.count(
+                    "karenbot.plugin.match",
+                    "plugin" to plugin,
+                    "outcome" to "unmatched"
+                )
             }
         }
     }
@@ -155,10 +179,18 @@ class SubscribeManager(
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    private fun CoroutineScope.launchHandle(block: suspend () -> Unit) {
+    private fun CoroutineScope.launchHandle(
+        plugin: String,
+        block: suspend () -> Unit
+    ) {
         launch(dispatcher) {
             runCatching {
-                block()
+                Metrics.time(
+                    "karenbot.plugin.handler",
+                    "plugin" to plugin
+                ) {
+                    block()
+                }
             }.onFailure { e ->
                 if (e !is CancellationException)
                     e.printStackTrace()

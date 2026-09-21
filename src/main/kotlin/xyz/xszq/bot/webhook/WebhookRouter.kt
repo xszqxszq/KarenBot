@@ -14,6 +14,7 @@ import xyz.xszq.bot.payload.OpCode
 import xyz.xszq.bot.payload.Payload
 import xyz.xszq.bot.payload.WebhookValidation
 import xyz.xszq.bot.service.WordFilter
+import xyz.xszq.bot.util.Metrics
 import xyz.xszq.bot.util.handleValidation
 import xyz.xszq.bot.util.json
 import xyz.xszq.bot.util.verifyBody
@@ -44,18 +45,51 @@ class WebhookRouter(
         }
         post("/webhook") {
             // 校验请求头
-            if (call.request.headers["User-Agent"] != "QQBot-Callback"
-                || call.request.headers["X-Bot-Appid"] != pluginLoader.api.config.appId)
+            if (call.request.headers["User-Agent"] != "QQBot-Callback") {
+                Metrics.count(
+                    "karenbot.webhook.validation",
+                    "stage" to "header",
+                    "outcome" to "bad_agent"
+                )
                 return@post call.respond(HttpStatusCode.BadRequest)
+            }
+            if (call.request.headers["X-Bot-Appid"] != pluginLoader.api.config.appId) {
+                Metrics.count(
+                    "karenbot.webhook.validation",
+                    "stage" to "header",
+                    "outcome" to "bad_appid"
+                )
+                return@post call.respond(HttpStatusCode.BadRequest)
+            }
             val signature = call.request.headers["X-Signature-Ed25519"]
-                ?: return@post call.respond(HttpStatusCode.BadRequest)
+                ?: run {
+                    Metrics.count(
+                        "karenbot.webhook.validation",
+                        "stage" to "header",
+                        "outcome" to "missing_signature"
+                    )
+                    return@post call.respond(HttpStatusCode.BadRequest)
+                }
             val timestamp = call.request.headers["X-Signature-Timestamp"]
-                ?: return@post call.respond(HttpStatusCode.BadRequest)
+                ?: run {
+                    Metrics.count(
+                        "karenbot.webhook.validation",
+                        "stage" to "header",
+                        "outcome" to "missing_timestamp"
+                    )
+                    return@post call.respond(HttpStatusCode.BadRequest)
+                }
 
             // 校验请求签名
             val body = call.receiveText()
-            if (!verifyBody(pluginLoader.api.config.clientSecret, signature, timestamp, body))
+            if (!verifyBody(pluginLoader.api.config.clientSecret, signature, timestamp, body)) {
+                Metrics.count(
+                    "karenbot.webhook.validation",
+                    "stage" to "signature",
+                    "outcome" to "invalid"
+                )
                 return@post call.respond(HttpStatusCode.Unauthorized)
+            }
 
             // 处理负荷
             handleWebhook(application, call, body)
@@ -80,6 +114,10 @@ class WebhookRouter(
             // 收到事件
             OpCode.DISPATCH -> with(dispatcher) {
                 // 确认收到
+                Metrics.count(
+                    "karenbot.webhook.op",
+                    "outcome" to "dispatch"
+                )
                 call.respond(Payload(OpCode.HTTP_CALLBACK_ACK))
                 application.launch(Dispatchers.IO) {
                     kotlin.runCatching {
@@ -98,6 +136,10 @@ class WebhookRouter(
             }
             // 收到 Webhook 地址验证
             OpCode.HTTP_CALLBACK_VALIDATE -> {
+                Metrics.count(
+                    "karenbot.webhook.op",
+                    "outcome" to "validate"
+                )
                 handleValidation(
                     pluginLoader.api.config.clientSecret,
                     json.decodeFromString<WebhookValidation>(payload.d!!)
@@ -109,11 +151,20 @@ class WebhookRouter(
             }
             // 未知操作码
             else -> {
+                Metrics.count(
+                    "karenbot.webhook.op",
+                    "outcome" to "unknown"
+                )
                 call.respond(HttpStatusCode.NotAcceptable)
             }
         }
     }.onFailure {
         // 未处理的异常
+        Metrics.count(
+            "karenbot.webhook.validation",
+            "stage" to "decode",
+            "outcome" to "error"
+        )
         it.printStackTrace()
         call.respond(HttpStatusCode.InternalServerError)
     }

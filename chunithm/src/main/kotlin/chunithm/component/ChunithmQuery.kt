@@ -12,6 +12,7 @@ import xyz.xszq.bot.chunithm.music.*
 import xyz.xszq.bot.chunithm.music.Rating.ratingFloor
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.util.Metrics
 
 /**
  * Chunithm 查询组件
@@ -105,12 +106,24 @@ class ChunithmQuery(
         user: UserQueryParams
     ): Pair<RatingResponse, ChunithmAPI> {
         if (user.isMaxScore())
-            return Pair(maxScoreRating(), listBackends(user).first())
-        val result = queryBackends(user, listBackends(user)) { backend ->
-            val response = backend.getPlayerRating(user) ?: return@queryBackends null
-            if (response.oldRatingList.isEmpty() && response.newRatingList.isEmpty())
-                throw NoDataException(api = backend)
-            response
+            return Metrics.time(
+                "karenbot.rating.query",
+                "game" to "chunithm",
+                "provider" to "local"
+            ) {
+                Pair(maxScoreRating(), listBackends(user).first())
+            }
+        val result = Metrics.time(
+            "karenbot.rating.query",
+            "game" to "chunithm",
+            "provider" to "prober"
+        ) {
+            queryBackends(user, listBackends(user)) { backend ->
+                val response = backend.getPlayerRating(user) ?: return@queryBackends null
+                if (response.oldRatingList.isEmpty() && response.newRatingList.isEmpty())
+                    throw NoDataException(api = backend)
+                response
+            }
         }
         // TODO: 设置表中用中二单独一个前缀
 //        result.first.settings = mergeSettings(result.first.settings, user.settings)
@@ -183,14 +196,39 @@ class ChunithmQuery(
         val failures = mutableListOf<QueryFailure>()
         backends.forEach { backend ->
             runCatching {
-                block(backend)
-            }.onSuccess { result ->
-                result ?.let {
-                    return Pair(it, backend)
+                Metrics.time(
+                    "karenbot.prober.request",
+                    "game" to "chunithm",
+                    "provider" to backend.id,
+                    outcome = ::requestOutcome
+                ) {
+                    block(backend)
                 }
+            }.onSuccess { result ->
+                if (result != null) {
+                    Metrics.count(
+                        "karenbot.prober.request",
+                        "game" to "chunithm",
+                        "provider" to backend.id,
+                        "outcome" to "success"
+                    )
+                    return Pair(result, backend)
+                }
+                Metrics.count(
+                    "karenbot.prober.request",
+                    "game" to "chunithm",
+                    "provider" to backend.id,
+                    "outcome" to "empty"
+                )
             }.onFailure { e ->
                 if (e is CancellationException)
                     throw e
+                Metrics.count(
+                    "karenbot.prober.request",
+                    "game" to "chunithm",
+                    "provider" to backend.id,
+                    "outcome" to requestOutcome(e)
+                )
                 if (e is Exception)
                     failures.add(QueryFailure(backend, e))
             }
@@ -209,10 +247,17 @@ class ChunithmQuery(
         throw failures.selectException()
     }
 
+    private fun requestOutcome(e: Throwable): String =
+        if (expectedExceptions.any { it.isInstance(e) }) "expected" else "error"
+
     private data class QueryFailure(
         val backend: ChunithmAPI,
         val exception: Exception
     )
+
+    private val expectedExceptions = queryExceptionOrder.filter {
+        it != UnknownException::class.java
+    }
 
     private fun List<QueryFailure>.selectException(): Exception =
         queryExceptionOrder.firstNotNullOfOrNull { type ->

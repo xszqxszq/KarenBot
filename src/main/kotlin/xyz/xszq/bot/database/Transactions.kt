@@ -3,6 +3,7 @@ package xyz.xszq.bot.database
 import kotlinx.coroutines.Deferred
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.Transaction
+import xyz.xszq.bot.util.Metrics
 import xyz.xszq.bot.util.dbDispatcher
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction as exposedTransaction
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync as exposedTransactionAsync
@@ -26,7 +27,19 @@ suspend fun <T> newSuspendedTransaction(
     db = db,
     transactionIsolation = transactionIsolation,
     readOnly = readOnly,
-    statement = statement
+    statement = {
+        Metrics.time(
+            "karenbot.db.transaction",
+            "mode" to "sync",
+            "access" to when (readOnly) {
+                true -> "read"
+                false -> "write"
+                null -> "default"
+            }
+        ) {
+            statement()
+        }
+    }
 )
 
 /**
@@ -48,5 +61,17 @@ suspend fun <T> suspendedTransactionAsync(
     db = db,
     transactionIsolation = transactionIsolation,
     readOnly = readOnly,
-    statement = statement
+    statement = {
+        Metrics.time(
+            "karenbot.db.transaction",
+            "mode" to "async",
+            "access" to when (readOnly) {
+                true -> "read"
+                false -> "write"
+                null -> "default"
+            }
+        ) {
+            statement()
+        }
+    }
 )

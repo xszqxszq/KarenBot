@@ -9,8 +9,11 @@ import xyz.xszq.bot.maimai.component.MaimaiData
 import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.database.ProberBindTable
 import xyz.xszq.bot.maimai.database.QQBindTable
+import xyz.xszq.bot.util.Metrics
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class MaimaiProberFallbackTest : MaimaiDatabaseTest() {
     private companion object {
@@ -88,6 +91,7 @@ class MaimaiProberFallbackTest : MaimaiDatabaseTest() {
         prober.oauthFriendCode = null
         sandbox.clear()
         assertReplied(sandbox, sandbox.user(openid) says "/mai b50", "绑定查分器")
+        assertExpectedFailureCounted()
     }
 
     /**
@@ -201,4 +205,14 @@ class MaimaiProberFallbackTest : MaimaiDatabaseTest() {
 
     private suspend fun friendCode(openid: String) =
         ProberBindTable[openid, "lxns", "friend-code"]
+
+    private fun assertExpectedFailureCounted() {
+        val metrics = Metrics.scrape()
+        assertTrue(metrics.lineSequence().any { sample ->
+            sample.startsWith("karenbot_prober_request_total{") &&
+                sample.contains("game=\"maimai\"") &&
+                sample.contains("outcome=\"expected\"")
+        })
+        assertFalse(metrics.contains("karenbot_prober_fallback_total"))
+    }
 }

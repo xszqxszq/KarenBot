@@ -9,6 +9,7 @@ val ktorVersion: String by project
 val logbackVersion: String by project
 val luceneVersion: String by project
 val mariadbVersion: String by project
+val micrometerVersion: String by project
 val mockkVersion: String by project
 val serializationVersion: String by project
 val skikoVersion: String by project
@@ -60,6 +61,7 @@ dependencies {
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-host-common:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation("io.micrometer:micrometer-registry-prometheus:$micrometerVersion")
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     implementation("org.mariadb.jdbc:mariadb-java-client:$mariadbVersion")

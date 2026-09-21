@@ -13,6 +13,7 @@ data class BotConfig(
     val token: String = "",
     val clientSecret: String = "",
     val port: Int = 18080,
+    val metricsPort: Int = 18081,
     val forward: Boolean = false,
     val database: DatabaseConfig
 )

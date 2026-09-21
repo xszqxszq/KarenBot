@@ -18,6 +18,7 @@ import xyz.xszq.bot.payload.markdown.Keyboard
 import xyz.xszq.bot.payload.markdown.MarkdownData
 import xyz.xszq.bot.util.errorLogger
 import xyz.xszq.bot.util.json
+import xyz.xszq.bot.util.Metrics
 import java.util.concurrent.TimeUnit
 
 
@@ -68,10 +69,15 @@ class OpenAPI(
     }
 
     private suspend fun getRawAccessToken() =
-        client.post(accessTokenUrl) {
-            contentType(ContentType.Application.Json)
-            setBody(AccessTokenRequest(config.appId, config.clientSecret))
-        }.body<AccessTokenResponse>()
+        Metrics.time(
+            "karenbot.qq.request",
+            "api" to "token"
+        ) {
+            client.post(accessTokenUrl) {
+                contentType(ContentType.Application.Json)
+                setBody(AccessTokenRequest(config.appId, config.clientSecret))
+            }.body<AccessTokenResponse>()
+        }
 
     private suspend fun getToken(): String {
         val currentTime = now()
@@ -113,7 +119,8 @@ class OpenAPI(
     }
     private suspend fun sendMessage(
         url: String,
-        payload: MessagePayload
+        payload: MessagePayload,
+        api: String
     ): Boolean {
         payload.content = filter.filter(payload.content)
         payload.markdown ?.let { markdown ->
@@ -124,27 +131,44 @@ class OpenAPI(
                 markdown.content = filter.filter(content)
             }
         }
-        val result = kotlin.runCatching {
-            client.post(url) {
-                contentType(ContentType.Application.Json.withCharset(Charsets.UTF_8))
-                setBody(payload)
-                setToken()
-            }.resultOrThrow<MessageResponse>()
-        }.onFailure { e ->
-            if (e is CancellationException)
-                throw e
-            if (e !is SendException) {
-                e.printStackTrace()
-                return false
-            }
-            when (e.response.code) {
-                40054005 -> {
-                    payload.msgSeq += 1
+        var outcome = "success"
+        val result = Metrics.time(
+            "karenbot.qq.request",
+            "api" to api
+        ) {
+            kotlin.runCatching {
+                client.post(url) {
+                    contentType(ContentType.Application.Json.withCharset(Charsets.UTF_8))
+                    setBody(payload)
+                    setToken()
+                }.resultOrThrow<MessageResponse>()
+            }.onFailure { e ->
+                if (e is CancellationException)
+                    throw e
+                if (e !is SendException) {
+                    outcome = "transport_error"
+                    e.printStackTrace()
+                } else {
+                    outcome = when {
+                        e.response.code == 429 -> "rate_limited"
+                        e.response.code in 400..499 -> "client_error"
+                        else -> "server_error"
+                    }
+                    when (e.response.code) {
+                        40054005 -> {
+                            payload.msgSeq += 1
+                        }
+                        else -> {}
+                    }
+                    errorLogger.error { "[${e.response.code}] ${e.response.message}" }
                 }
-                else -> {}
-            }
-            errorLogger.error { "[${e.response.code}] ${e.response.message}" }
-        }.getOrNull()
+            }.getOrNull()
+        }
+        Metrics.count(
+            "karenbot.qq.request.total",
+            "api" to api,
+            "outcome" to outcome
+        )
         return result != null
     }
 
@@ -172,16 +196,20 @@ class OpenAPI(
         msgId: String ?= null,
         msgSeq: Int = 1,
         media: FileResponse? = null,
-    ) = sendMessage("$server/v2/users/$user/messages", MessagePayload(
-        content = content,
-        msgType = msgType,
-        markdown = markdown,
-        keyboard = keyboard,
-        eventId = eventId,
-        msgId = msgId,
-        msgSeq = msgSeq,
-        media = media
-    ))
+    ) = sendMessage(
+        url = "$server/v2/users/$user/messages",
+        payload = MessagePayload(
+            content = content,
+            msgType = msgType,
+            markdown = markdown,
+            keyboard = keyboard,
+            eventId = eventId,
+            msgId = msgId,
+            msgSeq = msgSeq,
+            media = media
+        ),
+        api = "send-c2c"
+    )
 
     /**
      * 发送群聊消息
@@ -207,16 +235,20 @@ class OpenAPI(
         msgId: String ?= null,
         msgSeq: Int = 1,
         media: FileResponse? = null,
-    ) = sendMessage("$server/v2/groups/$group/messages", MessagePayload(
-        content = content,
-        msgType = msgType,
-        markdown = markdown,
-        keyboard = keyboard,
-        eventId = eventId,
-        msgId = msgId,
-        msgSeq = msgSeq,
-        media = media
-    ))
+    ) = sendMessage(
+        url = "$server/v2/groups/$group/messages",
+        payload = MessagePayload(
+            content = content,
+            msgType = msgType,
+            markdown = markdown,
+            keyboard = keyboard,
+            eventId = eventId,
+            msgId = msgId,
+            msgSeq = msgSeq,
+            media = media
+        ),
+        api = "send-group"
+    )
 
     /**
      * 上传文件到私聊对话

@@ -37,28 +37,33 @@ class WebhookDispatcher(
         attachments: List<Attachment>,
         fileManager: FileManager,
         logger: KLogger
-    ) = coroutineScope {
-        attachments.map { attachment ->
-            async {
-                downloadFile(attachment.url, attachment.filename, logger) ?.let { file ->
-                    Triple(
-                        attachment.url,
-                        file,
-                        RemoteImage(
-                            url = attachment.url,
-                            filename = attachment.filename,
-                            contentType = attachment.contentType,
-                            width = attachment.width ?: 0,
-                            height = attachment.height ?: 0
-                        )
-                    )
-                }
+    ) = run {
+        val pairs = Metrics.time("karenbot.webhook.download") {
+            coroutineScope {
+                attachments.map { attachment ->
+                    async {
+                        downloadFile(attachment.url, attachment.filename, logger) ?.let { file ->
+                            Triple(
+                                attachment.url,
+                                file,
+                                RemoteImage(
+                                    url = attachment.url,
+                                    filename = attachment.filename,
+                                    contentType = attachment.contentType,
+                                    width = attachment.width ?: 0,
+                                    height = attachment.height ?: 0
+                                )
+                            )
+                        }
+                    }
+                }.awaitAll().filterNotNull()
             }
-        }.awaitAll().filterNotNull()
-    }.also { pairs ->
+        }
+        Metrics.add("karenbot.webhook.files", pairs.size.toDouble())
         launch(Dispatchers.IO) {
             fileManager.addFiles(pairs.map { it.second })
         }
+        pairs
     }
 
     /**
@@ -109,7 +114,10 @@ class WebhookDispatcher(
         filter: WordFilter,
         pluginLoader: PluginLoader,
         body: String
-    ): Job? = when (payload.t) {
+    ): Job? = Metrics.time(
+        "karenbot.event.dispatch",
+        "type" to (payload.t ?: "unknown")
+    ) { when (payload.t) {
         // 私聊消息
         EventType.C2C.Message -> run {
             val data = json.decodeFromString<C2CMessageCreate>(payload.d!!)
@@ -448,6 +456,7 @@ class WebhookDispatcher(
         }
         // 无法处理的事件
         else -> null
+    }
     } ?.let { delivered ->
         launch(Dispatchers.IO) {
             pluginLoader.subscribes.handle(delivered)
@@ -470,7 +479,16 @@ class WebhookDispatcher(
         call: RoutingCall
     ): Boolean {
         val target = forwarder.forwardTarget(subject = subject, group = group) ?: return false
-        forwarder.forward(body, call, target)
+        Metrics.time(
+            "karenbot.webhook.forward",
+            "target" to if (subject != null) "c2c" else "group"
+        ) {
+            forwarder.forward(body, call, target)
+        }
+        Metrics.count(
+            "karenbot.webhook.forward.total",
+            "target" to if (subject != null) "c2c" else "group"
+        )
         return true
     }
 }

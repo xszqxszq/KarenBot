@@ -13,6 +13,7 @@ import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.database.ProberBindTable
 import xyz.xszq.bot.maimai.exception.*
 import xyz.xszq.bot.maimai.music.*
+import xyz.xszq.bot.util.Metrics
 
 /**
  * 舞萌成绩查询
@@ -119,12 +120,24 @@ class MaimaiQuery(
         user: UserQueryParams
     ): Pair<RatingResponse, MaimaiAPI> {
         if (user.isMaxScore())
-            return Pair(maxScoreRating(), listBackends(user).first())
-        val result = queryBackends(user, listBackends(user)) { backend ->
-            val response = backend.getPlayerRating(user) ?: return@queryBackends null
-            if (response.oldRatingList.isEmpty() && response.newRatingList.isEmpty())
-                throw NoDataException(api = backend)
-            response
+            return Metrics.time(
+                "karenbot.rating.query",
+                "game" to "maimai",
+                "provider" to "local"
+            ) {
+                Pair(maxScoreRating(), listBackends(user).first())
+            }
+        val result = Metrics.time(
+            "karenbot.rating.query",
+            "game" to "maimai",
+            "provider" to "prober"
+        ) {
+            queryBackends(user, listBackends(user)) { backend ->
+                val response = backend.getPlayerRating(user) ?: return@queryBackends null
+                if (response.oldRatingList.isEmpty() && response.newRatingList.isEmpty())
+                    throw NoDataException(api = backend)
+                response
+            }
         }
         result.first.settings = mergeSettings(result.first.settings, user.settings)
         return result
@@ -287,14 +300,39 @@ class MaimaiQuery(
         val failures = mutableListOf<QueryFailure>()
         backends.forEach { backend ->
             runCatching {
-                block(backend)
-            }.onSuccess { result ->
-                result ?.let {
-                    return Pair(it, backend)
+                Metrics.time(
+                    "karenbot.prober.request",
+                    "game" to "maimai",
+                    "provider" to backend.id,
+                    outcome = ::requestOutcome
+                ) {
+                    block(backend)
                 }
+            }.onSuccess { result ->
+                if (result != null) {
+                    Metrics.count(
+                        "karenbot.prober.request",
+                        "game" to "maimai",
+                        "provider" to backend.id,
+                        "outcome" to "success"
+                    )
+                    return Pair(result, backend)
+                }
+                Metrics.count(
+                    "karenbot.prober.request",
+                    "game" to "maimai",
+                    "provider" to backend.id,
+                    "outcome" to "empty"
+                )
             }.onFailure { e ->
                 if (e is CancellationException)
                     throw e
+                Metrics.count(
+                    "karenbot.prober.request",
+                    "game" to "maimai",
+                    "provider" to backend.id,
+                    "outcome" to requestOutcome(e)
+                )
                 if (e is Exception)
                     failures.add(QueryFailure(backend, e))
             }
@@ -313,10 +351,17 @@ class MaimaiQuery(
         throw failures.selectException()
     }
 
+    private fun requestOutcome(e: Throwable): String =
+        if (expectedExceptions.any { it.isInstance(e) }) "expected" else "error"
+
     private data class QueryFailure(
         val backend: MaimaiAPI,
         val exception: Exception
     )
+
+    private val expectedExceptions = queryExceptionOrder.filter {
+        it != UnknownException::class.java
+    }
 
     private fun List<QueryFailure>.selectException(): Exception =
         queryExceptionOrder.firstNotNullOfOrNull { type ->

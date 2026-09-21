@@ -6,6 +6,7 @@ import org.jetbrains.skia.Image
 import xyz.xszq.bot.maimai.component.image.FilterParams
 import xyz.xszq.bot.maimai.component.image.RatingRenderParams
 import xyz.xszq.bot.maimai.music.*
+import xyz.xszq.bot.util.Metrics
 import xyz.xszq.bot.util.cpuDispatcher
 import xyz.xszq.bot.util.pagination
 import xyz.xszq.shinobu.dom.Div
@@ -285,7 +286,13 @@ class RatingTemplate(
             }
         }
 
-        return withContext(cpuDispatcher) { template.render(main) }
+        return Metrics.time(
+            "karenbot.render",
+            "game" to "maimai",
+            "template" to "rating"
+        ) {
+            withContext(cpuDispatcher) { template.render(main) }
+        }
     }
 
     private fun Div.header(

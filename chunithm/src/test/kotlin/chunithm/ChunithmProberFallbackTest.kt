@@ -13,8 +13,11 @@ import xyz.xszq.bot.database.newSuspendedTransaction
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.reply
 import xyz.xszq.bot.subscribe.Channel
+import xyz.xszq.bot.util.Metrics
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class ChunithmProberFallbackTest : ChunithmDatabaseTest() {
     private companion object {
@@ -100,6 +103,7 @@ class ChunithmProberFallbackTest : ChunithmDatabaseTest() {
         prober.oauthFriendCode = null
         sandbox.clear()
         assertReplied(sandbox, sandbox.user(openid) says "/chu b50", BIND_PROMPT)
+        assertExpectedFailureCounted()
     }
 
     /**
@@ -216,4 +220,14 @@ class ChunithmProberFallbackTest : ChunithmDatabaseTest() {
 
     private suspend fun friendCode(openid: String) =
         ProberBindTable[openid, "lxns", "chunithm-friend-code"]
+
+    private fun assertExpectedFailureCounted() {
+        val metrics = Metrics.scrape()
+        assertTrue(metrics.lineSequence().any { sample ->
+            sample.startsWith("karenbot_prober_request_total{") &&
+                sample.contains("game=\"chunithm\"") &&
+                sample.contains("outcome=\"expected\"")
+        })
+        assertFalse(metrics.contains("karenbot_prober_fallback_total"))
+    }
 }

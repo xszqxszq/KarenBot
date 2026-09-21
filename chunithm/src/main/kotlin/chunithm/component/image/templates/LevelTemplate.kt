@@ -8,6 +8,7 @@ import xyz.xszq.bot.chunithm.component.image.LevelRenderParams
 import xyz.xszq.bot.chunithm.music.ChartInfo
 import xyz.xszq.bot.chunithm.music.Level
 import xyz.xszq.bot.chunithm.music.Record
+import xyz.xszq.bot.util.Metrics
 import xyz.xszq.bot.util.cpuDispatcher
 import xyz.xszq.shinobu.template.Template
 import xyz.xszq.shinobu.template.TemplateManager
@@ -83,7 +84,13 @@ class LevelTemplate(
                 })}
             }
         }
-        return withContext(cpuDispatcher) { template.render(main) }
+        return Metrics.time(
+            "karenbot.render",
+            "game" to "chunithm",
+            "template" to "level"
+        ) {
+            withContext(cpuDispatcher) { template.render(main) }
+        }
     }
 
     /**

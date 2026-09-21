@@ -4,11 +4,14 @@ import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -28,6 +31,7 @@ import xyz.xszq.bot.message.PlainText
 import xyz.xszq.bot.service.OpenAPI
 import xyz.xszq.bot.service.TencentCOS
 import xyz.xszq.bot.service.WordFilter
+import xyz.xszq.bot.util.Metrics
 import xyz.xszq.bot.util.json
 import xyz.xszq.bot.webhook.WebhookRouter
 import java.io.File
@@ -78,6 +82,8 @@ class BotRuntime : RuntimeControl {
             else listOf()
         }
         val llmConfig = loadLLMConfig()
+
+        startMetricsServer(botConfig.metricsPort)
 
         // 组装组件
         val database = DatabasePool.connect(botConfig.database)
@@ -132,6 +138,28 @@ class BotRuntime : RuntimeControl {
             }
             WebhookRouter(logger, pluginLoader, filter) { forwardConfig }.configure(this)
         }.start(wait = true)
+    }
+
+    /**
+     * 启动本机监控服务
+     */
+    private fun startMetricsServer(port: Int) = runCatching {
+        embeddedServer(
+            Netty,
+            port = port,
+            host = "127.0.0.1"
+        ) {
+            routing {
+                get("/metrics") {
+                    call.respondText(
+                        Metrics.scrape(),
+                        ContentType.Text.Plain.withCharset(Charsets.UTF_8)
+                    )
+                }
+            }
+        }.start(wait = false)
+    }.onFailure { e ->
+        logger.warn { "启动指标服务失败: ${e.message}" }
     }
 
     @OptIn(DelicateCoroutinesApi::class)

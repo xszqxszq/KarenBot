@@ -2,9 +2,11 @@ package xyz.xszq.bot.database
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import com.zaxxer.hikari.metrics.micrometer.MicrometerMetricsTrackerFactory
 import org.jetbrains.exposed.sql.Database
 import xyz.xszq.bot.config.DatabaseConfig
 import xyz.xszq.bot.util.DB_PARALLELISM
+import xyz.xszq.bot.util.Metrics
 
 /**
  * 数据库连接池
@@ -39,5 +41,6 @@ object DatabasePool {
         maximumPoolSize = DB_PARALLELISM
         minimumIdle = 1
         connectionTimeout = CONNECT_TIMEOUT_MS
+        metricsTrackerFactory = MicrometerMetricsTrackerFactory(Metrics.registry)
     })
 }

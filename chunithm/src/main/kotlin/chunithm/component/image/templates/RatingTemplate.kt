@@ -7,6 +7,7 @@ import xyz.xszq.bot.chunithm.component.image.FilterParams
 import xyz.xszq.bot.chunithm.component.image.RatingRenderParams
 import xyz.xszq.bot.chunithm.music.*
 import xyz.xszq.bot.chunithm.music.Rating.ratingFloor
+import xyz.xszq.bot.util.Metrics
 import xyz.xszq.bot.util.cpuDispatcher
 import xyz.xszq.bot.util.pagination
 import xyz.xszq.shinobu.dom.Div
@@ -260,7 +261,13 @@ class RatingTemplate(
             }
         }
 
-        return withContext(cpuDispatcher) { template.render(main) }
+        return Metrics.time(
+            "karenbot.render",
+            "game" to "chunithm",
+            "template" to "rating"
+        ) {
+            withContext(cpuDispatcher) { template.render(main) }
+        }
     }
 
     private fun Div.header(
