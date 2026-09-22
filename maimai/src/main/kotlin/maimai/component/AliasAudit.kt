@@ -83,6 +83,7 @@ class AliasAudit(
         appendLine("2. 非名人真实中文人名（type: name）")
         appendLine("   - 看起来十分确定是真实中国普通人姓名的")
         appendLine("   - 包含在长字符串中也算")
+        appendLine("   - 外文音译的姓名不算，包括英文、日语等来源的")
         appendLine("   - 名人/网红/历史人物的姓名不算，需要检索确认")
         appendLine("   - 二次元/游戏/虚拟角色名称不算，需要检索确认")
         appendLine("   - 明显且十分确定的歌曲名称的中文谐音不算，例如got more raves对应郭沫若")
