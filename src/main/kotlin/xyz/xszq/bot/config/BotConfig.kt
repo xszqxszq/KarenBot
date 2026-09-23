@@ -10,7 +10,6 @@ import kotlinx.serialization.Serializable
 data class BotConfig(
     val qq: Long = 0,
     val appId: String = "",
-    val token: String = "",
     val clientSecret: String = "",
     val port: Int = 18080,
     val metricsPort: Int = 18081,
