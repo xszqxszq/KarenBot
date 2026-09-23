@@ -67,7 +67,6 @@ dependencies {
     implementation("org.mariadb.jdbc:mariadb-java-client:$mariadbVersion")
     implementation("xyz.xszq:opencc-kt:1.0.0")
     implementation("xyz.xszq:silkt:1.0.1")
-    // skiko 原生库同一进程只能加载一次，由核心统一提供
     runtimeOnly("org.jetbrains.skiko:skiko-awt:$skikoVersion")
     runtimeOnly("org.jetbrains.skiko:skiko-awt-runtime-linux-x64:$skikoVersion")
     runtimeOnly("org.jetbrains.skiko:skiko-awt-runtime-macos-arm64:$skikoVersion")
