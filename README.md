@@ -33,11 +33,15 @@ KarenBot
 ├── shinobu/    # 图片渲染模块
 ```
 
-资源文件请移步至 [KarenBot-Resources](https://github.com/xszqxszq/KarenBot-Resources)
+资源文件请移步至 [KarenBot-Resources](https://github.com/xszqxszq/KarenBot-Resources)。
 
 ## 问题反馈
 
 Bug 或功能建议请在 [Issues](https://github.com/xszqxszq/KarenBot/issues) 中提出，也可提交 [Pull Request](https://github.com/xszqxszq/KarenBot/pulls)。
+
+## 开发部署
+
+本项目使用 Kotlin 进行开发，您可以阅读[文档](https://bot-docs.otmdb.cn/develop/deploy.html)来进行部署。
 
 ## 鸣谢
 
