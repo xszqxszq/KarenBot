@@ -2,7 +2,26 @@ name: Test
 
 on:
   push:
+    branches: ['9.0']
+    paths:
+      - 'src/**'
+      - '*/src/**'
+      - '*/build.gradle.kts'
+      - 'buildSrc/**'
+      - 'build.gradle.kts'
+      - 'gradle.properties'
+      - 'settings.gradle.kts'
+      - 'gradle/**'
   pull_request:
+    paths:
+      - 'src/**'
+      - '*/src/**'
+      - '*/build.gradle.kts'
+      - 'buildSrc/**'
+      - 'build.gradle.kts'
+      - 'gradle.properties'
+      - 'settings.gradle.kts'
+      - 'gradle/**'
 
 concurrency:
   group: test-${{ github.workflow }}-${{ github.ref }}
