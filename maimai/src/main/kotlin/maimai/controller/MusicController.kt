@@ -710,7 +710,7 @@ class MusicController(
         page: Int
     ) {
         val (result, nowPage, totalPages) = maimai.musics().filter {
-            version in it.version.name
+            version == it.version.name
         }.pagination(page, maxResults)
         showMusics(
             "maimai-search-version",

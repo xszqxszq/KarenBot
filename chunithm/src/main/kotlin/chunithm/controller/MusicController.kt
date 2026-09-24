@@ -596,9 +596,9 @@ class MusicController(
         version: String,
         page: Int
     ) {
-        val (result, nowPage, totalPages) = chunithm.musics()
-            .filter { version == it.version.name || version in it.version.name }
-            .pagination(page, maxResults)
+        val (result, nowPage, totalPages) = chunithm.musics().filter {
+            version == it.version.name
+        }.pagination(page, maxResults)
         showMusics(
             "chunithm-search-version",
             version,
@@ -613,9 +613,9 @@ class MusicController(
         artist: String,
         page: Int
     ) {
-        val (result, nowPage, totalPages) = chunithm.musics()
-            .filter { artist in it.artist }
-            .pagination(page, maxResults)
+        val (result, nowPage, totalPages) = chunithm.musics().filter {
+            artist in it.artist
+        }.pagination(page, maxResults)
         showMusics(
             "chunithm-search-artist",
             artist,
@@ -630,9 +630,9 @@ class MusicController(
         raw: String,
         regex: Regex
     ) {
-        val result = chunithm.musics()
-            .filter { regex.find(it.name) != null }
-            .take(maxResults)
+        val result = chunithm.musics().filter {
+            regex.find(it.name) != null
+        }.take(maxResults)
         showMusics(
             "chunithm-search-regex",
             raw,
@@ -645,9 +645,9 @@ class MusicController(
         bpm: Int,
         page: Int
     ) {
-        val (result, nowPage, totalPages) = chunithm.musics()
-            .filter { it.bpm == bpm }
-            .pagination(page, maxResults)
+        val (result, nowPage, totalPages) = chunithm.musics().filter {
+            it.bpm == bpm
+        }.pagination(page, maxResults)
         showMusics(
             "chunithm-search-bpm",
             "$bpm",
