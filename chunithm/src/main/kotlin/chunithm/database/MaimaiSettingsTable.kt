@@ -16,6 +16,9 @@ object MaimaiSettingsTable: Table() {
     val value = varchar("value", 512)
     override val primaryKey = PrimaryKey(id, key)
 
+    const val ICON_KEY = "chunithm-icon"
+    const val PLATE_KEY = "chunithm-plate"
+
     // 缓存变动广播频道
     const val CACHE_CHANNEL = "maimai-settings"
 
@@ -92,8 +95,8 @@ object MaimaiSettingsTable: Table() {
      */
     suspend fun settings(openId: String): PlayerSettings = rows(openId).let { rows ->
         PlayerSettings(
-            avatar = rows["icon"] ?.ifBlank { null } ?.toIntOrNull(),
-            plate = rows["plate"] ?.ifBlank { null } ?.toIntOrNull()
+            avatar = rows[ICON_KEY] ?.ifBlank { null } ?.toIntOrNull(),
+            plate = rows[PLATE_KEY] ?.ifBlank { null } ?.toIntOrNull()
         )
     }
 

@@ -124,8 +124,8 @@ class ImageController(
                 keyboard {
                     row {
                         at("💯我也要查", "/chu " + command.trim())
-//                    link("随心配", "https://otmdb.cn/bot/maimai/combo", enter = true, id = "2")
-//                    at("🎨修改设置", "设置mai", enter = true, id = "3")
+                        link("随心配", "https://otmdb.cn/bot/chunithm/combo")
+                        at("🎨修改设置", "设置chu", enter = true)
                     }
                     page?.let {
                         if (totalPages == null || totalPages <= 1)

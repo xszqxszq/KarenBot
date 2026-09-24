@@ -35,8 +35,12 @@ class MockLxnsProber(
         const val INVALID_FRIEND_CODE = "invalid friend code"
         const val SONGS_CACHE = "lxns-songs.json"
         const val TROPHIES_CACHE = "lxns-trophies.json"
+        const val CHARACTERS_CACHE = "lxns-characters.json"
+        const val PLATES_CACHE = "lxns-plates.json"
         const val EMPTY_SONGS = """{"songs":[],"versions":[]}"""
         const val EMPTY_TROPHIES = """{"trophies":[]}"""
+        const val EMPTY_CHARACTERS = """{"characters":[]}"""
+        const val EMPTY_PLATES = """{"plates":[]}"""
         val JSON_HEADERS = headersOf(HttpHeaders.ContentType, "application/json")
     }
 
@@ -100,6 +104,8 @@ class MockLxnsProber(
             path.endsWith("/oauth/token") -> token()
             path.endsWith("/song/list") -> cached(SONGS_CACHE, EMPTY_SONGS)
             path.endsWith("/trophy/list") -> cached(TROPHIES_CACHE, EMPTY_TROPHIES)
+            path.endsWith("/character/list") -> cached(CHARACTERS_CACHE, EMPTY_CHARACTERS)
+            path.endsWith("/plate/list") -> cached(PLATES_CACHE, EMPTY_PLATES)
             path.endsWith("/chunithm/alias/list") -> respond(
                 content = """{"aliases":[]}""",
                 status = HttpStatusCode.OK,

@@ -46,6 +46,8 @@ class ChunithmTest : ChunithmDatabaseTest() {
             testButtons(sandbox)
             testHelp(sandbox)
             testDefault(sandbox)
+            testCollections(sandbox)
+            testInvalidCollections(sandbox)
             testPreview(sandbox)
         } finally {
             sandbox.cleanup()
@@ -133,6 +135,29 @@ class ChunithmTest : ChunithmDatabaseTest() {
     private suspend fun testDefault(sandbox: BotSandbox) {
         sandbox.clear()
         assertReplied(sandbox, sandbox.user() says "/chu 默认", "设置成功")
+    }
+
+    private suspend fun testCollections(sandbox: BotSandbox) {
+        sandbox.clear()
+        assertReplied(sandbox, sandbox.user() says "设置chu", "支持以下设定")
+        assertReplied(sandbox, sandbox.user() says "设置头像 500", "设置头像成功")
+        assertEquals(500, MaimaiSettingsTable.settings("test-user").avatar)
+        assertReplied(sandbox, sandbox.user() says "设置头像 天王洲 なずな", "设置头像成功")
+        assertReplied(sandbox, sandbox.user() says "设置牌子 10129", "设置牌子成功")
+        assertEquals(10129, MaimaiSettingsTable.settings("test-user").plate)
+        assertReplied(sandbox, sandbox.user() says "设置牌子 41011", "设置牌子成功")
+        assertEquals(41011, MaimaiSettingsTable.settings("test-user").plate)
+        assertReplied(sandbox, sandbox.user() says "设置头像 不存在的头像", "使用方法")
+        assertReplied(sandbox, sandbox.user() says "设置牌子 不存在的牌子", "使用方法")
+    }
+
+    private suspend fun testInvalidCollections(sandbox: BotSandbox) {
+        newSuspendedTransaction(db = database) {
+            MaimaiSettingsTable["test-user", MaimaiSettingsTable.ICON_KEY] = "999999"
+            MaimaiSettingsTable["test-user", MaimaiSettingsTable.PLATE_KEY] = "999999"
+        }
+        sandbox.clear()
+        assertRepliedWithImage(sandbox, sandbox.user() says "/b50")
     }
 }
 

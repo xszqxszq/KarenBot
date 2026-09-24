@@ -95,6 +95,28 @@ class ChunithmQuery(
         return backends
     }
 
+    private fun mergeSettings(
+        existing: PlayerSettings?,
+        userSettings: PlayerSettings?
+    ): PlayerSettings? {
+        val merged = when {
+            userSettings == null -> existing
+            existing == null ->
+                if (userSettings.trophy == null && userSettings.avatar == null &&
+                    userSettings.plate == null) null
+                else userSettings
+            else -> PlayerSettings(
+                trophy = userSettings.trophy ?: existing.trophy,
+                plate = userSettings.plate ?: existing.plate,
+                avatar = userSettings.avatar ?: existing.avatar
+            )
+        } ?: return null
+        return PlayerSettings(
+            trophy = merged.trophy,
+            plate = merged.plate ?.takeIf { it in chunithm.chunithmData.plateIds } ?: 22,
+            avatar = merged.avatar ?.takeIf { it in chunithm.chunithmData.avatarIds } ?: 0
+        )
+    }
 
     /**
      * 查询玩家的 Best 50
@@ -125,8 +147,7 @@ class ChunithmQuery(
                 response
             }
         }
-        // TODO: 设置表中用中二单独一个前缀
-//        result.first.settings = mergeSettings(result.first.settings, user.settings)
+        result.first.settings = mergeSettings(result.first.settings, user.settings)
         return result
     }
 
@@ -145,7 +166,7 @@ class ChunithmQuery(
         val result = queryBackends(user, listBackends(user)) { backend ->
             backend.getPlayerRecords(user, musics)
         }
-//        result.first.settings = mergeSettings(result.first.settings, user.settings)
+        result.first.settings = mergeSettings(result.first.settings, user.settings)
         return result
     }
 
@@ -184,7 +205,7 @@ class ChunithmQuery(
         }
         val response = result.first
         val backend = result.second
-//        response.settings = mergeSettings(response.settings, user.settings)
+        response.settings = mergeSettings(response.settings, user.settings)
         return Pair(response, backend)
     }
 

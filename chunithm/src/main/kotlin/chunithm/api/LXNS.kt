@@ -73,6 +73,20 @@ class LXNS(
     suspend fun fetchTrophies(): LXNSTrophyList = client.get("$apiServer/trophy/list").body()
 
     /**
+     * 从落雪拉取角色列表
+     *
+     * @return 角色列表数据
+     */
+    suspend fun fetchCharacters(): LXNSCharacterList = client.get("$apiServer/character/list").body()
+
+    /**
+     * 从落雪拉取牌子列表
+     *
+     * @return 牌子列表数据
+     */
+    suspend fun fetchPlates(): LXNSPlateList = client.get("$apiServer/plate/list").body()
+
+    /**
      * 拉取歌曲信息列表
      *
      * @param cached 缓存数据
@@ -155,6 +169,32 @@ class LXNS(
         return data.trophies.filter {
             it.color == "image" && it.required != null
         }.associateBy { it.id }
+    }
+
+    /**
+     * 拉取角色列表
+     *
+     * @param cached 缓存数据
+     * @return 角色列表
+     */
+    suspend fun getCharacterList(
+        cached: LXNSCharacterList? = null
+    ): Map<Int, LXNSCharacterInfo> {
+        val data = cached ?: client.get("$apiServer/character/list").body<LXNSCharacterList>()
+        return data.characters.associateBy { it.id }
+    }
+
+    /**
+     * 拉取牌子列表
+     *
+     * @param cached 缓存数据
+     * @return 牌子列表
+     */
+    suspend fun getPlateList(
+        cached: LXNSPlateList? = null
+    ): Map<Int, LXNSPlateInfo> {
+        val data = cached ?: client.get("$apiServer/plate/list").body<LXNSPlateList>()
+        return data.plates.associateBy { it.id }
     }
 
     override suspend fun getPlayerRating(

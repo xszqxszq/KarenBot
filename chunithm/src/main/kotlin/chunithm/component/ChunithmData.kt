@@ -9,8 +9,11 @@ import xyz.xszq.bot.chunithm.config.DesignerConfig
 import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesTable
 import xyz.xszq.bot.chunithm.music.GameVersion
 import xyz.xszq.bot.chunithm.music.MusicInfo
+import xyz.xszq.bot.chunithm.payload.LXNSCharacterInfo
+import xyz.xszq.bot.chunithm.payload.LXNSPlateInfo
 import xyz.xszq.bot.chunithm.payload.LXNSTrophyInfo
 import xyz.xszq.bot.util.json
+import java.io.File
 
 /**
  * 中二游戏数据
@@ -21,6 +24,10 @@ class ChunithmData(
     val versions = mutableMapOf<String, GameVersion>()
     val musics = mutableMapOf<Int, MusicInfo>()
     val trophies = mutableMapOf<Int, LXNSTrophyInfo>()
+    val characters = mutableMapOf<Int, LXNSCharacterInfo>()
+    val plates = mutableMapOf<Int, LXNSPlateInfo>()
+    val avatarIds = mutableSetOf<Int>()
+    val plateIds = mutableSetOf<Int>()
     lateinit var newestVersion: GameVersion
     lateinit var designer: DesignerConfig
 
@@ -63,7 +70,26 @@ class ChunithmData(
             path = "$dataPath/lxns-trophies.json"
         )
         trophies.putAll(api.getTrophyList(cached = trophiesRaw))
+
+        val charactersRaw = fetchWithCacheFallback(
+            fetch = { api.fetchCharacters() },
+            path = "$dataPath/lxns-characters.json"
+        )
+        characters.putAll(api.getCharacterList(cached = charactersRaw))
+
+        val platesRaw = fetchWithCacheFallback(
+            fetch = { api.fetchPlates() },
+            path = "$dataPath/lxns-plates.json"
+        )
+        plates.putAll(api.getPlateList(cached = platesRaw))
+
+        avatarIds.addAll(localIds("$dataPath/avatars"))
+        plateIds.addAll(localIds("$dataPath/plates"))
     }
+
+    private fun localIds(path: String): List<Int> = File(path).listFiles()
+        .orEmpty()
+        .mapNotNull { it.name.substringBefore(".png").toIntOrNull() }
 
     /**
      * 从落雪拉取数据
