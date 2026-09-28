@@ -9,23 +9,22 @@ import io.ktor.serialization.kotlinx.json.*
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import xyz.xszq.bot.audio.Audio
 import xyz.xszq.bot.llm.LLMClient
 import xyz.xszq.bot.llm.LLMConfig
 import xyz.xszq.bot.llm.LLMModelConfig
 import xyz.xszq.bot.payload.llm.LLMRequest
-import xyz.xszq.bot.text.Text
-import xyz.xszq.bot.text.config.TextConfig
 import xyz.xszq.bot.util.json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class TextTest {
+class AudioAuditTest {
     @Test
-    fun testAuditUsesTargetAsUserMessage() = runTest {
+    fun testAuditUsesInputAsUserMessage() = runTest {
         var requestBody: String ?= null
-        val text = textWithClient(
+        val audio = audioWithClient(
             MockEngine {
                 requestBody = (it.body as? TextContent)?.text
                 respond(
@@ -38,34 +37,19 @@ class TextTest {
             }
         )
 
-        assertTrue(text.audit("小冰"))
+        assertTrue(audio.audit("大家好"))
         val request = json.decodeFromString<LLMRequest>(requestBody ?: "")
         val system = request.messages.first { it.role == "system" }.contentAsText() ?: ""
         val user = request.messages.first { it.role == "user" }.contentAsText()
 
-        assertTrue(system.contains("只审核用户输入"))
-        assertEquals("小冰", user)
-    }
-
-    @Test
-    fun testAudit() = runTest {
-        val text = textWithClient(
-            MockEngine {
-                respond(
-                    content = """{"id":"1","created":1,"model":"test","choices":[{"index":0,"message":{"role":"assistant","content":"false"},"finish_reason":"stop"}]}""",
-                    status = HttpStatusCode.OK,
-                    headers = jsonHeaders
-                )
-            }
-        )
-
-        val result = text.audit("Test")
-        assertFalse(result)
+        assertTrue(system.contains("仅政治敏感"))
+        assertFalse(system.contains("色情"))
+        assertEquals("大家好", user)
     }
 
     @Test
     fun testAuditRejectsGuardrailAnswer() = runTest {
-        val text = textWithClient(
+        val audio = audioWithClient(
             MockEngine {
                 respond(
                     content = """
@@ -77,40 +61,10 @@ class TextTest {
             }
         )
 
-        assertFalse(text.audit("Test"))
+        assertFalse(audio.audit("大家好"))
     }
 
-    @Test
-    fun testHardReject() = runTest {
-        val text = textWithClient(
-            MockEngine {
-                respond(
-                    content = "",
-                    status = HttpStatusCode.BadRequest,
-                    headers = headersOf(HttpHeaders.ContentType, ContentType.Text.Plain.toString())
-                )
-            }
-        )
-
-        assertFalse(text.audit("Test"))
-    }
-
-    @Test
-    fun testAuditServerGlitches() = runTest {
-        val text = textWithClient(
-            MockEngine {
-                respond(
-                    content = """{"error":"unknown"}""",
-                    status = HttpStatusCode.ServiceUnavailable,
-                    headers = jsonHeaders
-                )
-            }
-        )
-
-        assertTrue(text.audit("Test"))
-    }
-
-    private fun textWithClient(engine: MockEngine): Text {
+    private fun audioWithClient(engine: MockEngine): Audio {
         val llmClient = LLMClient(
             LLMConfig(
                 models = mapOf(
@@ -130,8 +84,7 @@ class TextTest {
         )
         val mockPluginLoader = mockk<PluginLoader>()
         every { mockPluginLoader.llmClient } returns llmClient
-        return Text().also {
-            it.textConfig = TextConfig(presets = emptyMap())
+        return Audio().also {
             it.pluginLoader = mockPluginLoader
         }
     }

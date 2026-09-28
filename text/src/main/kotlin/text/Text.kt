@@ -25,6 +25,19 @@ class Text: Plugin() {
     lateinit var textConfig: TextConfig
     lateinit var stereotypes: StereotypesPresets
 
+    private companion object {
+        val auditPrompt = buildString {
+            appendLine("审核发病小作文的目标名称，只审核用户输入。")
+            appendLine("仅两类内容返回 false：")
+            appendLine("1. 政治敏感，现实政治人物、重大政治事件、政治组织、口号、机构、")
+            appendLine("政策与意识形态争议，以及明显代称、谐音、缩写或影射。")
+            appendLine("2. 明显露骨色情，明确描述性行为、性器官、未成年性或强制性内容，")
+            appendLine("或名称本身是明显色情用语。")
+            appendLine("脏话辱骂、普通玩梗、暧昧表达、性暗示双关和拿不准的内容都返回 true。")
+            appendLine("只输出 true 或 false。")
+        }.trim()
+    }
+
     @OptIn(ExperimentalHoplite::class)
     override suspend fun load() {
         stereotypes = ConfigLoaderBuilder.default()
@@ -88,13 +101,14 @@ class Text: Plugin() {
                 }.trim())
                 return@startsWith
             }
+            if (!audit(target)) {
+                reply("检测到疑似违规内容，请检查输入")
+                return@startsWith
+            }
             val result = stereotypes.texts.random(
                 Random(System.currentTimeMillis())
             ).replace("{target_name}", target)
-            if (audit(result))
-                reply(result)
-            else
-                reply("检测到疑似违规内容，请检查输入")
+            reply(result)
         }
         // 渲染 LaTeX 图片
         startsWith("latex") { latex ->
@@ -116,23 +130,21 @@ class Text: Plugin() {
         }
     }
     /**
-     * 用 LLM 审核文本是否合规
+     * 用 LLM 审核发病小作文的用户输入
      *
-     * @param text 待审核文本
+     * @param input 用户输入
      * @return 是否合规
      */
-    suspend fun audit(text: String): Boolean {
+    suspend fun audit(input: String): Boolean {
         val client = pluginLoader.llmClient ?: return true
-        return try {
+        return runCatching {
             val content = client.chat(scene = "audit") {
-                system(textConfig.system)
-                user(text)
+                system(auditPrompt)
+                user(input)
             }
-            content.toBooleanStrictOrNull() ?: true
-        } catch (e: ClientRequestException) {
-            false
-        } catch (e: Exception) {
-            true
+            content.trim() == "true"
+        }.getOrElse { e ->
+            e !is ClientRequestException
         }
     }
 }

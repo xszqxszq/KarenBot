@@ -8,7 +8,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Suppress("unused")
 data class TextConfig(
-    val system: String = "",
     val presets: Map<String, String> = emptyMap(),
     val userSpecifiedPresets: List<UserSpecifiedPreset> = emptyList(),
 )

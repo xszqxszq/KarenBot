@@ -66,7 +66,6 @@ class TextPresetTest {
             plugin = "text"
             pluginLoader = sandbox.pluginLoader
             textConfig = TextConfig(
-                system = "",
                 presets = presets.toMap(),
             )
         }.setRoute()

@@ -3,6 +3,7 @@ package xyz.xszq.bot.audio
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
+import io.ktor.client.plugins.*
 import korlibs.io.async.launch
 import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -28,6 +29,17 @@ class Audio: Plugin() {
     lateinit var presets: VoicePresets
     lateinit var tts: TTSParser
     val touhou = Touhou(this)
+
+    private companion object {
+        val auditPrompt = buildString {
+            appendLine("审核活字印刷的输入文本，只审核用户输入。")
+            appendLine("仅政治敏感返回 false。")
+            appendLine("政治敏感指现实政治人物、重大政治事件、政治组织、口号、机构、")
+            appendLine("政策与意识形态争议，以及明显代称、谐音、缩写或影射。")
+            appendLine("其余内容，包括脏话辱骂、普通玩梗和拿不准的情况都返回 true。")
+            appendLine("只输出 true 或 false。")
+        }.trim()
+    }
 
     @OptIn(ExperimentalHoplite::class)
     override suspend fun load() {
@@ -61,8 +73,11 @@ class Audio: Plugin() {
                 }.trim())
                 return@startsWith
             }
+            if (!audit(text)) {
+                reply("检测到疑似违规内容，请检查输入")
+                return@startsWith
+            }
 
-            // TODO: 加入文本审查
             launch(cpuDispatcher) {
                 runCatching {
                     tts.generate(text) ?.let { pcm ->
@@ -91,6 +106,25 @@ class Audio: Plugin() {
                 reply(withContext(cpuDispatcher) { Audio(pcm) })
                 pcm.delete()
             }
+        }
+    }
+
+    /**
+     * 用 LLM 审核活字印刷的用户输入
+     *
+     * @param input 用户输入
+     * @return 是否合规
+     */
+    suspend fun audit(input: String): Boolean {
+        val client = pluginLoader.llmClient ?: return true
+        return runCatching {
+            val content = client.chat(scene = "audit") {
+                system(auditPrompt)
+                user(input)
+            }
+            content.trim() == "true"
+        }.getOrElse { e ->
+            e !is ClientRequestException
         }
     }
 
