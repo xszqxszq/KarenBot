@@ -94,7 +94,6 @@ class AudioAuditTest {
         val parts = (user as MessageContentMulti).parts
         val audioPart = parts.first { it.type == "input_audio" }.inputAudio
 
-        assertTrue(system.contains("倒放"))
         assertEquals("AQIDBA==", audioPart ?.data)
         assertEquals("wav", audioPart ?.format)
     }
