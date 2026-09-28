@@ -16,7 +16,6 @@ import kotlinx.serialization.json.Json
 import okhttp3.ConnectionPool
 import okhttp3.Protocol
 import xyz.xszq.bot.chunithm.component.ChunithmData
-import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
 import xyz.xszq.bot.chunithm.database.ProberBindTable
 import xyz.xszq.bot.chunithm.database.QQBindTable
 import xyz.xszq.bot.chunithm.exception.AuthorizationException
@@ -445,7 +444,6 @@ class LXNS(
                 }
             }
             val refresh = ProberBindTable[openid, "lxns", "refresh"]
-                ?: MaimaiSettingsTable[openid, "lxns-oa-refresh"]
                 ?: run {
                     logger.debug { "[落雪调试] accessToken 无refresh $openid" }
                     return@withLock null
@@ -467,7 +465,6 @@ class LXNS(
                 if (response.status == HttpStatusCode.BadRequest || response.status == HttpStatusCode.Unauthorized) {
                     logger.debug { "[落雪调试] accessToken refresh失效删除 $openid" }
                     ProberBindTable.delete(openid, "lxns")
-                    MaimaiSettingsTable[openid, "lxns-oa-refresh"] = ""
                 }
                 logger.debug { "[落雪调试] accessToken 刷新失败 $openid" }
                 return@withLock null
@@ -477,7 +474,6 @@ class LXNS(
                 parsed.accessToken,
                 System.currentTimeMillis() + parsed.expiresIn * 1000L
             )
-            MaimaiSettingsTable[openid, "lxns-oa-refresh"] = parsed.refreshToken
             ProberBindTable[openid, "lxns", "refresh"] = parsed.refreshToken
             parsed.accessToken
         }

@@ -9,8 +9,8 @@ import xyz.xszq.bot.load.LoadHarness
 import xyz.xszq.bot.load.LoadScenario
 import xyz.xszq.bot.load.NetworkGate
 import xyz.xszq.bot.maimai.component.MaimaiData
-import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.database.ProberBindTable
+import xyz.xszq.bot.maimai.database.RhythmGameSettingsTable
 import xyz.xszq.bot.payload.AdminCheckRequest
 import xyz.xszq.bot.subscribe.Channel
 import kotlin.test.Test
@@ -141,7 +141,7 @@ class MaimaiLoadTest : MaimaiDatabaseTest() {
         divingFish: MockDivingFish
     ) = newSuspendedTransaction(db = database) {
         USERS.forEach { (openid, prober) ->
-            MaimaiSettingsTable[openid, "prober"] = prober
+            RhythmGameSettingsTable[openid, "prober"] = prober
             when (prober) {
                 "lxns" -> ProberBindTable[openid, "lxns", "friend-code"] =
                     lxns.friendCode.toString()

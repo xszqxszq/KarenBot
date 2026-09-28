@@ -4,8 +4,8 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Tag
 import xyz.xszq.bot.chunithm.component.ChunithmData
-import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
 import xyz.xszq.bot.chunithm.database.ProberBindTable
+import xyz.xszq.bot.chunithm.database.RhythmGameSettingsTable
 import xyz.xszq.bot.database.newSuspendedTransaction
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.load.FakeQQServer
@@ -154,7 +154,7 @@ class ChunithmLoadTest : ChunithmDatabaseTest() {
         divingFish: MockDivingFish
     ) = newSuspendedTransaction(db = database) {
         USERS.forEach { (openid, prober) ->
-            MaimaiSettingsTable[openid, "prober"] = prober
+            RhythmGameSettingsTable[openid, "prober"] = prober
             when (prober) {
                 "lxns" -> {
                     ProberBindTable[openid, "lxns", "chunithm-friend-code"] =

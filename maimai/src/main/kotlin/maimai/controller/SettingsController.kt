@@ -4,8 +4,8 @@ import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.api.DivingFish
 import xyz.xszq.bot.maimai.api.LXNS
-import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.database.ProberBindTable
+import xyz.xszq.bot.maimai.database.RhythmGameSettingsTable
 import xyz.xszq.bot.maimai.music.Item
 import xyz.xszq.bot.maimai.music.MusicDifficulty
 import xyz.xszq.bot.maimai.music.UserQueryParams
@@ -37,13 +37,13 @@ class SettingsController(
         startsWith("设置查分器") { name ->
             when {
                 "水鱼" in name -> {
-                    MaimaiSettingsTable[sender.id, "prober"] = "diving-fish"
+                    RhythmGameSettingsTable[sender.id, "prober"] = "diving-fish"
                 }
                 "落雪" in name -> {
-                    MaimaiSettingsTable[sender.id, "prober"] = "lxns"
+                    RhythmGameSettingsTable[sender.id, "prober"] = "lxns"
                 }
                 "自动" in name -> {
-                    MaimaiSettingsTable[sender.id, "prober"] = ""
+                    RhythmGameSettingsTable[sender.id, "prober"] = ""
                 }
                 else -> {
                     reply(buildString {
@@ -60,33 +60,33 @@ class SettingsController(
         startsWith(listOf("设置水鱼", "水鱼")) {
             if (!text.startsWith("设置") && text.trim() != "水鱼")
                 return@startsWith
-            MaimaiSettingsTable[sender.id, "prober"] = "diving-fish"
+            RhythmGameSettingsTable[sender.id, "prober"] = "diving-fish"
             reply("设置查分器成功。")
         }
         startsWith(listOf("设置落雪", "落雪")) {
             if (!text.startsWith("设置") && text.trim() != "落雪")
                 return@startsWith
-            MaimaiSettingsTable[sender.id, "prober"] = "lxns"
+            RhythmGameSettingsTable[sender.id, "prober"] = "lxns"
             reply("设置查分器成功。")
         }
         startsWith("兼容模式") { arg ->
             when {
                 arg.trim() in listOf("取消", "关闭", "禁用") -> {
-                    MaimaiSettingsTable[sender.id, "text-mode"] = "0"
+                    RhythmGameSettingsTable[sender.id, "text-mode"] = "0"
                     reply("兼容模式禁用成功。")
                 }
                 else -> {
-                    MaimaiSettingsTable[sender.id, "text-mode"] = "1"
+                    RhythmGameSettingsTable[sender.id, "text-mode"] = "1"
                     reply("兼容模式启用成功，如需关闭请@机器人并发送“兼容模式 关闭”。")
                 }
             }
         }
         startsWith(listOf("取消兼容模式", "关闭兼容模式", "禁用兼容模式")) {
-            MaimaiSettingsTable[sender.id, "text-mode"] = "0"
+            RhythmGameSettingsTable[sender.id, "text-mode"] = "0"
             reply("兼容模式禁用成功。")
         }
         startsWith(listOf("打开兼容模式", "启用兼容模式")) {
-            MaimaiSettingsTable[sender.id, "text-mode"] = "1"
+            RhythmGameSettingsTable[sender.id, "text-mode"] = "1"
             reply("兼容模式启用成功，如需关闭请@机器人并发送“兼容模式 关闭”。")
         }
         startsWith("设置头像") { icon ->
@@ -119,7 +119,8 @@ class SettingsController(
                 }
                 return@startsWith
             }
-            MaimaiSettingsTable[sender.id, "icon"] = iconFile.id.toString()
+            RhythmGameSettingsTable[sender.id, RhythmGameSettingsTable.ICON_KEY] =
+                iconFile.id.toString()
             reply("设置头像成功。") {
                 brief("设置头像", "设置头像成功。")
                 keyboard {
@@ -186,7 +187,8 @@ class SettingsController(
                     return@startsWith
                 }
             }
-            MaimaiSettingsTable[sender.id, "plate"] = plateFile.id.toString()
+            RhythmGameSettingsTable[sender.id, RhythmGameSettingsTable.PLATE_KEY] =
+                plateFile.id.toString()
             reply("设置牌子成功。") {
                 brief("设置牌子", "设置牌子成功。")
                 keyboard {
@@ -235,7 +237,7 @@ class SettingsController(
         route()
         maimai.route("/mai", true) {
             startsWith(listOf("默认", "设为默认")) {
-                MaimaiSettingsTable.setDefaultGame(sender.id, "maimai")
+                RhythmGameSettingsTable.setDefaultGame(sender.id, "maimai")
                 reply("设置成功，在不带“/mai”“/chu”命令前缀时，将默认选择使用舞萌DX的相关功能")
             }
         }

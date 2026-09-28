@@ -9,8 +9,8 @@ import xyz.xszq.bot.llm.LLMClient
 import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.api.LXNS
 import xyz.xszq.bot.maimai.api.MaimaiAPI
-import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.database.ProberBindTable
+import xyz.xszq.bot.maimai.database.RhythmGameSettingsTable
 import xyz.xszq.bot.maimai.exception.*
 import xyz.xszq.bot.maimai.music.*
 import xyz.xszq.bot.util.Metrics
@@ -64,7 +64,7 @@ class MaimaiQuery(
         }
         return when {
             queryArgs.isNullOrBlank() ->
-                UserQueryParams.Self(event, MaimaiSettingsTable.settings(event.sender.id))
+                UserQueryParams.Self(event, RhythmGameSettingsTable.settings(event.sender.id))
             queryArgs.all { it.isDigit() } ->
                 UserQueryParams.FriendCode(queryArgs, event)
             else ->
@@ -88,7 +88,7 @@ class MaimaiQuery(
             maimai.backend("lxns"),
         ).toMutableList()
         if (user.isSelf && !listAll)
-            MaimaiSettingsTable[user.event.sender.id, "prober"] ?.let { prefer ->
+            RhythmGameSettingsTable[user.event.sender.id, "prober"] ?.let { prefer ->
                 if (prefer.isBlank())
                     return@let
                 backends = backends.filter { it.id == prefer }.toMutableList()

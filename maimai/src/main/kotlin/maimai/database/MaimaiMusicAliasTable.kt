@@ -9,7 +9,7 @@ import xyz.xszq.bot.maimai.music.MusicInfo
  * 歌曲别名表
  */
 @Suppress("unused")
-object MaimaiMusicAliasesTable: Table() {
+object MaimaiMusicAliasTable: Table() {
     val id = integer("id")
     val name = varchar("name", 128)
     val votes = integer("votes")
@@ -25,7 +25,7 @@ object MaimaiMusicAliasesTable: Table() {
      */
     suspend operator fun get(music: MusicInfo) = suspendedTransactionAsync {
         select(name, votes).where {
-            (MaimaiMusicAliasesTable.id eq music.id) and (votes greaterEq 0)
+            (MaimaiMusicAliasTable.id eq music.id) and (votes greaterEq 0)
         }.map { Pair(it[name], it[votes]) }
     }.await()
 
@@ -38,7 +38,7 @@ object MaimaiMusicAliasesTable: Table() {
      */
     suspend operator fun get(music: MusicInfo, alias: String) = suspendedTransactionAsync {
         select(votes).where {
-            (MaimaiMusicAliasesTable.id eq music.id) and (name eq alias)
+            (MaimaiMusicAliasTable.id eq music.id) and (name eq alias)
         }.map { it[votes] }.firstOrNull()
     }.await()
 
@@ -48,9 +48,9 @@ object MaimaiMusicAliasesTable: Table() {
      * @return 歌曲 ID / 别名的列表
      */
     suspend fun all() = suspendedTransactionAsync {
-        select(MaimaiMusicAliasesTable.id, name).where {
+        select(MaimaiMusicAliasTable.id, name).where {
             votes greaterEq 0
-        }.map { Pair(it[MaimaiMusicAliasesTable.id], it[name]) }
+        }.map { Pair(it[MaimaiMusicAliasTable.id], it[name]) }
     }.await()
 
     /**
@@ -61,9 +61,9 @@ object MaimaiMusicAliasesTable: Table() {
      */
     suspend fun exact(alias: String) = suspendedTransactionAsync {
         val cleaned = alias.trim().lowercase()
-        select(MaimaiMusicAliasesTable.id).where {
+        select(MaimaiMusicAliasTable.id).where {
             (name.lowerCase() eq cleaned) and (votes greaterEq 0)
-        }.map { it[MaimaiMusicAliasesTable.id] }
+        }.map { it[MaimaiMusicAliasTable.id] }
     }.await()
 
     /**
@@ -74,9 +74,9 @@ object MaimaiMusicAliasesTable: Table() {
      */
     suspend fun vote(music: MusicInfo, alias: String) = suspendedTransactionAsync {
         if (selectAll().where {
-                (MaimaiMusicAliasesTable.id eq music.id) and (name eq alias)
+                (MaimaiMusicAliasTable.id eq music.id) and (name eq alias)
             }.count() != 0L) {
-            update({ (MaimaiMusicAliasesTable.id eq music.id) and (name eq alias) }) {
+            update({ (MaimaiMusicAliasTable.id eq music.id) and (name eq alias) }) {
                 with(SqlExpressionBuilder) {
                     it[votes] = votes + 1
                 }
@@ -97,8 +97,8 @@ object MaimaiMusicAliasesTable: Table() {
      * @param alias 别名
      */
     suspend fun remove(music: MusicInfo, alias: String) = suspendedTransactionAsync {
-        MaimaiMusicAliasesTable.deleteWhere {
-            (MaimaiMusicAliasesTable.id eq music.id) and (MaimaiMusicAliasesTable.name eq alias)
+        MaimaiMusicAliasTable.deleteWhere {
+            (MaimaiMusicAliasTable.id eq music.id) and (MaimaiMusicAliasTable.name eq alias)
         }
     }.await()
 
@@ -110,9 +110,9 @@ object MaimaiMusicAliasesTable: Table() {
      */
     suspend fun add(music: MusicInfo, alias: String) = suspendedTransactionAsync {
         if (selectAll().where {
-                (MaimaiMusicAliasesTable.id eq music.id) and (name eq alias)
+                (MaimaiMusicAliasTable.id eq music.id) and (name eq alias)
             }.count() != 0L) {
-            update({ (MaimaiMusicAliasesTable.id eq music.id) and (name eq alias) }) {
+            update({ (MaimaiMusicAliasTable.id eq music.id) and (name eq alias) }) {
                 it[votes] = 0
             }
         } else {

@@ -143,8 +143,8 @@ class ApiController(
                         runCatching {
                             divingFish.bindByRef(openid)
                         }
-                        if (MaimaiSettingsTable[openid, "prober"]?.isNotBlank() == true)
-                            MaimaiSettingsTable[openid, "prober"] = "diving-fish"
+                        if (RhythmGameSettingsTable[openid, "prober"]?.isNotBlank() == true)
+                            RhythmGameSettingsTable[openid, "prober"] = "diving-fish"
                         data.event.reply("绑定成功，您可正常使用舞萌/中二各功能了。")
                         if (data.replay)
                             maimai.pluginLoader.subscribes.handle(data.event)
@@ -165,8 +165,8 @@ class ApiController(
                     return@get
                 }
                 if ((maimai.backend("lxns") as LXNS).initOAuth(code, data.event)) {
-                    if (MaimaiSettingsTable[data.event.sender.id, "prober"]?.isNotBlank() == true)
-                        MaimaiSettingsTable[data.event.sender.id, "prober"] = "lxns"
+                    if (RhythmGameSettingsTable[data.event.sender.id, "prober"]?.isNotBlank() == true)
+                        RhythmGameSettingsTable[data.event.sender.id, "prober"] = "lxns"
                     data.event.reply("绑定成功，您可正常使用舞萌/中二各功能了。")
                     if (data.replay)
                         maimai.pluginLoader.subscribes.handle(data.event)

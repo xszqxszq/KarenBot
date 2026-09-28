@@ -16,9 +16,9 @@ import xyz.xszq.bot.maimai.api.MaimaiAPI
 import xyz.xszq.bot.maimai.component.MaimaiQuery
 import xyz.xszq.bot.maimai.component.MarkdownTemplates
 import xyz.xszq.bot.maimai.component.WaitingEventData
-import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.database.ProberBindTable
 import xyz.xszq.bot.maimai.database.QQBindTable
+import xyz.xszq.bot.maimai.database.RhythmGameSettingsTable
 import xyz.xszq.bot.maimai.database.RhythmGameTokens
 import xyz.xszq.bot.maimai.exception.*
 import xyz.xszq.bot.maimai.music.MusicDifficulty
@@ -80,7 +80,7 @@ sealed class Controller(
                 name = "rhythm",
                 value = "maimai",
                 defaultHandler = {
-                    MaimaiSettingsTable.defaultGame(sender.id)
+                    RhythmGameSettingsTable.defaultGame(sender.id)
                 },
                 block = block
             )
@@ -275,7 +275,7 @@ sealed class Controller(
         replay: Boolean = false,
         fromBind: Boolean = false
     ) {
-        val prefer = MaimaiSettingsTable[sender.id, "prober"]
+        val prefer = RhythmGameSettingsTable[sender.id, "prober"]
         val migrateFailed = ProberBindTable[sender.id, "diving-fish", "migrate-failed"] != null
         val needReBind = !fromBind && migrateFailed &&
             (prefer.isNullOrBlank() || prefer == "diving-fish")

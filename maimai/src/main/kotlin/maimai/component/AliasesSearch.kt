@@ -24,7 +24,7 @@ import org.apache.lucene.search.IndexSearcher
 import org.apache.lucene.search.TermQuery
 import org.apache.lucene.store.FSDirectory
 import xyz.xszq.bot.maimai.Maimai
-import xyz.xszq.bot.maimai.database.MaimaiMusicAliasesTable
+import xyz.xszq.bot.maimai.database.MaimaiMusicAliasTable
 import xyz.xszq.bot.maimai.music.MusicInfo
 import xyz.xszq.bot.maimai.music.MusicNameAlias
 import xyz.xszq.bot.util.cpuDispatcher
@@ -124,7 +124,7 @@ class AliasesSearch(
                 return
             }
 
-            val aliases = MaimaiMusicAliasesTable.all().map { (id, alias) ->
+            val aliases = MaimaiMusicAliasTable.all().map { (id, alias) ->
                 MusicNameAlias(id, alias)
             }
             val currentNames = maimai.musics().map { music ->
@@ -292,7 +292,7 @@ class AliasesSearch(
         if (nameMatch.isNotEmpty()) {
             return nameMatch
         }
-        val exact = MaimaiMusicAliasesTable.exact(name)
+        val exact = MaimaiMusicAliasTable.exact(name)
         if (exact.isNotEmpty()) {
             return exact.distinct().mapNotNull { maimai.music(it) }
         }

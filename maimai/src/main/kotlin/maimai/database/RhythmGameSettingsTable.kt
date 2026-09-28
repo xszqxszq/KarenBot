@@ -1,26 +1,27 @@
-package xyz.xszq.bot.chunithm.database
+package xyz.xszq.bot.maimai.database
 
 import org.jetbrains.exposed.sql.*
-import xyz.xszq.bot.chunithm.music.PlayerSettings
 import xyz.xszq.bot.database.newSuspendedTransaction
 import xyz.xszq.bot.database.suspendedTransactionAsync
+import xyz.xszq.bot.maimai.music.PlayerSettings
 import java.util.concurrent.ConcurrentHashMap
 
 /**
  * 用户自定义设置表
  */
 @Suppress("unused")
-object MaimaiSettingsTable: Table() {
+object RhythmGameSettingsTable: Table() {
     val id = varchar("id", 32)
     val key = varchar("key", 32)
     val value = varchar("value", 512)
     override val primaryKey = PrimaryKey(id, key)
 
-    const val ICON_KEY = "chunithm-icon"
-    const val PLATE_KEY = "chunithm-plate"
+    const val ICON_KEY = "maimai-icon"
+    const val PLATE_KEY = "maimai-plate"
+    const val GUESS_KEY = "maimai-guess"
 
     // 缓存变动广播频道
-    const val CACHE_CHANNEL = "maimai-settings"
+    const val CACHE_CHANNEL = "game-settings"
 
     // 缓存变动广播
     var publisher: suspend (String) -> Unit = {}
@@ -59,16 +60,16 @@ object MaimaiSettingsTable: Table() {
         value: String
     ) = newSuspendedTransaction {
         if (selectAll().where {
-                (MaimaiSettingsTable.id eq openId) and (MaimaiSettingsTable.key eq key)
+                (RhythmGameSettingsTable.id eq openId) and (RhythmGameSettingsTable.key eq key)
             }.count() != 0L)
-            update({ (MaimaiSettingsTable.id eq openId) and (MaimaiSettingsTable.key eq key) }) {
-                it[MaimaiSettingsTable.value] = value
+            update({ (RhythmGameSettingsTable.id eq openId) and (RhythmGameSettingsTable.key eq key) }) {
+                it[RhythmGameSettingsTable.value] = value
             }
         else
             insert {
-                it[MaimaiSettingsTable.id] = openId
-                it[MaimaiSettingsTable.key] = key
-                it[MaimaiSettingsTable.value] = value
+                it[RhythmGameSettingsTable.id] = openId
+                it[RhythmGameSettingsTable.key] = key
+                it[RhythmGameSettingsTable.value] = value
             }
     }.also {
         clearCache(openId)
@@ -109,7 +110,7 @@ object MaimaiSettingsTable: Table() {
     suspend fun defaultGame(
         openId: String
     ): String {
-        return MaimaiSettingsTable[openId, "game-prior"] ?: "maimai"
+        return RhythmGameSettingsTable[openId, "game-prior"] ?: "maimai"
     }
 
     /**
@@ -122,7 +123,7 @@ object MaimaiSettingsTable: Table() {
         openId: String,
         game: String
     ) {
-        MaimaiSettingsTable[openId, "game-prior"] = game
+        RhythmGameSettingsTable[openId, "game-prior"] = game
     }
 
     /**
@@ -135,7 +136,7 @@ object MaimaiSettingsTable: Table() {
         cache[openId] ?.let { return it }
         val generation = generations[openId] ?: 0L
         val loaded = suspendedTransactionAsync {
-            selectAll().where { MaimaiSettingsTable.id eq openId }
+            selectAll().where { RhythmGameSettingsTable.id eq openId }
                 .associate { it[key] to it[value] }
         }.await()
         if ((generations[openId] ?: 0L) == generation)

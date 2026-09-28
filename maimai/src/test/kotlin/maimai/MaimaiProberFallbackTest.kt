@@ -6,9 +6,9 @@ import xyz.xszq.bot.assertReplied
 import xyz.xszq.bot.assertRepliedWithImage
 import xyz.xszq.bot.database.newSuspendedTransaction
 import xyz.xszq.bot.maimai.component.MaimaiData
-import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.database.ProberBindTable
 import xyz.xszq.bot.maimai.database.QQBindTable
+import xyz.xszq.bot.maimai.database.RhythmGameSettingsTable
 import xyz.xszq.bot.util.Metrics
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -198,7 +198,7 @@ class MaimaiProberFallbackTest : MaimaiDatabaseTest() {
                 QQBindTable.update(openid, it)
             }
             prefer ?.let {
-                MaimaiSettingsTable[openid, "prober"] = it
+                RhythmGameSettingsTable[openid, "prober"] = it
             }
         }
     }

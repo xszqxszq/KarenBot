@@ -20,8 +20,8 @@ import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.Maimai.Companion.textMode
 import xyz.xszq.bot.maimai.database.GuessGameStatus
-import xyz.xszq.bot.maimai.database.GuessGameTable
-import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
+import xyz.xszq.bot.maimai.database.MaimaiGuessGameTable
+import xyz.xszq.bot.maimai.database.RhythmGameSettingsTable
 import xyz.xszq.bot.maimai.music.MusicGenre
 import xyz.xszq.bot.maimai.music.MusicInfo
 import xyz.xszq.bot.maimai.music.MusicType
@@ -80,7 +80,7 @@ class GuessController(
             val args = data.split(",")
             val disable = args[0].toInt() == 0
             val group = args[1]
-            MaimaiSettingsTable[group, "guess"] = (args[0] == "1").toString()
+            RhythmGameSettingsTable[group, RhythmGameSettingsTable.GUESS_KEY] = (args[0] == "1").toString()
             if (disable)
                 reply("禁用猜歌成功，启用请@可怜BOT发送“启用猜歌”。")
             else
@@ -93,7 +93,7 @@ class GuessController(
         }
     }
     private suspend fun MessageEvent.playable(): Boolean {
-        MaimaiSettingsTable[contextId, "guess"] ?.let {
+        RhythmGameSettingsTable[contextId, RhythmGameSettingsTable.GUESS_KEY] ?.let {
             if (!it.toBoolean()) {
                 reply("当前群猜歌已被禁用，若要启用请管理员@可怜BOT发送“启用猜歌”。")
                 return false
@@ -108,25 +108,25 @@ class GuessController(
     private suspend fun MessageEvent.save(
         status: GuessGameStatus,
     ): Unit = newSuspendedTransaction {
-        GuessGameTable.deleteWhere {
-            GuessGameTable.id eq this@save.contextId
+        MaimaiGuessGameTable.deleteWhere {
+            MaimaiGuessGameTable.id eq this@save.contextId
         }
-        GuessGameTable.insert {
-            it[GuessGameTable.id] = this@save.contextId
-            it[GuessGameTable.eventType] = when (this@save) {
+        MaimaiGuessGameTable.insert {
+            it[MaimaiGuessGameTable.id] = this@save.contextId
+            it[MaimaiGuessGameTable.eventType] = when (this@save) {
                 is GroupMessageEvent -> "group"
                 else -> "c2c"
             }
-            it[GuessGameTable.eventId] = this@save.eventId
-            it[GuessGameTable.messageId] = this@save.id
-            it[GuessGameTable.senderId] = this@save.sender.id
-            it[GuessGameTable.seq] = this@save.seq
-            it[GuessGameTable.type] = when(status) {
+            it[MaimaiGuessGameTable.eventId] = this@save.eventId
+            it[MaimaiGuessGameTable.messageId] = this@save.id
+            it[MaimaiGuessGameTable.senderId] = this@save.sender.id
+            it[MaimaiGuessGameTable.seq] = this@save.seq
+            it[MaimaiGuessGameTable.type] = when(status) {
                 is GuessGameStatus.Classical -> "classical"
                 is GuessGameStatus.Opening -> "opening"
             }
-            it[GuessGameTable.status] = status
-            it[GuessGameTable.modified] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+            it[MaimaiGuessGameTable.status] = status
+            it[MaimaiGuessGameTable.modified] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         }
     }
     private suspend fun MessageEvent.endGame(
@@ -137,43 +137,43 @@ class GuessController(
         }
         subscribeId.remove(contextId)
         eventToReply.remove(contextId)
-        GuessGameTable.deleteWhere {
-            GuessGameTable.id eq contextId
+        MaimaiGuessGameTable.deleteWhere {
+            MaimaiGuessGameTable.id eq contextId
         }
     }
     private suspend fun Bot.restoreGuessGame() = newSuspendedTransaction {
         val now = Clock.System.now()
-        GuessGameTable.selectAll().forEach { result ->
-            if ((now - result[GuessGameTable.modified].toInstant(TimeZone.currentSystemDefault())).inWholeMinutes >= 30) {
-                GuessGameTable.deleteWhere {
-                    GuessGameTable.id eq result[GuessGameTable.id]
+        MaimaiGuessGameTable.selectAll().forEach { result ->
+            if ((now - result[MaimaiGuessGameTable.modified].toInstant(TimeZone.currentSystemDefault())).inWholeMinutes >= 30) {
+                MaimaiGuessGameTable.deleteWhere {
+                    MaimaiGuessGameTable.id eq result[MaimaiGuessGameTable.id]
                 }
                 return@forEach
             }
-            val event = when (result[GuessGameTable.eventType]) {
+            val event = when (result[MaimaiGuessGameTable.eventType]) {
                 "group" -> GroupMessageEvent(
                     bot = this@restoreGuessGame,
-                    eventId = result[GuessGameTable.eventId],
-                    id = result[GuessGameTable.messageId],
+                    eventId = result[MaimaiGuessGameTable.eventId],
+                    id = result[MaimaiGuessGameTable.messageId],
                     message = MessageChain(),
-                    sender = Member(this@restoreGuessGame, result[GuessGameTable.senderId]),
-                    group = Group(this@restoreGuessGame, result[GuessGameTable.id].value),
-                    seq = result[GuessGameTable.seq]
+                    sender = Member(this@restoreGuessGame, result[MaimaiGuessGameTable.senderId]),
+                    group = Group(this@restoreGuessGame, result[MaimaiGuessGameTable.id].value),
+                    seq = result[MaimaiGuessGameTable.seq]
                 )
                 else -> MessageEvent(
                     bot = this@restoreGuessGame,
-                    eventId = result[GuessGameTable.eventId],
-                    id = result[GuessGameTable.messageId],
+                    eventId = result[MaimaiGuessGameTable.eventId],
+                    id = result[MaimaiGuessGameTable.messageId],
                     message = MessageChain(),
-                    sender = User(this@restoreGuessGame, result[GuessGameTable.senderId]),
-                    seq = result[GuessGameTable.seq]
+                    sender = User(this@restoreGuessGame, result[MaimaiGuessGameTable.senderId]),
+                    seq = result[MaimaiGuessGameTable.seq]
                 )
             }
             if (!event.playable())
                 return@forEach
-            when (result[GuessGameTable.type]) {
+            when (result[MaimaiGuessGameTable.type]) {
                 "classical" -> event.run {
-                    val status = result[GuessGameTable.status] as GuessGameStatus.Classical
+                    val status = result[MaimaiGuessGameTable.status] as GuessGameStatus.Classical
                     val music = maimai.music(status.musicId) ?: return@forEach
                     val descriptions = status.hints
 
@@ -191,7 +191,7 @@ class GuessController(
                     }
                 }
                 "opening" -> event.run {
-                    val status = result[GuessGameTable.status] as GuessGameStatus.Opening
+                    val status = result[MaimaiGuessGameTable.status] as GuessGameStatus.Opening
                     val musics = status.musics.mapNotNull {
                         maimai.music(it.first) ?.let { music ->
                             Pair(music, it.second)
@@ -208,8 +208,8 @@ class GuessController(
                     }
 
                 }
-                else -> GuessGameTable.deleteWhere {
-                    GuessGameTable.id eq event.contextId
+                else -> MaimaiGuessGameTable.deleteWhere {
+                    MaimaiGuessGameTable.id eq event.contextId
                 }
             }
         }

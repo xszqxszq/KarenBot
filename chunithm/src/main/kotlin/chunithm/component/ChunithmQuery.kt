@@ -5,8 +5,8 @@ import kotlinx.coroutines.CancellationException
 import xyz.xszq.bot.chunithm.Chunithm
 import xyz.xszq.bot.chunithm.api.ChunithmAPI
 import xyz.xszq.bot.chunithm.api.LXNS
-import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
 import xyz.xszq.bot.chunithm.database.ProberBindTable
+import xyz.xszq.bot.chunithm.database.RhythmGameSettingsTable
 import xyz.xszq.bot.chunithm.exception.*
 import xyz.xszq.bot.chunithm.music.*
 import xyz.xszq.bot.chunithm.music.Rating.ratingFloor
@@ -63,7 +63,7 @@ class ChunithmQuery(
         }
         return when {
             queryArgs.isNullOrBlank() ->
-                UserQueryParams.Self(event, MaimaiSettingsTable.settings(event.sender.id))
+                UserQueryParams.Self(event, RhythmGameSettingsTable.settings(event.sender.id))
             queryArgs.all { it.isDigit() } ->
                 UserQueryParams.FriendCode(queryArgs, event)
             else ->
@@ -87,7 +87,7 @@ class ChunithmQuery(
             chunithm.backend("diving-fish"),
         ).toMutableList()
         if (user.isSelf && !listAll)
-            MaimaiSettingsTable[user.event.sender.id, "prober"] ?.let { prefer ->
+            RhythmGameSettingsTable[user.event.sender.id, "prober"] ?.let { prefer ->
                 if (prefer.isBlank())
                     return@let
                 backends = backends.filter { it.id == prefer }.toMutableList()

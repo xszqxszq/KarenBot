@@ -17,9 +17,9 @@ import xyz.xszq.bot.chunithm.api.LXNS
 import xyz.xszq.bot.chunithm.component.*
 import xyz.xszq.bot.chunithm.config.ChunithmConfig
 import xyz.xszq.bot.chunithm.controller.Controller
-import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesTable
-import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesVoteTable
-import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
+import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasTable
+import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasVoteTable
+import xyz.xszq.bot.chunithm.database.RhythmGameSettingsTable
 import xyz.xszq.bot.chunithm.query.ComboQuery
 import xyz.xszq.bot.event.ChannelEvent
 import xyz.xszq.bot.event.Event
@@ -110,7 +110,7 @@ class Chunithm: Plugin() {
         // 数据库初始化
         transaction(database) {
             listOf(
-                ChunithmMusicAliasesTable, ChunithmMusicAliasesVoteTable
+                ChunithmMusicAliasTable, ChunithmMusicAliasVoteTable
             ).forEach { table ->
                 if (!table.exists())
                     SchemaUtils.create(table)
@@ -143,10 +143,10 @@ class Chunithm: Plugin() {
             controllers.add(controller)
         }
 
-        MaimaiSettingsTable.publisher = { openId ->
+        RhythmGameSettingsTable.publisher = { openId ->
             pluginLoader.subscribes.handle(ChannelEvent(
                 bot = pluginLoader.bot,
-                channelName = MaimaiSettingsTable.CACHE_CHANNEL,
+                channelName = RhythmGameSettingsTable.CACHE_CHANNEL,
                 data = openId
             ))
         }
@@ -179,7 +179,7 @@ class Chunithm: Plugin() {
                 name = "rhythm",
                 value = "chunithm",
                 defaultHandler = {
-                    MaimaiSettingsTable.defaultGame(sender.id)
+                    RhythmGameSettingsTable.defaultGame(sender.id)
                 },
                 block = block
             )
@@ -190,8 +190,8 @@ class Chunithm: Plugin() {
      * 注册路由
      */
     suspend fun setRoute() = route("/chu") {
-        channel(MaimaiSettingsTable.CACHE_CHANNEL) { openId ->
-            MaimaiSettingsTable.clearCache(openId)
+        channel(RhythmGameSettingsTable.CACHE_CHANNEL) { openId ->
+            RhythmGameSettingsTable.clearCache(openId)
         }
     }
 
@@ -218,6 +218,6 @@ class Chunithm: Plugin() {
          * 判断是否开启纯文本模式
          */
         suspend fun Event.textMode() = if (this is MessageEvent)
-            MaimaiSettingsTable[sender.id, "text-mode"] == "1" else false
+            RhythmGameSettingsTable[sender.id, "text-mode"] == "1" else false
     }
 }

@@ -24,7 +24,7 @@ import org.apache.lucene.search.IndexSearcher
 import org.apache.lucene.search.TermQuery
 import org.apache.lucene.store.FSDirectory
 import xyz.xszq.bot.chunithm.Chunithm
-import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesTable
+import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasTable
 import xyz.xszq.bot.chunithm.music.MusicInfo
 import xyz.xszq.bot.chunithm.music.MusicNameAlias
 import xyz.xszq.bot.util.cpuDispatcher
@@ -135,7 +135,7 @@ class AliasesSearch(
             if (!force && latestSignature == indexedMusicSignature)
                 return
 
-            val aliases = ChunithmMusicAliasesTable.all().map { (id, alias) ->
+            val aliases = ChunithmMusicAliasTable.all().map { (id, alias) ->
                 MusicNameAlias(id, alias)
             }
             val currentNames = chunithm.musics().map { music ->
@@ -313,7 +313,7 @@ class AliasesSearch(
         if (nameMatch.isNotEmpty())
             return nameMatch
 
-        val exact = ChunithmMusicAliasesTable.exact(name)
+        val exact = ChunithmMusicAliasTable.exact(name)
         if (exact.isNotEmpty())
             return exact.mapNotNull { chunithm.music(it) }
 

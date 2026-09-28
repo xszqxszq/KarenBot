@@ -112,9 +112,9 @@ class Maimai: Plugin() {
         // 数据库初始化
         transaction(database) {
             listOf(
-                QQBindTable, ProberBindTable, MaimaiMusicAliasesTable, MaimaiMusicAliasesVoteTable,
-                MaimaiSettingsTable, ArcadeTable, ArcadeGroupTable, ArcadeGroupBindTable,
-                GuessGameTable, DivingFishBindTable, RhythmGameTokens
+                QQBindTable, ProberBindTable, MaimaiMusicAliasTable, MaimaiMusicAliasVoteTable,
+                RhythmGameSettingsTable, ArcadeTable, ArcadeGroupTable, ArcadeGroupBindTable,
+                MaimaiGuessGameTable, DivingFishBindTable, RhythmGameTokens
             ).forEach { table ->
                 if (!table.exists())
                     SchemaUtils.create(table)
@@ -155,10 +155,10 @@ class Maimai: Plugin() {
             }
         }
 
-        MaimaiSettingsTable.publisher = { openId ->
+        RhythmGameSettingsTable.publisher = { openId ->
             pluginLoader.subscribes.handle(ChannelEvent(
                 bot = pluginLoader.bot,
-                channelName = MaimaiSettingsTable.CACHE_CHANNEL,
+                channelName = RhythmGameSettingsTable.CACHE_CHANNEL,
                 data = openId
             ))
         }
@@ -191,8 +191,8 @@ class Maimai: Plugin() {
      * 配置路由
      */
     suspend fun setRoute() = route("/mai") {
-        channel(MaimaiSettingsTable.CACHE_CHANNEL) { openId ->
-            MaimaiSettingsTable.clearCache(openId)
+        channel(RhythmGameSettingsTable.CACHE_CHANNEL) { openId ->
+            RhythmGameSettingsTable.clearCache(openId)
         }
     }
 
@@ -238,6 +238,6 @@ class Maimai: Plugin() {
          * 判断是否开启兼容模式
          */
         suspend fun Event.textMode() = if (this is MessageEvent)
-            MaimaiSettingsTable[sender.id, "text-mode"] == "1" else false
+            RhythmGameSettingsTable[sender.id, "text-mode"] == "1" else false
     }
 }

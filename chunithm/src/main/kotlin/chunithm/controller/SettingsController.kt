@@ -2,7 +2,7 @@ package xyz.xszq.bot.chunithm.controller
 
 import xyz.xszq.bot.chunithm.Chunithm
 import xyz.xszq.bot.chunithm.api.LXNS
-import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
+import xyz.xszq.bot.chunithm.database.RhythmGameSettingsTable
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.newLine
 import xyz.xszq.bot.reply
@@ -53,7 +53,7 @@ class SettingsController(
                 }
                 return@startsWith
             }
-            MaimaiSettingsTable[sender.id, MaimaiSettingsTable.ICON_KEY] =
+            RhythmGameSettingsTable[sender.id, RhythmGameSettingsTable.ICON_KEY] =
                 avatarId.toString()
             reply("设置头像成功。") {
                 brief("设置头像", "设置头像成功。")
@@ -95,7 +95,7 @@ class SettingsController(
                 }
                 return@startsWith
             }
-            MaimaiSettingsTable[sender.id, MaimaiSettingsTable.PLATE_KEY] =
+            RhythmGameSettingsTable[sender.id, RhythmGameSettingsTable.PLATE_KEY] =
                 plateId.toString()
             reply("设置牌子成功。") {
                 brief("设置牌子", "设置牌子成功。")
@@ -143,7 +143,7 @@ class SettingsController(
         collections()
         chunithm.route("/chu", true) {
             startsWith(listOf("默认", "设为默认")) {
-                MaimaiSettingsTable.setDefaultGame(sender.id, "chunithm")
+                RhythmGameSettingsTable.setDefaultGame(sender.id, "chunithm")
                 reply("设置成功，在不带“/mai”“/chu”命令前缀时，将默认选择使用中二节奏的相关功能")
             }
         }

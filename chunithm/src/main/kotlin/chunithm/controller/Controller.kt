@@ -10,7 +10,7 @@ import xyz.xszq.bot.chunithm.api.LXNS
 import xyz.xszq.bot.chunithm.component.ChunithmQuery
 import xyz.xszq.bot.chunithm.component.ImageParseResult
 import xyz.xszq.bot.chunithm.component.MarkdownTemplates
-import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
+import xyz.xszq.bot.chunithm.database.RhythmGameSettingsTable
 import xyz.xszq.bot.chunithm.exception.*
 import xyz.xszq.bot.chunithm.music.MusicDifficulty
 import xyz.xszq.bot.chunithm.music.MusicInfo
@@ -72,7 +72,7 @@ sealed class Controller(
                 name = "rhythm",
                 value = "chunithm",
                 defaultHandler = {
-                    MaimaiSettingsTable.defaultGame(sender.id)
+                    RhythmGameSettingsTable.defaultGame(sender.id)
                 },
                 block = block
             )

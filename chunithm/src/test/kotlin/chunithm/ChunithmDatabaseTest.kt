@@ -29,15 +29,15 @@ abstract class ChunithmDatabaseTest {
     @BeforeTest
     fun resetDatabase() {
         connectIfNeeded()
-        MaimaiSettingsTable.clearCache()
+        RhythmGameSettingsTable.clearCache()
         transaction {
             SchemaUtils.drop(
-                QQBindTable, ProberBindTable, MaimaiSettingsTable,
-                ChunithmMusicAliasesTable, ChunithmMusicAliasesVoteTable
+                QQBindTable, ProberBindTable, RhythmGameSettingsTable,
+                ChunithmMusicAliasTable, ChunithmMusicAliasVoteTable
             )
             SchemaUtils.create(
-                QQBindTable, ProberBindTable, MaimaiSettingsTable,
-                ChunithmMusicAliasesTable, ChunithmMusicAliasesVoteTable
+                QQBindTable, ProberBindTable, RhythmGameSettingsTable,
+                ChunithmMusicAliasTable, ChunithmMusicAliasVoteTable
             )
         }
     }

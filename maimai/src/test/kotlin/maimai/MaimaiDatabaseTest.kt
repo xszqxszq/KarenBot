@@ -29,19 +29,19 @@ abstract class MaimaiDatabaseTest {
     @BeforeTest
     fun resetDatabase() {
         connectIfNeeded()
-        MaimaiSettingsTable.clearCache()
+        RhythmGameSettingsTable.clearCache()
         ArcadeGroupBind.clearCache()
         transaction {
             SchemaUtils.drop(
-                GuessGameTable,
-                MaimaiMusicAliasesVoteTable,
+                MaimaiGuessGameTable,
+                MaimaiMusicAliasVoteTable,
                 ArcadeTable,
                 ArcadeGroupBindTable,
                 ArcadeGroupTable,
                 QQBindTable,
                 ProberBindTable,
-                MaimaiSettingsTable,
-                MaimaiMusicAliasesTable,
+                RhythmGameSettingsTable,
+                MaimaiMusicAliasTable,
                 DivingFishBindTable
             )
             SchemaUtils.create(
@@ -50,10 +50,10 @@ abstract class MaimaiDatabaseTest {
                 ArcadeTable,
                 QQBindTable,
                 ProberBindTable,
-                MaimaiSettingsTable,
-                MaimaiMusicAliasesTable,
-                MaimaiMusicAliasesVoteTable,
-                GuessGameTable,
+                RhythmGameSettingsTable,
+                MaimaiMusicAliasTable,
+                MaimaiMusicAliasVoteTable,
+                MaimaiGuessGameTable,
                 DivingFishBindTable
             )
         }

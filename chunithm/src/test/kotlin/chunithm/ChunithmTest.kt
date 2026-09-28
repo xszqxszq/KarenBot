@@ -5,8 +5,8 @@ import kotlinx.coroutines.test.runTest
 import xyz.xszq.bot.*
 import xyz.xszq.bot.chunithm.api.ChunithmAPI
 import xyz.xszq.bot.chunithm.component.ChunithmData
-import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
 import xyz.xszq.bot.chunithm.database.ProberBindTable
+import xyz.xszq.bot.chunithm.database.RhythmGameSettingsTable
 import xyz.xszq.bot.database.newSuspendedTransaction
 import xyz.xszq.bot.payload.AdminCheckRequest
 import xyz.xszq.bot.subscribe.Channel
@@ -33,7 +33,7 @@ class ChunithmTest : ChunithmDatabaseTest() {
             newSuspendedTransaction(db = database) {
                 ProberBindTable["test-user", "diving-fish", "username"] = username
                 ProberBindTable["test-user", "diving-fish", "id"] = divingFish.bind("test-user")
-                MaimaiSettingsTable["test-user", "prober"] = "diving-fish"
+                RhythmGameSettingsTable["test-user", "prober"] = "diving-fish"
             }
             testB50Maxscore(sandbox)
             testB50(sandbox)
@@ -141,20 +141,20 @@ class ChunithmTest : ChunithmDatabaseTest() {
         sandbox.clear()
         assertReplied(sandbox, sandbox.user() says "设置chu", "支持以下设定")
         assertReplied(sandbox, sandbox.user() says "设置头像 500", "设置头像成功")
-        assertEquals(500, MaimaiSettingsTable.settings("test-user").avatar)
+        assertEquals(500, RhythmGameSettingsTable.settings("test-user").avatar)
         assertReplied(sandbox, sandbox.user() says "设置头像 天王洲 なずな", "设置头像成功")
         assertReplied(sandbox, sandbox.user() says "设置牌子 10129", "设置牌子成功")
-        assertEquals(10129, MaimaiSettingsTable.settings("test-user").plate)
+        assertEquals(10129, RhythmGameSettingsTable.settings("test-user").plate)
         assertReplied(sandbox, sandbox.user() says "设置牌子 41011", "设置牌子成功")
-        assertEquals(41011, MaimaiSettingsTable.settings("test-user").plate)
+        assertEquals(41011, RhythmGameSettingsTable.settings("test-user").plate)
         assertReplied(sandbox, sandbox.user() says "设置头像 不存在的头像", "使用方法")
         assertReplied(sandbox, sandbox.user() says "设置牌子 不存在的牌子", "使用方法")
     }
 
     private suspend fun testInvalidCollections(sandbox: BotSandbox) {
         newSuspendedTransaction(db = database) {
-            MaimaiSettingsTable["test-user", MaimaiSettingsTable.ICON_KEY] = "999999"
-            MaimaiSettingsTable["test-user", MaimaiSettingsTable.PLATE_KEY] = "999999"
+            RhythmGameSettingsTable["test-user", RhythmGameSettingsTable.ICON_KEY] = "999999"
+            RhythmGameSettingsTable["test-user", RhythmGameSettingsTable.PLATE_KEY] = "999999"
         }
         sandbox.clear()
         assertRepliedWithImage(sandbox, sandbox.user() says "/b50")

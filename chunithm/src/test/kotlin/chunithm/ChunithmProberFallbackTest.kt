@@ -6,9 +6,9 @@ import xyz.xszq.bot.BotSandbox
 import xyz.xszq.bot.assertReplied
 import xyz.xszq.bot.assertRepliedWithImage
 import xyz.xszq.bot.chunithm.component.ChunithmData
-import xyz.xszq.bot.chunithm.database.MaimaiSettingsTable
 import xyz.xszq.bot.chunithm.database.ProberBindTable
 import xyz.xszq.bot.chunithm.database.QQBindTable
+import xyz.xszq.bot.chunithm.database.RhythmGameSettingsTable
 import xyz.xszq.bot.database.newSuspendedTransaction
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.reply
@@ -213,7 +213,7 @@ class ChunithmProberFallbackTest : ChunithmDatabaseTest() {
                 }
             }
             prefer ?.let {
-                MaimaiSettingsTable[openid, "prober"] = it
+                RhythmGameSettingsTable[openid, "prober"] = it
             }
         }
     }

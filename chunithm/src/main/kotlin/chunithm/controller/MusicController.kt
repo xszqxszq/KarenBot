@@ -10,8 +10,8 @@ import xyz.xszq.bot.chunithm.component.CosineSimilarity
 import xyz.xszq.bot.chunithm.component.CoverDescData
 import xyz.xszq.bot.chunithm.component.CoverEmbeddingGenerator
 import xyz.xszq.bot.chunithm.component.MarkdownTemplates
-import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesTable
-import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesVoteTable
+import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasTable
+import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasVoteTable
 import xyz.xszq.bot.chunithm.music.ChartInfo
 import xyz.xszq.bot.chunithm.music.MusicDifficulty
 import xyz.xszq.bot.chunithm.music.MusicInfo
@@ -211,7 +211,7 @@ class MusicController(
         endsWith(listOf("有什么别名", "有什么别名？")) { name ->
             queryByTextOrImage(name) {
                 val music = chunithm.aliases.search(it).firstOrNull() ?: return@queryByTextOrImage
-                val aliases = ChunithmMusicAliasesTable[music]
+                val aliases = ChunithmMusicAliasTable[music]
                     .filter { a -> a.first != music.name }
                     .take(40)
                     .joinToString("\n") { (alias, _) -> alias }
@@ -260,12 +260,12 @@ class MusicController(
                 reply("未找到该歌曲。")
                 return@startsWith
             }
-            val existing = ChunithmMusicAliasesTable[music, alias]
+            val existing = ChunithmMusicAliasTable[music, alias]
             if (existing == null) {
                 reply("该别名不存在。")
                 return@startsWith
             }
-            ChunithmMusicAliasesTable.remove(music, alias)
+            ChunithmMusicAliasTable.remove(music, alias)
             chunithm.aliases.delete(music.id, alias)
             reply("别名已删除。")
         }
@@ -694,21 +694,21 @@ class MusicController(
         if (alias.length >= 32) throw IllegalArgsException("别名太长！")
         val music = chunithm.aliases.search(name).firstOrNull() ?: throw NotFoundException()
         if (isAdmin()) {
-            ChunithmMusicAliasesTable.add(music, alias)
+            ChunithmMusicAliasTable.add(music, alias)
             chunithm.aliases.insert(music.id, alias)
             reply("别名已添加。")
             return
         }
-        val existing = ChunithmMusicAliasesTable[music, alias]
+        val existing = ChunithmMusicAliasTable[music, alias]
         if (existing != null) {
             if (existing >= 0)
                 throw IllegalOperationException("该别名已存在！")
-            if (ChunithmMusicAliasesVoteTable[music, alias, sender.id]) {
+            if (ChunithmMusicAliasVoteTable[music, alias, sender.id]) {
                 throw IllegalOperationException("您已经投过票啦，还需${-existing}票通过")
             }
         }
-        ChunithmMusicAliasesVoteTable.vote(music, alias, sender.id)
-        ChunithmMusicAliasesTable.vote(music, alias)
+        ChunithmMusicAliasVoteTable.vote(music, alias, sender.id)
+        ChunithmMusicAliasTable.vote(music, alias)
         val current = existing?.let { it + 1 } ?: -2
         if (existing != null) {
             if (current >= 0) {

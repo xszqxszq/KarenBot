@@ -12,7 +12,7 @@ import org.jetbrains.exposed.sql.kotlin.datetime.datetime
  * 猜歌游戏状态表
  */
 @Suppress("unused")
-object GuessGameTable: IdTable<String>() {
+object MaimaiGuessGameTable: IdTable<String>() {
     override val id = varchar("context", 32).entityId()
     val eventType = varchar("event_type", 5)
     val eventId = varchar("event_id", 256)

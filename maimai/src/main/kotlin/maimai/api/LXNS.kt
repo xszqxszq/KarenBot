@@ -17,7 +17,6 @@ import okhttp3.ConnectionPool
 import okhttp3.Protocol
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.maimai.component.MaimaiData
-import xyz.xszq.bot.maimai.database.MaimaiSettingsTable
 import xyz.xszq.bot.maimai.database.ProberBindTable
 import xyz.xszq.bot.maimai.database.QQBindTable
 import xyz.xszq.bot.maimai.exception.AuthorizationException
@@ -103,7 +102,6 @@ class LXNS(
         }
         logger.debug { "[落雪调试] initOAuth 换token成功 sender=${event.sender.id}" }
         ProberBindTable[event.sender.id, "lxns", "refresh"] = tokens.refreshToken
-        MaimaiSettingsTable[event.sender.id, "lxns-oa-refresh"] = tokens.refreshToken
         runCatching {
             val info = client.get("$apiOauth/userinfo") { setOAuth(tokens.accessToken) }
                 .body<LXNSResponse<LXNSUserInfo>>().data ?: return@runCatching
@@ -180,14 +178,12 @@ class LXNS(
                 if (response.status == HttpStatusCode.BadRequest || response.status == HttpStatusCode.Unauthorized) {
                     logger.debug { "[落雪调试] accessToken refresh失效删除 $id" }
                     ProberBindTable.delete(id, "lxns")
-                    MaimaiSettingsTable[id, "lxns-oa-refresh"] = ""
                 }
                 logger.debug { "[落雪调试] accessToken 刷新失败 $id" }
                 return@withLock null
             }
             logger.debug { "[落雪调试] accessToken 刷新成功 $id" }
             ProberBindTable[id, "lxns", "refresh"] = parsed.refreshToken
-            MaimaiSettingsTable[id, "lxns-oa-refresh"] = parsed.refreshToken
             tokenCache[id] = Pair(
                 parsed.accessToken,
                 System.currentTimeMillis() + parsed.expiresIn * 1000L

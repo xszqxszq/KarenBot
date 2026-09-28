@@ -6,7 +6,7 @@ import com.sksamuel.hoplite.addFileSource
 import korlibs.io.file.std.localCurrentDirVfs
 import xyz.xszq.bot.chunithm.api.LXNS
 import xyz.xszq.bot.chunithm.config.DesignerConfig
-import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasesTable
+import xyz.xszq.bot.chunithm.database.ChunithmMusicAliasTable
 import xyz.xszq.bot.chunithm.music.GameVersion
 import xyz.xszq.bot.chunithm.music.MusicInfo
 import xyz.xszq.bot.chunithm.payload.LXNSCharacterInfo
@@ -62,7 +62,7 @@ class ChunithmData(
             if (musics.containsKey(id)) aliases.map { alias -> id to alias }
             else emptyList()
         }
-        ChunithmMusicAliasesTable.addAll(aliases)
+        ChunithmMusicAliasTable.addAll(aliases)
 
         // 拉取称号列表并组装可用称号，网络请求失败时改读缓存
         val trophiesRaw = fetchWithCacheFallback(

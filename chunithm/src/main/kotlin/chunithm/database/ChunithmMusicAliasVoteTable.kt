@@ -1,17 +1,17 @@
-package xyz.xszq.bot.maimai.database
+package xyz.xszq.bot.chunithm.database
 
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
+import xyz.xszq.bot.chunithm.music.MusicInfo
 import xyz.xszq.bot.database.suspendedTransactionAsync
-import xyz.xszq.bot.maimai.music.MusicInfo
 
 /**
  * 歌曲别名投票记录表
  */
 @Suppress("unused")
-object MaimaiMusicAliasesVoteTable: Table() {
+object ChunithmMusicAliasVoteTable: Table() {
     val id = integer("id")
     val name = varchar("name", 128)
     val user = varchar("user", 32)
@@ -31,7 +31,7 @@ object MaimaiMusicAliasesVoteTable: Table() {
         openId: String
     ) = suspendedTransactionAsync {
         if (selectAll().where {
-                (MaimaiMusicAliasesVoteTable.id eq music.id) and (name eq alias) and (user eq openId)
+                (ChunithmMusicAliasVoteTable.id eq music.id) and (name eq alias) and (user eq openId)
             }.count() > 0)
             return@suspendedTransactionAsync
         else
@@ -56,7 +56,7 @@ object MaimaiMusicAliasesVoteTable: Table() {
         openId: String
     ) = suspendedTransactionAsync {
         selectAll().where {
-            (MaimaiMusicAliasesVoteTable.id eq music.id) and (name eq alias) and (user eq openId)
+            (ChunithmMusicAliasVoteTable.id eq music.id) and (name eq alias) and (user eq openId)
         }.count() > 0
     }.await()
 }
