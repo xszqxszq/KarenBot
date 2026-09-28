@@ -9,7 +9,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ContentPart(
     val type: String,
-    val text: String? = null,
+    val text: String ?= null,
     @SerialName("image_url")
-    val imageUrl: ImageUrl? = null,
+    val imageUrl: ImageUrl ?= null,
+    @SerialName("input_audio")
+    val inputAudio: InputAudio ?= null,
 )

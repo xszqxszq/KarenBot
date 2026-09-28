@@ -8,12 +8,15 @@ import io.ktor.http.content.*
 import io.ktor.serialization.kotlinx.json.*
 import io.mockk.every
 import io.mockk.mockk
+import korlibs.io.file.VfsFile
 import kotlinx.coroutines.test.runTest
 import xyz.xszq.bot.audio.Audio
 import xyz.xszq.bot.llm.LLMClient
 import xyz.xszq.bot.llm.LLMConfig
 import xyz.xszq.bot.llm.LLMModelConfig
 import xyz.xszq.bot.payload.llm.LLMRequest
+import xyz.xszq.bot.payload.llm.MessageContentMulti
+import xyz.xszq.bot.util.useTempFile
 import xyz.xszq.bot.util.json
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -62,6 +65,38 @@ class AudioAuditTest {
         )
 
         assertFalse(audio.audit("大家好"))
+    }
+
+    @Test
+    fun testAudioAuditSendsWavContentPart() = runTest {
+        var requestBody: String ?= null
+        val audio = audioWithClient(
+            MockEngine {
+                requestBody = (it.body as? TextContent)?.text
+                respond(
+                    content = """
+                        {"id":"1","created":1,"model":"test","choices":[{"index":0,"message":{"role":"assistant","content":"true"},"finish_reason":"stop"}]}
+                    """.trimIndent(),
+                    status = HttpStatusCode.OK,
+                    headers = jsonHeaders
+                )
+            }
+        )
+
+        useTempFile(suffix = ".wav") { wav: VfsFile ->
+            wav.writeBytes(byteArrayOf(1, 2, 3, 4))
+            assertTrue(audio.audit(wav))
+        }
+
+        val request = json.decodeFromString<LLMRequest>(requestBody ?: "")
+        val system = request.messages.first { it.role == "system" }.contentAsText() ?: ""
+        val user = request.messages.first { it.role == "user" }.content
+        val parts = (user as MessageContentMulti).parts
+        val audioPart = parts.first { it.type == "input_audio" }.inputAudio
+
+        assertTrue(system.contains("倒放"))
+        assertEquals("AQIDBA==", audioPart ?.data)
+        assertEquals("wav", audioPart ?.format)
     }
 
     private fun audioWithClient(engine: MockEngine): Audio {
