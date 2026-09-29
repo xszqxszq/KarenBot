@@ -44,9 +44,9 @@ class MusicInfo(
      * @return 封面文件
      */
     suspend fun cover(): VfsFile {
-        val cover = localCurrentDirVfs["$coverDir/$resourceId.png"]
+        val cover = localCurrentDirVfs["$coverDir/$resourceId.webp"]
         if (!cover.exists() || !cover.isFile()) {
-            return localCurrentDirVfs["$coverDir/0.png"]
+            return localCurrentDirVfs["$coverDir/0.webp"]
         }
         return cover
     }

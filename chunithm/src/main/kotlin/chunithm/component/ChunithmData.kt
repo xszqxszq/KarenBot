@@ -89,7 +89,7 @@ class ChunithmData(
 
     private fun localIds(path: String): List<Int> = File(path).listFiles()
         .orEmpty()
-        .mapNotNull { it.name.substringBefore(".png").toIntOrNull() }
+        .mapNotNull { it.name.substringBeforeLast(".").toIntOrNull() }
 
     /**
      * 从落雪拉取数据

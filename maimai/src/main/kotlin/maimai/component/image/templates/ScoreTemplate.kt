@@ -31,7 +31,7 @@ class ScoreTemplate(
         val main = template["main"]!!.modify {
             div("upper") {
                 div("header-cover") header@ {
-                    background = "$resourcePath/covers/${music.resourceId}.png"
+                    background = "$resourcePath/covers/${music.resourceId}.webp"
                     musicInfo(music)
                 }
                 if (music.genre == MusicGenre.Utage)
@@ -55,7 +55,7 @@ class ScoreTemplate(
         music: MusicInfo
     ) {
         image("cover") {
-            src = "$resourcePath/covers/${music.resourceId}.png"
+            src = "$resourcePath/covers/${music.resourceId}.webp"
         }
         div("right") {
             div("top") {

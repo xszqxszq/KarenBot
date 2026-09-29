@@ -94,7 +94,7 @@ class SettingsController(
                 it.id == icon.trim().toIntOrNull() ||
                         it.name == icon.trim() ||
                         it.filename == icon.trim() ||
-                        it.filename.substringBefore(".png") == icon.trim()
+                        it.filename.substringBeforeLast(".") == icon.trim()
             } ?: run {
                 reply(buildString {
                     appendLine("使用方法：设置头像 <id/名称>")
@@ -137,7 +137,7 @@ class SettingsController(
                         it.name == plate.trim() ||
                         Item.toSimplified(it.name) == plate.trim() ||
                         it.filename == plate.trim() ||
-                        it.filename.substringBefore(".png") == plate.trim()
+                        it.filename.substringBeforeLast(".") == plate.trim()
             } ?: run {
                 reply(buildString {
                     appendLine("使用方法：设置牌子/设置姓名框 id/名称")

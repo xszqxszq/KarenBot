@@ -273,7 +273,7 @@ class RatingTemplate(
     private fun Div.header(
         params: RatingRenderParams
     ) {
-        background = "$resourcePath/plates/${params.plate}.png"
+        background = "$resourcePath/plates/${params.plate}.webp"
         div("info/rating-line") {
             image("rating") {
                 src = "rating_${params.ratingColor}.png"
@@ -297,7 +297,7 @@ class RatingTemplate(
             text = params.nickname
         }
         image("avatar") {
-            src = "$resourcePath/avatars/${params.avatar}.png"
+            src = "$resourcePath/avatars/${params.avatar}.webp"
         }
     }
 

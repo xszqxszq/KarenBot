@@ -38,7 +38,7 @@ class ResourceManager(
     init {
         if (preloadLocal && basePath.exists() && basePath.isDirectory) {
             basePath.listFiles()?.filter {
-                it.isFile && it.name.matches(Regex(".*\\.(png|jpe?g)$", RegexOption.IGNORE_CASE))
+                it.isFile && it.name.matches(Regex(".*\\.(png|jpe?g|webp)$", RegexOption.IGNORE_CASE))
             }?.forEach { file ->
                 runCatching {
                     imageCache[file.name] = Image.makeFromEncoded(file.readBytes())

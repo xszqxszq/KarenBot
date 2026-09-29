@@ -164,7 +164,7 @@ class CourseTemplate(
         div("music-div") {
             background = "base_${chart.difficulty.name}.png"
             image("cover") {
-                src = "$resourcePath/covers/${chart.music.resourceId}.png"
+                src = "$resourcePath/covers/${chart.music.resourceId}.webp"
             }
             div("info") {
                 div("header") {

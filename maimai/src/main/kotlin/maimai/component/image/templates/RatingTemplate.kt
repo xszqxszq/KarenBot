@@ -298,7 +298,7 @@ class RatingTemplate(
     private fun Div.header(
         params: RatingRenderParams
     ) {
-        background = "$resourcePath/plates/${params.plate}.png"
+        background = "$resourcePath/plates/${params.plate}.webp"
         div("info/rating") {
             background = "rating_base_${params.ratingColor}.png"
             params.rating.toString().forEach { digit ->
@@ -309,7 +309,7 @@ class RatingTemplate(
             text = params.nickname
         }
         image("avatar") {
-            src = "$resourcePath/avatars/${params.avatar}.png"
+            src = "$resourcePath/avatars/${params.avatar}.webp"
         }
         image("course") {
             src = "dani_${params.course}.png"

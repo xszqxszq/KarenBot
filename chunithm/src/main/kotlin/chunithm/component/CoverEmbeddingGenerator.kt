@@ -7,14 +7,15 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.serialization.json.Json
+import org.jetbrains.skia.EncodedImageFormat
+import org.jetbrains.skia.Image
+import org.jetbrains.skia.Rect
+import org.jetbrains.skia.SamplingMode
+import org.jetbrains.skia.Surface
 import xyz.xszq.bot.llm.LLMClient
-import java.awt.RenderingHints
-import java.awt.image.BufferedImage
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.file.Paths
 import java.util.concurrent.atomic.AtomicInteger
-import javax.imageio.ImageIO
 
 /**
  * 封面嵌入向量与描述
@@ -28,23 +29,33 @@ object CoverEmbeddingGenerator {
     }
 
     private const val MAX_DIMENSION = 256
+    private val coverExtensions = setOf("webp", "png")
 
     private fun compressImage(file: File): ByteArray {
-        val original = ImageIO.read(file) ?: throw Exception("无法读取图片：${file.name}")
-        val (width, height) = if (original.width > MAX_DIMENSION || original.height > MAX_DIMENSION) {
-            val scale = MAX_DIMENSION.toDouble() / maxOf(original.width, original.height)
-            (original.width * scale).toInt() to (original.height * scale).toInt()
-        } else original.width to original.height
+        Image.makeFromEncoded(file.readBytes()).use { original ->
+            val (width, height) =
+                if (original.width > MAX_DIMENSION || original.height > MAX_DIMENSION) {
+                    val scale = MAX_DIMENSION.toDouble() /
+                        maxOf(original.width, original.height)
+                    (original.width * scale).toInt() to
+                        (original.height * scale).toInt()
+                } else original.width to original.height
 
-        val scaled = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
-        val g = scaled.createGraphics()
-        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR)
-        g.drawImage(original, 0, 0, width, height, null)
-        g.dispose()
-
-        val stream = ByteArrayOutputStream()
-        ImageIO.write(scaled, "jpeg", stream)
-        return stream.toByteArray()
+            Surface.makeRasterN32Premul(width, height).use { surface ->
+                surface.canvas.drawImageRect(
+                    original,
+                    Rect.makeWH(original.width.toFloat(), original.height.toFloat()),
+                    Rect.makeWH(width.toFloat(), height.toFloat()),
+                    SamplingMode.LINEAR,
+                    null,
+                    true
+                )
+                surface.makeImageSnapshot().use { snapshot ->
+                    return snapshot.encodeToData(EncodedImageFormat.JPEG, 85)!!
+                        .bytes
+                }
+            }
+        }
     }
 
     /**
@@ -67,7 +78,9 @@ object CoverEmbeddingGenerator {
             logger.error { "[ChuCoverEmbedding] 无法读取封面目录：$coverDir" }
             return
         }
-        val files = allFiles.filter { it.name.endsWith(".png") && it.isFile }
+        val files = allFiles.filter {
+            it.isFile && it.extension.lowercase() in coverExtensions
+        }
             .sortedBy { it.nameWithoutExtension.toIntOrNull() ?: Int.MAX_VALUE }
             .filter { it.nameWithoutExtension.toIntOrNull() !in existingIds }
 
@@ -142,7 +155,9 @@ object CoverEmbeddingGenerator {
             logger.error { "[ChuCoverDesc] 无法读取封面目录：$coverDir" }
             return
         }
-        val files = allFiles.filter { it.name.endsWith(".png") && it.isFile }
+        val files = allFiles.filter {
+            it.isFile && it.extension.lowercase() in coverExtensions
+        }
             .sortedBy { it.nameWithoutExtension.toIntOrNull() ?: Int.MAX_VALUE }
             .filter { file -> file.nameWithoutExtension.toIntOrNull() !in existingIds }
 
