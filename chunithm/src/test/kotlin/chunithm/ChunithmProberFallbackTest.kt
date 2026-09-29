@@ -52,6 +52,8 @@ class ChunithmProberFallbackTest : ChunithmDatabaseTest() {
             testStaleFriendCodeFailedShowsBindPrompt(sandbox, prober)
             testSongRecordSelfHeal(sandbox, prober)
             testScoreListWithoutRefreshShowsBindPrompt(sandbox, prober)
+            testRecentAvailable(sandbox, prober)
+            testRecentUnavailableShowsCrawlPrompt(sandbox, prober)
             testOtherPlayerNotFound(sandbox, prober)
         } finally {
             sandbox.cleanup()
@@ -175,6 +177,35 @@ class ChunithmProberFallbackTest : ChunithmDatabaseTest() {
         prober.reset()
         sandbox.clear()
         assertReplied(sandbox, sandbox.user(openid) says "/chu 13分数列表", BIND_PROMPT)
+    }
+
+    /**
+     * 落雪缓存了 Recent 数据时正常出图
+     */
+    private suspend fun testRecentAvailable(
+        sandbox: BotSandbox,
+        prober: MockLxnsProber
+    ) {
+        val openid = "user-recent"
+        setBindings(openid, friendCode = NEW_FRIEND_CODE, prefer = "lxns")
+        prober.reset()
+        sandbox.clear()
+        assertRepliedWithImage(sandbox, sandbox.user(openid) says "/chu r50")
+    }
+
+    /**
+     * 落雪没有 Recent 数据时提示开启增量爬取
+     */
+    private suspend fun testRecentUnavailableShowsCrawlPrompt(
+        sandbox: BotSandbox,
+        prober: MockLxnsProber
+    ) {
+        val openid = "user-recent-missing"
+        setBindings(openid, friendCode = NEW_FRIEND_CODE, prefer = "lxns")
+        prober.reset()
+        prober.recentCodes = emptySet()
+        sandbox.clear()
+        assertReplied(sandbox, sandbox.user(openid) says "/chu r50", "增量爬取")
     }
 
     /**

@@ -235,6 +235,7 @@ sealed class Controller(
                 is FilterNoResultException -> messageFilterNoResult()
                 is FilterTooManyException -> messageFilterTooMany()
                 is NoDataException -> messageNoData(e.api)
+                is RecentUnavailableException -> messageRecentUnavailable()
                 is NotSupportedException -> messageNotSupported(e.message.orEmpty())
                 is NotFoundException -> messageNotFound(e.message.orEmpty())
                 is AuthorizationException -> messageNeedAuthorization()
@@ -322,6 +323,27 @@ sealed class Controller(
                         }
                     }
                     at("切换到自动", "设置查分器 自动", enter = true)
+                }
+            }
+        }
+    }
+    /**
+     * 回复无法获取最近成绩数据的提示
+     */
+    suspend fun MessageEvent.messageRecentUnavailable() {
+        reply(buildString {
+            appendLine("该功能仅当您开启了落雪查分器的增量爬取时可用。")
+            appendLine("请将爬取谱面成绩的方式改为自动检测或增量爬取，然后重新同步再重试：")
+            appendLine("https://maimai.lxns.net/user/settings")
+        }.trim().newLine()) {
+            brief("中二节奏", "该功能仅当您开启了落雪查分器的增量爬取时可用。" +
+                    "请将爬取谱面成绩的方式改为自动检测或增量爬取，然后重新同步再重试：")
+            keyboard {
+                row {
+                    link("⚙ 前往设置", "https://maimai.lxns.net/user/settings")
+                }
+                row {
+                    at("🔄重试", text, enter = true)
                 }
             }
         }

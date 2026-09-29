@@ -19,6 +19,7 @@ import xyz.xszq.bot.chunithm.component.ChunithmData
 import xyz.xszq.bot.chunithm.database.ProberBindTable
 import xyz.xszq.bot.chunithm.database.QQBindTable
 import xyz.xszq.bot.chunithm.exception.AuthorizationException
+import xyz.xszq.bot.chunithm.exception.RecentUnavailableException
 import xyz.xszq.bot.chunithm.exception.UnknownException
 import xyz.xszq.bot.chunithm.exception.UserBindRequiredException
 import xyz.xszq.bot.chunithm.exception.UserNotFoundException
@@ -360,7 +361,7 @@ class LXNS(
             logger.debug { "[落雪调试] getPlayerRecent code=${body.code} friendCode=$friendCode" }
             val records = when (body.code) {
                 200 -> body.data
-                404, 400 -> if (user is UserQueryParams.Self) throw UserBindRequiredException() else return null
+                404, 400 -> throw RecentUnavailableException()
                 else -> throw UnknownException(body.message ?: "code ${body.code}")
             } ?: return null
             RecordsResponse(

@@ -33,6 +33,7 @@ class MockLxnsProber(
         const val DEFAULT_FRIEND_CODE = 722520985289030L
         const val DEFAULT_MUSIC_ID = 3
         const val INVALID_FRIEND_CODE = "invalid friend code"
+        const val SCORE_NOT_FOUND = "score not found"
         const val SONGS_CACHE = "lxns-songs.json"
         const val TROPHIES_CACHE = "lxns-trophies.json"
         const val CHARACTERS_CACHE = "lxns-characters.json"
@@ -60,6 +61,11 @@ class MockLxnsProber(
     var songCodes: Set<Long> = setOf(friendCode)
 
     /**
+     * Recent 接口认可的好友码
+     */
+    var recentCodes: Set<Long> = setOf(friendCode)
+
+    /**
      * OAuth 拉到的好友码，为空时换票失败
      */
     var oauthFriendCode: Long ?= friendCode
@@ -76,6 +82,7 @@ class MockLxnsProber(
         playerCodes = setOf(friendCode)
         ratingCodes = setOf(friendCode)
         songCodes = setOf(friendCode)
+        recentCodes = setOf(friendCode)
         oauthFriendCode = friendCode
         qqFriendCode = null
     }
@@ -98,7 +105,7 @@ class MockLxnsProber(
         val path = request.url.encodedPath
         val parts = path.split("/")
         val code = parts.let {
-            if (it.last() == "bests") it[it.size - 2] else it.last()
+            if (it.last() in listOf("bests", "recents")) it[it.size - 2] else it.last()
         }.toLongOrNull()
         when {
             path.endsWith("/oauth/token") -> token()
@@ -114,6 +121,11 @@ class MockLxnsProber(
             path.endsWith("/user/chunithm/player/scores") -> success(scoreArray())
             path.endsWith("/user/chunithm/player") -> oauthPlayer()
             path.contains("/player/qq/") -> qqPlayer()
+            path.endsWith("/recents") ->
+                if (code != null && code in recentCodes)
+                    success(scoreArray())
+                else
+                    failure(404, SCORE_NOT_FOUND)
             path.endsWith("/bests") && request.url.parameters["song_id"] != null ->
                 if (code != null && code in songCodes)
                     success(scoreArray())

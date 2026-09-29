@@ -20,6 +20,7 @@ import xyz.xszq.bot.maimai.component.MaimaiData
 import xyz.xszq.bot.maimai.database.ProberBindTable
 import xyz.xszq.bot.maimai.database.QQBindTable
 import xyz.xszq.bot.maimai.exception.AuthorizationException
+import xyz.xszq.bot.maimai.exception.RecentUnavailableException
 import xyz.xszq.bot.maimai.exception.UnknownException
 import xyz.xszq.bot.maimai.exception.UserBindRequiredException
 import xyz.xszq.bot.maimai.exception.UserNotFoundException
@@ -507,7 +508,7 @@ class LXNS(
             logger.debug { "[落雪调试] getPlayerRecent code=${body.code} friendCode=$friendCode" }
             val records = when (body.code) {
                 200 -> body.data
-                404, 400 -> if (user is UserQueryParams.Self) throw UserBindRequiredException() else return null
+                404, 400 -> throw RecentUnavailableException()
                 else -> throw UnknownException(body.message ?: "code ${body.code}")
             } ?: return null
             RecordsResponse(

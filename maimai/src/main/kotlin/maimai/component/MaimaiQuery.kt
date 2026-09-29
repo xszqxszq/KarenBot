@@ -36,6 +36,7 @@ class MaimaiQuery(
             UserDeniedException::class.java,
             AuthorizationException::class.java,
             NoDataException::class.java,
+            RecentUnavailableException::class.java,
             UserNotFoundException::class.java,
             NotSupportedException::class.java,
             UnknownException::class.java,
