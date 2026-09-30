@@ -8,6 +8,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import org.jetbrains.exposed.sql.Database
 import xyz.xszq.bot.event.Event
+import xyz.xszq.bot.event.GroupInteractionEvent
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.InteractionEvent
 import xyz.xszq.bot.event.MessageEvent
@@ -99,6 +100,21 @@ class BotSandbox(
         return reply
     }
 
+    fun awaitReplyContaining(
+        event: Event,
+        containsText: String,
+        timeoutMs: Long = 30_000
+    ): MessageEvent? {
+        val deadline = System.nanoTime() + timeoutMs * 1_000_000L
+        var reply: MessageEvent? = null
+        while (reply == null && System.nanoTime() < deadline) {
+            reply = replyFor(event) ?.takeIf { it.text.contains(containsText) }
+            if (reply == null)
+                Thread.sleep(100)
+        }
+        return reply
+    }
+
     fun clear() {
         replies.clear()
         replyMap.clear()
@@ -110,15 +126,30 @@ class BotSandbox(
 
     fun group(id: String = "test-group") = GroupActor(id)
 
-    suspend fun tapButton(button: String, data: String = "", id: String = "test-user"): InteractionEvent {
+    suspend fun tapButton(
+        button: String,
+        data: String = "",
+        id: String = "test-user",
+        group: String ?= null
+    ): InteractionEvent {
         val globalSeq = replySeq++
-        val event = InteractionEvent(
+        val event = if (group == null)
+            InteractionEvent(
+                bot = pluginLoader.bot,
+                eventId = "$id-$globalSeq",
+                id = "$id-i-$globalSeq",
+                data = data,
+                button = button,
+                sender = User(pluginLoader.bot, id),
+            )
+        else GroupInteractionEvent(
             bot = pluginLoader.bot,
             eventId = "$id-$globalSeq",
             id = "$id-i-$globalSeq",
             data = data,
             button = button,
-            sender = User(pluginLoader.bot, id),
+            sender = Member(pluginLoader.bot, id),
+            group = Group(pluginLoader.bot, group)
         )
         pluginLoader.manualTrigger(event)
         scope.advanceUntilIdle()

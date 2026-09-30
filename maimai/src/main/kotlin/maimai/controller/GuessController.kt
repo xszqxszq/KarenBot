@@ -2,6 +2,7 @@ package xyz.xszq.bot.maimai.controller
 
 import korlibs.io.file.VfsFile
 import kotlinx.coroutines.*
+import kotlinx.coroutines.selects.select
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -16,7 +17,11 @@ import org.jetbrains.skia.Surface
 import xyz.xszq.bot.*
 import xyz.xszq.bot.database.newSuspendedTransaction
 import xyz.xszq.bot.event.GroupMessageEvent
+import xyz.xszq.bot.event.GroupReplyAbleEvent
+import xyz.xszq.bot.event.InteractionEvent
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.event.ReplyAble
+import xyz.xszq.bot.event.UserReplyAbleEvent
 import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.Maimai.Companion.textMode
 import xyz.xszq.bot.maimai.database.GuessGameStatus
@@ -35,6 +40,7 @@ import xyz.xszq.bot.util.toDBC
 import xyz.xszq.bot.util.useTempFile
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
 
 /**
@@ -46,13 +52,17 @@ class GuessController(
 ): Controller(maimai) {
     private val hints = 6
     private val maxOpening = 8
-    private val cooldown = 10000L
+    private val pauseAt = 3
+    private val continueTimeout = 4 * 60 * 1000L
     private val hintHandler = CoroutineExceptionHandler { _, e ->
         if (e !is CancellationException)
             maimai.logger.error(e) { "[舞萌] 猜歌提示发送失败" }
     }
     private val subscribeId = ConcurrentHashMap<String, String>()
-    private val eventToReply = ConcurrentHashMap<String, MessageEvent>()
+    private val eventToReply = ConcurrentHashMap<String, ReplyAble>()
+    private val speechCount = ConcurrentHashMap<String, AtomicInteger>()
+    private val continueSignals =
+        ConcurrentHashMap<String, CompletableDeferred<Unit>>()
 
     private val jacketUrl = maimai.config.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")
 
@@ -86,6 +96,13 @@ class GuessController(
             else
                 reply("启用猜歌成功，启用请@可怜BOT发送“禁用猜歌”。")
         }
+        // 继续获取提示
+        button("guess/continue") {
+            continueSignals.remove(data) ?.let { signal ->
+                eventToReply[data] = this
+                signal.complete(Unit)
+            }
+        }
     }
     override suspend fun unload() {
         subscribeId.forEach { (_, id) ->
@@ -105,7 +122,7 @@ class GuessController(
         }
         return true
     }
-    private suspend fun MessageEvent.save(
+    private suspend fun ReplyAble.save(
         status: GuessGameStatus,
     ): Unit = newSuspendedTransaction {
         MaimaiGuessGameTable.deleteWhere {
@@ -114,12 +131,16 @@ class GuessController(
         MaimaiGuessGameTable.insert {
             it[MaimaiGuessGameTable.id] = this@save.contextId
             it[MaimaiGuessGameTable.eventType] = when (this@save) {
-                is GroupMessageEvent -> "group"
+                is GroupReplyAbleEvent -> "group"
                 else -> "c2c"
             }
             it[MaimaiGuessGameTable.eventId] = this@save.eventId
             it[MaimaiGuessGameTable.messageId] = this@save.id
-            it[MaimaiGuessGameTable.senderId] = this@save.sender.id
+            it[MaimaiGuessGameTable.senderId] = when (this@save) {
+                is MessageEvent -> this@save.sender.id
+                is InteractionEvent -> this@save.sender.id
+                else -> ""
+            }
             it[MaimaiGuessGameTable.seq] = this@save.seq
             it[MaimaiGuessGameTable.type] = when(status) {
                 is GuessGameStatus.Classical -> "classical"
@@ -137,6 +158,8 @@ class GuessController(
         }
         subscribeId.remove(contextId)
         eventToReply.remove(contextId)
+        speechCount.remove(contextId)
+        continueSignals.remove(contextId)
         MaimaiGuessGameTable.deleteWhere {
             MaimaiGuessGameTable.id eq contextId
         }
@@ -264,15 +287,33 @@ class GuessController(
         descriptions: List<String>?,
         stop: CompletableDeferred<Unit>
     ) {
+        val sent = hints - (descriptions ?.size ?: 0)
+        val speechAtStart = speechCount[contextId] ?.get() ?: 0
+        val compatible = textMode()
         descriptions ?.forEachIndexed { index, desc ->
             val hint = buildString {
                 appendLine()
                 appendLine(desc)
             }.trim()
+            // 无人发言挂起，QQ限制一条消息只能回复5次
+            val paused = !compatible && sent + index == pauseAt - 1 &&
+                (speechCount[contextId] ?.get() ?: 0) == speechAtStart
+            val signal = if (paused) CompletableDeferred<Unit>().also {
+                continueSignals[contextId] = it
+            } else null
             eventToReply[contextId] ?.let { event ->
                 event.reply(hint) {
                     brief("舞萌猜歌", hint)
                     keyboard {
+                        if (paused) {
+                            row {
+                                callback(
+                                    label = "下一条提示",
+                                    data = contextId,
+                                    id = "guess/continue"
+                                )
+                            }
+                        }
                         row { at("⬇输入答案", " ", style = RenderData.FILLED_BLUE) }
                         row { at("不玩了", "不玩了", enter = true, style = RenderData.RED) }
                     }
@@ -282,7 +323,11 @@ class GuessController(
                 music.id,
                 descriptions.subList(index + 1, descriptions.size),
             ))
-            if (stop.awaitStop(cooldown))
+            val ended = if (signal == null)
+                stop.awaitStop(cooldown)
+            else
+                !awaitContinue(signal, contextId, subscribesAt, music, stop)
+            if (ended)
                 return
         }
 
@@ -313,9 +358,54 @@ class GuessController(
         }
         if (stop.awaitStop(30000L))
             return
+        revealAnswer(contextId, subscribesAt, music, stop)
+    }
+    /**
+     * 等待玩家点击继续获取提示
+     *
+     * @param signal 继续提示信号
+     * @param contextId 会话 ID
+     * @param subscribesAt 临时订阅名称
+     * @param music 当前题目
+     * @param stop 游戏结束信号
+     * @return 是否继续发送后续提示
+     */
+    private suspend fun MessageEvent.awaitContinue(
+        signal: CompletableDeferred<Unit>,
+        contextId: String,
+        subscribesAt: String,
+        music: MusicInfo,
+        stop: CompletableDeferred<Unit>
+    ): Boolean {
+        val continued = withTimeoutOrNull(continueTimeout) {
+            select {
+                signal.onAwait { true }
+                stop.onAwait { false }
+            }
+        }
+        continueSignals.remove(contextId, signal)
+        if (continued == true)
+            return true
+        if (continued == null)
+            revealAnswer(contextId, subscribesAt, music, stop)
+        return false
+    }
+    /**
+     * 揭晓答案并结束游戏
+     *
+     * @param contextId 会话 ID
+     * @param subscribesAt 临时订阅名称
+     * @param music 当前题目
+     * @param stop 游戏结束信号
+     */
+    private suspend fun MessageEvent.revealAnswer(
+        contextId: String,
+        subscribesAt: String,
+        music: MusicInfo,
+        stop: CompletableDeferred<Unit>
+    ) {
         if (!stop.complete(Unit))
             return
-
         val hint = "很遗憾，没有人猜中哦".toPlainText() + music.infoText()
         val url = "$jacketUrl/${music.resourceId}.jpg"
         eventToReply[contextId] ?.reply(hint, guessFinished(url, hint.text))
@@ -330,6 +420,8 @@ class GuessController(
         if (contextId != this.contextId) {
             return
         }
+        speechCount.computeIfAbsent(contextId) { AtomicInteger() }
+            .incrementAndGet()
         eventToReply[contextId] = this
         val input = text.trim()
         if (input.startsWith("不玩了")) {
@@ -583,9 +675,13 @@ class GuessController(
             }
         }
     }
-    private val MessageEvent.contextId
+    private val ReplyAble.contextId
         get() = when(this) {
-            is GroupMessageEvent -> group.id
-            else -> sender.id
+            is GroupReplyAbleEvent -> group.id
+            is UserReplyAbleEvent -> user.id
         }
+    companion object {
+        // 提示间隔（毫秒）
+        internal var cooldown = 10000L
+    }
 }

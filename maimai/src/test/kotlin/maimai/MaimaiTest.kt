@@ -6,6 +6,7 @@ import xyz.xszq.bot.assertReplied
 import xyz.xszq.bot.assertRepliedAny
 import xyz.xszq.bot.assertRepliedWithImage
 import xyz.xszq.bot.database.newSuspendedTransaction
+import xyz.xszq.bot.maimai.controller.GuessController
 import xyz.xszq.bot.maimai.database.ProberBindTable
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -96,6 +97,7 @@ class MaimaiTest : MaimaiDatabaseTest() {
             testGuess(sandbox)
             testGuessOpening(sandbox)
             testGuessAdmin(sandbox)
+            testGuessContinue(sandbox)
 
             testPreview(sandbox)
         } finally {
@@ -392,5 +394,38 @@ class MaimaiTest : MaimaiDatabaseTest() {
         assertReplied(sandbox, sandbox.tapButton("admin/guess", "1,test-group"), "启用猜歌成功")
         assertRepliedAny(sandbox, sandbox.group() says "猜歌")
         assertRepliedAny(sandbox, sandbox.group() says "不玩了")
+    }
+
+    private suspend fun testGuessContinue(sandbox: BotSandbox) {
+        sandbox.clear()
+        GuessController.cooldown = 500L
+        try {
+            val start = sandbox.group() says "猜歌"
+            // 等待第三条提示
+            check(sandbox.awaitReplyContaining(start, "提示3/7") != null) {
+                "第三条提示未发送"
+            }
+            // 未点击继续时不会发送后续提示
+            val uncontinued = sandbox.awaitReplyContaining(
+                event = start,
+                containsText = "提示4/7",
+                timeoutMs = 1500
+            )
+            check(uncontinued == null) {
+                "未点击继续仍发送了第四条提示"
+            }
+            // 点击继续后改回复这条互动消息，恢复提示
+            val tapped = sandbox.tapButton(
+                button = "guess/continue",
+                data = "test-group",
+                group = "test-group"
+            )
+            check(sandbox.awaitReplyContaining(tapped, "提示4/7") != null) {
+                "点击继续后未发送第四条提示"
+            }
+            assertRepliedAny(sandbox, sandbox.group() says "不玩了")
+        } finally {
+            GuessController.cooldown = 10000L
+        }
     }
 }
