@@ -35,7 +35,7 @@ class SettingsController(
                     appendLine("\t例：设置头像 500")
                     appendLine("\t例：设置头像 天王洲 なずな")
                     appendLine()
-                    appendLine("\t头像列表：https://otmdb.cn/bot/chunithm/icons")
+                    appendLine("\t头像列表：https://docs.karenbot.cn/chunithm/icons")
                 }.trim().newLine()) {
                     brief("设置头像", buildString {
                         appendLine("使用方法：设置头像 id/名称")
@@ -46,7 +46,7 @@ class SettingsController(
                     })
                     keyboard {
                         row {
-                            link("选择头像", "https://otmdb.cn/bot/chunithm/icons")
+                            link("选择头像", "https://docs.karenbot.cn/chunithm/icons")
                             at("⚙ 设置头像", "/chu 设置头像 ")
                         }
                     }
@@ -59,7 +59,7 @@ class SettingsController(
                 brief("设置头像", "设置头像成功。")
                 keyboard {
                     row {
-                        link("选择头像", "https://otmdb.cn/bot/chunithm/icons")
+                        link("选择头像", "https://docs.karenbot.cn/chunithm/icons")
                         at("⚙ 设置头像", "/chu 设置头像 ")
                     }
                 }
@@ -77,7 +77,7 @@ class SettingsController(
                     appendLine("\t例：设置牌子 10129")
                     appendLine("\t例：设置牌子 NEEDY GIRL OVERDOSE 【1】")
                     appendLine()
-                    appendLine("\t牌子列表：https://otmdb.cn/bot/chunithm/plates")
+                    appendLine("\t牌子列表：https://docs.karenbot.cn/chunithm/plates")
                 }.trim().newLine()) {
                     brief("设置牌子", buildString {
                         appendLine("使用方法：设置牌子 id/名称")
@@ -88,7 +88,7 @@ class SettingsController(
                     })
                     keyboard {
                         row {
-                            link("选择牌子", "https://otmdb.cn/bot/chunithm/plates")
+                            link("选择牌子", "https://docs.karenbot.cn/chunithm/plates")
                             at("⚙ 设置牌子", "/chu 设置牌子 ")
                         }
                     }
@@ -101,7 +101,7 @@ class SettingsController(
                 brief("设置牌子", "设置牌子成功。")
                 keyboard {
                     row {
-                        link("选择牌子", "https://otmdb.cn/bot/chunithm/plates")
+                        link("选择牌子", "https://docs.karenbot.cn/chunithm/plates")
                         at("⚙ 设置牌子", "/chu 设置牌子 ")
                     }
                 }

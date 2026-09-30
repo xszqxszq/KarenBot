@@ -124,7 +124,7 @@ class ImageController(
                 keyboard {
                     row {
                         at("💯我也要查", "/chu " + command.trim())
-                        link("随心配", "https://otmdb.cn/bot/chunithm/combo")
+                        link("随心配", "https://docs.karenbot.cn/chunithm/combo")
                         at("🎨修改设置", "设置chu", enter = true)
                     }
                     page?.let {

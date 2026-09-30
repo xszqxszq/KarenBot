@@ -11,7 +11,7 @@ class HelpController(
 ): Controller(maimai) {
     override suspend fun setRoute() = maimai.route {
         equalsTo("mai") {
-            reply("请查看文档：https://otmdb.cn/bot/maimai") {
+            reply("请查看文档：https://docs.karenbot.cn/maimai") {
                 brief("舞萌DX", buildString {
                     appendLine("这是一个查询舞萌DX成绩及相关信息的功能。")
                     append("支持以下功能指令：")
@@ -23,7 +23,7 @@ class HelpController(
                     }
                     row {
                         at("💯Best50", "/mai b50")
-                        link("随心配50", "https://otmdb.cn/bot/maimai/combo")
+                        link("随心配50", "https://docs.karenbot.cn/maimai/combo")
                     }
                     row {
                         at("⏳完成表", "/mai 橙将完成表")
@@ -31,7 +31,7 @@ class HelpController(
                     }
                     row {
                         at("🕹️开字母", "舞萌开字母")
-                        link("更多功能...", "https://otmdb.cn/bot/maimai")
+                        link("更多功能...", "https://docs.karenbot.cn/maimai")
                     }
                 }
             }

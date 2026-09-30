@@ -91,7 +91,7 @@ class UpdateController(
                 brief("更新查分器", "请连接代理（可点击下方查看教程），然后复制上方链接至微信中打开：")
                 keyboard {
                     row {
-                        link("设置代理", "https://bot-docs.otmdb.cn/maimai/update")
+                        link("设置代理", "https://docs.karenbot.cn/maimai/update")
                     }
                 }
             }

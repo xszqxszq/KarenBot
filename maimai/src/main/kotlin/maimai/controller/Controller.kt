@@ -262,8 +262,8 @@ sealed class Controller(
         val data = WaitingEventData(this, replay = replay)
         maimai.api.oauthBindTokens[token] = data
         RhythmGameTokens.save(token, this, replay, data.expireAt)
-        val divingFishUrl = "https://bot-api.otmdb.cn/jump/diving-fish-oa/$token"
-        val lxnsUrl = "https://bot-api.otmdb.cn/jump/lxns-oa/$token"
+        val divingFishUrl = "https://api.karenbot.cn/jump/diving-fish-oa/$token"
+        val lxnsUrl = "https://api.karenbot.cn/jump/lxns-oa/$token"
         return Pair(divingFishUrl, lxnsUrl)
     }
     /**
@@ -295,7 +295,7 @@ sealed class Controller(
             appendLine()
             appendLine("水鱼查分器：$divingFishUrl")
             appendLine("落雪查分器：$lxnsUrl")
-            appendLine("如果您不知道什么是查分器，可以查看：https://bot-docs.otmdb.cn/maimai/prober")
+            appendLine("如果您不知道什么是查分器，可以查看：https://docs.karenbot.cn/maimai/prober")
         }.trim()) {
             brief("绑定查分器", when {
                 needReBind -> "因水鱼查分器要求，需要您点击下方重新绑定账号，为此带来的不便十分抱歉"
@@ -321,7 +321,7 @@ sealed class Controller(
                     }
                 } else {
                     row {
-                        link("查分器是什么？", "https://bot-docs.otmdb.cn/maimai/prober", style = RenderData.GRAY)
+                        link("查分器是什么？", "https://docs.karenbot.cn/maimai/prober", style = RenderData.GRAY)
                     }
                 }
             }
@@ -344,7 +344,7 @@ sealed class Controller(
                 brief("舞萌DX", "请前往查分器同意用户协议再进行查询：")
                 keyboard {
                     row {
-                        link("前往查分器", "https://otmdb.cn/jump/maimaidxprober")
+                        link("前往查分器", "https://maimai.diving-fish.com")
                     }
                 }
             }
@@ -373,23 +373,23 @@ sealed class Controller(
         reply(buildString {
             appendLine("您似乎尚未导入舞萌DX分数，请查看数据导入教程：")
             when (backend) {
-                is DivingFish -> appendLine("水鱼查分器：https://otmdb.cn/jump/maimaidxprober_import")
-                is LXNS -> appendLine("落雪查分器：https://otmdb.cn/jump/lxnsprober_import")
+                is DivingFish -> appendLine("水鱼查分器：https://maimai.diving-fish.com/manual/docs/category/%E5%AF%BC%E5%85%A5%E6%88%90%E7%BB%A9")
+                is LXNS -> appendLine("落雪查分器：https://maimai.lxns.net/sync")
             }
         }.trim().newLine()) {
             brief("舞萌DX", "您似乎尚未导入舞萌DX分数到${backend.name}查分器，请参考下方教程：")
             keyboard {
                 when (backend) {
                     is DivingFish -> row {
-                        link("🐟水鱼(电脑/iOS)", "https://otmdb.cn/jump/maimaidxprober_import")
+                        link("🐟水鱼(电脑/iOS)", "https://maimai.diving-fish.com/manual/docs/category/%E5%AF%BC%E5%85%A5%E6%88%90%E7%BB%A9")
                     }
                     is LXNS -> row {
-                        link("❄落雪(电脑/手机)", "https://otmdb.cn/jump/lxnsprober_import")
+                        link("❄落雪(电脑/手机)", "https://maimai.lxns.net/sync")
                     }
                 }
                 row {
                     link("\uD83E\uDDCABakapiano", "https://www.bilibili.com/video/BV1QdhM6REGX")
-                    link("🐇UsagiPass", "https://otmdb.cn/jump/maimai_prober_mobile")
+                    link("\uD83D\uDD28EasyMai", "https://www.bilibili.com/video/BV1ifMMzWErB")
                 }
                 row {
                     when (backend) {

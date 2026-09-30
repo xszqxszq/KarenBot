@@ -184,11 +184,6 @@ class RandomPlugin: Plugin() {
                     }
                     row {
                         at("再抽一个", "随机音mad", enter = true, id = "2")
-                        link(
-                            label="otaMAD⋅top",
-                            url = "https://otmdb.cn/jump/otamad_top",
-                            id = "3"
-                        )
                     }
                 }
             })

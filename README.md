@@ -12,7 +12,7 @@
 
 ## 文档
 
-[功能](https://bot-docs.otmdb.cn/features.html) [添加机器人](https://bot-docs.otmdb.cn/get-started.html)
+[功能](https://docs.karenbot.cn/features.html) [添加机器人](https://docs.karenbot.cn/get-started.html)
 
 ## 项目结构
 
@@ -41,7 +41,7 @@ Bug 或功能建议请在 [Issues](https://github.com/xszqxszq/KarenBot/issues) 
 
 ## 开发部署
 
-本项目使用 Kotlin 进行开发，您可以阅读[文档](https://bot-docs.otmdb.cn/develop/deploy.html)来进行部署。
+本项目使用 Kotlin 进行开发，您可以阅读[文档](https://docs.karenbot.cn/develop/deploy.html)来进行部署。
 
 ## 鸣谢
 

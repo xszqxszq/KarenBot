@@ -270,7 +270,7 @@ sealed class Controller(
                 brief("中二节奏", "请前往查分器同意用户协议再进行查询：")
                 keyboard {
                     row {
-                        link("前往查分器", "https://otmdb.cn/jump/maimaidxprober")
+                        link("前往查分器", "https://maimai.diving-fish.com")
                     }
                 }
             }
@@ -299,18 +299,18 @@ sealed class Controller(
         reply(buildString {
             appendLine("您似乎尚未导入中二节奏分数，请查看数据导入教程：")
             when (backend) {
-                is DivingFish -> appendLine("水鱼查分器：https://otmdb.cn/jump/maimaidxprober_import")
-                is LXNS -> appendLine("落雪查分器：https://otmdb.cn/jump/lxnsprober_import")
+                is DivingFish -> appendLine("水鱼查分器：https://maimai.diving-fish.com/manual/docs/category/%E5%AF%BC%E5%85%A5%E6%88%90%E7%BB%A9")
+                is LXNS -> appendLine("落雪查分器：https://maimai.lxns.net/sync")
             }
         }.trim().newLine()) {
             brief("中二节奏", "您似乎尚未导入中二节奏分数到${backend.name}查分器，请参考下方教程：")
             keyboard {
                 when (backend) {
                     is DivingFish -> row {
-                        link("🐟水鱼(电脑/iOS)", "https://otmdb.cn/jump/maimaidxprober_import")
+                        link("🐟水鱼(电脑/iOS)", "https://maimai.diving-fish.com/manual/docs/category/%E5%AF%BC%E5%85%A5%E6%88%90%E7%BB%A9")
                     }
                     is LXNS -> row {
-                        link("❄落雪(电脑/手机)", "https://otmdb.cn/jump/lxnsprober_import")
+                        link("❄落雪(电脑/手机)", "https://maimai.lxns.net/sync")
                     }
                 }
                 row {

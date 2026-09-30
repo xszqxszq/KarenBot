@@ -223,7 +223,7 @@ class Meme: Plugin() {
     }
     val memeKeyboard = Keyboard.create {
         row {
-            link("选择表情", "https://otmdb.cn/bot/meme/", id = "1")
+            link("选择表情", "https://docs.karenbot.cn/meme/", id = "1")
             at("⚙ 生成表情", "\n", id = "2")
         }
     }
@@ -238,7 +238,7 @@ class Meme: Plugin() {
     )
     val sekaiKeyboard = Keyboard.create {
         row {
-            link("选择表情", "https://otmdb.cn/bot/meme/pjsk", id = "1")
+            link("选择表情", "https://docs.karenbot.cn/meme/pjsk", id = "1")
             at("⚙ 生成表情", "/pjsk ", id = "2")
         }
     }

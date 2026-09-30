@@ -68,7 +68,7 @@ class Text: Plugin() {
                 line("请点击下方查看帮助：")
                 keyboard {
                     row {
-                        link("查看帮助", "https://otmdb.cn/bot/features", id = "1")
+                        link("查看帮助", "https://docs.karenbot.cn/features", id = "1")
                     }
                 }
             })

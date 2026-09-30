@@ -58,7 +58,7 @@ class ImageController(
         listOf(50, 40).forEach { total ->
             commandEndsWith(total.toString()) { (command, queryArgs) ->
                 if (command == "随心配") {
-                    reply("https://otmdb.cn/bot/maimai/combo")
+                    reply("https://docs.karenbot.cn/maimai/combo")
                     return@commandEndsWith
                 }
 
@@ -253,7 +253,7 @@ class ImageController(
                 keyboard {
                     row {
                         at("💯我也要查", "/mai " + command.trim())
-                        link("随心配", "https://otmdb.cn/bot/maimai/combo")
+                        link("随心配", "https://docs.karenbot.cn/maimai/combo")
                         at("🎨修改设置", "设置mai", enter = true)
                     }
                     page?.let {

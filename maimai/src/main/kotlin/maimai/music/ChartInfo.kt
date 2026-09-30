@@ -89,7 +89,7 @@ class ChartInfo(
         appendLine("> **总DX分:** $maxDeluxeScore")
     }), Keyboard.create {
         row {
-            link("谱面确认", "https://otmdb.cn/jump/maimai_chart?chart_id=${
+            link("谱面确认", "https://maimai.lxns.net/chart?chart_id=${
                 if (difficulty == MusicDifficulty.Utage)
                     music.resourceId + 100000
                 else

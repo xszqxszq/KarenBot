@@ -101,7 +101,7 @@ class SettingsController(
                     appendLine("\t例：设置头像 106103")
                     appendLine("\t例：设置头像 高瀬 梨緒")
                     appendLine()
-                    appendLine("\t收藏品列表：https://otmdb.cn/bot/maimai/icons")
+                    appendLine("\t收藏品列表：https://docs.karenbot.cn/maimai/icons")
                 }.trim().newLine()) {
                     brief("设置头像", buildString {
                         appendLine("使用方法：设置头像 id/名称")
@@ -112,7 +112,7 @@ class SettingsController(
                     })
                     keyboard {
                         row {
-                            link("选择头像", "https://otmdb.cn/bot/maimai/icons")
+                            link("选择头像", "https://docs.karenbot.cn/maimai/icons")
                             at("⚙ 设置头像", "/mai 设置头像 ")
                         }
                     }
@@ -125,7 +125,7 @@ class SettingsController(
                 brief("设置头像", "设置头像成功。")
                 keyboard {
                     row {
-                        link("选择头像", "https://otmdb.cn/bot/maimai/icons")
+                        link("选择头像", "https://docs.karenbot.cn/maimai/icons")
                         at("⚙ 设置头像", "/mai 设置头像 ")
                     }
                 }
@@ -145,7 +145,7 @@ class SettingsController(
                     appendLine("\t例：设置牌子 晓将")
                     appendLine("\t例：设置姓名框 7sRefちほー2")
                     appendLine()
-                    appendLine("\t牌子列表：https://otmdb.cn/bot/maimai/plates")
+                    appendLine("\t牌子列表：https://docs.karenbot.cn/maimai/plates")
                 }.trim().newLine()) {
                     brief("设置牌子", buildString {
                         appendLine("使用方法：设置牌子/设置姓名框 id/名称")
@@ -157,7 +157,7 @@ class SettingsController(
                     })
                     keyboard {
                         row {
-                            link("选择牌子", "https://otmdb.cn/bot/maimai/plates")
+                            link("选择牌子", "https://docs.karenbot.cn/maimai/plates")
                             at("⚙ 设置牌子", "/mai 设置牌子 ")
                         }
                     }
@@ -193,7 +193,7 @@ class SettingsController(
                 brief("设置牌子", "设置牌子成功。")
                 keyboard {
                     row {
-                        link("选择牌子", "https://otmdb.cn/bot/maimai/plates")
+                        link("选择牌子", "https://docs.karenbot.cn/maimai/plates")
                         at("⚙ 设置牌子", "/mai 设置牌子 ")
                     }
                 }
@@ -245,7 +245,7 @@ class SettingsController(
 
     private fun collection(type: String, id: String) = Keyboard.create {
         row {
-            link("选择$type", "https://otmdb.cn/bot/maimai/$id", id = "1")
+            link("选择$type", "https://docs.karenbot.cn/maimai/$id", id = "1")
             at("⚙ 设置$type", "/mai 设置$type ", id = "2")
         }
     }
