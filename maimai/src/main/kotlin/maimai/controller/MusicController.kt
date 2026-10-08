@@ -5,6 +5,7 @@ import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import xyz.xszq.bot.event.ChannelEvent
 import xyz.xszq.bot.event.MessageEvent
 import xyz.xszq.bot.event.ReplyAble
 import xyz.xszq.bot.exception.IllegalArgsException
@@ -23,11 +24,15 @@ import xyz.xszq.bot.maimai.music.ChartInfo
 import xyz.xszq.bot.maimai.music.MusicDifficulty
 import xyz.xszq.bot.maimai.music.MusicInfo
 import xyz.xszq.bot.maimai.query.ComboQuery
+import xyz.xszq.bot.maimai.ReportingAlias
+import xyz.xszq.bot.util.json
 import xyz.xszq.bot.maimai.query.ComboQuery.filterCharts
 import xyz.xszq.bot.maimai.query.ComboQuery.filterMusics
 import xyz.xszq.bot.maimai.query.ComboQuery.isSingleChartSelected
 import xyz.xszq.bot.message.Audio
+import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.newLine
+import xyz.xszq.bot.payload.markdown.RenderData
 import xyz.xszq.bot.plus
 import xyz.xszq.bot.reply
 import xyz.xszq.bot.subscribe.CommandNotMatchedException
@@ -66,6 +71,11 @@ class MusicController(
             val id = raw.toIntOrNull() ?: throw CommandNotMatchedException()
             val music = maimai.music(id) ?: throw CommandNotMatchedException()
             reply(music.infoText(), music.infoMD(jacketUrl))
+        }
+        // 别名举报
+        button("maimai/report-alias") {
+            val songId = data.split("\n").getOrNull(1) ?: return@button
+            replyAliasPrompt(songId, "请填写要举报的别名。")
         }
         button("maimai-id") {
             val id = data.toIntOrNull() ?: return@button
@@ -303,9 +313,27 @@ class MusicController(
                         row {
                             at("添加别名", "/mai 添加别名 id${music.id}")
                         }
+                        row {
+                            callback(
+                                label = "🚨举报别名",
+                                data = "maimai/report-alias\n${music.id}",
+                                style = RenderData.GRAY,
+                                id = "maimai/report-alias"
+                            )
+                        }
                     }
                 }
             }
+        }
+        // 举报别名
+        startsWith("举报别名", matchWord = true) { raw ->
+            val args = raw.trim().split(" ", limit = 2)
+            if (args.size < 2 || args[0].isBlank() || args[1].isBlank()) {
+                val songId = args.firstOrNull() ?: ""
+                replyAliasPrompt(songId, "请填写要举报的别名。")
+                return@startsWith
+            }
+            reportAlias(args[0], args[1].trim())
         }
         startsWith("添加别名") { raw ->
             runCatching {
@@ -788,6 +816,63 @@ class MusicController(
         return true
     }
 
+    private suspend fun ReplyAble.replyAliasPrompt(
+        songId: String,
+        hint: String
+    ) {
+        reply(Markdown.create {
+            brief("举报别名", hint)
+            keyboard {
+                row {
+                    at("📝点击输入", "/mai 举报别名 $songId ", style = RenderData.FILLED_BLUE)
+                }
+                row {
+                    at(
+                        label = "😥不方便输入",
+                        data = "/mai 举报别名 $songId ...",
+                        enter = true,
+                        style = RenderData.GRAY
+                    )
+                }
+            }
+        })
+    }
+    private suspend fun MessageEvent.reportAlias(
+        songId: String,
+        alias: String
+    ) {
+        val id = songId.toIntOrNull()
+        if (id == null) {
+            reply("歌曲ID不存在，请从歌曲别名列表中点击“举报别名”。")
+            return
+        }
+        val music = maimai.music(id)
+        if (music == null) {
+            reply("未找到该歌曲，请从歌曲别名列表中点击“举报别名”。")
+            return
+        }
+        if (alias == "..." || alias == "…") {
+            replyAliasPrompt(songId, "请填写要举报的别名：")
+            return
+        }
+        val exists = MaimaiMusicAliasTable[music].any { it.first == alias }
+        if (!exists) {
+            replyAliasPrompt(songId, "该歌曲下不存在这个别名，请重新输入：")
+            return
+        }
+        val report = ReportingAlias(
+            game = "舞萌DX",
+            songId = music.id,
+            songName = music.name,
+            alias = alias
+        )
+        maimai.pluginLoader.subscribes.handle(ChannelEvent(
+            bot = maimai.pluginLoader.bot,
+            channelName = "feedback-report",
+            data = this to json.encodeToString(report)
+        ))
+    }
+
     private suspend fun MessageEvent.addAlias(
         raw: String
     ) {
@@ -873,6 +958,7 @@ class MusicController(
         return levels to page
     }
     companion object {
+
         /**
          * 将音频转为 PCM
          *

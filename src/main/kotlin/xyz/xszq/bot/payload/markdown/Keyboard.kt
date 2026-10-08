@@ -61,11 +61,16 @@ data class Keyboard(
             )
         )
 
+        /**
+         * 回调按钮，点击后按 id 触发对应订阅
+         *
+         * id 必须与订阅声明一致，用随机值会永远匹配不上
+         */
         fun KeyboardRowBuilder.callback(
             label: String,
             data: String,
-            style: Int = RenderData.BLUE,
-            id: String = UUID.randomUUID().toString().take(8)
+            id: String,
+            style: Int = RenderData.BLUE
         ) = button(
             id = id,
             renderData = RenderData(

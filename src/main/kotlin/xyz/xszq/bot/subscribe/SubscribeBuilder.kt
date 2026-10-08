@@ -131,6 +131,18 @@ class SubscribeBuilder(
     /**
      * 无条件订阅全部消息事件
      *
+     * 指定名称时作为命令域内的兜底订阅，只在其他订阅都不处理时接管
+     *
+     * @param name 订阅名称
+     * @param block 处理逻辑
+     */
+    fun always(name: String, block: suspend MessageEvent.() -> Unit) {
+        manager.always(name, domain, block)
+    }
+
+    /**
+     * 无条件订阅全部消息事件
+     *
      * @param block 处理逻辑
      */
     fun always(block: suspend MessageEvent.() -> Unit) {

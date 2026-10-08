@@ -11,6 +11,7 @@ import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.message.Markdown
 import xyz.xszq.bot.newLine
+import xyz.xszq.bot.payload.markdown.RenderData
 import xyz.xszq.bot.reply
 import xyz.xszq.bot.text.config.TextConfig
 import xyz.xszq.bot.util.useTempFile
@@ -69,6 +70,9 @@ class Text: Plugin() {
                 keyboard {
                     row {
                         link("查看帮助", "https://docs.karenbot.cn/features", id = "1")
+                    }
+                    row {
+                        at("反馈", "/反馈", enter = true, style = RenderData.FILLED_BLUE)
                     }
                 }
             })

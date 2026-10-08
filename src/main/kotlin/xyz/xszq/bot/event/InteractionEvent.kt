@@ -19,6 +19,6 @@ open class InteractionEvent(
     open val sender: User,
     override var seq: Int = 1
 ): UserReplyAbleEvent {
-    override val user: User = sender
+    override val user: User get() = sender
     val content = "[互动,$button,$data]"
 }

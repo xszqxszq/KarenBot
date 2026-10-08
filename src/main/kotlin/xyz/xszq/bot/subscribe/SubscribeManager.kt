@@ -20,6 +20,7 @@ class SubscribeManager(
     override val coroutineContext: CoroutineContext = Job()
     private val plugins = ConcurrentHashMap<String, CopyOnWriteArrayList<Subscribe<Event>>>()
     private val temp = ConcurrentHashMap<String, Subscribe<Event>>()
+    private val named = ConcurrentHashMap<String, CopyOnWriteArrayList<Subscribe<Event>>>()
     private val orderId = AtomicLong(0)
 
     private data class TextHandler(
@@ -62,12 +63,28 @@ class SubscribeManager(
     /**
      * 添加临时的无条件订阅
      *
+     * 指定命令域时与其他文本订阅同域互斥，同一条消息只会被一个订阅处理
+     *
      * @param name 名称
+     * @param domain 所属命令域
      * @param handler 处理逻辑
      */
-    fun always(name: String, handler: suspend MessageEvent.() -> Unit) {
+    fun always(
+        name: String,
+        domain: String ?= null,
+        handler: suspend MessageEvent.() -> Unit
+    ) {
+        val subscribe = Always(handler)
+        if (domain == null) {
+            @Suppress("UNCHECKED_CAST")
+            temp[name] = subscribe as Subscribe<Event>
+            return
+        }
+        subscribe.domain = domain
+        subscribe.order = orderId.getAndIncrement()
         @Suppress("UNCHECKED_CAST")
-        temp[name] = Always(handler) as Subscribe<Event>
+        named.computeIfAbsent(name) { CopyOnWriteArrayList() }
+            .add(subscribe as Subscribe<Event>)
     }
 
     /**
@@ -77,6 +94,7 @@ class SubscribeManager(
      */
     fun stop(name: String) {
         temp.remove(name)
+        named.remove(name)
     }
 
     /**
@@ -101,7 +119,9 @@ class SubscribeManager(
 
             val prefix = explicitPrefix(event)
             val groups = linkedMapOf<String, MutableList<TextHandler>>()
-            plugins.forEach { (plugin, subscribes) ->
+            val all = plugins.mapValues { it.value.toList() } +
+                named.mapValues { it.value.toList() }
+            all.forEach { (plugin, subscribes) ->
                 subscribes.forEach { subscribe ->
                     val textSubscribe = subscribe as? TextSubscribe
                     if (textSubscribe?.domain == null) {
