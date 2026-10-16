@@ -81,6 +81,8 @@ object MarkdownTemplates {
                 val url = "$jacketUrl/${music.resourceId}_s.jpg"
                 val command = "/chu " + "${displayName ?: type} ${difficulty?.brief ?: ""}id${music.id}".trim()
                 val musicName = "${music.id}. ${music.name}"
+                    .replace("[", "［")
+                    .replace("]", "］")
                 "![preview #20px #20px]($url) ${href(command, musicName)}"
             }
 
