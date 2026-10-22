@@ -462,7 +462,12 @@ sealed class Controller(
         args: String,
         needDifficulty: Boolean
     ): Pair<MusicInfo, MusicDifficulty?>? {
-        var difficulty = if (needDifficulty) MusicDifficulty.from(args.firstOrNull() ?.toString() ?: "") else null
+        var difficulty = if (needDifficulty)
+            MusicDifficulty.entries.firstOrNull {
+                it.brief == args.firstOrNull() ?.toString()
+            }
+        else
+            null
         val name = difficulty ?.let { args.substring(1, args.length) } ?: args
         var result = maimai.aliases.search(name)
         if (difficulty != null)

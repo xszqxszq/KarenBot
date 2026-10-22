@@ -114,7 +114,7 @@ class Maimai: Plugin() {
             listOf(
                 QQBindTable, ProberBindTable, MaimaiMusicAliasTable, MaimaiMusicAliasVoteTable,
                 RhythmGameSettingsTable, ArcadeTable, ArcadeGroupTable, ArcadeGroupBindTable,
-                MaimaiGuessGameTable, DivingFishBindTable, RhythmGameTokens
+                MaimaiGuessGameTable, DivingFishBindTable, RhythmGameTokens, MaimaiPreviewSettingsTable
             ).forEach { table ->
                 if (!table.exists())
                     SchemaUtils.create(table)

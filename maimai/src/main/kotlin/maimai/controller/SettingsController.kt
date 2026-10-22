@@ -1,9 +1,14 @@
 package xyz.xszq.bot.maimai.controller
 
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.event.ReplyAble
 import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.api.DivingFish
 import xyz.xszq.bot.maimai.api.LXNS
+import xyz.xszq.bot.maimai.component.MarkdownTemplates.href
+import xyz.xszq.bot.maimai.component.MarkdownTemplates.judgeUrl
+import xyz.xszq.bot.maimai.component.MarkdownTemplates.outlineUrl
+import xyz.xszq.bot.maimai.database.MaimaiPreviewSettingsTable
 import xyz.xszq.bot.maimai.database.ProberBindTable
 import xyz.xszq.bot.maimai.database.RhythmGameSettingsTable
 import xyz.xszq.bot.maimai.music.Item
@@ -15,6 +20,7 @@ import xyz.xszq.bot.maimai.query.ComboQuery.filterMusics
 import xyz.xszq.bot.maimai.query.ComboQuery.filterRecords
 import xyz.xszq.bot.newLine
 import xyz.xszq.bot.payload.markdown.Keyboard
+import xyz.xszq.bot.payload.markdown.RenderData
 import xyz.xszq.bot.reply
 
 /**
@@ -24,6 +30,23 @@ import xyz.xszq.bot.reply
 class SettingsController(
     override val maimai: Maimai
 ): Controller(maimai) {
+    private val judgeStyleNames = listOf(
+        "1-A", "1-B", "1-C", "1-D", "1-E",
+        "2-A", "2-B", "2-C", "2-D", "2-E", "2-F",
+        "3-B", "3-C", "3-D", "4-E"
+    )
+    private val outlineStyleNames = listOf(
+        "无", "点", "简洁", "感应区", "maimai", "GreeN", "ORANGE", "PiNK",
+        "MURASAKi", "MiLK", "FiNALE", "DX", "Splash", "UNiVERSE", "FESTiVAL", "BUDDiES", "PRiSM"
+    )
+    private val outlineStyleEnumNames = listOf(
+        "Hide", "Dot", "Simple", "Sensor", "maimai", "GreeN", "ORANGE", "PiNK",
+        "MURASAKi", "MiLK", "FiNALE", "DX", "Splash", "UNiVERSE", "FESTiVAL", "BUDDiES", "PRiSM"
+    )
+    private val tapStyleNames = listOf("默认", "经典", "实心", "砖块")
+    private val holdStyleNames = listOf("默认", "经典")
+    private val slideStyleNames = listOf("默认", "经典")
+
     private suspend fun route() = rhythm {
         startsWith(listOf("unbind", "解绑")) { _ ->
             ProberBindTable.delete(sender.id)
@@ -68,6 +91,15 @@ class SettingsController(
                 return@startsWith
             RhythmGameSettingsTable[sender.id, "prober"] = "lxns"
             reply("设置查分器成功。")
+        }
+        startsWith("设置谱面确认") { arg ->
+            maimaiPreviewSettings(sender.id, arg.trim())
+        }
+        button("maimai/preview-menu") {
+            maimaiPreviewSubmenu(sender.id, data)
+        }
+        button("maimai/preview-set") {
+            maimaiPreviewApply(sender.id, data)
         }
         startsWith("兼容模式") { arg ->
             when {
@@ -234,6 +266,7 @@ class SettingsController(
     }
 
     override suspend fun setRoute() {
+        MaimaiPreviewSettingsTable.load()
         route()
         maimai.route("/mai", true) {
             startsWith(listOf("默认", "设为默认")) {
@@ -241,6 +274,224 @@ class SettingsController(
                 reply("设置成功，在不带“/mai”“/chu”命令前缀时，将默认选择使用舞萌DX的相关功能")
             }
         }
+    }
+
+    private suspend fun ReplyAble.maimaiPreviewSettings(openId: String, argument: String) {
+        val current = MaimaiPreviewSettingsTable.settings(openId)
+        if (argument.isNotEmpty()) {
+            val updated = parsePreviewArgument(argument, current)
+            if (updated == null) {
+                reply("无法识别该参数，发送「设置谱面确认」查看当前数值。")
+                return
+            }
+            MaimaiPreviewSettingsTable.put(openId, updated)
+            reply("设置成功。")
+            return
+        }
+        reply(buildString {
+            appendLine("请使用“/兼容模式 禁用”关闭兼容模式来修改设置。")
+        }.trim().newLine()) {
+            brief("谱面预览设置", "请点击按钮来修改设置：")
+            keyboard {
+                row {
+                    at("音符流速 (${current.noteSpeed})", "/mai 设置谱面确认 流速 ", enter = false)
+                    at("Touch 流速 (${current.touchSpeed})", "/mai 设置谱面确认 Touch ", enter = false)
+                }
+                row {
+                    at("星星时间 (${formatSlideSpeed(current.slideSpeed)})", "/mai 设置谱面确认 星星时间 ", enter = false)
+                    callback("星星头 (${starTypeName(current.starType)})", "menu:star", "maimai/preview-menu")
+                }
+                row {
+                    callback("判定样式 (${judgeStyleName(current.judgeStyle)})", "menu:judge", "maimai/preview-menu")
+                    callback("音符样式 (${noteStyleName(current.tapStyle)})", "menu:note", "maimai/preview-menu")
+                }
+                row {
+                    callback("边框样式 (${outlineStyleName(current.outlineStyle)})", "menu:outline", "maimai/preview-menu")
+                    at("背景亮度 (${current.brightness}%)", "/mai 设置谱面确认 亮度 ", enter = false)
+                }
+            }
+        }
+    }
+
+    private suspend fun ReplyAble.maimaiPreviewSubmenu(openId: String, menu: String) {
+        val current = MaimaiPreviewSettingsTable.settings(openId)
+        when (menu) {
+            "menu:slide" -> reply("星星时间") {
+                brief("星星时间", "当前 ${formatSlideSpeed(current.slideSpeed)}")
+                keyboard {
+                    for (start in 0..20 step 5) {
+                        row {
+                            for (index in start until minOf(start + 5, 21)) {
+                                callback(
+                                    formatSlideSpeed(index),
+                                    "set:slide:$index",
+                                    "maimai/preview-set",
+                                    style = if (index == current.slideSpeed)
+                                        RenderData.FILLED_BLUE
+                                    else
+                                        RenderData.BLUE
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            "menu:star" -> reply("星星头颜色") {
+                brief("星星头颜色", "当前 ${starTypeName(current.starType)}")
+                keyboard {
+                    row {
+                        callback(
+                            "蓝", "set:star:0", "maimai/preview-set",
+                            style = if (current.starType == 0) RenderData.FILLED_BLUE else RenderData.BLUE
+                        )
+                        callback(
+                            "粉", "set:star:1", "maimai/preview-set",
+                            style = if (current.starType == 1) RenderData.FILLED_BLUE else RenderData.BLUE
+                        )
+                    }
+                }
+            }
+            "menu:judge" -> reply("判定样式") {
+                line(bold("判定样式"))
+                line()
+                line("| 名称 | 说明 |")
+                line("| --- | --- |")
+                judgeStyleNames.forEachIndexed { index, name ->
+                    val label = if (index == current.judgeStyle) bold(name) else name
+                    line(
+                        "| ${href("/mai 设置谱面确认 判定 $name", label)} | " +
+                            "![preview #78px #29px]($judgeUrl/$name.png) |"
+                    )
+                }
+            }
+            "menu:outline" -> reply("边框样式") {
+                line(bold("边框样式"))
+                line()
+                line("| 名称 | 说明 |")
+                line("| --- | --- |")
+                outlineStyleNames.forEachIndexed { index, name ->
+                    val label = if (index == current.outlineStyle) bold(name) else name
+                    line(
+                        "| ${href("/mai 设置谱面确认 边框 $name", label)} | " +
+                            "![preview #78px #29px]($outlineUrl/${outlineStyleEnumNames[index]}.png) |"
+                    )
+                }
+            }
+            "menu:note" -> reply("音符样式") {
+                line(bold("音符样式"))
+                line()
+                line("| 类型 | 样式 |")
+                line("| --- | --- |")
+                line("| Tap | ${tapStyleNames.mapIndexed { index, name ->
+                    val label = if (index == current.tapStyle) bold(name) else name
+                    href("/mai 设置谱面确认 Tap $name", label)
+                }.joinToString("　")} |")
+                line("| Hold | ${holdStyleNames.mapIndexed { index, name ->
+                    val label = if (index == current.holdStyle) bold(name) else name
+                    href("/mai 设置谱面确认 Hold $name", label)
+                }.joinToString("　")} |")
+                line("| Slide | ${slideStyleNames.mapIndexed { index, name ->
+                    val label = if (index == current.slideStyle) bold(name) else name
+                    href("/mai 设置谱面确认 Slide $name", label)
+                }.joinToString("　")} |")
+            }
+            else -> reply("该项暂未开放。")
+        }
+    }
+
+    private fun formatSlideSpeed(index: Int): String =
+        String.format("%.1f", (10 - index) * 0.1f)
+
+    private fun parsePreviewArgument(argument: String, current: MaimaiPreviewSettingsTable.Settings):
+        MaimaiPreviewSettingsTable.Settings? {
+        val parts = argument.split(" ", limit = 2)
+        if (parts.size != 2) return null
+        val key = parts[0].trim()
+        val raw = parts[1].trim()
+        return when (key) {
+            "流速" -> raw.toFloatOrNull() ?.takeIf { it in 1.0f..10.0f }
+                ?.let { current.copy(noteSpeed = it) }
+            "Touch" -> raw.toFloatOrNull() ?.takeIf { it in 1.0f..10.0f }
+                ?.let { current.copy(touchSpeed = it) }
+            "亮度" -> {
+                val number = raw.removeSuffix("%").toFloatOrNull() ?: return null
+                val value = if (number <= 1.0f) (number * 100).toInt() else number.toInt()
+                if (value in 0..100) current.copy(brightness = value) else null
+            }
+            "星星时间" -> raw.toFloatOrNull() ?.takeIf { it in -1.0f..1.0f }
+                ?.let { current.copy(slideSpeed = Math.round(10 - it * 10).toInt()) }
+            "判定" -> judgeStyleIndexOf(raw) ?.let { current.copy(judgeStyle = it) }
+            "边框" -> outlineStyleIndexOf(raw) ?.let { current.copy(outlineStyle = it) }
+            "Tap" -> tapStyleIndexOf(raw) ?.let { current.copy(tapStyle = it) }
+            "Hold" -> holdStyleIndexOf(raw) ?.let { current.copy(holdStyle = it) }
+            "Slide" -> slideStyleIndexOf(raw) ?.let { current.copy(slideStyle = it) }
+            else -> null
+        }
+    }
+
+    private fun judgeStyleName(index: Int) =
+        if (index in judgeStyleNames.indices) judgeStyleNames[index] else judgeStyleNames[0]
+
+    private fun starTypeName(value: Int) = if (value == 0) "蓝" else "粉"
+
+    private fun noteStyleName(value: Int) = tapStyleName(value)
+
+    private fun tapStyleName(index: Int) =
+        if (index in tapStyleNames.indices) tapStyleNames[index] else tapStyleNames[0]
+
+    private fun tapStyleIndexOf(name: String): Int? {
+        val index = tapStyleNames.indexOfFirst { it.equals(name, ignoreCase = true) }
+        return if (index >= 0) index else null
+    }
+
+    private fun holdStyleIndexOf(name: String): Int? {
+        val index = holdStyleNames.indexOfFirst { it.equals(name, ignoreCase = true) }
+        return if (index >= 0) index else null
+    }
+
+    private fun slideStyleIndexOf(name: String): Int? {
+        val index = slideStyleNames.indexOfFirst { it.equals(name, ignoreCase = true) }
+        return if (index >= 0) index else null
+    }
+
+    private fun judgeStyleIndexOf(name: String): Int? {
+        val index = judgeStyleNames.indexOfFirst { it.equals(name, ignoreCase = true) }
+        if (index >= 0) return index
+        val normalized = name.replace("Type", "").replace("-", "").lowercase()
+        val aliasIndex = judgeStyleNames.indexOfFirst {
+            it.replace("-", "").lowercase() == normalized
+        }
+        return if (aliasIndex >= 0) aliasIndex else null
+    }
+
+    private fun outlineStyleName(index: Int) =
+        if (index in outlineStyleNames.indices) outlineStyleNames[index] else outlineStyleNames[0]
+
+    private fun outlineStyleIndexOf(name: String): Int? {
+        val index = outlineStyleNames.indexOfFirst { it.equals(name, ignoreCase = true) }
+        if (index >= 0) return index
+        val enumIndex = outlineStyleEnumNames.indexOfFirst { it.equals(name, ignoreCase = true) }
+        return if (enumIndex >= 0) enumIndex else null
+    }
+
+    private suspend fun ReplyAble.maimaiPreviewApply(openId: String, payload: String) {
+        val parts = payload.split(":")
+        if (parts.size != 3) return
+        val value = parts[2].toIntOrNull() ?: return
+        val current = MaimaiPreviewSettingsTable.settings(openId)
+        val updated = when (parts[1]) {
+            "slide" -> current.copy(slideSpeed = value)
+            "star" -> current.copy(starType = value)
+            "note" -> current.copy(tapStyle = value, holdStyle = value, slideStyle = value)
+            "tap" -> current.copy(tapStyle = value)
+            "hold" -> current.copy(holdStyle = value)
+            "noteSlide" -> current.copy(slideStyle = value)
+            "judge" -> current.copy(judgeStyle = value)
+            "outline" -> current.copy(outlineStyle = value)
+            else -> return
+        }
+        MaimaiPreviewSettingsTable.put(openId, updated)
+        reply("设置成功。")
     }
 
     private fun collection(type: String, id: String) = Keyboard.create {

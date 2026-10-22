@@ -89,17 +89,11 @@ class ChartInfo(
         appendLine("> **总DX分:** $maxDeluxeScore")
     }), Keyboard.create {
         row {
-            link("谱面确认", "https://maimai.lxns.net/chart?chart_id=${
-                if (difficulty == MusicDifficulty.Utage)
-                    music.resourceId + 100000
-                else
-                    music.resourceId
-            }&difficulty=${
-                if (difficulty == MusicDifficulty.Utage)
-                    0
-                else
-                    difficulty.value
-            }")
+            callback(
+                label = "谱面确认",
+                data = "${music.id}\n${difficulty.value}",
+                id = "maimai/preview"
+            )
         }
     })
 }

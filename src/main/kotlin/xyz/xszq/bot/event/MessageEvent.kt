@@ -17,7 +17,7 @@ open class MessageEvent(
     override var seq: Int = 1,
     open val reference: MessageChain ?= null
 ): UserReplyAbleEvent {
-    override val user: User = sender
+    override val user: User get() = sender
     val content get() = message.content
     val text get() = message.text
 }

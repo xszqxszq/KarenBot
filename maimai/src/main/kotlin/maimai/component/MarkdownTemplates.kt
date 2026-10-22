@@ -17,6 +17,8 @@ object MarkdownTemplates {
      * 封面图路径
      */
     lateinit var jacketUrl: String
+    lateinit var judgeUrl: String
+    lateinit var outlineUrl: String
 
     /**
      * 初始化
@@ -25,6 +27,9 @@ object MarkdownTemplates {
      */
     fun init(maimai: Maimai) {
         jacketUrl = maimai.config.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")
+        judgeUrl = maimai.config.tokens["assets-judge"] ?: throw Exception("assets-judge missing")
+        outlineUrl = maimai.config.tokens["assets-outline"]
+            ?: throw Exception("assets-outline missing")
     }
 
     /**

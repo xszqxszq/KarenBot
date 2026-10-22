@@ -1,13 +1,16 @@
 package xyz.xszq.bot.maimai.controller
 
+import io.ktor.client.*
+import io.ktor.client.request.*
+import io.ktor.http.*
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.localCurrentDirVfs
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import xyz.xszq.bot.event.ChannelEvent
-import xyz.xszq.bot.event.MessageEvent
-import xyz.xszq.bot.event.ReplyAble
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+import xyz.xszq.bot.event.*
 import xyz.xszq.bot.exception.IllegalArgsException
 import xyz.xszq.bot.exception.IllegalOperationException
 import xyz.xszq.bot.exception.NeedHelpException
@@ -16,30 +19,32 @@ import xyz.xszq.bot.ffmpeg.FFMpegFileType
 import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.Maimai.Companion.textMode
+import xyz.xszq.bot.maimai.ReportingAlias
 import xyz.xszq.bot.maimai.component.*
 import xyz.xszq.bot.maimai.component.MarkdownTemplates.Templates.selectMusic
 import xyz.xszq.bot.maimai.database.MaimaiMusicAliasTable
 import xyz.xszq.bot.maimai.database.MaimaiMusicAliasVoteTable
+import xyz.xszq.bot.maimai.database.MaimaiPreviewSettingsTable
 import xyz.xszq.bot.maimai.music.ChartInfo
 import xyz.xszq.bot.maimai.music.MusicDifficulty
 import xyz.xszq.bot.maimai.music.MusicInfo
 import xyz.xszq.bot.maimai.query.ComboQuery
-import xyz.xszq.bot.maimai.ReportingAlias
-import xyz.xszq.bot.util.json
 import xyz.xszq.bot.maimai.query.ComboQuery.filterCharts
 import xyz.xszq.bot.maimai.query.ComboQuery.filterMusics
 import xyz.xszq.bot.maimai.query.ComboQuery.isSingleChartSelected
-import xyz.xszq.bot.message.Audio
-import xyz.xszq.bot.message.Markdown
+import xyz.xszq.bot.message.*
 import xyz.xszq.bot.newLine
 import xyz.xszq.bot.payload.markdown.RenderData
 import xyz.xszq.bot.plus
 import xyz.xszq.bot.reply
 import xyz.xszq.bot.subscribe.CommandNotMatchedException
 import xyz.xszq.bot.toPlainText
+import xyz.xszq.bot.util.json
 import xyz.xszq.bot.util.pagination
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 
 /**
@@ -50,6 +55,7 @@ class MusicController(
     override val maimai: Maimai
 ): Controller(maimai) {
     private lateinit var aliasAudit: AliasAudit
+    private val previewClient = HttpClient()
     private val previewDir = "${maimai.dataPath}/preview/"
     private val notFound = "未查找到相关的歌曲，请检查拼写是否有误。"
 
@@ -57,6 +63,10 @@ class MusicController(
     private val maxResultsLong = 40
 
     private val jacketUrl = maimai.config.tokens["assets-jacket"] ?: throw Exception("assets-jacket missing")
+    private val previewServer = maimai.config.tokens["preview-server"]
+        ?: throw Exception("preview-server missing")
+    private val previewCallback = maimai.config.tokens["preview-callback"]
+        ?: throw Exception("preview-callback missing")
 
     private var coverEmbeddings: Map<Int, FloatArray>? = null
     private var coverDescriptions: Map<Int, CoverDescData>? = null
@@ -412,6 +422,42 @@ class MusicController(
             }
         }
 
+        // 谱面预览
+        startsWith(listOf("谱面预览", "谱面确认")) { raw ->
+            if (raw.isBlank()) {
+                val help = buildString {
+                    appendLine("该功能可以获取指定歌曲的谱面确认。")
+                    appendLine("使用方法：谱面确认 (难度)id/名称/别称")
+                    appendLine("\t例：谱面确认 海底谭")
+                    appendLine("\t例：谱面确认 白xx")
+                }.trim()
+                reply(help.newLine()) {
+                    brief("舞萌DX", help)
+                    keyboard {
+                        row { at("⬇试一试", "/mai 谱面确认 海底谭") }
+                    }
+                }
+                return@startsWith
+            }
+            runCatching {
+                val (music, difficulty) = selectMusic("谱面确认", raw.trim(), true)
+                    ?: return@runCatching
+                val target = difficulty ?: MusicDifficulty.Master
+                music.charts.getOrNull(target.value)
+                    ?: throw NotFoundException("该歌曲没有可预览的谱面")
+                generatePreview(music.id, target.value)
+            }.onFailure { e ->
+                handleError(this, e, null)
+            }
+        }
+
+        button("maimai/preview") {
+            val args = data.split("\n")
+            val musicId = args.getOrNull(0)?.toIntOrNull() ?: return@button
+            val difficulty = args.getOrNull(1)?.toIntOrNull() ?: return@button
+            generatePreview(musicId, difficulty)
+        }
+
         startsWith("生成封面embedding") {
             if (!isAdmin()) {
                 return@startsWith
@@ -483,6 +529,72 @@ class MusicController(
     val dailyOps = listOf(
         "推分", "下埋", "越级", "拼机", "单刷", "练底力", "练手法", "抓准度", "抓绝赞", "收歌", "堵门", "夜勤"
     )
+
+    private val previewCooldowns = ConcurrentHashMap<String, Long>()
+    private val previewCooldownWarned = ConcurrentHashMap<String, Boolean>()
+
+    private suspend fun UserReplyAbleEvent.generatePreview(
+        musicId: Int,
+        difficulty: Int
+    ) {
+        val groupOpenid = (this as? GroupEvent) ?.group ?.id
+        val userOpenid = this.user.id
+        val now = System.currentTimeMillis()
+        val last = previewCooldowns[userOpenid]
+        if (last != null) {
+            if (now - last < PREVIEW_COOLDOWN_MS) {
+                if (previewCooldownWarned.putIfAbsent(userOpenid, true) == null) {
+                    reply("您获取谱面确认的速度太快了，请耐心等待一分钟……")
+                }
+                return
+            }
+        }
+        previewCooldowns[userOpenid] = now
+        previewCooldownWarned.remove(userOpenid)
+        val jobId = "mai-" + UUID.randomUUID().toString().take(8)
+        maimai.api.previewEvents[jobId] = this
+        val payload = buildJsonObject {
+            put("music_id", musicId)
+            put("difficulty", difficulty)
+            put("job_id", jobId)
+            put("upload", true)
+            groupOpenid ?.let { put("group_openid", it) }
+            put("user_openid", userOpenid)
+            put("msg_id", id)
+            put("event_id", eventId)
+            put("callback_url", previewCallback)
+            val settings = MaimaiPreviewSettingsTable.settings(userOpenid)
+            put("settings", buildJsonObject {
+                put("note_speed", settings.noteSpeed.toDouble())
+                put("touch_speed", settings.touchSpeed.toDouble())
+                put("tap_design", settings.tapStyle)
+                put("hold_design", settings.holdStyle)
+                put("slide_design", settings.slideStyle)
+                put("star_type", settings.starType)
+                put("slide_speed", settings.slideSpeed)
+                put("outline", settings.outlineStyle)
+                put("judge_shown", settings.judgeStyle)
+                put("brightness", settings.brightness)
+            })
+        }
+        reply(MessageChain(listOf(
+            Image(localCurrentDirVfs["data/maimai/preview/rendering.gif"]),
+            PlainText("正在渲染中……")
+        )))
+        maimai.scope.launch {
+            runCatching {
+                val response = previewClient.post("$previewServer/v1/jobs") {
+                    contentType(ContentType.Application.Json)
+                    setBody(payload.toString())
+                }
+                if (response.status == HttpStatusCode.TooManyRequests) {
+                    previewCooldowns.remove(userOpenid)
+                    previewCooldownWarned.remove(userOpenid)
+                    reply("生成失败，请稍后再试。")
+                }
+            }
+        }
+    }
 
     private suspend fun ReplyAble.showMusics(
         type: String,
@@ -958,6 +1070,7 @@ class MusicController(
         return levels to page
     }
     companion object {
+        private const val PREVIEW_COOLDOWN_MS = 60_000L
 
         /**
          * 将音频转为 PCM

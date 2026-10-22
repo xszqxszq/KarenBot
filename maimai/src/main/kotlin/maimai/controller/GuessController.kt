@@ -16,12 +16,7 @@ import org.jetbrains.skia.Rect
 import org.jetbrains.skia.Surface
 import xyz.xszq.bot.*
 import xyz.xszq.bot.database.newSuspendedTransaction
-import xyz.xszq.bot.event.GroupMessageEvent
-import xyz.xszq.bot.event.GroupReplyAbleEvent
-import xyz.xszq.bot.event.InteractionEvent
-import xyz.xszq.bot.event.MessageEvent
-import xyz.xszq.bot.event.ReplyAble
-import xyz.xszq.bot.event.UserReplyAbleEvent
+import xyz.xszq.bot.event.*
 import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.Maimai.Companion.textMode
 import xyz.xszq.bot.maimai.database.GuessGameStatus

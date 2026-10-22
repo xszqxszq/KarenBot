@@ -12,22 +12,31 @@ import io.ktor.server.routing.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import xyz.xszq.bot.Group
 import xyz.xszq.bot.Member
 import xyz.xszq.bot.User
 import xyz.xszq.bot.event.ChannelEvent
 import xyz.xszq.bot.event.GroupMessageEvent
 import xyz.xszq.bot.event.MessageEvent
+import xyz.xszq.bot.event.ReplyAble
 import xyz.xszq.bot.exception.NotFoundException
 import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.api.DivingFish
 import xyz.xszq.bot.maimai.api.LXNS
 import xyz.xszq.bot.maimai.component.WaitingEventData
 import xyz.xszq.bot.maimai.database.*
+import korlibs.io.file.std.localCurrentDirVfs
+import xyz.xszq.bot.message.Image
 import xyz.xszq.bot.message.MessageChain
+import xyz.xszq.bot.message.PlainText
 import xyz.xszq.bot.reply
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * API 服务
@@ -38,6 +47,7 @@ class ApiController(
     lateinit var server: EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration>
     val oauthBindTokens = ConcurrentHashMap<String, WaitingEventData>()
     val updateTokens = ConcurrentHashMap<String, WaitingEventData>()
+    val previewEvents = ConcurrentHashMap<String, ReplyAble>()
     var proxyIP: String = ""
     var proxyServer: String = ""
     var proxyPort: Int = 0
@@ -59,7 +69,7 @@ class ApiController(
         maimai.scope.launch {
             restoreOAuthBindTokens()
             while (isActive) {
-                delay(60_000L)
+                delay(60_000L.milliseconds)
                 val now = System.currentTimeMillis()
                 oauthBindTokens.entries.removeIf { it.value.expireAt < now }
                 updateTokens.entries.removeIf { it.value.expireAt < now }
@@ -115,6 +125,31 @@ class ApiController(
             }
         }
         routing {
+            // 谱面预览进度
+            post("/preview/callback") {
+                val body = call.receiveText()
+                maimai.logger.info { "[舞萌] 谱面预览回调 $body" }
+                call.respondText("ok")
+
+                val fields = runCatching {
+                    Json.parseToJsonElement(body).jsonObject
+                }.getOrNull() ?: return@post
+                val jobId = fields["job_id"] ?.jsonPrimitive ?.contentOrNull ?: return@post
+
+                when (fields["stage"] ?.jsonPrimitive ?.contentOrNull) {
+                    "rendered" -> previewEvents.remove(jobId) ?.let { event ->
+                        maimai.scope.launch {
+                            runCatching {
+                                event.reply(MessageChain(listOf(
+                                    Image(localCurrentDirVfs["data/maimai/preview/uploading.gif"]),
+                                    PlainText("正在上传中……")
+                                )))
+                            }
+                        }
+                    }
+                    "upload_failed", "failed" -> previewEvents.remove(jobId)
+                }
+            }
             get("/diving-fish/device-bind/{token}") {
                 val token = call.parameters["token"] ?: run {
                     call.respondText("Token不存在", status = HttpStatusCode.BadRequest)
