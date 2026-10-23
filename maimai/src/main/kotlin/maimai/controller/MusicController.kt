@@ -19,7 +19,6 @@ import xyz.xszq.bot.ffmpeg.FFMpegFileType
 import xyz.xszq.bot.ffmpeg.FFMpegTask
 import xyz.xszq.bot.maimai.Maimai
 import xyz.xszq.bot.maimai.Maimai.Companion.textMode
-import xyz.xszq.bot.maimai.ReportingAlias
 import xyz.xszq.bot.maimai.component.*
 import xyz.xszq.bot.maimai.component.MarkdownTemplates.Templates.selectMusic
 import xyz.xszq.bot.maimai.database.MaimaiMusicAliasTable
@@ -28,6 +27,7 @@ import xyz.xszq.bot.maimai.database.MaimaiPreviewSettingsTable
 import xyz.xszq.bot.maimai.music.ChartInfo
 import xyz.xszq.bot.maimai.music.MusicDifficulty
 import xyz.xszq.bot.maimai.music.MusicInfo
+import xyz.xszq.bot.maimai.payload.ReportingAlias
 import xyz.xszq.bot.maimai.query.ComboQuery
 import xyz.xszq.bot.maimai.query.ComboQuery.filterCharts
 import xyz.xszq.bot.maimai.query.ComboQuery.filterMusics

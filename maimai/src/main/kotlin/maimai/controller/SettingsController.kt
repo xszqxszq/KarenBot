@@ -258,6 +258,9 @@ class SettingsController(
                     row {
                         at("🔄自动选择查分器", "设置查分器 自动", enter = true)
                     }
+                    row {
+                        at("▶️谱面确认设置", "/mai 设置谱面确认", enter = true)
+                    }
                 }
             }
         }
