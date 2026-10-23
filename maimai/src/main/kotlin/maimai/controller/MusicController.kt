@@ -434,7 +434,10 @@ class MusicController(
                 reply(help.newLine()) {
                     brief("舞萌DX", help)
                     keyboard {
-                        row { at("⬇试一试", "/mai 谱面确认 海底谭") }
+                        row {
+                            at("⬇试一试", "/mai 谱面确认 海底谭")
+                            at("⚙️设置", "/mai 设置谱面确认", enter = true)
+                        }
                     }
                 }
                 return@startsWith

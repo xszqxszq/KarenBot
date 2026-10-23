@@ -293,9 +293,9 @@ class SettingsController(
             return
         }
         reply(buildString {
-            appendLine("请使用“/兼容模式 禁用”关闭兼容模式来修改设置。")
+            appendLine("请使用“/兼容模式 禁用”关闭兼容模式之后再修改设置。")
         }.trim().newLine()) {
-            brief("谱面预览设置", "请点击按钮来修改设置：")
+            brief("谱面预览设置", "以下是「谱面确认」命令的选项设置，请点击按钮来修改：")
             keyboard {
                 row {
                     at("音符流速 (${current.noteSpeed})", "/mai 设置谱面确认 流速 ", enter = false)
