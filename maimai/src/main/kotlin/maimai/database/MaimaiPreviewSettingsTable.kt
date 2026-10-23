@@ -28,6 +28,8 @@ object MaimaiPreviewSettingsTable: Table() {
     val slideStyle = integer("slide_style").default(0)
     val outlineStyle = integer("outline_style").default(2)
     val brightness = integer("brightness").default(0)
+    val starRotate = integer("star_rotate").default(1)
+    val judgePos = integer("judge_pos").default(1)
     val updatedAt = long("updated_at")
 
     override val primaryKey = PrimaryKey(id)
@@ -45,7 +47,9 @@ object MaimaiPreviewSettingsTable: Table() {
         val holdStyle: Int = 0,
         val slideStyle: Int = 0,
         val outlineStyle: Int = 2,
-        val brightness: Int = 0
+        val brightness: Int = 0,
+        val starRotate: Int = 1,
+        val judgePos: Int = 1
     )
 
     private val cache = ConcurrentHashMap<String, Settings>()
@@ -62,7 +66,9 @@ object MaimaiPreviewSettingsTable: Table() {
                 holdStyle = row[holdStyle],
                 slideStyle = row[slideStyle],
                 outlineStyle = row[outlineStyle],
-                brightness = row[brightness]
+                brightness = row[brightness],
+                starRotate = row[starRotate],
+                judgePos = row[judgePos]
             )
         }
     }
@@ -82,7 +88,9 @@ object MaimaiPreviewSettingsTable: Table() {
                     holdStyle = row[holdStyle],
                     slideStyle = row[slideStyle],
                     outlineStyle = row[outlineStyle],
-                    brightness = row[brightness]
+                    brightness = row[brightness],
+                    starRotate = row[starRotate],
+                    judgePos = row[judgePos]
                 )
             }
         }.await() ?: Settings()
@@ -115,6 +123,8 @@ object MaimaiPreviewSettingsTable: Table() {
         this[slideStyle] = settings.slideStyle
         this[outlineStyle] = settings.outlineStyle
         this[brightness] = settings.brightness
+        this[starRotate] = settings.starRotate
+        this[judgePos] = settings.judgePos
         this[updatedAt] = System.currentTimeMillis()
     }
 }

@@ -574,7 +574,9 @@ class MusicController(
                 put("slide_speed", settings.slideSpeed)
                 put("outline", settings.outlineStyle)
                 put("judge_shown", settings.judgeStyle)
-                put("brightness", settings.brightness)
+                put("brightness", settings.brightness.toDouble())
+                put("star_rotate", settings.starRotate)
+                put("judge_pos", settings.judgePos)
             })
         }
         reply(MessageChain(listOf(

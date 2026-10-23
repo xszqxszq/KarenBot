@@ -43,6 +43,7 @@ class SettingsController(
         "Hide", "Dot", "Simple", "Sensor", "maimai", "GreeN", "ORANGE", "PiNK",
         "MURASAKi", "MiLK", "FiNALE", "DX", "Splash", "UNiVERSE", "FESTiVAL", "BUDDiES", "PRiSM"
     )
+    private val judgePosNames = listOf("关闭", "内侧", "内中", "中间", "中外", "外侧")
     private val tapStyleNames = listOf("默认", "经典", "实心", "砖块")
     private val holdStyleNames = listOf("默认", "经典")
     private val slideStyleNames = listOf("默认", "经典")
@@ -309,6 +310,10 @@ class SettingsController(
                     callback("边框样式 (${outlineStyleName(current.outlineStyle)})", "menu:outline", "maimai/preview-menu")
                     at("背景亮度 (${current.brightness}%)", "/mai 设置谱面确认 亮度 ", enter = false)
                 }
+                row {
+                    callback("星星旋转 (${if (current.starRotate == 0) "关" else "开"})", "menu:star-rotate", "maimai/preview-menu")
+                    callback("判定位置 (${if (current.judgePos == 0) "关闭" else current.judgePos})", "menu:judge-pos", "maimai/preview-menu")
+                }
             }
         }
     }
@@ -348,6 +353,34 @@ class SettingsController(
                             "粉", "set:star:1", "maimai/preview-set",
                             style = if (current.starType == 1) RenderData.FILLED_BLUE else RenderData.BLUE
                         )
+                    }
+                }
+            }
+            "menu:star-rotate" -> reply("星星旋转") {
+                brief("星星旋转", "当前 ${if (current.starRotate == 0) "关" else "开"}")
+                keyboard {
+                    row {
+                        callback(
+                            "开", "set:star-rotate:1", "maimai/preview-set",
+                            style = if (current.starRotate == 1) RenderData.FILLED_BLUE else RenderData.BLUE
+                        )
+                        callback(
+                            "关", "set:star-rotate:0", "maimai/preview-set",
+                            style = if (current.starRotate == 0) RenderData.FILLED_BLUE else RenderData.BLUE
+                        )
+                    }
+                }
+            }
+            "menu:judge-pos" -> reply("判定位置") {
+                brief("判定位置", "当前 ${if (current.judgePos == 0) "关闭" else judgePosName(current.judgePos)}")
+                keyboard {
+                    row {
+                        judgePosNames.forEachIndexed { index, name ->
+                            callback(
+                                name, "set:judge-pos:$index", "maimai/preview-set",
+                                style = if (index == current.judgePos) RenderData.FILLED_BLUE else RenderData.BLUE
+                            )
+                        }
                     }
                 }
             }
@@ -425,9 +458,24 @@ class SettingsController(
             "Tap" -> tapStyleIndexOf(raw) ?.let { current.copy(tapStyle = it) }
             "Hold" -> holdStyleIndexOf(raw) ?.let { current.copy(holdStyle = it) }
             "Slide" -> slideStyleIndexOf(raw) ?.let { current.copy(slideStyle = it) }
+            "星星旋转" -> when (raw) {
+                "开", "1", "on" -> current.copy(starRotate = 1)
+                "关", "0", "off" -> current.copy(starRotate = 0)
+                else -> null
+            }
+            "判定位置" -> {
+                val value = when (raw) {
+                    "关闭", "off" -> 0
+                    else -> raw.toIntOrNull()
+                } ?: return null
+                if (value in 0..5) current.copy(judgePos = value) else null
+            }
             else -> null
         }
     }
+
+    private fun judgePosName(index: Int) =
+        if (index in judgePosNames.indices) judgePosNames[index] else judgePosNames[0]
 
     private fun judgeStyleName(index: Int) =
         if (index in judgeStyleNames.indices) judgeStyleNames[index] else judgeStyleNames[0]

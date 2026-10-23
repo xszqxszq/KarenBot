@@ -116,8 +116,7 @@ class Maimai: Plugin() {
                 RhythmGameSettingsTable, ArcadeTable, ArcadeGroupTable, ArcadeGroupBindTable,
                 MaimaiGuessGameTable, DivingFishBindTable, RhythmGameTokens, MaimaiPreviewSettingsTable
             ).forEach { table ->
-                if (!table.exists())
-                    SchemaUtils.create(table)
+                SchemaUtils.createMissingTablesAndColumns(table)
             }
         }
         api.start()
