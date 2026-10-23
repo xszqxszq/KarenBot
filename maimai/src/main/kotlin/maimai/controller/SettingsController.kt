@@ -306,16 +306,16 @@ class SettingsController(
                     callback("星星头 (${starTypeName(current.starType)})", "menu:star", "maimai/preview-menu")
                 }
                 row {
+                    callback("星星旋转 (${if (current.starRotate == 0) "关" else "开"})", "menu:star-rotate", "maimai/preview-menu")
+                    callback("判定位置 (${if (current.judgePos == 0) "关闭" else current.judgePos})", "menu:judge-pos", "maimai/preview-menu")
+                }
+                row {
                     callback("判定样式 (${judgeStyleName(current.judgeStyle)})", "menu:judge", "maimai/preview-menu")
                     callback("音符样式 (${noteStyleName(current.tapStyle)})", "menu:note", "maimai/preview-menu")
                 }
                 row {
                     callback("边框样式 (${outlineStyleName(current.outlineStyle)})", "menu:outline", "maimai/preview-menu")
                     at("背景亮度 (${current.brightness}%)", "/mai 设置谱面确认 亮度 ", enter = false)
-                }
-                row {
-                    callback("星星旋转 (${if (current.starRotate == 0) "关" else "开"})", "menu:star-rotate", "maimai/preview-menu")
-                    callback("判定位置 (${if (current.judgePos == 0) "关闭" else current.judgePos})", "menu:judge-pos", "maimai/preview-menu")
                 }
             }
         }
@@ -533,11 +533,13 @@ class SettingsController(
         val updated = when (parts[1]) {
             "slide" -> current.copy(slideSpeed = value)
             "star" -> current.copy(starType = value)
+            "star-rotate" -> current.copy(starRotate = value)
             "note" -> current.copy(tapStyle = value, holdStyle = value, slideStyle = value)
             "tap" -> current.copy(tapStyle = value)
             "hold" -> current.copy(holdStyle = value)
             "noteSlide" -> current.copy(slideStyle = value)
             "judge" -> current.copy(judgeStyle = value)
+            "judge-pos" -> current.copy(judgePos = value)
             "outline" -> current.copy(outlineStyle = value)
             else -> return
         }
