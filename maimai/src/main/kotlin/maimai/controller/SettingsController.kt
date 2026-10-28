@@ -530,11 +530,13 @@ class SettingsController(
         val updated = when (parts[1]) {
             "slide" -> current.copy(slideSpeed = value)
             "star" -> current.copy(starType = value)
+            "star-rotate" -> current.copy(starRotate = value)
             "note" -> current.copy(tapStyle = value, holdStyle = value, slideStyle = value)
             "tap" -> current.copy(tapStyle = value)
             "hold" -> current.copy(holdStyle = value)
             "noteSlide" -> current.copy(slideStyle = value)
             "judge" -> current.copy(judgeStyle = value)
+            "judge-pos" -> current.copy(judgePos = value)
             "outline" -> current.copy(outlineStyle = value)
             else -> return
         }
