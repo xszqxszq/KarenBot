@@ -258,6 +258,9 @@ class SettingsController(
                     row {
                         at("🔄自动选择查分器", "设置查分器 自动", enter = true)
                     }
+                    row {
+                        at("▶️谱面确认设置", "/mai 设置谱面确认", enter = true)
+                    }
                 }
             }
         }
@@ -290,9 +293,9 @@ class SettingsController(
             return
         }
         reply(buildString {
-            appendLine("请使用“/兼容模式 禁用”关闭兼容模式来修改设置。")
+            appendLine("请使用“/兼容模式 禁用”关闭兼容模式之后再修改设置。")
         }.trim().newLine()) {
-            brief("谱面预览设置", "请点击按钮来修改设置：")
+            brief("谱面预览设置", "以下是「谱面确认」命令的选项设置，请点击按钮来修改：")
             keyboard {
                 row {
                     at("音符流速 (${current.noteSpeed})", "/mai 设置谱面确认 流速 ", enter = false)
@@ -303,16 +306,16 @@ class SettingsController(
                     callback("星星头 (${starTypeName(current.starType)})", "menu:star", "maimai/preview-menu")
                 }
                 row {
+                    callback("星星旋转 (${if (current.starRotate == 0) "关" else "开"})", "menu:star-rotate", "maimai/preview-menu")
+                    callback("判定位置 (${if (current.judgePos == 0) "关闭" else current.judgePos})", "menu:judge-pos", "maimai/preview-menu")
+                }
+                row {
                     callback("判定样式 (${judgeStyleName(current.judgeStyle)})", "menu:judge", "maimai/preview-menu")
                     callback("音符样式 (${noteStyleName(current.tapStyle)})", "menu:note", "maimai/preview-menu")
                 }
                 row {
                     callback("边框样式 (${outlineStyleName(current.outlineStyle)})", "menu:outline", "maimai/preview-menu")
                     at("背景亮度 (${current.brightness}%)", "/mai 设置谱面确认 亮度 ", enter = false)
-                }
-                row {
-                    callback("星星旋转 (${if (current.starRotate == 0) "关" else "开"})", "menu:star-rotate", "maimai/preview-menu")
-                    callback("判定位置 (${if (current.judgePos == 0) "关闭" else current.judgePos})", "menu:judge-pos", "maimai/preview-menu")
                 }
             }
         }

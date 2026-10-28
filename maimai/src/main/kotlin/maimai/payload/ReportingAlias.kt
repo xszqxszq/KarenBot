@@ -1,4 +1,4 @@
-package xyz.xszq.bot.maimai
+package xyz.xszq.bot.maimai.payload
 
 import kotlinx.serialization.Serializable
 
